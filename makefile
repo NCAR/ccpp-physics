@@ -15,7 +15,10 @@ else
     $(info )
 endif
 
-LIBRARY  = libgfsphys.a
+LIBRARY   = libgfsphys.so
+VER_MAJOR = 1
+VER_MINOR = 0
+VER_PATCH = 0
 
 FFLAGS   += -I../fms -I../fms/include
 
@@ -127,7 +130,8 @@ SRCS_f90 = \
 	   ./physics/module_nst_water_prop.f90                                       \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90						     \
-	   ./physics/wam_f107_kp_mod.f90
+	   ./physics/wam_f107_kp_mod.f90                                             \
+	   ./IPD_layer/IPD_driver_cap.f90
 
 SRCS_F   = ./physics/aer_cloud.F						     \
 	   ./physics/cldmacro.F   						     \
@@ -163,7 +167,9 @@ OBJS = $(OBJS_f) $(OBJS_f90) $(OBJS_F) $(OBJS_F90) $(OBJS_c)
 all default: depend $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
-	$(AR) $(ARFLAGS) $@ $?
+	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
+	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
 
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
@@ -176,6 +182,8 @@ clean:
 	@echo "Cleaning gfsphysics  ... "
 	@echo
 	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.lst *.i depend
+	$(RM) -f $(LIBRARY).$(VER_MAJOR)
+	$(RM) -f $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
 MKDEPENDS = ../mkDepends.pl
 include ../conf/make.rules
