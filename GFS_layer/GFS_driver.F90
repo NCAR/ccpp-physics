@@ -254,7 +254,17 @@ module GFS_driver
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-    nblks = size(blksz)
+      ! PAJ variables
+    logical, parameter :: SET_NB = .true.
+
+
+    if (SET_NB) then
+      call Set_nblks (nblks)
+    else
+      nblks = size(blksz)
+    end if
+
+
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
     rinc(1:5)   = 0
@@ -581,6 +591,21 @@ module GFS_driver
     enddo
 
   end subroutine GFS_grid_populate
+
+
+    ! Subroutines added by PAJ
+
+  subroutine Set_nblks (nblks)
+
+    implicit none
+
+    integer, intent(out) :: nblks
+
+      ! blksz is a global var
+    nblks = size(blksz)
+
+  end subroutine Set_nblks
+
 
 end module GFS_driver
 
