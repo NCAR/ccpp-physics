@@ -257,6 +257,7 @@ module GFS_driver
       ! PAJ variables
     logical, parameter :: SET_NB = .true.
     logical, parameter :: UPDATE_CALTRIGS = .true.
+    logical, parameter :: SET_BUCKET_H = .true.
 
 
     if (SET_NB) then
@@ -278,14 +279,19 @@ module GFS_driver
     end if
 
 
-    !--- set current bucket hour
-    Model%zhour = Model%phour
-    Model%fhour = (sec + Model%dtp)/con_hr
-    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+      !--- set current bucket hour
+    if (SET_BUCKET_H) then
+      call Set_bucket_hour (Model, sec)
+    else
+      Model%zhour = Model%phour
+      Model%fhour = (sec + Model%dtp)/con_hr
+      Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-    Model%ipt    = 1
-    Model%lprnt  = .false.
-    Model%lssav  = .true.
+      Model%ipt    = 1
+      Model%lprnt  = .false.
+      Model%lssav  = .true.
+    end if
+
 
     !--- radiation triggers
     Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
@@ -629,6 +635,25 @@ module GFS_driver
     Model%phour = sec/con_hr
 
   end subroutine Update_cal_and_triggers
+
+
+  subroutine Set_bucket_hour (Model, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    Model%zhour = Model%phour
+     ! con_hr is a global var
+    Model%fhour = (sec + Model%dtp)/con_hr
+    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+
+    Model%ipt    = 1
+    Model%lprnt  = .false.
+    Model%lssav  = .true.
+
+  end subroutine Set_bucket_hour
 
 
 end module GFS_driver
