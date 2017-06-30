@@ -258,6 +258,9 @@ module GFS_driver
     logical, parameter :: SET_NB = .true.
     logical, parameter :: UPDATE_CALTRIGS = .true.
     logical, parameter :: SET_BUCKET_H = .true.
+    logical, parameter :: SET_RAD_TRIGGERS = .true.
+    logical, parameter :: SET_SOLARH = .true.
+    logical, parameter :: PRINT_DEBUG = .true.
 
 
     if (SET_NB) then
@@ -293,25 +296,41 @@ module GFS_driver
     end if
 
 
-    !--- radiation triggers
-    Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-    Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+      !--- radiation triggers
+    if (SET_RAD_TRIGGERS) then
+      call Set_radiation_triggers (Model)
+    else
+      Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+      Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+    end if
+
 
     !--- set the solar hour based on a combination of phour and time initial hour
-    Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+    if (SET_SOLARH) then
+      call Set_solar_h (Model)
+    else
+      Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+    end if
 
-    if ((Model%debug) .and. (Model%me == Model%master)) then
-      print *,'   sec ', sec
-      print *,'   kdt ', Model%kdt
-      print *,' nsswr ', Model%nsswr
-      print *,' nslwr ', Model%nslwr
-      print *,' nscyc ', Model%nscyc
-      print *,' lsswr ', Model%lsswr
-      print *,' lslwr ', Model%lslwr
-      print *,' fhour ', Model%fhour
-      print *,' phour ', Model%phour
-      print *,' solhr ', Model%solhr
-    endif
+
+      ! Print debug info
+    if (PRINT_DEBUG) then
+      call Print_debug_info (Model, sec)
+    else
+      if ((Model%debug) .and. (Model%me == Model%master)) then
+        print *,'   sec ', sec
+        print *,'   kdt ', Model%kdt
+        print *,' nsswr ', Model%nsswr
+        print *,' nslwr ', Model%nslwr
+        print *,' nscyc ', Model%nscyc
+        print *,' lsswr ', Model%lsswr
+        print *,' lslwr ', Model%lslwr
+        print *,' fhour ', Model%fhour
+        print *,' phour ', Model%phour
+        print *,' solhr ', Model%solhr
+      endif
+    end if
+
 
     !--- radiation time varying routine
     if (Model%lsswr .or. Model%lslwr) then
@@ -654,6 +673,54 @@ module GFS_driver
     Model%lssav  = .true.
 
   end subroutine Set_bucket_hour
+
+
+  subroutine Set_radiation_triggers (Model)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+
+    Model%lsswr = (mod (Model%kdt, Model%nsswr) == 1)
+    Model%lslwr = (mod (Model%kdt, Model%nslwr) == 1)
+
+  end subroutine Set_radiation_triggers
+
+
+  subroutine Set_solar_h (Model)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+
+      ! con_24 is a global variable
+    Model%solhr  = mod (Model%phour + Model%idate(1), con_24)
+
+  end subroutine Set_solar_h
+
+
+  subroutine Print_debug_info (Model, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    if ((Model%debug) .and. (Model%me == Model%master)) then
+      print *,'   sec ', sec
+      print *,'   kdt ', Model%kdt
+      print *,' nsswr ', Model%nsswr
+      print *,' nslwr ', Model%nslwr
+      print *,' nscyc ', Model%nscyc
+      print *,' lsswr ', Model%lsswr
+      print *,' lslwr ', Model%lslwr
+      print *,' fhour ', Model%fhour
+      print *,' phour ', Model%phour
+      print *,' solhr ', Model%solhr
+    endif
+
+  end subroutine Print_debug_info
+
 
 
 end module GFS_driver
