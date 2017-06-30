@@ -256,6 +256,7 @@ module GFS_driver
 
       ! PAJ variables
     logical, parameter :: SET_NB = .true.
+    logical, parameter :: UPDATE_CALTRIGS = .true.
 
 
     if (SET_NB) then
@@ -267,10 +268,16 @@ module GFS_driver
 
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
-    rinc(1:5)   = 0
-    call w3difdat(Model%jdat,Model%idat,4,rinc)
-    sec = rinc(4)
-    Model%phour = sec/con_hr
+    if (UPDATE_CALTRIGS) then
+      call Update_cal_and_triggers (Model, rinc, sec)
+    else
+      rinc(1:5)   = 0
+      call w3difdat(Model%jdat,Model%idat,4,rinc)
+      sec = rinc(4)
+      Model%phour = sec/con_hr
+    end if
+
+
     !--- set current bucket hour
     Model%zhour = Model%phour
     Model%fhour = (sec + Model%dtp)/con_hr
@@ -605,6 +612,23 @@ module GFS_driver
     nblks = size(blksz)
 
   end subroutine Set_nblks
+
+
+  subroutine Update_cal_and_triggers (Model, rinc, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(inout) :: rinc(:)
+    real(kind=kind_phys),   intent(inout) :: sec
+
+
+    rinc(1:5) = 0
+    call W3difdat (Model%jdat, Model%idat, 4, rinc)
+    sec = rinc(4)
+    Model%phour = sec/con_hr
+
+  end subroutine Update_cal_and_triggers
 
 
 end module GFS_driver
