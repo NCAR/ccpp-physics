@@ -261,6 +261,9 @@ module GFS_driver
     logical, parameter :: SET_RAD_TRIGGERS = .true.
     logical, parameter :: SET_SOLARH = .true.
     logical, parameter :: PRINT_DEBUG = .true.
+    logical, parameter :: USE_NEW_RAD_TIME_VARY = .true.
+    logical, parameter :: USE_NEW_GCYCLE = .true.
+    logical, parameter :: SET_BUCKETS = .true.
 
 
     if (SET_NB) then
@@ -331,30 +334,44 @@ module GFS_driver
       endif
     end if
 
-
     !--- radiation time varying routine
-    if (Model%lsswr .or. Model%lslwr) then
-      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
-    endif
+    if (USE_NEW_RAD_TIME_VARY) then
+      call Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
+    else
+      if (Model%lsswr .or. Model%lslwr) then
+        call GFS_rad_time_vary (Model, Statein, Tbd, sec)
+      endif
+    end if
+
 
     !--- physics time varying routine
     call GFS_phys_time_vary (Model, Grid, Tbd)
 
+
     !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    if (Model%nscyc >  0) then
-      if (mod(Model%kdt,Model%nscyc) == 1) THEN
-        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+    if (USE_NEW_GCYCLE) then
+      call Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
+    else
+      if (Model%nscyc >  0) then
+        if (mod(Model%kdt,Model%nscyc) == 1) THEN
+          call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+        endif
       endif
-    endif
+    end if
+
 
     !--- determine if diagnostics buckets need to be cleared
-    if (mod(Model%kdt,Model%nszero) == 1) then
-      do nb = 1,nblks
-        call Diag(nb)%rad_zero  (Model)
-        call Diag(nb)%phys_zero (Model)
-    !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-      enddo
-    endif
+    if (SET_BUCKETS) then
+      call Clear_buckets (Model, Diag, nblks)
+    else
+      if (mod(Model%kdt,Model%nszero) == 1) then
+        do nb = 1,nblks
+          call Diag(nb)%rad_zero  (Model)
+          call Diag(nb)%phys_zero (Model)
+      !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+        enddo
+      endif
+    end if
 
   end subroutine GFS_time_vary_step
 
@@ -721,6 +738,63 @@ module GFS_driver
 
   end subroutine Print_debug_info
 
+
+  subroutine Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    type(GFS_statein_type), intent(in)    :: Statein(:)
+    type(GFS_tbd_type),     intent(inout) :: Tbd(:)
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    if (Model%lsswr .or. Model%lslwr) then
+      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
+    endif
+
+  end subroutine Gfs_rad_time_vary_driver
+
+
+  subroutine Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
+
+    implicit none
+
+    integer,                intent(in)    :: nblks
+    type(GFS_control_type), intent(in)    :: Model
+    type(GFS_grid_type),    intent(in)    :: Grid(nblks)
+    type(GFS_sfcprop_type), intent(inout) :: Sfcprop(nblks)
+    type(GFS_cldprop_type), intent(inout) :: Cldprop(nblks)
+
+
+    if (Model%nscyc >  0) then
+      if (mod (Model%kdt, Model%nscyc) == 1) then
+        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+      end if
+    end if
+
+  end subroutine Gcycle_driver
+
+
+  subroutine Clear_buckets (Model, Diag, nblks)
+
+    implicit none
+
+    type(GFS_control_type), intent(in)    :: Model
+    type(GFS_diag_type),    intent(inout) :: Diag(:)
+    integer,                intent(in)    :: nblks
+
+      ! Local vars
+    integer :: nb
+
+
+    if (mod (Model%kdt, Model%nszero) == 1) then
+      do nb = 1, nblks
+        call Diag(nb)%rad_zero  (Model)
+        call Diag(nb)%phys_zero (Model)
+      enddo
+    endif
+
+  end subroutine Clear_buckets
 
 
 end module GFS_driver
