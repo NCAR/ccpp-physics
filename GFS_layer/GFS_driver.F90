@@ -255,6 +255,7 @@ module GFS_driver
     real(kind=kind_phys) :: sec
 
 
+      ! Set the value of nblks
     call Set_nblks (nblks)
 
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
