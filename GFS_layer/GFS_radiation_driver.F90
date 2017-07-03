@@ -1205,17 +1205,25 @@
 
       !--- TYPED VARIABLES
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
+
+
+        ! PAJ variables
+      logical, parameter :: SET_INT = .true.
 !
 !===> ...  begin here
 !
       !--- set commonly used integers
-      me = Model%me
-      LM = Model%levr
-      IM = size(Grid%xlon,1)
-      NFXR = Model%nfxr
-      NTRAC = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
+      if (SET_INT) then
+        call Set_common_int (Model, Grid, lm, me, im, nfxr, ntrac, lp1)
+      else
+        me = Model%me
+        LM = Model%levr
+        IM = size(Grid%xlon,1)
+        NFXR = Model%nfxr
+        NTRAC = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
 
-      LP1 = LM + 1               ! num of in/out levels
+        LP1 = LM + 1               ! num of in/out levels
+      end if
 
 !  --- ...  set local /level/layer indexes corresponding to in/out variables
 
@@ -1845,6 +1853,25 @@
       end subroutine GFS_radiation_driver
 !----------------------------------------
 
+        ! Subroutines added by PAJ
+
+      subroutine Set_common_int (Model, Grid, lm, me, im, nfxr, ntrac, lp1)
+
+        implicit none
+
+        integer, intent(inout) :: me, lm, im, nfxr, ntrac, lp1
+        type(GFS_control_type),   intent(in) :: Model
+        type(GFS_grid_type),      intent(in) :: Grid
+
+        me = Model%me
+        lm = Model%levr
+        im = Size (Grid%xlon, 1)
+        nfxr = Model%nfxr
+        ntrac = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
+
+        lp1 = lm + 1               ! num of in/out levels
+
+      end subroutine Set_common_int
 
 !
 !> @}
