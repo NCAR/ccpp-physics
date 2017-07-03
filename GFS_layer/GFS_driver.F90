@@ -250,128 +250,40 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
     !--- local variables
-    integer :: nb, nblks
+    integer :: nblks
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-      ! PAJ variables
-    logical, parameter :: SET_NB = .true.
-    logical, parameter :: UPDATE_CALTRIGS = .true.
-    logical, parameter :: SET_BUCKET_H = .true.
-    logical, parameter :: SET_RAD_TRIGGERS = .true.
-    logical, parameter :: SET_SOLARH = .true.
-    logical, parameter :: PRINT_DEBUG = .true.
-    logical, parameter :: USE_NEW_RAD_TIME_VARY = .true.
-    logical, parameter :: USE_NEW_GCYCLE = .true.
-    logical, parameter :: SET_BUCKETS = .true.
 
-
-    if (SET_NB) then
-      call Set_nblks (nblks)
-    else
-      nblks = size(blksz)
-    end if
-
+    call Set_nblks (nblks)
 
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
-    if (UPDATE_CALTRIGS) then
-      call Update_cal_and_triggers (Model, rinc, sec)
-    else
-      rinc(1:5)   = 0
-      call w3difdat(Model%jdat,Model%idat,4,rinc)
-      sec = rinc(4)
-      Model%phour = sec/con_hr
-    end if
-
+    call Update_cal_and_triggers (Model, rinc, sec)
 
       !--- set current bucket hour
-    if (SET_BUCKET_H) then
-      call Set_bucket_hour (Model, sec)
-    else
-      Model%zhour = Model%phour
-      Model%fhour = (sec + Model%dtp)/con_hr
-      Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
-
-      Model%ipt    = 1
-      Model%lprnt  = .false.
-      Model%lssav  = .true.
-    end if
-
+    call Set_bucket_hour (Model, sec)
 
       !--- radiation triggers
-    if (SET_RAD_TRIGGERS) then
-      call Set_radiation_triggers (Model)
-    else
-      Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-      Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
-    end if
-
+    call Set_radiation_triggers (Model)
 
     !--- set the solar hour based on a combination of phour and time initial hour
-    if (SET_SOLARH) then
-      call Set_solar_h (Model)
-    else
-      Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
-    end if
-
+    call Set_solar_h (Model)
 
       ! Print debug info
-    if (PRINT_DEBUG) then
-      call Print_debug_info (Model, sec)
-    else
-      if ((Model%debug) .and. (Model%me == Model%master)) then
-        print *,'   sec ', sec
-        print *,'   kdt ', Model%kdt
-        print *,' nsswr ', Model%nsswr
-        print *,' nslwr ', Model%nslwr
-        print *,' nscyc ', Model%nscyc
-        print *,' lsswr ', Model%lsswr
-        print *,' lslwr ', Model%lslwr
-        print *,' fhour ', Model%fhour
-        print *,' phour ', Model%phour
-        print *,' solhr ', Model%solhr
-      endif
-    end if
+    call Print_debug_info (Model, sec)
 
     !--- radiation time varying routine
-    if (USE_NEW_RAD_TIME_VARY) then
-      call Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
-    else
-      if (Model%lsswr .or. Model%lslwr) then
-        call GFS_rad_time_vary (Model, Statein, Tbd, sec)
-      endif
-    end if
-
+    call Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
 
     !--- physics time varying routine
     call GFS_phys_time_vary (Model, Grid, Tbd)
 
-
     !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    if (USE_NEW_GCYCLE) then
-      call Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
-    else
-      if (Model%nscyc >  0) then
-        if (mod(Model%kdt,Model%nscyc) == 1) THEN
-          call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
-        endif
-      endif
-    end if
-
+    call Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
 
     !--- determine if diagnostics buckets need to be cleared
-    if (SET_BUCKETS) then
-      call Clear_buckets (Model, Diag, nblks)
-    else
-      if (mod(Model%kdt,Model%nszero) == 1) then
-        do nb = 1,nblks
-          call Diag(nb)%rad_zero  (Model)
-          call Diag(nb)%phys_zero (Model)
-      !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-        enddo
-      endif
-    end if
+    call Clear_buckets (Model, Diag, nblks)
 
   end subroutine GFS_time_vary_step
 
