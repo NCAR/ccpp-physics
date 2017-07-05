@@ -1214,7 +1214,7 @@
       logical, parameter :: PREP_PROFS = .true.
       logical, parameter :: RECAST_TRAC = .true.
       logical, parameter :: PREP_O3 = .true.
-      logical, parameter :: PREP_T_MOIST = .false.
+      logical, parameter :: PREP_T_MOIST = .true.
       logical, parameter :: FIND_DAYTIME_P = .true.
       logical, parameter :: GET_CLD_INFO = .false.
       logical, parameter :: DO_SW = .false.
@@ -1392,83 +1392,88 @@
                      gasvmr)                                 !  ---  outputs
 
 
-!>  - Get temperature at layer interface, and layer moisture.
-      do k = 2, LMK
-        do i = 1, IM
-          tem2da(i,k) = log( plyr(i,k) )
-          tem2db(i,k) = log( plvl(i,k) )
-        enddo
-      enddo
-
-      if (ivflip == 0) then              ! input data from toa to sfc
-        do i = 1, IM
-          tem1d (i)   = QME6
-          tem2da(i,1) = log( plyr(i,1) )
-          tem2db(i,1) = 1.0
-          tsfa  (i)   = tlyr(i,LMK)                  ! sfc layer air temp
-          tlvl(i,1)   = tlyr(i,1)
-          tlvl(i,LMP) = tskn(i)
-        enddo
-
-        do k = 1, LM
-          k1 = k + kd
-          do i = 1, IM
-            qlyr(i,k1) = max( tem1d(i), Statein%qgrs(i,k,1) )
-            tem1d(i)   = min( QME5, qlyr(i,k1) )
-            tvly(i,k1) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k1)) ! virtual T (K)
-          enddo
-        enddo
-
-        if ( lextop ) then
-          do i = 1, IM
-            qlyr(i,lyb) = qlyr(i,lya)
-            tvly(i,lyb) = tvly(i,lya)
-          enddo
-        endif
-
+      !>  - Get temperature at layer interface, and layer moisture.
+      if_prep_tm: if (PREP_T_MOIST) then
+        call Prep_t_and_moist (Grid, Model, Statein, lmp, kd, lmk, lm, im, lya, lyb, plyr, tlyr, &
+          tlvl, plvl, tsfa, tskn, tvly, qlyr)
+      else
         do k = 2, LMK
           do i = 1, IM
-            tlvl(i,k) = tlyr(i,k) + (tlyr(i,k-1) - tlyr(i,k))           &
-     &                * (tem2db(i,k)   - tem2da(i,k))                   &
-     &                / (tem2da(i,k-1) - tem2da(i,k))
+            tem2da(i,k) = log( plyr(i,k) )
+            tem2db(i,k) = log( plvl(i,k) )
           enddo
         enddo
 
-      else                               ! input data from sfc to toa
-
-        do i = 1, IM
-          tem1d (i)   = QME6
-          tem2da(i,1) = log( plyr(i,1) )
-          tem2db(i,1) = log( plvl(i,1) )
-          tsfa  (i)   = tlyr(i,1)                    ! sfc layer air temp
-          tlvl(i,1)   = tskn(i)
-          tlvl(i,LMP) = tlyr(i,LMK)
-        enddo
-
-        do k = LM, 1, -1
+        if (ivflip == 0) then              ! input data from toa to sfc
           do i = 1, IM
-            qlyr(i,k) = max( tem1d(i), Statein%qgrs(i,k,1) )
-            tem1d(i)  = min( QME5, qlyr(i,k) )
-            tvly(i,k) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k)) ! virtual T (K)
+            tem1d (i)   = QME6
+            tem2da(i,1) = log( plyr(i,1) )
+            tem2db(i,1) = 1.0
+            tsfa  (i)   = tlyr(i,LMK)                  ! sfc layer air temp
+            tlvl(i,1)   = tlyr(i,1)
+            tlvl(i,LMP) = tskn(i)
           enddo
-        enddo
 
-        if ( lextop ) then
+          do k = 1, LM
+            k1 = k + kd
+            do i = 1, IM
+              qlyr(i,k1) = max( tem1d(i), Statein%qgrs(i,k,1) )
+              tem1d(i)   = min( QME5, qlyr(i,k1) )
+              tvly(i,k1) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k1)) ! virtual T (K)
+            enddo
+          enddo
+
+          if ( lextop ) then
+            do i = 1, IM
+              qlyr(i,lyb) = qlyr(i,lya)
+              tvly(i,lyb) = tvly(i,lya)
+            enddo
+          endif
+
+          do k = 2, LMK
+            do i = 1, IM
+              tlvl(i,k) = tlyr(i,k) + (tlyr(i,k-1) - tlyr(i,k))           &
+       &                * (tem2db(i,k)   - tem2da(i,k))                   &
+       &                / (tem2da(i,k-1) - tem2da(i,k))
+            enddo
+          enddo
+
+        else                               ! input data from sfc to toa
+
           do i = 1, IM
-            qlyr(i,lyb) = qlyr(i,lya)
-            tvly(i,lyb) = tvly(i,lya)
+            tem1d (i)   = QME6
+            tem2da(i,1) = log( plyr(i,1) )
+            tem2db(i,1) = log( plvl(i,1) )
+            tsfa  (i)   = tlyr(i,1)                    ! sfc layer air temp
+            tlvl(i,1)   = tskn(i)
+            tlvl(i,LMP) = tlyr(i,LMK)
           enddo
-        endif
 
-        do k = 1, LMK-1
-          do i = 1, IM
-            tlvl(i,k+1) = tlyr(i,k) + (tlyr(i,k+1) - tlyr(i,k))         &
-     &                  * (tem2db(i,k+1) - tem2da(i,k))                 &
-     &                  / (tem2da(i,k+1) - tem2da(i,k))
+          do k = LM, 1, -1
+            do i = 1, IM
+              qlyr(i,k) = max( tem1d(i), Statein%qgrs(i,k,1) )
+              tem1d(i)  = min( QME5, qlyr(i,k) )
+              tvly(i,k) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k)) ! virtual T (K)
+            enddo
           enddo
-        enddo
 
-      endif                              ! end_if_ivflip
+          if ( lextop ) then
+            do i = 1, IM
+              qlyr(i,lyb) = qlyr(i,lya)
+              tvly(i,lyb) = tvly(i,lya)
+            enddo
+          endif
+
+          do k = 1, LMK-1
+            do i = 1, IM
+              tlvl(i,k+1) = tlyr(i,k) + (tlyr(i,k+1) - tlyr(i,k))         &
+       &                  * (tem2db(i,k+1) - tem2da(i,k))                 &
+       &                  / (tem2da(i,k+1) - tem2da(i,k))
+            enddo
+          enddo
+
+        endif                              ! end_if_ivflip
+      end if if_prep_tm
 
 
       !>  - Check for daytime points for SW radiation.
@@ -1950,7 +1955,7 @@
           endif                    ! end if_ivflip_block
         else
           kd = 0
-          if ( ivflip == 1 ) then  ! vertical from sfc upward
+          if (ivflip == 1) then  ! vertical from sfc upward
             kt = 1                   ! index diff between lyr and upper bound
             kb = 0                   ! index diff between lyr and lower bound
           else                     ! vertical from toa downward
@@ -2111,32 +2116,149 @@
           call getozn (prslk1, Grid%xlat, im, lmk, olyr)
         endif
 
-     end subroutine Prep_ozone
+      end subroutine Prep_ozone
 
 
-     subroutine Find_daytime (im, Radtend, Grid, nday, idxday)
+      subroutine Prep_t_and_moist (Grid, Model, Statein, lmp, kd, lmk, lm, im, lya, lyb, plyr, tlyr, &
+          tlvl, plvl, tsfa, tskn, tvly, qlyr)
 
-       implicit none
+        implicit none
 
-       type(GFS_radtend_type), intent(in) :: Radtend
-       type(GFS_grid_type),    intent(in) :: Grid
-       integer, intent(in) :: im
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_statein_type), intent(in) :: Statein
 
-       integer, intent(out) :: nday
-       integer, dimension(Size (Grid%xlon, 1)), intent(inout) :: idxday
+        integer, intent(in) :: lmk, lm, im, lya, lyb, lmp, kd
 
-         ! Local vars
-       integer :: i
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+             LTP), intent(in) :: plyr, tlyr
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(in) :: plvl
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(inout) :: tlvl
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(inout) :: tsfa
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(inout) :: tskn
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP), intent(inout) :: qlyr, tvly
 
-        nday = 0
-        do i = 1, im
-          if (Radtend%coszen(i) >= 0.0001) then
-            nday = nday + 1
-            idxday(nday) = i
+          ! Local vars
+        integer :: i, k, k1
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP) :: tem2da, tem2db
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)) :: tem1d
+
+
+        do k = 2, lmk
+          do i = 1, im
+            tem2da(i, k) = Log (plyr(i, k))
+            tem2db(i, k) = Log (plvl(i, k))
+          enddo
+        enddo
+
+        if_ivlflip: if (ivflip == 0) then
+            ! input data from toa to sfc
+          do i = 1, im
+              ! QME6 is a global parameter
+            tem1d(i) = QME6
+            tem2da(i, 1) = Log (plyr(i, 1))
+            tem2db(i, 1) = 1.0
+            tsfa(i) = tlyr(i, lmk)                  ! sfc layer air temp
+            tlvl(i, 1) = tlyr(i, 1)
+            tlvl(i, lmp) = tskn(i)
+          end do
+
+          do k = 1, lm
+            k1 = k + kd
+            do i = 1, im
+              qlyr(i, k1) = Max (tem1d(i), Statein%qgrs(i, k, 1))
+              tem1d(i) = Min (QME5, qlyr(i,k1))
+                ! virtual T (K)
+              tvly(i, k1) = Statein%tgrs(i, k) * (1.0 + FVIRT * &
+                  qlyr(i, k1))
+            end do
+          end do
+
+          if (lextop) then
+            do i = 1, im
+              qlyr(i, lyb) = qlyr(i, lya)
+              tvly(i, lyb) = tvly(i, lya)
+            end do
           end if
-        end do
 
-     end subroutine Find_daytime
+          do k = 2, lmk
+            do i = 1, im
+              tlvl(i, k) = tlyr(i, k) + (tlyr(i, k - 1) - tlyr(i, k))   &
+                  * (tem2db(i, k) - tem2da(i, k)) / (tem2da(i, k - 1) - &
+                  tem2da(i, k))
+            end do
+          end do
+
+        else
+
+           ! input data from sfc to toa
+          do i = 1, im
+            tem1d(i) = QME6
+            tem2da(i, 1) = Log (plyr(i, 1))
+            tem2db(i, 1) = Log (plvl(i, 1))
+              ! sfc layer air temp
+            tsfa(i) = tlyr(i, 1)
+            tlvl(i, 1) = tskn(i)
+            tlvl(i, lmp) = tlyr(i, lmk)
+          end do
+
+          do k = lm, 1, -1
+            do i = 1, im
+              qlyr(i, k) = Max (tem1d(i), Statein%qgrs(i, k, 1))
+              tem1d(i) = Min (QME5, qlyr(i, k))
+                ! virtual T (K)
+              tvly(i, k) = Statein%tgrs(i, k) * (1.0 + FVIRT * &
+                  qlyr(i, k))
+            end do
+          end do
+
+          if (lextop) then
+            do i = 1, im
+              qlyr(i, lyb) = qlyr(i, lya)
+              tvly(i, lyb) = tvly(i, lya)
+            end do
+          end if
+
+          do k = 1, lmk - 1
+            do i = 1, im
+              tlvl(i, k + 1) = tlyr(i, k) + (tlyr(i, k + 1) - tlyr(i, k))   &
+                  * (tem2db(i, k + 1) - tem2da(i, k)) / (tem2da(i, k + 1) - &
+                  tem2da(i,k))
+            end do
+          end do
+
+        end if if_ivlflip
+
+      end subroutine Prep_t_and_moist
+
+
+      subroutine Find_daytime (im, Radtend, Grid, nday, idxday)
+
+        implicit none
+
+        type(GFS_radtend_type), intent(in) :: Radtend
+        type(GFS_grid_type),    intent(in) :: Grid
+        integer, intent(in) :: im
+
+        integer, intent(out) :: nday
+        integer, dimension(Size (Grid%xlon, 1)), intent(inout) :: idxday
+
+          ! Local vars
+        integer :: i
+
+         nday = 0
+         do i = 1, im
+           if (Radtend%coszen(i) >= 0.0001) then
+             nday = nday + 1
+             idxday(nday) = i
+           end if
+         end do
+
+      end subroutine Find_daytime
 
 !
 !> @}
