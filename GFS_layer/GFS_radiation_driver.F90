@@ -1209,9 +1209,19 @@
 
         ! PAJ variables
       logical, parameter :: SET_INT = .true.
-!
-!===> ...  begin here
-!
+      logical, parameter :: SET_INDEXES = .true.
+      logical, parameter :: SET_SFC = .true.
+      logical, parameter :: PREP_PROFS = .true.
+      logical, parameter :: RECAST_TRAC = .true.
+      logical, parameter :: PREP_O3 = .true.
+      logical, parameter :: PREP_T_MOIST = .false.
+      logical, parameter :: FIND_DAYTIME_P = .true.
+      logical, parameter :: GET_CLD_INFO = .false.
+      logical, parameter :: DO_SW = .false.
+      logical, parameter :: DO_LW = .false.
+      logical, parameter :: ORGANIZE_OUT = .false.
+
+
       !--- set commonly used integers
       if (SET_INT) then
         call Set_common_int (Model, Grid, lm, me, im, nfxr, ntrac, lp1)
@@ -1225,116 +1235,141 @@
         LP1 = LM + 1               ! num of in/out levels
       end if
 
-!  --- ...  set local /level/layer indexes corresponding to in/out variables
 
-      LMK = LM + LTP             ! num of local layers
-      LMP = LMK + 1              ! num of local levels
-
-      if ( lextop ) then
-        if ( ivflip == 1 ) then    ! vertical from sfc upward
-          kd = 0                   ! index diff between in/out and local
-          kt = 1                   ! index diff between lyr and upper bound
-          kb = 0                   ! index diff between lyr and lower bound
-          lla = LMK                ! local index at the 2nd level from top
-          llb = LMP                ! local index at toa level
-          lya = LM                 ! local index for the 2nd layer from top
-          lyb = LP1                ! local index for the top layer
-        else                       ! vertical from toa downward
-          kd = 1                   ! index diff between in/out and local
-          kt = 0                   ! index diff between lyr and upper bound
-          kb = 1                   ! index diff between lyr and lower bound
-          lla = 2                  ! local index at the 2nd level from top
-          llb = 1                  ! local index at toa level
-          lya = 2                  ! local index for the 2nd layer from top
-          lyb = 1                  ! local index for the top layer
-        endif                    ! end if_ivflip_block
+      !  --- ...  set local /level/layer indexes corresponding to in/out variables
+      if (SET_INDEXES) then
+        call Set_local_int (lmk, lm, lmp, kd, kt, &
+            kb, lla, llb, lya, lyb, lp1, raddt, Model)
       else
-        kd = 0
-        if ( ivflip == 1 ) then  ! vertical from sfc upward
-          kt = 1                   ! index diff between lyr and upper bound
-          kb = 0                   ! index diff between lyr and lower bound
-        else                     ! vertical from toa downward
-          kt = 0                   ! index diff between lyr and upper bound
-          kb = 1                   ! index diff between lyr and lower bound
-        endif                    ! end if_ivflip_block
-      endif   ! end if_lextop_block
+        LMK = LM + LTP             ! num of local layers
+        LMP = LMK + 1              ! num of local levels
 
-      raddt = min(Model%fhswr, Model%fhlwr)
-!     print *,' in grrad : raddt=',raddt
+        if ( lextop ) then
+          if ( ivflip == 1 ) then    ! vertical from sfc upward
+            kd = 0                   ! index diff between in/out and local
+            kt = 1                   ! index diff between lyr and upper bound
+            kb = 0                   ! index diff between lyr and lower bound
+            lla = LMK                ! local index at the 2nd level from top
+            llb = LMP                ! local index at toa level
+            lya = LM                 ! local index for the 2nd layer from top
+            lyb = LP1                ! local index for the top layer
+          else                       ! vertical from toa downward
+            kd = 1                   ! index diff between in/out and local
+            kt = 0                   ! index diff between lyr and upper bound
+            kb = 1                   ! index diff between lyr and lower bound
+            lla = 2                  ! local index at the 2nd level from top
+            llb = 1                  ! local index at toa level
+            lya = 2                  ! local index for the 2nd layer from top
+            lyb = 1                  ! local index for the top layer
+          endif                    ! end if_ivflip_block
+        else
+          kd = 0
+          if ( ivflip == 1 ) then  ! vertical from sfc upward
+            kt = 1                   ! index diff between lyr and upper bound
+            kb = 0                   ! index diff between lyr and lower bound
+          else                     ! vertical from toa downward
+            kt = 0                   ! index diff between lyr and upper bound
+            kb = 1                   ! index diff between lyr and lower bound
+          endif                    ! end if_ivflip_block
+        endif   ! end if_lextop_block
 
-!> -# Setup surface ground temperature and ground/air skin temperature
-!! if required.
+        raddt = min(Model%fhswr, Model%fhlwr)
+          !     print *,' in grrad : raddt=',raddt
+      end if
 
-      if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
-        do i = 1, IM
-          tskn(i) = Sfcprop%tsfc(i)
-          tsfg(i) = Sfcprop%tsfc(i)
-        enddo
-      else                              ! use diff sfc skin-air/ground temp
-        do i = 1, IM
-          tskn(i) = Sfcprop%tsfc(i)
-          tsfg(i) = Sfcprop%tsfc(i)
-        enddo
-      endif
 
-!> -# Prepare atmospheric profiles for radiation input.
-!
-!           convert pressure unit from pa to mb
-      do k = 1, LM
-        k1 = k + kd
-        do i = 1, IM
-          plvl(i,k1)   = 0.01 * Statein%prsi(i,k)   ! pa to mb (hpa)
-          plyr(i,k1)   = 0.01 * Statein%prsl(i,k)   ! pa to mb (hpa)
-          tlyr(i,k1)   = Statein%tgrs(i,k)
-          prslk1(i,k1) = Statein%prslk(i,k)
+      !> -# Setup surface ground temperature and ground/air skin temperature
+      !! if required.
+      if (SET_SFC) then
+        call Set_sfc_vars (IM, tskn, tsfg, Sfcprop, Grid)
+      else
+        if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
+          do i = 1, IM
+            tskn(i) = Sfcprop%tsfc(i)
+            tsfg(i) = Sfcprop%tsfc(i)
+          enddo
+        else                              ! use diff sfc skin-air/ground temp
+          do i = 1, IM
+            tskn(i) = Sfcprop%tsfc(i)
+            tsfg(i) = Sfcprop%tsfc(i)
+          enddo
+        endif
+      end if
 
-!>  - Compute relative humidity.
-!         es  = min( Statein%prsl(i,k), 0.001 * fpvs( Statein%tgrs(i,k) ) )   ! fpvs in pa
-          es  = min( Statein%prsl(i,k),  fpvs( Statein%tgrs(i,k) ) )  ! fpvs and prsl in pa
-          qs  = max( QMIN, eps * es / (Statein%prsl(i,k) + epsm1*es) )
-          rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, Statein%qgrs(i,k,1))/qs ) )
-          qstl(i,k1) = qs
-        enddo
-      enddo
-
-      !--- recast remaining all tracers (except sphum) forcing them all to be positive
-      do j = 2, NTRAC
+      !> -# Prepare atmospheric profiles for radiation input.
+      !           convert pressure unit from pa to mb
+      if (PREP_PROFS) then
+        call Prep_profiles (lm, kd, im, Statein, plvl, plyr, tlyr, &
+            prslk1, es, qs, rhly, qstl, Model, Grid)
+      else
         do k = 1, LM
           k1 = k + kd
-          tracer1(:,k1,j) = max(0.0,Statein%qgrs(:,k,j))
+          do i = 1, IM
+            plvl(i,k1)   = 0.01 * Statein%prsi(i,k)   ! pa to mb (hpa)
+            plyr(i,k1)   = 0.01 * Statein%prsl(i,k)   ! pa to mb (hpa)
+            tlyr(i,k1)   = Statein%tgrs(i,k)
+            prslk1(i,k1) = Statein%prslk(i,k)
+
+            !>  - Compute relative humidity.
+            ! es  = min( Statein%prsl(i,k), 0.001 * fpvs( Statein%tgrs(i,k) ) )   ! fpvs in pa
+            es  = min( Statein%prsl(i,k),  fpvs( Statein%tgrs(i,k) ) )  ! fpvs and prsl in pa
+            qs  = max( QMIN, eps * es / (Statein%prsl(i,k) + epsm1*es) )
+            rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, Statein%qgrs(i,k,1))/qs ) )
+            qstl(i,k1) = qs
+          enddo
         enddo
-      enddo
+      end if
 
-      do i = 1, IM
-        plvl(i,LP1+kd) = 0.01 * Statein%prsi(i,LP1)  ! pa to mb (hpa)
-      enddo
 
-      if ( lextop ) then                 ! values for extra top layer
+      !--- recast remaining all tracers (except sphum) forcing them all to be positive
+      if (RECAST_TRAC) then
+        call Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, rhly, &
+          qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, llb,    &
+          lla, lya, lyb)
+      else
+        do j = 2, NTRAC
+          do k = 1, LM
+            k1 = k + kd
+            tracer1(:,k1,j) = max(0.0,Statein%qgrs(:,k,j))
+          enddo
+        enddo
+
         do i = 1, IM
-          plvl(i,llb) = prsmin
-          if ( plvl(i,lla) <= prsmin ) plvl(i,lla) = 2.0*prsmin
-          plyr(i,lyb)   = 0.5 * plvl(i,lla)
-          tlyr(i,lyb)   = tlyr(i,lya)
-          prslk1(i,lyb) = (plyr(i,lyb)*0.00001) ** rocp ! plyr in Pa
-          rhly(i,lyb)   = rhly(i,lya)
-          qstl(i,lyb)   = qstl(i,lya)
+          plvl(i,LP1+kd) = 0.01 * Statein%prsi(i,LP1)  ! pa to mb (hpa)
         enddo
 
-!  ---  note: may need to take care the top layer amount
-       tracer1(:,lyb,:) = tracer1(:,lya,:)
-      endif
+        if ( lextop ) then                 ! values for extra top layer
+          do i = 1, IM
+            plvl(i,llb) = prsmin
+            if ( plvl(i,lla) <= prsmin ) plvl(i,lla) = 2.0*prsmin
+            plyr(i,lyb)   = 0.5 * plvl(i,lla)
+            tlyr(i,lyb)   = tlyr(i,lya)
+            prslk1(i,lyb) = (plyr(i,lyb)*0.00001) ** rocp ! plyr in Pa
+            rhly(i,lyb)   = rhly(i,lya)
+            qstl(i,lyb)   = qstl(i,lya)
+          enddo
 
-!>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
-!!    call getozn()).
+         !  ---  note: may need to take care the top layer amount
+         tracer1(:,lyb,:) = tracer1(:,lya,:)
+        endif
+      end if
 
-      if (Model%ntoz > 0) then            ! interactive ozone generation
-        olyr(:,:) = max( QMIN, tracer1(:,1:LMK,Model%ntoz) )
-      else                                ! climatological ozone
-        call getozn (prslk1, Grid%xlat, IM, LMK,    &     !  ---  inputs
-                     olyr)                                !  ---  outputs
-      endif                               ! end_if_ntoz
 
-!>  - Call coszmn(), to compute cosine of zenith angle.
+      !>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
+      !!    call getozn()).
+      if (PREP_O3) then
+        call Prep_ozone  (Model, Grid, im, lmk, tracer1, olyr, prslk1)
+      else
+        if (Model%ntoz > 0) then            ! interactive ozone generation
+          olyr(:,:) = max( QMIN, tracer1(:,1:LMK,Model%ntoz) )
+        else                                ! climatological ozone
+          call getozn (prslk1, Grid%xlat, IM, LMK,    &     !  ---  inputs
+                       olyr)                                !  ---  outputs
+        endif                               ! end_if_ntoz
+      end if
+
+
+      !>  - Call coszmn(), to compute cosine of zenith angle.
       call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
                    Grid%coslat,Model%solhr, IM, me, & 
                    Radtend%coszen, Radtend%coszdg)        !  ---  outputs
@@ -1351,10 +1386,11 @@
 !  - gasvmr(:,:,8)  -  cf22 volume mixing ratio
 !  - gasvmr(:,:,9)  -  ccl4 volume mixing ratio
 
-!  --- ...  set up non-prognostic gas volume mixing ratioes
 
+      !  --- ...  set up non-prognostic gas volume mixing ratioes
       call getgases (plvl, Grid%xlon, Grid%xlat, IM, LMK,  & !  ---  inputs
                      gasvmr)                                 !  ---  outputs
+
 
 !>  - Get temperature at layer interface, and layer moisture.
       do k = 2, LMK
@@ -1434,25 +1470,29 @@
 
       endif                              ! end_if_ivflip
 
-!>  - Check for daytime points for SW radiation.
 
-      nday = 0
-      do i = 1, IM
-        if (Radtend%coszen(i) >= 0.0001) then
-          nday = nday + 1
-          idxday(nday) = i
-        endif
-      enddo
+      !>  - Check for daytime points for SW radiation.
+      if (FIND_DAYTIME_P) then
+        call Find_daytime (im, Radtend, Grid, nday, idxday)
+      else
+        nday = 0
+        do i = 1, IM
+          if (Radtend%coszen(i) >= 0.0001) then
+            nday = nday + 1
+            idxday(nday) = i
+          endif
+        enddo
+      end if
 
-!>  - Call module_radiation_aerosols::setaer(),to setup aerosols
-!! property profile for radiation.
 
-!check  print *,' in grrad : calling setaer '
-
+        !>  - Call module_radiation_aerosols::setaer(),to setup aerosols
+        !! property profile for radiation.
+        !check  print *,' in grrad : calling setaer '
       call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, &  !  ---  inputs
                    tracer1, Grid%xlon, Grid%xlat, IM, LMK, LMP,    &
                    Model%lsswr,Model%lslwr,                        &
                    faersw,faerlw,aerodp)                              !  ---  outputs
+
 
 !>  - Obtain cloud information for radiation calculations
 !!    (clouds,cldsa,mtopa,mbota)
@@ -1872,6 +1912,231 @@
         lp1 = lm + 1               ! num of in/out levels
 
       end subroutine Set_common_int
+
+
+      subroutine Set_local_int (lmk, lm, lmp, kd, kt, &
+          kb, lla, llb, lya, lyb, lp1, raddt, Model)
+
+        implicit none
+
+        integer, intent(inout) :: lmk, lmp, kd, kt, kb, lla, llb, lya, lyb
+        integer, intent(in) :: lm, lp1
+        type(GFS_control_type),   intent(in) :: Model
+        real(kind=kind_phys), intent(out)    :: raddt
+       
+
+          ! PAJ: LTP is a global parameter
+        lmk = lm + LTP             ! num of local layers
+        lmp = lmk + 1              ! num of local levels
+
+          ! PAJ: lextop is a global variable
+        if (lextop) then
+          if (ivflip == 1) then    ! vertical from sfc upward
+            kd = 0                   ! index diff between in/out and local
+            kt = 1                   ! index diff between lyr and upper bound
+            kb = 0                   ! index diff between lyr and lower bound
+            lla = lmk                ! local index at the 2nd level from top
+            llb = lmp                ! local index at toa level
+            lya = lm                 ! local index for the 2nd layer from top
+            lyb = lp1                ! local index for the top layer
+          else                       ! vertical from toa downward
+            kd = 1                   ! index diff between in/out and local
+            kt = 0                   ! index diff between lyr and upper bound
+            kb = 1                   ! index diff between lyr and lower bound
+            lla = 2                  ! local index at the 2nd level from top
+            llb = 1                  ! local index at toa level
+            lya = 2                  ! local index for the 2nd layer from top
+            lyb = 1                  ! local index for the top layer
+          endif                    ! end if_ivflip_block
+        else
+          kd = 0
+          if ( ivflip == 1 ) then  ! vertical from sfc upward
+            kt = 1                   ! index diff between lyr and upper bound
+            kb = 0                   ! index diff between lyr and lower bound
+          else                     ! vertical from toa downward
+            kt = 0                   ! index diff between lyr and upper bound
+            kb = 1                   ! index diff between lyr and lower bound
+          endif                    ! end if_ivflip_block
+        endif   ! end if_lextop_block
+
+        raddt = min(Model%fhswr, Model%fhlwr)
+
+      end subroutine Set_local_int
+
+
+      subroutine Set_sfc_vars (im, tskn, tsfg, Sfcprop, Grid)
+
+        implicit none
+
+        integer, intent(in) :: im
+        type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
+        type(GFS_grid_type),            intent(in)    :: Grid
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(inout) :: tsfg, tskn
+
+          ! Local vars
+        integer :: i
+
+
+          ! itsfc is a global var
+        if (itsfc == 0) then            ! use same sfc skin-air/ground temp
+          do i = 1, im
+            tskn(i) = Sfcprop%tsfc(i)
+            tsfg(i) = Sfcprop%tsfc(i)
+          enddo
+        else                              ! use diff sfc skin-air/ground temp
+          do i = 1, im
+            tskn(i) = Sfcprop%tsfc(i)
+            tsfg(i) = Sfcprop%tsfc(i)
+          enddo
+        endif
+
+      end subroutine Set_sfc_vars
+
+
+      subroutine Prep_profiles (lm, kd, im, Statein, plvl, plyr, tlyr, &
+          prslk1, es, qs, rhly, qstl, Model, Grid)
+
+        implicit none
+
+        integer, intent(in) :: lm, kd, im
+        type(GFS_statein_type), intent(in) :: Statein
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_control_type), intent(in) :: Model
+
+        real(kind=kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(out) :: plvl
+        real(kind=kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+             LTP), intent(out) :: prslk1, plyr, tlyr, qstl, rhly
+        real(kind=kind_phys), intent(out) :: es, qs
+
+
+          ! Local vars
+        integer :: k, k1, i
+
+        do k = 1, lm
+          k1 = k + kd
+          do i = 1, im
+            plvl(i, k1)   = 0.01 * Statein%prsi(i, k)   ! pa to mb (hpa)
+            plyr(i, k1)   = 0.01 * Statein%prsl(i, k)   ! pa to mb (hpa)
+            tlyr(i, k1)   = Statein%tgrs(i, k)
+            prslk1(i, k1) = Statein%prslk(i, k)
+
+            !>  - Compute relative humidity.
+            ! es  = min( Statein%prsl(i,k), 0.001 * fpvs( Statein%tgrs(i,k) ) )   ! fpvs in pa
+            es  = min (Statein%prsl(i,k), fpvs (Statein%tgrs(i, k)))  ! fpvs and prsl in pa
+            qs  = max (QMIN, EPS * es / (Statein%prsl(i,k) + EPSM1 * es))
+            rhly(i,k1) = max (0.0, min (1.0, max(QMIN, Statein%qgrs(i, k, 1)) / qs))
+            qstl(i,k1) = qs
+          end do
+        end do
+
+      end subroutine Prep_profiles
+
+
+      subroutine Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, & 
+          rhly, qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, &
+          llb, lla, lya, lyb)
+
+        implicit none
+ 
+        type(GFS_statein_type), intent(in) :: Statein
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_control_type), intent(in) :: Model
+
+        integer, intent(in) :: ntrac, lm, im, kd, lp1, lla, llb, lya, lyb
+
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, 2:Model%ntrac), intent(inout) :: tracer1
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(inout) :: plvl
+        real(kind=kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+             LTP), intent(inout) :: plyr, tlyr, prslk1, rhly, qstl
+
+          ! Local vars
+        integer :: i, j, k, k1
+
+
+        do j = 2, ntrac
+          do k = 1, lm 
+            k1 = k + kd
+            tracer1(:, k1, j) = Max (0.0, Statein%qgrs(:, k, j))
+          end do
+        end do
+
+        do i = 1, im
+          plvl(i, lp1 + kd) = 0.01 * Statein%prsi(i, lp1)  ! pa to mb (hpa)
+        enddo
+
+          ! PAJ: lextop is a global variable
+        if (lextop) then                 ! values for extra top layer
+          do i = 1, im
+            plvl(i, llb) = PRSMIN
+            if (plvl(i, lla) <= PRSMIN) plvl(i, lla) = 2.0 * PRSMIN
+            plyr(i, lyb) = 0.5 * plvl(i, lla)
+            tlyr(i, lyb) = tlyr(i, lya)
+            prslk1(i, lyb) = (plyr(i, lyb) * 0.00001) ** ROCP ! plyr in Pa
+            rhly(i, lyb) = rhly(i, lya)
+            qstl(i, lyb) = qstl(i, lya)
+          enddo
+
+            ! note: may need to take care the top layer amount
+          tracer1(:,lyb,:) = tracer1(:,lya,:)
+        endif
+
+      end subroutine Recast_tracers
+
+
+      subroutine Prep_ozone (Model, Grid, im, lmk, tracer1, olyr, prslk1)
+
+        implicit none
+
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_control_type), intent(in) :: Model
+
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, 2:Model%ntrac), intent(in) :: tracer1
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+             LTP), intent(in) :: prslk1
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+             LTP), intent(inout) :: olyr
+
+        integer, intent(in) :: im, lmk
+
+
+        if (Model%ntoz > 0) then
+            ! interactive ozone generation
+          olyr(:,:) = Max (QMIN, tracer1(:, 1:lmk, Model%ntoz))
+        else
+            ! climatological ozone
+          call getozn (prslk1, Grid%xlat, im, lmk, olyr)
+        endif
+
+     end subroutine Prep_ozone
+
+
+     subroutine Find_daytime (im, Radtend, Grid, nday, idxday)
+
+       implicit none
+
+       type(GFS_radtend_type), intent(in) :: Radtend
+       type(GFS_grid_type),    intent(in) :: Grid
+       integer, intent(in) :: im
+
+       integer, intent(out) :: nday
+       integer, dimension(Size (Grid%xlon, 1)), intent(inout) :: idxday
+
+         ! Local vars
+       integer :: i
+
+        nday = 0
+        do i = 1, im
+          if (Radtend%coszen(i) >= 0.0001) then
+            nday = nday + 1
+            idxday(nday) = i
+          end if
+        end do
+
+     end subroutine Find_daytime
 
 !
 !> @}
