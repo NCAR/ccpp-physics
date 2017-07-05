@@ -1219,7 +1219,7 @@
       logical, parameter :: GET_CLD_INFO = .true.
       logical, parameter :: DO_SW = .true.
       logical, parameter :: DO_LW = .true.
-      logical, parameter :: ORGANIZE_OUT = .false.
+      logical, parameter :: ORGANIZE_OUT = .true.
 
 
       !--- set commonly used integers
@@ -1819,100 +1819,103 @@
       end if if_lw
 
 
-!>  - For time averaged output quantities (including total-sky and
-!!    clear-sky SW and LW fluxes at TOA and surface; conventional
-!!    3-domain cloud amount, cloud top and base pressure, and cloud top
-!!    temperature; aerosols AOD, etc.), store computed results in
-!!    corresponding slots of array fluxr with appropriate time weights.
+        !>  - For time averaged output quantities (including total-sky and
+        !!    clear-sky SW and LW fluxes at TOA and surface; conventional
+        !!    3-domain cloud amount, cloud top and base pressure, and cloud top
+        !!    temperature; aerosols AOD, etc.), store computed results in
+        !!    corresponding slots of array fluxr with appropriate time weights.
 
-!  --- ...  collect the fluxr data for wrtsfc
+        !  --- ...  collect the fluxr data for wrtsfc
+      if_organize: if (ORGANIZE_OUT) then
+        call Organize_output (Diag, Model, Grid, Radtend, Statein, Coupling,  &
+            im, kd, kt, kb, lm, scmpsw, raddt, cldsa, mtopa, mbota, clouds, aerodp)
+      else
+        if (Model%lssav) then
+          if (Model%lsswr) then
+            Diag%fluxr(:,34) = Diag%fluxr(:,34) + Model%fhswr*aerodp(:,1)  ! total aod at 550nm
+            Diag%fluxr(:,35) = Diag%fluxr(:,35) + Model%fhswr*aerodp(:,2)  ! DU aod at 550nm
+            Diag%fluxr(:,36) = Diag%fluxr(:,36) + Model%fhswr*aerodp(:,3)  ! BC aod at 550nm
+            Diag%fluxr(:,37) = Diag%fluxr(:,37) + Model%fhswr*aerodp(:,4)  ! OC aod at 550nm
+            Diag%fluxr(:,38) = Diag%fluxr(:,38) + Model%fhswr*aerodp(:,5)  ! SU aod at 550nm
+            Diag%fluxr(:,39) = Diag%fluxr(:,39) + Model%fhswr*aerodp(:,6)  ! SS aod at 550nm
+          endif
 
-      if (Model%lssav) then
-        if (Model%lsswr) then
-          Diag%fluxr(:,34) = Diag%fluxr(:,34) + Model%fhswr*aerodp(:,1)  ! total aod at 550nm
-          Diag%fluxr(:,35) = Diag%fluxr(:,35) + Model%fhswr*aerodp(:,2)  ! DU aod at 550nm
-          Diag%fluxr(:,36) = Diag%fluxr(:,36) + Model%fhswr*aerodp(:,3)  ! BC aod at 550nm
-          Diag%fluxr(:,37) = Diag%fluxr(:,37) + Model%fhswr*aerodp(:,4)  ! OC aod at 550nm
-          Diag%fluxr(:,38) = Diag%fluxr(:,38) + Model%fhswr*aerodp(:,5)  ! SU aod at 550nm
-          Diag%fluxr(:,39) = Diag%fluxr(:,39) + Model%fhswr*aerodp(:,6)  ! SS aod at 550nm
-        endif
+            !  ---  save lw toa and sfc fluxes
+          if (Model%lslwr) then
+              !  ---  lw total-sky fluxes
+            Diag%fluxr(:,1 ) = Diag%fluxr(:,1 ) + Model%fhlwr *    Diag%topflw(:)%upfxc   ! total sky top lw up
+            Diag%fluxr(:,19) = Diag%fluxr(:,19) + Model%fhlwr * Radtend%sfcflw(:)%dnfxc   ! total sky sfc lw dn
+            Diag%fluxr(:,20) = Diag%fluxr(:,20) + Model%fhlwr * Radtend%sfcflw(:)%upfxc   ! total sky sfc lw up
+              !  ---  lw clear-sky fluxes
+            Diag%fluxr(:,28) = Diag%fluxr(:,28) + Model%fhlwr *    Diag%topflw(:)%upfx0   ! clear sky top lw up
+            Diag%fluxr(:,30) = Diag%fluxr(:,30) + Model%fhlwr * Radtend%sfcflw(:)%dnfx0   ! clear sky sfc lw dn
+            Diag%fluxr(:,33) = Diag%fluxr(:,33) + Model%fhlwr * Radtend%sfcflw(:)%upfx0   ! clear sky sfc lw up
+          endif
 
-!  ---  save lw toa and sfc fluxes
-        if (Model%lslwr) then
-!  ---  lw total-sky fluxes
-          Diag%fluxr(:,1 ) = Diag%fluxr(:,1 ) + Model%fhlwr *    Diag%topflw(:)%upfxc   ! total sky top lw up
-          Diag%fluxr(:,19) = Diag%fluxr(:,19) + Model%fhlwr * Radtend%sfcflw(:)%dnfxc   ! total sky sfc lw dn
-          Diag%fluxr(:,20) = Diag%fluxr(:,20) + Model%fhlwr * Radtend%sfcflw(:)%upfxc   ! total sky sfc lw up
-!  ---  lw clear-sky fluxes
-          Diag%fluxr(:,28) = Diag%fluxr(:,28) + Model%fhlwr *    Diag%topflw(:)%upfx0   ! clear sky top lw up
-          Diag%fluxr(:,30) = Diag%fluxr(:,30) + Model%fhlwr * Radtend%sfcflw(:)%dnfx0   ! clear sky sfc lw dn
-          Diag%fluxr(:,33) = Diag%fluxr(:,33) + Model%fhlwr * Radtend%sfcflw(:)%upfx0   ! clear sky sfc lw up
-        endif
-
-!  ---  save sw toa and sfc fluxes with proper diurnal sw wgt. coszen=mean cosz over daylight
-!       part of sw calling interval, while coszdg= mean cosz over entire interval
-        if (Model%lsswr) then
-          do i = 1, IM
-            if (Radtend%coszen(i) > 0.) then
-!  ---                                  sw total-sky fluxes
-!                                       -------------------
-              tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
-              Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
-              Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
-              Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
-!  ---                                  sw uv-b fluxes
-!                                       --------------
-              Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
-              Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
-!  ---                                  sw toa incoming fluxes
-!                                       ----------------------
-              Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
-!  ---                                  sw sfc flux components
-!                                       ----------------------
-              Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
-              Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
-              Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
-              Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
-!  ---                                  sw clear-sky fluxes
-!                                       -------------------
-              Diag%fluxr(i,29) = Diag%fluxr(i,29) +    Diag%topfsw(i)%upfx0 * tem0d  ! clear sky top sw up
-              Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
-              Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
-            endif
-          enddo
-        endif
-
-!  ---  save total and boundary layer clouds
-
-        if (Model%lsswr .or. Model%lslwr) then
-          Diag%fluxr(:,17) = Diag%fluxr(:,17) + raddt * cldsa(:,4)
-          Diag%fluxr(:,18) = Diag%fluxr(:,18) + raddt * cldsa(:,5)
-
-!  ---  save cld frac,toplyr,botlyr and top temp, note that the order
-!       of h,m,l cloud is reversed for the fluxr output.
-!  ---  save interface pressure (pa) of top/bot
-
-          do j = 1, 3
+            !  ---  save sw toa and sfc fluxes with proper diurnal sw wgt. coszen=mean cosz over daylight
+            !       part of sw calling interval, while coszdg= mean cosz over entire interval
+          if (Model%lsswr) then
             do i = 1, IM
-              tem0d = raddt * cldsa(i,j)
-              itop  = mtopa(i,j) - kd
-              ibtc  = mbota(i,j) - kd
-              Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
-              Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
-              Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
-              Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+              if (Radtend%coszen(i) > 0.) then
+                  !  ---                                  sw total-sky fluxes
+                  !                                       -------------------
+                tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
+                Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
+                Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
+                Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
+                  !  ---                                  sw uv-b fluxes
+                  !                                       --------------
+                Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
+                Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
+                  !  ---                                  sw toa incoming fluxes
+                  !                                       ----------------------
+                Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
+                  !  ---                                  sw sfc flux components
+                  !                                       ----------------------
+                Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
+                Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
+                Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
+                Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
+                  !  ---                                  sw clear-sky fluxes
+                  !                                       -------------------
+                Diag%fluxr(i,29) = Diag%fluxr(i,29) +    Diag%topfsw(i)%upfx0 * tem0d  ! clear sky top sw up
+                Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
+                Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
+              endif
             enddo
-          enddo
-        endif
+          endif
 
-        if (.not. Model%uni_cld) then
-          do k = 1, LM
-            k1 = k + kd
-            Coupling%cldcovi(:,k) = clouds(:,k1,1)
-          enddo
-        endif
-      endif                                ! end_if_lssav
-!
+            !  ---  save total and boundary layer clouds
+          if (Model%lsswr .or. Model%lslwr) then
+            Diag%fluxr(:,17) = Diag%fluxr(:,17) + raddt * cldsa(:,4)
+            Diag%fluxr(:,18) = Diag%fluxr(:,18) + raddt * cldsa(:,5)
+
+              !  ---  save cld frac,toplyr,botlyr and top temp, note that the order
+              !       of h,m,l cloud is reversed for the fluxr output.
+              !  ---  save interface pressure (pa) of top/bot
+            do j = 1, 3
+              do i = 1, IM
+                tem0d = raddt * cldsa(i,j)
+                itop  = mtopa(i,j) - kd
+                ibtc  = mbota(i,j) - kd
+                Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
+                Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
+                Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
+                Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+              enddo
+            enddo
+          endif
+
+          if (.not. Model%uni_cld) then
+            do k = 1, LM
+              k1 = k + kd
+              Coupling%cldcovi(:,k) = clouds(:,k1,1)
+            enddo
+          endif
+        endif                                ! end_if_lssav
+      end if if_organize
+
+
       return
 !........................................
       end subroutine GFS_radiation_driver
@@ -2684,6 +2687,127 @@
         end if if_lslwr
 
       end subroutine Do_lw_rad
+
+
+        !>  - For time averaged output quantities (including total-sky and
+        !!    clear-sky SW and LW fluxes at TOA and surface; conventional
+        !!    3-domain cloud amount, cloud top and base pressure, and cloud top
+        !!    temperature; aerosols AOD, etc.), store computed results in
+        !!    corresponding slots of array fluxr with appropriate time weights.
+
+        !  --- ...  collect the fluxr data for wrtsfc
+      subroutine Organize_output (Diag, Model, Grid, Radtend, Statein, Coupling, &
+          im, kd, kt, kb, lm, scmpsw, raddt, cldsa, mtopa, mbota, clouds, aerodp)
+
+        implicit none
+
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_radtend_type), intent(in) :: Radtend
+        type(GFS_statein_type), intent(in) :: Statein
+        type(GFS_diag_type), intent(inout) :: Diag
+        type(GFS_coupling_type), intent(inout) :: Coupling
+
+        integer, intent(in) :: im, kd, kt, lm, kb
+        real(kind = kind_phys), intent(in) :: raddt
+        type (cmpfsw_type), dimension(Size (Grid%xlon, 1)), intent(in) :: scmpsw
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(in) :: cldsa
+        integer, dimension(size(Grid%xlon, 1), 3), intent(in) :: mbota, mtopa
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_CLDS), intent(in) :: clouds
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(in) :: aerodp
+
+          ! Local vars
+        integer :: i, j, k1, k, itop, ibtc
+        real(kind = kind_phys) :: tem0d 
+
+
+        if_lssav: if (Model%lssav) then
+          if (Model%lsswr) then
+            Diag%fluxr(:,34) = Diag%fluxr(:,34) + Model%fhswr*aerodp(:,1)  ! total aod at 550nm
+            Diag%fluxr(:,35) = Diag%fluxr(:,35) + Model%fhswr*aerodp(:,2)  ! DU aod at 550nm
+            Diag%fluxr(:,36) = Diag%fluxr(:,36) + Model%fhswr*aerodp(:,3)  ! BC aod at 550nm
+            Diag%fluxr(:,37) = Diag%fluxr(:,37) + Model%fhswr*aerodp(:,4)  ! OC aod at 550nm
+            Diag%fluxr(:,38) = Diag%fluxr(:,38) + Model%fhswr*aerodp(:,5)  ! SU aod at 550nm
+            Diag%fluxr(:,39) = Diag%fluxr(:,39) + Model%fhswr*aerodp(:,6)  ! SS aod at 550nm
+          end if
+
+            !  ---  save lw toa and sfc fluxes
+          if (Model%lslwr) then
+              !  ---  lw total-sky fluxes
+            Diag%fluxr(:,1 ) = Diag%fluxr(:,1 ) + Model%fhlwr *    Diag%topflw(:)%upfxc   ! total sky top lw up
+            Diag%fluxr(:,19) = Diag%fluxr(:,19) + Model%fhlwr * Radtend%sfcflw(:)%dnfxc   ! total sky sfc lw dn
+            Diag%fluxr(:,20) = Diag%fluxr(:,20) + Model%fhlwr * Radtend%sfcflw(:)%upfxc   ! total sky sfc lw up
+              !  ---  lw clear-sky fluxes
+            Diag%fluxr(:,28) = Diag%fluxr(:,28) + Model%fhlwr *    Diag%topflw(:)%upfx0   ! clear sky top lw up
+            Diag%fluxr(:,30) = Diag%fluxr(:,30) + Model%fhlwr * Radtend%sfcflw(:)%dnfx0   ! clear sky sfc lw dn
+            Diag%fluxr(:,33) = Diag%fluxr(:,33) + Model%fhlwr * Radtend%sfcflw(:)%upfx0   ! clear sky sfc lw up
+          end if
+
+            !  ---  save sw toa and sfc fluxes with proper diurnal sw wgt. coszen=mean cosz over daylight
+            !       part of sw calling interval, while coszdg= mean cosz over entire interval
+          if (Model%lsswr) then
+            do i = 1, im
+              if (Radtend%coszen(i) > 0.0) then
+                  !  ---                                  sw total-sky fluxes
+                  !                                       -------------------
+                tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
+                Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
+                Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
+                Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
+                  !  ---                                  sw uv-b fluxes
+                  !                                       --------------
+                Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
+                Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
+                  !  ---                                  sw toa incoming fluxes
+                  !                                       ----------------------
+                Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
+                  !  ---                                  sw sfc flux components
+                  !                                       ----------------------
+                Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
+                Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
+                Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
+                Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
+                  !  ---                                  sw clear-sky fluxes
+                  !                                       -------------------
+                Diag%fluxr(i,29) = Diag%fluxr(i,29) +    Diag%topfsw(i)%upfx0 * tem0d  ! clear sky top sw up
+                Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
+                Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
+              end if
+            end do
+          end if
+
+            !  ---  save total and boundary layer clouds
+          if (Model%lsswr .or. Model%lslwr) then
+            Diag%fluxr(:, 17) = Diag%fluxr(:, 17) + raddt * cldsa(:, 4)
+            Diag%fluxr(:, 18) = Diag%fluxr(:, 18) + raddt * cldsa(:, 5)
+
+              !  ---  save cld frac,toplyr,botlyr and top temp, note that the order
+              !       of h,m,l cloud is reversed for the fluxr output.
+              !  ---  save interface pressure (pa) of top/bot
+            do j = 1, 3
+              do i = 1, im
+                tem0d = raddt * cldsa(i, j)
+                itop = mtopa(i, j) - kd
+                ibtc = mbota(i, j) - kd
+                Diag%fluxr(i, 8 - j) = Diag%fluxr(i, 8 - j) + tem0d
+                Diag%fluxr(i, 11 - j) = Diag%fluxr(i, 11 - j) + tem0d * Statein%prsi(i, itop + kt)
+                Diag%fluxr(i, 14 - j) = Diag%fluxr(i, 14 - j) + tem0d * Statein%prsi(i, ibtc + kb)
+                Diag%fluxr(i, 17 - j) = Diag%fluxr(i, 17 - j) + tem0d * Statein%tgrs(i, itop)
+              end do
+            end do
+          end if
+
+          if (.not. Model%uni_cld) then
+            do k = 1, lm
+              k1 = k + kd
+              Coupling%cldcovi(:, k) = clouds(:, k1, 1)
+            end do
+          end if
+
+        end if if_lssav
+
+      end subroutine Organize_output
 
 
 !
