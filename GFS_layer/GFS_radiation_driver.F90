@@ -1218,7 +1218,7 @@
       logical, parameter :: FIND_DAYTIME_P = .true.
       logical, parameter :: GET_CLD_INFO = .true.
       logical, parameter :: DO_SW = .true.
-      logical, parameter :: DO_LW = .false.
+      logical, parameter :: DO_LW = .true.
       logical, parameter :: ORGANIZE_OUT = .false.
 
 
@@ -1751,66 +1751,73 @@
       end if if_sw
 
 
-!> -# Start LW radiation calculations
-      if (Model%lslwr) then
+      !> -# Start LW radiation calculations
+      if_lw: if (DO_LW) then
+        call Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag,     &
+          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, tlyr,   & 
+          tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
+      else
+        if (Model%lslwr) then
 
-!>  - Call module_radiation_surface::setemis(),to setup surface
-!! emissivity for LW radiation.
+            !>  - Call module_radiation_surface::setemis(),to setup surface
+            !! emissivity for LW radiation.
 
-        call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
-                      Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
-                      tsfg, tsfa, Sfcprop%hprim, IM,               & 
-                      Radtend%semis)                                              !  ---  outputs
+          call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
+                        Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
+                        tsfg, tsfa, Sfcprop%hprim, IM,               &
+                        Radtend%semis)                                              !  ---  outputs
 
-!>  - Call module_radlw_main::lwrad(), to compute LW heating rates and
-!!    fluxes.
-!     print *,' in grrad : calling lwrad'
+            !>  - Call module_radlw_main::lwrad(), to compute LW heating rates and
+            !!    fluxes.
+            !     print *,' in grrad : calling lwrad'
 
-        if (Model%lwhtr) then
-          call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
-                      clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
-                      tsfg, im, lmk, lmp, Model%lprnt,             &
-                      htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
-                      hlw0=htlw0)                                           !  ---  optional
-        else
-          call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
-                      clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
-                      tsfg, IM, LMK, LMP, Model%lprnt,             &
-                      htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs
-        endif
+          if (Model%lwhtr) then
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+                        tsfg, im, lmk, lmp, Model%lprnt,             &
+                        htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
+                        hlw0=htlw0)                                           !  ---  optional
+          else
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+                        tsfg, IM, LMK, LMP, Model%lprnt,             &
+                        htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs
+          endif
 
-!> -# Save calculation results
-!>  - Save surface air temp for diurnal adjustment at model t-steps
-        Radtend%tsflw (:) = tsfa(:)
+            !> -# Save calculation results
+            !>  - Save surface air temp for diurnal adjustment at model t-steps
+          Radtend%tsflw (:) = tsfa(:)
 
-        do k = 1, LM
-          k1 = k + kd
-            Radtend%htrlw(:,k) = htlwc(:,k1)
-        enddo
-        ! --- repopulate the points above levr
-        if (Model%levr < Model%levs) then
-          do k = LM,Model%levs
-            Radtend%htrlw (:,k) = Radtend%htrlw (:,LM)
-          enddo
-        endif
-
-        if (Model%lwhtr) then
-          do k = 1, lm
+          do k = 1, LM
             k1 = k + kd
-            Radtend%lwhc(:,k) = htlw0(:,k1)
+              Radtend%htrlw(:,k) = htlwc(:,k1)
           enddo
           ! --- repopulate the points above levr
           if (Model%levr < Model%levs) then
             do k = LM,Model%levs
-              Radtend%lwhc(:,k) = Radtend%lwhc(:,LM) 
+              Radtend%htrlw (:,k) = Radtend%htrlw (:,LM)
             enddo
           endif
-        endif
 
-! --- radiation fluxes for other physics processes
-        Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+          if (Model%lwhtr) then
+            do k = 1, lm
+              k1 = k + kd
+              Radtend%lwhc(:,k) = htlw0(:,k1)
+            enddo
+            ! --- repopulate the points above levr
+            if (Model%levr < Model%levs) then
+              do k = LM,Model%levs
+                Radtend%lwhc(:,k) = Radtend%lwhc(:,LM)
+              enddo
+            endif
+          endif
 
-      endif                                ! end_if_lslwr
+            ! --- radiation fluxes for other physics processes
+          Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+
+        endif                                ! end_if_lslwr
+      end if if_lw
+
 
 !>  - For time averaged output quantities (including total-sky and
 !!    clear-sky SW and LW fluxes at TOA and surface; conventional
@@ -2584,6 +2591,99 @@
         end if if_lsswr
 
       end subroutine Do_sw_rad
+
+
+      subroutine Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
+          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, tlyr,   &
+          tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
+
+        implicit none
+
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_sfcprop_type), intent(in) :: Sfcprop
+        type(GFS_radtend_type), intent(inout) :: Radtend
+        type(GFS_tbd_type),     intent(in) :: Tbd
+        type(GFS_diag_type), intent(inout) :: Diag
+        type(GFS_coupling_type), intent(inout) :: Coupling
+
+        integer, intent(in) :: im, lmk, lmp, kd, lm
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP), intent(in) :: plyr, tlyr, qlyr, olyr
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfg, tsfa
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(in) :: plvl, tlvl
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_VGAS), intent(in) :: gasvmr
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_CLDS), intent(in) :: clouds
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NBDLW, NF_AELW), intent(in)::faerlw
+
+          ! Local vars
+        integer :: k, k1
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+          LTP) :: htlw0, htlwc
+
+
+        if_lslwr: if (Model%lslwr) then
+            ! Setup surface emissivity for LW radiation.
+          call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
+                        Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
+                        tsfg, tsfa, Sfcprop%hprim, im,               &
+                        Radtend%semis)                                              !  ---  outputs
+
+            ! Compute LW heating rates and fluxes.
+          if (Model%lwhtr) then
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+                        tsfg, im, lmk, lmp, Model%lprnt,             &
+                        htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
+                        hlw0=htlw0)                                           !  ---  optional
+          else
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+                        tsfg, im, lmk, lmp, Model%lprnt,             &
+                        htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs
+          end if
+
+            ! Save calculation results
+            ! Save surface air temp for diurnal adjustment at model t-steps
+          Radtend%tsflw (:) = tsfa(:)
+
+          do k = 1, lm
+            k1 = k + kd
+              Radtend%htrlw(:,k) = htlwc(:, k1)
+          end do
+
+            ! Repopulate the points above levr
+          if (Model%levr < Model%levs) then
+            do k = lm, Model%levs
+              Radtend%htrlw (:, k) = Radtend%htrlw (:, lm)
+            end do
+          end if
+
+          if (Model%lwhtr) then
+            do k = 1, lm
+              k1 = k + kd
+              Radtend%lwhc(:, k) = htlw0(:, k1)
+            end do
+
+            ! --- repopulate the points above levr
+            if (Model%levr < Model%levs) then
+              do k = lm, Model%levs
+                Radtend%lwhc(:, k) = Radtend%lwhc(:, lm)
+              end do
+            end if
+          end if
+
+
+            ! Radiation fluxes for other physics processes
+          Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+
+        end if if_lslwr
+
+      end subroutine Do_lw_rad
 
 
 !
