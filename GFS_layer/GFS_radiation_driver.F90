@@ -1216,7 +1216,7 @@
       logical, parameter :: PREP_O3 = .true.
       logical, parameter :: PREP_T_MOIST = .true.
       logical, parameter :: FIND_DAYTIME_P = .true.
-      logical, parameter :: GET_CLD_INFO = .false.
+      logical, parameter :: GET_CLD_INFO = .true.
       logical, parameter :: DO_SW = .false.
       logical, parameter :: DO_LW = .false.
       logical, parameter :: ORGANIZE_OUT = .false.
@@ -1511,123 +1511,129 @@
 !!   cloud scheme, compute cloud information based on Slingo's
 !!   diagnostic cloud scheme (call module_radiation_clouds::diagcld1())
 
-!  --- ...  obtain cloud information for radiation calculations
 
-      if (Model%ntcw > 0) then                   ! prognostic cloud scheme
-        if (Model%uni_cld .and. Model%ncld >= 2) then
-          clw(:,:) = tracer1(:,1:LMK,Model%ntcw)              ! cloud water amount
-          ciw(:,:) = 0.0
-          do j = 2, Model%ncld
-            ciw(:,:) = ciw(:,:) + tracer1(:,1:LMK,Model%ntcw+j-1)   ! cloud ice amount
-          enddo
-
-          do k = 1, LMK
-            do i = 1, IM
-              if ( clw(i,k) < EPSQ ) clw(i,k) = 0.0
-              if ( ciw(i,k) < EPSQ ) ciw(i,k) = 0.0
-            enddo
-          enddo
-        else
-          clw(:,:) = 0.0
-          do j = 1, Model%ncld
-            clw(:,:) = clw(:,:) + tracer1(:,1:LMK,Model%ntcw+j-1)   ! cloud condensate amount
-          enddo
-
-          do k = 1, LMK
-            do i = 1, IM
-              if ( clw(i,k) < EPSQ ) clw(i,k) = 0.0
-            enddo
-          enddo
-        endif
-!
-!  --- add suspended convective cloud water to grid-scale cloud water
-!      only for cloud fraction & radiation computation
-!      it is to enhance cloudiness due to suspended convec cloud water
-!      for zhao/moorthi's (icmphys=1) &
-!          ferrier's (icmphys=2) microphysics schemes
-!
-        if (Model%shoc_cld) then                                       ! all but MG microphys
-          cldcov(:,1:LM) = Tbd%phy_f3d(:,1:LM,Model%ntot3d-2)
-        elseif (Model%ncld == 2) then                                  ! MG microphys (icmphys = 1)
-          cldcov(:,1:LM) = Tbd%phy_f3d(:,1:LM,1)
-        else                                                           ! neither of the other two cases
-          cldcov = 0
-        endif
-
-        if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then       ! icmphys = 3
-          deltaq(:,1:LM) = Tbd%phy_f3d(:,1:LM,5)
-          cnvw  (:,1:LM) = Tbd%phy_f3d(:,1:LM,6)
-          cnvc  (:,1:LM) = Tbd%phy_f3d(:,1:LM,7)
-        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then  ! icmphys = 1
-          deltaq(:,1:LM) = 0.
-          cnvw  (:,1:LM) = Tbd%phy_f3d(:,1:LM,Model%num_p3d+1)
-          cnvc  (:,1:LM) = 0.
-        else                                                           ! icmphys = 1 (ncld=2)
-          deltaq = 0.0
-          cnvw   = 0.0
-          cnvc   = 0.0
-        endif
-
-        if (lextop) then
-          cldcov(:,lyb) = cldcov(:,lya)
-          deltaq(:,lyb) = deltaq(:,lya)
-          cnvw  (:,lyb) = cnvw  (:,lya)
-          cnvc  (:,lyb) = cnvc  (:,lya)
-        endif
-
-        if (icmphys == 1) then
-          clw(:,1:LMK) = clw(:,1:LMK) + cnvw(:,1:LMK)
-        endif
-!
-
-        if (icmphys == 1) then           ! zhao/moorthi's prognostic cloud scheme
-                                         ! or unified cloud and/or with MG microphysics
-
+      !  --- ...  obtain cloud information for radiation calculations
+      if_cld_info: if (GET_CLD_INFO) then
+        call Get_cloud_info (Model, Grid, Tbd, Sfcprop, Cldprop,       &
+           Statein, tracer1, lmk, lmp, lm, lya, lyb, im, me, kd, clw, ciw, &
+           cldcov, deltaq, cnvc, cnvw, plvl, plyr, tlyr, qlyr, tvly,   &
+           rhly, qstl, clouds, cldsa, mtopa, mbota)
+      else
+        if (Model%ntcw > 0) then                   ! prognostic cloud scheme
           if (Model%uni_cld .and. Model%ncld >= 2) then
-            call progclduni (plyr, plvl, tlyr, tvly, clw, ciw,    &    !  ---  inputs
-                             Grid%xlat, Grid%xlon, Sfcprop%slmsk, &
-                             IM, LMK, LMP, cldcov(:,1:LMK),       &
-                             clouds, cldsa, mtopa, mbota)              !  ---  outputs
+            clw(:,:) = tracer1(:,1:LMK,Model%ntcw)              ! cloud water amount
+            ciw(:,:) = 0.0
+            do j = 2, Model%ncld
+              ciw(:,:) = ciw(:,:) + tracer1(:,1:LMK,Model%ntcw+j-1)   ! cloud ice amount
+            enddo
+
+            do k = 1, LMK
+              do i = 1, IM
+                if ( clw(i,k) < EPSQ ) clw(i,k) = 0.0
+                if ( ciw(i,k) < EPSQ ) ciw(i,k) = 0.0
+              enddo
+            enddo
           else
-            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl,    &    !  ---  inputs
-                           rhly, clw, Grid%xlat,Grid%xlon,        &
-                           Sfcprop%slmsk, IM, LMK, LMP,           &
-                           Model%uni_cld, Model%lmfshal,          &
-                           Model%lmfdeep2, cldcov(:,1:LMK),       &
-                           clouds, cldsa, mtopa, mbota)                !  ---  outputs
+            clw(:,:) = 0.0
+            do j = 1, Model%ncld
+              clw(:,:) = clw(:,:) + tracer1(:,1:LMK,Model%ntcw+j-1)   ! cloud condensate amount
+            enddo
+
+            do k = 1, LMK
+              do i = 1, IM
+                if ( clw(i,k) < EPSQ ) clw(i,k) = 0.0
+              enddo
+            enddo
+          endif
+            !
+            !  --- add suspended convective cloud water to grid-scale cloud water
+            !      only for cloud fraction & radiation computation
+            !      it is to enhance cloudiness due to suspended convec cloud water
+            !      for zhao/moorthi's (icmphys=1) &
+            !          ferrier's (icmphys=2) microphysics schemes
+            !
+          if (Model%shoc_cld) then                                       ! all but MG microphys
+            cldcov(:,1:LM) = Tbd%phy_f3d(:,1:LM,Model%ntot3d-2)
+          elseif (Model%ncld == 2) then                                  ! MG microphys (icmphys = 1)
+            cldcov(:,1:LM) = Tbd%phy_f3d(:,1:LM,1)
+          else                                                           ! neither of the other two cases
+            cldcov = 0
           endif
 
-        elseif(icmphys == 3) then      ! zhao/moorthi's prognostic cloud+pdfcld
+          if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then       ! icmphys = 3
+            deltaq(:,1:LM) = Tbd%phy_f3d(:,1:LM,5)
+            cnvw  (:,1:LM) = Tbd%phy_f3d(:,1:LM,6)
+            cnvc  (:,1:LM) = Tbd%phy_f3d(:,1:LM,7)
+          elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then  ! icmphys = 1
+            deltaq(:,1:LM) = 0.
+            cnvw  (:,1:LM) = Tbd%phy_f3d(:,1:LM,Model%num_p3d+1)
+            cnvc  (:,1:LM) = 0.
+          else                                                           ! icmphys = 1 (ncld=2)
+            deltaq = 0.0
+            cnvw   = 0.0
+            cnvc   = 0.0
+          endif
 
-          call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,&    !  ---  inputs
-                         clw, cnvw, cnvc, Grid%xlat, Grid%xlon,   &
-                         Sfcprop%slmsk,im, lmk, lmp, deltaq,      &
-                         Model%sup, Model%kdt, me,                &
-                         clouds, cldsa, mtopa, mbota)                  !  ---  outputs
+          if (lextop) then
+            cldcov(:,lyb) = cldcov(:,lya)
+            deltaq(:,lyb) = deltaq(:,lya)
+            cnvw  (:,lyb) = cnvw  (:,lya)
+            cnvc  (:,lyb) = cnvc  (:,lya)
+          endif
 
-        endif                            ! end if_icmphys
+          if (icmphys == 1) then
+            clw(:,1:LMK) = clw(:,1:LMK) + cnvw(:,1:LMK)
+          endif
 
-      else                               ! diagnostic cloud scheme
+          if (icmphys == 1) then           ! zhao/moorthi's prognostic cloud scheme
+                                           ! or unified cloud and/or with MG microphysics
 
-        cvt1(:) = 0.01 * Cldprop%cvt(:)
-        cvb1(:) = 0.01 * Cldprop%cvb(:)
+            if (Model%uni_cld .and. Model%ncld >= 2) then
+              call progclduni (plyr, plvl, tlyr, tvly, clw, ciw,    &    !  ---  inputs
+                               Grid%xlat, Grid%xlon, Sfcprop%slmsk, &
+                               IM, LMK, LMP, cldcov(:,1:LMK),       &
+                               clouds, cldsa, mtopa, mbota)              !  ---  outputs
+            else
+              call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl,    &    !  ---  inputs
+                             rhly, clw, Grid%xlat,Grid%xlon,        &
+                             Sfcprop%slmsk, IM, LMK, LMP,           &
+                             Model%uni_cld, Model%lmfshal,          &
+                             Model%lmfdeep2, cldcov(:,1:LMK),       &
+                             clouds, cldsa, mtopa, mbota)                !  ---  outputs
+            endif
 
-        do k = 1, LM
-          k1 = k + kd
-          vvel(:,k1) = 0.01 * Statein%vvl(:,k)
-        enddo
-        if (lextop) then
-          vvel(:,lyb) = vvel(:,lya)
-        endif
+          elseif(icmphys == 3) then      ! zhao/moorthi's prognostic cloud+pdfcld
 
-!  ---  compute diagnostic cloud related quantities
+            call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,&    !  ---  inputs
+                           clw, cnvw, cnvc, Grid%xlat, Grid%xlon,   &
+                           Sfcprop%slmsk,im, lmk, lmp, deltaq,      &
+                           Model%sup, Model%kdt, me,                &
+                           clouds, cldsa, mtopa, mbota)                  !  ---  outputs
 
-        call diagcld1 (plyr, plvl, tlyr, rhly, vvel, Cldprop%cv,  &    !  ---  inputs
-                       cvt1, cvb1, Grid%xlat, Grid%xlon,          &
-                       Sfcprop%slmsk, IM, LMK, LMP,               &
-                       clouds, cldsa, mtopa, mbota)                    !  ---  outputs
+          endif                            ! end if_icmphys
 
-      endif                                ! end_if_ntcw
+        else                               ! diagnostic cloud scheme
+
+          cvt1(:) = 0.01 * Cldprop%cvt(:)
+          cvb1(:) = 0.01 * Cldprop%cvb(:)
+
+          do k = 1, LM
+            k1 = k + kd
+            vvel(:,k1) = 0.01 * Statein%vvl(:,k)
+          enddo
+          if (lextop) then
+            vvel(:,lyb) = vvel(:,lya)
+          endif
+
+          !  ---  compute diagnostic cloud related quantities
+          call diagcld1 (plyr, plvl, tlyr, rhly, vvel, Cldprop%cv,  &    !  ---  inputs
+                         cvt1, cvb1, Grid%xlat, Grid%xlon,          &
+                         Sfcprop%slmsk, IM, LMK, LMP,               &
+                         clouds, cldsa, mtopa, mbota)                    !  ---  outputs
+
+        endif                                ! end_if_ntcw
+      end if if_cld_info
+
 
 !  --- ...  start radiation calculations
 !           remember to set heating rate unit to k/sec!
@@ -2259,6 +2265,175 @@
          end do
 
       end subroutine Find_daytime
+
+
+      subroutine Get_cloud_info (Model, Grid, Tbd, Sfcprop, Cldprop,   &
+           Statein, tracer1, lmk, lmp, lm, lya, lyb, im, me, kd, clw, ciw, &
+           cldcov, deltaq, cnvc, cnvw, plvl, plyr, tlyr, qlyr, tvly,   &
+           rhly, qstl, clouds, cldsa, mtopa, mbota)
+
+        implicit none
+
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_tbd_type),     intent(in) :: Tbd
+        type(GFS_sfcprop_type), intent(in) :: Sfcprop
+        type(GFS_cldprop_type), intent(in) :: Cldprop
+        type(GFS_statein_type), intent(in) :: Statein
+
+        integer, intent(in) :: lmk, lm, lya, lyb, lmp, im, me, kd
+
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+            LTP), intent(out) :: clw, ciw, cldcov, deltaq, cnvc, cnvw 
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_CLDS), intent(inout) :: clouds
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(out) :: cldsa
+        integer, dimension(size(Grid%xlon, 1), 3), intent(out) :: mbota, mtopa
+
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(in) :: plvl
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, 2:Model%ntrac), intent(in) :: tracer1
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+            LTP), intent(in) :: plyr, tlyr, tvly, qlyr, qstl, rhly
+
+
+          ! Local vars
+        integer :: i, j, k, k1
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1)) :: cvt1, cvb1
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+            LTP) :: vvel
+
+
+        if (Model%ntcw > 0) then
+            ! prognostic cloud scheme
+          if (Model%uni_cld .and. Model%ncld >= 2) then
+              ! cloud water amount
+            clw(:,:) = tracer1(:, 1:lmk, Model%ntcw)
+              ! cloud ice amount
+            ciw(:,:) = 0.0
+            do j = 2, Model%ncld
+              ciw(:, :) = ciw(:, :) + tracer1(:, 1:lmk, Model%ntcw + j - 1)
+            end do
+
+            do k = 1, lmk
+              do i = 1, im
+                if (clw(i, k) < EPSQ) clw(i, k) = 0.0
+                if (ciw(i, k) < EPSQ) ciw(i, k) = 0.0
+              end do
+            end do
+          else
+              ! cloud condensate amount
+            clw(:, :) = 0.0
+            do j = 1, Model%ncld
+              clw(:, :) = clw(:, :) + tracer1(:, 1:lmk, Model%ntcw + j - 1)
+            end do
+
+            do k = 1, lmk
+              do i = 1, im
+                if (clw(i, k) < EPSQ ) clw(i, k) = 0.0
+              end do
+            end do
+          endif
+
+            !
+            !  --- add suspended convective cloud water to grid-scale cloud water
+            !      only for cloud fraction & radiation computation
+            !      it is to enhance cloudiness due to suspended convec cloud water
+            !      for zhao/moorthi's (icmphys=1) &
+            !          ferrier's (icmphys=2) microphysics schemes
+            !                                       
+
+          if (Model%shoc_cld) then
+              ! all but MG microphys
+            cldcov(:, 1:lm) = Tbd%phy_f3d(:, 1:lm, Model%ntot3d - 2)
+          elseif (Model%ncld == 2) then
+              ! MG microphys (icmphys = 1)
+            cldcov(:,1:lm) = Tbd%phy_f3d(:, 1:lm, 1)
+          else
+              ! neither of the other two cases
+            cldcov = 0
+          end if
+
+          if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then
+              ! icmphys = 3
+            deltaq(:, 1:lm) = Tbd%phy_f3d(:, 1:lm, 5)
+            cnvw (:, 1:lm) = Tbd%phy_f3d(:, 1:lm, 6)
+            cnvc (:, 1:lm) = Tbd%phy_f3d(:, 1:lm, 7)
+          elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+              ! icmphys = 1
+            deltaq(:, 1:lm) = 0.0
+            cnvw(:, 1:lm) = Tbd%phy_f3d(:, 1:lm, Model%num_p3d + 1)
+            cnvc(:, 1:lm) = 0.0
+          else
+              ! icmphys = 1 (ncld=2)
+            deltaq = 0.0
+            cnvw = 0.0
+            cnvc = 0.0
+          endif
+
+          if (lextop) then
+            cldcov(:, lyb) = cldcov(:, lya)
+            deltaq(:, lyb) = deltaq(:, lya)
+            cnvw(:, lyb) = cnvw(:, lya)
+            cnvc(:, lyb) = cnvc(:, lya)
+          endif
+
+          if (icmphys == 1) then
+            clw(:, 1:lmk) = clw(:, 1:lmk) + cnvw(:, 1:lmk)
+          end if
+
+          if (icmphys == 1) then
+              ! zhao/moorthi's prognostic cloud scheme
+              ! or unified cloud and/or with MG microphysics
+            if (Model%uni_cld .and. Model%ncld >= 2) then
+              call progclduni (plyr, plvl, tlyr, tvly, clw, ciw,    &    !  ---  inputs
+                               Grid%xlat, Grid%xlon, Sfcprop%slmsk, &
+                               im, lmk, lmp, cldcov(:, 1:lmk),      &
+                               clouds, cldsa, mtopa, mbota)              !  ---  outputs
+            else
+              call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl,    &    !  ---  inputs
+                             rhly, clw, Grid%xlat, Grid%xlon,       &
+                             Sfcprop%slmsk, im, lmk, lmp,           &
+                             Model%uni_cld, Model%lmfshal,          &
+                             Model%lmfdeep2, cldcov(:, 1:lmk),      &
+                             clouds, cldsa, mtopa, mbota)                !  ---  outputs
+            endif
+
+          elseif(icmphys == 3) then      ! zhao/moorthi's prognostic cloud+pdfcld
+
+            call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,&    !  ---  inputs
+                           clw, cnvw, cnvc, Grid%xlat, Grid%xlon,   &
+                           Sfcprop%slmsk, im, lmk, lmp, deltaq,     &
+                           Model%sup, Model%kdt, me,                &
+                           clouds, cldsa, mtopa, mbota)                  !  ---  outputs
+
+          endif
+
+        else
+            ! diagnostic cloud scheme
+          cvt1(:) = 0.01 * Cldprop%cvt(:)
+          cvb1(:) = 0.01 * Cldprop%cvb(:)
+
+          do k = 1, lm
+            k1 = k + kd
+            vvel(:, k1) = 0.01 * Statein%vvl(:, k)
+          end do
+
+          if (lextop) then
+            vvel(:, lyb) = vvel(:, lya)
+          endif
+
+            !  ---  compute diagnostic cloud related quantities
+          call diagcld1 (plyr, plvl, tlyr, rhly, vvel, Cldprop%cv,  &    !  ---  inputs
+                         cvt1, cvb1, Grid%xlat, Grid%xlon,          &
+                         Sfcprop%slmsk, im, lmk, lmp,               &
+                         clouds, cldsa, mtopa, mbota)                    !  ---  outputs
+
+        endif                                ! end_if_ntcw
+
+      end subroutine Get_cloud_info
+
 
 !
 !> @}
