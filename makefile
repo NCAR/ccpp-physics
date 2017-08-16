@@ -67,7 +67,6 @@ SRCS_f   =  \
 	   ./physics/moninshoc.f                                                     \
 	   ./physics/mstadb.f                                                        \
 	   ./physics/mstadbtn.f                                                      \
-	   ./physics/mstadbtn2.f                                                     \
 	   ./physics/mstcnv.f                                                        \
 	   ./physics/namelist_soilveg.f                                              \
 	   ./physics/ozne_def.f                                                      \
@@ -77,7 +76,6 @@ SRCS_f   =  \
 	   ./physics/precpd.f                                                        \
 	   ./physics/precpd_shoc.f                                                   \
 	   ./physics/precpdp.f                                                       \
-	   ./physics/precpd_shoc.f                                                   \
 	   ./physics/progt2.f                                                        \
 	   ./physics/progtm_module.f                                                 \
 	   ./physics/rad_initialize.f                                                \
@@ -110,8 +108,6 @@ SRCS_f   =  \
 	   ./physics/sflx.f                                                          \
 	   ./physics/shalcnv.f                                                       \
 	   ./physics/shalcv.f                                                        \
-	   ./physics/shalcv_1lyr.f                                                   \
-	   ./physics/shalcv_fixdp.f                                                  \
 	   ./physics/shalcv_opr.f                                                    \
 	   ./physics/tracer_const_h.f                                                \
 	   ./physics/tridi2t3.f
@@ -167,7 +163,7 @@ OBJS = $(OBJS_f) $(OBJS_f90) $(OBJS_F) $(OBJS_F90) $(OBJS_c)
 all default: depend $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
-	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
 
