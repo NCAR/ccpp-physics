@@ -20,7 +20,7 @@ VER_MAJOR = 1
 VER_MINOR = 0
 VER_PATCH = 0
 
-FFLAGS   += -I../fms -I../fms/include
+FFLAGS   += -I../fms -I../fms/include -fPIC
 
 CPPDEFS = -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 
@@ -163,7 +163,7 @@ OBJS = $(OBJS_f) $(OBJS_f90) $(OBJS_F) $(OBJS_F90) $(OBJS_c)
 all default: depend $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
-	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS)  $(LDFLAGS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
 
