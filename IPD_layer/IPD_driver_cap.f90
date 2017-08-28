@@ -243,7 +243,7 @@ module IPD_driver_cap
 
         call c_f_pointer(ptr, cdata)
 
-        call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
+        call ccpp_fields_get(cdata, 'IPD_Control', ptr, ierr)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve IPD_Control')
             return
@@ -306,7 +306,7 @@ module IPD_driver_cap
 
         call c_f_pointer(ptr, cdata)
 
-        call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
+        call ccpp_fields_get(cdata, 'IPD_Control', ptr, ierr)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve IPD_Control')
             return
