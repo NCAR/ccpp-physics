@@ -4,8 +4,8 @@ module sasas_deep
       subroutine sasasdeep_init
       end subroutine sasasdeep_init
 
-      subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql,
-     &     q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
+      subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,
+     &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
 !
 ! | local var name | longname                                              | description                   | units   | rank | type    |    kind   | intent |
@@ -54,7 +54,8 @@ module sasas_deep
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
       real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),
+     &                     ql1(ix,km)  ql2(ix,im)   q1(ix,km),   
+     &                     t1(ix,km),
      &                     u1(ix,km),  v1(ix,km),
 !    &                     u1(ix,km),  v1(ix,km),   rcs(im),
      &                     cldwrk(im), rn(im),      garea(im),
@@ -2230,11 +2231,11 @@ c
             if (k >= kbcon(i) .and. k <= ktcon(i)) then
               tem  = dellal(i,k) * xmb(i) * dt2
               tem1 = max(0.0, min(1.0, (tcr-t1(i,k))*tcrf))
-              if (ql(i,k,2) > -999.0) then
-                ql(i,k,1) = ql(i,k,1) + tem * tem1            ! ice
-                ql(i,k,2) = ql(i,k,2) + tem *(1.0-tem1)       ! water
+              if (ql2(i,k) > -999.0) then
+                ql1(i,k) = ql1(i,k) + tem * tem1            ! ice
+                ql2(i,k) = ql2(i,k) + tem *(1.0-tem1)       ! water
               else
-                ql(i,k,1) = ql(i,k,1) + tem
+                ql1(i,k) = ql1(i,k) + tem
               endif
             endif
           endif
