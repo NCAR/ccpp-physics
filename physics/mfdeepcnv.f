@@ -8,36 +8,36 @@ module sasas_deep
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
 !
-! | local var name | longname                                              | description                   | units   | rank | type    |    kind   | intent |
-! |================|=======================================================|===============================|=========|======|=========|===========|========|
-! | im             | horizontal_dimension                                  | number of used points         | index   |    0 | integer |           | in     |
-! | ix             | horizontal_dimension                                  | horizontal dimension          | index   |    0 | integer |           | in     |
-! | km             | vertical_dimension                                    | vertical layer dimension      | index   |    0 | integer |           | in     |
-! | delt           | time_step                                             | physics time step             | s       |    0 | real    | kind_phys | in     |
-! | delp           | air_pressure_layer_difference                         | pres(k) - pres(k+1)           | Pa      | 2    | real    | kind_phys | in     |
-! | prslp          | air_pressure_layer                                    | mean layer pressure           | Pa      | 2    | real    | kind_phys | in     |
-! | psp            | surface_air_pressure                                  | surface pressure              | Pa      | 1    | real    | kind_phys | in     |
-! | phil           | geopotential                                          | layer geopotential            | m2 s-2  | 2    | real    | kind_phys | in     |
-! | ql1            | cloud_ice_mixing_ratio                                | cloud ice                     | kg kg-1 | 2    | real    | kind_phys | inout  |
-! | ql2            | cloud_liquid_water_mixing_ratio                       | cloud water                   | kg kg-1 | 2    | real    | kind_phys | inout  |
-! | q1             | water_vapor_mixing_ratio                              | updated vapor mixing ratio    | kg kg-1 | 2    | real    | kind_phys | inout  |
-! | t1             | air_temperature                                       | updated temperature           | K       | 2    | real    | kind_phys | inout  |
-! | u1             | grid_eastward_wind                                    | updated zonal wind            | m s-1   | 2    | real    | kind_phys | inout  |
-! | v1             | grid_northward_wind                                   | updated meridional wind       | m s-1   | 2    | real    | kind_phys | inout  |
-! | cldwrk         | cloud_work_function                                   | cloud work function           | m2 s-2  | 1    | real    | kind_phys |   out  |
-! | rn             | convective_rainfall_amount                            | convective rain               | m       | 1    | real    | kind_phys |   out  |
-! | kbot           | index_for_cloud_base                                  | index for cloud base          | index   | 1    | integer |           |   out  |
-! | ktop           | index_for_cloud_top                                   | index for cloud top           | index   | 1    | integer |           |   out  |
-! | kcnv           | flag_deep_convection                                  | deep convection: 0=no, 1=yes  | flag    | 1    | integer |           |   out  |
-! | islimsk        | sea_land_ice_mask                                     | landmask: sea/land/ice=0/1/2  | flag    | 1    | integer |           | in     |
-! | garea          | cell_area                                             | grid cell area                | m2      | 1    | real    | kind_phys | in     |
-! | dot            | omega                                                 | layer mean vertical velocity  | Pa s-1  | 2    | real    | kind_phys | in     |
-! | ncloud         |                                                       | number of cloud species       |         |    0 | integer |           | in     |
-! | ud_mf          | atmosphere_updraft_convective_mass_flux               | (updraft mass flux) * delt    | kg m-2  | 2    | real    | kind_phys |   out  |
-! | dd_mf          | atmosphere_downdraft_convective_mass_flux             | (downdraft mass flux) * delt  | kg m-2  | 2    | real    | kind_phys |   out  |
-! | dt_mf          | atmosphere_updraft_convective_mass_flux_at_cloud_top  | ud_mf at cloud top            | kg m-2  | 2    | real    | kind_phys |   out  |
-! | cnvw           | atmosphere_convective_cloud_water_mixing_ratio        | convective cloud water        | kg kg-1 | 2    | real    | kind_phys |   out  |
-! | cnvc           | cloud_binary_mask                                     | convective cloud cover        | flag    | 2    | real    | kind_phys |   out  |
+! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent |
+! |================|=======================================================|====================================|=========|======|=========|===========|========|
+! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     |
+! | ix             | horizontal_dimension                                  | horizontal dimension               | index   |    0 | integer |           | in     |
+! | km             | vertical_dimension                                    | vertical layer dimension           | index   |    0 | integer |           | in     |
+! | delt           | time_step                                             | physics time step                  | s       |    0 | real    | kind_phys | in     |
+! | delp           | air_pressure_layer_difference                         | pres(k) - pres(k+1)                | Pa      | 2    | real    | kind_phys | in     |
+! | prslp          | air_pressure_layer                                    | mean layer pressure                | Pa      | 2    | real    | kind_phys | in     |
+! | psp            | surface_air_pressure                                  | surface pressure                   | Pa      | 1    | real    | kind_phys | in     |
+! | phil           | geopotential                                          | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     |
+! | ql1            | cloud_ice_specific_humidity                           | cloud ice specific humidity        | kg kg-1 | 2    | real    | kind_phys | inout  |
+! | ql2            | cloud_liquid_water_specific_humidity                  | cloud water specific humidity      | kg kg-1 | 2    | real    | kind_phys | inout  |
+! | q1             | water_vapor_specific_humidity                         | updated vapor specific humidity    | kg kg-1 | 2    | real    | kind_phys | inout  |
+! | t1             | air_temperature                                       | updated temperature                | K       | 2    | real    | kind_phys | inout  |
+! | u1             | grid_eastward_wind                                    | updated zonal wind                 | m s-1   | 2    | real    | kind_phys | inout  |
+! | v1             | grid_northward_wind                                   | updated meridional wind            | m s-1   | 2    | real    | kind_phys | inout  |
+! | cldwrk         | cloud_work_function                                   | cloud work function                | m2 s-2  | 1    | real    | kind_phys |   out  |
+! | rn             | convective_rainfall_amount                            | convective rain                    | m       | 1    | real    | kind_phys |   out  |
+! | kbot           | index_for_cloud_base                                  | index for cloud base               | index   | 1    | integer |           |   out  |
+! | ktop           | index_for_cloud_top                                   | index for cloud top                | index   | 1    | integer |           |   out  |
+! | kcnv           | flag_deep_convection                                  | deep convection: 0=no, 1=yes       | flag    | 1    | integer |           |   out  |
+! | islimsk        | sea_land_ice_mask                                     | landmask: sea/land/ice=0/1/2       | flag    | 1    | integer |           | in     |
+! | garea          | cell_area                                             | grid cell area                     | m2      | 1    | real    | kind_phys | in     |
+! | dot            | omega                                                 | layer mean vertical velocity       | Pa s-1  | 2    | real    | kind_phys | in     |
+! | ncloud         | number_of_hydrometeors                                | number of hydrometeors             | count   |    0 | integer |           | in     |
+! | ud_mf          | atmosphere_updraft_convective_mass_flux               | (updraft mass flux) * delt         | kg m-2  | 2    | real    | kind_phys |   out  |
+! | dd_mf          | atmosphere_downdraft_convective_mass_flux             | (downdraft mass flux) * delt       | kg m-2  | 2    | real    | kind_phys |   out  |
+! | dt_mf          | atmosphere_updraft_convective_mass_flux_at_cloud_top  | ud_mf at cloud top                 | kg m-2  | 2    | real    | kind_phys |   out  |
+! | cnvw           | atmosphere_convective_cloud_water_specific_humidity   | convective cloud water             | kg kg-1 | 2    | real    | kind_phys |   out  |
+! | cnvc           | cloud_binary_mask                                     | convective cloud cover             | flag    | 2    | real    | kind_phys |   out  |
 
 !
       use machine , only : kind_phys
@@ -48,6 +48,8 @@ module sasas_deep
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
+! In the current NCEP spectral model im <= ix for reduced grid numbers 
+! near the pole and a parallel computing. For FV3, im=ix.
       integer            im, ix,  km, ncloud,
      &                   kbot(im), ktop(im), kcnv(im) 
 !    &,                  me
@@ -405,9 +407,9 @@ c
 c  column variables
 c  p is pressure of the layer (mb)
 c  t is temperature at t-dt (k)..tn
-c  q is mixing ratio at t-dt (kg/kg)..qn
-c  to is temperature at t+dt (k)... this is after advection and turbulan
-c  qo is mixing ratio at t+dt (kg/kg)..q1
+c  q is specific humidity at t-dt (kg/kg)..qn
+c  to is temperature at t+dt (k)... this is after advection and turbulence
+c  qo is specific humidity at t+dt (kg/kg)..q1
 c
       do k = 1, km
         do i=1,im
