@@ -37,6 +37,8 @@ module IPD_driver_cap
                             IPD_radiation_step,                        &
                             IPD_physics_step1,                         &
                             IPD_physics_step2
+    use            :: namelist_soilveg,                                &
+                      only: salp_data, snupx, max_vegtyp
     implicit none
 
     private
@@ -60,7 +62,9 @@ module IPD_driver_cap
         type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
         type(IPD_restart_type), pointer  :: IPD_Restart => null()
         type(IPD_init_type),    pointer  :: Init_parm   => null()
-        type(c_ptr),            pointer  :: tmp         => null()
+        type(c_ptr)                      :: tmp
+        real, pointer                    :: l_snupx(:)  => null()
+        real, pointer                    :: l_salp_data => null()
 
         call c_f_pointer(ptr, cdata)
 
@@ -103,11 +107,17 @@ module IPD_driver_cap
             deallocate(dims)
         end if
 
+        call ccpp_fields_get(cdata, 'salp_data', l_salp_data, ierr)
+        call ccpp_fields_get(cdata, 'snupx', l_snupx, ierr)
+
         call IPD_initialize(IPD_Control=IPD_Control, &
                             IPD_Data=IPD_Data,       &
                             IPD_Diag=IPD_Diag,       &
                             IPD_Restart=IPD_Restart, &
                             IPD_init_parm=Init_parm)
+
+        l_snupx = snupx
+        l_salp_data = salp_data
     end subroutine ipd_initialize_cap
 
     subroutine ipd_setup_step_cap(ptr) bind(c)
@@ -121,7 +131,7 @@ module IPD_driver_cap
         type(IPD_data_type),    pointer  :: IPD_Data(:) => null()
         type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
         type(IPD_restart_type), pointer  :: IPD_Restart => null()
-        type(c_ptr),            pointer  :: tmp         => null()
+        type(c_ptr)                      :: tmp
 
         call c_f_pointer(ptr, cdata)
 
@@ -175,10 +185,16 @@ module IPD_driver_cap
         type(IPD_data_type),    pointer  :: IPD_Data(:) => null()
         type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
         type(IPD_restart_type), pointer  :: IPD_Restart => null()
-        integer,                pointer  :: nblks       => null()
-        type(c_ptr),            pointer  :: tmp         => null()
+        integer,                pointer  :: nblks
+        type(c_ptr)                      :: tmp
 
         call c_f_pointer(ptr, cdata)
+
+        call ccpp_fields_get(cdata, 'nblks', nblks, ierr)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve nblks')
+            return
+        end if
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
         if (ierr /= 0) then
@@ -192,7 +208,7 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Data')
             return
         end if
-        call c_f_pointer(tmp, IPD_Data)
+        call c_f_pointer(tmp, IPD_Data, [nblks])
 
         call ccpp_fields_get(cdata, 'IPD_Diag', tmp, ierr)
         if (ierr /= 0) then
@@ -238,12 +254,18 @@ module IPD_driver_cap
         type(IPD_data_type),    pointer  :: IPD_Data(:) => null()
         type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
         type(IPD_restart_type), pointer  :: IPD_Restart => null()
-        integer,                pointer  :: nblks       => null()
-        type(c_ptr),            pointer  :: tmp         => null()
+        integer,                pointer  :: nblks
+        type(c_ptr)                      :: tmp
 
         call c_f_pointer(ptr, cdata)
 
-        call ccpp_fields_get_ptr(cdata, 'IPD_Control', tmp, ierr)
+        call ccpp_fields_get(cdata, 'nblks', nblks, ierr)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve nblks')
+            return
+        end if
+
+        call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve IPD_Control')
             return
@@ -255,7 +277,7 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Data')
             return
         end if
-        call c_f_pointer(tmp, IPD_Data, dims)
+        call c_f_pointer(tmp, IPD_Data, [nblks])
 
         call ccpp_fields_get(cdata, 'IPD_Diag', tmp, ierr, dims=dims)
         if (ierr /= 0) then
@@ -301,12 +323,18 @@ module IPD_driver_cap
         type(IPD_data_type),    pointer  :: IPD_Data(:) => null()
         type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
         type(IPD_restart_type), pointer  :: IPD_Restart => null()
-        integer,                pointer  :: nblks       => null()
-        type(c_ptr),            pointer  :: tmp         => null()
+        integer,                pointer  :: nblks
+        type(c_ptr)                      :: tmp
 
         call c_f_pointer(ptr, cdata)
 
-        call ccpp_fields_get_ptr(cdata, 'IPD_Control', tmp, ierr)
+        call ccpp_fields_get(cdata, 'nblks', nblks, ierr)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve nblks')
+            return
+        end if
+
+        call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve IPD_Control')
             return
@@ -318,7 +346,7 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Data')
             return
         end if
-        call c_f_pointer(tmp, IPD_Data, dims)
+        call c_f_pointer(tmp, IPD_Data, [nblks])
 
         call ccpp_fields_get(cdata, 'IPD_Diag', tmp, ierr, dims=dims)
         if (ierr /= 0) then
