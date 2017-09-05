@@ -55,7 +55,7 @@ module sasas_deep
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
       real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),
-     &                     ql1(ix,km)  ql2(ix,im)   q1(ix,km),   
+     &                     ql1(ix,km), ql2(ix,km)   q1(ix,km),   
      &                     t1(ix,km),
      &                     u1(ix,km),  v1(ix,km),
 !    &                     u1(ix,km),  v1(ix,km),   rcs(im),
