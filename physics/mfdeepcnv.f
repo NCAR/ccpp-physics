@@ -22,8 +22,8 @@
 ! | ql2            | cloud_liquid_water_specific_humidity                  | cloud water specific humidity      | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 ! | q1             | water_vapor_specific_humidity                         | updated vapor specific humidity    | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 ! | t1             | air_temperature                                       | updated temperature                | K       | 2    | real    | kind_phys | inout  | F        |
-! | u1             | grid_eastward_wind                                    | updated zonal wind                 | m s-1   | 2    | real    | kind_phys | inout  | F        |
-! | v1             | grid_northward_wind                                   | updated meridional wind            | m s-1   | 2    | real    | kind_phys | inout  | F        |
+! | u1             | x_wind                                                | updated x-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
+! | v1             | y_wind                                                | updated y-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
 ! | cldwrk         | cloud_work_function                                   | cloud work function                | m2 s-2  | 1    | real    | kind_phys |   out  | F        |
 ! | rn             | convective_rainfall_amount                            | convective rain                    | m       | 1    | real    | kind_phys |   out  | F        |
 ! | kbot           | index_for_cloud_base                                  | index for cloud base               | index   | 1    | integer |           |   out  | F        |
