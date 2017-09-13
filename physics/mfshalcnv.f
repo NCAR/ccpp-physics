@@ -1,5 +1,23 @@
-      subroutine mfshalcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,
-     &     q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,
+!>  \file mfshalcnv.f
+!!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
+
+!> \defgroup SASHAL Scale-Aware Mass Flux Shallow Convection
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
+      subroutine mfshalcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,        &
+     &     q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,                 &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
 !    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
 !
@@ -11,20 +29,18 @@
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
-      integer            im, ix,  km, ncloud,
-     &                   kbot(im), ktop(im), kcnv(im) 
+      integer            im, ix,  km, ncloud,                           &
+     &                   kbot(im), ktop(im), kcnv(im)
 !    &,                  me
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
-      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),
-     &                     u1(ix,km),  v1(ix,km),
-!    &                     u1(ix,km),  v1(ix,km),   rcs(im),
-     &                     rn(im),     garea(im),
-     &                     dot(ix,km), phil(ix,km), hpbl(im),
-     &                     cnvw(ix,km),cnvc(ix,km)
-! hchuang code change mass flux output
-     &,                    ud_mf(im,km),dt_mf(im,km)
+      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
+     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),          &
+     &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
+     &                     rn(im),     garea(im),                       &
+     &                     dot(ix,km), phil(ix,km), hpbl(im),           &
+     &                     cnvw(ix,km),cnvc(ix,km)                      &
+     &,                    ud_mf(im,km),dt_mf(im,km)                    & ! hchuang code change mass flux output
 !
       integer              i,j,indx, k, kk, km1, n
       integer              kpbl(im)
@@ -50,7 +66,7 @@
      &                     w1,      w1l,     w1s,     w2,
      &                     w2l,     w2s,     w3,      w3l,
      &                     w3s,     w4,      w4l,     w4s,
-     &                     rho,     tem,     tem1,    tem2,    
+     &                     rho,     tem,     tem1,    tem2,
      &                     ptem,    ptem1,
      &                     pgcon
 !
@@ -58,7 +74,7 @@
      &                     ktcon(im), ktcon1(im), ktconn(im),
      &                     kbm(im), kmax(im)
 !
-      real(kind=kind_phys) aa1(im),     cina(im),   
+      real(kind=kind_phys) aa1(im),     cina(im),
      &                     umean(im),  tauadv(im),  gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
@@ -116,7 +132,7 @@ c  cloud water
 !     real(kind=kind_phys) qlko_ktcon(im), dellal(im,km), tvo(im,km),
       real(kind=kind_phys) qlko_ktcon(im), dellal(im,km),
      &                     dbyo(im,km),    zo(im,km),     xlamue(im,km),
-     &                     heo(im,km),     heso(im,km), 
+     &                     heo(im,km),     heso(im,km),
      &                     dellah(im,km),  dellaq(im,km),
      &                     dellau(im,km),  dellav(im,km), hcko(im,km),
      &                     ucko(im,km),    vcko(im,km),   qcko(im,km),
@@ -214,9 +230,9 @@ c     evef    = 0.07
 !
 !     pgcon   = 0.7     ! Gregory et al. (1997, QJRMS)
       pgcon   = 0.55    ! Zhang & Wu (2003,JAS)
-      w1l     = -8.e-3 
+      w1l     = -8.e-3
       w2l     = -4.e-2
-      w3l     = -5.e-3 
+      w3l     = -5.e-3
       w4l     = -5.e-4
       w1s     = -2.e-4
       w2s     = -2.e-3
@@ -231,7 +247,7 @@ c
         kmax(i)  = km
         tx1(i)   = 1.0 / ps(i)
       enddo
-!     
+!
       do k = 1, km
         do i=1,im
           if (prsl(i,k)*tx1(i) > 0.70) kbm(i)   = k + 1
@@ -653,7 +669,7 @@ c
           else
             tem = 0.
           endif
- 
+
           val1    =            -1.
           tem = max(tem,val1)
           val2    =             1.
@@ -1437,3 +1453,5 @@ c
 !!
       return
       end
+!> @}
+!> @}

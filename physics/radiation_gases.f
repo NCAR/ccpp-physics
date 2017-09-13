@@ -104,7 +104,7 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!> \ingroup rad
+!> \ingroup RRTMG
 !! \defgroup module_radiation_gases module_radiation_gases
 !! @{
 !> This module sets up ozone climatological profiles and other constant
@@ -139,22 +139,22 @@
 !>\name parameter constants
 
 !> number of gas species
-      integer, parameter, public :: NF_VGAS = 10     
+      integer, parameter, public :: NF_VGAS = 10
 !> input co2 dat lon points
-      integer, parameter         :: IMXCO2  = 24    
+      integer, parameter         :: IMXCO2  = 24
 !> input co2 data lat points
-      integer, parameter         :: JMXCO2  = 12   
+      integer, parameter         :: JMXCO2  = 12
 !> earlist year 2-d co2 data available
       integer, parameter         :: MINYEAR = 1957
-                                                 
+
 !> horizontal resolution in degree
-      real (kind=kind_phys), parameter :: resco2=15.0       
+      real (kind=kind_phys), parameter :: resco2=15.0
 !> rad->deg conversion
-      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi 
+      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi
 !> pressure limitation for 2-d co2 (mb)
-      real (kind=kind_phys), parameter :: prsco2=788.0      
+      real (kind=kind_phys), parameter :: prsco2=788.0
 !> half of pi
-      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi 
+      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi
 
 !>\name parameter constants for gas volume mixing ratioes
 
@@ -164,15 +164,15 @@
       real (kind=kind_phys), parameter :: o2vmr_def  = 0.209
       real (kind=kind_phys), parameter :: covmr_def  = 1.50e-8
 !> aer 2003 value
-      real (kind=kind_phys), parameter :: f11vmr_def = 3.520e-10  
+      real (kind=kind_phys), parameter :: f11vmr_def = 3.520e-10
 !> aer 2003 value
-      real (kind=kind_phys), parameter :: f12vmr_def = 6.358e-10  
+      real (kind=kind_phys), parameter :: f12vmr_def = 6.358e-10
 !> aer 2003 value
-      real (kind=kind_phys), parameter :: f22vmr_def = 1.500e-10 
+      real (kind=kind_phys), parameter :: f22vmr_def = 1.500e-10
 !> aer 2003 value
       real (kind=kind_phys), parameter :: cl4vmr_def = 1.397e-10
 !> gfdl 1999 value
-      real (kind=kind_phys), parameter :: f113vmr_def= 8.2000e-11 
+      real (kind=kind_phys), parameter :: f113vmr_def= 8.2000e-11
 
 !  ---  ozone seasonal climatology parameters defined in module ozne_def
 !   - 4x5 ozone data parameter
@@ -888,9 +888,9 @@
 !! from observed values, all other gases are asigned to the
 !! climatological values.
 !!\param plvl       (IMAX,LMAX+1), pressure at model layer interfaces (mb)
-!!\param xlon       (IMAX), grid longitude in radians, ok both 0->2pi 
+!!\param xlon       (IMAX), grid longitude in radians, ok both 0->2pi
 !!                  or -pi -> +pi arrangements
-!!\param xlat       (IMAX), grid latitude in radians, default range to 
+!!\param xlat       (IMAX), grid latitude in radians, default range to
 !!                  pi/2 -> -pi/2, otherwise see in-line comment
 !!\param IMAX, LMAX      horizontal/vertical dimensions for output data
 !!\param gasdat     (IMAX,LMAX,NF_VGAS) - gases volume mixing ratioes
@@ -906,9 +906,9 @@
 !!\n                    (:,:,10)          - cfc113
 !-----------------------------------
       subroutine getgases                                               &
-     &     ( plvl, xlon, xlat,                                          & ! ---  inputs               
+     &     ( plvl, xlon, xlat,                                          & ! ---  inputs
      &       IMAX, LMAX,                                                &
-     &       gasdat                                                     & ! ---  outputs    
+     &       gasdat                                                     & ! ---  outputs
      &      )
 
 !  ===================================================================  !
@@ -1053,7 +1053,7 @@
 !!\param xlat        (IMAX), latitude in radians, default to pi/2 ->
 !!                    -pi/2 range, otherwise see in-line comment
 !!\param IMAX, LM    horizontal and vertical dimensions
-!!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing 
+!!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing
 !!                   ratio (g/g)
 !-----------------------------------
       subroutine getozn                                                 &
