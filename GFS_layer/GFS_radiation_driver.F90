@@ -1,7 +1,7 @@
 !> \file grrad.f This file is the radiation driver module. It prepares
 !! the atmospheric profiles and invokes the main radiation calculation.
 
-!> \defgroup rad RRTMG Shortwave/Longwave Radiation Scheme
+!> \defgroup RRTMG RRTMG Shortwave/Longwave Radiation
 !> @{
 !!  \brief The GFS radiation scheme
 !!  \details Radiative processes are among the most complex and
@@ -1018,7 +1018,7 @@
       type(GFS_cldprop_type),         intent(in)    :: Cldprop
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_diag_type),            intent(inout) :: Diag
-        
+
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -1180,7 +1180,7 @@
       integer, dimension(size(Grid%xlon,1),3) :: mbota, mtopa
 
       !--- REAL VARIABLES
-      real(kind=kind_phys) :: raddt, es, qs, delt, tem0d 
+      real(kind=kind_phys) :: raddt, es, qs, delt, tem0d
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::             &
            tsfa, cvt1, cvb1, tem1d, tsfg, tskn
@@ -1328,7 +1328,7 @@
 
 !>  - Call coszmn(), to compute cosine of zenith angle.
       call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
-                   Grid%coslat,Model%solhr, IM, me, & 
+                   Grid%coslat,Model%solhr, IM, me, &
                    Radtend%coszen, Radtend%coszdg)        !  ---  outputs
 
 !>  - Call getgases(), to set up non-prognostic gas volume mixing
@@ -1609,12 +1609,12 @@
                         htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
                         hsw0=htsw0, fdncmp=scmpsw)                     ! ---  optional
           else
-            call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
+            call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
                         gasvmr, clouds, Tbd%icsdsw, faersw,     &
                         sfcalb, Radtend%coszen, Model%solcon,   &
                         nday, idxday, IM, LMK, LMP, Model%lprnt,&
-                        htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs 
-                        FDNCMP=scmpsw)                                 ! ---  optional 
+                        htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
+                        FDNCMP=scmpsw)                                 ! ---  optional
           endif
 
           do k = 1, LM
@@ -1636,7 +1636,7 @@
              ! --- repopulate the points above levr
              if (Model%levr < Model%levs) then
                do k = LM,Model%levs
-                 Radtend%swhc(:,k) = Radtend%swhc(:,LM) 
+                 Radtend%swhc(:,k) = Radtend%swhc(:,LM)
                enddo
              endif
           endif
@@ -1693,7 +1693,7 @@
 
         call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
                       Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
-                      tsfg, tsfa, Sfcprop%hprim, IM,               & 
+                      tsfg, tsfa, Sfcprop%hprim, IM,               &
                       Radtend%semis)                                              !  ---  outputs
 
 !>  - Call module_radlw_main::lwrad(), to compute LW heating rates and
@@ -1736,7 +1736,7 @@
           ! --- repopulate the points above levr
           if (Model%levr < Model%levs) then
             do k = LM,Model%levs
-              Radtend%lwhc(:,k) = Radtend%lwhc(:,LM) 
+              Radtend%lwhc(:,k) = Radtend%lwhc(:,LM)
             enddo
           endif
         endif
