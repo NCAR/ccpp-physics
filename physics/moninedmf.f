@@ -2,7 +2,7 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
-!> \defgroup PBL Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux PBL and Free Atmospheric Turbulence
 !! @{
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
 !!
@@ -150,7 +150,7 @@
      &                     govrth(im),  hrad(im),                       &
 !    &                     hradm(im),   radmin(im),   vrad(im),         &
      &                     radmin(im),  vrad(im),                       &
-     &                     zd(im),      zdd(im),      thlvx1(im) 
+     &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
      &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
@@ -1188,11 +1188,11 @@ c
 !>  @}
 
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
-      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)             
+      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
       implicit none
@@ -1231,7 +1231,7 @@ c-----------------------------------------------------------------------
       return
       end
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
