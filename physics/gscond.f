@@ -81,8 +81,44 @@
 !! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
 !> \section gen_algorithm General Algorithm
 !> @{
-      subroutine gscond (im,ix,km,dt,dtf,prsl,ps,q,cwm,t                &
+
+!zhang
+       module zhaocarr_gscond
+       contains
+
+!> @{
+       subroutine gscond_init
+       end subroutine gscond_init
+!> @}
+      
+!> @{
+!      subroutine gscond (im,ix,km,dt,dtf,prsl,ps,q,cwm,t              &
+       subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
      &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
+
+!!\table
+!!| local var name | longname                                                 |description                                               | units   | rank |  type   |   kind    | intent | optional |
+!!|----------------|----------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |  
+!!| ix             | horizontal_dimension                                     | horizontal dimension                                     | index   |    0 | integer |           |  in    |   F      |
+!!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           |  in    |   F      |
+!!| dt             | physics_time_step                                        | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
+!!| dtf            | dynamics_time_step                                       | dynamics time step                                       | s       |    0 | real    | kind_phys |  in    |   F      |
+!!| prsl           | air_pressure_layer                                       | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys |  in    |   F      |
+!!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys |  in    |   F      |
+!!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |   
+!!| tp             | air_temperature_for_restart                              | updated temperature for restart                          | K       |    2 | real    | kind_phys | inout  |   F      |
+!!| qp             | water_vapor_specific_humidity_for_restart                | updated vapor specific humidity for restart              | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| psp            | surface_air_pressure_for_restart                         | updated surface pressure for restart                     | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!!| tp1            | air_temperature_for_restart                              | updated temperature for restart                          | K       |    2 | real    | kind_phys | inout  |   F      |
+!!| qp1            | water_vapor_specific_humidity_for_restart                | updated vapor specific humidity for restart              | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| psp1           | surface_air_pressure_restart                             | updated surface pressure for restart                     | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!!| u              | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation | 1       |    0 | real    | kind_phys | in     |   F      |
+!!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
+!!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      | 
+
 !
 !     ******************************************************************
 !     *                                                                *
@@ -516,6 +552,9 @@
 !-----------------------------------------------------------------------
       return
       end
+!> @}
+
+      end module  zhaocarr_gscond
 !> @}
 !! @}
 !! @}

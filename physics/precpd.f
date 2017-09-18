@@ -73,10 +73,45 @@
 !! \param[in] lprnt     logical print flag
 !! \param[in] jpr       check print point for debugging
 !> \section general General Algorithm
+
 !> @{
-       subroutine precpd (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr            &
+     
+      module zhaocarr_precpd
+      contains
+
+!> @{ 
+      subroutine precpd_init
+      end subroutine precpd_init
+!> @}
+
+!> @{
+!       subroutine precpd (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr            &
+       subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
      &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
      &,                   lprnt,jpr)
+
+!>\table
+!!| local var name | longname                                                 |description                                                        | units   | rank |  type   |   kind   | intent  | optional |
+!!|----------------|----------------------------------------------------------|-------------------------------------------------------------------|---------|------|---------|----------|---------|----------|
+!!|  im            | horizontal_loop_extent                                   | horizontal loop extent, start at 1                                | index   |  0   | integer |          |  in     |   F      |     
+!!|  ix            | horizontal_dimension                                     | horizontal dimension                                              | index   |  0   | integer |          |  in     |   F      |
+!!|  km            | vertical_dimension                                       | vertical layer dimension                                          | index   |  0   | integer |          |  in     |   F      |
+!!|  dt            | physics_time_step                                        | physics time step                                                 | s       |  0   | real    | kind_phys|  in     |   F      |
+!!|  del           | air_pressure_layer_difference                            | pressure level thickness                                          | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  prsl          | air_pressure_layer                                       | layer mean pressure                                               | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  q             | water_vapor_specific_humidity                            | water vapor specific humidity                                     | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
+!!|  cwm           | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
+!!|  t             | air_temperature                                          | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
+!!|  rn            | large_scale_rainfall_amount                              | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
+!!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | 1       |  1   | real    | kind_phys|  out    |   F      |  
+!!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
+!!|  u00k          | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation          | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  psautco       | coefficient_from_cloud_ice_to_snow                       | conversion coefficient from cloud ice to snow                     | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  prautco       | coefficient_from_cloud_water_to_rain                     | conversion coefficient from cloud water to rain                   | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  evpco         | coefficient_for_evaporation_of_rainfall                  | coefficient for evaporation of rainfall                           | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  wminco        | cloud_condensed_water_conversion_threshold               | conversion coefficient from cloud liquid and ice to precipitation | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  lprnt         | flag_print                                               | flag for printing diagnostics to output                           | flag    |  0   | logical |          |  in     |   F      |
+!!|  jpr           | horizontal_index_of_printed_column                       | horizontal index of printed column                                | index   |  0   | integer |          |  in     |   F      | 
 !
 !
 !     ******************************************************************
@@ -715,5 +750,8 @@
 !
       return
       end
-!! @}
 !> @}
+      end module zhaocarr_precpd
+!> @}
+!! @}
+

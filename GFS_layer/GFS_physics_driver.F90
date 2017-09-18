@@ -16,6 +16,8 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
+  use zhaocarr_gscond,       only: gscond_init, gscond_run
+  use zhaocarr_precpd,       only: precpd_init, precpd_run
   implicit none
 
 
@@ -2372,14 +2374,22 @@ module module_physics_driver
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), lprnt, ipr)
             else
-              call gscond (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,    &
-                           Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),    &
-                           Stateout%gt0, Tbd%phy_f3d(1,1,1), Tbd%phy_f3d(1,1,2), &
-                           Tbd%phy_f2d(1,1), Tbd%phy_f3d(1,1,3),                 &
-                           Tbd%phy_f3d(1,1,4), Tbd%phy_f2d(1,2), rhc,lprnt, ipr)
 
-              call precpd (im, ix, levs, dtp, del, Statein%prsl,               &
-                          Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),   &
+!              call gscond (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,    &
+              call gscond_run (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,&
+!                           Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),    &
+!                           Stateout%gt0, Tbd%phy_f3d(1,1,1), Tbd%phy_f3d(1,1,2), &
+!                           Tbd%phy_f2d(1,1), Tbd%phy_f3d(1,1,3),                 &
+!                           Tbd%phy_f3d(1,1,4), Tbd%phy_f2d(1,2), rhc,lprnt, ipr)
+                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),    &
+                           Stateout%gt0, Tbd%phy_f3d(:,:,1), Tbd%phy_f3d(:,:,2), &
+                           Tbd%phy_f2d(:,1), Tbd%phy_f3d(:,:,3),                 &
+                           Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,lprnt, ipr)
+
+!              call precpd (im, ix, levs, dtp, del, Statein%prsl,               &
+              call precpd_run (im, ix, levs, dtp, del, Statein%prsl,           &
+!                          Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),   &
+                          Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),   &
                           Stateout%gt0, rain1, Diag%sr, rainp, rhc, psautco_l, &
                           prautco_l, Model%evpco, Model%wminco, lprnt, ipr)
             endif
