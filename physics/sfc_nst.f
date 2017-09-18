@@ -1,19 +1,93 @@
+      module sfc_nst
 
-      subroutine sfc_nst                                                &
+      contains
+
+      subroutine sfc_nst_init
+
+      end
+
+      subroutine sfc_nst_finalize
+
+      end
+
+      subroutine sfc_nst_run                                            &
 !...................................
 !  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name,                    &
-     &       lprnt, ipr,                                                &
+     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
+     &       nstf_name5, lprnt, ipr,                                    &
 !  --- input/output
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
      &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
 !  ---  outputs:
      &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &
      &      )
-!
+
+!!| local var name | longname                                                    | description                                    | units      | rank | type    |    kind   | intent | optional |
+!!|----------------|-------------------------------------------------------------|----------------------------------------------- |------------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1             | index      | 0    | integer |           | in     | F        |
+!!| km             | vertical_dimension                                          | vertical layer dimension                       | index      | 0    | integer |           | in     | F        |
+!!| ps             | surface_air_pressure                                        | surface pressure                               | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| u1             | surface_x_wind                                              | x component of surface layer wind              | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | surface_y_wind                                              | y component of surface layer wind              | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | surface_temperature                                         | surface layer mean temperature                 | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | surface_specific_humidity                                   | surface layer mean specific humidity           | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!! tref           ! sea_surface_foundation_temperature                          ! reference/foundation temperature               ! K          ! 1    ! real    ! kind_phys ! in     ! F        !
+!!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum            | none       | 1    | real    | kind_phys | in     | F        |
+!!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture         | none       | 1    | real    | kind_phys | in     | F        |
+!!| prsl1          | air_pressure_at_first_model_layer                           | Model layer 1 mean pressure                    | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| prslki         | dimensionless_exner_function_at_first_model_layer           | Exner function at 1st layer                    | ratio      | 1    | real    | kind_phys | in     | F        |
+!!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2                   | flag       | 1    | integer |           | in     | F        |
+!!! xlon           ! longitude                                                   ! longitude                                      | radians    ! 1    ! real    ! kind_phys ! in     ! F        !
+!!! sinlat         ! sin_of_latitude                                             ! sin of latitude                                ! none       ! 1    ! real    ! kind_phys ! in     ! F        !
+!!| stress         | surface_wind_stress                                         | surface wind stress                            | m2 s-2     | 1    | real    | kind_phys | in     | F        |
+!!| sfcemis        | surface_longwave_emissivity                                 | surface longwave emissivity                    | frac       | 1    | real    | kind_phys | in     | F        |
+!!| dlwflx         | surface_downwelling_longwave_flux                           | total sky surface downward longwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
+!!! sfcnsw         ! net_downward_shortwave_flux_at_sea_water_surface            ! total sky sfc netsw flx into ocean             ! W m-2      ! 1    ! real    ! kind_phys ! in     ! F        !
+!!! rain           ! rainfall_flux                                               ! rainfall rate                                  ! kg m-2 s-1 ! 1    ! real    ! kind_phys ! in     ! F        !
+!!! timestep       ! timestep                                                    ! timestep interval                              ! s          ! 0    ! real    ! kind_phys ! in     ! F        !
+!!! kdt            ! index_of_time_step                                          ! time step counter                              ! count      ! 0    ! integer !           ! in     ! F        !
+!!! solhr          ! forecast_hour                                               ! fcst hour at the end of prev time step         ! none       ! 0    ! real    ! kind_phys ! in     ! F        !
+!!! xcosz          ! cosine_of_solar_zenith_angle                                ! cosine of solar zenith angle                   ! none       ! 1    ! real    ! kind_phys ! in     ! F        !
+!!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection     | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| flag_iter      | flag_for_iteration                                          | flag for iteration                             | flag       | 1    | logical |           | in     | F        |
+!!| flag_guess     | flag_for_guess_run                                          | flag for guess run                             | flag       | 1    | logical |           | in     | F        |
+!!! nstf_name1     ! flag_for_nsstm_run                                          ! NSSTM flag: off/uncoupled/coupled=0/1/2        ! flag       ! 1    ! integer !           ! in     ! F        !
+!!! nstf_name4     ! vertical_temperature_average_range_lower_bound              ! zsea1                                          ! mm         ! 1    ! integer !           ! in     ! F        !
+!!! nstf_name5     ! vertical_temperature_average_range_upper_bound              ! zsea2                                          ! mm         ! 1    ! integer !           ! in     ! F        !
+!!| lprnt          | flag_print                                                  | flag for printing diagnostics to output        | flag       | 0    | logical |           | in     | F        |
+!!| ipr            | horizontal_index_of_printed_column                          | horizontal index of printed column             | index      | 0    | integer |           | in     | F        |
+!!| tskin          | surface_temperature                                         | ocean surface skin temperature                 | K          | 1    | real    | kind_phys | inout  | F        |
+!!| tsurf          | surface_temperature_after_iteration                         | ocean surface skin temperature for guess run   | K          | 1    | real    | kind_phys | inout  | F        |
+!!! xt             ! diurnal thermocline layer_heat_content                      ! heat content in diurnal thermocline layer      ! K m        ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xs             ! sea_water_salinity                                          ! salinity  content in diurnal thermocline layer ! ppt m      ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xu             ! diurnal_thermocline_layer_x_current                         ! u-current content in diurnal thermocline layer ! m2 s-1     ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xv             ! diurnal_thermocline_layer_y_current                         ! v-current content in diurnal thermocline layer ! m2 s-1     ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xz             ! diurnal_thermocline_layer_thickness                         ! diurnal thermocline layer thickness            ! m          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! zm             ! ocean_mixed_layer_thickness                                 ! mixed layer thickness                          ! m          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xtts           ! sensitivity_of_dtl_heat_content_to_surface_temperature      ! d(xt)/d(ts)                                    ! m          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! xzts           ! sensitivity_of_dtl_thickness_to_surface_temperature         ! d(xz)/d(ts)                                    ! m K-1      ! 1    ! real    ! kind_phys | inout  | F        |
+!!! dt_cool        ! sub-layer_cooling_amount                                    ! sub-layer cooling amount                       ! K          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! z_c            ! sub-layer_cooling_thickness                                 ! sub-layer cooling thickness                    ! m          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! c_0            ! coefficient                                                 ! coefficient1 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!! c_d            ! coefficient                                                 ! coefficient2 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!! w_0            ! coefficient                                                 ! coefficient3 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!! w_d            ! coefficient                                                 ! coefficient4 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!! d_conv         ! free_convection_layer_thickness                             ! thickness of free convection layer             ! m          ! 1    ! real    ! kind_phys | inout  | F        |
+!!! ifd            ! index_of_dtlm_start                                         ! index to start dtlm run or not                 ! index      ! 1    ! real    ! kind_phys | inout  | F        |
+!!! qrain          ! sensible_heat_flux_due_to_rainfall                          ! sensible heat flux due to rainfall             ! W          ! 1    ! real    ! kind_phys | inout  | F        |
+!!| qsurf          | surface_specific_humidity                                   | surface specific humidity                      | kg kg-1    | 1    | real    | kind_phys |   out  | F        |
+!!| gflux          | upward_heat_flux_in_soil                                    | upward soil heat flux                          | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| cmm            | surface_drag_wind_speed_for_momentum_in_air                 | surf mom exch coef time mean surf wind         | m s-1      | 1    | real    | kind_phys |   out  | F        |
+!!| chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air         | surf h&m exch coef time surf wind & density    | kg m-2 s-1 | 1    | real    | kind_phys |   out  | F        |
+!!| evap           | surface_upward_latent_heat_flux                             | surface upward latent heat flux                | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| hflx           | surface_upward_sensible_heat_flux                           | surface upward sensible heat flux              | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| ep             | surface_upward_potential_latent_heat_flux                   | surface upward potential latent heat flux      | W m-2      | 1    | real    | kind_phys |   out  | F        |
+
+
+
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -25,8 +99,8 @@
 !          ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  !
 !            prsl1, prslki, islimsk, xlon, sinlat, stress,              !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
-!            ddvel, flag_iter, flag_guess, nstf_name,                    !
-!            lprnt, ipr,                                                !
+!            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
+!            nstf_name5, lprnt, ipr,                                    !
 !       input/outputs:                                                  !
 !            tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, !
 !            z_c, c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,           !
@@ -84,20 +158,16 @@
 !     flag_iter- logical, execution or not                         im   !
 !                when iter = 1, flag_iter = .true. for all grids   im   !
 !                when iter = 2, flag_iter = .true. when wind < 2   im   !
-!                for both land and ocean (when nstf_name(1) > 0)   im   !
+!                for both land and ocean (when nstf_name1 > 0)     im   !
 !     flag_guess-logical, .true.=  guess step to get CD et al      im   !
 !                when iter = 1, flag_guess = .true. when wind < 2  im   !
 !                when iter = 2, flag_guess = .false. for all grids im   !
-!     nstf_name   -integer array, NSST related flag parameters     1    !
-!                nstf_name(1) : 0 = NSSTM off                      1    !
-!                               1 = NSSTM on but uncoupled         1    !
-!                               2 = NSSTM on and coupled           1    !
-!                nstf_name(2) : 1 = NSSTM spin up on               1    !
-!                               0 = NSSTM spin up off              1    !
-!                nstf_name(3) : 1 = NSST analysis on               1    !
-!                               0 = NSSTM analysis off             1    !
-!                nstf_name(4) : zsea1 in mm                        1    !
-!                nstf_name(5) : zsea2 in mm                        1    !
+!     nstf_name - integers , NSST related flag parameters          1    !
+!                nstf_name1 : 0 = NSSTM off                        1    !
+!                             1 = NSSTM on but uncoupled           1    !
+!                             2 = NSSTM on and coupled             1    !
+!                nstf_name4 : zsea1 in mm                          1    !
+!                nstf_name5 : zsea2 in mm                          1    !
 !     lprnt    - logical, control flag for check print out         1    !
 !     ipr      - integer, grid index for check print out           1    !
 !                                                                       !
@@ -164,7 +234,8 @@
 
 
 !  ---  inputs:
-      integer, intent(in) :: im, km, kdt, ipr,nstf_name(5)
+      integer, intent(in) :: im, km, kdt, ipr, nstf_name1, nstf_name4,  &
+     &       nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
@@ -293,8 +364,8 @@ cc
 
 ! run nst model: dtm + slm   
 ! 
-      zsea1 = 0.001*real(nstf_name(4))
-      zsea2 = 0.001*real(nstf_name(5))
+      zsea1 = 0.001*real(nstf_name4)
+      zsea2 = 0.001*real(nstf_name5)
       do i = 1, im
         if ( flag(i) ) then
           tsea      = tsurf(i)
@@ -532,16 +603,16 @@ cc
 !         update tskin when coupled and not guess run
 !         (all other NSST variables have been updated in this case)
 !
-            if ( nstf_name(1) > 1 ) then
+            if ( nstf_name1 > 1 ) then
               tskin(i) = tsurf(i)
-            endif               ! if ( nstf_name(1) > 1  then
+            endif               ! if ( nstf_name1 > 1  then
           endif                 ! if(flag_guess(i)) then
         endif                   ! if((islimsk(i).eq. 0.) ) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
 
-      if ( nstf_name(1) > 1 ) then
+      if ( nstf_name1 > 1 ) then
 !  --- ...  latent and sensible heat flux over open water with updated tskin
 !      for the grids of open water and the iteration is on
         do i = 1, im
@@ -553,7 +624,7 @@ cc
             hflx(i)  = rch(i) * (tskin(i) - theta1(i))
           endif
         enddo
-      endif                   ! if ( nstf_name(1) > 1 ) then
+      endif                   ! if ( nstf_name1 > 1 ) then
 
 !
       do i=1,im
@@ -568,3 +639,5 @@ cc
 
       return
       end
+
+      end module
