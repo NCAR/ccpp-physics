@@ -37,12 +37,12 @@
 !!| tref           ! sea_surface_foundation_temperature                          ! reference/foundation temperature               ! K          ! 1    ! real    ! kind_phys ! in     ! F        !
 !!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum            | none       | 1    | real    | kind_phys | in     | F        |
 !!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture         | none       | 1    | real    | kind_phys | in     | F        |
-!!| prsl1          | air_pressure_at_first_model_layer                           | Model layer 1 mean pressure                    | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| prsl1          | air_pressure_at_first_model_layer                           | surface layer mean pressure                    | Pa         | 1    | real    | kind_phys | in     | F        |
 !!| prslki         | dimensionless_exner_function_at_first_model_layer           | Exner function at 1st layer                    | ratio      | 1    | real    | kind_phys | in     | F        |
 !!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2                   | flag       | 1    | integer |           | in     | F        |
 !!| xlon           ! longitude                                                   ! longitude                                      | radians    ! 1    ! real    ! kind_phys ! in     ! F        !
 !!| sinlat         ! sin_of_latitude                                             ! sin of latitude                                ! none       ! 1    ! real    ! kind_phys ! in     ! F        !
-!!| stress         | surface_wind_stress                                         | surface wind stress                            | m2 s-2     | 1    | real    | kind_phys | in     | F        |
+!!| stress         | surface_wind_stress                                         | wind stress                                    | m2 s-2     | 1    | real    | kind_phys | in     | F        |
 !!| sfcemis        | surface_longwave_emissivity                                 | surface longwave emissivity                    | frac       | 1    | real    | kind_phys | in     | F        |
 !!| dlwflx         | surface_downwelling_longwave_flux                           | total sky surface downward longwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
 !!| sfcnsw         ! net_downward_shortwave_flux_at_sea_water_surface            ! total sky sfc netsw flx into ocean             ! W m-2      ! 1    ! real    ! kind_phys ! in     ! F        !
@@ -51,7 +51,7 @@
 !!| kdt            ! index_of_time_step                                          ! time step counter                              ! count      ! 0    ! integer !           ! in     ! F        !
 !!| solhr          ! forecast_hour                                               ! fcst hour at the end of prev time step         ! none       ! 0    ! real    ! kind_phys ! in     ! F        !
 !!| xcosz          ! cosine_of_solar_zenith_angle                                ! cosine of solar zenith angle                   ! none       ! 1    ! real    ! kind_phys ! in     ! F        !
-!!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection     | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| ddvel          | surface_wind_enhancement_due_to_convection                  | wind enhancement due to convection             | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                             | flag       | 1    | logical |           | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                          | flag for guess run                             | flag       | 1    | logical |           | in     | F        |
 !!| nstf_name1     ! flag_for_nsstm_run                                          ! NSSTM flag: off/uncoupled/coupled=0/1/2        ! flag       ! 1    ! integer !           ! in     ! F        !
@@ -71,20 +71,20 @@
 !!| xzts           ! sensitivity_of_dtl_thickness_to_surface_temperature         ! d(xz)/d(ts)                                    ! m K-1      ! 1    ! real    ! kind_phys | inout  | F        |
 !!| dt_cool        ! sub-layer_cooling_amount                                    ! sub-layer cooling amount                       ! K          ! 1    ! real    ! kind_phys | inout  | F        |
 !!| z_c            ! sub-layer_cooling_thickness                                 ! sub-layer cooling thickness                    ! m          ! 1    ! real    ! kind_phys | inout  | F        |
-!!| c_0            ! coefficient                                                 ! coefficient1 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
-!!| c_d            ! coefficient                                                 ! coefficient2 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
-!!| w_0            ! coefficient                                                 ! coefficient3 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
-!!| w_d            ! coefficient                                                 ! coefficient4 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!| c_0            ! coefficient_c_0                                             ! coefficient1 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!| c_d            ! coefficient_c_d                                             ! coefficient2 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!| w_0            ! coefficient_w_0                                             ! coefficient3 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
+!!| w_d            ! coefficient_w_d                                             ! coefficient4 to calculate d(tz)/d(ts)          ! none       ! 1    ! real    ! kind_phys | inout  | F        |
 !!| d_conv         ! free_convection_layer_thickness                             ! thickness of free convection layer             ! m          ! 1    ! real    ! kind_phys | inout  | F        |
 !!| ifd            ! index_of_dtlm_start                                         ! index to start dtlm run or not                 ! index      ! 1    ! real    ! kind_phys | inout  | F        |
 !!| qrain          ! sensible_heat_flux_due_to_rainfall                          ! sensible heat flux due to rainfall             ! W          ! 1    ! real    ! kind_phys | inout  | F        |
-!!| qsurf          | surface_specific_humidity                                   | surface specific humidity                      | kg kg-1    | 1    | real    | kind_phys |   out  | F        |
-!!| gflux          | upward_heat_flux_in_soil                                    | upward soil heat flux                          | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| qsurf          | surface_specific_humidity                                   | surface air saturation specific humidity       | kg kg-1    | 1    | real    | kind_phys |   out  | F        |
+!!| gflux          | upward_heat_flux_in_soil                                    | soil heat flux                                 | W m-2      | 1    | real    | kind_phys |   out  | F        |
 !!| cmm            | surface_drag_wind_speed_for_momentum_in_air                 | surf mom exch coef time mean surf wind         | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air         | surf h&m exch coef time surf wind & density    | kg m-2 s-1 | 1    | real    | kind_phys |   out  | F        |
-!!| evap           | surface_upward_latent_heat_flux                             | surface upward latent heat flux                | W m-2      | 1    | real    | kind_phys |   out  | F        |
-!!| hflx           | surface_upward_sensible_heat_flux                           | surface upward sensible heat flux              | W m-2      | 1    | real    | kind_phys |   out  | F        |
-!!| ep             | surface_upward_potential_latent_heat_flux                   | surface upward potential latent heat flux      | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| evap           | surface_upward_latent_heat_flux                             | evaperation from latent heat flux              | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| hflx           | surface_upward_sensible_heat_flux                           | sensible heat flux                             | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| ep             | surface_upward_potential_latent_heat_flux                   | potential evaporation                          | W m-2      | 1    | real    | kind_phys |   out  | F        |
 
 
 
