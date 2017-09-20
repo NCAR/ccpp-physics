@@ -96,7 +96,7 @@
        subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
      &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
 
-!!\table
+!>\table
 !!| local var name | longname                                                 |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|----------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |  
@@ -109,12 +109,12 @@
 !!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |   
-!!| tp             | air_temperature_for_restart                              | updated temperature for restart                          | K       |    2 | real    | kind_phys | inout  |   F      |
-!!| qp             | water_vapor_specific_humidity_for_restart                | updated vapor specific humidity for restart              | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| psp            | surface_air_pressure_for_restart                         | updated surface pressure for restart                     | Pa      |    1 | real    | kind_phys | inout  |   F      |
-!!| tp1            | air_temperature_for_restart                              | updated temperature for restart                          | K       |    2 | real    | kind_phys | inout  |   F      |
-!!| qp1            | water_vapor_specific_humidity_for_restart                | updated vapor specific humidity for restart              | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| psp1           | surface_air_pressure_restart                             | updated surface pressure for restart                     | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!!| tp             | air_temperature_at_two_time_step_back                    | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
+!!| qp             | water_vapor_specific_humidity_at_two_time_step_back      | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| psp            | surface_air_pressure_at_two_time_step_back               | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!!| tp1            | air_temperature_at_previous_time_step                    | air temperature at previous time step                    | K       |    2 | real    | kind_phys | inout  |   F      |
+!!| qp1            | water_vapor_specific_humidity_at_previous_time_step      | water vapor specific humidity at previous time step      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| psp1           | surface_air_pressure_at_previous_time_step               | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |
 !!| u              | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation | 1       |    0 | real    | kind_phys | in     |   F      |
 !!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
 !!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      | 
