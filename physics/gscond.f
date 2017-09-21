@@ -93,11 +93,8 @@
 
       
 !> @{
-!      subroutine gscond (im,ix,km,dt,dtf,prsl,ps,q,cwm,t              &
-       subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
-     &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
 
-!>\table
+!!\section arg_table_gscond_run
 !!| local var name | longname                                                 |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|----------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |  
@@ -120,6 +117,9 @@
 !!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
 !!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      | 
 !!
+       subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
+     &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
+
 
 !
 !     ******************************************************************

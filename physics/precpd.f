@@ -85,12 +85,8 @@
 !> @}
 
 !> @{
-!       subroutine precpd (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr            &
-       subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
-     &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
-     &,                   lprnt,jpr)
 
-!>\table
+!!\section arg_table_precpd_run
 !!| local var name | longname                                                 |description                                                        | units   | rank |  type   |   kind   | intent  | optional |
 !!|----------------|----------------------------------------------------------|-------------------------------------------------------------------|---------|------|---------|----------|---------|----------|
 !!|  im            | horizontal_loop_extent                                   | horizontal loop extent, start at 1                                | index   |  0   | integer |          |  in     |   F      |     
@@ -112,7 +108,11 @@
 !!|  wminco        | cloud_condensed_water_conversion_threshold               | conversion coefficient from cloud liquid and ice to precipitation | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  lprnt         | flag_print                                               | flag for printing diagnostics to output                           | flag    |  0   | logical |          |  in     |   F      |
 !!|  jpr           | horizontal_index_of_printed_column                       | horizontal index of printed column                                | index   |  0   | integer |          |  in     |   F      | 
-!
+!!
+       subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
+     &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
+     &,                   lprnt,jpr)
+
 !
 !     ******************************************************************
 !     *                                                                *
