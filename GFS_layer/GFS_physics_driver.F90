@@ -866,7 +866,8 @@ module module_physics_driver
 !
 !     if (lprnt) write(0,*)' tsea=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 
-        call sfc_diff (im,Statein%pgr, Statein%ugrs, Statein%vgrs,        &
+!        call sfc_diff (im,Statein%pgr, Statein%ugrs, Statein%vgrs,        &
+        call sfc_ex_coef_run(im,Statein%pgr, Statein%ugrs, Statein%vgrs,  &
                        Statein%tgrs, Statein%qgrs, Diag%zlvl,             &
                        Sfcprop%snowd, Sfcprop%tsfc,  Sfcprop%zorl, cd,    &
                        cdq, rb, Statein%prsl(1,1), work3, islmsk, stress, &
@@ -965,7 +966,8 @@ module module_physics_driver
 !     if (lprnt) write(0,*)' tsead=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 !    &,' pgr=',pgr(ipr),' sfcemis=',sfcemis(ipr)
 
-          call sfc_drv                                                 &
+!          call sfc_drv                                                 &
+          call lsmnoah_run                                             &
 !  ---  inputs:
            (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,  &
             Statein%tgrs, Statein%qgrs, soiltyp, vegtype, sigmaf,      &
@@ -1070,9 +1072,10 @@ module module_physics_driver
 
 !  --- ...  update near surface fields
 
-      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
+!      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
+      call sfc_diag_run(im, Statein%pgr, Statein%ugrs, Statein%vgrs,  &
                      Statein%tgrs, Statein%qgrs, Sfcprop%tsfc, qss,   &
-                     Sfcprop%f10m, Diag%u10m, Diag%v10m,        &
+                     Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
                      Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
 

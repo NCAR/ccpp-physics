@@ -1,3 +1,12 @@
+      module lsm_noah
+      contains
+
+      subroutine lsmnoah_init
+      end subroutine lsmnoah_init
+
+      subroutine lsmnoah_finalize
+      end subroutine lsmnoah_finalize
+
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -52,7 +61,7 @@
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, sfc layer 1 mean pressure (pa)              im   !
-!     prslki   - real,                                             im   !
+!     prslki   - real, dimensionless exner function at layer 1     im   !
 !     zf       - real, height of bottom layer (m)                  im   !
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     ddvel    - real,                                             im   !
@@ -104,7 +113,8 @@
 !  ====================    end of description    =====================  !
 
 !-----------------------------------
-      subroutine sfc_drv                                                &
+!      subroutine sfc_drv                                                &
+      subroutine lsmnoah_run                                            &
 !...................................
 !  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
@@ -120,7 +130,74 @@
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
      &       smcwlt2, smcref2, wet1                                     &
      &     )
-!
+!!
+!!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
+!!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| km             | vertical_dimension                                          | vertical layer dimension                   | index      |    0 | integer |           | in     | F        |
+!!| ps             | surface_air_pressure                                        | surface pressure                           | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature            | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity          | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!| soiltyp        | cell_soil_type                                              | soil type at each grid cell                | index      | 1    | integer |           | in     | F        |
+!!| vegtype        | cell_vegetation_type                                        | vegetation type at each grid cell          | index      | 1    | integer |           | in     | F        |
+!!| sigmaf         | vegetation_area_fraction                                    | areal fractional cover of green vegetation | frac       | 1    | real    | kind_phys | in     | F        |
+!!| sfcemis        | surface_longwave_emissivity                                 | surface longwave emissivity                | frac       | 1    | real    | kind_phys | in     | F        |
+!!| dlwflx         | surface_downwelling_longwave_flux                           | total sky surface downward longwave flux   | W m-2      | 1    | real    | kind_phys | in     | F        |
+!!| dswsfc         | surface_downwelling_shortwave_flux                          | total sky surface downward shortwave flux  | W m-2      | 1    | real    | kind_phys | in     | F        |
+!!| snet           | surface_net_downward_shortwave_flux                         | total sky surface net shortwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
+!!| delt           | timestep_for_physics                                        | physics time step                          | s          |    0 | real    | kind_phys | in     | F        |
+!!| tg3            | deep_soil_temperature                                       | bottom soil temperature                    | K          | 1    | real    | kind_phys | in     | F        |
+!!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum        | none       | 1    | real    | kind_phys | in     | F        |
+!!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture     | none       | 1    | real    | kind_phys | in     | F        |
+!!| prsl1          | air_pressure_at_lowest_model_layer                          | Model layer 1 mean pressure                | Pa         | 1    | real    | kind_phys | in     | F        |        
+!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
+!!| zf             | height_above_mean_sea_level_at_lowest_model_layer           | height above MSL at 1st model layer        | m          | 1    | real    | kind_phys | in     | F        |
+!!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2               | flag       | 1    | integer |           | in     | F        |
+!!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| slopetyp       | surface_slope_classification                                | class of sfc slope                         | index      | 1    | integer |           | in     | F        |
+!!| shdmin         | minimum_vegetation_area_fraction                            | min fractional coverage of green veg       | frac       | 1    | real    | kind_phys | in     | F        | 
+!!| shdmax         | maximum_vegetation_area_fraction                            | max fractnl cover of green veg (not used)  | frac       | 1    | real    | kind_phys | in     | F        |
+!!| snoalb         | upper_bound_on_max_albedo_over_deep_snow                    | upper bound on max albedo over deep snow   | frac       | 1    | real    | kind_phys | in     | F        |
+!!| sfalb          | surface_diffused_shortwave_albedo                           | mean surface diffused shortwave albedo     | frac       | 1    | real    | kind_phys | in     | F        |
+!!| flag_iter      | flag_for_iteration                                          | flag for iteration                         | flag       | 1    | logical |           | in     | F        |
+!!| flag_guess     | flag_for_guess_run                                          | flag for guess run                         | flag       | 1    | logical |           | in     | F        |
+!!| isot           | soil_type                                                   | soil type (not used)                       | index      |    0 | integer |           | in     | F        |
+!!| ivegsrc        | vegetation_type                                             | vegetation type data source umd or igbp    | index      |    0 | integer |           | in     | F        |
+!!| weasd          | water_equivalent_accumulated_snow_depth                     | water equivalent accumulated snow depth    | mm         | 1    | real    | kind_phys | inout  | F        |
+!!| snwdph         | water_equivalent_snow_depth_over_land                       | water equivalent snow depth over land      | mm         | 1    | real    | kind_phys | inout  | F        |
+!!| tskin          | surface_skin_temperature                                    | surface skin temperature                   | K          | 1    | real    | kind_phys | inout  | F        |
+!!| tprcp          | precipitation_amount_in_one_timestep                        | total precipitation in each time step      | kg m-2     | 1    | real    | kind_phys | inout  | F        |
+!!| srflag         | flag_for_snow_or_rain_precipitation                         | flag for snow or rain precipitation        | flag       | 1    | real    | kind_phys | inout  | F        |
+!!| smc            | volume_fraction_of_soil_moisture                            | volumetric fraction of soil moisture       | frac       | 2    | real    | kind_phys | inout  | F        | 
+!!| stc            | soil_temperature                                            | soil temperature                           | K          | 2    | real    | kind_phys | inout  | F        | 
+!!| slc            | volume_fraction_of_unfrozen_soil_moisture                   | volume fraction of unfrozen soil moisture  | frac       | 2    | real    | kind_phys | inout  | F        | 
+!!| canopy         | canopy_water_amount                                         | canopy moisture content                    | kg m-2     | 1    | real    | kind_phys | inout  | F        |
+!!| trans          | transpiration_flux                                          | total plant transpiration rate             | kg m-2 s-1 | 1    | real    | kind_phys | inout  | F        |
+!!| tsurf          | surface_skin_temperature_after_iteration                    | surface skin temperature after iteration   | K          | 1    | real    | kind_phys | inout  | F        |
+!!| zorl           | surface_roughness_length                                    | surface roughness length                   | m          | 1    | real    | kind_phys | inout  | F        | 
+!!| sncovr1        | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       | 1    | real    | kind_phys |   out  | F        |
+!!| qsurf          | surface_specific_humidity                                   | surface specific humidity                  | kg kg-1    | 1    | real    | kind_phys |   out  | F        |
+!!| gflux          | upward_heat_flux_in_soil                                    | upward soil heat flux                      | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | kg m-2 s-1 | 1    | real    | kind_phys |   out  | F        |
+!!| evap           | surface_upward_latent_heat_flux                             | surface upward latent heat flux            | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| hflx           | surface_upward_sensible_heat_flux                           | surface upward sensible heat flux          | W m-2      | 1    | real    | kind_phys |   out  | F        | 
+!!| ep             | surface_upward_potential_latent_heat_flux                   | surface upward potential latent heat flux  | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| runoff         | surface_runoff_flux                                         | surface runoff flux                        | kg m-2 s-1 | 1    | real    | kind_phys |   out  | F        |
+!!| cmm            | surface_drag_wind_speed_for_momentum_in_air                 | surf mom exch coef time mean surf wind     | m s-1      | 1    | real    | kind_phys |   out  | F        |
+!!| chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air         | surf h&m exch coef time surf wind & density| kg m-2 s-1 | 1    | real    | kind_phys |   out  | F        |
+!!| evbs           | soil_upward_latent_heat_flux                                | soil upward latent heat flux               | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| evcw           | canopy_upward_latent_heat_flux                              | canopy upward latent heat flux             | W m-2      | 1    | real    | kind_phys |   out  | F        | 
+!!| sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl       | W m-2      | 1    | real    | kind_phys |   out  | F        | 
+!!| snowc          | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       | 1    | real    | kind_phys |   out  | F        |
+!!| stm            | soil_moisture_content                                       | soil moisture content                      | kg m-2     | 1    | real    | kind_phys |   out  | F        |
+!!| snohf          | snow_freezing_rain_upward_latent_heat_flux                  | latent heat flux due to snow and frz rain  | W m-2      | 1    | real    | kind_phys |   out  | F        |
+!!| smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point | soil water fraction at wilting point       | frac       | 1    | real    | kind_phys |   out  | F        |
+!!| smcref2        | threshold_volume_fraction_of_condensed_water_in_soil        | soil moisture threshold                    | frac       | 1    | real    | kind_phys |   out  | F        |
+!!| wet1           | normalized_soil_wetness                                     | normalized soil wetness                    | frac       | 1    | real    | kind_phys |   out  | F        |
+
+
       use machine , only : kind_phys
       use funcphys, only : fpvs
       use physcons, only : grav   => con_g,    cp   => con_cp,          &
@@ -544,6 +621,8 @@
 !
       return
 !...................................
-      end subroutine sfc_drv
+!      end subroutine sfc_drv
+      end subroutine lsmnoah_run
 !-----------------------------------
 
+      end module lsm_noah
