@@ -2,6 +2,10 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
+      module edmf
+
+      contains
+
 !> \defgroup PBL Hybrid Eddy-diffusivity Mass-flux Scheme
 !! @{
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
@@ -13,11 +17,11 @@
 !!  \section intraphysics Intraphysics Communication
 !!  This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
-      subroutine moninedmf_init()
-      end subroutine moninedmf_init()
+      subroutine edmf_init ()
+      end subroutine edmf_init
 
-      subroutine moninedmf_finalize()
-      end subroutine moninedmf_finalize()
+      subroutine edmf_finalize ()
+      end subroutine edmf_finalize
 
 !>  \brief This subroutine contains all of logic for the Hybrid EDMF PBL scheme except for the calculation of the updraft properties and mass flux.
 !!
@@ -95,7 +99,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine moninedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,      &
+      subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,      &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,qss,heat,evap,stress,spd1,kpbl,                           &
@@ -1309,3 +1313,4 @@ c-----------------------------------------------------------------------
       return
       end
 !> @}
+      end module edmf
