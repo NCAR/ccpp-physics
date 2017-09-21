@@ -102,8 +102,8 @@
 !!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |  
 !!| ix             | horizontal_dimension                                     | horizontal dimension                                     | index   |    0 | integer |           |  in    |   F      |
 !!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           |  in    |   F      |
-!!| dt             | physics_time_step                                        | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
-!!| dtf            | dynamics_time_step                                       | dynamics time step                                       | s       |    0 | real    | kind_phys |  in    |   F      |
+!!| dt             | time_step_for_physics                                    | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
+!!| dtf            | time_step_for_dynamics                                   | dynamics time step                                       | s       |    0 | real    | kind_phys |  in    |   F      |
 !!| prsl           | air_pressure_layer                                       | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys |  in    |   F      |
 !!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys |  in    |   F      |
 !!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
@@ -118,6 +118,7 @@
 !!| u              | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation | 1       |    0 | real    | kind_phys | in     |   F      |
 !!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
 !!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      | 
+!!
 
 !
 !     ******************************************************************
