@@ -1,17 +1,21 @@
 !>  \file mfdeepcnv.f
 !!  This file contains NCEP's Scale Aware Simplified Arakawa Schubert Scheme
-!!  for convection.
+!!  for deep convection.
 !! @{
       module sasas_deep
       contains
 
 !! @{
       subroutine sasasdeep_init
+!! \section arg_table_sasasdeep_init
+!!
       end subroutine sasasdeep_init
 !! @}
 
 !! @{
       subroutine sasasdeep_finalize
+!! \section arg_table_sasasdeep_finalize
+!!
       end subroutine sasasdeep_finalize
 !! @}
 
@@ -19,7 +23,7 @@
       subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
-!!\table
+!! \section arg_table_sasasdeep_run
 !! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
@@ -50,6 +54,7 @@
 !! | dt_mf          | atmosphere_updraft_convective_mass_flux_at_cloud_top  | ud_mf at cloud top                 | kg m-2  | 2    | real    | kind_phys |   out  | F        |
 !! | cnvw           | atmosphere_convective_cloud_water_specific_humidity   | convective cloud water             | kg kg-1 | 2    | real    | kind_phys |   out  | F        |
 !! | cnvc           | cloud_binary_mask                                     | convective cloud cover             | flag    | 2    | real    | kind_phys |   out  | F        |
+!!
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
