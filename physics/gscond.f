@@ -90,6 +90,7 @@
        subroutine gscond_init
        end subroutine gscond_init
 !> @}
+
       
 !> @{
 !      subroutine gscond (im,ix,km,dt,dtf,prsl,ps,q,cwm,t              &
@@ -552,6 +553,11 @@
 !-----------------------------------------------------------------------
       return
       end
+!> @}
+
+!> @{
+       subroutine gscond_finalize
+       end subroutine gscond_finalize
 !> @}
 
       end module  zhaocarr_gscond
