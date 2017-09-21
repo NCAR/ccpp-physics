@@ -13,62 +13,71 @@
 !!  \section intraphysics Intraphysics Communication
 !!  This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
+      subroutine moninedmf_init()
+      end subroutine moninedmf_init()
+
+      subroutine moninedmf_finalize()
+      end subroutine moninedmf_finalize()
+
 !>  \brief This subroutine contains all of logic for the Hybrid EDMF PBL scheme except for the calculation of the updraft properties and mass flux.
 !!
 !!  The scheme works on a basic level by calculating background diffusion coefficients and updating them according to which processes are occurring in the column. The most important difference in diffusion coefficients occurs between those levels in the PBL and those above the PBL, so the PBL height calculation is of utmost importance. An initial estimate is calculated in a "predictor" step in order to calculate Monin-Obukhov similarity values and a corrector step recalculates the PBL height based on updated surface thermal characteristics. Using the PBL height and the similarity parameters, the diffusion coefficients are updated below the PBL top based on Hong and Pan (1996) \cite hong_and_pan_1996 (including counter-gradient terms). Diffusion coefficients in the free troposphere (above the PBL top) are calculated according to Louis (1979) \cite louis_1979 with updated Richardson number-dependent functions. If it is diagnosed that PBL top-down mixing is occurring according to Lock et al. (2000) \cite lock_et_al_2000 , then then diffusion coefficients are updated accordingly. Finally, for convective boundary layers (defined as when the Obukhov length exceeds a threshold), the counter-gradient terms are replaced using the mass flux scheme of Siebesma et al. (2007) \cite siebesma_et_al_2007 . In order to return time tendencies, a fully implicit solution is found using tridiagonal matrices, and time tendencies are "backed out." Before returning, the time tendency of temperature is updated to reflect heating due to TKE dissipation following Han et al. (2015) \cite han_et_al_2015 .
 !!
-!!  \param[in] ix horizontal dimension
-!!  \param[in] im number of used points
-!!  \param[in] km vertical layer dimension
-!!  \param[in] ntrac number of tracers
-!!  \param[in] ntcw cloud condensate index in the tracer array
-!!  \param[in,out] dv v-momentum tendency (\f$ m s^{-2} \f$)
-!!  \param[in,out] du u-momentum tendency (\f$ m s^{-2} \f$)
-!!  \param[in,out] tau temperature tendency (\f$ K s^{-1} \f$)
-!!  \param[in,out] rtg moisture tendency (\f$ kg kg^{-1} s^{-1} \f$)
-!!  \param[in] u1 u component of layer wind (\f$ m s^{-1} \f$)
-!!  \param[in] v1 v component of layer wind (\f$ m s^{-1} \f$)
-!!  \param[in] t1 layer mean temperature (\f$ K \f$)
-!!  \param[in] q1 layer mean tracer concentration (units?)
-!!  \param[in] swh total sky shortwave heating rate (\f$ K s^-1 \f$)
-!!  \param[in] hlw total sky longwave heating rate (\f$ K s^-1 \f$)
-!!  \param[in] xmu time step zenith angle adjust factor for shortwave
-!!  \param[in] psk Exner function at surface interface?
-!!  \param[in] rbsoil surface bulk Richardson number
-!!  \param[in] zorl surface roughness (units?)
-!!  \param[in] u10m 10-m u wind (\f$ m s^{-1} \f$)
-!!  \param[in] v10m 10-m v wind (\f$ m s^{-1} \f$)
-!!  \param[in] fm fm parameter from PBL scheme
-!!  \param[in] fh fh parameter from PBL scheme
-!!  \param[in] tsea ground surface temperature (K)
-!!  \param[in] qss surface saturation humidity (units?)
-!!  \param[in] heat surface sensible heat flux (units?)
-!!  \param[in] evap evaporation from latent heat flux (units?)
-!!  \param[in] stress surface wind stress? (\f$ cm*v^2\f$ in sfc_diff subroutine) (units?)
-!!  \param[in] spd1 surface wind speed? (units?)
-!!  \param[out] kpbl PBL top index
-!!  \param[in] prsi pressure at layer interfaces (units?)
-!!  \param[in] del pressure difference between level k and k+1 (units?)
-!!  \param[in] prsl mean layer pressure (units?)
-!!  \param[in] prslk Exner function at layer
-!!  \param[in] phii interface geopotential height (units?)
-!!  \param[in] phil layer geopotential height (units?)
-!!  \param[in] delt physics time step (s)
-!!  \param[in] dspheat flag for TKE dissipative heating
-!!  \param[out] dusfc surface u-momentum tendency (units?)
-!!  \param[out] dvsfc surface v-momentum tendency (units?)
-!!  \param[out] dtsfc surface temperature tendency (units?)
-!!  \param[out] dqsfc surface moisture tendency (units?)
-!!  \param[out] hpbl PBL top height (m)
-!!  \param[out] hgamt counter gradient mixing term for temperature (units?)
-!!  \param[out] hgamq counter gradient mixing term for moisture (units?)
-!!  \param[out] dkt diffusion coefficient for temperature (units?)
-!!  \param[in] kinver index location of temperature inversion
-!!  \param[in] xkzm_m background vertical diffusion coefficient for momentum (units?)
-!!  \param[in] xkzm_h background vertical diffusion coefficeint for heat, moisture (units?)
-!!  \param[in] xkzm_s sigma threshold for background momentum diffusion (units?)
-!!  \param[in] lprnt flag to print some output
-!!  \param[in] ipr index of point to print
+!! \section arg_table_moninedmf_run
+!! | local var name | longname                                               | description                                        | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|----------------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                                   | horizontal dimension                               | index         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent, start at 1                 | index         |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                     | vertical layer dimension                           | index         |    0 | integer |           | in     | F        |
+!! | ntrac          | number_of_vertical_diffusion_tracers                   | number of tracers to diffuse vertically            | count         |    0 | integer |           | in     | F        |
+!! | ntcw           | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array             | index         |    0 | integer |           | in     | F        |
+!! | dv             | tendency_of_y_wind                                     | updated tendency of the y wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
+!! | du             | tendency_of_x_wind                                     | updated tendency of the x wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
+!! | tau            | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                | K s-1         |    2 | real    | kind_phys | inout  | F        |
+!! | rtg            | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                    | kg kg-1 s-1   |    3 | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind                                                 | x component of layer wind                          | m s-1         |    2 | real    | kind_phys | in     | F        |
+!! | v1             | y_wind                                                 | y component of layer wind                          | m s-1         |    2 | real    | kind_phys | in     | F        |
+!! | t1             | air_temperature                                        | layer mean air temperature                         | K             |    2 | real    | kind_phys | in     | F        |
+!! | q1             | tracer_concentration                                   | layer mean tracer concentration                    | kg kg-1       |    3 | real    | kind_phys | in     | F        |
+!! | swh            | tendency_of_air_temperature_due_to_shortwave_heating   | total sky shortwave heating rate                   | K s-1         |    2 | real    | kind_phys | in     | F        |
+!! | hlw            | tendency_of_air_temperature_due_to_longwave_heating    | total sky longwave heating rate                    | K s-1         |    2 | real    | kind_phys | in     | F        |
+!! | xmu            | time_step_zenith_angle_adjust_factor_for_sw            | time step zenith angle adjust factor for shortwave | none          |    2 | real    | kind_phys | in     | F        |
+!! | psk            | exner_function_at_lowest_model_interface               | exner function at the surface interface            | none          |    1 | real    | kind_phys | in     | F        |
+!! | rbsoil         | bulk_richardson_number_at_lowest_model_level           | bulk Richardson number at the surface              | none          |    1 | real    | kind_phys | in     | F        |
+!! | zorl           | surface_roughness_length                               | surface roughness length in cm                     | cm            |    1 | real    | kind_phys | in     | F        |
+!! | u10m           | x_wind_at_10m                                          | x component of wind at 10 m                        | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | v10m           | y_wind_at_10m                                          | y component of wind at 10 m                        | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | fm             | Monin-Obukhov_similarity_parameter_for_momentum        | Monin-Obukhov similarity parameter for momentum    | none          |    1 | real    | kind_phys | in     | F        |
+!! | fh             | Monin-Obukhov_similarity_parameter_for_heat            | Monin-Obukhov similarity parameter for heat        | none          |    1 | real    | kind_phys | in     | F        |
+!! | tsea           | surface_temperature                                    | surface temperature                                | K             |    1 | real    | kind_phys | in     | F        |
+!! | qss            | saturation_specific_humidity_at_the_surface            | surface saturation specific humidity               | kg kg-1       |    1 | real    | kind_phys | in     | F        |
+!! | heat           | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | K m s-1       |    1 | real    | kind_phys | in     | F        |
+!! | evap           | evaporation_from_surface_upward_latent_heat_flux       | evaporation from surface upward latent heat flux   | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
+!! | stress         | surface_wind_stress                                    | surface wind stress                                | m2 s-2        |    1 | real    | kind_phys | in     | F        |
+!! | spd1           | wind_speed_at_lowest_model_level                       | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | kpbl           | model_level_number_at_top_of_atmosphere_boundary_layer | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
+!! | prsi           | air_pressure_at_model_layer_interfaces                 | air pressure at model layer interfaces             | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | del            | air_pressure_layer_difference                          | pres(k) - pres(k+1)                                | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure_layer                                     | mean layer pressure                                | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function                           | Exner function at layers                           | none          |    2 | real    | kind_phys | in     | F        |
+!! | phii           | geopotential_at_interfaces                             | geopotential at model layer interfaces             | m2 s-2        |    2 | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                           | geopotential at model layer centers                | m2 s-2        |    2 | real    | kind_phys | in     | F        |
+!! | delt           | time_step_for_physics                                  | time step for physics                              | s             |    0 | real    | kind_phys | in     | F        |
+!! | dspheat        | flag_TKE_dissipation_heating                           | flag for using TKE dissipation heating             | flag          |    0 | logical |           | in     | F        |
+!! | dusfc          | x_momentum_flux                                        | x momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dvsfc          | y_momentum_flux                                        | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dtsfc          | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | W m-2         |    1 | real    | kind_phys | out    | F        |
+!! | dqsfc          | surface_upward_latent_heat_flux                        | surface upward latent heat flux                    | W m-2         |    1 | real    | kind_phys | out    | F        |
+!! | hpbl           | atmosphere_boundary_layer_thickness                    | PBL thickness                                       | m             |    1 | real    | kind_phys | out    | F        |
+!! | hgamt          | countergradient_mixing_term_for_temperature            | countergradient mixing term for temperature        | K             |    1 | real    | kind_phys | out    | F        |
+!! | hgamq          | countergradient_mixing_term_for_water_vapor            | countergradient mixing term for water vapor        | kg kg-1       |    1 | real    | kind_phys | out    | F        |
+!! | dkt            | atmosphere_heat_diffusivity                            | diffusivity for heat                               | m2 s-1        |    1 | real    | kind_phys | out    | F        |
+!! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer |           | in     | F        |
+!! | xkzm_m         | atmosphere_momentum_diffusivity_background             | background value of momentum diffusivity           | m2 s-1        |    0 | real    | kind_phys | in     | F        |
+!! | xkzm_h         | atmosphere_heat_diffusivity_background                 | background value of heat diffusivity               | m2 s-1        |    0 | real    | kind_phys | in     | F        |
+!! | xkzm_s         | diffusivity_background_sigma_level                     | sigma level threshold for background diffusivity   | none          |    0 | real    | kind_phys | in     | F        |
+!! | lprnt          | flag_print                                             | flag for printing diagnostics to output            | flag          |    0 | logical |           | in     | F        |
+!! | ipr            | horizontal_index_of_printed_column                     | horizontal index of printed column                 | index         |    0 | integer |           | in     | F        |
 !!
 !!  \section general General Algorithm
 !!  -# Compute preliminary variables from input arguments.
@@ -86,7 +95,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine moninedmf(ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
+      subroutine moninedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,      &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,qss,heat,evap,stress,spd1,kpbl,                           &
@@ -150,7 +159,7 @@
      &                     govrth(im),  hrad(im),                       &
 !    &                     hradm(im),   radmin(im),   vrad(im),         &
      &                     radmin(im),  vrad(im),                       &
-     &                     zd(im),      zdd(im),      thlvx1(im) 
+     &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
      &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
@@ -1192,7 +1201,7 @@ c-----------------------------------------------------------------------
 !!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
-      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)             
+      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
       implicit none
