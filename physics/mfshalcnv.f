@@ -21,7 +21,7 @@
 !! | delp           | air_pressure_layer_difference                         | pres(k) - pres(k+1)                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prslp          | air_pressure_layer                                    | mean layer pressure                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | psp            | surface_air_pressure                                  | surface pressure                   | Pa      | 1    | real    | kind_phys | in     | F        |
-!! | phil           | geopotential_height                                   | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                          | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     | F        |
 !! | ql1            | cloud_ice_specific_humidity                           | cloud ice specific humidity        | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | ql2            | cloud_liquid_water_specific_humidity                  | cloud water specific humidity      | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | q1             | water_vapor_specific_humidity                         | updated vapor specific humidity    | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
