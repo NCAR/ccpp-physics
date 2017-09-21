@@ -20,7 +20,7 @@
 !! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
 !! | ix             | horizontal_dimension                                  | horizontal dimension               | index   |    0 | integer |           | in     | F        |
 !! | km             | vertical_dimension                                    | vertical layer dimension           | index   |    0 | integer |           | in     | F        |
-!! | delt           | time_step                                             | physics time step                  | s       |    0 | real    | kind_phys | in     | F        |
+!! | delt           | time_step_for_physics                                 | physics time step                  | s       |    0 | real    | kind_phys | in     | F        |
 !! | delp           | air_pressure_layer_difference                         | pres(k) - pres(k+1)                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prslp          | air_pressure_layer                                    | mean layer pressure                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | psp            | surface_air_pressure                                  | surface pressure                   | Pa      | 1    | real    | kind_phys | in     | F        |
