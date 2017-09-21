@@ -2,6 +2,16 @@
 !! stationary convection forced gravity wave drag based on Chun and 
 !! Baik(1998) \cite chun_and_baik_1998
 
+      module gwdc
+
+      contains
+
+
+      subroutine gwdc_init()
+
+      end subroutine gwdc_init
+
+
 !> \ingroup gwd
 !> \defgroup convective Convective Gravity Wave Drag
 !! This subroutine is the parameterization of convective gravity wave
@@ -40,6 +50,7 @@
 !> \param[in] V1       v component of layer wind
 !> \param[in] T1       layer mean temperature (K)
 !> \param[in] Q1       layer mean tracer concentration
+!> \param[in] DELTIM   physics time step in sectons
 !> \param[in] PMID1    mean layer pressure
 !> \param[in] PINT1    pressure at layer interfaces
 !> \param[in] DPMID1   mean layer delta p
@@ -55,6 +66,7 @@
 !!                     physcon
 !> \param[in] RD       gas constant air defined in physcon
 !> \param[in] FV       con_fvirt = con_rv/con_rd-1
+!> \param[in] PI       ratio of a circle's circumference to its diameter
 !> \param[in] DLENGTH  grid spacing in the direction of basic wind at 
 !!                     the cloud top
 !> \param[in] LPRNT    logical print flag
@@ -69,10 +81,44 @@
 !!
 !> \section al_gwdc General Algorithm
 !> @{
-      subroutine gwdc(im,ix,iy,km,lat,u1,v1,t1,q1,deltim,
+      subroutine gwdc_run( 
+     &                im,ix,iy,km,lat,u1,v1,t1,q1,deltim,
      &                pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,
      &                grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,
      &                utgwc,vtgwc,tauctx,taucty)
+!! | local var name | longname                                                       | description                                                  | units      | rank | type    | kind      | intent | optional |
+!! |----------------|----------------------------------------------------------------|--------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                         | horizontal loop extent; start at 1                           | index      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                           | horizontal dimension                                         | index      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_dimension                                           | horizontal dimension                                         | index      | 0    | integer | default   | in     | F        |
+!! | km             | vertical_dimension                                             | number of vertical layers                                    | index      | 0    | integer | default   | in     | F        |
+!! | lat            | latitude_index_in_debug_printouts                              | latitude index in debug printouts                            | index      | 0    | integer | default   | in     | F        |
+!! | u1             | grid_eastward_wind                                             | zonal wind                                                   | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | v1             | grid_northward_wind                                            | meridional wind                                              | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | t1             | air_temperature                                                | mid-layer temperature                                        | K          | 2    | real    | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity                                  | mid-layer specific humidity of water vapor                   | kg kg-1    | 2    | real    | kind_phys | in     | F        |
+!! | deltim         | time_step_for_physics                                          | physics time step                                            | s          | 0    | real    | kind_phys | in     | F        |
+!! | pmid1          | air_pressure_at_midlayer                                       | mid-layer pressure                                           | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | pint1          | air_pressure_at_layer_interface                                | layer interface pressure                                     | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | dpmid1         | air_pressure_difference_between_midlayers                      | difference between mid-layer pressures                       | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | qmax           | maximum_column_heating_rate                                    | maximum heating rate in column                               | K s-1      | 1    | real    | kind_phys | in     | F        |
+!! | ktop           | vertical_level_index_for_cloud_top                             | vertical level index for cloud top                           | index      | 1    | integer | default   | in     | F        |
+!! | kbot           | vertical_level_index_for_cloud_bottom                          | vertical level index for cloud bottom                        | index      | 1    | integer | default   | in     | F        |
+!! | kcnv           | column_convection_flag                                         | flag indicating whether convection occurs in column (0 or 1) | index      | 1    | integer | default   | in     | F        |
+!! | cldf           | cloud_fraction                                                 | total convective fractional cloud cover                      | frac       | 1    | real    | kind_phys | in     | F        |
+!! | grav           | gravitational_acceleration                                     | gravitational acceleration                                   | m s-2      | 0    | real    | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                  | specific heat of dry air at constant pressure                | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                           | ideal gas constant for dry air                               | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one              | rv/rd - 1 (rv = ideal gas constant for water vapor)          | none       | 0    | real    | kind_phys | in     | F        |
+!! | pi             | pi                                                             | ratio of a circle's circumference to its diameter            | radians    | 0    | real    | kind_phys | in     | F        |
+!! | dlength        | grid_spacing                                                   | grid spacing in the direction of basic wind at the cloud top | m          | 1    | real    | kind_phys | in     | F        |
+!! | lprnt          | flag_for_debug_printouts                                       | flag for debugging printouts                                 | flag       | 0    | logical | default   | in     | F        |
+!! | ipr            | horizontal_index_of_debug_printouts                            | horizontal index for debugging printouts                     | index      | 0    | integer | default   | in     | F        |
+!! | fhour          | forecast_time                                                  | forecast hour                                                | hr         | 0    | real    | kind_phys | in     | F        |
+!! | utgwc          | tendency_of_eastward_wind_due_to_convective_gravity_wave_drag  | zonal wind tendency                                          | m s-2      | 2    | real    | kind_phys | out    | F        |
+!! | vtgwc          | tendency_of_northward_wind_due_to_convective_gravity_wave_drag | meridional wind tendency                                     | m s-2      | 2    | real    | kind_phys | out    | F        |
+!! | tauctx         | atmosphere_eastward_stress_due_to_gravity_wave_drag            | eastward gravity wave stress                                 | Pa         | 1    | real    | kind_phys | out    | F        |
+!! | taucty         | atmosphere_northtward_stress_due_to_gravity_wave_drag          | northward gravity wave stress                                | Pa         | 1    | real    | kind_phys | out    | F        |
 
 !***********************************************************************
 ! aug   2005 Ake Johansson - ORIGINAL CODE FOR PARAMETERIZATION OF CONVECTIVELY FORCED
@@ -1348,6 +1394,17 @@
      &            pmid,   dpmid,  brunm,  rhom, taugw)
 
       return
-      end
+      end subroutine gwdc_run
 !> @}
 !! @}
+
+
+
+      subroutine gwdc_finalize()
+
+      end subroutine gwdc_finalize
+
+
+
+      end module gwdc
+

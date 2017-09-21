@@ -130,6 +130,82 @@
 !! include the effect of mountain induced gravity wave drag from 
 !! subgrid scale orography including convective breaking, shear 
 !! breaking and the presence of critical levels.
+
+      module gwdps
+
+      contains
+
+
+      subroutine gwdps_init(
+     &           im, iy,
+     &           nmtvr, mntvar, 
+     &           hprime, oc, oa4, clx, theta, 
+     &           sigma, gamma, elvmax)
+
+      use machine, only : kind_phys
+      implicit none
+
+      integer, intent(in) :: im, iy, nmtvr
+!      integer, intent(in) :: nmtvar
+      real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
+
+      real(kind=kind_phys), intent(out) :: 
+     &  hprime(im), oc(im), oa4(iy,4), clx(iy,4), 
+     &  theta(im), sigma(im), gamma(im), elvmax(im)
+!     &  hprime(:), oc(:), oa4(:,4), clx4(:,4), 
+!     &  theta(:), sigma(:), gamma(:), elvmax(:)
+
+      if (nmtvr == 14) then  ! current operational - as of 2014
+        hprime(:) = mntvar(:,1)
+        oc(:)     = mntvar(:,2)
+        oa4(:,1)  = mntvar(:,3)
+        oa4(:,2)  = mntvar(:,4)
+        oa4(:,3)  = mntvar(:,5)
+        oa4(:,4)  = mntvar(:,6)
+        clx(:,1)  = mntvar(:,7)
+        clx(:,2)  = mntvar(:,8)
+        clx(:,3)  = mntvar(:,9)
+        clx(:,4)  = mntvar(:,10)
+        theta(:)  = mntvar(:,11)
+        gamma(:)  = mntvar(:,12)
+        sigma(:)  = mntvar(:,13)
+        elvmax(:) = mntvar(:,14)
+      elseif (nmtvr == 10) then 
+        hprime(:) = mntvar(:,1)
+        oc(:)     = mntvar(:,2)
+        oa4(:,1)  = mntvar(:,3)
+        oa4(:,2)  = mntvar(:,4)
+        oa4(:,3)  = mntvar(:,5)
+        oa4(:,4)  = mntvar(:,6)
+        clx(:,1)  = mntvar(:,7)
+        clx(:,2)  = mntvar(:,8)
+        clx(:,3)  = mntvar(:,9)
+        clx(:,4)  = mntvar(:,10)
+      elseif (nmtvr == 6) then 
+        hprime(:) = mntvar(:,1)
+        oc(:)     = mntvar(:,2)
+        oa4(:,1)  = mntvar(:,3)
+        oa4(:,2)  = mntvar(:,4)
+        oa4(:,3)  = mntvar(:,5)
+        oa4(:,4)  = mntvar(:,6)
+        clx(:,1)  = 0.0
+        clx(:,2)  = 0.0
+        clx(:,3)  = 0.0
+        clx(:,4)  = 0.0
+      else 
+        hprime = 0
+        oc = 0
+        oa4 = 0
+        clx = 0
+        theta = 0
+        gamma = 0
+        sigma = 0
+        elvmax = 0
+      endif   ! end if_nmtvr
+
+      end subroutine gwdps_init
+
+
 !! @{
 
 !> \param[in] IM       horizontal number of used pts
@@ -180,11 +256,55 @@
 !> \param[in] IPR      check print point for debugging
 !> \section gen_gwdps General Algorithm
 !> @{
-      SUBROUTINE GWDPS(IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,              &
+      subroutine gwdps_run(                                             &
+     &               IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,                &
      &               PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,         &
      &               HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,       &
      &               DUSFC,DVSFC,G, CP, RD, RV, IMX,                    &
      &               nmtvr, cdmbgwd, me, lprnt, ipr)
+!! | local var name | longname                                                           | description                                                                                   | units      | rank | type    | kind      | intent | optional |
+!! |----------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                             | horizontal loop extent; start at 1                                                            | index      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                               | horizontal dimension                                                                          | index      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_dimension                                               | horizontal dimension                                                                          | index      | 0    | integer | default   | in     | F        |
+!! | km             | vertical_dimension                                                 | number of vertical layers                                                                     | index      | 0    | integer | default   | in     | F        |
+!! | A              | tendency_of_northward_wind_due_to_orographic_gravity_wave_drag     | meridional wind tendency                                                                      | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | B              | tendency_of_eastward_wind_due_to_orographic_gravity_wave_drag      | zonal wind tendency                                                                           | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | C              | tendency_of_air_temperature_due_to_orographic_gravity_wave_drag    | air temperature tendency                                                                      | K s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | grid_eastward_wind                                                 | zonal wind                                                                                    | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | v1             | grid_northward_wind                                                | meridional wind                                                                               | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | t1             | air_temperature                                                    | mid-layer temperature                                                                         | K          | 2    | real    | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity                                      | mid-layer specific humidity of water vapor                                                    | kg kg-1    | 2    | real    | kind_phys | in     | F        |
+!! | kpbl           | index_of_PBL_top_layer                                             | vertical index of top layer of PBL                                                            | index      | 1    | integer | default   | in     | F        |
+!! | prsi           | air_pressure_at_layer_interface                                    | layer interface pressure                                                                      | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | del            | air_pressure_difference_between_midlayers                          | difference between mid-layer pressures                                                        | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure_at_midlayer                                           | mid-layer pressure                                                                            | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function_at_midlayer                           | mid-layer Exner function                                                                      | none       | 2    | real    | kind_phys | in     | F        |
+!! | phii           | geopotential_at_layer_interface                                    | layer interface geopotential                                                                  | m2 s-2     | 2    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential_at_midlayer                                           | mid-layer geopotential                                                                        | m2 s-2     | 2    | real    | kind_phys | in     | F        |
+!! | deltim         | time_step_for_physics                                              | physics time step                                                                             | s          | 0    | real    | kind_phys | in     | F        |
+!! | kdt            | index_of_time_step                                                 | current time step index                                                                       | index      | 0    | integer | default   | in     | F        |
+!! | hprime         | standard_deviation_of_orography                                    | standard deviation of orography in grid box                                                   | m          | 1    | real    | kind_phys | in     | F        |
+!! | oc             | convexity_of_orography                                             | convexity of orography in grid box                                                            | none       | 1    | real    | kind_phys | in     | F        |
+!! | oa4            | asymmetry_of_orography                                             | asymmetry of orography in grid box                                                            | none       | 2    | real    | kind_phys | in     | F        |
+!! | clx4           | fraction_of_grid_box_higher_than_critical_height                   | fractional grid box extent covered by orography higher than critical height                   | frac       | 2    | real    | kind_phys | in     | F        |
+!! | theta          | angle_from_east_of_maximum_orographic_variations                   | angle with_respect to east of maximum orographic variations in grid box                       | degrees    | 1    | real    | kind_phys | in     | F        |
+!! | sigma          | slope_of_orography                                                 | slope of orography in grid box                                                                | none       | 1    | real    | kind_phys | in     | F        |
+!! | gamma          | anisotropy_of_orography                                            | anisotropy of orography in grid box                                                           | none       | 1    | real    | kind_phys | in     | F        |
+!! | elvmax         | maximum_orography                                                  | maximum of orography in grid box                                                              | m          | 1    | real    | kind_phys | in     | F        |
+!! | dusfc          | eastward_surface_stress                                            | zonal component of surface stress                                                             | Pa         | 1    | real    | kind_phys | out    | F        |
+!! | dvsfc          | northward_surface_stress                                           | meridional component of surface stress                                                        | Pa         | 1    | real    | kind_phys | out    | F        |
+!! | g              | gravitational_acceleration                                         | gravitational acceleration                                                                    | m s-2      | 0    | real    | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                      | specific heat of dry air at constant pressure                                                 | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                               | ideal gas constant for dry air                                                                | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | rv             | gas_constant_water_vapor                                           | ideal gas constant for water vapor                                                            | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | imx            | number_of_equatorial_longitude_points                              | number of longitude points along the equator                                                  | count      | 0    | integer | default   | in     | F        |
+!! | nmtvr          | number_of_topographic_variables                                    | number of topographic variables                                                               | count      | 0    | integer | default   | in     | F        |
+!! | cdmbgwd        | multiplication_factors_for_mountain_blocking_and_gravity_wave_drag | multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level gravity wave drag | none       | 1    | real    | kind_phys | in     | F        |
+!! | me             | mpi_rank                                                           | rank of the current MPI task                                                                  | index      | 0    | integer | default   | in     | F        |
+!! | lprnt          | flag_for_debug_printouts                                           | flag for debugging printouts                                                                  | flag       | 0    | logical | default   | in     | F        |
+!! | ipr            | horizontal_index_of_debug_printouts                                | horizontal index for debugging printouts                                                      | index      | 0    | integer | default   | in     | F        |
+
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -1236,7 +1356,18 @@
 !      print *,' in gwdps_lm.f 18  =',A(ipt(1),idxzb(1))
 !    &,                          B(ipt(1),idxzb(1)),me
       RETURN
-      END
+      end subroutine GWDPS_run
 !> @}
 !! @}
 !! @}
+
+
+
+      subroutine gwdps_finalize()
+
+      end subroutine gwdps_finalize
+
+
+
+      end module gwdps
+

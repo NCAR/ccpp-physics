@@ -15,6 +15,8 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
+  use gwdc,                  only: gwdc_init, gwdc_run, gwdc_finalize
+  use gwdps,                 only: gwdps_init, gwdps_run, gwdps_finalize
 
   implicit none
 
@@ -58,8 +60,12 @@ module module_physics_driver
 !                                                                       !
 !     get_prs,  dcyc2t2_pre_rad (testing),    dcyc2t3,  sfc_diff,       !
 !     sfc_ocean,sfc_drv,  sfc_land, sfc_sice, sfc_diag, moninp1,        !
-!     moninp,   moninq1,  moninq,   gwdps,    ozphys,   get_phi,        !
-!     sascnv,   sascnvn,  rascnv,   cs_convr, gwdc,     shalcvt3,shalcv,!
+!     moninp,   moninq1,  moninq,   
+!     gwdps_init, gwdps_run, gwdps_finalize, 
+!     ozphys,   get_phi,        !
+!     sascnv,   sascnvn,  rascnv,   cs_convr, 
+!     gwdc_init, gwdc_run, gwdc_finalize, 
+!     shalcvt3,shalcv,!
 !     shalcnv,  cnvc90,   lrgscl,   gsmdrive, gscond,   precpd,         !
 !     progt2.                                                           !
 !                                                                       !
@@ -436,6 +442,7 @@ module module_physics_driver
            rain1, raincs, snowmt, cd, cdq, qss, dusfcg, dvsfcg, dusfc1, &
            dvsfc1,  dtsfc1, dqsfc1, rb, drain,  cld1d, evap, hflx,      &
            stress, t850, ep1d, gamt, gamq, sigmaf, oc, theta, gamma,    &
+           hprime,                                                      &
            sigma, elvmax, wind, work1, work2, runof, xmu, fm10, fh2,    &
            tsurf,  tx1, tx2, ctei_r, evbs, evcw, trans, sbsno, snowc,   &
            frland, adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw,          &
@@ -1323,53 +1330,68 @@ module module_physics_driver
 !            Orographic gravity wave drag parameterization
 !            ---------------------------------------------
 
-      if (Model%nmtvr == 14) then         ! current operational - as of 2014
-        oc(:)     = Sfcprop%hprime(:,2)
-        oa4(:,1)  = Sfcprop%hprime(:,3)
-        oa4(:,2)  = Sfcprop%hprime(:,4)
-        oa4(:,3)  = Sfcprop%hprime(:,5)
-        oa4(:,4)  = Sfcprop%hprime(:,6)
-        clx(:,1)  = Sfcprop%hprime(:,7)
-        clx(:,2)  = Sfcprop%hprime(:,8)
-        clx(:,3)  = Sfcprop%hprime(:,9)
-        clx(:,4)  = Sfcprop%hprime(:,10)
-        theta(:)  = Sfcprop%hprime(:,11)
-        gamma(:)  = Sfcprop%hprime(:,12)
-        sigma(:)  = Sfcprop%hprime(:,13)
-        elvmax(:) = Sfcprop%hprime(:,14)
-      elseif (Model%nmtvr == 10) then
-        oc(:)     = Sfcprop%hprime(:,2)
-        oa4(:,1)  = Sfcprop%hprime(:,3)
-        oa4(:,2)  = Sfcprop%hprime(:,4)
-        oa4(:,3)  = Sfcprop%hprime(:,5)
-        oa4(:,4)  = Sfcprop%hprime(:,6)
-        clx(:,1)  = Sfcprop%hprime(:,7)
-        clx(:,2)  = Sfcprop%hprime(:,8)
-        clx(:,3)  = Sfcprop%hprime(:,9)
-        clx(:,4)  = Sfcprop%hprime(:,10)
-      elseif (Model%nmtvr == 6) then
-        oc(:)     = Sfcprop%hprime(:,2)
-        oa4(:,1)  = Sfcprop%hprime(:,3)
-        oa4(:,2)  = Sfcprop%hprime(:,4)
-        oa4(:,3)  = Sfcprop%hprime(:,5)
-        oa4(:,4)  = Sfcprop%hprime(:,6)
-        clx(:,1)  = 0.0
-        clx(:,2)  = 0.0
-        clx(:,3)  = 0.0
-        clx(:,4)  = 0.0
-      else
-        oc = 0 ; oa4 = 0 ; clx = 0 ; theta = 0 ; gamma = 0 ; sigma = 0
-        elvmax = 0
+! GSK 9/18/2017:
+! Move this portion into gwdps_init(...)
 
-      endif   ! end if_nmtvr
+!      if (Model%nmtvr == 14) then         ! current operational - as of 2014
+!        hprime(:) = Sfcprop%hprime(:,1)
+!        oc(:)     = Sfcprop%hprime(:,2)
+!        oa4(:,1)  = Sfcprop%hprime(:,3)
+!        oa4(:,2)  = Sfcprop%hprime(:,4)
+!        oa4(:,3)  = Sfcprop%hprime(:,5)
+!        oa4(:,4)  = Sfcprop%hprime(:,6)
+!        clx(:,1)  = Sfcprop%hprime(:,7)
+!        clx(:,2)  = Sfcprop%hprime(:,8)
+!        clx(:,3)  = Sfcprop%hprime(:,9)
+!        clx(:,4)  = Sfcprop%hprime(:,10)
+!        theta(:)  = Sfcprop%hprime(:,11)
+!        gamma(:)  = Sfcprop%hprime(:,12)
+!        sigma(:)  = Sfcprop%hprime(:,13)
+!        elvmax(:) = Sfcprop%hprime(:,14)
+!      elseif (Model%nmtvr == 10) then
+!        hprime(:) = Sfcprop%hprime(:,1)
+!        oc(:)     = Sfcprop%hprime(:,2)
+!        oa4(:,1)  = Sfcprop%hprime(:,3)
+!        oa4(:,2)  = Sfcprop%hprime(:,4)
+!        oa4(:,3)  = Sfcprop%hprime(:,5)
+!        oa4(:,4)  = Sfcprop%hprime(:,6)
+!        clx(:,1)  = Sfcprop%hprime(:,7)
+!        clx(:,2)  = Sfcprop%hprime(:,8)
+!        clx(:,3)  = Sfcprop%hprime(:,9)
+!        clx(:,4)  = Sfcprop%hprime(:,10)
+!      elseif (Model%nmtvr == 6) then
+!        hprime(:) = Sfcprop%hprime(:,1)
+!        oc(:)     = Sfcprop%hprime(:,2)
+!        oa4(:,1)  = Sfcprop%hprime(:,3)
+!        oa4(:,2)  = Sfcprop%hprime(:,4)
+!        oa4(:,3)  = Sfcprop%hprime(:,5)
+!        oa4(:,4)  = Sfcprop%hprime(:,6)
+!        clx(:,1)  = 0.0
+!        clx(:,2)  = 0.0
+!        clx(:,3)  = 0.0
+!        clx(:,4)  = 0.0
+!      else
+!        hprime = 0
+!        oc = 0 ; oa4 = 0 ; clx = 0 ; theta = 0 ; gamma = 0 ; sigma = 0
+!        elvmax = 0
+!
+!      endif   ! end if_nmtvr
+
+      call gwdps_init(                          &
+           im, im, Model%nmtvr, Sfcprop%hprime, &
+           hprime, oc, oa4, clx, theta,         &
+           sigma, gamma, elvmax)
+
 
 !     write(0,*)' before gwd clstp=',clstp,' kdt=',kdt,' lat=',lat
-      call gwdps(im, ix, im, levs, dvdt, dudt, dtdt,        &
+      call gwdps_run(                                       &
+                 im, ix, im, levs, dvdt, dudt, dtdt,        &
                  Statein%ugrs, Statein%vgrs, Statein%tgrs,  &
                  Statein%qgrs, kpbl, Statein%prsi, del,     &
                  Statein%prsl, Statein%prslk, Statein%phii, &
                  Statein%phil, dtp, kdt,                    &
-                 Sfcprop%hprime(1,1), oc, oa4, clx, theta,  &
+!                 Sfcprop%hprime(1,1), oc, oa4, clx, theta,  &
+                 hprime, oc, oa4, clx, theta,  &
                  sigma, gamma, elvmax, dusfcg, dvsfcg,      &
                  con_g, con_cp, con_rd, con_rv, Model%lonr, &
                  Model%nmtvr, Model%cdmbgwd, me, lprnt,ipr)
@@ -1389,6 +1411,8 @@ module module_physics_driver
           Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + dtdt(:,:) * dtf
         endif
       endif
+
+      call gwdps_finalize()
 
 !    Rayleigh damping  near the model top
       if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
@@ -1986,9 +2010,12 @@ module module_physics_driver
 
 !  --- ...  end check print ********************************************
 
+        call gwdc_init()
+
 !GFDL replacing lat with "1"
 !       call gwdc(im, ix, im, levs, lat, gu0, gv0, gt0, gq0, dtp,       &
-        call gwdc (im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,     &
+        call gwdc_run(                                                  & 
+                   im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,     &
                    Statein%tgrs, Statein%qgrs, dtp, Statein%prsl,       &
                    Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,   &
                    con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,   &
@@ -2014,6 +2041,8 @@ module module_physics_driver
 !           print *,' after gwdc in gbphys end print'
 !         endif
 !       endif
+
+        call gwdc_finalize()
 
 !  --- ...  write out cloud top stress and wind tendencies
 
