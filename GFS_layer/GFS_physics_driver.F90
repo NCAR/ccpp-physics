@@ -4,7 +4,7 @@ module module_physics_driver
   use physcons,              only: con_cp, con_fvirt, con_g, con_rd, &
                                    con_rv, con_hvap, con_hfus,       &
                                    con_rerth, con_pi, rhc_max, dxmin,&
-                                   dxinv, pa2mb, rlapse 
+                                   dxinv, pa2mb, rlapse
   use cs_conv,               only: cs_convr
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
@@ -15,6 +15,7 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
+  use edmf,                  only: edmf_run
 
   implicit none
 
@@ -27,7 +28,7 @@ module module_physics_driver
   real(kind=kind_phys), parameter :: hsub    = con_hvap+con_hfus
   real(kind=kind_phys), parameter :: czmin   = 0.0001      ! cos(89.994)
   real(kind=kind_phys), parameter :: onebg   = 1.0/con_g
-  real(kind=kind_phys), parameter :: albdf   = 0.06 
+  real(kind=kind_phys), parameter :: albdf   = 0.06
   real(kind=kind_phys) tf, tcr, tcrf
   parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf))
 
@@ -422,14 +423,14 @@ module module_physics_driver
            flag_cice
 
       logical, dimension(Model%ntrac-Model%ncld+2,2) ::                 &
-           otspt 
+           otspt
 
       !--- REAL VARIABLES
       real(kind=kind_phys) ::                                           &
            dtf, dtp, rhbbot, rhbtop, rhpbl, frain, tem, tem1, tem2,     &
            xcosz_loc, zsea1, zsea2, eng0, eng1, dpshc,                  &
-           !--- experimental for shoc sub-stepping 
-           dtshoc                                                      
+           !--- experimental for shoc sub-stepping
+           dtshoc
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1))  ::            &
            ccwfac, garea, dlength, cumabs, cice, zice, tice, gflx,      &
@@ -460,7 +461,7 @@ module module_physics_driver
           del, rhc, dtdt, dudt, dvdt, gwdcu, gwdcv, dtdtc, rainp,       &
           ud_mf, dd_mf, dt_mf, prnum, dkt, sigmatot, sigmafrac
 
-      !--- GFDL modification for FV3 
+      !--- GFDL modification for FV3
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs+1) ::&
            del_gz
 
@@ -468,7 +469,7 @@ module module_physics_driver
            dqdt
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%nctp) ::  &
-           sigmai, vverti 
+           sigmai, vverti
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,oz_coeff+5) ::  &
            dq3dt_loc
@@ -477,7 +478,7 @@ module module_physics_driver
       !--- in clw, the first two varaibles are cloud water and ice.
       !--- from third to ntrac are convective transportable tracers,
       !--- third being the ozone, when ntrac=3 (valid only with ras)
-      !--- Anning Cheng 9/21/2016 leave a hook here for diagnosed snow, 
+      !--- Anning Cheng 9/21/2016 leave a hook here for diagnosed snow,
       !--- rain, and their number
       real(kind=kind_phys), allocatable ::                              &
            clw(:,:,:), qpl(:,:),  qpi(:,:), ncpl(:,:), ncpi(:,:),       &
@@ -1012,7 +1013,7 @@ module module_physics_driver
             Model%lsm, lprnt, ipr,                                      &
 !  ---  input/outputs:
             zice, cice, tice, Sfcprop%weasd, Sfcprop%tsfc,              &
-            Sfcprop%tprcp, stsoil, ep1d,                                & 
+            Sfcprop%tprcp, stsoil, ep1d,                                &
 !  ---  outputs:
             Sfcprop%snowd, qss, snowmt, gflx, Diag%cmm, Diag%chh, evap, &
             hflx)
@@ -1189,7 +1190,7 @@ module module_physics_driver
                        Model%xkzm_m, Model%xkzm_h, Model%xkzm_s, lprnt, ipr, me)
       else
         if (Model%hybedmf) then
-          call moninedmf(ix, im, levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
+          call edmf_run (ix, im, levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
                          Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,  &
                          Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(1,1),   &
                          rb, Sfcprop%zorl, Diag%u10m, Diag%v10m, Sfcprop%ffmm,    &
@@ -1904,7 +1905,7 @@ module module_physics_driver
 
       if (Model%cnvgwd) then         !        call convective gravity wave drag
 
-!  --- ...  calculate maximum convective heating rate 
+!  --- ...  calculate maximum convective heating rate
 !           cuhr = temperature change due to deep convection
 
         cumabs(:) = 0.0
@@ -2238,7 +2239,7 @@ module module_physics_driver
                    Stateout%gq0(1,1,1), clw(1,1,1), clw(1,1,2), qpi, qpl,rhc,     &
                    Model%sup, Tbd%phy_f3d(1,1,Model%ntot3d-2),                    &
                    Stateout%gq0(1,1,Model%ntke), hflx, evap, prnum,               &
-                   Tbd%phy_f3d(1,1,Model%ntot3d-1), Tbd%phy_f3d(1,1,Model%ntot3d),&  
+                   Tbd%phy_f3d(1,1,Model%ntot3d-1), Tbd%phy_f3d(1,1,Model%ntot3d),&
                    lprnt, ipr, ncpl, ncpi, kdt)
 
         if ((Model%ntlnc > 0) .and. (Model%ntinc > 0) .and. (Model%ncld >= 2)) then
@@ -2428,13 +2429,13 @@ module module_physics_driver
             ncpr(:,:)  = 0.
             ncps(:,:)  = 0.
             Tbd%phy_f3d(:,:,1) = Tbd%phy_f3d(:,:,Model%ntot3d-2) ! clouds from shoc
-          else 
+          else
             clw(:,:,1) = Stateout%gq0(:,:,Model%ntiw)             ! ice
             clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)             ! water
-            qrn(:,:)   = Stateout%gq0(:,:,Model%ntrw)            
-            qsnw(:,:)  = Stateout%gq0(:,:,Model%ntsw)       
-            ncpr(:,:)  = Stateout%gq0(:,:,Model%ntrnc)        
-            ncps(:,:)  = Stateout%gq0(:,:,Model%ntsnc)         
+            qrn(:,:)   = Stateout%gq0(:,:,Model%ntrw)
+            qsnw(:,:)  = Stateout%gq0(:,:,Model%ntsw)
+            ncpr(:,:)  = Stateout%gq0(:,:,Model%ntrnc)
+            ncps(:,:)  = Stateout%gq0(:,:,Model%ntsnc)
             Tbd%phy_f3d(:,:,1) = Tbd%phy_f3d(:,:,Model%ntot3d-2) ! clouds from shoc
           end if
         elseif ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
@@ -2470,10 +2471,10 @@ module module_physics_driver
           else
             clw(:,:,1) = Stateout%gq0(:,:,Model%ntiw)             ! ice
             clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)             ! water
-            qrn(:,:)   = Stateout%gq0(:,:,Model%ntrw)       
-            qsnw(:,:)  = Stateout%gq0(:,:,Model%ntsw)       
-            ncpr(:,:)  = Stateout%gq0(:,:,Model%ntrnc)       
-            ncps(:,:)  = Stateout%gq0(:,:,Model%ntsnc)       
+            qrn(:,:)   = Stateout%gq0(:,:,Model%ntrw)
+            qsnw(:,:)  = Stateout%gq0(:,:,Model%ntsw)
+            ncpr(:,:)  = Stateout%gq0(:,:,Model%ntrnc)
+            ncps(:,:)  = Stateout%gq0(:,:,Model%ntsnc)
             Tbd%phy_f3d(:,:,1) = min(1.0, Tbd%phy_f3d(:,:,1)+cnvc(:,:))
           endif
         endif
@@ -2812,7 +2813,7 @@ module module_physics_driver
 !       endif
       enddo
       return
-      
+
     end subroutine moist_bud
 !> @}
 
