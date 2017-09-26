@@ -1930,7 +1930,7 @@
               ! Night time: set SW heating rates and fluxes to zero
             if (ZERO_OUT_HEATING_RATES_AND_FLUXES) then
 
-              call Zero_out_heatflux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
+              call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
 
             else
               Radtend%htrsw(:,:) = 0.0
@@ -2180,7 +2180,7 @@
       end subroutine Organize_output
 
 
-      subroutine Zero_out_heatflux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
+      subroutine Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
 
         implicit none
 
@@ -2212,7 +2212,7 @@
           Radtend%swhc(:,:) = 0
         endif
 
-      end subroutine Zero_out_heatflux
+      end subroutine Zero_out_heatrate_flux
 
 !
 !> @}
