@@ -1852,12 +1852,15 @@
           ! Added by PAJ:
         logical, parameter :: ZERO_OUT_HEATING_RATES_AND_FLUXES = .true.
         logical, parameter :: SET_SURFACE_ALBEDO = .true.
+        logical, parameter :: ORGANIZE_HEATING_RATE = .true.
+        logical, parameter :: ORGANIZE_HEATING_RATE_CSK = .true.
+        logical, parameter :: SAVE_SW_OUT = .true.
 
 
         if_lsswr: if (Model%lsswr) then
 
-            ! Setup surface albedo for SW calculation
           if (SET_SURFACE_ALBEDO) then
+              ! Setup surface albedo for SW calculation
             call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
                          Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
                          tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
@@ -1882,6 +1885,7 @@
 
               ! Daytime: Compute SW heating rates and fluxes.
             if (Model%swhtr) then
+                ! Output SW heating rate for clear skies (htsw0)
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
                           gasvmr, clouds, Tbd%icsdsw, faersw,     &
                           sfcalb, Radtend%coszen, Model%solcon,   &
@@ -1889,6 +1893,7 @@
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
                           hsw0=htsw0, fdncmp=scmpsw)                     ! ---  optional
             else
+                ! Does not output SW heating rates for clear skies.
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
                           gasvmr, clouds, Tbd%icsdsw, faersw,     &
                           sfcalb, Radtend%coszen, Model%solcon,   &
@@ -1897,44 +1902,58 @@
                           FDNCMP=scmpsw)                                 ! ---  optional 
             end if
 
-            do k = 1, lm
-              k1 = k + kd
-              Radtend%htrsw(:, k) = htswc(:, k1)
-            end do
 
-              ! Repopulate the points above levr
-            if (Model%levr < Model%levs) then
-              do k = lm, Model%levs
-                Radtend%htrsw (:, k) = Radtend%htrsw (:, lm)
-              end do
-            end if
-
-            if (Model%swhtr) then
+            if (ORGANIZE_HEATING_RATE) then
+              call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
+            else
               do k = 1, lm
-                 k1 = k + kd
-                 Radtend%swhc(:, k) = htsw0(:, k1)
-               end do
+                k1 = k + kd
+                Radtend%htrsw(:, k) = htswc(:, k1)
+              end do
 
-                 ! Repopulate the points above levr
-               if (Model%levr < Model%levs) then
-                 do k = lm, Model%levs
-                   Radtend%swhc(:, k) = Radtend%swhc(:, lm)
-                 end do
-               end if
+                ! Repopulate the points above levr
+              if (Model%levr < Model%levs) then
+                do k = lm, Model%levs
+                  Radtend%htrsw (:, k) = Radtend%htrsw (:, lm)
+                end do
+              end if
             end if
 
 
-              ! Surface down and up spectral component fluxes
-              ! Save two spectral bands' surface downward and upward fluxes for output.
-            Coupling%nirbmdi(:) = scmpsw(:)%nirbm
-            Coupling%nirdfdi(:) = scmpsw(:)%nirdf
-            Coupling%visbmdi(:) = scmpsw(:)%visbm
-            Coupling%visdfdi(:) = scmpsw(:)%visdf
+            if (ORGANIZE_HEATING_RATE_CSK) then
+              call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
+            else
+              if (Model%swhtr) then
+                do k = 1, lm
+                   k1 = k + kd
+                   Radtend%swhc(:, k) = htsw0(:, k1)
+                 end do
 
-            Coupling%nirbmui(:) = scmpsw(:)%nirbm * sfcalb(:, 1)
-            Coupling%nirdfui(:) = scmpsw(:)%nirdf * sfcalb(:, 2)
-            Coupling%visbmui(:) = scmpsw(:)%visbm * sfcalb(:, 3)
-            Coupling%visdfui(:) = scmpsw(:)%visdf * sfcalb(:, 4)
+                   ! Repopulate the points above levr
+                 if (Model%levr < Model%levs) then
+                   do k = lm, Model%levs
+                     Radtend%swhc(:, k) = Radtend%swhc(:, lm)
+                   end do
+                 end if
+              end if
+            end if
+
+
+            if (SAVE_SW_OUT) then
+                ! Surface down and up spectral component fluxes
+                ! Save two spectral bands' surface downward and upward fluxes for output.
+              call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
+            else
+              Coupling%nirbmdi(:) = scmpsw(:)%nirbm
+              Coupling%nirdfdi(:) = scmpsw(:)%nirdf
+              Coupling%visbmdi(:) = scmpsw(:)%visbm
+              Coupling%visdfdi(:) = scmpsw(:)%visdf
+
+              Coupling%nirbmui(:) = scmpsw(:)%nirbm * sfcalb(:, 1)
+              Coupling%nirdfui(:) = scmpsw(:)%nirdf * sfcalb(:, 2)
+              Coupling%visbmui(:) = scmpsw(:)%visbm * sfcalb(:, 3)
+              Coupling%visdfui(:) = scmpsw(:)%visdf * sfcalb(:, 4)
+            end if
 
           else
 
@@ -2249,6 +2268,89 @@
         sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
 
       end subroutine Set_sfc_albedo
+
+
+      subroutine Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
+
+        implicit none
+
+        type(GFS_coupling_type), intent(inout) :: Coupling
+        type(GFS_grid_type), intent(in) :: Grid
+        type(cmpfsw_type), dimension(Size (Grid%xlon, 1)), intent(in) :: scmpsw
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD), intent(in) :: sfcalb
+
+
+        Coupling%nirbmdi(:) = scmpsw(:)%nirbm
+        Coupling%nirdfdi(:) = scmpsw(:)%nirdf
+        Coupling%visbmdi(:) = scmpsw(:)%visbm
+        Coupling%visdfdi(:) = scmpsw(:)%visdf
+
+        Coupling%nirbmui(:) = scmpsw(:)%nirbm * sfcalb(:, 1)
+        Coupling%nirdfui(:) = scmpsw(:)%nirdf * sfcalb(:, 2)
+        Coupling%visbmui(:) = scmpsw(:)%visbm * sfcalb(:, 3)
+        Coupling%visdfui(:) = scmpsw(:)%visdf * sfcalb(:, 4)
+
+      end subroutine Save_sw_fluxes
+
+
+      subroutine Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
+
+        implicit none
+
+        type(GFS_radtend_type), intent(inout) :: Radtend
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_grid_type), intent(in) :: Grid
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP), intent(in) :: htswc
+        integer, intent(in) :: lm, kd
+
+          ! Local vars
+        integer :: k, k1
+
+
+        do k = 1, lm
+          k1 = k + kd
+          Radtend%htrsw(:, k) = htswc(:, k1)
+        end do
+
+          ! Repopulate the points above levr
+        if (Model%levr < Model%levs) then
+          do k = lm, Model%levs
+            Radtend%htrsw (:, k) = Radtend%htrsw (:, lm)
+          end do
+        end if
+
+      end subroutine Save_sw_heating_rate
+
+
+      subroutine Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
+
+        implicit none
+
+        type(GFS_radtend_type), intent(inout) :: Radtend
+        type(GFS_control_type), intent(in) :: Model
+        type(GFS_grid_type), intent(in) :: Grid
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP), intent(in) :: htsw0
+        integer, intent(in) :: lm, kd
+
+          ! Local vars
+        integer :: k, k1
+
+        if (Model%swhtr) then
+          do k = 1, lm
+             k1 = k + kd
+             Radtend%swhc(:, k) = htsw0(:, k1)
+           end do
+
+           if (Model%levr < Model%levs) then
+             do k = lm, Model%levs
+               Radtend%swhc(:, k) = Radtend%swhc(:, lm)
+             end do
+           end if
+        end if
+
+      end subroutine Save_sw_heating_rate_csk
 
 !
 !> @}
