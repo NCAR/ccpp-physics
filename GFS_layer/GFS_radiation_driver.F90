@@ -1849,6 +1849,9 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
             LTP) :: htswc, htsw0
 
+          ! Added by PAJ:
+        logical, parameter :: ZERO_OUT_HEATING_RATES_AND_FLUXES = .true.
+
 
         if_lsswr: if (Model%lsswr) then
 
@@ -1866,8 +1869,7 @@
 
           if_nday: if (nday > 0) then
 
-              ! Compute SW heating rates
-              ! and fluxes.
+              ! Daytime: Compute SW heating rates and fluxes.
             if (Model%swhtr) then
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
                           gasvmr, clouds, Tbd%icsdsw, faersw,     &
@@ -1925,25 +1927,33 @@
 
           else
 
-            Radtend%htrsw(:,:) = 0.0
+              ! Night time: set SW heating rates and fluxes to zero
+            if (ZERO_OUT_HEATING_RATES_AND_FLUXES) then
 
-            Radtend%sfcfsw = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
-            Diag%topfsw = topfsw_type( 0.0, 0.0, 0.0 )
-            scmpsw = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
+              call Zero_out_heatflux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
 
-            Coupling%nirbmdi(:) = 0.0
-            Coupling%nirdfdi(:) = 0.0
-            Coupling%visbmdi(:) = 0.0
-            Coupling%visdfdi(:) = 0.0
+            else
+              Radtend%htrsw(:,:) = 0.0
 
-            Coupling%nirbmui(:) = 0.0
-            Coupling%nirdfui(:) = 0.0
-            Coupling%visbmui(:) = 0.0
-            Coupling%visdfui(:) = 0.0
+              Radtend%sfcfsw = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
+              Diag%topfsw = topfsw_type( 0.0, 0.0, 0.0 )
+              scmpsw = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
 
-            if (Model%swhtr) then
-              Radtend%swhc(:,:) = 0
-            endif
+              Coupling%nirbmdi(:) = 0.0
+              Coupling%nirdfdi(:) = 0.0
+              Coupling%visbmdi(:) = 0.0
+              Coupling%visdfdi(:) = 0.0
+
+              Coupling%nirbmui(:) = 0.0
+              Coupling%nirdfui(:) = 0.0
+              Coupling%visbmui(:) = 0.0
+              Coupling%visdfui(:) = 0.0
+
+              if (Model%swhtr) then
+                Radtend%swhc(:,:) = 0
+              endif
+
+            end if
 
           end if if_nday
 
@@ -2169,6 +2179,40 @@
 
       end subroutine Organize_output
 
+
+      subroutine Zero_out_heatflux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
+
+        implicit none
+
+        type(GFS_radtend_type), intent(inout) :: Radtend
+        type(GFS_diag_type), intent(inout) :: Diag
+        type(GFS_coupling_type), intent(inout) :: Coupling
+        type(GFS_grid_type), intent(in) :: Grid
+        type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
+        type(GFS_control_type), intent(in) :: Model
+
+
+        Radtend%htrsw(:,:) = 0.0
+
+        Radtend%sfcfsw = sfcfsw_type(0.0, 0.0, 0.0, 0.0)
+        Diag%topfsw = topfsw_type(0.0, 0.0, 0.0)
+        scmpsw = cmpfsw_type(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+        Coupling%nirbmdi(:) = 0.0
+        Coupling%nirdfdi(:) = 0.0
+        Coupling%visbmdi(:) = 0.0
+        Coupling%visdfdi(:) = 0.0
+
+        Coupling%nirbmui(:) = 0.0
+        Coupling%nirdfui(:) = 0.0
+        Coupling%visbmui(:) = 0.0
+        Coupling%visdfui(:) = 0.0
+
+        if (Model%swhtr) then
+          Radtend%swhc(:,:) = 0
+        endif
+
+      end subroutine Zero_out_heatflux
 
 !
 !> @}
