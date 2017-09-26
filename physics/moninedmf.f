@@ -99,7 +99,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,      &
+      subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,qss,heat,evap,stress,spd1,kpbl,                           &
