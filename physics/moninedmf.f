@@ -1047,8 +1047,8 @@ c
 !
 !     solve tridiagonal problem for heat and moisture
 !
-!>  The tridiagonal system is solved by calling the internal ::tridin subroutine.
-      call tridin(im,km,ntrac,al,ad,au,a1,a2,au,a1,a2)
+!>  The tridiagonal system is solved by calling the internal ::edmf_tridin subroutine.
+      call edmf_tridin(im,km,ntrac,al,ad,au,a1,a2,au,a1,a2)
 
 !
 !     recover tendencies of heat and moisture
@@ -1162,7 +1162,7 @@ c
 !
 !     solve tridiagonal problem for momentum
 !
-      call tridi2(im,km,al,ad,au,a1,a2,au,a1,a2)
+      call edmf_tridi2(im,km,al,ad,au,a1,a2,au,a1,a2)
 !
 !     recover tendencies of momentum
 !
@@ -1205,7 +1205,7 @@ c-----------------------------------------------------------------------
 !!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
-      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
+      subroutine edmf_tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
       implicit none
@@ -1248,7 +1248,7 @@ c-----------------------------------------------------------------------
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
-      subroutine tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
+      subroutine edmf_tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
       implicit none

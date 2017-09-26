@@ -1192,7 +1192,7 @@ module module_physics_driver
         if (Model%hybedmf) then
           call edmf_run (ix, im, levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
                          Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,  &
-                         Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(1,1),   &
+                         Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(:,1),   &
                          rb, Sfcprop%zorl, Diag%u10m, Diag%v10m, Sfcprop%ffmm,    &
                          Sfcprop%ffhh, Sfcprop%tsfc, qss, hflx, evap, stress,     &
                          wind, kpbl, Statein%prsi, del, Statein%prsl,             &
