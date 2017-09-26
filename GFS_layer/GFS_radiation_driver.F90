@@ -1851,21 +1851,32 @@
 
           ! Added by PAJ:
         logical, parameter :: ZERO_OUT_HEATING_RATES_AND_FLUXES = .true.
+        logical, parameter :: SET_SURFACE_ALBEDO = .true.
 
 
         if_lsswr: if (Model%lsswr) then
 
             ! Setup surface albedo for SW calculation
-          call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                       Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                       tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                       Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                       Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                       Sfcprop%tisfc, im,                           &
-                       sfcalb)                                           !  ---  outputs
+          if (SET_SURFACE_ALBEDO) then
+            call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+                         Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
+                         tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
+                         Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
+                         Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
+                         Sfcprop%tisfc, im,                           &
+                         sfcalb, Radtend%sfalb)                            !  ---  outputs
+          else
+            call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+                         Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
+                         tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
+                         Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
+                         Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
+                         Sfcprop%tisfc, im,                           &
+                         sfcalb)                                           !  ---  outputs
 
-            ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-          Radtend%sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
+              ! Approximate mean surface albedo from vis- and nir-  diffuse values.
+            Radtend%sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
+          end if
 
           if_nday: if (nday > 0) then
 
@@ -2213,6 +2224,31 @@
         endif
 
       end subroutine Zero_out_heatrate_flux
+
+
+      subroutine Set_sfc_albedo (slmsk, snowf, sncovr, snoalb, zorlf, &
+          coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf,     &
+          facsf, facwf, fice, tisfc, IMAX, sfcalb, sfalb)
+
+        implicit none
+
+        integer, intent(in) :: IMAX
+        real (kind = kind_phys), dimension(:), intent(in) :: slmsk, snowf, &
+            zorlf, coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf,      &
+            alnwf, facsf, facwf, fice, tisfc, sncovr, snoalb
+
+        real (kind = kind_phys), dimension(IMAX, NF_ALBD), intent(out) ::  sfcalb
+        real (kind = kind_phys), dimension(:), intent(out) :: sfalb
+
+
+        call setalb (slmsk, snowf, sncovr, snoalb, zorlf,           &
+            coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf, &
+            facsf, facwf, fice, tisfc, IMAX, sfcalb)
+
+          ! Approximate mean surface albedo from vis- and nir-  diffuse values.
+        sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
+
+      end subroutine Set_sfc_albedo
 
 !
 !> @}
