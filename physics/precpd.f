@@ -93,12 +93,12 @@
 !!|  ix            | horizontal_dimension                                     | horizontal dimension                                              | index   |  0   | integer |          |  in     |   F      |
 !!|  km            | vertical_dimension                                       | vertical layer dimension                                          | index   |  0   | integer |          |  in     |   F      |
 !!|  dt            | time_step_for_physics                                    | physics time step                                                 | s       |  0   | real    | kind_phys|  in     |   F      |
-!!|  del           | air_pressure_layer_difference                            | pressure level thickness                                          | Pa      |  2   | real    | kind_phys|  in     |   F      |
-!!|  prsl          | air_pressure_layer                                       | layer mean pressure                                               | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  del           | air_pressure_difference_between_midlayers                | pressure level thickness                                          | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  prsl          | air_pressure                                             | layer mean pressure                                               | Pa      |  2   | real    | kind_phys|  in     |   F      |
 !!|  q             | water_vapor_specific_humidity                            | water vapor specific humidity                                     | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !!|  cwm           | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !!|  t             | air_temperature                                          | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
-!!|  rn            | large_scale_rainfall_amount                              | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
+!!|  rn            | rainfall_amount                                          | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
 !!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | 1       |  1   | real    | kind_phys|  out    |   F      |  
 !!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
 !!|  u00k          | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation          | 1       |  0   | real    | kind_phys|  in     |   F      |

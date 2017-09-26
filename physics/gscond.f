@@ -102,7 +102,7 @@
 !!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           |  in    |   F      |
 !!| dt             | time_step_for_physics                                    | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
 !!| dtf            | time_step_for_dynamics                                   | dynamics time step                                       | s       |    0 | real    | kind_phys |  in    |   F      |
-!!| prsl           | air_pressure_layer                                       | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys |  in    |   F      |
+!!| prsl           | air_pressure                                             | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys |  in    |   F      |
 !!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys |  in    |   F      |
 !!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
