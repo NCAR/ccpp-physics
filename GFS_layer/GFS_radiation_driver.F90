@@ -1848,7 +1848,13 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
             LTP) :: htswc, htsw0
-
+        real (kind=kind_phys), dimension(im, lmk) :: gasvmr_co2, &
+            gasvmr_n2o, gasvmr_ch4, gasvmr_o2
+       
+        gasvmr_co2 = gasvmr(:, :, 1)
+        gasvmr_n2o = gasvmr(:, :, 2)
+        gasvmr_ch4 = gasvmr(:, :, 3)
+        gasvmr_o2 = gasvmr(:, :, 4)
 
         if_lsswr: if (Model%lsswr) then
 
@@ -1867,7 +1873,9 @@
             if (Model%swhtr) then
                 ! Output SW heating rate for clear skies (htsw0)
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
-                          gasvmr, clouds, Tbd%icsdsw, faersw,     &
+                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
+                          gasvmr_o2,                                  &
+                          clouds, Tbd%icsdsw, faersw,     &
                           sfcalb, Radtend%coszen, Model%solcon,   &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
@@ -1875,7 +1883,9 @@
             else
                 ! Does not output SW heating rates for clear skies.
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
-                          gasvmr, clouds, Tbd%icsdsw, faersw,     &
+                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
+                          gasvmr_o2,                                  & 
+                          clouds, Tbd%icsdsw, faersw,     &
                           sfcalb, Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs 

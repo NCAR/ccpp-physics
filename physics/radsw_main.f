@@ -583,7 +583,10 @@
 !> @{
 !-----------------------------------
       subroutine swrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                      &    !  ---  inputs
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
+     &       gasvmr_co2,                                                &
+     &       gasvmr_n2o, gasvmr_ch4,                                    &
+     &       gasvmr_o2,                                                 &    !  ---  inputs
      &       clouds,icseed,aerosols,sfcalb,                             &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
@@ -809,7 +812,12 @@
      &       plyr, tlyr, qlyr, olyr
       real (kind=kind_phys), dimension(npts,4),    intent(in) :: sfcalb
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
+      !real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
+
       real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
       real (kind=kind_phys), dimension(npts,nlay,nbdsw,3),intent(in)::  &
      &       aerosols
@@ -868,6 +876,25 @@
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb
+
+        ! PAJ
+      real (kind=kind_phys), dimension(npts, nlay) :: gasvmr_zero
+      real (kind=kind_phys), dimension(npts, nlay, 9) :: gasvmr
+
+
+        ! PAJ: Inirialize some arrays
+      gasvmr_zero = 0.0
+
+      gasvmr(:, :, 1) = gasvmr_co2
+      gasvmr(:, :, 2) = gasvmr_n2o
+      gasvmr(:, :, 3) = gasvmr_ch4
+      gasvmr(:, :, 4) = gasvmr_o2
+      gasvmr(:, :, 5) = gasvmr_zero
+      gasvmr(:, :, 6) = gasvmr_zero
+      gasvmr(:, :, 7) = gasvmr_zero
+      gasvmr(:, :, 8) = gasvmr_zero
+      gasvmr(:, :, 9) = gasvmr_zero
+
 !
 !===> ... begin here
 !
