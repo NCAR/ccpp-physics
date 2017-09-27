@@ -1849,37 +1849,17 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
             LTP) :: htswc, htsw0
 
-          ! Added by PAJ:
-        logical, parameter :: ZERO_OUT_HEATING_RATES_AND_FLUXES = .true.
-        logical, parameter :: SET_SURFACE_ALBEDO = .true.
-        logical, parameter :: ORGANIZE_HEATING_RATE = .true.
-        logical, parameter :: ORGANIZE_HEATING_RATE_CSK = .true.
-        logical, parameter :: SAVE_SW_OUT = .true.
-
 
         if_lsswr: if (Model%lsswr) then
 
-          if (SET_SURFACE_ALBEDO) then
-              ! Setup surface albedo for SW calculation
-            call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                         Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                         tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                         Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                         Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                         Sfcprop%tisfc, im,                           &
-                         sfcalb, Radtend%sfalb)                            !  ---  outputs
-          else
-            call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                         Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                         tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                         Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                         Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                         Sfcprop%tisfc, im,                           &
-                         sfcalb)                                           !  ---  outputs
-
-              ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-            Radtend%sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
-          end if
+            ! Setup surface albedo for SW calculation
+          call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+                       Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
+                       tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
+                       Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
+                       Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
+                       Sfcprop%tisfc, im,                           &
+                       sfcalb, Radtend%sfalb)                            !  ---  outputs
 
           if_nday: if (nday > 0) then
 
@@ -1903,87 +1883,18 @@
             end if
 
 
-            if (ORGANIZE_HEATING_RATE) then
-              call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
-            else
-              do k = 1, lm
-                k1 = k + kd
-                Radtend%htrsw(:, k) = htswc(:, k1)
-              end do
+            call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
 
-                ! Repopulate the points above levr
-              if (Model%levr < Model%levs) then
-                do k = lm, Model%levs
-                  Radtend%htrsw (:, k) = Radtend%htrsw (:, lm)
-                end do
-              end if
-            end if
+            call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
 
-
-            if (ORGANIZE_HEATING_RATE_CSK) then
-              call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
-            else
-              if (Model%swhtr) then
-                do k = 1, lm
-                   k1 = k + kd
-                   Radtend%swhc(:, k) = htsw0(:, k1)
-                 end do
-
-                   ! Repopulate the points above levr
-                 if (Model%levr < Model%levs) then
-                   do k = lm, Model%levs
-                     Radtend%swhc(:, k) = Radtend%swhc(:, lm)
-                   end do
-                 end if
-              end if
-            end if
-
-
-            if (SAVE_SW_OUT) then
-                ! Surface down and up spectral component fluxes
-                ! Save two spectral bands' surface downward and upward fluxes for output.
-              call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
-            else
-              Coupling%nirbmdi(:) = scmpsw(:)%nirbm
-              Coupling%nirdfdi(:) = scmpsw(:)%nirdf
-              Coupling%visbmdi(:) = scmpsw(:)%visbm
-              Coupling%visdfdi(:) = scmpsw(:)%visdf
-
-              Coupling%nirbmui(:) = scmpsw(:)%nirbm * sfcalb(:, 1)
-              Coupling%nirdfui(:) = scmpsw(:)%nirdf * sfcalb(:, 2)
-              Coupling%visbmui(:) = scmpsw(:)%visbm * sfcalb(:, 3)
-              Coupling%visdfui(:) = scmpsw(:)%visdf * sfcalb(:, 4)
-            end if
+              ! Surface down and up spectral component fluxes
+              ! Save two spectral bands' surface downward and upward fluxes for output.
+            call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
 
           else
 
               ! Night time: set SW heating rates and fluxes to zero
-            if (ZERO_OUT_HEATING_RATES_AND_FLUXES) then
-
-              call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
-
-            else
-              Radtend%htrsw(:,:) = 0.0
-
-              Radtend%sfcfsw = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
-              Diag%topfsw = topfsw_type( 0.0, 0.0, 0.0 )
-              scmpsw = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
-
-              Coupling%nirbmdi(:) = 0.0
-              Coupling%nirdfdi(:) = 0.0
-              Coupling%visbmdi(:) = 0.0
-              Coupling%visdfdi(:) = 0.0
-
-              Coupling%nirbmui(:) = 0.0
-              Coupling%nirdfui(:) = 0.0
-              Coupling%visbmui(:) = 0.0
-              Coupling%visdfui(:) = 0.0
-
-              if (Model%swhtr) then
-                Radtend%swhc(:,:) = 0
-              endif
-
-            end if
+            call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
 
           end if if_nday
 
