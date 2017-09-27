@@ -587,51 +587,66 @@
      &       gasvmr_co2,                                                &
      &       gasvmr_n2o, gasvmr_ch4,                                    &
      &       gasvmr_o2,                                                 &    !  ---  inputs
-     &       clouds,icseed, aeraod, aerssa, aerasy,                     &
+     &       icseed, aeraod, aerssa, aerasy,                            &
      &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
+     &       cld_cf,                                                    &
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
-     &       HSW0,HSWB,FLXPRF,FDNCMP                                    &   ! ---  optional
+     &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od, cld_ssa, cld_asy
      &     )
 !! \section arg_table_swrad
-!! | local var name  | longname                             | description                                            | units   | rank | type        |    kind   | intent | optional |
-!! |-----------------|--------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
-!! | plyr            | air_pressure_layer                   | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | plvl            | air_pressure_level                   | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | tlyr            | air_temperature_layer                | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
-!! | tlvl            | air_temperature_level                | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
-!! | qlyr            | specific_humidity_layer              | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | olyr            | ozone_concentration_layer            | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_co2      | volumetric_mixing_ratio_co2          | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o          | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4          | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_o2       | volumetric_mixing_ratio_o2           | volumetric mixing ratio o2                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | clouds          | cloud profile                        | split TBD
-!! | icseed          | seed_random_numbers                  | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
-!! | aeraod          | aerosol_optical_depth                | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
-!! | aerssa          | aerosol_single_scattering_albedo     | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
-!! | aerasy          | aerosol_asymetry_parameter           | aerosol asymetry paramter                              |         |    3 | real        | kind_phys | in     | F        |
-!! | sfcalb_nir_dir  | albedo_sfc_nir_dir                   | near infrared sw albedo for surface direct irradiance  |         |    1 | real        | kind_phys | in     | F        |
-!! | sfcalb_nir_dif  | albedo_sfc_nir_dif                   | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
-!! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                  | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
-!! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                  | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
-!! | cosz            | cosine_zenit_angle                   | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
-!! | solcon          | solar_constant                       | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
-!! | nday            | daytime_points_dimension             | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
-!! | idxday          | daytime_points                       | daytime points                                         |         |    1 | integer     |           | in     | F        |
-!! | npts            | horizontal_dimension                 | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
-!! | nlay            | vertical_layer_dimension             | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
-!! | nlp1            | vertical_level_dimension             | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
-!! | lprnt           | flag_to_print                        | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
-!! | hswc            | sw_heating_rate_total_sky            | shortwave total sky heating rate                       | k s-1???|    2 | real        | kind_phys | out    | F        |
-!! | topflx          | sw_fluxes_top_atmosphere             | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
-!! | sfcflx          | sw_fluxes_sfc                        | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
-!! | hsw0            | sw_heating_rate_csk                  | shortwave clear sky heating rate                       | W m-2   |    2 | real        | kind_phys | out    | T        |
-!! | hswb            | sw_heating_rate_spectral             | shortwave total sky heating rate (spectral)            | W m-2   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | sw_fluxes                            | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
-!! | fdncmp          | sw_fluxes_down_components_sfc        | componenets of the downward sw fluxes at the surface   | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+!! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
+!! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
+!! | plyr            | air_pressure_layer                      | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature_layer                   | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | specific_humidity_layer                 | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration_layer               | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_o2       | volumetric_mixing_ratio_o2              | volumetric mixing ratio o2                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
+!! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
+!! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
+!! | aerasy          | aerosol_asymetry_parameter              | aerosol asymetry paramter                              |         |    3 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dir  | albedo_sfc_nir_dir                      | near infrared sw albedo for surface direct irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dif  | albedo_sfc_nir_dif                      | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                     | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                     | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | cosz            | cosine_zenit_angle                      | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
+!! | solcon          | solar_constant                          | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
+!! | nday            | daytime_points_dimension                | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | idxday          | daytime_points                          | daytime points                                         |         |    1 | integer     |           | in     | F        |
+!! | npts            | horizontal_dimension                    | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
+!! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
+!! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
+!! | hswc            | sw_heating_rate_total_sky               | shortwave total sky heating rate                       | k s-1???|    2 | real        | kind_phys | out    | F        |
+!! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
+!! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | hsw0            | sw_heating_rate_csk                     | shortwave clear sky heating rate                       | W m-2   |    2 | real        | kind_phys | out    | T        |
+!! | hswb            | sw_heating_rate_spectral                | shortwave total sky heating rate (spectral)            | W m-2   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
+!! | fdncmp          | sw_fluxes_down_components_sfc           | componenets of the downward sw fluxes at the surface   | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_ice     | effective_radious_ice_hydrometeor       | effective radious ice hydrometeor                      | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_rwp         | cloud_rain_water_path                   | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_rain    | effective_radious_rain_hydrometeor      | effective radious rain hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
 
 
 !  ====================  defination of variables  ====================  !
@@ -831,7 +846,11 @@
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
+      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf   
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od, cld_ssa, cld_asy
 
       real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
       real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
@@ -1043,23 +1062,23 @@
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
-              cfrac(k) = clouds(j1,kk,1)      ! cloud fraction
-              cliqp(k) = clouds(j1,kk,2)      ! cloud liq path
-              reliq(k) = clouds(j1,kk,3)      ! liq partical effctive radius
-              cicep(k) = clouds(j1,kk,4)      ! cloud ice path
-              reice(k) = clouds(j1,kk,5)      ! ice partical effctive radius
-              cdat1(k) = clouds(j1,kk,6)      ! cloud rain drop path
-              cdat2(k) = clouds(j1,kk,7)      ! rain partical effctive radius
-              cdat3(k) = clouds(j1,kk,8)      ! cloud snow path
-              cdat4(k) = clouds(j1,kk,9)      ! snow partical effctive radius
+              cfrac(k) = cld_cf(j1,kk)        ! cloud fraction
+              cliqp(k) = cld_lwp(j1,kk)       ! cloud liq path
+              reliq(k) = cld_ref_liq(j1,kk)   ! liq partical effctive radius
+              cicep(k) = cld_iwp(j1,kk)       ! cloud ice path
+              reice(k) = cld_ref_ice(j1,kk)   ! ice partical effctive radius
+              cdat1(k) = cld_rwp(j1,kk)       ! cloud rain drop path
+              cdat2(k) = cld_ref_rain(j1,kk)  ! rain partical effctive radius
+              cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
+              cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
-              cfrac(k) = clouds(j1,kk,1)      ! cloud fraction
-              cdat1(k) = clouds(j1,kk,2)      ! cloud optical depth
-              cdat2(k) = clouds(j1,kk,3)      ! cloud single scattering albedo
-              cdat3(k) = clouds(j1,kk,4)      ! cloud asymmetry factor
+              cfrac(k) = cld_cf(j1,kk)      ! cloud fraction
+              cdat1(k) = cld_od(j1,kk)      ! cloud optical depth
+              cdat2(k) = cld_ssa(j1,kk)      ! cloud single scattering albedo
+              cdat3(k) = cld_asy(j1,kk)      ! cloud asymmetry factor
             enddo
           endif                    ! end if_iswcliq
 
@@ -1141,22 +1160,22 @@
 
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
-              cfrac(k) = clouds(j1,k,1)       ! cloud fraction
-              cliqp(k) = clouds(j1,k,2)       ! cloud liq path
-              reliq(k) = clouds(j1,k,3)       ! liq partical effctive radius
-              cicep(k) = clouds(j1,k,4)       ! cloud ice path
-              reice(k) = clouds(j1,k,5)       ! ice partical effctive radius
-              cdat1(k) = clouds(j1,k,6)       ! cloud rain drop path
-              cdat2(k) = clouds(j1,k,7)       ! rain partical effctive radius
-              cdat3(k) = clouds(j1,k,8)       ! cloud snow path
-              cdat4(k) = clouds(j1,k,9)       ! snow partical effctive radius
+              cfrac(k) = cld_cf(j1,k)       ! cloud fraction
+              cliqp(k) = cld_lwp(j1,k)       ! cloud liq path
+              reliq(k) = cld_ref_liq(j1,k)   ! liq partical effctive radius
+              cicep(k) = cld_iwp(j1,k)       ! cloud ice path
+              reice(k) = cld_ref_ice(j1,k)   ! ice partical effctive radius
+              cdat1(k) = cld_rwp(j1,k)       ! cloud rain drop path
+              cdat2(k) = cld_ref_rain(j1,k)  ! rain partical effctive radius
+              cdat3(k) = cld_swp(j1,k)       ! cloud snow path
+              cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
           else                     ! use diagnostic cloud method
             do k = 1, nlay
-              cfrac(k) = clouds(j1,k,1)       ! cloud fraction
-              cdat1(k) = clouds(j1,k,2)       ! cloud optical depth
-              cdat2(k) = clouds(j1,k,3)       ! cloud single scattering albedo
-              cdat3(k) = clouds(j1,k,4)       ! cloud asymmetry factor
+              cfrac(k) = cld_cf(j1,k)     ! cloud fraction
+              cdat1(k) = cld_od(j1,k)     ! cloud optical depth
+              cdat2(k) = cld_ssa(j1,k)    ! cloud single scattering albedo
+              cdat3(k) = cld_asy(j1,k)    ! cloud asymmetry factor
             enddo
           endif                    ! end if_iswcliq
 

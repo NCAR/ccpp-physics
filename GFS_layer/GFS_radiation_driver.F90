@@ -1854,7 +1854,9 @@
             aeraod, aerssa, aerasy
         real (kind=kind_phys), dimension(im) :: sfcalb_nir_dir, sfcalb_nir_dif, &
             sfcalb_uvis_dir, sfcalb_uvis_dif
-
+        real (kind=kind_phys), dimension(im, lmk) :: cld_cf, cld_lwp, cld_ref_liq, &
+            cld_iwp, cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,    &
+            cld_od, cld_ssa, cld_asy
 
        
           ! Split some arrays
@@ -1871,6 +1873,24 @@
         sfcalb_nir_dif = sfcalb(:, 2)
         sfcalb_uvis_dir = sfcalb(:, 3)
         sfcalb_uvis_dif = sfcalb(:, 4)
+
+        cld_cf = clouds(:,:,1)
+        if (ISWCLIQ > 0) then
+            ! use prognostic cloud method
+          cld_lwp = clouds(:, :, 2)
+          cld_ref_liq = clouds(:, :, 3)
+          cld_iwp = clouds(:, :, 4)
+          cld_ref_ice = clouds(:, :, 5)
+          cld_rwp = clouds(:, :, 6)
+          cld_ref_rain = clouds(:, :, 7)
+          cld_swp = clouds(:, :, 8)
+          cld_ref_snow = clouds(:, :, 9)
+        else
+            ! Impose cloud optical properties
+          cld_od = clouds(:, :, 2)
+          cld_ssa = clouds(:, :, 3)
+          cld_asy = clouds(:, :, 4)
+        end if
 
 
         if_lsswr: if (Model%lsswr) then
@@ -1889,30 +1909,75 @@
               ! Daytime: Compute SW heating rates and fluxes.
             if (Model%swhtr) then
                 ! Output SW heating rate for clear skies (htsw0)
-              call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
+              if (ISWCLIQ > 0) then
+                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
+                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4,   &
+                          gasvmr_o2,                            &
+                          Tbd%icsdsw, aeraod,                   &
+                          aerssa, aerasy,                       &
+                          sfcalb_nir_dir, sfcalb_nir_dif,       &
+                          sfcalb_uvis_dir, sfcalb_uvis_dif,     &
+                          Radtend%coszen, Model%solcon,         &
+                          nday, idxday, im, lmk, lmp, Model%lprnt,&
+                          cld_cf,                                 &
+                          htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
+                          hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
+                          cld_lwp=cld_lwp,                      &    ! Optional input
+                          cld_ref_liq=cld_ref_liq, cld_iwp=cld_iwp, &
+                          cld_ref_ice=cld_ref_ice, cld_rwp=cld_rwp, &
+                          cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
+                          cld_ref_snow=cld_ref_snow)
+              else
+                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
                           gasvmr_o2,                                  &
-                          clouds, Tbd%icsdsw, aeraod,     &
+                          Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,     &
                           sfcalb_nir_dir, sfcalb_nir_dif,          &
                           sfcalb_uvis_dir, sfcalb_uvis_dif,          &
                           Radtend%coszen, Model%solcon,   &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
-                          htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
-                          hsw0=htsw0, fdncmp=scmpsw)                     ! ---  optional
+                          cld_cf,                                 &
+                          htswc, Diag%topfsw, Radtend%sfcfsw,     &     !  ---  outputs
+                          hsw0=htsw0, fdncmp=scmpsw,              &     ! Optional optputs
+                          cld_od=cld_od, cld_ssa=cld_ssa, cld_asy=cld_asy) ! Optional input
+              end if
             else
                 ! Does not output SW heating rates for clear skies.
-              call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
+              if (ISWCLIQ > 0) then
+                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
                           gasvmr_o2,                                  & 
-                          clouds, Tbd%icsdsw, aeraod,     &
+                          Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,           &
                           sfcalb_nir_dir, sfcalb_nir_dif,          &
                           sfcalb_uvis_dir, sfcalb_uvis_dif,          &
                           Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
-                          htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs 
-                          FDNCMP=scmpsw)                                 ! ---  optional 
+                          cld_cf,                                 &
+                          htswc, Diag%topfsw, Radtend%sfcfsw,     &    !  ---  outputs 
+                          FDNCMP=scmpsw,                          &    ! ---  optional outputs
+                          cld_lwp=cld_lwp,                        &    ! Optional input
+                          cld_ref_liq=cld_ref_liq, cld_iwp=cld_iwp, &
+                          cld_ref_ice=cld_ref_ice, cld_rwp=cld_rwp, &
+                          cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
+                          cld_ref_snow=cld_ref_snow)
+
+              else
+                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
+                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
+                          gasvmr_o2,                                  & 
+                          Tbd%icsdsw, aeraod,     &
+                          aerssa, aerasy,           &
+                          sfcalb_nir_dir, sfcalb_nir_dif,          &
+                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          Radtend%coszen, Model%solcon,   &
+                          nday, idxday, IM, LMK, LMP, Model%lprnt,&
+                          cld_cf,                                 &
+                          htswc, Diag%topfsw, Radtend%sfcfsw,     &     !  ---  outputs 
+                          FDNCMP=scmpsw,                          &     ! ---  optional  outputs
+                          cld_od=cld_od, cld_ssa=cld_ssa, cld_asy=cld_asy)    ! Optional input
+              end if
             end if
 
 
