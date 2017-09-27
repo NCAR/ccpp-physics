@@ -588,46 +588,50 @@
      &       gasvmr_n2o, gasvmr_ch4,                                    &
      &       gasvmr_o2,                                                 &    !  ---  inputs
      &       clouds,icseed, aeraod, aerssa, aerasy,                     &
-     &       sfcalb,                                                    &
+     &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
+     &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP                                    &   ! ---  optional
      &     )
 !! \section arg_table_swrad
-!! | local var name | longname                                              | description                                          | units   | rank | type        |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
-!! | plyr           | air_pressure_layer                                    | air pressure layer                                   | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | plvl           | air_pressure_level                                    | air pressure level                                   | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | tlyr           | air_temperature_layer                                 | air temperature layer                                | K       |    2 | real        | kind_phys | in     | F        |
-!! | tlvl           | air_temperature_level                                 | air temperature level                                | K       |    2 | real        | kind_phys | in     | F        |
-!! | qlyr           | specific_humidity_layer                               | specific humidity layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | olyr           | ozone_concentration_layer                             | ozone concentration layer                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_co2     | volumetric_mixing_ratio_co2                           | volumetric mixing ratio co2                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_n2o     | volumetric_mixing_ratio_n2o                           | volumetric mixing ratio no2                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_ch4     | volumetric_mixing_ratio_ch4                           | volumetric mixing ratio ch4                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_o2      | volumetric_mixing_ratio_o2                            | volumetric mixing ratio o2                           ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | clouds         | cloud profile                                         | split TBD
-!! | icseed         | seed_random_numbers                                   | seed for random number generation                    |         |    2 | integer     |           | in     | F        |
-!! | aeraod         | aerosol_optical_depth                                 | aerosol optical depth                                |         |    3 | real        | kind_phys | in     | F        |
-!! | aerssa         | aerosol_single_scattering_albedo                      | aerosol sngle scattering albedo                      |         |    3 | real        | kind_phys | in     | F        |
-!! | aerasy         | aerosol_asymetry_parameter                            | aerosol asymetry paramter                            |         |    3 | real        | kind_phys | in     | F        |
-!! | sfcalb         | Surface albedo                                        | split TBD
-!! | cosz           | cosine_zenit_angle                                    | cosine of the solar zenit angle                      |         |    1 | real        | kind_phys | in     | F        |
-!! | solcon         | solar_constant                                        | solar constant                                       | W m-2   |    0 | real        | kind_phys | in     | F        |
-!! | nday           | daytime_points_dimension                              | daytime points dimension                             | index   |    0 | integer     |           | in     | F        |
-!! | idxday         | daytime_points                                        | daytime points                                       |         |    1 | integer     |           | in     | F        |
-!! | npts           | horizontal_dimension                                  | horizontal dimension                                 | index   |    0 | integer     |           | in     | F        |
-!! | nlay           | vertical_layer_dimension                              | vertical layer dimension                             | index   |    0 | integer     |           | in     | F        |
-!! | nlp1           | vertical_level_dimension                              | vertical level dimension                             | index   |    0 | integer     |           | in     | F        |
-!! | lprnt          | flag_to_print                                         | logical flag to print                                | logical |    0 | logical     |           | in     | F        |
-!! | hswc           | sw_heating_rate_total_sky                             | shortwave total sky heating rate                     | k s-1???|    2 | real        | kind_phys | out    | F        |
-!! | topflx         | sw_fluxes_top_atmosphere                              | shortwave total sky fluxes at the top of the atm     | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
-!! | sfcflx         | sw_fluxes_sfc                                         | shortwave total sky fluxes at the Earth surface      | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
-!! | hsw0           | sw_heating_rate_csk                                   | shortwave clear sky heating rate                     | W m-2   |    2 | real        | kind_phys | out    | T        |
-!! | hswb           | sw_heating_rate_spectral                              | shortwave total sky heating rate (spectral)          | W m-2   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf         | sw_fluxes                                             | sw fluxes total sky / csk and up / down at levels    | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
-!! | fdncmp         | sw_fluxes_down_components_sfc                         | componenets of the downward sw fluxes at the surface | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+!! | local var name  | longname                             | description                                            | units   | rank | type        |    kind   | intent | optional |
+!! |-----------------|--------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
+!! | plyr            | air_pressure_layer                   | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level                   | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature_layer                | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl            | air_temperature_level                | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | specific_humidity_layer              | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration_layer            | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volumetric_mixing_ratio_co2          | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o          | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4          | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_o2       | volumetric_mixing_ratio_o2           | volumetric mixing ratio o2                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | clouds          | cloud profile                        | split TBD
+!! | icseed          | seed_random_numbers                  | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
+!! | aeraod          | aerosol_optical_depth                | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
+!! | aerssa          | aerosol_single_scattering_albedo     | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
+!! | aerasy          | aerosol_asymetry_parameter           | aerosol asymetry paramter                              |         |    3 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dir  | albedo_sfc_nir_dir                   | near infrared sw albedo for surface direct irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dif  | albedo_sfc_nir_dif                   | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                  | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                  | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | cosz            | cosine_zenit_angle                   | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
+!! | solcon          | solar_constant                       | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
+!! | nday            | daytime_points_dimension             | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | idxday          | daytime_points                       | daytime points                                         |         |    1 | integer     |           | in     | F        |
+!! | npts            | horizontal_dimension                 | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
+!! | nlay            | vertical_layer_dimension             | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | nlp1            | vertical_level_dimension             | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | lprnt           | flag_to_print                        | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
+!! | hswc            | sw_heating_rate_total_sky            | shortwave total sky heating rate                       | k s-1???|    2 | real        | kind_phys | out    | F        |
+!! | topflx          | sw_fluxes_top_atmosphere             | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
+!! | sfcflx          | sw_fluxes_sfc                        | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | hsw0            | sw_heating_rate_csk                  | shortwave clear sky heating rate                       | W m-2   |    2 | real        | kind_phys | out    | T        |
+!! | hswb            | sw_heating_rate_spectral             | shortwave total sky heating rate (spectral)            | W m-2   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | sw_fluxes                            | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
+!! | fdncmp          | sw_fluxes_down_components_sfc        | componenets of the downward sw fluxes at the surface   | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
 
 
 !  ====================  defination of variables  ====================  !
@@ -816,7 +820,11 @@
      &       plvl, tlvl
       real (kind=kind_phys), dimension(npts,nlay), intent(in) ::        &
      &       plyr, tlyr, qlyr, olyr
-      real (kind=kind_phys), dimension(npts,4),    intent(in) :: sfcalb
+
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir &
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif &
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir&
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif&
 
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
@@ -951,10 +959,10 @@
         ssolar = s0fac * cosz(j1)
 
 !> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
-        albbm(1) = sfcalb(j1,1)
-        albdf(1) = sfcalb(j1,2)
-        albbm(2) = sfcalb(j1,3)
-        albdf(2) = sfcalb(j1,4)
+        albbm(1) = sfcalb_nir_dir(j1)
+        albdf(1) = sfcalb_nir_dif(j1)
+        albbm(2) = sfcalb_uvis_dir(j1)
+        albdf(2) = sfcalb_uvis_dif(j1)
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top

@@ -1852,6 +1852,9 @@
             gasvmr_n2o, gasvmr_ch4, gasvmr_o2
         real (kind=kind_phys), dimension(im, lmk, NBDSW) ::  &
             aeraod, aerssa, aerasy
+        real (kind=kind_phys), dimension(im) :: sfcalb_nir_dir, sfcalb_nir_dif, &
+            sfcalb_uvis_dir, sfcalb_uvis_dif
+
 
        
           ! Split some arrays
@@ -1863,6 +1866,12 @@
         aeraod = faersw(:, :, :, 1)
         aerssa = faersw(:, :, :, 2)
         aerasy = faersw(:, :, :, 3)
+
+        sfcalb_nir_dir = sfcalb(:, 1)
+        sfcalb_nir_dif = sfcalb(:, 2)
+        sfcalb_uvis_dir = sfcalb(:, 3)
+        sfcalb_uvis_dif = sfcalb(:, 4)
+
 
         if_lsswr: if (Model%lsswr) then
 
@@ -1885,7 +1894,9 @@
                           gasvmr_o2,                                  &
                           clouds, Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,     &
-                          sfcalb, Radtend%coszen, Model%solcon,   &
+                          sfcalb_nir_dir, sfcalb_nir_dif,          &
+                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          Radtend%coszen, Model%solcon,   &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
                           hsw0=htsw0, fdncmp=scmpsw)                     ! ---  optional
@@ -1896,7 +1907,9 @@
                           gasvmr_o2,                                  & 
                           clouds, Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,           &
-                          sfcalb, Radtend%coszen, Model%solcon,   &
+                          sfcalb_nir_dir, sfcalb_nir_dif,          &
+                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs 
                           FDNCMP=scmpsw)                                 ! ---  optional 
