@@ -587,7 +587,8 @@
      &       gasvmr_co2,                                                &
      &       gasvmr_n2o, gasvmr_ch4,                                    &
      &       gasvmr_o2,                                                 &    !  ---  inputs
-     &       clouds,icseed,aerosols,sfcalb,                             &
+     &       clouds,icseed, aeraod, aerssa, aerasy,                     &
+     &       sfcalb,                                                    &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
@@ -608,7 +609,9 @@
 !! | gasvmr_o2      | volumetric_mixing_ratio_o2                            | volumetric mixing ratio o2                           ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
 !! | clouds         | cloud profile                                         | split TBD
 !! | icseed         | seed_random_numbers                                   | seed for random number generation                    |         |    2 | integer     |           | in     | F        |
-!! | aerosols       | aerosol optical properties                            | split TBD
+!! | aeraod         | aerosol_optical_depth                                 | aerosol optical depth                                |         |    3 | real        | kind_phys | in     | F        |
+!! | aerssa         | aerosol_single_scattering_albedo                      | aerosol sngle scattering albedo                      |         |    3 | real        | kind_phys | in     | F        |
+!! | aerasy         | aerosol_asymetry_parameter                            | aerosol asymetry paramter                            |         |    3 | real        | kind_phys | in     | F        |
 !! | sfcalb         | Surface albedo                                        | split TBD
 !! | cosz           | cosine_zenit_angle                                    | cosine of the solar zenit angle                      |         |    1 | real        | kind_phys | in     | F        |
 !! | solcon         | solar_constant                                        | solar constant                                       | W m-2   |    0 | real        | kind_phys | in     | F        |
@@ -821,8 +824,10 @@
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
 
       real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
-      real (kind=kind_phys), dimension(npts,nlay,nbdsw,3),intent(in)::  &
-     &       aerosols
+
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerasy
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon
 
@@ -1017,9 +1022,12 @@
           do k = 1, nlay
             kk = nlp1 - k
             do ib = 1, nbdsw
-              tauae(k,ib) = aerosols(j1,kk,ib,1)
-              ssaae(k,ib) = aerosols(j1,kk,ib,2)
-              asyae(k,ib) = aerosols(j1,kk,ib,3)
+              !tauae(k,ib) = aerosols(j1,kk,ib,1)
+              !ssaae(k,ib) = aerosols(j1,kk,ib,2)
+              !asyae(k,ib) = aerosols(j1,kk,ib,3)
+              tauae(k,ib) = aeraod(j1,kk,ib)
+              ssaae(k,ib) = aerssa(j1,kk,ib)
+              asyae(k,ib) = aerasy(j1,kk,ib)
             enddo
           enddo
 
@@ -1114,9 +1122,12 @@
 
           do ib = 1, nbdsw
             do k = 1, nlay
-              tauae(k,ib) = aerosols(j1,k,ib,1)
-              ssaae(k,ib) = aerosols(j1,k,ib,2)
-              asyae(k,ib) = aerosols(j1,k,ib,3)
+              !tauae(k,ib) = aerosols(j1,k,ib,1)
+              !ssaae(k,ib) = aerosols(j1,k,ib,2)
+              !asyae(k,ib) = aerosols(j1,k,ib,3)
+              tauae(k,ib) = aeraod(j1,k,ib)
+              ssaae(k,ib) = aerssa(j1,k,ib)
+              asyae(k,ib) = aerasy(j1,k,ib)
             enddo
           enddo
 

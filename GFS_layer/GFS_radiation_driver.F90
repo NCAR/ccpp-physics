@@ -1850,11 +1850,19 @@
             LTP) :: htswc, htsw0
         real (kind=kind_phys), dimension(im, lmk) :: gasvmr_co2, &
             gasvmr_n2o, gasvmr_ch4, gasvmr_o2
+        real (kind=kind_phys), dimension(im, lmk, NBDSW) ::  &
+            aeraod, aerssa, aerasy
+
        
+          ! Split some arrays
         gasvmr_co2 = gasvmr(:, :, 1)
         gasvmr_n2o = gasvmr(:, :, 2)
         gasvmr_ch4 = gasvmr(:, :, 3)
         gasvmr_o2 = gasvmr(:, :, 4)
+
+        aeraod = faersw(:, :, :, 1)
+        aerssa = faersw(:, :, :, 2)
+        aerasy = faersw(:, :, :, 3)
 
         if_lsswr: if (Model%lsswr) then
 
@@ -1875,7 +1883,8 @@
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
                           gasvmr_o2,                                  &
-                          clouds, Tbd%icsdsw, faersw,     &
+                          clouds, Tbd%icsdsw, aeraod,     &
+                          aerssa, aerasy,     &
                           sfcalb, Radtend%coszen, Model%solcon,   &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs
@@ -1885,7 +1894,8 @@
               call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
                           gasvmr_o2,                                  & 
-                          clouds, Tbd%icsdsw, faersw,     &
+                          clouds, Tbd%icsdsw, aeraod,     &
+                          aerssa, aerasy,           &
                           sfcalb, Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &      !  ---  outputs 
