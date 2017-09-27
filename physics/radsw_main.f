@@ -602,7 +602,10 @@
 !! | tlvl           | air_temperature_level                                 | air temperature level                                | K       |    2 | real        | kind_phys | in     | F        |
 !! | qlyr           | specific_humidity_layer                               | specific humidity layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
 !! | olyr           | ozone_concentration_layer                             | ozone concentration layer                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr         | atmospheric constant gases                            | split TBD
+!! | gasvmr_co2     | volumetric_mixing_ratio_co2                           | volumetric mixing ratio co2                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_n2o     | volumetric_mixing_ratio_n2o                           | volumetric mixing ratio no2                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_ch4     | volumetric_mixing_ratio_ch4                           | volumetric mixing ratio ch4                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_o2      | volumetric_mixing_ratio_o2                            | volumetric mixing ratio o2                           ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
 !! | clouds         | cloud profile                                         | split TBD
 !! | icseed         | seed_random_numbers                                   | seed for random number generation                    |         |    2 | integer     |           | in     | F        |
 !! | aerosols       | aerosol optical properties                            | split TBD
@@ -812,7 +815,6 @@
      &       plyr, tlyr, qlyr, olyr
       real (kind=kind_phys), dimension(npts,4),    intent(in) :: sfcalb
 
-      !real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
@@ -876,24 +878,6 @@
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb
-
-        ! PAJ
-      real (kind=kind_phys), dimension(npts, nlay) :: gasvmr_zero
-      real (kind=kind_phys), dimension(npts, nlay, 9) :: gasvmr
-
-
-        ! PAJ: Inirialize some arrays
-      gasvmr_zero = 0.0
-
-      gasvmr(:, :, 1) = gasvmr_co2
-      gasvmr(:, :, 2) = gasvmr_n2o
-      gasvmr(:, :, 3) = gasvmr_ch4
-      gasvmr(:, :, 4) = gasvmr_o2
-      gasvmr(:, :, 5) = gasvmr_zero
-      gasvmr(:, :, 6) = gasvmr_zero
-      gasvmr(:, :, 7) = gasvmr_zero
-      gasvmr(:, :, 8) = gasvmr_zero
-      gasvmr(:, :, 9) = gasvmr_zero
 
 !
 !===> ... begin here
@@ -999,7 +983,8 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,kk,1))   ! co2
+            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,kk,1))   ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,kk))   ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
           enddo
@@ -1010,9 +995,12 @@
           if (iswrgas > 0) then
             do k = 1, nlay
               kk = nlp1 - k
-              colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,kk,2))  ! n2o
-              colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,kk,3))  ! ch4
-              colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,kk,4))  ! o2
+              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,kk,2))  ! n2o
+             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,kk))  ! n2o
+             ! colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,kk,3))  ! ch4
+             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,kk))  ! ch4
+             ! colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,kk,4))  ! o2
+             colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,kk))  ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,kk,5))  ! co - notused
             enddo
           else
@@ -1083,7 +1071,8 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,k,1))    ! co2
+            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,k,1))    ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,k))  ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
           enddo
@@ -1104,9 +1093,12 @@
 
           if (iswrgas > 0) then
             do k = 1, nlay
-              colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,k,2))  ! n2o
-              colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,k,3))  ! ch4
-              colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,k,4))  ! o2
+              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,k,2))  ! n2o
+            colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,k))  ! n2o
+              !colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,k,3))  ! ch4
+            colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,k))  ! ch4
+              !colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,k,4))  ! o2
+            colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,k))  ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,k,5))  ! co - notused
             enddo
           else
