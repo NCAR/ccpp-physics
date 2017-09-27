@@ -1898,9 +1898,7 @@
 
           end if if_nday
 
-            ! Radiation fluxes for other physics processes
-          Coupling%sfcnsw(:) = Radtend%sfcfsw(:)%dnfxc - Radtend%sfcfsw(:)%upfxc
-          Coupling%sfcdsw(:) = Radtend%sfcfsw(:)%dnfxc
+           call Save_more_sw_fluxes (Radtend, Coupling)
 
         end if if_lsswr
 
@@ -2262,6 +2260,20 @@
         end if
 
       end subroutine Save_sw_heating_rate_csk
+
+
+      subroutine Save_more_sw_fluxes (Radtend, Coupling)
+
+        implicit none
+
+        type(GFS_radtend_type), intent(in) :: Radtend
+        type(GFS_coupling_type), intent(inout) :: Coupling
+
+          ! Radiation fluxes for other physics processes
+        Coupling%sfcnsw(:) = Radtend%sfcfsw(:)%dnfxc - Radtend%sfcfsw(:)%upfxc
+        Coupling%sfcdsw(:) = Radtend%sfcfsw(:)%dnfxc
+
+      end subroutine Save_more_sw_fluxes
 
 !
 !> @}
