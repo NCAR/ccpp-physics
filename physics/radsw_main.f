@@ -590,6 +590,36 @@
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP                                    &   ! ---  optional
      &     )
+!! \section arg_table_swrad
+!! | local var name | longname                                              | description                                          | units   | rank | type        |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
+!! | plyr           | air_pressure_layer                                    | air pressure layer                                   | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl           | air_pressure_level                                    | air pressure level                                   | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr           | air_temperature_layer                                 | air temperature layer                                | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl           | air_temperature_level                                 | air temperature level                                | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr           | specific_humidity_layer                               | specific humidity layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr           | ozone_concentration_layer                             | ozone concentration layer                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr         | atmospheric constant gases                            | split TBD
+!! | clouds         | cloud profile                                         | split TBD
+!! | icseed         | seed_random_numbers                                   | seed for random number generation                    |         |    2 | integer     |           | in     | F        |
+!! | aerosols       | aerosol optical properties                            | split TBD
+!! | sfcalb         | Surface albedo                                        | split TBD
+!! | cosz           | cosine_zenit_angle                                    | cosine of the solar zenit angle                      |         |    1 | real        | kind_phys | in     | F        |
+!! | solcon         | solar_constant                                        | solar constant                                       | W m-2   |    0 | real        | kind_phys | in     | F        |
+!! | nday           | daytime_points_dimension                              | daytime points dimension                             | index   |    0 | integer     |           | in     | F        |
+!! | idxday         | daytime_points                                        | daytime points                                       |         |    1 | integer     |           | in     | F        |
+!! | npts           | horizontal_dimension                                  | horizontal dimension                                 | index   |    0 | integer     |           | in     | F        |
+!! | nlay           | vertical_layer_dimension                              | vertical layer dimension                             | index   |    0 | integer     |           | in     | F        |
+!! | nlp1           | vertical_level_dimension                              | vertical level dimension                             | index   |    0 | integer     |           | in     | F        |
+!! | lprnt          | flag_to_print                                         | logical flag to print                                | logical |    0 | logical     |           | in     | F        |
+!! | hswc           | sw_heating_rate_total_sky                             | shortwave total sky heating rate                     | k s-1???|    2 | real        | kind_phys | out    | F        |
+!! | topflx         | sw_fluxes_top_atmosphere                              | shortwave total sky fluxes at the top of the atm     | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
+!! | sfcflx         | sw_fluxes_sfc                                         | shortwave total sky fluxes at the Earth surface      | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | hsw0           | sw_heating_rate_csk                                   | shortwave clear sky heating rate                     | W m-2   |    2 | real        | kind_phys | out    | T        |
+!! | hswb           | sw_heating_rate_spectral                              | shortwave total sky heating rate (spectral)          | W m-2   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf         | sw_fluxes                                             | sw fluxes total sky / csk and up / down at levels    | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
+!! | fdncmp         | sw_fluxes_down_components_sfc                         | componenets of the downward sw fluxes at the surface | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
