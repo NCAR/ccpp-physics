@@ -452,12 +452,61 @@
 !> @{
 ! --------------------------------
       subroutine lwrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                      &   !  ---  inputs
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
+     &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
+     &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       clouds,icseed,aerosols,sfemis,sfgtmp,                      &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
      &       HLW0,HLWB,FLXPRF                                           &   !! ---  optional
      &     )
+
+!! \section arg_table_swrad
+!! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
+!! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
+!! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration_layer               | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_o2       | volumetric_mixing_ratio_o2              | volumetric mixing ratio o2                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_co       | volumetric_mixing_ratio_co              | volumetric mixing ratio co                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_cfc11    | volumetric_mixing_ratio_cfc11           | volumetric mixing ratio cfc11                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_cfc12    | volumetric_mixing_ratio_cfc12           | volumetric mixing ratio cfc12                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_cfc22    | volumetric_mixing_ratio_cfc22           | volumetric mixing ratio cfc22                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | gasvmr_ccl4     | volumetric_mixing_ratio_ccl4            | volumetric mixing ratio ccl4                           ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
+!! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
+!! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
+!! | clouds
+!! | sfemis
+!! | sfgtmp
+!! | npts            | horizontal_dimension                    | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
+!! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
+!! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
+!! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | k s-1???|    2 | real        | kind_phys | out    | F        |
+!! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
+!! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | W m-2   |    2 | real        | kind_phys | out    | T        |
+!! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | W m-2   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
+!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_ice     | effective_radious_ice_hydrometeor       | effective radious ice hydrometeor                      | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_rwp         | cloud_rain_water_path                   | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_rain    | effective_radious_rain_hydrometeor      | effective radious rain hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -641,7 +690,10 @@
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: plyr,  &
      &       tlyr, qlyr, olyr
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2,&
+     &     gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,  &
+     &     gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4
+
       real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
@@ -793,7 +845,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))          ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(iplon,k1,1)) ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k1)) ! co2
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
@@ -804,15 +856,15 @@
           if (ilwrgas > 0) then
             do k = 1, nlay
               k1 = nlp1 - k
-              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr(iplon,k1,2))  ! n2o
-              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr(iplon,k1,3))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr(iplon,k1,4))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr(iplon,k1,5))  ! co
+              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k1))  ! n2o
+              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k1))  ! ch4
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k1))  ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k1))  ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr(iplon,k1,9) )   ! ccl4
-              wx(k,2) = max( f_zero, coldry(k)*gasvmr(iplon,k1,6) )   ! cf11
-              wx(k,3) = max( f_zero, coldry(k)*gasvmr(iplon,k1,7) )   ! cf12
-              wx(k,4) = max( f_zero, coldry(k)*gasvmr(iplon,k1,8) )   ! cf22
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k1) )   ! ccl4
+              wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k1) )   ! cf11
+              wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k1) )   ! cf12
+              wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k1) )   ! cf22
             enddo
           else
             do k = 1, nlay
@@ -903,7 +955,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))          ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(iplon,k,1))  ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k))  ! co2
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
@@ -912,15 +964,15 @@
 
           if (ilwrgas > 0) then
             do k = 1, nlay
-              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr(iplon,k,2))  ! n2o
-              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr(iplon,k,3))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr(iplon,k,4))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr(iplon,k,5))  ! co
+              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k))  ! n2o
+              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k))  ! ch4
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k))  ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k))  ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr(iplon,k,9) )   ! ccl4
-              wx(k,2) = max( f_zero, coldry(k)*gasvmr(iplon,k,6) )   ! cf11
-              wx(k,3) = max( f_zero, coldry(k)*gasvmr(iplon,k,7) )   ! cf12
-              wx(k,4) = max( f_zero, coldry(k)*gasvmr(iplon,k,8) )   ! cf22
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k) )   ! ccl4
+              wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k) )   ! cf11
+              wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k) )   ! cf12
+              wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k) )   ! cf22
             enddo
           else
             do k = 1, nlay

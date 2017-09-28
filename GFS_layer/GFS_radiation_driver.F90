@@ -2045,13 +2045,19 @@
 
             ! Compute LW heating rates and fluxes.
           if (Model%lwhtr) then
-            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+               gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+               gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+               gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
                         clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
                         tsfg, im, lmk, lmp, Model%lprnt,             &
                         htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
                         hlw0=htlw0)                                           !  ---  optional
           else
-            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr,  &        !  ---  inputs
+            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+               gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+               gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+               gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
                         clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
                         tsfg, im, lmk, lmp, Model%lprnt,             &
                         htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs

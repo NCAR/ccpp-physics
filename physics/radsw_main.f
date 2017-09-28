@@ -604,10 +604,10 @@
 !! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | tlyr            | air_temperature_layer                   | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
-!! | qlyr            | specific_humidity_layer                 | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | olyr            | ozone_concentration_layer               | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration                     | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
 !! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
 !! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
 !! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
