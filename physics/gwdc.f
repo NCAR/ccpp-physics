@@ -15,7 +15,7 @@
 
       subroutine gwdc_pre_run(
      &  im, levs, kbot, ktop, dtp, gt0, dtdt, del, cumabs)
-!! \section arg_table_gwdc_prerun
+!! \section arg_table_gwdc_pre_run
 !! | local var name     | longname                                   | description                             | units | rank | type    | kind      | intent | optional |
 !! |--------------------|--------------------------------------------|-----------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | im                 | horizontal_loop_extent                     | horizontal loop extent                  | index | 0    | integer | default   | in     | F        |
@@ -1472,7 +1472,7 @@
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp, 
      &  tauctx, taucty, gwdcu, gwdcv, 
      &  dugwd, dvgwd, du3dt, dv3dt, gu0, gv0, gt0)
-!! \section arg_table_gwdc_postrun
+!! \section arg_table_gwdc_post_run
 !! | local var name | longname                                                                       | description                                                                           | units      | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                         | horizontal loop extent                                                                | index      | 0    | integer | default   | in     | F        |

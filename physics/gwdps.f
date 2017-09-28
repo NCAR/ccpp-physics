@@ -144,7 +144,7 @@
      &           im, iy, nmtvr, mntvar, 
      &           hprime, oc, oa4, clx, theta, 
      &           sigma, gamma, elvmax)
-!! \section arg_table_gwdps_prerun
+!! \section arg_table_gwdps_pre_run
 !! | local var name | longname                                                                | description                                                                              | units       | rank | type    | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | index       | 0    | integer | default   | in     | F        |
@@ -1401,7 +1401,7 @@
       subroutine gwdps_post_run(
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt, 
      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt) 
-!! \section arg_table_gwdps_postrun
+!! \section arg_table_gwdps_post_run
 !! | local var name | longname                                                                  | description                                                                         | units     | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-----------|------|---------|-----------|--------|----------|
 !! | lssav          | flag_diagnostics                                                          | flag for calculating diagnostic fields                                              | flag      | 0    | logical | default   | in     | F        |
