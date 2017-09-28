@@ -15,8 +15,8 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
-  use gwdc,                  only: gwdc_init, gwdc_run, gwdc_finalize
-  use gwdps,                 only: gwdps_init, gwdps_run, gwdps_finalize
+  use gwdc,                  only: gwdc_prerun, gwdc_run, gwdc_postrun
+  use gwdps,                 only: gwdps_prerun, gwdps_run, gwdps_postrun
 
   implicit none
 
@@ -61,10 +61,10 @@ module module_physics_driver
 !     get_prs,  dcyc2t2_pre_rad (testing),    dcyc2t3,  sfc_diff,       !
 !     sfc_ocean,sfc_drv,  sfc_land, sfc_sice, sfc_diag, moninp1,        !
 !     moninp,   moninq1,  moninq,   
-!     gwdps_init, gwdps_run, gwdps_finalize, 
+!     gwdps_prerun, gwdps_run, gwdps_postrun, 
 !     ozphys,   get_phi,        !
 !     sascnv,   sascnvn,  rascnv,   cs_convr, 
-!     gwdc_init, gwdc_run, gwdc_finalize, 
+!     gwdc_prerun, gwdc_run, gwdc_postrun, 
 !     shalcvt3,shalcv,!
 !     shalcnv,  cnvc90,   lrgscl,   gsmdrive, gscond,   precpd,         !
 !     progt2.                                                           !
@@ -257,7 +257,7 @@ module module_physics_driver
 !!    - accumulate the ozone tendency in dq3dt(:,:,5)
 !!  .
 !!  ## Calculate the state variable tendencies due to orographic gravity wave drag and Rayleigh damping.
-!!   - Based on the variable nmtvr, unpack orographic gravity wave varibles from the hprime array
+!!   - Based on the variable nmtvr, unpack orographic gravity wave variables from the hprime array
 !!   - Call 'gwdps' to calculate tendencies of u, v, T, and surface stress
 !!   - Accumulate gravity wave drag surface stresses.
 !!   - Accumulate change in u, v, and T due to oro. gravity wave drag in du3dt(:,:,2), dv3dt(:,:,2), and dt3dt(:,:,2)
@@ -1331,7 +1331,7 @@ module module_physics_driver
 !            ---------------------------------------------
 
 ! GSK 9/18/2017:
-! Move this portion into gwdps_init(...)
+! Move this portion into gwdps_prerun(...)
 
 !      if (Model%nmtvr == 14) then         ! current operational - as of 2014
 !        hprime(:) = Sfcprop%hprime(:,1)
@@ -1377,42 +1377,49 @@ module module_physics_driver
 !
 !      endif   ! end if_nmtvr
 
-      call gwdps_init(                          &
+      call gwdps_prerun (                       &
            im, im, Model%nmtvr, Sfcprop%hprime, &
            hprime, oc, oa4, clx, theta,         &
            sigma, gamma, elvmax)
 
 
 !     write(0,*)' before gwd clstp=',clstp,' kdt=',kdt,' lat=',lat
-      call gwdps_run(                                       &
-                 im, ix, im, levs, dvdt, dudt, dtdt,        &
-                 Statein%ugrs, Statein%vgrs, Statein%tgrs,  &
-                 Statein%qgrs, kpbl, Statein%prsi, del,     &
-                 Statein%prsl, Statein%prslk, Statein%phii, &
-                 Statein%phil, dtp, kdt,                    &
-!                 Sfcprop%hprime(1,1), oc, oa4, clx, theta,  &
-                 hprime, oc, oa4, clx, theta,  &
-                 sigma, gamma, elvmax, dusfcg, dvsfcg,      &
-                 con_g, con_cp, con_rd, con_rv, Model%lonr, &
-                 Model%nmtvr, Model%cdmbgwd, me, lprnt,ipr)
+      call gwdps_run (                                          &
+           im, ix, im, levs, dvdt, dudt, dtdt,            &
+           Statein%ugrs, Statein%vgrs, Statein%tgrs,      &
+           Statein%qgrs(:,:,1), kpbl, Statein%prsi, del,  &
+           Statein%prsl, Statein%prslk, Statein%phii,     &
+           Statein%phil, dtp, kdt,                        &
+!           Sfcprop%hprime(1,1), oc, oa4, clx, theta,      &
+           hprime, oc, oa4, clx, theta,                   &
+           sigma, gamma, elvmax, dusfcg, dvsfcg,          &
+           con_g, con_cp, con_rd, con_rv, Model%lonr,     &
+           Model%nmtvr, Model%cdmbgwd, me, lprnt,ipr)
 
 !     if (lprnt)  print *,' dudtg=',dudt(ipr,:)
 
-      if (Model%lssav) then
-        Diag%dugwd(:) = Diag%dugwd(:) + dusfcg(:)*dtf
-        Diag%dvgwd(:) = Diag%dvgwd(:) + dvsfcg(:)*dtf
+! GSK 9/21/2017:
+! Move this portion into gwdps_prerun(...)
+!      if (Model%lssav) then
+!        Diag%dugwd(:) = Diag%dugwd(:) + dusfcg(:)*dtf
+!        Diag%dvgwd(:) = Diag%dvgwd(:) + dvsfcg(:)*dtf
+!
+!!       if (lprnt) print *,' dugwd=',dugwd(ipr),' dusfcg=',dusfcg(ipr)
+!!       if (lprnt) print *,' dvgwd=',dvgwd(ipr),' dvsfcg=',dvsfcg(ipr)
+!
+!        if (Model%ldiag3d) then
+!          Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) + dudt(:,:) * dtf
+!          Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) + dvdt(:,:) * dtf
+!          Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + dtdt(:,:) * dtf
+!        endif
+!      endif
 
-!       if (lprnt) print *,' dugwd=',dugwd(ipr),' dusfcg=',dusfcg(ipr)
-!       if (lprnt) print *,' dvgwd=',dvgwd(ipr),' dvsfcg=',dvsfcg(ipr)
+      call gwdps_postrun (                   &
+           Model%lssav, Model%ldiag3d, dtf,  &
+           dusfcg, dvsfcg, dudt, dvdt, dtdt, &
+           Diag%dugwd, Diag%dvgwd,           &
+           Diag%du3dt(:,:,2), Diag%dv3dt(:,:,2), Diag%dt3dt(:,:,2)) 
 
-        if (Model%ldiag3d) then
-          Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) + dudt(:,:) * dtf
-          Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) + dvdt(:,:) * dtf
-          Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + dtdt(:,:) * dtf
-        endif
-      endif
-
-      call gwdps_finalize()
 
 !    Rayleigh damping  near the model top
       if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
@@ -1928,22 +1935,26 @@ module module_physics_driver
 
       if (Model%cnvgwd) then         !        call convective gravity wave drag
 
-!  --- ...  calculate maximum convective heating rate 
-!           cuhr = temperature change due to deep convection
+! GSK 9/26/2017:
+! Move this portion into gwdc_prerun(...)
+!!  --- ...  calculate maximum convective heating rate 
+!!           cuhr = temperature change due to deep convection
+!        cumabs(:) = 0.0
+!        work3 (:)  = 0.0
+!        do k = 1, levs
+!          do i = 1, im
+!            if (k >= kbot(i) .and. k <= ktop(i)) then
+!              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-dtdt(i,k)) * del(i,k)
+!              work3(i)  = work3(i)  + del(i,k)
+!            endif
+!          enddo
+!        enddo
+!        do i=1,im
+!          if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
+!        enddo
 
-        cumabs(:) = 0.0
-        work3 (:)  = 0.0
-        do k = 1, levs
-          do i = 1, im
-            if (k >= kbot(i) .and. k <= ktop(i)) then
-              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-dtdt(i,k)) * del(i,k)
-              work3(i)  = work3(i)  + del(i,k)
-            endif
-          enddo
-        enddo
-        do i=1,im
-          if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
-        enddo
+        call gwdc_prerun (im, levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
+
 
 !       do i = 1, im
 !         do k = kbot(i), ktop(i)
@@ -2010,16 +2021,15 @@ module module_physics_driver
 
 !  --- ...  end check print ********************************************
 
-        call gwdc_init()
 
 !GFDL replacing lat with "1"
-!       call gwdc(im, ix, im, levs, lat, gu0, gv0, gt0, gq0, dtp,       &
-        call gwdc_run(                                                  & 
-                   im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,     &
-                   Statein%tgrs, Statein%qgrs, dtp, Statein%prsl,       &
-                   Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,   &
-                   con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,   &
-                   lprnt, ipr, Model%fhour, gwdcu, gwdcv, dusfcg, dvsfcg)
+!       call gwdc (im, ix, im, levs, lat, gu0, gv0, gt0, gq0, dtp,       &
+        call gwdc_run (                                             & 
+             im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,       &
+             Statein%tgrs, Statein%qgrs(:,:,1), dtp, Statein%prsl,  &
+             Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,     &
+             con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,     &
+             lprnt, ipr, Model%fhour, gwdcu, gwdcv, dusfcg, dvsfcg)
 
 !       if (lprnt) then
 !         if (fhour >= fhourpr) then
@@ -2042,34 +2052,41 @@ module module_physics_driver
 !         endif
 !       endif
 
-        call gwdc_finalize()
 
-!  --- ...  write out cloud top stress and wind tendencies
+! GSK 9/26/2017:
+! Move this portion into gwdc_postrun(...)
+!!  --- ...  write out cloud top stress and wind tendencies
+!
+!        if (Model%lssav) then
+!          Diag%dugwd(:) = Diag%dugwd(:) + dusfcg(:)*dtf
+!          Diag%dvgwd(:) = Diag%dvgwd(:) + dvsfcg(:)*dtf
+!
+!          if (Model%ldiag3d) then
+!            Diag%du3dt(:,:,4) = Diag%du3dt(:,:,4) + gwdcu(:,:)  * dtf
+!            Diag%dv3dt(:,:,4) = Diag%dv3dt(:,:,4) + gwdcv(:,:)  * dtf
+!          endif
+!        endif   ! end if_lssav
+!
+!!  --- ...  update the wind components with  gwdc tendencies
+!
+!        do k = 1, levs
+!          do i = 1, im
+!            eng0               = 0.5*(Stateout%gu0(i,k)*Stateout%gu0(i,k)+Stateout%gv0(i,k)*Stateout%gv0(i,k))
+!            Stateout%gu0(i,k)  = Stateout%gu0(i,k) + gwdcu(i,k) * dtp
+!            Stateout%gv0(i,k)  = Stateout%gv0(i,k) + gwdcv(i,k) * dtp
+!            eng1               = 0.5*(Stateout%gu0(i,k)*Stateout%gu0(i,k)+Stateout%gv0(i,k)*Stateout%gv0(i,k))
+!            Stateout%gt0(i,k)  = Stateout%gt0(i,k) + (eng0-eng1)/(dtp*con_cp)
+!          enddo
+!!         if (lprnt) write(7000,*)' gu0=',gu0(ipr,k),' gwdcu=',
+!!    &gwdcu(ipr,k), ' gv0=', gv0(ipr,k),' gwdcv=',gwdcv(ipr,k)
+!!    &,' k=',k
+!        enddo
 
-        if (Model%lssav) then
-          Diag%dugwd(:) = Diag%dugwd(:) + dusfcg(:)*dtf
-          Diag%dvgwd(:) = Diag%dvgwd(:) + dvsfcg(:)*dtf
-
-          if (Model%ldiag3d) then
-            Diag%du3dt(:,:,4) = Diag%du3dt(:,:,4) + gwdcu(:,:)  * dtf
-            Diag%dv3dt(:,:,4) = Diag%dv3dt(:,:,4) + gwdcv(:,:)  * dtf
-          endif
-        endif   ! end if_lssav
-
-!  --- ...  update the wind components with  gwdc tendencies
-
-        do k = 1, levs
-          do i = 1, im
-            eng0               = 0.5*(Stateout%gu0(i,k)*Stateout%gu0(i,k)+Stateout%gv0(i,k)*Stateout%gv0(i,k))
-            Stateout%gu0(i,k)  = Stateout%gu0(i,k) + gwdcu(i,k) * dtp
-            Stateout%gv0(i,k)  = Stateout%gv0(i,k) + gwdcv(i,k) * dtp
-            eng1               = 0.5*(Stateout%gu0(i,k)*Stateout%gu0(i,k)+Stateout%gv0(i,k)*Stateout%gv0(i,k))
-            Stateout%gt0(i,k)  = Stateout%gt0(i,k) + (eng0-eng1)/(dtp*con_cp)
-          enddo
-!         if (lprnt) write(7000,*)' gu0=',gu0(ipr,k),' gwdcu=',
-!    &gwdcu(ipr,k), ' gv0=', gv0(ipr,k),' gwdcv=',gwdcv(ipr,k)
-!    &,' k=',k
-        enddo
+        call gwdc_postrun (                                                &
+             im, levs, Model%lssav, Model%ldiag3d, dtf, dtp, con_cp,       & 
+             dusfcg, dvsfcg, gwdcu, gwdcv,                                 &
+             Diag%dugwd, Diag%dvgwd, Diag%du3dt(:,:,4), Diag%dv3dt(:,:,4), &
+             Stateout%gu0, Stateout%gv0, Stateout%gt0)
 
 !       if (lprnt) then
 !         if (fhour >= fhourpr) then

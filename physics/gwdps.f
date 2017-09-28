@@ -136,9 +136,12 @@
       contains
 
 
-      subroutine gwdps_init(
-     &           im, iy,
-     &           nmtvr, mntvar, 
+
+      subroutine gwdps_prerun_init()
+      end subroutine gwdps_prerun_init
+
+      subroutine gwdps_prerun(
+     &           im, iy, nmtvr, mntvar, 
      &           hprime, oc, oa4, clx, theta, 
      &           sigma, gamma, elvmax)
 
@@ -203,9 +206,17 @@
         elvmax = 0
       endif   ! end if_nmtvr
 
+      end subroutine gwdps_prerun
+
+      subroutine gwdps_prerun_finalize()
+      end subroutine gwdps_prerun_finalize
+
+
+
+
+
+      subroutine gwdps_init()
       end subroutine gwdps_init
-
-
 !! @{
 
 !> \param[in] IM       horizontal number of used pts
@@ -256,12 +267,12 @@
 !> \param[in] IPR      check print point for debugging
 !> \section gen_gwdps General Algorithm
 !> @{
-      subroutine gwdps_run(                                             &
-     &               IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,                &
-     &               PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,         &
-     &               HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,       &
-     &               DUSFC,DVSFC,G, CP, RD, RV, IMX,                    &
-     &               nmtvr, cdmbgwd, me, lprnt, ipr)
+      subroutine gwdps_run(
+     &           IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,
+     &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,
+     &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,
+     &           DUSFC,DVSFC,G, CP, RD, RV, IMX,
+     &           nmtvr, cdmbgwd, me, lprnt, ipr)
 !! | local var name | longname                                                           | description                                                                                   | units      | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                             | horizontal loop extent; start at 1                                                            | index      | 0    | integer | default   | in     | F        |
@@ -1361,11 +1372,46 @@
 !! @}
 !! @}
 
-
-
       subroutine gwdps_finalize()
-
       end subroutine gwdps_finalize
+
+
+
+
+      subroutine gwdps_postrun_init()
+      end subroutine gwdps_postrun_init
+
+      subroutine gwdps_postrun(
+     &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt, 
+     &  dugwd, dvgwd, du3dt, dv3dt, dt3dt) 
+
+      use machine, only : kind_phys
+      implicit none
+
+      logical, intent(in) :: lssav, ldiag3d
+      real(kind=kind_phys), intent(in) :: dtf
+      real(kind=kind_phys), intent(in) :: 
+     &  dusfcg(:), dvsfcg(:), dudt(:,:), dvdt(:,:), dtdt(:,:)
+
+      real(kind=kind_phys), intent(inout) :: 
+     &  dugwd(:), dvgwd(:), du3dt(:,:), dv3dt(:,:), dt3dt(:,:)
+
+      if (lssav) then 
+        dugwd(:) = dugwd(:) + dusfcg(:)*dtf
+        dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
+
+        if (ldiag3d) then 
+          du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
+          dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
+          dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
+        endif
+      endif
+
+      end subroutine gwdps_postrun
+
+      subroutine gwdps_postrun_finalize()
+      end subroutine gwdps_postrun_finalize
+
 
 
 

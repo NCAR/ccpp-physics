@@ -7,10 +7,57 @@
       contains
 
 
+
+
+
+      subroutine gwdc_prerun_init()
+      end subroutine gwdc_prerun_init
+
+      subroutine gwdc_prerun(
+     &  im, levs, kbot, ktop, dtp, gt0, dtdt, del, cumabs)
+
+      use machine, only : kind_phys
+      implicit none 
+
+      integer, intent(in) :: im, levs
+      integer, intent(in) :: kbot(:), ktop(:)
+      real(kind=kind_phys), intent(in) :: dtp
+      real(kind=kind_phys), intent(in) :: 
+     &  gt0(:,:), dtdt(:,:), del(:,:)
+
+      real(kind=kind_phys), intent(out) :: cumabs(:)
+
+      integer :: i, k
+      real(kind=kind_phys) :: work3(im)
+
+!  --- ...  calculate maximum convective heating rate 
+!           cuhr = temperature change due to deep convection
+
+      cumabs(:) = 0.0
+      work3 (:)  = 0.0
+      do k = 1, levs
+        do i = 1, im
+          if (k >= kbot(i) .and. k <= ktop(i)) then
+            cumabs(i) = cumabs(i) + (gt0(i,k)-dtdt(i,k)) * del(i,k)
+            work3(i)  = work3(i)  + del(i,k)
+          endif
+        enddo
+      enddo
+      do i=1,im
+        if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
+      enddo
+
+      end subroutine gwdc_prerun
+
+      subroutine gwdc_prerun_finalize()
+      end subroutine gwdc_prerun_finalize
+
+
+
+
+
       subroutine gwdc_init()
-
       end subroutine gwdc_init
-
 
 !> \ingroup gwd
 !> \defgroup convective Convective Gravity Wave Drag
@@ -82,10 +129,10 @@
 !> \section al_gwdc General Algorithm
 !> @{
       subroutine gwdc_run( 
-     &                im,ix,iy,km,lat,u1,v1,t1,q1,deltim,
-     &                pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,
-     &                grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,
-     &                utgwc,vtgwc,tauctx,taucty)
+     &           im,ix,iy,km,lat,u1,v1,t1,q1,deltim,
+     &           pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,
+     &           grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,
+     &           utgwc,vtgwc,tauctx,taucty)
 !! | local var name | longname                                                       | description                                                  | units      | rank | type    | kind      | intent | optional |
 !! |----------------|----------------------------------------------------------------|--------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                         | horizontal loop extent; start at 1                           | index      | 0    | integer | default   | in     | F        |
@@ -318,7 +365,7 @@
           vtgwc(i,k) = 0.0
 !         brunm(i,k) = 0.0
 !         rhom(i,k)  = 0.0
-          enddo
+        enddo
       enddo
       do i=1,im
         tauctx(i) = 0.0
@@ -1398,11 +1445,69 @@
 !> @}
 !! @}
 
-
-
       subroutine gwdc_finalize()
-
       end subroutine gwdc_finalize
+
+
+
+
+      subroutine gwdc_postrun_init()
+      end subroutine gwdc_postrun_init
+
+      subroutine gwdc_postrun(
+     &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp, 
+     &  tauctx, taucty, gwdcu, gwdcv, 
+     &  dugwd, dvgwd, du3dt, dv3dt, gu0, gv0, gt0)
+
+      use machine, only : kind_phys
+      implicit none 
+
+      integer, intent(in) :: im, levs
+      logical, intent(in) :: lssav, ldiag3d
+      real(kind=kind_phys), intent(in) :: dtf, dtp, con_cp
+      real(kind=kind_phys), intent(in) :: 
+     &  tauctx(:), taucty(:), gwdcu(:,:), gwdcv(:,:)
+
+      real(kind=kind_phys), intent(inout) :: 
+     &  dugwd(:), dvgwd(:), du3dt(:,:), dv3dt(:,:), 
+     &  gu0(:,:), gv0(:,:), gt0(:,:)
+
+      integer :: i, k
+      real(kind=kind_phys) :: eng0, eng1
+
+!  --- ...  write out cloud top stress and wind tendencies
+
+      if (lssav) then 
+        dugwd(:) = dugwd(:) + tauctx(:)*dtf
+        dvgwd(:) = dvgwd(:) + taucty(:)*dtf
+
+        if (ldiag3d) then 
+          du3dt(:,:) = du3dt(:,:) + gwdcu(:,:)  * dtf
+          dv3dt(:,:) = dv3dt(:,:) + gwdcv(:,:)  * dtf
+        endif
+      endif   ! end if_lssav
+
+!  --- ...  update the wind components with  gwdc tendencies
+
+      do k = 1, levs 
+        do i = 1, im
+          eng0     = 0.5*(gu0(i,k)*gu0(i,k) + gv0(i,k)*gv0(i,k))
+          gu0(i,k) = gu0(i,k) + gwdcu(i,k) * dtp
+          gv0(i,k) = gv0(i,k) + gwdcv(i,k) * dtp
+          eng1     = 0.5*(gu0(i,k)*gu0(i,k) + gv0(i,k)*gv0(i,k))
+          gt0(i,k) = gt0(i,k) + (eng0-eng1)/(dtp*con_cp)
+        enddo
+!         if (lprnt) write(7000,*)' gu0=',gu0(ipr,k),' gwdcu=',
+!    &gwdcu(ipr,k), ' gv0=', gv0(ipr,k),' gwdcv=',gwdcv(ipr,k)
+!    &,' k=',k
+      enddo
+
+      end subroutine gwdc_postrun
+
+      subroutine gwdc_postrun_finalize()
+      end subroutine gwdc_postrun_finalize
+
+
 
 
 
