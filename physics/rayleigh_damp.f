@@ -1,5 +1,5 @@
-      SUBROUTINE Rayleigh_damp(IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
-     &                         LEVR,pgr,PRSL,PRSLRD0,ral_ts)
+      SUBROUTINE Rayleigh_damp_run(IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
+     &                             LEVR,pgr,PRSL,PRSLRD0,ral_ts)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
