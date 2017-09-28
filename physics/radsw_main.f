@@ -602,7 +602,7 @@
 !! \section arg_table_swrad
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
-!! | plyr            | air_pressure_layer                      | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | tlyr            | air_temperature_layer                   | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
