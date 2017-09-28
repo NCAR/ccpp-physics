@@ -2042,7 +2042,7 @@
                gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
                gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
                gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+               clouds, Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
                         tsfg, im, lmk, lmp, Model%lprnt,             &
                         htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
                         hlw0=htlw0)                                           !  ---  optional
@@ -2051,7 +2051,7 @@
                gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
                gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
                gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                        clouds, Tbd%icsdlw, faerlw, Radtend%semis,   &
+               clouds, Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
                         tsfg, im, lmk, lmp, Model%lprnt,             &
                         htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs
           end if

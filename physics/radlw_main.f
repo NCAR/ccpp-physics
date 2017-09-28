@@ -455,7 +455,7 @@
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
-     &       clouds,icseed,aerosols,sfemis,sfgtmp,                      &
+     &       clouds,icseed,aeraod,aerssa,sfemis,sfgtmp,                 &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
      &       HLW0,HLWB,FLXPRF                                           &   !! ---  optional
@@ -483,16 +483,16 @@
 !! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
 !! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
 !! | clouds
-!! | sfemis
-!! | sfgtmp
+!! | sfemis          | surface_emissivity                      | surface emissivity                                     |         |    1 | real        | kind_phys | in     | F        |
+!! | sfgtmp          | surface_groud_temperature               | surface ground temperature                             | K       |    1 | real        | kind_phys | in     | F        |
 !! | npts            | horizontal_dimension                    | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
 !! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
 !! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
 !! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | k s-1???|    2 | real        | kind_phys | out    | F        |
-!! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
-!! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | topflx          | lw_fluxes_top_atmosphere                | longwave total sky fluxes at the top of the atm        | W m-2   |    1 | topflw_type | kind_phys | out    | F        |
+!! | sfcflx          | lw_fluxes_sfc                           | longwave total sky fluxes at the Earth surface         | W m-2   |    1 | sfcflw_type | kind_phys | out    | F        |
 !! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | W m-2   |    2 | real        | kind_phys | out    | T        |
 !! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | W m-2   |    3 | real        | kind_phys | out    | T        |
 !! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
@@ -699,8 +699,8 @@
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp
 
-      real (kind=kind_phys), dimension(npts,nlay,nbands,3),intent(in):: &
-     &       aerosols
+      real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
+     &       aeraod, aerssa
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(out) :: hlwc
@@ -885,8 +885,8 @@
           do k = 1, nlay
             k1 = nlp1 - k
             do j = 1, nbands
-              tauaer(j,k) = aerosols(iplon,k1,j,1)                      &
-     &                    * (f_one - aerosols(iplon,k1,j,2))
+              tauaer(j,k) = aeraod(iplon,k1,j)                          &
+     &                    * (f_one - aerssa(iplon,k1,j))
             enddo
           enddo
 
@@ -992,8 +992,8 @@
 
           do j = 1, nbands
             do k = 1, nlay
-              tauaer(j,k) = aerosols(iplon,k,j,1)                       &
-     &                    * (f_one - aerosols(iplon,k,j,2))
+              tauaer(j,k) = aeraod(iplon,k,j)                           &
+     &                    * (f_one - aerssa(iplon,k,j))
             enddo
           enddo
 
