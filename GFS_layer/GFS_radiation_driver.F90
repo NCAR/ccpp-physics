@@ -1852,8 +1852,6 @@
             gasvmr_n2o, gasvmr_ch4, gasvmr_o2
         real (kind=kind_phys), dimension(im, lmk, NBDSW) ::  &
             aeraod, aerssa, aerasy
-        real (kind=kind_phys), dimension(im) :: sfcalb_nir_dir, sfcalb_nir_dif, &
-            sfcalb_uvis_dir, sfcalb_uvis_dif
         real (kind=kind_phys), dimension(im, lmk) :: cld_cf, cld_lwp, cld_ref_liq, &
             cld_iwp, cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,    &
             cld_od, cld_ssa, cld_asy
@@ -1868,11 +1866,6 @@
         aeraod = faersw(:, :, :, 1)
         aerssa = faersw(:, :, :, 2)
         aerasy = faersw(:, :, :, 3)
-
-        sfcalb_nir_dir = sfcalb(:, 1)
-        sfcalb_nir_dif = sfcalb(:, 2)
-        sfcalb_uvis_dir = sfcalb(:, 3)
-        sfcalb_uvis_dif = sfcalb(:, 4)
 
         cld_cf = clouds(:,:,1)
         if (ISWCLIQ > 0) then
@@ -1915,8 +1908,8 @@
                           gasvmr_o2,                            &
                           Tbd%icsdsw, aeraod,                   &
                           aerssa, aerasy,                       &
-                          sfcalb_nir_dir, sfcalb_nir_dif,       &
-                          sfcalb_uvis_dir, sfcalb_uvis_dif,     &
+                          sfcalb(:, 1), sfcalb(:,2),       &
+                          sfcalb(:,3), sfcalb(:,4),     &
                           Radtend%coszen, Model%solcon,         &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
                           cld_cf,                                 &
@@ -1933,8 +1926,8 @@
                           gasvmr_o2,                                  &
                           Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,     &
-                          sfcalb_nir_dir, sfcalb_nir_dif,          &
-                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          sfcalb(:,1), sfcalb(:,2),          &
+                          sfcalb(:,3), sfcalb(:,4),          &
                           Radtend%coszen, Model%solcon,   &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
                           cld_cf,                                 &
@@ -1950,8 +1943,8 @@
                           gasvmr_o2,                                  & 
                           Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,           &
-                          sfcalb_nir_dir, sfcalb_nir_dif,          &
-                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          sfcalb(:,1), sfcalb(:,2),          &
+                          sfcalb(:,3), sfcalb(:,4),          &
                           Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
                           cld_cf,                                 &
@@ -1969,8 +1962,8 @@
                           gasvmr_o2,                                  & 
                           Tbd%icsdsw, aeraod,     &
                           aerssa, aerasy,           &
-                          sfcalb_nir_dir, sfcalb_nir_dif,          &
-                          sfcalb_uvis_dir, sfcalb_uvis_dif,          &
+                          sfcalb(:,1), sfcalb(:,2),          &
+                          sfcalb(:,3), sfcalb(:,4),          &
                           Radtend%coszen, Model%solcon,   &
                           nday, idxday, IM, LMK, LMP, Model%lprnt,&
                           cld_cf,                                 &
