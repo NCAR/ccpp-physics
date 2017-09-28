@@ -16,17 +16,17 @@
       subroutine gwdc_prerun(
      &  im, levs, kbot, ktop, dtp, gt0, dtdt, del, cumabs)
 !! \section arg_table_gwdc_prerun
-!! | local var name | longname                                   | description                             | units | rank | type    | kind      | intent | optional |
-!! |----------------|--------------------------------------------|-----------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                     | horizontal loop extent                  | index | 0    | integer | default   | in     | F        |
-!! | levs           | vertical_dimension                         | number of vertical layers               | index | 0    | integer | default   | in     | F        |
-!! | kbot           | vertical_index_of_cloud_base               | vertical index of cloud base            | index | 1    | integer | default   | in     | F        |
-!! | ktop           | vertical_index_of_cloud_top                | vertical index of cloud top             | index | 1    | integer | default   | in     | F        |
-!! | dtp            | time_step_for_physics                      | physics time step                       | s     | 0    | real    | kind_phys | in     | F        |
-!! | gt0            | updated_air_temperature                    | updated air temperature                 | m s-1 | 2    | real    | kind_phys | inout  | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_physics | air temperature tendency due to physics | K s-1 | 2    | real    | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers  | difference between mid-layer pressures  | Pa    | 2    | real    | kind_phys | in     | F        |
-!! | cumabs         | maximum_column_heating_rate                | maximum heating rate in column          | K s-1 | 1    | real    | kind_phys | in     | F        |
+!! | local var name     | longname                                   | description                             | units | rank | type    | kind      | intent | optional |
+!! |--------------------|--------------------------------------------|-----------------------------------------|-------|------|---------|-----------|--------|----------|
+!! | im                 | horizontal_loop_extent                     | horizontal loop extent                  | index | 0    | integer | default   | in     | F        |
+!! | levs               | vertical_dimension                         | number of vertical layers               | index | 0    | integer | default   | in     | F        |
+!! | kbot               | vertical_index_of_cloud_base               | vertical index of cloud base            | index | 1    | integer | default   | in     | F        |
+!! | ktop               | vertical_index_of_cloud_top                | vertical index of cloud top             | index | 1    | integer | default   | in     | F        |
+!! | dtp                | time_step_for_physics                      | physics time step                       | s     | 0    | real    | kind_phys | in     | F        |
+!! | gt0                | updated_air_temperature                    | updated air temperature                 | m s-1 | 2    | real    | kind_phys | inout  | F        |
+!! | dtdt  misleading?? | tendency_of_air_temperature_due_to_physics | air temperature tendency due to physics | K s-1 | 2    | real    | kind_phys | in     | F        |
+!! | del                | air_pressure_difference_between_midlayers  | difference between mid-layer pressures  | Pa    | 2    | real    | kind_phys | in     | F        |
+!! | cumabs             | maximum_column_heating_rate                | maximum heating rate in column          | K s-1 | 1    | real    | kind_phys | in     | F        |
 !!
       use machine, only : kind_phys
       implicit none 
