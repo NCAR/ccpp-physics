@@ -10,10 +10,10 @@
 
 
 
-      subroutine gwdc_prerun_init()
-      end subroutine gwdc_prerun_init
+      subroutine gwdc_pre_init()
+      end subroutine gwdc_pre_init
 
-      subroutine gwdc_prerun(
+      subroutine gwdc_pre_run(
      &  im, levs, kbot, ktop, dtp, gt0, dtdt, del, cumabs)
 !! \section arg_table_gwdc_prerun
 !! | local var name     | longname                                   | description                             | units | rank | type    | kind      | intent | optional |
@@ -59,10 +59,10 @@
         if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
       enddo
 
-      end subroutine gwdc_prerun
+      end subroutine gwdc_pre_run
 
-      subroutine gwdc_prerun_finalize()
-      end subroutine gwdc_prerun_finalize
+      subroutine gwdc_pre_finalize()
+      end subroutine gwdc_pre_finalize
 
 
 
@@ -1465,10 +1465,10 @@
 
 
 
-      subroutine gwdc_postrun_init()
-      end subroutine gwdc_postrun_init
+      subroutine gwdc_post_init()
+      end subroutine gwdc_post_init
 
-      subroutine gwdc_postrun(
+      subroutine gwdc_post_run(
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp, 
      &  tauctx, taucty, gwdcu, gwdcv, 
      &  dugwd, dvgwd, du3dt, dv3dt, gu0, gv0, gt0)
@@ -1537,10 +1537,10 @@
 !    &,' k=',k
       enddo
 
-      end subroutine gwdc_postrun
+      end subroutine gwdc_post_run
 
-      subroutine gwdc_postrun_finalize()
-      end subroutine gwdc_postrun_finalize
+      subroutine gwdc_post_finalize()
+      end subroutine gwdc_post_finalize
 
 
 

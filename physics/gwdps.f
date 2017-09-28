@@ -137,10 +137,10 @@
 
 
 
-      subroutine gwdps_prerun_init()
-      end subroutine gwdps_prerun_init
+      subroutine gwdps_pre_init()
+      end subroutine gwdps_pre_init
 
-      subroutine gwdps_prerun(
+      subroutine gwdps_pre_run(
      &           im, iy, nmtvr, mntvar, 
      &           hprime, oc, oa4, clx, theta, 
      &           sigma, gamma, elvmax)
@@ -221,10 +221,10 @@
         elvmax = 0
       endif   ! end if_nmtvr
 
-      end subroutine gwdps_prerun
+      end subroutine gwdps_pre_run
 
-      subroutine gwdps_prerun_finalize()
-      end subroutine gwdps_prerun_finalize
+      subroutine gwdps_pre_finalize()
+      end subroutine gwdps_pre_finalize
 
 
 
@@ -1395,10 +1395,10 @@
 
 
 
-      subroutine gwdps_postrun_init()
-      end subroutine gwdps_postrun_init
+      subroutine gwdps_post_init()
+      end subroutine gwdps_post_init
 
-      subroutine gwdps_postrun(
+      subroutine gwdps_post_run(
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt, 
      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt) 
 !! \section arg_table_gwdps_postrun
@@ -1440,10 +1440,10 @@
         endif
       endif
 
-      end subroutine gwdps_postrun
+      end subroutine gwdps_post_run
 
-      subroutine gwdps_postrun_finalize()
-      end subroutine gwdps_postrun_finalize
+      subroutine gwdps_post_finalize()
+      end subroutine gwdps_post_finalize
 
 
 

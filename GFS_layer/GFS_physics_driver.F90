@@ -15,8 +15,8 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
-  use gwdc,                  only: gwdc_prerun, gwdc_run, gwdc_postrun
-  use gwdps,                 only: gwdps_prerun, gwdps_run, gwdps_postrun
+  use gwdc,                  only: gwdc_pre_run, gwdc_run, gwdc_post_run
+  use gwdps,                 only: gwdps_pre_run, gwdps_run, gwdps_post_run
 
   implicit none
 
@@ -61,10 +61,10 @@ module module_physics_driver
 !     get_prs,  dcyc2t2_pre_rad (testing),    dcyc2t3,  sfc_diff,       !
 !     sfc_ocean,sfc_drv,  sfc_land, sfc_sice, sfc_diag, moninp1,        !
 !     moninp,   moninq1,  moninq,   
-!     gwdps_prerun, gwdps_run, gwdps_postrun, 
+!     gwdps_pre_run, gwdps_run, gwdps_post_run, 
 !     ozphys,   get_phi,        !
 !     sascnv,   sascnvn,  rascnv,   cs_convr, 
-!     gwdc_prerun, gwdc_run, gwdc_postrun, 
+!     gwdc_pre_run, gwdc_run, gwdc_post_run, 
 !     shalcvt3,shalcv,!
 !     shalcnv,  cnvc90,   lrgscl,   gsmdrive, gscond,   precpd,         !
 !     progt2.                                                           !
@@ -1331,7 +1331,7 @@ module module_physics_driver
 !            ---------------------------------------------
 
 ! GSK 9/18/2017:
-! Move this portion into gwdps_prerun(...)
+! Move this portion into gwdps_pre_run(...)
 
 !      if (Model%nmtvr == 14) then         ! current operational - as of 2014
 !        hprime(:) = Sfcprop%hprime(:,1)
@@ -1377,7 +1377,7 @@ module module_physics_driver
 !
 !      endif   ! end if_nmtvr
 
-      call gwdps_prerun (                       &
+      call gwdps_pre_run (                       &
            im, im, Model%nmtvr, Sfcprop%hprime, &
            hprime, oc, oa4, clx, theta,         &
            sigma, gamma, elvmax)
@@ -1399,7 +1399,7 @@ module module_physics_driver
 !     if (lprnt)  print *,' dudtg=',dudt(ipr,:)
 
 ! GSK 9/21/2017:
-! Move this portion into gwdps_prerun(...)
+! Move this portion into gwdps_pre_run(...)
 !      if (Model%lssav) then
 !        Diag%dugwd(:) = Diag%dugwd(:) + dusfcg(:)*dtf
 !        Diag%dvgwd(:) = Diag%dvgwd(:) + dvsfcg(:)*dtf
@@ -1414,7 +1414,7 @@ module module_physics_driver
 !        endif
 !      endif
 
-      call gwdps_postrun (                   &
+      call gwdps_post_run (                   &
            Model%lssav, Model%ldiag3d, dtf,  &
            dusfcg, dvsfcg, dudt, dvdt, dtdt, &
            Diag%dugwd, Diag%dvgwd,           &
@@ -1423,10 +1423,11 @@ module module_physics_driver
 
 !    Rayleigh damping  near the model top
       if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
-        call rayleigh_damp(im, ix, im, levs, dvdt, dudt, dtdt,      &
-                           Statein%ugrs, Statein%vgrs, dtp, con_cp, &
-                           Model%levr, Statein%pgr, Statein%prsl,   &
-                           Model%prslrd0, Model%ral_ts)
+        call rayleigh_damp_run (                      &
+             im, ix, im, levs, dvdt, dudt, dtdt,      &
+             Statein%ugrs, Statein%vgrs, dtp, con_cp, &
+             Model%levr, Statein%pgr, Statein%prsl,   &
+             Model%prslrd0, Model%ral_ts)
       endif
 
 !     if (lprnt) then
@@ -1936,7 +1937,7 @@ module module_physics_driver
       if (Model%cnvgwd) then         !        call convective gravity wave drag
 
 ! GSK 9/26/2017:
-! Move this portion into gwdc_prerun(...)
+! Move this portion into gwdc_pre_run(...)
 !!  --- ...  calculate maximum convective heating rate 
 !!           cuhr = temperature change due to deep convection
 !        cumabs(:) = 0.0
@@ -1953,7 +1954,7 @@ module module_physics_driver
 !          if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
 !        enddo
 
-        call gwdc_prerun (im, levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
+        call gwdc_pre_run (im, levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
 
 
 !       do i = 1, im
@@ -2054,7 +2055,7 @@ module module_physics_driver
 
 
 ! GSK 9/26/2017:
-! Move this portion into gwdc_postrun(...)
+! Move this portion into gwdc_post_run(...)
 !!  --- ...  write out cloud top stress and wind tendencies
 !
 !        if (Model%lssav) then
@@ -2082,7 +2083,7 @@ module module_physics_driver
 !!    &,' k=',k
 !        enddo
 
-        call gwdc_postrun (                                                &
+        call gwdc_post_run (                                                &
              im, levs, Model%lssav, Model%ldiag3d, dtf, dtp, con_cp,       & 
              dusfcg, dvsfcg, gwdcu, gwdcv,                                 &
              Diag%dugwd, Diag%dvgwd, Diag%du3dt(:,:,4), Diag%dv3dt(:,:,4), &
