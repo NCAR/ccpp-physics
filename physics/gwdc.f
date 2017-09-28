@@ -150,7 +150,7 @@
 !! |----------------|-----------------------------------------------------------|--------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                                             | index      | 0    | integer | default   | in     | F        |
 !! | ix             | horizontal_dimension                                      | horizontal dimension                                               | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_dimension                                      | horizontal dimension                                               | index      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                                    | horizontal dimension                                               | index      | 0    | integer | default   | in     | F        |
 !! | km             | vertical_dimension                                        | number of vertical layers                                          | index      | 0    | integer | default   | in     | F        |
 !! | lat            | latitude_index_in_debug_printouts                         | latitude index in debug printouts                                  | index      | 0    | integer | default   | in     | F        |
 !! | u1             | x_wind                                                    | zonal wind                                                         | m s-1      | 2    | real    | kind_phys | in     | F        |
