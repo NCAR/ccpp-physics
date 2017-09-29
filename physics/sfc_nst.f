@@ -45,8 +45,8 @@
 !!| stress         | surface_wind_stress                                         | wind stress                                    | m2 s-2     | 1    | real    | kind_phys | in     | F        |
 !!| sfcemis        | surface_longwave_emissivity                                 | surface longwave emissivity                    | frac       | 1    | real    | kind_phys | in     | F        |
 !!| dlwflx         | surface_downwelling_longwave_flux                           | total sky surface downward longwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
-!!| sfcnsw         ! net_downward_shortwave_flux_at_sea_water_surface            ! total sky sfc netsw flx into ocean             ! W m-2      ! 1    ! real    ! kind_phys ! in     ! F        !
-!!| rain           ! rainfall_flux                                               ! rainfall rate                                  ! kg m-2 s-1 ! 1    ! real    ! kind_phys ! in     ! F        !
+!!| sfcnsw         ! surface_net_downward_shortwave_flux                         ! total sky sfc netsw flx into ocean             ! W m-2      ! 1    ! real    ! kind_phys ! in     ! F        !
+!!| rain           ! precipitation_amount_in_one_dynamics_time_step              ! rainfall rate                                  ! kg m-2 s-1 ! 1    ! real    ! kind_phys ! in     ! F        !
 !!| timestep       ! timestep                                                    ! timestep interval                              ! s          ! 0    ! real    ! kind_phys ! in     ! F        !
 !!| kdt            ! index_of_time_step                                          ! time step counter                              ! count      ! 0    ! integer !           ! in     ! F        !
 !!| solhr          ! forecast_hour                                               ! fcst hour at the end of prev time step         ! none       ! 0    ! real    ! kind_phys ! in     ! F        !
@@ -60,7 +60,7 @@
 !!| lprnt          | flag_print                                                  | flag for printing diagnostics to output        | flag       | 0    | logical |           | in     | F        |
 !!| ipr            | horizontal_index_of_printed_column                          | horizontal index of printed column             | index      | 0    | integer |           | in     | F        |
 !!| tskin          | surface_temperature                                         | ocean surface skin temperature                 | K          | 1    | real    | kind_phys | inout  | F        |
-!!| tsurf          | surface_temperature_after_iteration                         | ocean surface skin temperature for guess run   | K          | 1    | real    | kind_phys | inout  | F        |
+!!| tsurf          | surface_skin_temperature_after_iteration                    | ocean surface skin temperature for guess run   | K          | 1    | real    | kind_phys | inout  | F        |
 !!| xt             ! diurnal thermocline layer_heat_content                      ! heat content in diurnal thermocline layer      ! K m        ! 1    ! real    ! kind_phys | inout  | F        |
 !!| xs             ! sea_water_salinity                                          ! salinity  content in diurnal thermocline layer ! ppt m      ! 1    ! real    ! kind_phys | inout  | F        |
 !!| xu             ! diurnal_thermocline_layer_x_current                         ! u-current content in diurnal thermocline layer ! m2 s-1     ! 1    ! real    ! kind_phys | inout  | F        |
