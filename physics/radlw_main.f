@@ -455,10 +455,13 @@
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
-     &       clouds,icseed,aeraod,aerssa,sfemis,sfgtmp,                 &
-     &       npts, nlay, nlp1, lprnt,                                   &
+     &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
+     &       npts, nlay, nlp1, lprnt, cld_cf,                           &
      &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
-     &       HLW0,HLWB,FLXPRF                                           &   !! ---  optional
+     &       HLW0,HLWB,FLXPRF,                                          &   !! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od                                                     &
      &     )
 
 !! \section arg_table_swrad
@@ -497,8 +500,6 @@
 !! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | W m-2   |    3 | real        | kind_phys | out    | T        |
 !! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
 !! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
-!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
-!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
 !! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -694,7 +695,11 @@
      &     gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,  &
      &     gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
+      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow, cld_od
+
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp
@@ -894,21 +899,21 @@
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
-              cldfrc(k)= clouds(iplon,k1,1)
-              clwp(k)  = clouds(iplon,k1,2)
-              relw(k)  = clouds(iplon,k1,3)
-              ciwp(k)  = clouds(iplon,k1,4)
-              reiw(k)  = clouds(iplon,k1,5)
-              cda1(k)  = clouds(iplon,k1,6)
-              cda2(k)  = clouds(iplon,k1,7)
-              cda3(k)  = clouds(iplon,k1,8)
-              cda4(k)  = clouds(iplon,k1,9)
+              cldfrc(k)= cld_cf(iplon,k1)
+              clwp(k)  = cld_lwp(iplon,k1)
+              relw(k)  = cld_ref_liq(iplon,k1)
+              ciwp(k)  = cld_iwp(iplon,k1)
+              reiw(k)  = cld_ref_ice(iplon,k1)
+              cda1(k)  = cld_rwp(iplon,k1)
+              cda2(k)  = cld_ref_rain(iplon,k1)
+              cda3(k)  = cld_swp(iplon,k1)
+              cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
-              cldfrc(k)= clouds(iplon,k1,1)
-              cda1(k)  = clouds(iplon,k1,2)
+              cldfrc(k)= cld_cf(iplon,k1)
+              cda1(k)  = cld_od(iplon,k1)
             enddo
           endif                      ! end if_ilwcliq
 
@@ -999,20 +1004,20 @@
 
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
-              cldfrc(k)= clouds(iplon,k,1)
-              clwp(k)  = clouds(iplon,k,2)
-              relw(k)  = clouds(iplon,k,3)
-              ciwp(k)  = clouds(iplon,k,4)
-              reiw(k)  = clouds(iplon,k,5)
-              cda1(k)  = clouds(iplon,k,6)
-              cda2(k)  = clouds(iplon,k,7)
-              cda3(k)  = clouds(iplon,k,8)
-              cda4(k)  = clouds(iplon,k,9)
+              cldfrc(k)= cld_cf(iplon,k)
+              clwp(k)  = cld_lwp(iplon,k)
+              relw(k)  = cld_ref_liq(iplon,k)
+              ciwp(k)  = cld_iwp(iplon,k)
+              reiw(k)  = cld_ref_ice(iplon,k)
+              cda1(k)  = cld_rwp(iplon,k)
+              cda2(k)  = cld_ref_rain(iplon,k)
+              cda3(k)  = cld_swp(iplon,k)
+              cda4(k)  = cld_ref_snow(iplon,k)
             enddo
           else                       ! use diagnostic cloud method
             do k = 1, nlay
-              cldfrc(k)= clouds(iplon,k,1)
-              cda1(k)  = clouds(iplon,k,2)
+              cldfrc(k)= cld_cf(iplon,k)
+              cda1(k)  = cld_od(iplon,k)
             enddo
           endif                      ! end if_ilwcliq
 

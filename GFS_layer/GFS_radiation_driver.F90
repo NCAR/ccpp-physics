@@ -2038,22 +2038,54 @@
 
             ! Compute LW heating rates and fluxes.
           if (Model%lwhtr) then
-            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-               gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-               gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-               gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-               clouds, Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
-                        tsfg, im, lmk, lmp, Model%lprnt,             &
-                        htlwc, Diag%topflw, Radtend%sfcflw,          &        !  ---  outputs
-                        hlw0=htlw0)                                           !  ---  optional
+            if (ilwcliq > 0 ) then
+              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
+                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
+                 hlw0=htlw0,                                           & !  ---  optional output
+                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
+                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
+                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
+                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+
+            else
+              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
+                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
+                 hlw0=htlw0,                                           & !  ---  optional output
+                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
+            end if
           else
-            call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-               gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-               gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-               gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-               clouds, Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
-                        tsfg, im, lmk, lmp, Model%lprnt,             &
-                        htlwc, Diag%topflw, Radtend%sfcflw)                   !  ---  outputs
+            if (ilwcliq > 0 ) then
+              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
+                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
+                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
+                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
+                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
+                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+            else
+              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
+                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
+                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
+            end if
           end if
 
             ! Save calculation results
