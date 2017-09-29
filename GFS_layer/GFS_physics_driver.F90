@@ -10,6 +10,7 @@ module module_physics_driver
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
   use gfs_fv3_needs,         only: get_prs_fv3, get_phi_fv3
   use module_nst_water_prop, only: get_dtzm_2d
+  use sasas_shal,            only: sasasshal_run
   use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type, &
                                    GFS_sfcprop_type, GFS_coupling_type, &
                                    GFS_control_type, GFS_grid_type,     &
@@ -2113,8 +2114,9 @@ module module_physics_driver
             endif
 
           elseif (Model%imfshalcnv == 2) then
-            call mfshalcnv (im, ix, levs, dtp, del, Statein%prsl,         &
-                            Statein%pgr, Statein%phil, clw, Stateout%gq0, &
+            call sasasshal_run (im, ix, levs, dtp, del, Statein%prsl,     &
+                            Statein%pgr, Statein%phil, clw(:,:,1),        &
+                            clw(:,:,2), Stateout%gq0(:,:,1),              &
                             Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
                             rain1, kbot, ktop, kcnv, islmsk, garea,       &
                             Statein%vvl, Model%ncld, DIag%hpbl, ud_mf,    &

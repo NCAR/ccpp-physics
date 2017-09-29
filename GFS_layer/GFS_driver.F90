@@ -250,69 +250,41 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
     !--- local variables
-    integer :: nb, nblks
+    integer :: nblks
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-    nblks = size(blksz)
+
+      ! Set the value of nblks
+    call Set_nblks (nblks)
+
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
-    rinc(1:5)   = 0
-    call w3difdat(Model%jdat,Model%idat,4,rinc)
-    sec = rinc(4)
-    Model%phour = sec/con_hr
-    !--- set current bucket hour
-    Model%zhour = Model%phour
-    Model%fhour = (sec + Model%dtp)/con_hr
-    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+    call Update_cal_and_triggers (Model, rinc, sec)
 
-    Model%ipt    = 1
-    Model%lprnt  = .false.
-    Model%lssav  = .true.
+      !--- set current bucket hour
+    call Set_bucket_hour (Model, sec)
 
-    !--- radiation triggers
-    Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-    Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+      !--- radiation triggers
+    call Set_radiation_triggers (Model)
 
     !--- set the solar hour based on a combination of phour and time initial hour
-    Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+    call Set_solar_h (Model)
 
-    if ((Model%debug) .and. (Model%me == Model%master)) then
-      print *,'   sec ', sec
-      print *,'   kdt ', Model%kdt
-      print *,' nsswr ', Model%nsswr
-      print *,' nslwr ', Model%nslwr
-      print *,' nscyc ', Model%nscyc
-      print *,' lsswr ', Model%lsswr
-      print *,' lslwr ', Model%lslwr
-      print *,' fhour ', Model%fhour
-      print *,' phour ', Model%phour
-      print *,' solhr ', Model%solhr
-    endif
+      ! Print debug info
+    call Print_debug_info (Model, sec)
 
     !--- radiation time varying routine
-    if (Model%lsswr .or. Model%lslwr) then
-      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
-    endif
+    call Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
 
     !--- physics time varying routine
     call GFS_phys_time_vary (Model, Grid, Tbd)
 
     !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    if (Model%nscyc >  0) then
-      if (mod(Model%kdt,Model%nscyc) == 1) THEN
-        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
-      endif
-    endif
+    call Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
 
     !--- determine if diagnostics buckets need to be cleared
-    if (mod(Model%kdt,Model%nszero) == 1) then
-      do nb = 1,nblks
-        call Diag(nb)%rad_zero  (Model)
-        call Diag(nb)%phys_zero (Model)
-    !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-      enddo
-    endif
+    call Clear_buckets (Model, Diag, nblks)
 
   end subroutine GFS_time_vary_step
 
@@ -581,6 +553,162 @@ module GFS_driver
     enddo
 
   end subroutine GFS_grid_populate
+
+
+    ! Subroutines added by PAJ
+
+  subroutine Set_nblks (nblks)
+
+    implicit none
+
+    integer, intent(out) :: nblks
+
+      ! blksz is a global var
+    nblks = size(blksz)
+
+  end subroutine Set_nblks
+
+
+  subroutine Update_cal_and_triggers (Model, rinc, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(inout) :: rinc(:)
+    real(kind=kind_phys),   intent(inout) :: sec
+
+
+    rinc(1:5) = 0
+    call W3difdat (Model%jdat, Model%idat, 4, rinc)
+    sec = rinc(4)
+    Model%phour = sec/con_hr
+
+  end subroutine Update_cal_and_triggers
+
+
+  subroutine Set_bucket_hour (Model, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    Model%zhour = Model%phour
+     ! con_hr is a global var
+    Model%fhour = (sec + Model%dtp)/con_hr
+    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+
+    Model%ipt    = 1
+    Model%lprnt  = .false.
+    Model%lssav  = .true.
+
+  end subroutine Set_bucket_hour
+
+
+  subroutine Set_radiation_triggers (Model)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+
+    Model%lsswr = (mod (Model%kdt, Model%nsswr) == 1)
+    Model%lslwr = (mod (Model%kdt, Model%nslwr) == 1)
+
+  end subroutine Set_radiation_triggers
+
+
+  subroutine Set_solar_h (Model)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+
+      ! con_24 is a global variable
+    Model%solhr  = mod (Model%phour + Model%idate(1), con_24)
+
+  end subroutine Set_solar_h
+
+
+  subroutine Print_debug_info (Model, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    if ((Model%debug) .and. (Model%me == Model%master)) then
+      print *,'   sec ', sec
+      print *,'   kdt ', Model%kdt
+      print *,' nsswr ', Model%nsswr
+      print *,' nslwr ', Model%nslwr
+      print *,' nscyc ', Model%nscyc
+      print *,' lsswr ', Model%lsswr
+      print *,' lslwr ', Model%lslwr
+      print *,' fhour ', Model%fhour
+      print *,' phour ', Model%phour
+      print *,' solhr ', Model%solhr
+    endif
+
+  end subroutine Print_debug_info
+
+
+  subroutine Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
+
+    implicit none
+
+    type(GFS_control_type), intent(inout) :: Model
+    type(GFS_statein_type), intent(in)    :: Statein(:)
+    type(GFS_tbd_type),     intent(inout) :: Tbd(:)
+    real(kind=kind_phys),   intent(in)    :: sec
+
+    if (Model%lsswr .or. Model%lslwr) then
+      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
+    endif
+
+  end subroutine Gfs_rad_time_vary_driver
+
+
+  subroutine Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
+
+    implicit none
+
+    integer,                intent(in)    :: nblks
+    type(GFS_control_type), intent(in)    :: Model
+    type(GFS_grid_type),    intent(in)    :: Grid(nblks)
+    type(GFS_sfcprop_type), intent(inout) :: Sfcprop(nblks)
+    type(GFS_cldprop_type), intent(inout) :: Cldprop(nblks)
+
+
+    if (Model%nscyc >  0) then
+      if (mod (Model%kdt, Model%nscyc) == 1) then
+        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+      end if
+    end if
+
+  end subroutine Gcycle_driver
+
+
+  subroutine Clear_buckets (Model, Diag, nblks)
+
+    implicit none
+
+    type(GFS_control_type), intent(in)    :: Model
+    type(GFS_diag_type),    intent(inout) :: Diag(:)
+    integer,                intent(in)    :: nblks
+
+      ! Local vars
+    integer :: nb
+
+
+    if (mod (Model%kdt, Model%nszero) == 1) then
+      do nb = 1, nblks
+        call Diag(nb)%rad_zero  (Model)
+        call Diag(nb)%phys_zero (Model)
+      enddo
+    endif
+
+  end subroutine Clear_buckets
+
 
 end module GFS_driver
 
