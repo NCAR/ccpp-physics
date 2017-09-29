@@ -485,7 +485,6 @@
 !! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
 !! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
 !! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
-!! | clouds
 !! | sfemis          | surface_emissivity                      | surface emissivity                                     |         |    1 | real        | kind_phys | in     | F        |
 !! | sfgtmp          | surface_groud_temperature               | surface ground temperature                             | K       |    1 | real        | kind_phys | in     | F        |
 !! | npts            | horizontal_dimension                    | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
@@ -493,13 +492,12 @@
 !! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
 !! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
-!! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | k s-1???|    2 | real        | kind_phys | out    | F        |
+!! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | K s-1???|    2 | real        | kind_phys | out    | F        |
 !! | topflx          | lw_fluxes_top_atmosphere                | longwave total sky fluxes at the top of the atm        | W m-2   |    1 | topflw_type | kind_phys | out    | F        |
 !! | sfcflx          | lw_fluxes_sfc                           | longwave total sky fluxes at the Earth surface         | W m-2   |    1 | sfcflw_type | kind_phys | out    | F        |
-!! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | W m-2   |    2 | real        | kind_phys | out    | T        |
-!! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | W m-2   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
-!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+!! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | K s-1???|    2 | real        | kind_phys | out    | T        |
+!! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | K s-1???|    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | lw_fluxes                               | lw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | proflw_type | kind_phys | out    | T        |
 !! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -508,6 +506,7 @@
 !! | cld_ref_rain    | effective_radious_rain_hydrometeor      | effective radious rain hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !

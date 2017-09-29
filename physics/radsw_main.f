@@ -632,13 +632,10 @@
 !! | hswc            | sw_heating_rate_total_sky               | shortwave total sky heating rate                       | k s-1???|    2 | real        | kind_phys | out    | F        |
 !! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
 !! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
-!! | hsw0            | sw_heating_rate_csk                     | shortwave clear sky heating rate                       | W m-2   |    2 | real        | kind_phys | out    | T        |
-!! | hswb            | sw_heating_rate_spectral                | shortwave total sky heating rate (spectral)            | W m-2   |    3 | real        | kind_phys | out    | T        |
+!! | hsw0            | sw_heating_rate_csk                     | shortwave clear sky heating rate                       | K s-1???|    2 | real        | kind_phys | out    | T        |
+!! | hswb            | sw_heating_rate_spectral                | shortwave total sky heating rate (spectral)            | K s-1???|    3 | real        | kind_phys | out    | T        |
 !! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
 !! | fdncmp          | sw_fluxes_down_components_sfc           | componenets of the downward sw fluxes at the surface   | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
-!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
-!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
-!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
 !! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -647,6 +644,9 @@
 !! | cld_ref_rain    | effective_radious_rain_hydrometeor      | effective radious rain hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
 
 
 !  ====================  defination of variables  ====================  !
