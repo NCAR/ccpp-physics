@@ -10,21 +10,7 @@
 
       end
 
-      subroutine sfc_nst_run                                            &
-!...................................
-!  ---  inputs:
-     &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
-     &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
-     &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
-     &       nstf_name5, lprnt, ipr,                                    &
-!  --- input/output
-     &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
-     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
-!  ---  outputs:
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &
-     &      )
-
+!!\section arg_table_sfc_nst_run
 !!| local var name | longname                                                    | description                                    | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|----------------------------------------------- |------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1             | index      | 0    | integer |           | in     | F        |
@@ -85,8 +71,20 @@
 !!| evap           | surface_upward_latent_heat_flux                             | evaperation from latent heat flux              | W m-2      | 1    | real    | kind_phys |   out  | F        |
 !!| hflx           | surface_upward_sensible_heat_flux                           | sensible heat flux                             | W m-2      | 1    | real    | kind_phys |   out  | F        |
 !!| ep             | surface_upward_potential_latent_heat_flux                   | potential evaporation                          | W m-2      | 1    | real    | kind_phys |   out  | F        |
-
-
+      subroutine sfc_nst_run                                            &
+!...................................
+!  ---  inputs:
+     &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
+     &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
+     &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
+     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
+     &       nstf_name5, lprnt, ipr,                                    &
+!  --- input/output
+     &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
+     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
+!  ---  outputs:
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &
+     &      )
 
 ! ===================================================================== !
 !  description:                                                         !
