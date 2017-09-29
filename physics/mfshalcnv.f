@@ -3,15 +3,8 @@
 
       subroutine sasasshal_init
       end subroutine sasasshal_init
-
-      subroutine sasasshal_finalize
-      end subroutine sasasshal_finalize
-
-      subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,
-     &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
-!    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
 !
+!! \section arg_table_sasasshal_run
 !! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
@@ -41,6 +34,11 @@
 !! | dt_mf          | atmosphere_updraft_convective_mass_flux_at_cloud_top  | ud_mf at cloud top                 | kg m-2  | 2    | real    | kind_phys | out    | F        |
 !! | cnvw           | atmosphere_convective_cloud_water_specific_humidity   | convective cloud water             | kg kg-1 | 2    | real    | kind_phys | out    | F        |
 !! | cnvc           | cloud_binary_mask                                     | convective cloud cover             | flag    | 2    | real    | kind_phys | out    | F        |
+!!
+      subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,
+     &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,
+     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
+!    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
 
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -1479,5 +1477,8 @@ c
 !!
       return
       end subroutine sasasshal_run
+
+      subroutine sasasshal_finalize
+      end subroutine sasasshal_finalize
 
       end module sasas_shal
