@@ -35,8 +35,8 @@
 !! | km             | vertical_dimension                                     | vertical layer dimension                           | index         |    0 | integer |           | in     | F        |
 !! | ntrac          | number_of_vertical_diffusion_tracers                   | number of tracers to diffuse vertically            | count         |    0 | integer |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array             | index         |    0 | integer |           | in     | F        |
-!! | dv             | tendency_of_y_wind                                     | updated tendency of the y wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
-!! | du             | tendency_of_x_wind                                     | updated tendency of the x wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
+!! | dv             | tendency_of_y_wind_due_to_model_physics                | updated tendency of the y wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
+!! | du             | tendency_of_x_wind_due_to_model_physics                | updated tendency of the x wind                     | m s-2         |    2 | real    | kind_phys | inout  | F        |
 !! | tau            | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                | K s-1         |    2 | real    | kind_phys | inout  | F        |
 !! | rtg            | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                    | kg kg-1 s-1   |    3 | real    | kind_phys | inout  | F        |
 !! | u1             | x_wind                                                 | x component of layer wind                          | m s-1         |    2 | real    | kind_phys | in     | F        |
@@ -58,8 +58,8 @@
 !! | heat           | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | K m s-1       |    1 | real    | kind_phys | in     | F        |
 !! | evap           | evaporation_from_surface_upward_latent_heat_flux       | evaporation from surface upward latent heat flux   | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                    | surface wind stress                                | m2 s-2        |    1 | real    | kind_phys | in     | F        |
-!! | spd1           | surface_wind_speed                                     | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_for_top_of_atmosphere_boundary_layer    | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
+!! | spd1           | wind_speed_at_lowest_model_layer                       | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | kpbl           | vertical_index_of_top_of_atmosphere_boundary_layer     | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
 !! | prsi           | air_pressure_at_interface                              | air pressure at model layer interfaces             | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers              | pres(k) - pres(k+1)                                | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                           | mean layer pressure                                | Pa            |    2 | real    | kind_phys | in     | F        |
