@@ -53,18 +53,18 @@
 !! | v10m           | y_wind_at_10m                                          | y component of wind at 10 m                        | m s-1         |    1 | real    | kind_phys | in     | F        |
 !! | fm             | Monin-Obukhov_similarity_parameter_for_momentum        | Monin-Obukhov similarity parameter for momentum    | none          |    1 | real    | kind_phys | in     | F        |
 !! | fh             | Monin-Obukhov_similarity_parameter_for_heat            | Monin-Obukhov similarity parameter for heat        | none          |    1 | real    | kind_phys | in     | F        |
-!! | tsea           | surface_temperature                                    | surface temperature                                | K             |    1 | real    | kind_phys | in     | F        |
+!! | tsea           | surface_skin_temperature                               | surface temperature                                | K             |    1 | real    | kind_phys | in     | F        |
 !! | qss            | saturation_specific_humidity_at_the_surface            | surface saturation specific humidity               | kg kg-1       |    1 | real    | kind_phys | in     | F        |
 !! | heat           | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | K m s-1       |    1 | real    | kind_phys | in     | F        |
 !! | evap           | evaporation_from_surface_upward_latent_heat_flux       | evaporation from surface upward latent heat flux   | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                    | surface wind stress                                | m2 s-2        |    1 | real    | kind_phys | in     | F        |
-!! | spd1           | wind_speed_at_lowest_model_level                       | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | kpbl           | model_level_number_at_top_of_atmosphere_boundary_layer | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
-!! | prsi           | air_pressure_at_model_layer_interfaces                 | air pressure at model layer interfaces             | Pa            |    2 | real    | kind_phys | in     | F        |
-!! | del            | air_pressure_layer_difference                          | pres(k) - pres(k+1)                                | Pa            |    2 | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure_layer                                     | mean layer pressure                                | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | spd1           | surface_wind_speed                                     | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | kpbl           | vertical_index_for_top_of_atmosphere_boundary_layer    | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
+!! | prsi           | air_pressure_at_interface                              | air pressure at model layer interfaces             | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | del            | air_pressure_difference_between_midlayers              | pres(k) - pres(k+1)                                | Pa            |    2 | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                           | mean layer pressure                                | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | prslk          | dimensionless_exner_function                           | Exner function at layers                           | none          |    2 | real    | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interfaces                             | geopotential at model layer interfaces             | m2 s-2        |    2 | real    | kind_phys | in     | F        |
+!! | phii           | geopotential_at_interface                              | geopotential at model layer interfaces             | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | phil           | geopotential                                           | geopotential at model layer centers                | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | delt           | time_step_for_physics                                  | time step for physics                              | s             |    0 | real    | kind_phys | in     | F        |
 !! | dspheat        | flag_TKE_dissipation_heating                           | flag for using TKE dissipation heating             | flag          |    0 | logical |           | in     | F        |
@@ -1243,6 +1243,7 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       return
       end
+
 c-----------------------------------------------------------------------
 !>  \ingroup PBL
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
