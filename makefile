@@ -168,8 +168,11 @@ $(LIBRARY): $(OBJS)
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
 
-./radiation_aerosols.o : ./gfsphys/radiation_aerosols.f
+./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
+
+./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
 
 .PHONY: clean
 clean:
