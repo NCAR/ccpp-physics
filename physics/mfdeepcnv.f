@@ -1,5 +1,24 @@
-      subroutine mfdeepcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,
-     &     q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
+!>  \file mfdeepcnv.f
+!!  This file contains the Scale-Aware Simplified Arakawa-Schubert deep convection parameterization.
+
+!> \defgroup SASAS Scale-Aware Simplified Arakawa-Schubert Deep Convection
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_SASAS_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
+      subroutine mfdeepcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,        &
+     &     q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,          &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
 !
       use machine , only : kind_phys
@@ -10,20 +29,18 @@
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
-      integer            im, ix,  km, ncloud,
-     &                   kbot(im), ktop(im), kcnv(im) 
+      integer            im, ix,  km, ncloud,                           &
+     &                   kbot(im), ktop(im), kcnv(im)
 !    &,                  me
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
-      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),
-     &                     u1(ix,km),  v1(ix,km),
-!    &                     u1(ix,km),  v1(ix,km),   rcs(im),
-     &                     cldwrk(im), rn(im),      garea(im),
-     &                     dot(ix,km), phil(ix,km),
-     &                     cnvw(ix,km),cnvc(ix,km),
-! hchuang code change mass flux output
-     &                     ud_mf(im,km),dd_mf(im,km),dt_mf(im,km)
+      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
+     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),          &
+     &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
+     &                     cldwrk(im), rn(im),      garea(im),          &
+     &                     dot(ix,km), phil(ix,km),                     &
+     &                     cnvw(ix,km),cnvc(ix,km),                     &
+     &                     ud_mf(im,km),dd_mf(im,km),dt_mf(im,km) ! hchuang code change mass flux output
 !
       integer              i, indx, jmn, k, kk, km1, n
       integer, dimension(im), intent(in) :: islimsk
@@ -32,7 +49,7 @@
       real(kind=kind_phys) clam,    cxlamu,  cxlamd,
      &                     xlamde,  xlamdd,
      &                     crtlamu, crtlamd
-! 
+!
 !     real(kind=kind_phys) detad
       real(kind=kind_phys) adw,     aup,     aafac,
      &                     beta,    betal,   betas,
@@ -41,7 +58,7 @@
      &                     dellat,  delta,   desdt,   dg,
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
-     &                     dt2,     dtmax,   dtmin,   
+     &                     dt2,     dtmax,   dtmin,
      &                     dxcrtas, dxcrtuf,
      &                     dv1h,    dv2h,    dv3h,
      &                     dv1q,    dv2q,    dv3q,
@@ -50,7 +67,7 @@
      &                     es,      etah,
      &                     cthk,    dthk,
      &                     evef,    evfact,  evfactl, fact1,
-     &                     fact2,   factor,  
+     &                     fact2,   factor,
      &                     g,       gamma,   pprime,  cm,
      &                     qlk,     qrch,    qs,
      &                     rain,    rfact,   shear,   tfac,
@@ -77,7 +94,7 @@
      &                     delqbar(im), delqev(im), deltbar(im),
      &                     deltv(im),   dtconv(im), edt(im),
      &                     edto(im),    edtx(im),   fld(im),
-     &                     hcdo(im,km), hmax(im),   hmin(im), 
+     &                     hcdo(im,km), hmax(im),   hmin(im),
      &                     ucdo(im,km), vcdo(im,km),aa2(im),
      &                     pdot(im),    po(im,km),
      &                     pwavo(im),   pwevo(im),  mbdt(im),
@@ -109,7 +126,7 @@ c  physical parameters
 !      cx = min([-0.7 ln(Nccn) + 24]*1.e-4, c0s)
 !      Nccn: CCN number concentration in cm^(-3)
 !      Until a realistic Nccn is provided, typical Nccns are assumed
-!      as Nccn=100 for sea and Nccn=7000 for land 
+!      as Nccn=100 for sea and Nccn=7000 for land
 !
       parameter(cm=1.0,delta=fv)
       parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
@@ -130,7 +147,7 @@ c  physical parameters
 c  cloud water
 !     real(kind=kind_phys) tvo(im,km)
       real(kind=kind_phys) qlko_ktcon(im), dellal(im,km), tvo(im,km),
-     &                     dbyo(im,km),    zo(im,km),     
+     &                     dbyo(im,km),    zo(im,km),
      &                     xlamue(im,km),  xlamud(im,km),
      &                     fent1(im,km),   fent2(im,km),  frh(im,km),
      &                     heo(im,km),     heso(im,km),
@@ -274,9 +291,9 @@ c     evef    = 0.07
 !     pgcon   = 0.7     ! Gregory et al. (1997, QJRMS)
       pgcon   = 0.55    ! Zhang & Wu (2003,JAS)
 !
-      w1l     = -8.e-3 
+      w1l     = -8.e-3
       w2l     = -4.e-2
-      w3l     = -5.e-3 
+      w3l     = -5.e-3
       w4l     = -5.e-4
       w1s     = -2.e-4
       w2s     = -2.e-3
@@ -292,7 +309,7 @@ c
         kmax(i)  = km
         tx1(i)   = 1.0 / ps(i)
       enddo
-!     
+!
       do k = 1, km
         do i=1,im
           if (prsl(i,k)*tx1(i) > 0.04) kmax(i)  = k + 1
@@ -307,7 +324,7 @@ c
       enddo
 c
 c  hydrostatic height assume zero terr and initially assume
-c    updraft entrainment rate as an inverse function of height 
+c    updraft entrainment rate as an inverse function of height
 c
       do k = 1, km
         do i=1,im
@@ -759,7 +776,7 @@ c
           else
             tem = 0.
           endif
- 
+
           val1    =            -1.
           tem = max(tem,val1)
           val2    =             1.
@@ -994,7 +1011,7 @@ c
       if(totflg) return
 !!
 c
-c  estimate the onvective overshooting as the level 
+c  estimate the onvective overshooting as the level
 c    where the [aafac * cloud work function] becomes zero,
 c    which is the final cloud top
 c
@@ -1035,8 +1052,8 @@ c
         enddo
       enddo
 c
-c  compute cloud moisture property, detraining cloud water 
-c    and precipitation in overshooting layers 
+c  compute cloud moisture property, detraining cloud water
+c    and precipitation in overshooting layers
 c
       do k = 2, km1
         do i = 1, im
@@ -1471,14 +1488,14 @@ cj
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
               ptem1=etad(i,k)*(uo(i,k)-ucdo(i,k))
               ptem2=etad(i,k-1)*(uo(i,k-1)-ucdo(i,k-1))
-              dellau(i,k) = dellau(i,k) + 
+              dellau(i,k) = dellau(i,k) +
      &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
               ptem1=etad(i,k)*(vo(i,k)-vcdo(i,k))
               ptem2=etad(i,k-1)*(vo(i,k-1)-vcdo(i,k-1))
-              dellav(i,k) = dellav(i,k) + 
+              dellav(i,k) = dellav(i,k) +
      &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
 cj
           endif
@@ -1511,9 +1528,9 @@ c
 c
 c------- final changed variable per unit mass flux
 c
-!  if grid size is less than a threshold value (dxcrtas), 
+!  if grid size is less than a threshold value (dxcrtas),
 !    the quasi-equilibrium assumption of Arakawa-Schubert is not
-!      used any longer. 
+!      used any longer.
 !
       do i = 1, im
          asqecflg(i) = cnvflg(i)
@@ -1910,7 +1927,7 @@ c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity for the grid sizes where
 c    the quasi-equilibrium assumption of Arakawa-Schubert is not
-c      valid any longer. 
+c      valid any longer.
 c
       do i= 1, im
         if(cnvflg(i) .and. .not.asqecflg(i)) then
@@ -1923,7 +1940,7 @@ c
       enddo
 c
 c  compute cloud base mass flux using
-c    the quasi-equilibrium assumption of Arakawa-Schubert 
+c    the quasi-equilibrium assumption of Arakawa-Schubert
 c
       do i= 1, im
         if(asqecflg(i)) then
@@ -2172,7 +2189,7 @@ c
         do i = 1, im
           if (cnvflg(i) .and. rn(i) > 0.) then
             if (k >= kbcon(i) .and. k < ktcon(i)) then
-              cnvc(i,k) = 0.04 * log(1. + 675. * eta(i,k) * xmb(i)) 
+              cnvc(i,k) = 0.04 * log(1. + 675. * eta(i,k) * xmb(i))
               cnvc(i,k) = min(cnvc(i,k), 0.6)
               cnvc(i,k) = max(cnvc(i,k), 0.0)
             endif
@@ -2247,3 +2264,5 @@ c
 !!
       return
       end
+!> @}
+!> @}
