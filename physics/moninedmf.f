@@ -51,12 +51,11 @@
 !! | zorl           | surface_roughness_length                               | surface roughness length in cm                     | cm            |    1 | real    | kind_phys | in     | F        |
 !! | u10m           | x_wind_at_10m                                          | x component of wind at 10 m                        | m s-1         |    1 | real    | kind_phys | in     | F        |
 !! | v10m           | y_wind_at_10m                                          | y component of wind at 10 m                        | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_parameter_for_momentum        | Monin-Obukhov similarity parameter for momentum    | none          |    1 | real    | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_parameter_for_heat            | Monin-Obukhov similarity parameter for heat        | none          |    1 | real    | kind_phys | in     | F        |
+!! | fm             | Monin-Obukhov_similarity_function_for_momentum         | Monin-Obukhov similarity function for momentum     | none          |    1 | real    | kind_phys | in     | F        |
+!! | fh             | Monin-Obukhov_similarity_function_for_heat             | Monin-Obukhov similarity function for heat         | none          |    1 | real    | kind_phys | in     | F        |
 !! | tsea           | surface_skin_temperature                               | surface temperature                                | K             |    1 | real    | kind_phys | in     | F        |
-!! | qss            | saturation_specific_humidity_at_the_surface            | surface saturation specific humidity               | kg kg-1       |    1 | real    | kind_phys | in     | F        |
-!! | heat           | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | K m s-1       |    1 | real    | kind_phys | in     | F        |
-!! | evap           | evaporation_from_surface_upward_latent_heat_flux       | evaporation from surface upward latent heat flux   | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
+!! | heat           | kinematic_surface_upward_sensible_heat_flux            | kinematic surface upward sensible heat flux        | K m s-1       |    1 | real    | kind_phys | in     | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux              | kinematic surface upward latent heat flux          | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                    | surface wind stress                                | m2 s-2        |    1 | real    | kind_phys | in     | F        |
 !! | spd1           | wind_speed_at_lowest_model_layer                       | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
 !! | kpbl           | vertical_index_of_top_of_atmosphere_boundary_layer     | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
@@ -72,7 +71,7 @@
 !! | dvsfc          | y_momentum_flux                                        | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
 !! | dtsfc          | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | W m-2         |    1 | real    | kind_phys | out    | F        |
 !! | dqsfc          | surface_upward_latent_heat_flux                        | surface upward latent heat flux                    | W m-2         |    1 | real    | kind_phys | out    | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                    | PBL thickness                                       | m             |    1 | real    | kind_phys | out    | F        |
+!! | hpbl           | atmosphere_boundary_layer_thickness                    | PBL thickness                                      | m             |    1 | real    | kind_phys | out    | F        |
 !! | hgamt          | countergradient_mixing_term_for_temperature            | countergradient mixing term for temperature        | K             |    1 | real    | kind_phys | out    | F        |
 !! | hgamq          | countergradient_mixing_term_for_water_vapor            | countergradient mixing term for water vapor        | kg kg-1       |    1 | real    | kind_phys | out    | F        |
 !! | dkt            | atmosphere_heat_diffusivity                            | diffusivity for heat                               | m2 s-1        |    1 | real    | kind_phys | out    | F        |
@@ -102,7 +101,7 @@
       subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
-     &   tsea,qss,heat,evap,stress,spd1,kpbl,                           &
+     &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr)
@@ -129,7 +128,7 @@
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
-     &                     tsea(im),      qss(im),                      &
+     &                     tsea(im),                                    &
      &                                    spd1(im),                     &
      &                     prsi(ix,km+1), del(ix,km),                   &
      &                     prsl(ix,km),   prslk(ix,km),                 &
