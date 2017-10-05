@@ -1,3 +1,22 @@
+!>  \file sfc_drv.f
+!!  This file contains the NOAH land surface scheme.
+
+!> \defgroup NOAH NOAH Land Surface
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_Noah_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -105,20 +124,16 @@
 
 !-----------------------------------
       subroutine sfc_drv                                                &
-!...................................
-!  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, islimsk, ddvel, slopetyp,               &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
-     &       isot, ivegsrc,                                             &
-!  ---  in/outs:
+     &       isot, ivegsrc,                                             & !  ---  inputs from here and above
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-     &       canopy, trans, tsurf, zorl,                                &
-!  ---  outputs:
+     &       canopy, trans, tsurf, zorl,                                & ! --- in/outs from here and above
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1                                     &
+     &       smcwlt2, smcref2, wet1                                     & ! -- outputs from here and above
      &     )
 !
       use machine , only : kind_phys
@@ -170,7 +185,7 @@
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
      &       zorl, wet1
-    
+
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, theta1, wind, weasd_old, snwdph_old,              &
@@ -192,7 +207,7 @@
      &       snomlt, sncovr, soilw, soilm, ssoil, tsea, th2, tbot,      &
      &       xlai, zlvl, swdn, tem,z0
 
-      integer :: couple, ice, nsoil, nroot, slope, stype, vtype 
+      integer :: couple, ice, nsoil, nroot, slope, stype, vtype
       integer :: i, k
 
       logical :: flag(im)
@@ -245,7 +260,7 @@
         endif
       enddo
 
-!  --- ...  initialize variables 
+!  --- ...  initialize variables
 
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
@@ -276,8 +291,8 @@
 !  --- ...  noah: prepare variables to run noah lsm
 !   1. configuration information (c):
 !      ------------------------------
-!    couple  - couple-uncouple flag (=1: coupled, =0: uncoupled) 
-!    ffrozp  - flag for snow-rain detection (1.=snow, 0.=rain)                
+!    couple  - couple-uncouple flag (=1: coupled, =0: uncoupled)
+!    ffrozp  - flag for snow-rain detection (1.=snow, 0.=rain)
 !    ice     - sea-ice flag (=1: sea-ice, =0: land)
 !    dt      - timestep (sec) (dt should not exceed 3600 secs) = delt
 !    zlvl    - height (m) above ground of atmospheric forcing variables
@@ -316,9 +331,9 @@
           solnet = snet(i)           !..net sw rad flx (dn-up) at sfc in w/m2
           sfcems = sfcemis(i)
 
-          sfcprs = prsl1(i) 
+          sfcprs = prsl1(i)
           prcp   = rhoh2o * tprcp(i) / delt
-          sfctmp = t1(i)  
+          sfctmp = t1(i)
           th2    = theta1(i)
           q2     = q0(i)
 
@@ -349,9 +364,9 @@
           slope = slopetyp(i)
           shdfac= sigmaf(i)
 
-          shdmin1d = shdmin(i)   
-          shdmax1d = shdmax(i)     
-          snoalb1d = snoalb(i)    
+          shdmin1d = shdmin(i)
+          shdmax1d = shdmax(i)
+          snoalb1d = snoalb(i)
 
           ptu  = 0.0
           alb  = sfalb(i)
@@ -403,13 +418,13 @@
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
 !  ---  input/outputs:
      &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &
-     &       z0,                                                        & 
+     &       z0,                                                        &
 !  ---  outputs:
      &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              &
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax) 
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
 
 !  --- ...  noah: prepare variables for return to parent mode
 !   6. output (o):
@@ -441,7 +456,7 @@
           tsurf(i)   = tsea
 
           do k = 1, km
-            stc(i,k) = stsoil(k) 
+            stc(i,k) = stsoil(k)
             smc(i,k) = smsoil(k)
             slc(i,k) = slsoil(k)
           enddo
@@ -537,7 +552,7 @@
               slc(i,k) = slc_old(i,k)
             enddo
           else
-            tskin(i) = tsurf(i)    
+            tskin(i) = tsurf(i)
           endif
         endif
       enddo
@@ -546,4 +561,5 @@
 !...................................
       end subroutine sfc_drv
 !-----------------------------------
-
+!> @}
+!> @}

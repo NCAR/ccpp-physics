@@ -2,7 +2,7 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
-!> \defgroup PBL Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux PBL and Free Atmospheric Turbulence
 !! @{
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
 !!
@@ -16,6 +16,11 @@
 !>  \brief This subroutine contains all of logic for the Hybrid EDMF PBL scheme except for the calculation of the updraft properties and mass flux.
 !!
 !!  The scheme works on a basic level by calculating background diffusion coefficients and updating them according to which processes are occurring in the column. The most important difference in diffusion coefficients occurs between those levels in the PBL and those above the PBL, so the PBL height calculation is of utmost importance. An initial estimate is calculated in a "predictor" step in order to calculate Monin-Obukhov similarity values and a corrector step recalculates the PBL height based on updated surface thermal characteristics. Using the PBL height and the similarity parameters, the diffusion coefficients are updated below the PBL top based on Hong and Pan (1996) \cite hong_and_pan_1996 (including counter-gradient terms). Diffusion coefficients in the free troposphere (above the PBL top) are calculated according to Louis (1979) \cite louis_1979 with updated Richardson number-dependent functions. If it is diagnosed that PBL top-down mixing is occurring according to Lock et al. (2000) \cite lock_et_al_2000 , then then diffusion coefficients are updated accordingly. Finally, for convective boundary layers (defined as when the Obukhov length exceeds a threshold), the counter-gradient terms are replaced using the mass flux scheme of Siebesma et al. (2007) \cite siebesma_et_al_2007 . In order to return time tendencies, a fully implicit solution is found using tridiagonal matrices, and time tendencies are "backed out." Before returning, the time tendency of temperature is updated to reflect heating due to TKE dissipation following Han et al. (2015) \cite han_et_al_2015 .
+!!
+!! \section arg_table_edmf_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
 !!
 !!  \param[in] ix horizontal dimension
 !!  \param[in] im number of used points
@@ -150,7 +155,7 @@
      &                     govrth(im),  hrad(im),                       &
 !    &                     hradm(im),   radmin(im),   vrad(im),         &
      &                     radmin(im),  vrad(im),                       &
-     &                     zd(im),      zdd(im),      thlvx1(im) 
+     &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
      &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
@@ -1188,11 +1193,11 @@ c
 !>  @}
 
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
-      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)             
+      subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
       implicit none
@@ -1231,7 +1236,7 @@ c-----------------------------------------------------------------------
       return
       end
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.

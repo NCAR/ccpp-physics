@@ -1,5 +1,5 @@
 !>  \file radiation_astronomy.f
-!!  This file sets up astronomical quantities for solar radiation 
+!!  This file sets up astronomical quantities for solar radiation
 !!  calculations.
 
 !  ==========================================================  !!!!!
@@ -75,7 +75,7 @@
 
 
 
-!> \ingroup rad
+!> \ingroup RRTMG
 !! \defgroup module_radiation_astronomy module_radiation_astronomy
 !! @{
 !> This module sets up astronomical quantities for solar radiation
@@ -116,21 +116,21 @@
 !> \name Module variables (to be set in module_radiation_astronomy::sol_update)
 
 !> equation of time
-      real (kind=kind_phys) :: sollag=0.0   
+      real (kind=kind_phys) :: sollag=0.0
 !> sine of the solar declination angle
-      real (kind=kind_phys) :: sindec=0.0   
+      real (kind=kind_phys) :: sindec=0.0
 !> cosine of the solar declination angle
-      real (kind=kind_phys) :: cosdec=0.0   
+      real (kind=kind_phys) :: cosdec=0.0
 !> solar angle increment per interation of cosz calc
-      real (kind=kind_phys) :: anginc=0.0   
+      real (kind=kind_phys) :: anginc=0.0
 !> saved monthly solar constants (isolflg=4 only)
-      real (kind=kind_phys) :: smon_sav(12) 
+      real (kind=kind_phys) :: smon_sav(12)
       data smon_sav(1:12) / 12*con_solr /
 
 !> saved year  of data used
-      integer               :: iyr_sav =0  
+      integer               :: iyr_sav =0
 !> total number of zenith angle iterations
-      integer               :: nstp    =6  
+      integer               :: nstp    =6
 
       public  sol_init, sol_update, coszmn
 
@@ -301,7 +301,7 @@
 
 
 !> This subroutine computes solar parameters at forecast time.
-!!\param jdate     ncep absolute date and time at fcst time 
+!!\param jdate     ncep absolute date and time at fcst time
 !!                 (yr, mon, day, t-zone, hr, min, sec, mil-sec)
 !!\param kyear     usually kyear=jdate(1). if not, it is for hindcast
 !!                 mode, and it is usually the init cond time and
