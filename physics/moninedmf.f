@@ -6,7 +6,7 @@
 
       contains
 
-!> \defgroup PBL Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux PBL and Free Atmospheric Turbulence
 !! @{
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
 !!
@@ -1200,7 +1200,7 @@ c
 !>  @}
 
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
@@ -1244,7 +1244,7 @@ c-----------------------------------------------------------------------
       end
 
 c-----------------------------------------------------------------------
-!>  \ingroup PBL
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!
 !!  Origin of subroutine unknown.
