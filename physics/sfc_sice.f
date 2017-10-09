@@ -1,15 +1,30 @@
+!>  \file sfc_sice.f
+!!  This file contains the GFS thermodynamics surface ice model.
+
+!> \defgroup GFS_Ice GFS Thermodynamics Surface Ice
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sice_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
 !-----------------------------------
       subroutine sfc_sice                                               &
-!...................................
-!  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
-     &       flag_iter, mom4ice, lsm, lprnt,ipr,                        &
-!  ---  input/outputs:
-     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            &
-!  ---  outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx         &
+     &       flag_iter, mom4ice, lsm, lprnt,ipr,                        & ! -- inputs from here and above
+     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & ! -- in/outs
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx         & ! -- outputs
      &     )
 
 ! ===================================================================== !
@@ -151,7 +166,7 @@
       real (kind=kind_phys), parameter :: cimin=0.15 !  --- minimum ice concentration
 
       integer :: i, k
- 
+
       logical :: flag(im)
 !
 !===> ...  begin here
@@ -380,8 +395,11 @@
       contains
 ! =================
 
+!> @}
 
 !-----------------------------------
+!> \brief Brief description of the subroutine
+!!
       subroutine ice3lay
 !...................................
 !  ---  inputs:
@@ -429,7 +447,7 @@
 !  input/outputs:                                                         !
 !     snowd    - real, surface pressure                              im   !
 !     hice     - real, sea-ice thickness                             im   !
-!     stsice   - real, temp @ midpt of ice levels  (deg c)          im,kmi!     
+!     stsice   - real, temp @ midpt of ice levels  (deg c)          im,kmi!
 !     tice     - real, surface temperature     (deg c)               im   !
 !     snof     - real, snowfall rate           (m/sec)               im   !
 !                                                                         !
@@ -463,9 +481,9 @@
       real (kind=kind_phys), parameter :: tfi  = -mu*si   ! sea ice freezing temp = -mu*salinity
       real (kind=kind_phys), parameter :: tfw  = -1.8     ! tfw - seawater freezing temp (c)
       real (kind=kind_phys), parameter :: tfi0 = tfi-0.0001
-      real (kind=kind_phys), parameter :: dici = di*ci 
-      real (kind=kind_phys), parameter :: dili = di*li 
-      real (kind=kind_phys), parameter :: dsli = ds*li 
+      real (kind=kind_phys), parameter :: dici = di*ci
+      real (kind=kind_phys), parameter :: dili = di*li
+      real (kind=kind_phys), parameter :: dsli = ds*li
       real (kind=kind_phys), parameter :: ki4  = ki*4.0
 
 !  ---  inputs:
@@ -650,3 +668,5 @@
 !...................................
       end subroutine sfc_sice
 !-----------------------------------
+
+!> @}

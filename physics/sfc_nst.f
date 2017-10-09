@@ -1,17 +1,31 @@
+!>  \file sfc_nst.f
+!!  This file contains the GFS NSST model.
 
+!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_NSST_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
       subroutine sfc_nst                                                &
-!...................................
-!  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name,                    &
-     &       lprnt, ipr,                                                &
-!  --- input/output
+     &       ddvel, flag_iter, flag_guess, nstf_name,                   &
+     &       lprnt, ipr,                                                &  ! inputs from here and above
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
-     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
-!  ---  outputs:
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &
+     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &  ! in/outs from here and above
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &  ! outputs
      &      )
 !
 ! ===================================================================== !
@@ -189,7 +203,7 @@
 !
       integer :: k,i
 !
-      real (kind=kind_phys), dimension(im) ::  q0, qss, rch, 
+      real (kind=kind_phys), dimension(im) ::  q0, qss, rch,
      &                     rho_a, theta1, tv1, wind, wndmag
 
       real(kind=kind_phys) elocp,tem
@@ -197,7 +211,7 @@
 !    nstm related prognostic fields
 !
       logical flag(im)
-      real (kind=kind_phys), dimension(im) ::        
+      real (kind=kind_phys), dimension(im) ::
      &   xt_old, xs_old, xu_old, xv_old, xz_old,zm_old,xtts_old,
      &   xzts_old, ifd_old, tref_old, tskin_old, dt_cool_old,z_c_old
 
@@ -291,8 +305,8 @@ cc
         endif
       enddo
 
-! run nst model: dtm + slm   
-! 
+! run nst model: dtm + slm
+!
       zsea1 = 0.001*real(nstf_name(4))
       zsea2 = 0.001*real(nstf_name(5))
       do i = 1, im
@@ -306,7 +320,7 @@ cc
           call density(tsea,sss,rho_w)                     ! sea water density
           call rhocoef(tsea,sss,rho_w,alpha,beta)          ! alpha & beta
 !
-!  calculate sensible heat flux due to rainfall 
+!  calculate sensible heat flux due to rainfall
 !
           le       = (2.501-.00237*tsea)*1e6
           dwat     = 2.11e-5*(t1(i)/t0k)**1.94               ! water vapor diffusivity
@@ -382,7 +396,7 @@ cc
 !           endif
 
             rich = ri_c
-         
+
             call dtm_1p(kdt,timestep,rich,taux,tauy,nswsfc(i),
      &                  f_nsol,sss,sep,q_ts,hl_ts,rho_w,alpha,beta,alon,
      &                  sinlat(i),soltim,grav,le,d_conv(i),
@@ -507,14 +521,14 @@ cc
 
 !         qrain(i) = rig(i)
           zm(i) = wind(i)
-        
+
         endif
       enddo
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
         if((islimsk(i) == 0) ) then
-          if(flag_guess(i)) then    ! when it is guess of 
+          if(flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
             xu(i)      = xu_old(i)
@@ -568,3 +582,4 @@ cc
 
       return
       end
+!> @}
