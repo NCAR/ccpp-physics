@@ -1,0 +1,15 @@
+/**
+\mainpage 2017 GFS Operational Physics
+
+The documentation found here corresponds to the state of the operational GFS physics suite as of 2017. Documentation for the operational physics suite can be access through these links::
+  - \ref RRTMG
+  - \ref SASAS
+  - \ref SASHAL
+  - \ref HEDMF
+  - \ref Zhao-Carr
+  - \ref NOAH
+  - \ref GFS_Ice
+  - \ref GFS_NSST
+  - \ref GFS_gwd
+  - \ref GFS_ozn
+*/
