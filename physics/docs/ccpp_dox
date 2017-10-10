@@ -1,4 +1,4 @@
-# Doxyfile 1.8.11
+re# Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP Physics Documentation"
 PROJECT_NUMBER         = ""
@@ -9,7 +9,7 @@ CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
-REPEAT_BRIEF           = YES
+REPEAT_BRIEF           = NO
 ABBREVIATE_BRIEF       =
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
