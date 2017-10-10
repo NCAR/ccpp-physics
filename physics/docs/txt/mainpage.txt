@@ -10,6 +10,7 @@ The documentation found here corresponds to the state of the operational GFS phy
   - \ref NOAH
   - \ref GFS_Ice
   - \ref GFS_NSST
-  - \ref GFS_gwd
+  - \ref GFS_ogwd
+  - \ref GFS_cgwd
   - \ref GFS_ozn
 */
