@@ -74,9 +74,9 @@
 !!
 !> \section al_gwdc General Algorithm
 !> @{
-      subroutine gwdc(im,ix,iy,km,lat,u1,v1,t1,q1,deltim,              &
-     &                pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,     &
-     &                grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,        &
+      subroutine gwdc(im,ix,iy,km,lat,u1,v1,t1,q1,deltim,               &
+     &                pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,      &
+     &                grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,         &
      &                utgwc,vtgwc,tauctx,taucty)             
 
 !***********************************************************************
