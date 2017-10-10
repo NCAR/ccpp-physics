@@ -1,4 +1,4 @@
-re# Doxyfile 1.8.11
+# Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP Physics Documentation"
 PROJECT_NUMBER         = ""
