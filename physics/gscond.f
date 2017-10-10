@@ -3,6 +3,9 @@
 !! condensation and evaporation for use in the Zhao and Carr (1997)
 !! \cite zhao_and_carr_1997 scheme.
 
+      module zhaocarr_gscond
+      contains
+
 !> \defgroup Zhao-Carr Zhao-Carr Microphysics
 !! @{
 !! \brief The GFS scheme for large-scale condensation and precipitation
@@ -38,71 +41,32 @@
 !! - Routine PRECPD is called from GBPHYS after call to GSCOND
 
 !> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
-!! This subroutine computes grid-scale condensation and evaporation of
+!! @{
+
+!> \ingroup condense
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_gscond_init  Argument Table
+!!
+       subroutine gscond_init
+       end subroutine gscond_init
+
+
+!> \ingroup condense
+!! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
-!> There are two sources of condensation, one from large-scale
+!! There are two sources of condensation, one from large-scale
 !! processes and the other from convective processes. Both of them
 !! produce either cloud water or cloud ice, depending on the cloud
 !! substance at and above the grid point at current and previous time
 !! steps, and on the temperature. Evaporation of cloud is allowed at
 !! points where the relative humidity is lower than the critical value
 !! required for condensation.
-!! @{
-
-!> \param[in] ix         horizontal dimension
-!! \param[in] im         horizontal number of used pts
-!! \param[in] km         vertical layer dimension
-!! \param[in] dt         physics time step in seconds
-!! \param[in] dtf        dynamics time step in seconds
-!! \param[in] prsl       pressure values for model layers
-!! \param[in] ps         surface pressure (Pa)
-!! \param[in,out] q      model layer specific humidity (gm/gm)
-!! \param[in,out] cwm    model layer cloud condensate
-!! \param[in,out] t      model layer mean temperature (K)
-!! \param[in,out] tp     model layer mean temperature (K) saved for
-!!                       restart
-!! \param[in,out] qp     model layer specific humidity (gm/gm) saved
-!!                       for restart
-!! \param[in,out] psp    surface pressure (Pa) saved for restart
-!! \param[in,out] tp1    updated model layer mean temperature (K) saved
-!!                       for restart
-!! \param[in,out] qp1    updated model layer specific humidity (gm/gm)
-!!                       saved for restart
-!! \param[in,out] psp1   updated surface pressure (Pa) saved for
-!!                       restart
-!! \param[in] u          the critical value of relative humidity for
-!!                       large-scale condensation
-!! \param[in] lprnt      logical print flag
-!! \param[in] ipr        check print point for debugging
-!!
-!! \section arg_table_Zhao_Carr_run Arguments
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
-!!
-!! \section def Definition of symbols
-!! - \f$C_{g}\f$: grid-scale condensation rate (\f$s^{-1}\f$)
-!! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
-!> \section gen_algorithm General Algorithm
-!> @{
-
-!zhang
-       module zhaocarr_gscond
-       contains
-
-!> @{
-       subroutine gscond_init
-       end subroutine gscond_init
-!> @}
-
-      
-!> @{
-
-!!\section arg_table_gscond_run
+!!\section arg_table_gscond_run Argument Table
 !!| local var name | longname                                                 |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|----------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |  
+!!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |
 !!| ix             | horizontal_dimension                                     | horizontal dimension                                     | index   |    0 | integer |           |  in    |   F      |
 !!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           |  in    |   F      |
 !!| dt             | time_step_for_physics                                    | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
@@ -111,7 +75,7 @@
 !!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys |  in    |   F      |
 !!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |   
+!!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| tp             | air_temperature_at_two_time_step_back                    | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| qp             | water_vapor_specific_humidity_at_two_time_step_back      | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| psp            | surface_air_pressure_at_two_time_step_back               | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |
@@ -120,8 +84,13 @@
 !!| psp1           | surface_air_pressure_at_previous_time_step               | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |
 !!| u              | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation | 1       |    0 | real    | kind_phys | in     |   F      |
 !!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
-!!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      | 
+!!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      |
 !!
+!! \section def Definition of symbols
+!! - \f$C_{g}\f$: grid-scale condensation rate (\f$s^{-1}\f$)
+!! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
+!> \section Zhao-Carr_cond_detailed Detailed Algorithm
+!> @{
        subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
      &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
 
@@ -561,12 +530,16 @@
       end
 !> @}
 
-!> @{
+!> \ingroup condense
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_gscond_finalize  Argument Table
+!!
        subroutine gscond_finalize
        end subroutine gscond_finalize
+
+
 !> @}
+!! @}
 
       end module  zhaocarr_gscond
-!> @}
-!! @}
-!! @}
