@@ -212,7 +212,11 @@
 
       end module gwdps_pre
 
+
+
       module gwdps
+
+      contains
 
 !> \ingroup GFS_ogwd
 !! \brief Brief description of the subroutine
@@ -1393,7 +1397,10 @@
 
       end module gwdps
 
+
+
       module gwdps_post
+
       contains
 
 !> \ingroup GFS_ogwd

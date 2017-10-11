@@ -140,7 +140,10 @@
 
       end module gwdc_pre
 
+
+
       module gwdc
+
       contains
 
 !> \ingroup GFS_cgwd
@@ -1545,7 +1548,10 @@
 
       end module gwdc
 
+
+
       module gwdc_post
+
       contains
 
 !> \ingroup GFS_cgwd
