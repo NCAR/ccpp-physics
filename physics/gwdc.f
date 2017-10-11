@@ -73,7 +73,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_pre_init  Argument Table
+!! \section arg_table_gwdc_pre_init Argument Table
 !!
       subroutine gwdc_pre_init ()
       end subroutine gwdc_pre_init
@@ -133,7 +133,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_pre_finalize  Argument Table
+!! \section arg_table_gwdc_pre_finalize Argument Table
 !!
       subroutine gwdc_pre_finalize ()
       end subroutine gwdc_pre_finalize
@@ -146,7 +146,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_init  Argument Table
+!! \section arg_table_gwdc_init Argument Table
 !!
       subroutine gwdc_init()
       end subroutine gwdc_init
@@ -1538,7 +1538,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_finalize  Argument Table
+!! \section arg_table_gwdc_finalize Argument Table
 !!
       subroutine gwdc_finalize()
       end subroutine gwdc_finalize
@@ -1551,7 +1551,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_post_init  Argument Table
+!! \section arg_table_gwdc_post_init Argument Table
 !!
       subroutine gwdc_post_init()
       end subroutine gwdc_post_init
@@ -1634,7 +1634,7 @@
 !> \ingroup GFS_cgwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdc_post_finalize  Argument Table
+!! \section arg_table_gwdc_post_finalize Argument Table
 !!
       subroutine gwdc_post_finalize()
       end subroutine gwdc_post_finalize

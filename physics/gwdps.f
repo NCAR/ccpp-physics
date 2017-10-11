@@ -106,7 +106,7 @@
 !> \ingroup GFS_ogwd
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gwdps_pre_init  Argument Table
+!! \section arg_table_gwdps_pre_init Argument Table
 !!
       subroutine gwdps_pre_init()
       end subroutine gwdps_pre_init
