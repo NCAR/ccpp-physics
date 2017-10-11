@@ -15,8 +15,13 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
-  use gwdc,                  only: gwdc_pre_run, gwdc_run, gwdc_post_run
-  use gwdps,                 only: gwdps_pre_run, gwdps_run, gwdps_post_run
+  use gwdps_pre,             only: gwdps_pre_run
+  use gwdps,                 only: gwdps_run
+  use gwdps_post,            only: gwdps_post_run
+  use gwdc_pre,              only: gwdc_pre_run
+  use gwdc,                  only: gwdc_run
+  use gwdc_post,             only: gwdc_post_run
+  use rayleigh_damp,         only: rayleigh_damp_run
 
   implicit none
 
@@ -1377,14 +1382,14 @@ module module_physics_driver
 !
 !      endif   ! end if_nmtvr
 
-      call gwdps_pre_run (                       &
+      call gwdps_pre_run (                      &
            im, im, Model%nmtvr, Sfcprop%hprime, &
            hprime, oc, oa4, clx, theta,         &
            sigma, gamma, elvmax)
 
 
 !     write(0,*)' before gwd clstp=',clstp,' kdt=',kdt,' lat=',lat
-      call gwdps_run (                                          &
+      call gwdps_run (                                    &
            im, ix, im, levs, dvdt, dudt, dtdt,            &
            Statein%ugrs, Statein%vgrs, Statein%tgrs,      &
            Statein%qgrs(:,:,1), kpbl, Statein%prsi, del,  &
@@ -1414,7 +1419,7 @@ module module_physics_driver
 !        endif
 !      endif
 
-      call gwdps_post_run (                   &
+      call gwdps_post_run (                  &
            Model%lssav, Model%ldiag3d, dtf,  &
            dusfcg, dvsfcg, dudt, dvdt, dtdt, &
            Diag%dugwd, Diag%dvgwd,           &
@@ -2083,7 +2088,7 @@ module module_physics_driver
 !!    &,' k=',k
 !        enddo
 
-        call gwdc_post_run (                                                &
+        call gwdc_post_run (                                               &
              im, levs, Model%lssav, Model%ldiag3d, dtf, dtp, con_cp,       & 
              dusfcg, dvsfcg, gwdcu, gwdcv,                                 &
              Diag%dugwd, Diag%dvgwd, Diag%du3dt(:,:,4), Diag%dv3dt(:,:,4), &
