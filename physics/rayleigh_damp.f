@@ -1,6 +1,13 @@
-      SUBROUTINE Rayleigh_damp_run(IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
-     &                             LEVR,pgr,PRSL,PRSLRD0,ral_ts)
-!! \section arg_table_Rayleigh_damp_run
+      module rayleigh_damp
+      contains
+
+!! \section arg_table_rayleigh_damp_init Argument Table
+!!
+      subroutine rayleigh_damp_init ()
+      end subroutine rayleigh_damp_init
+
+
+!! \section arg_table_rayleigh_damp_run Argument Table
 !! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
 !! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
@@ -17,9 +24,11 @@
 !! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
 !! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_Rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_Rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
+!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
 !!
+      subroutine rayleigh_damp_run (IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
+     &                              LEVR,pgr,PRSL,PRSLRD0,ral_ts)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -107,4 +116,13 @@
 
 
       RETURN
-      END
+      end subroutine rayleigh_damp_run
+
+
+!! \section arg_table_rayleigh_damp_finalize Argument Table
+!!
+      subroutine rayleigh_damp_finalize ()
+      end subroutine rayleigh_damp_finalize
+
+
+      end module rayleigh_damp
