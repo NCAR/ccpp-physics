@@ -7,11 +7,21 @@
 
 !> \defgroup GFS_NSST GFS Near Sea Surface Temperature
 !! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+!! \brief Brief description of the parameterization
+!!
+!! Blah blah blah description of parameterization
+!!
+!! \section diagram Calling Hierarchy Diagram
+!!
+!! Blah blah blah diagram
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! Blah blah blah intraphysics communication
 
 !> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
 !!
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
@@ -21,6 +31,8 @@
 
 !> \brief Brief description of the subroutine
 !!
+!! Blah blah description of subroutine
+!!
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_finalize
@@ -28,6 +40,8 @@
       end
 
 !> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
 !!
 !!\section arg_table_sfc_nst_run Argument Table
 !!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
@@ -92,6 +106,9 @@
 !!| ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                          | W m-2         | 1    | real    | kind_phys |   out  | F        |
 !!
 !! \section NSST_general_algorithm General Algorithm
+!!
+!! Blah blah general algorithm
+!!
 !! \section NSST_detailed_algorithm Detailed Algorithm
 !! @{
       subroutine sfc_nst_run                                            &
@@ -659,4 +676,136 @@ cc
       end
 !> @}
 !! @}
+      end module
+
+
+
+      module sfc_nst_pre
+
+      contains
+
+      subroutine sfc_nst_pre_init
+
+      end
+
+      subroutine sfc_nst_pre_finalize
+
+      end
+
+      subroutine sfc_nst_pre_run                                        &
+     &     ( im, islimsk, oro, oro_uf, tsfc, tsurf, tskin )
+
+      use machine , only : kind_phys
+      use physcons, only: rlapse
+
+      implicit none
+
+!  ---  inputs:
+      integer, intent(in) :: im
+      integer, dimension(im), intent(in) :: islimsk
+      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      real (kind=kind_phys), dimension(im), intent(in) :: tsfc
+
+!  ---  input/outputs:
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+
+!  ---  outputs:
+      real (kind=kind_phys), dimension(im), intent(out) :: tskin
+
+!  ---  locals
+      integer :: i
+      real(kind=kind_phys) :: tem
+
+      do i = 1, im
+        if ( islimsk(i) == 0 ) then
+          tem      = (oro(i)-oro_uf(i)) * rlapse
+          tskin(i) = tsfc(i)  + tem
+          tsurf(i) = tsurf(i) + tem
+        endif
+      enddo
+
+      return
+      end
+
+      end module
+
+
+
+
+      module sfc_nst_post
+
+      contains
+
+      subroutine sfc_nst_post_init
+
+      end
+
+      subroutine sfc_nst_post_finalize
+
+      end
+
+      subroutine sfc_nst_post_run                                       &
+     &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
+     &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
+     &       tsurf, dtzm, tsfc                                          &
+     &     )
+
+      use machine , only : kind_phys
+      use physcons, only: rlapse
+      use module_nst_water_prop, only: get_dtzm_2d
+
+      implicit none
+
+!  ---  inputs:
+      integer, intent(in) :: im
+      integer, dimension(im), intent(in) :: islimsk
+      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
+      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
+     &      dt_cool, z_c, rslimsk, tref, xlon
+
+!  ---  input/outputs:
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+
+!  ---  outputs:
+      real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
+     &      dtzm
+      real (kind=kind_phys), dimension(im), intent(out) :: tsfc
+
+!  ---  locals
+      integer :: i
+      real(kind=kind_phys) :: zsea1, zsea2
+
+!     if (lprnt) print *,' tseaz2=',tseal(ipr),' tref=',tref(ipr),
+!    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),
+!    &     ' kdt=',kdt
+
+      do i = 1, im
+        if ( islimsk(i) == 0 ) then
+          tsurf(i) = tsurf(i) - (oro(i)-oro_uf(i)) * rlapse
+        endif
+      enddo
+
+!  --- ...  run nsst model  ... ---
+
+      if (nstf_name1 > 1) then
+        zsea1 = 0.001*real(nstf_name4)
+        zsea2 = 0.001*real(nstf_name5)
+        call get_dtzm_2d (xt, xz, dt_cool,                              &
+     &                    z_c, rslimsk, zsea1, zsea2,                   &
+     &                    im, 1, dtzm)
+        do i = 1, im
+          if ( islimsk(i) == 0 ) then
+            tsfc(i) = max(271.2,tref(i) + dtzm(i)) -                    &
+     &                    (oro(i)-oro_uf(i))*rlapse
+          endif
+        enddo
+      endif
+
+!     if (lprnt) print *,' tseaz2=',tsea(ipr),' tref=',tref(ipr),   &
+!    &    ' dt_cool=',dt_cool(ipr),' dt_warm=',dt_warm(ipr),' kdt=',kdt
+
+      return
+      end
+
       end module

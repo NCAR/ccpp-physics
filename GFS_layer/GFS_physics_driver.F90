@@ -9,8 +9,9 @@ module module_physics_driver
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
   use gfs_fv3_needs,         only: get_prs_fv3, get_phi_fv3
-  use module_nst_water_prop, only: get_dtzm_2d
   use sfc_nst,               only: sfc_nst_run
+  use sfc_nst_pre,           only: sfc_nst_pre_run
+  use sfc_nst_post,          only: sfc_nst_post_run
   use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type, &
                                    GFS_sfcprop_type, GFS_coupling_type, &
                                    GFS_control_type, GFS_grid_type,     &
@@ -886,13 +887,12 @@ module module_physics_driver
 
         if (Model%nstf_name(1) > 0) then
 
-          do i = 1, im
-            if ( islmsk(i) == 0 ) then
-              tem      = (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
-              tseal(i) = Sfcprop%tsfc(i)  + tem
-              tsurf(i) = tsurf(i) + tem
-            endif
-          enddo
+          call sfc_nst_pre_run(im, islmsk, Sfcprop%oro, Sfcprop%oro_uf,        &
+                               Sfcprop%tsfc,                                   &
+!  --- Input/output
+                               tsurf,                                          &
+!  ---  outputs:
+                               tseal)
 
           call sfc_nst_run (im, Model%lsoil, Statein%pgr, Statein%ugrs,        &
                             Statein%vgrs, Statein%tgrs, Statein%qgrs,          &
@@ -912,34 +912,16 @@ module module_physics_driver
 !  ---  outputs:
                             qss, gflx, Diag%cmm, Diag%chh, evap, hflx, ep1d)
 
-!         if (lprnt) print *,' tseaz2=',tseal(ipr),' tref=',tref(ipr),
-!    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),
-!    &     ' kdt=',kdt
 
-          do i = 1, im
-            if ( islmsk(i) == 0 ) then
-              tsurf(i) = tsurf(i) - (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
-            endif
-          enddo
-
-!  --- ...  run nsst model  ... ---
-
-          if (Model%nstf_name(1) > 1) then
-            zsea1 = 0.001*real(Model%nstf_name(4))
-            zsea2 = 0.001*real(Model%nstf_name(5))
-            call get_dtzm_2d (Sfcprop%xt, Sfcprop%xz, Sfcprop%dt_cool,   &
-                              Sfcprop%z_c, Sfcprop%slmsk, zsea1, zsea2,  &
-                              im, 1, dtzm)
-            do i = 1, im
-              if ( islmsk(i) == 0 ) then
-              Sfcprop%tsfc(i) = max(271.2,Sfcprop%tref(i) + dtzm(i)) -   &
-                                (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
-              endif
-            enddo
-          endif
-
-!         if (lprnt) print *,' tseaz2=',tsea(ipr),' tref=',tref(ipr),   &
-!    &    ' dt_cool=',dt_cool(ipr),' dt_warm=',dt_warm(ipr),' kdt=',kdt
+          call sfc_nst_post_run(im, islmsk, Sfcprop%oro, Sfcprop%oro_uf,       &
+                                Model%nstf_name(1), Model%nstf_name(4),        &
+                                Model%nstf_name(5), Sfcprop%xt, Sfcprop%xz,    &
+                                Sfcprop%dt_cool, Sfcprop%z_c, Sfcprop%slmsk,   &
+                                Sfcprop%tref, Grid%xlon,                       &
+!  --- Input/output
+                                tsurf,                                         &
+!  ---  outputs:
+                                dtzm, Sfcprop%tsfc)
 
         else
 
