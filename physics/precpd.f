@@ -35,7 +35,7 @@
 !!|  cwm           | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !!|  t             | air_temperature                                          | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
 !!|  rn            | rainfall_amount                                          | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
-!!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | 1       |  1   | real    | kind_phys|  out    |   F      |
+!!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | frac    |  1   | real    | kind_phys|  out    |   F      |
 !!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
 !!|  u00k          | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation          | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  psautco       | coefficient_from_cloud_ice_to_snow                       | conversion coefficient from cloud ice to snow                     | 1       |  0   | real    | kind_phys|  in     |   F      |

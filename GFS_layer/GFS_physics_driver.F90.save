@@ -16,9 +16,8 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
-  use zhaocarr_gscond,       only: gscond_run
-  use zhaocarr_precpd,       only: precpd_run
-  use calpreciptype,         only: calpreciptype_run
+  use zhaocarr_gscond,       only: gscond_init, gscond_run
+  use zhaocarr_precpd,       only: precpd_init, precpd_run
   implicit none
 
 
@@ -2576,13 +2575,11 @@ module module_physics_driver
 
       if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
         i = min(3,Model%num_p3d)
-!        call calpreciptype (kdt, Model%nrcm, im, ix, levs, levs+1,        &
-        call calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,        &
+        call calpreciptype (kdt, Model%nrcm, im, ix, levs, levs+1,        &
                             Tbd%rann, Grid%xlat, Grid%xlon, Stateout%gt0, &
                             Stateout%gq0, Statein%prsl, Statein%prsi,     &
                             Diag%rain, Statein%phii, Model%num_p3d,       &
-!                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(1,1,i),    &     ! input
-                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,i),    &     ! input
+                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(1,1,i),    &     ! input
                             domr, domzr, domip, doms)                           ! output
 !
 !        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '

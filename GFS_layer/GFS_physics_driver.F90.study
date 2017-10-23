@@ -16,9 +16,8 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
-  use zhaocarr_gscond,       only: gscond_run
-  use zhaocarr_precpd,       only: precpd_run
-  use calpreciptype,         only: calpreciptype_run
+  use zhaocarr_gscond,       only: gscond_init, gscond_run
+  use zhaocarr_precpd,       only: precpd_init, precpd_run
   implicit none
 
 
@@ -509,6 +508,7 @@ module module_physics_driver
       nvdiff = ntrac           ! vertical diffusion of all tracers!
       ipr    = min(im,10)
 
+!zhang: Morrison_MP_pre
       do i = 1, im
         if(nint(Sfcprop%slmsk(i)) == 1) then
           frland(i) = 1.0
@@ -519,6 +519,7 @@ module module_physics_driver
 !
 !  --- ...                       figure out number of extra tracers
 !
+!zhang:  GFS_physics_pre
       tottracer = 0            ! no convective transport of tracers
       if (Model%trans_trac .or. Model%cscnv) then
         if (Model%ntcw > 0) then
@@ -537,6 +538,7 @@ module module_physics_driver
         tottracer = tracers
         if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
       endif
+!zhang: shoc_pre
       if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
 
 !     if (lprnt) write(0,*)' trans_trac=',trans_trac,' tottracer=',     &
@@ -547,12 +549,14 @@ module module_physics_driver
 
       skip_macro = .false.
 
+!zhang: GFS_physics_pre
       allocate ( clw(ix,levs,tottracer+2) )
       if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
         allocate (cnvc(ix,levs), cnvw(ix,levs))
       endif
 !
 !  ---  set initial quantities for stochastic physics deltas
+!zhang:sppt_pre
       if (Model%do_sppt) then
         Tbd%dtdtr     = 0.0
         Tbd%dtotprcp  (:) = Diag%rain    (:)
@@ -561,6 +565,7 @@ module module_physics_driver
         Tbd%dsnow_cpl (:) = Coupling%snow_cpl (:)
       endif
 
+!zhang: do_shoc=false
       if (Model%do_shoc) then
         allocate (qpl(im,levs),  qpi(im,levs), ncpl(im,levs), ncpi(im,levs))
         do k=1,levs
@@ -571,6 +576,7 @@ module module_physics_driver
         enddo
       endif
 
+!zhang:ncld=1; not used in GFS OP
       if (Model%ncld == 2) then         ! For MGB double moment microphysics
         allocate (qlcn(im,levs), qicn(im,levs), w_upi(im,levs),         &
                  cf_upi(im,levs), CNV_MFD(im,levs), CNV_PRC3(im,levs),  &
@@ -584,7 +590,7 @@ module module_physics_driver
                   clcn(1,1), cnv_fice(1,1), cnv_ndrop(1,1), cnv_nice(1,1))
       endif
 
-
+!zhang: where is it defined?
 #ifdef GFS_HYDRO
       call get_prs(im, ix, levs, ntrac, Statein%tgrs, Statein%qgrs,     &
                    Model%thermodyn_id, Model%sfcpress_id,               &
@@ -596,6 +602,8 @@ module module_physics_driver
                         Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
 !
+
+!zhang: zhao_carr_pre
       rhbbot = Model%crtrh(1)
       rhpbl  = Model%crtrh(2)
       rhbtop = Model%crtrh(3)
@@ -648,6 +656,7 @@ module module_physics_driver
         wcbmax(i)  = Model%cs_parm(1)*work1(i) + Model%cs_parm(2)*work2(i)
       enddo
 !
+!zhang:cplflx=.false.
       if (Model%cplflx) then
         do i = 1, im
           islmsk_cice(i) = nint(Coupling%slimskin_cpl(i))
@@ -666,9 +675,12 @@ module module_physics_driver
       endif
 
 !  --- ...  transfer soil moisture and temperature from global to local variables
+!zhang sfc_drv_pre, sfc_ice_pre
       smsoil(:,:) = Sfcprop%smc(:,:)
       stsoil(:,:) = Sfcprop%stc(:,:)
       slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
+
+!zhang: GFS_physics_pre
       dudt(:,:)  = 0.
       dvdt(:,:)  = 0.
       dtdt(:,:)  = 0.
@@ -682,6 +694,7 @@ module module_physics_driver
 !      sw:  using cos of zenith angle as scaling factor
 !      lw:  using surface air skin temperature as scaling factor
 
+!zhang: pre_rad=.false.
       if (Model%pre_rad) then
         call dcyc2t3_pre_rad                                                &
 !  ---  inputs:
@@ -701,7 +714,7 @@ module module_physics_driver
            )
 
       else
-
+!zhang: dcyc2t3_run in dcyc2.f
         call dcyc2t3                                                        &
 !  ---  inputs:
            ( Model%solhr, Model%slag, Model%sdec, Model%cdec, Grid%sinlat,  &
@@ -725,6 +738,7 @@ module module_physics_driver
 !---------------------------------------------------------------------
       endif
 !
+!zhang: lsidea=.false. ! idea convective adjustment
       if (Model%lsidea) then                       !idea jw
         dtdt(:,:) = 0.
       endif
@@ -748,7 +762,7 @@ module module_physics_driver
 !  --- ...  define the downward lw flux absorbed by ground
 
       gabsbdlw(:) = Radtend%semis(:) * adjsfcdlw(:)
-
+!zhang: false in GFS_typedefs, true in GFS_driver
       if (Model%lssav) then      !  --- ...  accumulate/save output variables
 
 !  --- ...  sunshine duration time is defined as the length of time (in mdl output
@@ -791,9 +805,12 @@ module module_physics_driver
           endif
         endif
       endif    ! end if_lssav_block
-
+!zhang: GFS_physics_pre
       kcnv(:)   = 0
+!zhang: GFS_PBL_generic_pre
       kinver(:) = levs
+
+!zhang:old_phys (non-OP)
       invrsn(:) = .false.
       tx1(:)    = 0.0
       tx2(:)    = 10.0
@@ -1059,26 +1076,29 @@ module module_physics_driver
         enddo
 
       enddo   ! end iter_loop
-
+!zhang: GFS_surface_generic_post (for instantaneous diagnostics)
       Diag%epi(:)     = ep1d(:)
+!zhang:dcyc2t3_post
       Diag%dlwsfci(:) = adjsfcdlw(:)
       Diag%ulwsfci(:) = adjsfculw(:)
       Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
       Diag%dswsfci(:) = adjsfcdsw(:)
+!zhang: GFS_surface_generic_post (for instantaneous diagnostics)
       Diag%gfluxi(:)  = gflx(:)
+!zhang: GFS_diagnostics_pre, see GFS_diagnostics.F
       Diag%t1(:)      = Statein%tgrs(:,1)
       Diag%q1(:)      = Statein%qgrs(:,1,1)
       Diag%u1(:)      = Statein%ugrs(:,1)
       Diag%v1(:)      = Statein%vgrs(:,1)
 
 !  --- ...  update near surface fields
-
+!zhang: sfc_diag_run
       call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
                      Statein%tgrs, Statein%qgrs, Sfcprop%tsfc, qss,   &
                      Sfcprop%f10m, Diag%u10m, Diag%v10m,        &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
                      Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
-
+!zhang: only used in rascnv
       Tbd%phy_f2d(:,Model%num_p2d) = 0.0
 
       if (Model%cplflx) then
@@ -1325,7 +1345,7 @@ module module_physics_driver
 !
 !            Orographic gravity wave drag parameterization
 !            ---------------------------------------------
-
+!zhang:gwdps_pre
       if (Model%nmtvr == 14) then         ! current operational - as of 2014
         oc(:)     = Sfcprop%hprime(:,2)
         oa4(:,1)  = Sfcprop%hprime(:,3)
@@ -1394,6 +1414,7 @@ module module_physics_driver
       endif
 
 !    Rayleigh damping  near the model top
+!zhang: in NEMS ral_ts=10., in comfv3 =0.0
       if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
         call rayleigh_damp(im, ix, im, levs, dvdt, dudt, dtdt,      &
                            Statein%ugrs, Statein%vgrs, dtp, con_cp, &
@@ -1406,6 +1427,7 @@ module module_physics_driver
 !       write(0,*)' dtdt=',(dtdt(ipr,ik),k=1,10)
 !     endif
 
+!zhang: GFS_physics_update_state
       Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * dtp
       Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * dtp
       Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * dtp
@@ -1524,8 +1546,10 @@ module module_physics_driver
 !       print *,' phil2=',phil(ipr,:)
 !     endif
 
+!zhang:zhao-carr_pre
       clw(:,:,1) = 0.0
       clw(:,:,2) = -999.9
+!zhang: CPS_pre
       if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
         cnvc(:,:)  = 0.0
         cnvw(:,:)  = 0.0
@@ -1552,13 +1576,15 @@ module module_physics_driver
         endif
       endif   ! end if_ras or cfscnv
 
+!zhang: CPS_PRE
       ktop(:)  = 1
       kbot(:)  = levs
 
 !  --- ...  calling condensation/precipitation processes
 !           --------------------------------------------
-
+!zhang:ntcw=3
       if (Model%ntcw > 0) then
+!zhang: GFS,rhc used in shoc and zhao-carr,mstadj
         do k=1,levs
           do i=1,im
             tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
@@ -1566,10 +1592,12 @@ module module_physics_driver
             rhc(i,k) = max(0.0, min(1.0,tem))
           enddo
         enddo
+!zhang:ncld=1
         if (Model%ncld == 2) then
           clw(:,:,1) = Stateout%gq0(:,:,Model%ntiw)                    ! ice
           clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)                    ! water
         else
+!zhang: GFS_suite_interstitial , clw used in both zhao-carr and SASAS deep/shal
           if (Model%num_p3d == 4) then   ! zhao-carr microphysics
             psautco_l(:) = Model%psautco(1)*work1(:) + Model%psautco(2)*work2(:)
             prautco_l(:) = Model%prautco(1)*work1(:) + Model%prautco(2)*work2(:)
@@ -1859,6 +1887,7 @@ module module_physics_driver
 !       write(0,*)' aftcnvgq1=',(gq0(ipr,k,ntcw),k=1,levs)
 !     endif
 !
+!zhang: sasas shal_pre
       do i = 1, im
         Diag%rainc(:) = frain * rain1(:)
       enddo
@@ -1889,11 +1918,13 @@ module module_physics_driver
         Coupling%cnvqci (:,:)  = Coupling%cnvqci (:,:) + (clw(:,:,1)+clw(:,:,2))*frain
       endif ! if (lgocart)
 !
+!zhang: for pdf cld and zhao
       if ((Model%npdf3d == 3) .and. (Model%num_p3d == 4)) then
         num2 = Model%num_p3d + 2
         num3 = num2 + 1
         Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
         Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+!zhang:zhao-car,num_p3d=4,GFS_DCNV_generic_post
       elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
         num2 = Model%num_p3d + 1
         Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
@@ -1904,7 +1935,7 @@ module module_physics_driver
 !     if (lprnt) write(7000,*)' bef cnvgwd gv0=',gv0(ipr,:)
 !
 !----------------Convective gravity wave drag parameterization starting --------
-
+!zhang:gwdc_pre
       if (Model%cnvgwd) then         !        call convective gravity wave drag
 
 !  --- ...  calculate maximum convective heating rate 
@@ -1991,6 +2022,7 @@ module module_physics_driver
 
 !GFDL replacing lat with "1"
 !       call gwdc(im, ix, im, levs, lat, gu0, gv0, gt0, gq0, dtp,       &
+!zhang:gwdc_run
         call gwdc (im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,     &
                    Statein%tgrs, Statein%qgrs, dtp, Statein%prsl,       &
                    Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,   &
@@ -2072,6 +2104,7 @@ module module_physics_driver
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !----------------Convective gravity wave drag parameterization over --------
 
+!zhang: GFS_SCNV_generic_pre
       if (Model%ldiag3d) then
         dtdt(:,:)   = Stateout%gt0(:,:)
       endif
@@ -2178,12 +2211,14 @@ module module_physics_driver
               enddo
             enddo
           endif
+!zhang: GFS_diagnostics
           if (Model%ldiag3d) then
             Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
             Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
           endif
         endif   ! end if_lssav
 !
+!zhang: GFS_suite_interstitial
         do k = 1, levs
           do i = 1, im
             if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
@@ -2275,6 +2310,7 @@ module module_physics_driver
           Stateout%gq0(:,:,Model%ntiw) = clw(:,:,1)                     ! ice
           Stateout%gq0(:,:,Model%ntcw) = clw(:,:,2)                     ! water
         elseif (Model%num_p3d == 4) then    ! if_num_p3d
+!zhang:zhao-carr_pre
           Stateout%gq0(:,:,Model%ntcw) = clw(:,:,1) + clw(:,:,2)
         endif   ! end if_num_p3d
 
@@ -2286,7 +2322,7 @@ module module_physics_driver
       endif   ! end if_ntcw
 
 !  Legacy routine which determines convectve clouds - should be removed at some point
-
+!zhang: cnvc90_run, need to be CCPP_compliant
       call cnvc90 (Model%clstp, im, ix, Diag%rainc, kbot, ktop, levs, Statein%prsi,  &
                    Tbd%acv, Tbd%acvb, Tbd%acvt, Cldprop%cv, Cldprop%cvb, Cldprop%cvt)
 
@@ -2353,7 +2389,7 @@ module module_physics_driver
 
         call lrgscl (ix, im, levs, dtp, Stateout%gt0, Stateout%gq0, &
                      Statein%prsl, del, Statein%prslk, rain1, clw)
-
+!zhang
       elseif (Model%ncld == 1) then       ! microphysics with single cloud condensate
 
         if (Model%num_p3d == 4) then  ! call zhao/carr/sundqvist microphysics
@@ -2576,13 +2612,11 @@ module module_physics_driver
 
       if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
         i = min(3,Model%num_p3d)
-!        call calpreciptype (kdt, Model%nrcm, im, ix, levs, levs+1,        &
-        call calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,        &
+        call calpreciptype (kdt, Model%nrcm, im, ix, levs, levs+1,        &
                             Tbd%rann, Grid%xlat, Grid%xlon, Stateout%gt0, &
                             Stateout%gq0, Statein%prsl, Statein%prsi,     &
                             Diag%rain, Statein%phii, Model%num_p3d,       &
-!                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(1,1,i),    &     ! input
-                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,i),    &     ! input
+                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(1,1,i),    &     ! input
                             domr, domzr, domip, doms)                           ! output
 !
 !        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '

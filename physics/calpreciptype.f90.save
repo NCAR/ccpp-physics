@@ -1,42 +1,4 @@
-!> \file calpreciptype.f90
-!! This file contains the subroutine that calculates dominant precipitation type. It is 
-!! adopted from post but was made into a column to used by GFS model.
-
-      module calpreciptype
-      contains
-
-!>\section arg_table_calpreciptype_init Argument Table
-      subroutine calpreciptype_init
-      end subroutine calpreciptype_init
-
-!!\section arg_table_calpreciptype_run Argument Table
-!!| local var name | longname                                       |description                                               | units   | rank |  type   |   kind    | intent | optional |
-!!|----------------|------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!!|    kdt         | index_of_time_step                             | current time step index                                  | index   | 0    | integer |           | in     |  F       |
-!!|    nrcm        | array_dimension                                | second dimension of random number array                  | index   | 0    | integer |           | in     |  F       |
-!!|    im          | horizontal_loop_extent                         | horizontal loop extent, start at 1                       | index   | 0    | integer |           | in     |  F       |
-!!|    ix          | horizontal_dimension                           | horizontal dimension                                     | index   | 0    | integer |           | in     |  F       |
-!!|    lm          | vertical_dimension                             | vertical layer dimension                                 | index   | 0    | integer |           | in     |  F       |
-!!|    lp1         | vertical_interface_dimension                   | vertical interface dimension                             | index   | 0    | integer |           | in     |  F       |
-!!|    randomno    | random_number_array                            | random number array                                      | none    | 2    | real    |           | in     |  F       |
-!!|    xlat        | latitude                                       | latitude                                                 | 1       | 1    | real    |           | in     |  F       |
-!!|    xlon        | longitude                                      | longitude                                                | 1       | 1    | real    |           | in     |  F       | 
-!!|    gt0         | air_temperature                                | layer mean air temperature                               | K       | 2    | real    | kind_phys | in     |  F       |
-!!|    gq0         | water_vapor_specific_humidity                  | water vapor specific humidity                            | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
-!!|    prsl        | air_pressure                                   | layer mean pressure                                      | Pa      | 2    | real    | kind_phys | in     |  F       | 
-!!|    prsi        | air_pressure_at_interface                      | pressure at layer interface                              | Pa      | 2    | real    | kind_phys | in     |  F       |
-!!|    prec        | total_rainfall_amount                          | instantaneous total precipitation at surface             | m       | 1    | real    | kind_phys | in     |  F       |
-!!|    phii        | geopotential_at_interface                      | geopotential at model layer interfaces                   | m2 s-2  | 2    | real    | kind_phys | in     |  F       |
-!!|    n3dfercld   | num_p3d=4  ??                                  | number of 3D arrays needed for microphysics              | count   | 0    | integer |           | in     |  F       |
-!!|    tskin       | surface_skin_temperature                       | surface skin temperature                                 | K       | 1    | real    | kind_phys | in     |  F       |
-!!|    sr          | ratio_of_snowfall_to_rainfall                  | ratio of snowfall to rainfall                            | frac    | 1    | real    | kind_phys | in     |  F       |
-!!|    phy_f3d     | air_temperature_at_previous_time_step          | air temperature at previous time step                    | K       | 2    | real    | kind_phys | in     |  F       |
-!!|    domr        | dominant_rain_type                             | dominant rain type                                       | none    | 1    | real    | kind_phys | out    |  F       |
-!!|    domzr       | dominant_freezing_rain_type                    | dominant freezing rain type                              | none    | 1    | real    | kind_phys | out    |  F       |
-!!|    domip       | dominant_sleet_type                            | dominant sleet type                                      | none    | 1    | real    | kind_phys | out    |  F       |
-!!|    doms        | dominant_snow_type                             | dominant snow type                                       | none    | 1    | real    | kind_phys | out    |  F       |
-!      subroutine calpreciptype(kdt,nrcm,im,ix,lm,lp1,randomno,      &
-      subroutine calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
+      subroutine calpreciptype(kdt,nrcm,im,ix,lm,lp1,randomno,      &
                                xlat,xlon,                           &
                                gt0,gq0,prsl,prsi,prec,              & !input
                                phii,n3dfercld,tskin,sr,phy_f3d,     & !input
@@ -159,11 +121,7 @@
 !-------------------------------------------------------------------------------
 !
 !     instantaneous precipitation type.
-!> -# Call calwxt(), to compute precipitation type using a decision tree approach 
-!! that uses variables such as integrated wet bulb temperature below freezing and 
-!! lowest layer temperature. See Baldwin and Contorno preprint from 13th weather 
-!! analysis and forcasting conference for more details (or Baldwin et al, 10th NWP
-!! conference preprint)
+
         call calwxt(lm,lp1,t,q,pmid,pint,con_fvirt,con_rog,con_epsq,zint,iwx,twet)
         snow(1)   = mod(iwx,2)
         sleet(1)  = mod(iwx,4)/2
@@ -204,7 +162,6 @@
 !     &  mod(ifhr*60+ifmin,44641)+4357
 
         ranl = randomno(i,1:2)
-!> -# Call calwxt_bourg() using Bourgouin algorithm
         call calwxt_bourg(lm,lp1,ranl,con_g,t,q,pmid,pint,zint(1),iwx)
 
 !
@@ -215,7 +172,6 @@
 !
 ! revised ncep algorithm
 !
-!> -# Call calwxt_revised(), revised NCEP algorithm
         call calwxt_revised(lm,lp1,t,q,pmid,pint,                       &
                             con_fvirt,con_rog,con_epsq,zint,twet,iwx)
 !
@@ -239,8 +195,6 @@
           rain(5)   = 0
         endif
 !               
-! -# Call calwxt_dominant(),which takes the precip type solution from different 
-!! algorithms and sums them up to give a dominant type.
          call calwxt_dominant(nalg,rain(1),freezr(1),sleet(1),         &
                             snow(1),domr(i),domzr(i),domip(i),doms(i))
 
@@ -542,7 +496,7 @@
       real    rhmax,twmax,ptop,dpdrh,twtop,rhtop,wgt1,wgt2,    &
               rhavg,dtavg,dpk,ptw,pbot
 !     real b,qtmp,rate,qc
-!zhang      real,external :: xmytw
+      real,external :: xmytw
 !
 !  initialize.
       icefrac = -9999.
@@ -787,16 +741,13 @@
 !
 !
 !--------------------------------------------------------------------------
-!zhang
-      real function xmytw(t,td,p)
-!      function xmytw(t,td,p)
+      function xmytw(t,td,p)
 !
       implicit none
 !
       integer*4 cflag, l
       real   f, c0, c1, c2, k, kd, kw, ew, t, td, p, ed, fp, s,        &
-     &         de
-!     &          de, xmytw
+     &          de, xmytw
       data f, c0, c1, c2 /0.0006355, 26.66082, 0.0091379024, 6106.3960/
 !
       xmytw = (t+td) / 2
@@ -1459,10 +1410,3 @@
 !
       return
       end
-
-!> \section arg_table_calpreciptype_finalize Argument table
-!!
-      subroutine calpreciptype_finalize
-      end subroutine calpreciptype_finalize
-     
-      end module calpreciptype 
