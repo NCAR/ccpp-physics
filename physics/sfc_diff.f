@@ -1,7 +1,7 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface exchange coefficient calculation scheme.
 
-!> \defgroup Surface Exchange Coefficient Calculation
+!> \defgroup Sfc_ex_cal Surface Exchange Coefficient Calculation
 !! @{
 !!  \brief Brief description of the scheme 
 !!  \section diagram Calling Hierarchy Diagram

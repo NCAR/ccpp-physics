@@ -1,7 +1,7 @@
 !>  \file sfc_diag.f
 !!  This file contains the land surface diagnose calculation scheme.
 
-!> \defgroup Land Surface Diagnose Calculation
+!> \defgroup Sfc_diag Land Surface Diagnose Calculation
 !! @{
 !!  \brief Brief description of the parameterization
 !!  \section diagram Calling Hierarchy Diagram
