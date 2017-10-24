@@ -110,7 +110,7 @@
 !                                                                          !
 !                                                                          !
 !                   a rapid radiative transfer model                       !
-!                       for the longwave region                            ! 
+!                       for the longwave region                            !
 !             for application to general circulation models                !
 !                                                                          !
 !                                                                          !
@@ -228,7 +228,7 @@
 !       apr 2012,  b. ferrier and y. hou -- added conversion factor to fu's!
 !                    cloud-snow optical property scheme.                   !
 !       nov 2012,  yu-tai hou        -- modified control parameters thru   !
-!                     module 'physparam'.                                  !  
+!                     module 'physparam'.                                  !
 !                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
@@ -236,7 +236,7 @@
 
 
 !> \defgroup module_radlw_main module_radlw_main
-!! \ingroup rad
+!! \ingroup RRTMG
 !! This module includes NCEP's modifications of the rrtmg-lw radiation
 !! code from AER.
 !!
@@ -258,13 +258,13 @@
 !! module 'module_radlw_main' and many of them are not directly
 !! accessable from places outside the module.
 !!
-!!\author   Eli J. Mlawer, emlawer@aer.com 
-!!\author   Jennifer S. Delamere, jdelamer@aer.com                    
-!!\author   Michael J. Iacono, miacono@aer.com  
+!!\author   Eli J. Mlawer, emlawer@aer.com
+!!\author   Jennifer S. Delamere, jdelamer@aer.com
+!!\author   Michael J. Iacono, miacono@aer.com
 !!\author   Shepard A. Clough
 !!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
-!!                                                               
-!! The authors wish to acknowledge the contributions of the       
+!!
+!! The authors wish to acknowledge the contributions of the
 !! following people:  Steven J. Taubman, Karen Cady-Pereira,
 !! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
 !!
@@ -394,8 +394,8 @@
 !!\param plvl           model interface pressure in mb
 !!\param tlyr           model layer mean temperature in K
 !!\param tlvl           model interface temperature in K
-!!\param qlyr           layer specific humidity in gm/gm  
-!!\param olyr           layer ozone concentration in gm/gm 
+!!\param qlyr           layer specific humidity in gm/gm
+!!\param olyr           layer ozone concentration in gm/gm
 !!\param gasvmr         atmospheric gases amount:
 !!\n                    (:,:,1)  - co2 volume mixing ratio
 !!\n                    (:,:,2)  - n2o volume mixing ratio
@@ -423,7 +423,7 @@
 !!\n                    (:,:,3)  - layer cloud single scattering albedo
 !!\n                    (:,:,4)  - layer cloud asymmetry factor
 !!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties 
+!!\param aerosols       aerosol optical properties
 !!\n                    (:,:,:,1) - optical depth
 !!\n                    (:,:,:,2) - single scattering albedo
 !!\n                    (:,:,:,3) - asymmetry parameter
@@ -715,7 +715,7 @@
       lhlwb  = present ( hlwb )
       lhlw0  = present ( hlw0 )
       lflxprf= present ( flxprf )
- 
+
 
       colamt(:,:) = f_zero
 
@@ -738,7 +738,7 @@
 !     endif
 
 !  --- ...  loop over horizontal npts profiles
- 
+
       lab_do_iplon : do iplon = 1, npts
 
 !> -# Read surface emissivity.
@@ -1090,7 +1090,7 @@
 !      print *,'indfor',indfor
 !     endif
 
-!> -# Call taumol() to calculte the gaseous optical depths and Plank 
+!> -# Call taumol() to calculte the gaseous optical depths and Plank
 !! fractions for each longwave spectral band.
 
         call taumol                                                     &
@@ -1969,18 +1969,18 @@
 !!\param rfrate          ref ratios of binary species param
 !!\n                     (:,m,:)m=1-h2o/co2,2-h2o/o3,3-h2o/n2o,
 !!                                4-h2o/ch4,5-n2o/co2,6-o3/co2
-!!\n                     (:,:,n)n=1,2: the rates of ref press at 
+!!\n                     (:,:,n)n=1,2: the rates of ref press at
 !!                                the 2 sides of the layer
 !!\param facij           factors multiply the reference ks, i,j=0/1 for
 !!                       lower/higher of the 2 appropriate temperatures
 !!                       and altitudes.
 !!\param selffac         scale factor for w. v. self-continuum equals
 !!                       (w. v. density)/(atmospheric density at 296k and 1013 mb)
-!!\param selffrac        factor for temperature interpolation of 
+!!\param selffrac        factor for temperature interpolation of
 !!                       reference w. v. self-continuum data
 !!\param indself         index of lower ref temp for selffac
 !!\param forfac          scale factor for w. v. foreign-continuum
-!!\param forfrac         factor for temperature interpolation of 
+!!\param forfrac         factor for temperature interpolation of
 !!                       reference w.v. foreign-continuum data
 !!\param indfor          index of lower ref temp for forfac
 !!\param minorfrac       factor for minor gases
@@ -2251,7 +2251,7 @@
 !! randomly overlaping in a vertical column.
 !!\brief Original Code Description: this program calculates the upward
 !! fluxes, downward fluxes, and heating rates for an arbitrary clear or
-!! cloudy atmosphere. The input to this program is the atmospheric 
+!! cloudy atmosphere. The input to this program is the atmospheric
 !! profile, all Planck function information, and the cloud fraction by
 !! layer. A variable diffusivity angle (secdif) is used for the angle
 !! integration. Bands 2-3 and 5-9 use a value for secdif that varies
@@ -2585,7 +2585,7 @@
 
       enddo   ! end do_ig_loop
 
-!> -# Process longwave output from band for total and clear streams. 
+!> -# Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
 
       flxfac = wtdiff * fluxfac
@@ -2641,7 +2641,7 @@
 
 
 !> This subroutine computes the upward/downward radiative fluxes, and
-!! heating rates for both clear or cloudy atmosphere. Clouds are 
+!! heating rates for both clear or cloudy atmosphere. Clouds are
 !! assumed as in maximum-randomly overlaping in a vertical column.
 !!\param semiss        lw surface emissivity
 !!\param delp          layer pressure thickness (mb)
@@ -3629,13 +3629,13 @@
 !> This subroutine contains optical depths developed for the rapid
 !! radiative transfer model.
 !!\brief This file contains the subroutines taugbn (where n goes from
-!! 1 to 16). taugbn calculates the optical depths and planck fractions 
+!! 1 to 16). taugbn calculates the optical depths and planck fractions
 !! per g-value and layer for band n.
-!!\param laytrop          tropopause layer index (unitless) layer at 
+!!\param laytrop          tropopause layer index (unitless) layer at
 !!                        which switch is made for key species
 !!\param pavel            layer pressures (mb)
 !!\param coldry           column amount for dry air \f$(mol/cm^2)\f$
-!!\param colamt           column amounts of h2o, co2, o3, n2o, ch4,o2, 
+!!\param colamt           column amounts of h2o, co2, o3, n2o, ch4,o2,
 !!                        co \f$(mol/cm^2)\f$
 !!\param colbrd           column amount of broadening gases
 !!\param wx               cross-section amounts \f$(mol/cm^2)\f$
@@ -3646,7 +3646,7 @@
 !!\n                      (:,:,n)n=1,2: the rates of ref press at the 2
 !!                                 sides of the layer
 !!\param facij            factors multiply the reference ks, i,j of 0/1
-!!                        for lower/higher of the 2 appropriate 
+!!                        for lower/higher of the 2 appropriate
 !!                        temperatures and altitudes
 !!\param jp               index of lower reference pressure
 !!\param jt, jt1          indices of lower reference temperatures for
@@ -3855,7 +3855,7 @@
 ! =================
 
 !> band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
-!!  (high key - h2o; high minor - n2)         
+!!  (high key - h2o; high minor - n2)
 ! ----------------------------------
       subroutine taugb01
 ! ..................................
@@ -3914,7 +3914,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) -  forref(ig,indf))) 
+     &            * (forref(ig,indfp) -  forref(ig,indf)))
           taun2   = scalen2 * (ka_mn2(ig,indm) + minorfrac(k)           &
      &            * (ka_mn2(ig,indmp) - ka_mn2(ig,indm)))
 
@@ -3945,7 +3945,7 @@
 
         do ig = 1, ng01
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           taun2  = scalen2 * (kb_mn2(ig,indm) + minorfrac(k)            &
      &           * (kb_mn2(ig,indmp) - kb_mn2(ig,indm)))
 
@@ -4000,7 +4000,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns02+ig,k) = corradj * (colamt(k,1)                      &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -4024,7 +4024,7 @@
 
         do ig = 1, ng02
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns02+ig,k) = colamt(k,1)                                 &
      &           * (fac00(k)*absb(ig,ind0) + fac10(k)*absb(ig,ind0p)    &
@@ -4087,7 +4087,7 @@
         specparm = colamt(k,1) / speccomb
         specmult = 8.0 * min(specparm, oneminus)
         js = 1 + int(specmult)
-        fs = mod(specmult, f_one)        
+        fs = mod(specmult, f_one)
         ind0 = ((jp(k)-1)*5 + (jt(k)-1)) * nspa(3) + js
 
         speccomb1 = colamt(k,1) + rfrate(k,1,2)*colamt(k,2)
@@ -4320,7 +4320,7 @@
 
         do ig = 1, ng03
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           n2om1  = kb_mn2o(ig,jmn2o,indm) + fmn2o                       &
      &           * (kb_mn2o(ig,jmn2op,indm) - kb_mn2o(ig,jmn2o,indm))
           n2om2  = kb_mn2o(ig,jmn2o,indmp) + fmn2o                      &
@@ -4336,7 +4336,7 @@
      &              +  fac101*absb(ig,id101) + fac111*absb(ig,id111))
 
           taug(ns03+ig,k) = tau_major + tau_major1                      &
-     &                    + taufor + adjcoln2o*absn2o            
+     &                    + taufor + adjcoln2o*absn2o
 
           fracs(ns03+ig,k) = fracrefb(ig,jpl) + fpl                     &
      &                     * (fracrefb(ig,jplp) - fracrefb(ig,jpl))
@@ -4495,7 +4495,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           tau_major = speccomb                                          &
      &              * (fac000*absa(ig,id000) + fac010*absa(ig,id010)    &
@@ -4591,8 +4591,8 @@
       end subroutine taugb04
 ! ----------------------------------
 
-!> Band 5:  700-820 cm-1 (low key - h2o,co2; low minor - o3, ccl4) 
-!!                       (high key - o3,co2)                 
+!> Band 5:  700-820 cm-1 (low key - h2o,co2; low minor - o3, ccl4)
+!!                       (high key - o3,co2)
 ! ----------------------------------
       subroutine taugb05
 ! ..................................
@@ -4604,7 +4604,7 @@
 
       use module_radlw_kgb05
 
-!  ---  locals: 
+!  ---  locals:
       integer :: k, ind0, ind1, inds, indsp, indf, indfp, indm, indmp,  &
      &       id000, id010, id100, id110, id200, id210, jmo3, jmo3p,     &
      &       id001, id011, id101, id111, id201, id211, jpl, jplp,       &
@@ -4854,7 +4854,7 @@
       end subroutine taugb05
 ! ----------------------------------
 
-!> Band 6:  820-980 cm-1 (low key - h2o; low minor - co2) 
+!> Band 6:  820-980 cm-1 (low key - h2o; low minor - co2)
 !!                       (high key - none; high minor - cfc11, cfc12)
 ! ----------------------------------
       subroutine taugb06
@@ -4867,7 +4867,7 @@
 
       use module_radlw_kgb06
 
-!  ---  locals: 
+!  ---  locals:
       integer :: k, ind0, ind0p, ind1, ind1p, inds, indsp, indf, indfp, &
      &       indm, indmp, ig
 
@@ -5129,7 +5129,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           co2m1   = ka_mco2(ig,jmco2,indm) + fmco2                      &
      &            * (ka_mco2(ig,jmco2p,indm) - ka_mco2(ig,jmco2,indm))
           co2m2   = ka_mco2(ig,jmco2,indmp) + fmco2                     &
@@ -5202,8 +5202,8 @@
       end subroutine taugb07
 ! ----------------------------------
 
-!> Band 8:  1080-1180 cm-1 (low key - h2o; low minor - co2,o3,n2o) 
-!!                         (high key - o3; high minor - co2, n2o) 
+!> Band 8:  1080-1180 cm-1 (low key - h2o; low minor - co2,o3,n2o)
+!!                         (high key - o3; high minor - co2, n2o)
 ! ----------------------------------
       subroutine taugb08
 ! ..................................
@@ -5328,7 +5328,7 @@
 ! ----------------------------------
 
 !> Band 9:  1180-1390 cm-1 (low key - h2o,ch4; low minor - n2o)
-!!                         (high key - ch4; high minor - n2o)  
+!!                         (high key - ch4; high minor - n2o)
 ! ----------------------------------
       subroutine taugb09
 ! ..................................
@@ -5514,7 +5514,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           n2om1   = ka_mn2o(ig,jmn2o,indm) + fmn2o                      &
      &            * (ka_mn2o(ig,jmn2op,indm) - ka_mn2o(ig,jmn2o,indm))
           n2om2   = ka_mn2o(ig,jmn2o,indmp) + fmn2o                     &
@@ -5529,7 +5529,7 @@
      &                * (fac001*absa(ig,id001) + fac011*absa(ig,id011)  &
      &                +  fac101*absa(ig,id101) + fac111*absa(ig,id111)  &
      &                +  fac201*absa(ig,id201) + fac211*absa(ig,id211)) &
-     &                + tauself + taufor + adjcoln2o*absn2o            
+     &                + tauself + taufor + adjcoln2o*absn2o
 
           fracs(ns09+ig,k) = fracrefa(ig,jpl) + fpl                     &
      &                     * (fracrefa(ig,jplp) - fracrefa(ig,jpl))
@@ -5613,7 +5613,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns10+ig,k) = colamt(k,1)                                 &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -5652,8 +5652,8 @@
       end subroutine taugb10
 ! ----------------------------------
 
-!> Band 11:  1480-1800 cm-1 (low - h2o; low minor - o2) 
-!!                          (high key - h2o; high minor - o2)   
+!> Band 11:  1480-1800 cm-1 (low - h2o; low minor - o2)
+!!                          (high key - h2o; high minor - o2)
 ! ----------------------------------
       subroutine taugb11
 ! ..................................
@@ -5728,7 +5728,7 @@
 
         do ig = 1, ng11
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           tauo2  = scaleo2 * (kb_mo2(ig,indm) + minorfrac(k)            &
      &           * (kb_mo2(ig,indmp) - kb_mo2(ig,indm)))
 
@@ -5900,7 +5900,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns12+ig,k) = speccomb                                    &
      &                * (fac000*absa(ig,id000) + fac010*absa(ig,id010)  &
@@ -6129,7 +6129,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           co2m1   = ka_mco2(ig,jmco2,indm) + fmco2                      &
      &            * (ka_mco2(ig,jmco2p,indm) - ka_mco2(ig,jmco2,indm))
           co2m2   = ka_mco2(ig,jmco2,indmp) + fmco2                     &
@@ -6177,7 +6177,7 @@
       end subroutine taugb13
 ! ----------------------------------
 
-!> Band 14:  2250-2380 cm-1 (low - co2; high - co2) 
+!> Band 14:  2250-2380 cm-1 (low - co2; high - co2)
 ! ----------------------------------
       subroutine taugb14
 ! ..................................
@@ -6213,7 +6213,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns14+ig,k) = colamt(k,2)                                 &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -6246,8 +6246,8 @@
       end subroutine taugb14
 ! ----------------------------------
 
-!> Band 15:  2380-2600 cm-1 (low - n2o,co2; low minor - n2) 
-!!                          (high - nothing)     
+!> Band 15:  2380-2600 cm-1 (low - n2o,co2; low minor - n2)
+!!                          (high - nothing)
 ! ----------------------------------
       subroutine taugb15
 ! ..................................
@@ -6325,7 +6325,7 @@
         indmp = indm + 1
         jplp  = jpl  + 1
         jmn2p = jmn2 + 1
-         
+
 
         if (specparm < 0.125 .and. specparm1 < 0.125) then
           p0 = fs - f_one
@@ -6421,7 +6421,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           n2m1    = ka_mn2(ig,jmn2,indm) + fmn2                         &
      &            * (ka_mn2(ig,jmn2p,indm) - ka_mn2(ig,jmn2,indm))
           n2m2    = ka_mn2(ig,jmn2,indmp) + fmn2                        &
@@ -6611,7 +6611,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns16+ig,k) = speccomb                                    &
      &                * (fac000*absa(ig,id000) + fac010*absa(ig,id010)  &
