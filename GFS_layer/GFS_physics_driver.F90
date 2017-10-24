@@ -867,10 +867,10 @@ module module_physics_driver
 !     if (lprnt) write(0,*)' tsea=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 
 !        call sfc_diff (im,Statein%pgr, Statein%ugrs, Statein%vgrs,        &
-        call sfc_ex_coef_run(im,Statein%pgr, Statein%ugrs, Statein%vgrs,  &
-                       Statein%tgrs, Statein%qgrs, Diag%zlvl,             &
+        call sfc_ex_coef_run(im,Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                       Statein%tgrs(:,1), Statein%qgrs(:,1,1), Diag%zlvl,           &
                        Sfcprop%snowd, Sfcprop%tsfc,  Sfcprop%zorl, cd,    &
-                       cdq, rb, Statein%prsl(1,1), work3, islmsk, stress, &
+                       cdq, rb, Statein%prsl(:,1), work3, islmsk, stress, &
                        Sfcprop%ffmm,  Sfcprop%ffhh, Sfcprop%uustar,       &
                        wind,  Tbd%phy_f2d(1,Model%num_p2d), fm10, fh2,    &
                        sigmaf, vegtype, Sfcprop%shdmax, Model%ivegsrc,    &
@@ -969,10 +969,10 @@ module module_physics_driver
 !          call sfc_drv                                                 &
           call lsmnoah_run                                             &
 !  ---  inputs:
-           (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,  &
-            Statein%tgrs, Statein%qgrs, soiltyp, vegtype, sigmaf,      &
+           (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+            Statein%tgrs(:,1), Statein%qgrs(:,1), soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
-            Sfcprop%tg3, cd, cdq, Statein%prsl(1,1), work3, DIag%zlvl, &
+            Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, DIag%zlvl, &
             islmsk, Tbd%phy_f2d(1,Model%num_p2d), slopetyp,            &
             Sfcprop%shdmin, Sfcprop%shdmax, Sfcprop%snoalb,            &
             Radtend%sfalb, flag_iter, flag_guess, Model%isot,          &
@@ -1073,8 +1073,8 @@ module module_physics_driver
 !  --- ...  update near surface fields
 
 !      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
-      call sfc_diag_run(im, Statein%pgr, Statein%ugrs, Statein%vgrs,  &
-                     Statein%tgrs, Statein%qgrs, Sfcprop%tsfc, qss,   &
+      call sfc_diag_run(im, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                     Statein%tgrs(:,1), Statein%qgrs(:,1), Sfcprop%tsfc, qss,   &
                      Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
                      Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
