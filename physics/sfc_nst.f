@@ -78,7 +78,7 @@
 !!| nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                          | mm            | 1    | integer |           | in     | F        |
 !!| lprnt          | flag_print                                                                   | flag for printing diagnostics to output        | flag          | 0    | logical |           | in     | F        |
 !!| ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column             | index         | 0    | integer |           | in     | F        |
-!!| tskin          | surface_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | inout  | F        |
+!!| tskin          | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | inout  | F        |
 !!| tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
 !!| xt             | diurnal thermocline layer_heat_content                                       | heat content in diurnal thermocline layer      | K m           | 1    | real    | kind_phys | inout  | F        |
 !!| xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer | ppt m         | 1    | real    | kind_phys | inout  | F        |
@@ -684,14 +684,61 @@ cc
 
       contains
 
+!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!! @{
+!! \brief Brief description of the parameterization
+!!
+!! Blah blah blah description of parameterization
+!!
+!! \section diagram Calling Hierarchy Diagram
+!!
+!! Blah blah blah diagram
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! Blah blah blah intraphysics communication
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
       subroutine sfc_nst_pre_init
 
       end
 
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
       subroutine sfc_nst_pre_finalize
 
       end
 
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!!\section arg_table_sfc_nst_run Argument Table
+!!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
+!!|----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
+!!| islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
+!!| oro            | orography                                                                    | orography                                      |               | 1    | real    | kind_phys | in     | F        |
+!!| oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          |               | 1    | real    | kind_phys | in     | F        |
+!!| tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | in     | F        |
+!!| tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
+!!| tskin          | surface_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!!
+!! \section NSST_general_algorithm General Algorithm
+!!
+!! Blah blah general algorithm
+!!
+!! \section NSST_detailed_algorithm Detailed Algorithm
+!! @{
       subroutine sfc_nst_pre_run                                        &
      &     ( im, islimsk, oro, oro_uf, tsfc, tsurf, tskin )
 
@@ -727,6 +774,8 @@ cc
       return
       end
 
+!> @}
+!! @}
       end module
 
 
@@ -736,14 +785,71 @@ cc
 
       contains
 
+!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!! @{
+!! \brief Brief description of the parameterization
+!!
+!! Blah blah blah description of parameterization
+!!
+!! \section diagram Calling Hierarchy Diagram
+!!
+!! Blah blah blah diagram
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! Blah blah blah intraphysics communication
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
       subroutine sfc_nst_post_init
 
       end
 
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
       subroutine sfc_nst_post_finalize
 
       end
 
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!!\section arg_table_sfc_nst_run Argument Table
+!!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
+!!|----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
+!!| islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
+!!| oro            | orography                                                                    | orography                                      |               | 1    | real    | kind_phys | in     | F        |
+!!| oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          |               | 1    | real    | kind_phys | in     | F        |
+!!| nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2        | flag          | 1    | integer |           | in     | F        |
+!!| nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                          | mm            | 1    | integer |           | in     | F        |
+!!| nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                          | mm            | 1    | integer |           | in     | F        |
+!!| xt             | diurnal thermocline layer_heat_content                                       | heat content in diurnal thermocline layer      | K m           | 1    | real    | kind_phys | in     | F        |
+!!| xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness            | m             | 1    | real    | kind_phys | in     | F        |
+!!| dt_cool        | sub-layer_cooling_amount                                                     | sub-layer cooling amount                       | K             | 1    | real    | kind_phys | in     | F        |
+!!| z_c            | sub-layer_cooling_thickness                                                  | sub-layer cooling thickness                    | m             | 1    | real    | kind_phys | in     | F        |
+!!| rslimsk        | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                   | flag          | 1    | real    | kind_phys | in     | F        |
+!!| tref           | sea_surface_foundation_temperature                                           | reference/foundation temperature               | K             | 1    | real    | kind_phys | in     | F        |
+!!| xlon           | longitude                                                                    | longitude                                      | radians       | 1    | real    | kind_phys | in     | F        |
+!!| tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
+!!| dtzm           | mean_change_over_depth_in_sea_water_temperature                              | mean of dT(z)  (zsea1 to zsea2)                | K             | 1    | real    | kind_phys | out    | F        |
+!!| tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!!
+!! \section NSST_general_algorithm General Algorithm
+!!
+!! Blah blah general algorithm
+!!
+!! \section NSST_detailed_algorithm Detailed Algorithm
+!! @{
       subroutine sfc_nst_post_run                                       &
      &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
      &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
@@ -808,4 +914,6 @@ cc
       return
       end
 
+!> @}
+!! @}
       end module
