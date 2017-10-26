@@ -63,7 +63,7 @@
      &                    ustar,wind,ddvel,fm10,fh2,
      &                    sigmaf,vegtype,shdmax,ivegsrc,
      &                    tsurf,flag_iter,redrag)
-
+!!
 
 !
       use machine , only : kind_phys

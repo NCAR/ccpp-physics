@@ -46,7 +46,7 @@
       subroutine sfc_diag_run(im,ps,u1,v1,t1,q1,
      &                    tskin,qsurf,f10m,u10m,v10m,t2m,q2m,
      &                    prslki,evap,fm,fh,fm10,fh2)
-
+!!
 !
       use machine , only : kind_phys
       use funcphys, only : fpvs
