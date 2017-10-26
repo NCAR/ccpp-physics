@@ -56,31 +56,32 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine sfc_ex_coef_run(im,ps,u1,v1,t1,q1,z1,
-     &                    snwdph,tskin,z0rl,cm,ch,rb,
-     &                    prsl1,prslki,islimsk,
-     &                    stress,fm,fh,
-     &                    ustar,wind,ddvel,fm10,fh2,
-     &                    sigmaf,vegtype,shdmax,ivegsrc,
-     &                    tsurf,flag_iter,redrag)
+      subroutine sfc_ex_coef_run                                        &
+     &                   (im,ps,u1,v1,t1,q1,z1,                         &
+     &                    snwdph,tskin,z0rl,cm,ch,rb,                   &
+     &                    prsl1,prslki,islimsk,                         &
+     &                    stress,fm,fh,                                 &
+     &                    ustar,wind,ddvel,fm10,fh2,                    &
+     &                    sigmaf,vegtype,shdmax,ivegsrc,                &
+     &                    tsurf,flag_iter,redrag                        &
+     &                   ) 
 !!
 
-!
       use machine , only : kind_phys
       use funcphys, only : fpvs    
-      use physcons, grav => con_g,       cp => con_cp
-     &,             rvrdm1 => con_fvirt, rd => con_rd
-     &,             eps => con_eps, epsm1 => con_epsm1
+      use physcons, grav => con_g,       cp => con_cp                   &
+     &,             rvrdm1 => con_fvirt, rd => con_rd                   &
+     &,             eps => con_eps, epsm1 => con_epsm1                  
 
       implicit none
 !
       integer              im, ivegsrc
-      real(kind=kind_phys), dimension(im) :: ps,  u1, v1, t1, q1, z1
-     &,                                      tskin, z0rl, cm,  ch, rb
-     &,                                      prsl1, prslki, stress
-     &,                                      fm, fh, ustar, wind, ddvel
-     &,                                      fm10, fh2, sigmaf, shdmax
-     &,                                      tsurf, snwdph
+      real(kind=kind_phys), dimension(im) :: ps,  u1, v1, t1, q1, z1    &
+     &,                                      tskin, z0rl, cm,  ch, rb   &
+     &,                                      prsl1, prslki, stress      &
+     &,                                      fm, fh, ustar, wind, ddvel &
+     &,                                      fm10, fh2, sigmaf, shdmax  &
+     &,                                      tsurf, snwdph              
       integer, dimension(im)              ::  vegtype, islimsk
 
       logical   flag_iter(im) ! added by s.lu
@@ -90,11 +91,11 @@
 !
       integer   i
 !
-      real(kind=kind_phys) aa,     aa0,    bb,     bb0, dtv,   adtv,qs1,
-     &                     hl1,    hl12,   pm,     ph,  pm10,  ph2, rat,
-     &                     thv1,   tvs,    z1i,    z0,  z0max, ztmax,
-     &                     fms,    fhs,    hl0,    hl0inf, hlinf,
-     &                     hl110,  hlt,    hltinf, olinf,
+      real(kind=kind_phys) aa,     aa0,    bb,     bb0, dtv,   adtv,qs1,&
+     &                     hl1,    hl12,   pm,     ph,  pm10,  ph2, rat,&
+     &                     thv1,   tvs,    z1i,    z0,  z0max, ztmax,   &
+     &                     fms,    fhs,    hl0,    hl0inf, hlinf,       &
+     &                     hl110,  hlt,    hltinf, olinf,               &
      &                     restar, czilc,  tem1,   tem2, ztmax1
 !
       real(kind=kind_phys), parameter ::

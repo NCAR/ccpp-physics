@@ -43,20 +43,22 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine sfc_diag_run(im,ps,u1,v1,t1,q1,
-     &                    tskin,qsurf,f10m,u10m,v10m,t2m,q2m,
-     &                    prslki,evap,fm,fh,fm10,fh2)
+      subroutine sfc_diag_run                                           &
+     &                   (im,ps,u1,v1,t1,q1,                            &
+     &                    tskin,qsurf,f10m,u10m,v10m,t2m,q2m,           &
+     &                    prslki,evap,fm,fh,fm10,fh2                    &
+     &                   )
 !!
 !
       use machine , only : kind_phys
       use funcphys, only : fpvs
-      use physcons, grav => con_g,  cp => con_cp,
+      use physcons, grav => con_g,  cp => con_cp,                       &
      &              eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
       integer              im
-      real, dimension(im) :: ps,   u1,   v1,   t1,  q1,  tskin,  qsurf,
-     &                       f10m, u10m, v10m, t2m, q2m, prslki, evap,
+      real, dimension(im) :: ps,   u1,   v1,   t1,  q1,  tskin,  qsurf, &
+     &                       f10m, u10m, v10m, t2m, q2m, prslki, evap,  &
      &                       fm,   fh,   fm10, fh2
 !
 !     locals
