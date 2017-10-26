@@ -596,6 +596,7 @@ module module_physics_driver
                         Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
 !
+!zhang: calrhc_run
       rhbbot = Model%crtrh(1)
       rhpbl  = Model%crtrh(2)
       rhbtop = Model%crtrh(3)
@@ -1561,6 +1562,7 @@ module module_physics_driver
       if (Model%ntcw > 0) then
         do k=1,levs
           do i=1,im
+!zhang: gscond, precpd interstitial calrhc_run
             tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
             tem      = rhc_max * work1(i) + tem * work2(i)
             rhc(i,k) = max(0.0, min(1.0,tem))
@@ -1571,8 +1573,9 @@ module module_physics_driver
           clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)                    ! water
         else
           if (Model%num_p3d == 4) then   ! zhao-carr microphysics
-            psautco_l(:) = Model%psautco(1)*work1(:) + Model%psautco(2)*work2(:)
-            prautco_l(:) = Model%prautco(1)*work1(:) + Model%prautco(2)*work2(:)
+!zhang: precpd interstitial
+!            psautco_l(:) = Model%psautco(1)*work1(:) + Model%psautco(2)*work2(:)
+!            prautco_l(:) = Model%prautco(1)*work1(:) + Model%prautco(2)*work2(:)
             clw(:,:,1) = Stateout%gq0(:,:,Model%ntcw)
           endif  ! end if_num_p3d
         endif    ! end if (ncld == 2)
@@ -2375,24 +2378,17 @@ module module_physics_driver
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), lprnt, ipr)
             else
-
-!              call gscond (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,    &
               call gscond_run (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,&
-!                           Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),    &
-!                           Stateout%gt0, Tbd%phy_f3d(1,1,1), Tbd%phy_f3d(1,1,2), &
-!                           Tbd%phy_f2d(1,1), Tbd%phy_f3d(1,1,3),                 &
-!                           Tbd%phy_f3d(1,1,4), Tbd%phy_f2d(1,2), rhc,lprnt, ipr)
                            Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),    &
                            Stateout%gt0, Tbd%phy_f3d(:,:,1), Tbd%phy_f3d(:,:,2), &
                            Tbd%phy_f2d(:,1), Tbd%phy_f3d(:,:,3),                 &
                            Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,lprnt, ipr)
 
-!              call precpd (im, ix, levs, dtp, del, Statein%prsl,               &
               call precpd_run (im, ix, levs, dtp, del, Statein%prsl,           &
-!                          Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw),   &
                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),   &
-                          Stateout%gt0, rain1, Diag%sr, rainp, rhc, psautco_l, &
-                          prautco_l, Model%evpco, Model%wminco, lprnt, ipr)
+                          Stateout%gt0, rain1, Diag%sr, rainp, rhc,            &
+                          Model%psautco, Model%prautco, Model%evpco,           &
+                          Model%wminco, work1, lprnt, ipr)
             endif
 !           if (lprnt) then
 !             write(0,*)' prsl=',prsl(ipr,:)

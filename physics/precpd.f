@@ -42,6 +42,7 @@
 !!|  prautco       | coefficient_from_cloud_water_to_rain                     | conversion coefficient from cloud water to rain                   | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  evpco         | coefficient_for_evaporation_of_rainfall                  | coefficient for evaporation of rainfall                           | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  wminco        | cloud_condensed_water_conversion_threshold               | conversion coefficient from cloud liquid and ice to precipitation | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  wk1           | coefficient_for_grid                                     | grid coefficient calculated                                       | frac    |  1   | real    | kind_phys|  in     |   F      |
 !!|  lprnt         | flag_print                                               | flag for printing diagnostics to output                           | flag    |  0   | logical |          |  in     |   F      |
 !!|  jpr           | horizontal_index_of_printed_column                       | horizontal index of printed column                                | index   |  0   | integer |          |  in     |   F      |
 !!
@@ -88,7 +89,8 @@
 !! @{
        subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
      &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
-     &,                   lprnt,jpr)
+     &,                   wk1,lprnt,jpr)
+!zhang     &,                   lprnt,jpr)
 
 !
 !     ******************************************************************
@@ -161,8 +163,10 @@
      &,                                 del(ix,km),  prsl(ix,km)        &
      &,                     rn(im),      sr(im)                         &
      &,                     dt                                          &
-     &,                     rainp(im,km), rnp(im),                      &
-     &                      psautco(im), prautco(im), evpco, wminco(2)
+     &,                     rainp(im,km), rnp(im)                       &
+     &,                     psautco(2), prautco(2), evpco, wminco(2)    &
+     &,                     psautco_l(im), prautco_l(im), wk1(im)       &
+     &,                     wk2(im)
 !
 !
       real (kind=kind_phys) err(im),      ers(im),     precrl(im)       &
@@ -193,6 +197,12 @@
      &,                     praut, fi, qc, amaxrq, rqkll
       integer i, k, ihpr, n
 !
+!--------------  GFS psautco/prautco interstitial ----------------
+      do i=1, im
+        wk2(i) = 1.0-wk1(i)
+        psautco_l(i) = psautco(1)*wk1(i) + psautco(2)*wk2(i)
+        prautco_l(i) = prautco(1)*wk1(i) + prautco(2)*wk2(i)
+      enddo 
 !-----------------------preliminaries ---------------------------------
 !
 !     do k=1,km
@@ -462,7 +472,7 @@
             if (iwl(n) == 1) then                 !  ice phase
                amaxcm = max(cons_0, cwmk - wmini(i,k))
                expf      = dt * exp(0.025*tmt0(n))
-               psaut     = min(cwmk, psautco(i)*expf*amaxcm)
+               psaut     = min(cwmk, psautco_l(i)*expf*amaxcm)
                ww(n)     = ww(n) - psaut
                cwmk      = max(cons_0, ww(n))
 !              cwmk      = max(cons_0, ww(n)-wmini(i,k))
@@ -491,7 +501,7 @@
                tem2      = amaxcm * cmr * tem / max(ccr(n),cons_p01)
                tem2      = min(cons_50, tem2*tem2)
 !              praut     = c00  * tem * amaxcm * (1.0-exp(-tem2))
-               praut     = (prautco(i)*dt) * tem * amaxcm
+               praut     = (prautco_l(i)*dt) * tem * amaxcm
      &                                     * (1.0-exp(-tem2))
                praut     = min(praut, cwmk)
                ww(n)     = ww(n) - praut
