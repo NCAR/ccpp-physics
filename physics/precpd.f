@@ -37,12 +37,12 @@
 !!|  rn            | rainfall_amount                                          | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
 !!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | frac    |  1   | real    | kind_phys|  out    |   F      |
 !!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
-!!|  u00k          | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation          | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  u00k          | critical_relative_humidity                               | critical relative humidity                                        | 1       |  2   | real    | kind_phys|  in     |   F      |
 !!|  psautco       | coefficient_from_cloud_ice_to_snow                       | conversion coefficient from cloud ice to snow                     | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  prautco       | coefficient_from_cloud_water_to_rain                     | conversion coefficient from cloud water to rain                   | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  evpco         | coefficient_for_evaporation_of_rainfall                  | coefficient for evaporation of rainfall                           | 1       |  0   | real    | kind_phys|  in     |   F      |
 !!|  wminco        | cloud_condensed_water_conversion_threshold               | conversion coefficient from cloud liquid and ice to precipitation | 1       |  0   | real    | kind_phys|  in     |   F      |
-!!|  wk1           | coefficient_for_grid                                     | grid coefficient calculated                                       | frac    |  1   | real    | kind_phys|  in     |   F      |
+!!|  wk1           | coefficient_for_grid                                     | grid coefficient                                                  | frac    |  1   | real    | kind_phys|  in     |   F      |
 !!|  lprnt         | flag_print                                               | flag for printing diagnostics to output                           | flag    |  0   | logical |          |  in     |   F      |
 !!|  jpr           | horizontal_index_of_printed_column                       | horizontal index of printed column                                | index   |  0   | integer |          |  in     |   F      |
 !!

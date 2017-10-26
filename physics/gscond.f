@@ -82,7 +82,7 @@
 !!| tp1            | air_temperature_at_previous_time_step                    | air temperature at previous time step                    | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| qp1            | water_vapor_specific_humidity_at_previous_time_step      | water vapor specific humidity at previous time step      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| psp1           | surface_air_pressure_at_previous_time_step               | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |
-!!| u              | relative_humidity_threshold_for_large_scale_condensation | relative humidity threshold for large-scale condensation | 1       |    0 | real    | kind_phys | in     |   F      |
+!!| u              | critical_relative_humidity                               | critical relative humidity                               | 1       |    2 | real    | kind_phys | in     |   F      |
 !!| lprnt          | flag_print                                               | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
 !!| ipr            | horizontal_index_of_printed_column                       | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      |
 !!
