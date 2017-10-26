@@ -7,21 +7,32 @@
 
 !> \defgroup GFS_NSST GFS Near Sea Surface Temperature
 !! @{
-!! \brief Brief description of the parameterization
+!! \brief Near Sea Surface Temperature (NSST) is a temperature profile just below the sea surface. The GFS NSST scheme is used to forecast the NSST for two main purposes: supply SSTs to the atmospheric model for the calculation of air-sea heat and moisture fluxes and providing a sub-layer temperature profile forecast for use as a first guess in the Gridpoint Statistical Interpolator (GSI) data assimilation code.
 !!
-!! Blah blah blah description of parameterization
+!! The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li 2015, Li and Derber 2008 and 2009). The GFS NSST scheme predicts the vertical profile of sea temperature between the surface and a reference level (zr), which is on the order of 5 m.  Only two physical process are considered in this scheme: diurnal thermocline layer warming and thermal skin layer (also known as sub-layer) cooling. All other process that could influence NSST are ignored in this simple scheme.
 !!
-!! \section diagram Calling Hierarchy Diagram
+!!This profile is a composed by subdividing the near-surface layer in three parts
 !!
-!! Blah blah blah diagram
+!!T(z) = Tr + T’w (z) + T’c (z),
+!!
+!!where
+!!Ts = T(z=0) is the SST
+!!T’c (z) is the temperature profile in the skin layer (0 < z <= zc)
+!!T’w (z) is the temperature profile in the warm layer (0 < z <= zr)
+!!Tr is the reference temperature
+!!zc is the depth of the skin layer
+!!
+!!Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996). Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
+!!
+!! \section  Calling Hierarchy Diagram
 !!
 !! \section intraphysics Intraphysics Communication
 !!
-!! Blah blah blah intraphysics communication
+!! This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
-!> \brief Brief description of the subroutine
+!> \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
-!! Blah blah description of subroutine
+!! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
@@ -29,9 +40,9 @@
 
       end
 
-!> \brief Brief description of the subroutine
+!> \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !!
-!! Blah blah description of subroutine
+!! This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !!
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
@@ -39,9 +50,9 @@
 
       end
 
-!> \brief Brief description of the subroutine
+!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !!
-!! Blah blah description of subroutine
+!! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !!
 !!\section arg_table_sfc_nst_run Argument Table
 !!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
@@ -107,9 +118,9 @@
 !!
 !! \section NSST_general_algorithm General Algorithm
 !!
-!! Blah blah general algorithm
+!! This is the main subroutine for the NSST scheme, and it calls the DTM and TSM.
 !!
-!! \section NSST_detailed_algorithm Detailed Algorithm
+!! \section NSST_detailed_algorithm Under construction
 !! @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
@@ -684,7 +695,7 @@ cc
 
       contains
 
-!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!> \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
 !! @{
 !! \brief Brief description of the parameterization
 !!
@@ -785,7 +796,7 @@ cc
 
       contains
 
-!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!> \defgroup GFS_NSST_POST GFS Near Sea Surface Temperature Post
 !! @{
 !! \brief Brief description of the parameterization
 !!
