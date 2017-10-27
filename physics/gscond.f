@@ -3,7 +3,7 @@
 !! condensation and evaporation for use in the Zhao and Carr (1997)
 !! \cite zhao_and_carr_1997 scheme.
 
-      module zhaocarr_gscond
+      module GFS_zhaocarr_gscond
       contains
 
 !> \defgroup Zhao-Carr Zhao-Carr Microphysics
@@ -542,4 +542,4 @@
 !> @}
 !! @}
 
-      end module  zhaocarr_gscond
+      end module  GFS_zhaocarr_gscond

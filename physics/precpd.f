@@ -2,7 +2,7 @@
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice
 
-      module zhaocarr_precpd
+      module GFS_zhaocarr_precpd
       contains
 
 !> \ingroup Zhao-Carr
@@ -749,4 +749,4 @@
 
 !> @}
 
-      end module zhaocarr_precpd
+      end module GFS_zhaocarr_precpd

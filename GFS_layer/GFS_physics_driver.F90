@@ -16,9 +16,9 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
-  use zhaocarr_gscond,       only: gscond_run
-  use zhaocarr_precpd,       only: precpd_run
-  use calpreciptype,         only: calpreciptype_run
+  use GFS_zhaocarr_gscond,       only: gscond_run
+  use GFS_zhaocarr_precpd,       only: precpd_run
+  use GFS_calpreciptype,         only: GFS_calpreciptype_run
   implicit none
 
 
@@ -2569,17 +2569,24 @@ module module_physics_driver
       endif
 
       Diag%rain(:)  = Diag%rainc(:) + frain * rain1(:)
-
-      if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
-        i = min(3,Model%num_p3d)
-!        call calpreciptype (kdt, Model%nrcm, im, ix, levs, levs+1,        &
-        call calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,        &
-                            Tbd%rann, Grid%xlat, Grid%xlon, Stateout%gt0, &
+ 
+      call GFS_calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,  &
+                            Tbd%rann, Model%cal_pre, Stateout%gt0,        &
                             Stateout%gq0, Statein%prsl, Statein%prsi,     &
                             Diag%rain, Statein%phii, Model%num_p3d,       &
-!                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(1,1,i),    &     ! input
-                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,i),    &     ! input
-                            domr, domzr, domip, doms)                           ! output
+                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,i),    &   ! input
+                            domr, domzr, domip, doms, Sfcprop%srflag,     &   ! output
+                            Sfcprop%tprcp)        
+
+
+!      if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
+!        i = min(3,Model%num_p3d)
+!        call calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,        &
+!                            Tbd%rann, Grid%xlat, Grid%xlon, Stateout%gt0, &
+!                            Stateout%gq0, Statein%prsl, Statein%prsi,     &
+!                            Diag%rain, Statein%phii, Model%num_p3d,       &
+!                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,i),    &     ! input
+!                            domr, domzr, domip, doms)                           ! output
 !
 !        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '
 !     &,DOMR(ipr),DOMZR(ipr),DOMIP(ipr),DOMS(ipr)
@@ -2591,14 +2598,14 @@ module module_physics_driver
 !       end do
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
-        do i=1,im
-          if(doms(i) > 0.0 .or. domip(i) > 0.0) then
-            Sfcprop%srflag(i) = 1.
-          else
-            Sfcprop%srflag(i) = 0.
-          end if
-        enddo
-      endif
+!        do i=1,im
+!          if(doms(i) > 0.0 .or. domip(i) > 0.0) then
+!            Sfcprop%srflag(i) = 1.
+!          else
+!            Sfcprop%srflag(i) = 0.
+!          end if
+!        enddo
+!      endif
 
       if (Model%lssav) then
         Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
@@ -2611,31 +2618,31 @@ module module_physics_driver
 
 !  --- ...  estimate t850 for rain-snow decision
 
-      t850(:) = Stateout%gt0(:,1)
+!      t850(:) = Stateout%gt0(:,1)
 
-      do k = 1, levs-1
-        do i = 1, im
-          if (Statein%prsl(i,k) > p850 .and. Statein%prsl(i,k+1) <= p850) then
-            t850(i) = Stateout%gt0(i,k) - (Statein%prsl(i,k)-p850) / &
-                      (Statein%prsl(i,k)-Statein%prsl(i,k+1)) *      &
-                      (Stateout%gt0(i,k)-Stateout%gt0(i,k+1))
-          endif
-        enddo
-      enddo
+!      do k = 1, levs-1
+!        do i = 1, im
+!          if (Statein%prsl(i,k) > p850 .and. Statein%prsl(i,k+1) <= p850) then
+!            t850(i) = Stateout%gt0(i,k) - (Statein%prsl(i,k)-p850) / &
+!                      (Statein%prsl(i,k)-Statein%prsl(i,k+1)) *      &
+!                      (Stateout%gt0(i,k)-Stateout%gt0(i,k+1))
+!          endif
+!        enddo
+!      enddo
 
 !  --- ...  lu: snow-rain detection is performed in land/sice module
 
-      if (Model%cal_pre) then ! hchuang: new precip type algorithm defines srflag
-        Sfcprop%tprcp(:) = max(0.0, Diag%rain(:))  ! clu: rain -> tprcp
-      else
-        do i = 1, im
-          Sfcprop%tprcp(i)  = max(0.0, Diag%rain(i) )! clu: rain -> tprcp
-          Sfcprop%srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
-          if (t850(i) <= 273.16) then
-            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
-          endif
-        enddo
-      endif
+!      if (Model%cal_pre) then ! hchuang: new precip type algorithm defines srflag
+!        Sfcprop%tprcp(:) = max(0.0, Diag%rain(:))  ! clu: rain -> tprcp
+!      else
+!        do i = 1, im
+!          Sfcprop%tprcp(i)  = max(0.0, Diag%rain(i) )! clu: rain -> tprcp
+!          Sfcprop%srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
+!          if (t850(i) <= 273.16) then
+!            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
+!          endif
+!        enddo
+!      endif
 
 !  --- ...  coupling insertion
 
