@@ -90,7 +90,6 @@
        subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
      &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
      &,                   wk1,lprnt,jpr)
-!zhang     &,                   lprnt,jpr)
 
 !
 !     ******************************************************************
@@ -197,6 +196,7 @@
      &,                     praut, fi, qc, amaxrq, rqkll
       integer i, k, ihpr, n
 !
+
 !--------------  GFS psautco/prautco interstitial ----------------
       do i=1, im
         wk2(i) = 1.0-wk1(i)

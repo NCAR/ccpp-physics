@@ -2278,7 +2278,7 @@ module module_physics_driver
           Stateout%gq0(:,:,Model%ntiw) = clw(:,:,1)                     ! ice
           Stateout%gq0(:,:,Model%ntcw) = clw(:,:,2)                     ! water
         elseif (Model%num_p3d == 4) then    ! if_num_p3d
-          Stateout%gq0(:,:,Model%ntcw) = clw(:,:,1) + clw(:,:,2)
+!zhao-carr interstitial          Stateout%gq0(:,:,Model%ntcw) = clw(:,:,1) + clw(:,:,2)
         endif   ! end if_num_p3d
 
       else    ! if_ntcw
@@ -2379,7 +2379,8 @@ module module_physics_driver
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), lprnt, ipr)
             else
               call gscond_run (im, ix, levs, dtp, dtf, Statein%prsl, Statein%pgr,&
-                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),    &
+                           Stateout%gq0(:,:,1), clw(:,:,1), clw(:,:,2),          &
+                           Stateout%gq0(:,:,Model%ntcw),                         &
                            Stateout%gt0, Tbd%phy_f3d(:,:,1), Tbd%phy_f3d(:,:,2), &
                            Tbd%phy_f2d(:,1), Tbd%phy_f3d(:,:,3),                 &
                            Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,lprnt, ipr)

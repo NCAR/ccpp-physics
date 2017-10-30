@@ -66,15 +66,17 @@
 !!\section arg_table_gscond_run Argument Table
 !!| local var name | longname                                                 |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|----------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           |  in    |   F      |
-!!| ix             | horizontal_dimension                                     | horizontal dimension                                     | index   |    0 | integer |           |  in    |   F      |
-!!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           |  in    |   F      |
-!!| dt             | time_step_for_physics                                    | physics time step                                        | s       |    0 | real    | kind_phys |  in    |   F      |
-!!| dtf            | time_step_for_dynamics                                   | dynamics time step                                       | s       |    0 | real    | kind_phys |  in    |   F      |
-!!| prsl           | air_pressure                                             | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys |  in    |   F      |
-!!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys |  in    |   F      |
+!!| im             | horizontal_loop_extent                                   | horizontal loop extent, start at 1                       | index   |    0 | integer |           | in     |   F      |
+!!| ix             | horizontal_dimension                                     | horizontal dimension                                     | index   |    0 | integer |           | in     |   F      |
+!!| km             | vertical_dimension                                       | vertical layer dimension                                 | index   |    0 | integer |           | in     |   F      |
+!!| dt             | time_step_for_physics                                    | physics time step                                        | s       |    0 | real    | kind_phys | in     |   F      |
+!!| dtf            | time_step_for_dynamics                                   | dynamics time step                                       | s       |    0 | real    | kind_phys | in     |   F      |
+!!| prsl           | air_pressure                                             | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys | in     |   F      |
+!!| ps             | surface_air_pressure                                     | surface pressure                                         | Pa      |    1 | real    | kind_phys | in     |   F      |
 !!| q              | water_vapor_specific_humidity                            | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!!| clw1           | cloud_ice_specific_humidity                              | cloud ice specific humidity                              | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
+!!| clw2           | cloud_liquid_water_specific_humidity                     | cloud water specific humidity                            | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
+!!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | out    |   F      |
 !!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| tp             | air_temperature_at_two_time_step_back                    | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| qp             | water_vapor_specific_humidity_at_two_time_step_back      | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
@@ -91,7 +93,8 @@
 !! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
 !> \section Zhao-Carr_cond_detailed Detailed Algorithm
 !> @{
-       subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,cwm,t           &
+        subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1,clw2      &
+     &,                  cwm, t                                         &
      &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
 
 
@@ -132,7 +135,8 @@
       real(kind=kind_phys), parameter :: cons_0=0.0, cons_m15=-15.0
 !
       integer im, ix, km, ipr
-      real (kind=kind_phys) q(ix,km),    t(ix,km),    cwm(ix,km)        &
+      real (kind=kind_phys) q(ix,km),    t(ix,km), cwm(ix,km)           & 
+     &,                     clw1(ix,km), clw2(ix,km)                    &
      &,                     prsl(ix,km), ps(im), dt,  dtf               &
      &,                     tp(ix,km),   qp(ix,km),   psp(im)           &
      &,                     tp1(ix,km),  qp1(ix,km),  psp1(im)
@@ -150,6 +154,12 @@
       integer iw(im,km), i, k, iwik
       logical lprnt
 !
+!-----------------GFS interstitial in driver ----------------------------
+       do i = 1,im
+         do k= 1,km
+              cwm(i,k) = clw1(i,k)+clw2(i,k)
+         enddo
+       enddo
 !-----------------prepare constants for later uses-----------------
 !
       el2orc = hvap*hvap / (rv*cp)
