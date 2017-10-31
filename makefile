@@ -120,6 +120,7 @@ SRCS_f90 = \
 	   ./physics/gcm_shoc.f90                                                    \
 	   ./physics/gcycle.f90                                                      \
 	   ./physics/get_prs_fv3.f90                                                 \
+		 ./physics/GFS_PBL_generic.f90                                             \
 	   ./physics/h2ointerp.f90                                                   \
 	   ./physics/m_micro_driver.f90                                              \
 	   ./physics/module_nst_model.f90                                            \
@@ -186,4 +187,3 @@ include ./depend
 ifneq (clean,$(findstring clean,$(MAKECMDGOALS)))
    -include depend
 endif
-

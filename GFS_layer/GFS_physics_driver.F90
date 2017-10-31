@@ -16,6 +16,8 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
   use edmf,                  only: edmf_run
+  use GFS_PBL_generic,       only: GFS_PBL_generic_pre,                 &
+                                   GFS_PBL_generic_post
 
   implicit none
 
@@ -790,8 +792,10 @@ module module_physics_driver
         endif
       endif    ! end if_lssav_block
 
+      call GFS_PBL_generic_pre(im, levs, kinver)
+
       kcnv(:)   = 0
-      kinver(:) = levs
+      !kinver(:) = levs
       invrsn(:) = .false.
       tx1(:)    = 0.0
       tx2(:)    = 10.0
@@ -1269,56 +1273,59 @@ module module_physics_driver
         Coupling%dtsfci_cpl(:) = dtsfc1(:)
         Coupling%dqsfci_cpl(:) = dqsfc1(:)
       endif
-!-------------------------------------------------------lssav if loop ----------
-      if (Model%lssav) then
-        Diag%dusfc (:) = Diag%dusfc(:) + dusfc1(:)*dtf
-        Diag%dvsfc (:) = Diag%dvsfc(:) + dvsfc1(:)*dtf
-        Diag%dtsfc (:) = Diag%dtsfc(:) + dtsfc1(:)*dtf
-        Diag%dqsfc (:) = Diag%dqsfc(:) + dqsfc1(:)*dtf
-        Diag%dusfci(:) = dusfc1(:)
-        Diag%dvsfci(:) = dvsfc1(:)
-        Diag%dtsfci(:) = dtsfc1(:)
-        Diag%dqsfci(:) = dqsfc1(:)
-!       if (lprnt) then
-!         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
-!    &     dtf,' kdt=',kdt,' lat=',lat
-!       endif
 
-        if (Model%ldiag3d) then
-          if (Model%lsidea) then
-            Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + dtdt(:,:)*dtf
-          else
-            do k = 1, levs
-              do i = 1, im
-                tem          = dtdt(i,k) - (Radtend%htrlw(i,k)+Radtend%htrsw(i,k)*xmu(i))
-                Diag%dt3dt(i,k,3) = Diag%dt3dt(i,k,3) + tem*dtf
-              enddo
-            enddo
-          endif
-          Diag%du3dt(:,:,1) = Diag%du3dt(:,:,1) + dudt(:,:) * dtf
-          Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) - dudt(:,:) * dtf
-          Diag%dv3dt(:,:,1) = Diag%dv3dt(:,:,1) + dvdt(:,:) * dtf
-          Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) - dvdt(:,:) * dtf
-! update dqdt_v to include moisture tendency due to vertical diffusion
-!         if (lgocart) then
+      call GFS_PBL_generic_post(Grid, Model, Radtend, dusfc1, dvsfc1,   &
+        dtsfc1, dqsfc1, dudt, dvdt, dtdt, dqdt, xmu, Diag)
+! !-------------------------------------------------------lssav if loop ----------
+!       if (Model%lssav) then
+!         Diag%dusfc (:) = Diag%dusfc(:) + dusfc1(:)*dtf
+!         Diag%dvsfc (:) = Diag%dvsfc(:) + dvsfc1(:)*dtf
+!         Diag%dtsfc (:) = Diag%dtsfc(:) + dtsfc1(:)*dtf
+!         Diag%dqsfc (:) = Diag%dqsfc(:) + dqsfc1(:)*dtf
+!         Diag%dusfci(:) = dusfc1(:)
+!         Diag%dvsfci(:) = dvsfc1(:)
+!         Diag%dtsfci(:) = dtsfc1(:)
+!         Diag%dqsfci(:) = dqsfc1(:)
+! !       if (lprnt) then
+! !         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
+! !    &     dtf,' kdt=',kdt,' lat=',lat
+! !       endif
+!
+!         if (Model%ldiag3d) then
+!           if (Model%lsidea) then
+!             Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + dtdt(:,:)*dtf
+!           else
+!             do k = 1, levs
+!               do i = 1, im
+!                 tem          = dtdt(i,k) - (Radtend%htrlw(i,k)+Radtend%htrsw(i,k)*xmu(i))
+!                 Diag%dt3dt(i,k,3) = Diag%dt3dt(i,k,3) + tem*dtf
+!               enddo
+!             enddo
+!           endif
+!           Diag%du3dt(:,:,1) = Diag%du3dt(:,:,1) + dudt(:,:) * dtf
+!           Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) - dudt(:,:) * dtf
+!           Diag%dv3dt(:,:,1) = Diag%dv3dt(:,:,1) + dvdt(:,:) * dtf
+!           Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) - dvdt(:,:) * dtf
+! ! update dqdt_v to include moisture tendency due to vertical diffusion
+! !         if (lgocart) then
+! !           do k = 1, levs
+! !             do i = 1, im
+! !               dqdt_v(i,k)  = dqdt(i,k,1) * dtf
+! !             enddo
+! !           enddo
+! !         endif
 !           do k = 1, levs
 !             do i = 1, im
-!               dqdt_v(i,k)  = dqdt(i,k,1) * dtf
+!               tem  = dqdt(i,k,1) * dtf
+!               Diag%dq3dt(i,k,1) = Diag%dq3dt(i,k,1) + tem
 !             enddo
 !           enddo
+!           if (Model%ntoz > 0) then
+!             Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * dtf
+!           endif
 !         endif
-          do k = 1, levs
-            do i = 1, im
-              tem  = dqdt(i,k,1) * dtf
-              Diag%dq3dt(i,k,1) = Diag%dq3dt(i,k,1) + tem
-            enddo
-          enddo
-          if (Model%ntoz > 0) then
-            Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * dtf
-          endif
-        endif
-
-      endif   ! end if_lssav
+!
+!       endif   ! end if_lssav
 !-------------------------------------------------------lssav if loop ----------
 !
 !            Orographic gravity wave drag parameterization
