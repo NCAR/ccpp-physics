@@ -26,7 +26,7 @@
 !!| ps             | surface_air_pressure                                        | surface pressure                                | Pa         | 1    | real    | kind_phys | in     | F        |
 !!| u1             | x_wind_at_lowest_layer                                      | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| v1             | y_wind_at_lowest_layer                                      | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| t1             | air_temperature_at_lowest_layer                             | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                             | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
 !!| q1             | specific_humidity_at_lowest_layer                           | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
 !!| z1             | height_above_mean_sea_level_at_lowest_layer                 | height above mean sea level at 1st model layer  | m          | 1    | real    | kind_phys | in     | F        |
 !!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent surface snow thickness         | m          | 1    | real    | kind_phys | in     | F        |
@@ -34,9 +34,9 @@
 !!| z0rl           | surface_roughness_length                                    | surface roughness length                        | m          | 1    | real    | kind_phys | inout  | F        |
 !!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum             | none       | 1    | real    | kind_phys |   out? | F        |
 !!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture          | none       | 1    | real    | kind_phys |   out? | F        |
-!!| rb             | bulk_richardson_number_at_lowest_level                      | bulk Richardson number at the surface           | none       | 1    | real    | kind_phys |   out? | F        |
+!!| rb             | bulk_richardson_number_at_lowest_model_level                | bulk Richardson number at the surface           | none       | 1    | real    | kind_phys |   out? | F        |
 !!| prsl1          | air_pressure_at_lowest_layer                                | Model layer 1 mean pressure                     | Pa         | 1    | real    | kind_phys | in     | F        |
-!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
+!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
 !!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2                    | flag       | 1    | integer |           | in     | F        |
 !!| stress         | surface_wind_stress                                         | surface wind stress                             | m2 s-2     | 1    | real    | kind_phys |   out? | F        |
 !!| fm             | Monin-Obukhov_similarity_function_for_momentum              | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out? | F        |
