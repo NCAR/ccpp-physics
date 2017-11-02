@@ -8,7 +8,8 @@ module module_physics_driver
   use cs_conv,               only: cs_convr
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
-  use gfs_fv3_needs,         only: get_prs_fv3, get_phi_fv3
+  use get_prs_fv3,           only: get_prs_fv3_run
+  use get_phi_fv3,           only: get_phi_fv3_run
   use module_nst_water_prop, only: get_dtzm_2d
   use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type, &
                                    GFS_sfcprop_type, GFS_coupling_type, &
@@ -22,6 +23,8 @@ module module_physics_driver
   use gwdc,                  only: gwdc_run
   use gwdc_post,             only: gwdc_post_run
   use rayleigh_damp,         only: rayleigh_damp_run
+  use dcyc2t3,               only: dcyc2t3_run
+  use cnvc90,                only: cnvc90_run
 
   implicit none
 
@@ -601,8 +604,8 @@ module module_physics_driver
                    Statein%prsl, Statein%prslk, Statein%phii, Statein%phil, del)
 #else
 !GFDL   Adjust the geopotential height hydrostatically in a way consistent with FV3 discretization
-      call get_prs_fv3 (ix, levs, ntrac, Statein%phii, Statein%prsi, &
-                        Statein%tgrs, Statein%qgrs, del, del_gz)
+      call get_prs_fv3_run (ix, levs, ntrac, Statein%phii, Statein%prsi, &
+                            Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
 !
       rhbbot = Model%crtrh(1)
@@ -711,7 +714,7 @@ module module_physics_driver
 
       else
 
-        call dcyc2t3                                                        &
+        call dcyc2t3_run                                                    &
 !  ---  inputs:
            ( Model%solhr, Model%slag, Model%sdec, Model%cdec, Grid%sinlat,  &
              Grid%coslat, Grid%xlon, Radtend%coszen, Sfcprop%tsfc,          &
@@ -1549,8 +1552,8 @@ module module_physics_driver
                    Statein%prsl, Statein%prslk, Statein%phii, Statein%phil)
 #else
 !GFDL   Adjust the height hydrostatically in a way consistent with FV3 discretization
-      call get_phi_fv3 (ix, levs, ntrac, Stateout%gt0, Stateout%gq0, &
-                        del_gz, Statein%phii, Statein%phil)
+      call get_phi_fv3_run (ix, levs, ntrac, Stateout%gt0, Stateout%gq0, &
+                            del_gz, Statein%phii, Statein%phil)
 #endif
 
 !     if (lprnt) then

@@ -1,3 +1,13 @@
+      module dcyc2t3
+
+      contains
+
+!! \section arg_table_dcyc2t3_init Argument Table
+!!
+      subroutine dcyc2t3_init()
+      end subroutine dcyc2t3_init
+
+
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -116,7 +126,27 @@
 !  ====================    end of description    =====================  !
 
 !-----------------------------------
-      subroutine dcyc2t3                                                &
+!! \section arg_table_dcyc2t3_run Argument Table
+!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
+!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
+!! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
+!! | A              | tendency_of_y_wind_due_to_physics                    | meridional wind tendency due to physics              | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | B              | tendency_of_x_wind_due_to_physics                    | zonal wind tendency due to physics                   | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | C              | tendency_of_air_temperature_due_to_physics           | air temperature tendency due to physics              | K s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
+!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
+!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!!
+      subroutine dcyc2t3_run                                            &
 !...................................
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
@@ -237,6 +267,13 @@
 !
       return
 !...................................
-      end subroutine dcyc2t3
+      end subroutine dcyc2t3_run
 !-----------------------------------
 
+
+!! \section arg_table_dcyc2t3_finalize Argument Table
+!!
+      subroutine dcyc2t3_finalize()
+      end subroutine dcyc2t3_finalize
+
+      end module dcyc2t3
