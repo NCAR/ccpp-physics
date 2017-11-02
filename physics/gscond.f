@@ -77,7 +77,7 @@
 !!| clw1           | cloud_ice_specific_humidity                              | cloud ice specific humidity                              | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
 !!| clw2           | cloud_liquid_water_specific_humidity                     | cloud water specific humidity                            | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
 !!| cwm            | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | out    |   F      |
-!!| t              | air_temperature                                          | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
+!!| t              | air_temperature_updated_by_physics                       | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| tp             | air_temperature_at_two_time_step_back                    | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
 !!| qp             | water_vapor_specific_humidity_at_two_time_step_back      | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !!| psp            | surface_air_pressure_at_two_time_step_back               | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |

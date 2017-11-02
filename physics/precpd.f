@@ -33,8 +33,8 @@
 !!|  prsl          | air_pressure                                             | layer mean pressure                                               | Pa      |  2   | real    | kind_phys|  in     |   F      |
 !!|  q             | water_vapor_specific_humidity                            | water vapor specific humidity                                     | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !!|  cwm           | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
-!!|  t             | air_temperature                                          | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
-!!|  rn            | rainfall_amount                                          | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
+!!|  t             | air_temperature_updated_by_physics                       | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
+!!|  rn            | instantaneous_rainfall_amount                            | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
 !!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | frac    |  1   | real    | kind_phys|  out    |   F      |
 !!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
 !!|  u00k          | critical_relative_humidity                               | critical relative humidity                                        | 1       |  2   | real    | kind_phys|  in     |   F      |
