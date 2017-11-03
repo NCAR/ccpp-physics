@@ -4,7 +4,7 @@ module get_prs_fv3
    use physcons, only: con_fvirt
 
 !--- public declarations
-   public get_prs_fv3, get_phi_fv3
+   public get_prs_fv3_init, get_prs_fv3_run, get_prs_fv3_finalize
 
 !--- local variables
    real(kind=kind_phys), parameter :: zero = 0.0_kind_phys
@@ -77,7 +77,7 @@ module get_phi_fv3
    use physcons, only: con_fvirt
 
 !--- public declarations
-   public get_prs_fv3, get_phi_fv3
+   public get_phi_fv3_init, get_phi_fv3_run, get_phi_fv3_finalize
 
 !--- local variables
    real(kind=kind_phys), parameter :: zero = 0.0_kind_phys

@@ -74,7 +74,7 @@ module module_physics_driver
 !     sascnv,   sascnvn,  rascnv,   cs_convr, 
 !     gwdc_pre_run, gwdc_run, gwdc_post_run, 
 !     shalcvt3,shalcv,!
-!     shalcnv,  cnvc90,   lrgscl,   gsmdrive, gscond,   precpd,         !
+!     shalcnv,  cnvc90_run,   lrgscl,   gsmdrive, gscond,   precpd,     !
 !     progt2.                                                           !
 !                                                                       !
 !                                                                       !
@@ -344,7 +344,7 @@ module module_physics_driver
 !!    - calculate and save ice fraction and rain fraction in phy_f3d(1),(2)
 !!   - For Zhao-Carr, combine convectively transported cloud water and ice into the cloud water array
 !!   - Otherwise, combine convectively transported cloud water and ice into the convectively transported cloud water
-!!   - Call 'cnvc90'; a "legacy routine which determines convective clouds"; outputs 'acv','acvb','acvt','cv','cvb','cvt'
+!!   - Call 'cnvc90_run'; a "legacy routine which determines convective clouds"; outputs 'acv','acvb','acvt','cv','cvb','cvt'
 !!  .
 !!  ## If necessary, call the moist convective adjustment subroutine and update the state temperature and moisture variable within.
 !!   - Updates T, q, 'rain1', cloud water array
@@ -718,7 +718,8 @@ module module_physics_driver
 !  ---  inputs:
            ( Model%solhr, Model%slag, Model%sdec, Model%cdec, Grid%sinlat,  &
              Grid%coslat, Grid%xlon, Radtend%coszen, Sfcprop%tsfc,          &
-             Statein%tgrs(1,1), Radtend%tsflw, Radtend%semis,               &
+!             Statein%tgrs(1,1), Radtend%tsflw, Radtend%semis,               &
+             Statein%tgrs(:,1), Radtend%tsflw, Radtend%semis,               &
              Coupling%sfcdsw, Coupling%sfcnsw, Coupling%sfcdlw,             &
              Radtend%htrsw, Radtend%swhc, Radtend%htrlw, Radtend%lwhc,      &
              Coupling%nirbmui, Coupling%nirdfui, Coupling%visbmui,          &
@@ -2339,8 +2340,8 @@ module module_physics_driver
 
 !  Legacy routine which determines convectve clouds - should be removed at some point
 
-      call cnvc90 (Model%clstp, im, ix, Diag%rainc, kbot, ktop, levs, Statein%prsi,  &
-                   Tbd%acv, Tbd%acvb, Tbd%acvt, Cldprop%cv, Cldprop%cvb, Cldprop%cvt)
+      call cnvc90_run (Model%clstp, im, ix, Diag%rainc, kbot, ktop, levs, Statein%prsi,  &
+                       Tbd%acv, Tbd%acvb, Tbd%acvt, Cldprop%cv, Cldprop%cvb, Cldprop%cvt)
 
       if (Model%moist_adj) then       ! moist convective adjustment
 !                                     ---------------------------
