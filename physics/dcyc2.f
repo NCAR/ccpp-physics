@@ -127,24 +127,54 @@
 
 !-----------------------------------
 !! \section arg_table_dcyc2t3_run Argument Table
-!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
-!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_physics                    | meridional wind tendency due to physics              | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_physics                    | zonal wind tendency due to physics                   | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_physics           | air temperature tendency due to physics              | K s-1      | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
-!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
-!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!! | local var name | longname               | description                                                                 | units   | rank | type    | kind      | intent | optional |
+!! |----------------|------------------------|-----------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | solhr          |                        | forecast time in 24-hour formx                                              | hr      | 0    | real    | kind_phys | in     | F        |
+!! | slag           |                        | equation of time                                                            | radians | 0    | real    | kind_phys | in     | F        |
+!! | sdec           |                        | sine of solar declination angle                                             | none    | 0    | real    | kind_phys | in     | F        |
+!! | cdec           |                        | cosine of solar declination angle                                           | none    | 0    | real    | kind_phys | in     | F        |
+!! | sinlat         |                        | sine of latitude                                                            | none    | 1    | real    | kind_phys | in     | F        |
+!! | coslat         |                        | cosine of latitude                                                          | none    | 1    | real    | kind_phys | in     | F        |
+!! | xlon           |                        | longitude                                                                   | radians | 1    | real    | kind_phys | in     | F        |
+!! | coszen         |                        | average of cosine of zenith angle over daytime shortwave call time interval | none    | 1    | real    | kind_phys | in     | F        |
+!! | tsea           |                        | ground surface temperature                                                  | K       | 1    | real    | kind_phys | in     | F        |
+!! | tf             |                        | surface (first layer) air temperature                                       | K       | 1    | real    | kind_phys | in     | F        |
+!! | tsflw          |                        | surface (first layer) air temperature saved in longwave call                | K       | 1    | real    | kind_phys | in     | F        |
+!! | sfcemis        |                        | surface emissivity                                                          | frac    | 1    | real    | kind_phys | in     | F        |
+!! | sfcdsw         |                        | total sky surface downward shortwave flux                                   | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcnsw         |                        | total sky surface net shortwave flux into ground                            | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcdlw         |                        | total sky surface downward longwave flux                                    | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | swh            |                        | total sky shortwave heating rates                                           | K s-1   | 2    | real    | kind_phys | in     | F        |
+!! | swhc           |                        | clear sky shortwave heating rates                                           | K s-1   | 2    | real    | kind_phys | in     | F        |
+!! | hlw            |                        | total sky longwave heating rates                                            | K s-1   | 2    | real    | kind_phys | in     | F        |
+!! | hlwc           |                        | clear sky longwave heating rates                                            | K s-1   | 2    | real    | kind_phys | in     | F        |
+!! | sfcnirbmu      |                        | total sky surface nir-beam shortwave upward flux                            | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcnirdfu      |                        | total sky surface nir-diff shortwave upward flux                            | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcvisbmu      |                        | total sky surface uv+vis-beam shortwave upward flux                         | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcvisdfu      |                        | total sky surface uv+vis-diff shortwave upward flux                         | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcnirbmd      |                        | total sky surface nir-beam shortwave downward flux                          | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcnirdfd      |                        | total sky surface nir-diff shortwave downward flux                          | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcvisbmd      |                        | total sky surface uv+vis-beam shortwave dnward flux                         | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | sfcvisdfd      |                        | total sky surface uv+vis-diff shortwave dnward flux                         | W m-2   | 1    | real    | kind_phys | in     | F        |
+!! | ix             | horizontal_dimension   | horizontal dimension                                                        | index   | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent | horizontal loop extent                                                      | index   | 0    | integer | default   | in     | F        |
+!! | levs           | vertical_dimension     | number of vertical layers                                                   | index   | 0    | integer | default   | in     | F        |
+!! | dtdt           |                        | model time-step-adjusted total radiation heating rates                      | K s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | dtdtdtcdt      |                        | model time-step-adjusted clear sky radiation heating rates                  | K s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | adjsfcdsw      |                        | time-step-adjusted surface downward shortwave flux                          | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjsfcnsw      |                        | time-step-adjusted surface net shortwave into ground                        | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjsfcdlw      |                        | time-step-adjusted surface downward longwave flux                           | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjsfculw      |                        | surface upward longwave flux at current time                                | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | xmu            |                        | time-step zenith angle adjustment factor for shortwave                      |         | 1    | real    | kind_phys | out    | F        |
+!! | xcosz          |                        | cosine of zenith angle at current time step                                 | none    | 1    | real    | kind_phys | out    | F        |
+!! | adjnirbmu      |                        | time-step-adjusted surface nir-beam shortwave upward flux                   | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjnirdfu      |                        | time-step-adjusted surface nir-diff shortwave upward flux                   | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjvisbmu      |                        | time-step-adjusted surface uv+vis-beam shortwave upward flux                | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjvisdfu      |                        | time-step-adjusted surface uv+vis-diff shortwave upward flux                | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjnirbmd      |                        | time-step-adjusted surface nir-beam shortwave downward flux                 | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjnirdfd      |                        | time-step-adjusted surface nir-diff shortwave downward flux                 | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjvisbmd      |                        | time-step-adjusted surface uv+vis-beam shortwave downward flux              | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | adjvisdfd      |                        | time-step-adjusted surface uv+vis-diff shortwave downward flux              | W m-2   | 1    | real    | kind_phys | out    | F        |
 !!
       subroutine dcyc2t3_run                                            &
 !...................................

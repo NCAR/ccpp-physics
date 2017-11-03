@@ -604,8 +604,9 @@ module module_physics_driver
                    Statein%prsl, Statein%prslk, Statein%phii, Statein%phil, del)
 #else
 !GFDL   Adjust the geopotential height hydrostatically in a way consistent with FV3 discretization
-      call get_prs_fv3_run (ix, levs, ntrac, Statein%phii, Statein%prsi, &
-                            Statein%tgrs, Statein%qgrs, del, del_gz)
+      call get_prs_fv3_run (ix, levs, Statein%phii, Statein%prsi, &
+                            Statein%tgrs, Statein%qgrs(:,:,1), del, del_gz)
+
 #endif
 !
       rhbbot = Model%crtrh(1)
@@ -1553,7 +1554,7 @@ module module_physics_driver
                    Statein%prsl, Statein%prslk, Statein%phii, Statein%phil)
 #else
 !GFDL   Adjust the height hydrostatically in a way consistent with FV3 discretization
-      call get_phi_fv3_run (ix, levs, ntrac, Stateout%gt0, Stateout%gq0, &
+      call get_phi_fv3_run (ix, levs, Stateout%gt0, Stateout%gq0(:,:,1), &
                             del_gz, Statein%phii, Statein%phil)
 #endif
 

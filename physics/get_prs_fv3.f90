@@ -20,31 +20,23 @@ contains
 
 
 !! \section arg_table_get_prs_fv3_run Argument Table
-!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
-!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_physics                    | meridional wind tendency due to physics              | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_physics                    | zonal wind tendency due to physics                   | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_physics           | air temperature tendency due to physics              | K s-1      | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
-!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
-!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!! | local var name | longname                                                                          | description                                                                         | units      | rank | type    | kind      | intent | optional |
+!! |----------------|-----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                                                              | horizontal dimension                                                                | index      | 0    | integer | default   | in     | F        |
+!! | levs           | vertical_dimension                                                                | number of vertical layers                                                           | index      | 0    | integer | default   | in     | F        |
+!! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     | 2    | real    | kind_phys | in     | F        |
+!! | prsi           | air_pressure_at_interface                                                         | interface pressure                                                                  | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | tgrs           | air_temperature                                                                   | mid-layer temperature                                                               | K          | 2    | real    | kind_phys | in     | F        |
+!! | qgrs1          | water_vapor_specific_humidity                                                     | mid-layer specific humidity of water vapor                                          | kg kg-1    | 2    | real    | kind_phys | in     | F        |
+!! | del            | air_pressure_difference_between_midlayers                                         | difference between mid-layer pressures                                              | Pa         | 2    | real    | kind_phys | inout  | F        |
+!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
 !!
-   subroutine get_prs_fv3_run(ix, levs, ntrac, phii, prsi, tgrs, qgrs, del, del_gz)
-     integer, intent(in) :: ix, levs, ntrac
+   subroutine get_prs_fv3_run(ix, levs, phii, prsi, tgrs, qgrs1, del, del_gz)
+     integer, intent(in) :: ix, levs
      real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: phii
      real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: prsi
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: tgrs
-     real(kind=kind_phys), dimension(ix,levs,ntrac), intent(in)    :: qgrs
+     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: qgrs1
      real(kind=kind_phys), dimension(ix,levs),       intent(inout) :: del
      real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
 
@@ -54,7 +46,7 @@ contains
        do i=1,ix
             del(i,k) = prsi(i,k) - prsi(i,k+1)
          del_gz(i,k) = (phii(i,k+1) - phii(i,k)) /                    &
-                        (tgrs(i,k)*(1.+con_fvirt*max(zero,qgrs(i,k,1))))
+                        (tgrs(i,k)*(1.+con_fvirt*max(zero,qgrs1(i,k))))
        enddo
      enddo
 
@@ -92,29 +84,20 @@ contains
 
 
 !! \section arg_table_get_phi_fv3_run Argument Table
-!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
-!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_physics                    | meridional wind tendency due to physics              | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_physics                    | zonal wind tendency due to physics                   | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_physics           | air temperature tendency due to physics              | K s-1      | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
-!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
-!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!! | local var name | longname                                                                          | description                                                                         | units      | rank | type    | kind      | intent | optional |
+!! |----------------|-----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                                                              | horizontal dimension                                                                | index      | 0    | integer | default   | in     | F        |
+!! | levs           | vertical_dimension                                                                | number of vertical layers                                                           | index      | 0    | integer | default   | in     | F        |
+!! | gt0            | air_temperature                                                                   | mid-layer temperature                                                               | K          | 2    | real    | kind_phys | in     | F        |
+!! | gq01           | water_vapor_specific_humidity                                                     | mid-layer specific humidity of water vapor                                          | kg kg-1    | 2    | real    | kind_phys | in     | F        |
+!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
+!! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     | 2    | real    | kind_phys | inout  | F        |
+!! | phil           | geopotential                                                                      | mid-layer geopotential                                                              | m2 s-2     | 2    | real    | kind_phys | inout  | F        |
 !!
-   subroutine get_phi_fv3_run(ix, levs, ntrac, gt0, gq0, del_gz, phii, phil)
-     integer, intent(in) :: ix, levs, ntrac
+   subroutine get_phi_fv3_run(ix, levs, gt0, gq01, del_gz, phii, phil)
+     integer, intent(in) :: ix, levs
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gt0
-     real(kind=kind_phys), dimension(ix,levs,ntrac), intent(in)    :: gq0
+     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gq01
      real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
      real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: phii
      real(kind=kind_phys), dimension(ix,levs),       intent(inout) :: phil
@@ -126,7 +109,7 @@ contains
      do k=1,levs
        do i=1,ix
          del_gz(i,k) = del_gz(i,k)*gt0(i,k) *                          &
-     &                 (1.+con_fvirt*max(zero,gq0(i,k,1)))
+     &                 (1.+con_fvirt*max(zero,gq01(i,k)))
          phii(i,k+1) = phii(i,k) + del_gz(i,k)
          phil(i,k)   = half*(phii(i,k) + phii(i,k+1))
        enddo
