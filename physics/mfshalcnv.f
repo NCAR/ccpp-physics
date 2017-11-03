@@ -29,16 +29,16 @@
 !! | delp           | air_pressure_difference_between_midlayers             | pres(k) - pres(k+1)                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prslp          | air_pressure                                          | mean layer pressure                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | psp            | surface_air_pressure                                  | surface pressure                   | Pa      | 1    | real    | kind_phys | in     | F        |
-!! | phil           | geopotential_at_midlayer                              | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                          | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     | F        |
 !! | ql1            | cloud_ice_specific_humidity                           | cloud ice specific humidity        | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | ql2            | cloud_liquid_water_specific_humidity                  | cloud water specific humidity      | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | q1             | water_vapor_specific_humidity                         | updated vapor specific humidity    | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | t1             | air_temperature                                       | updated temperature                | K       | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind                                                | updated x-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | v1             | y_wind                                                | updated y-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | rn             | convective_rainfall_amount                            | convective rain                    | m       | 1    | real    | kind_phys | out    | F        |
-!! | kbot           | vertical_index_for_cloud_base                         | index for cloud base               | index   | 1    | integer |           | out    | F        |
-!! | ktop           | vertical_index_for_cloud_top                          | index for cloud top                | index   | 1    | integer |           | out    | F        |
+!! | t1             | air_temperature_updated_by_physics                    | updated temperature                | K       | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                             | updated x-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                             | updated y-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | rn             | instantaneous_rainfall_amount                         | convective rain                    | m       | 1    | real    | kind_phys | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                          | index at cloud base                | index   | 1    | integer |           | out    | F        |
+!! | ktop           | vertical_index_at_cloud_top                           | index at cloud top                 | index   | 1    | integer |           | out    | F        |
 !! | kcnv           | flag_deep_convection                                  | deep convection: 0=no, 1=yes       | flag    | 1    | integer |           | out    | F        |
 !! | islimsk        | sea_land_ice_mask                                     | landmask: sea/land/ice=0/1/2       | flag    | 1    | integer |           | in     | F        |
 !! | garea          | cell_area                                             | grid cell area                     | m2      | 1    | real    | kind_phys | in     | F        |
