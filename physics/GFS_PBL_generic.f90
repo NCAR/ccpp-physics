@@ -1,27 +1,47 @@
 !> \file GFS_PBL_generic.f90
 !!  Contains code related to PBL schemes to be used within the GFS physics suite.
 
-      module GFS_PBL_generic
+      module GFS_PBL_generic_pre
 
       contains
 
-!! \section arg_table_GFS_PBL_generic_pre
+      subroutine GFS_PBL_generic_pre_init ()
+      end subroutine GFS_PBL_generic_pre_init
+
+      subroutine GFS_PBL_generic_pre_finalize()
+      subroutine GFS_PBL_generic_pre_finalize
+
+!> \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! | local var name | longname                                               | description                                        | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|----------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                 | horizontal loop extent, start at 1                 | index         |    0 | integer |           | in     | F        |
 !! | levs           | vertical_dimension                                     | vertical layer dimension                           | index         |    0 | integer |           | in     | F        |
 !! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer |           | in     | F        |
 !!
-      subroutine GFS_PBL_generic_pre (im, levs, kinver)
+      subroutine GFS_PBL_generic_pre_run (im, levs, kinver)
 
       integer , intent(in) :: im, levs
       integer, dimension(im), intent(inout) :: kinver
 
       kinver(:) = levs
 
-      end subroutine GFS_PBL_generic_pre
+    end subroutine GFS_PBL_generic_pre_run
 
-!! \section arg_table_GFS_PBL_generic_post
+    end module
+
+    module GFS_PBL_generic_post
+
+    contains
+
+    subroutine GFS_PBL_generic_post_init ()
+    end subroutine GFS_PBL_generic_post_init
+
+    subroutine GFS_PBL_generic_post_finalize ()
+    end subroutine GFS_PBL_generic_post_finalize
+
+
+
+!> \section arg_table_GFS_PBL_generic_post_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
@@ -38,7 +58,7 @@
 !! | xmu            | time_step_zenith_angle_adjust_factor_for_sw            | time step zenith angle adjust factor for shortwave                    | none          |    2 | real                          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | in     | F        |
 !!
-      subroutine GFS_PBL_generic_post (Grid, Model, Radtend, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
+      subroutine GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
         dudt, dvdt, dtdt, dqdt, xmu, Diag)
 
       use machine,               only: kind_phys
@@ -101,6 +121,6 @@
           endif
 
         endif   ! end if_lssav
-      end subroutine GFS_PBL_generic_post
+      end subroutine GFS_PBL_generic_post_run
 
       end module
