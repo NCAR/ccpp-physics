@@ -970,7 +970,7 @@ module module_physics_driver
           call lsmnoah_run                                             &
 !  ---  inputs:
            (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
-            Statein%tgrs(:,1), Statein%qgrs(:,1), soiltyp, vegtype, sigmaf,      &
+            Statein%tgrs(:,1), Statein%qgrs(:,1,1), soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
             Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, DIag%zlvl, &
             islmsk, Tbd%phy_f2d(1,Model%num_p2d), slopetyp,            &
@@ -1074,7 +1074,7 @@ module module_physics_driver
 
 !      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
       call sfc_diag_run(im, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
-                     Statein%tgrs(:,1), Statein%qgrs(:,1), Sfcprop%tsfc, qss,   &
+                     Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
                      Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
                      Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
@@ -2649,11 +2649,16 @@ module module_physics_driver
 !!! this change allows gocart to use filtered wind fields
 !!!
       if (Model%lgocart) then
-        call sfc_diag (im, Statein%pgr, Stateout%gu0, Stateout%gv0,     &
-                       Stateout%gt0, Stateout%gq0, Sfcprop%tsfc, qss,   &
-                       Sfcprop%f10m, Diag%u10m, Diag%v10m, Sfcprop%t2m, &
-                       Sfcprop%q2m, work3, evap, Sfcprop%ffmm,          &
-                       Sfcprop%ffhh, fm10, fh2)
+!        call sfc_diag (im, Statein%pgr, Stateout%gu0, Stateout%gv0,     &
+!                       Stateout%gt0, Stateout%gq0, Sfcprop%tsfc, qss,   &
+!                       Sfcprop%f10m, Diag%u10m, Diag%v10m, Sfcprop%t2m, &
+!                       Sfcprop%q2m, work3, evap, Sfcprop%ffmm,          &
+!                       Sfcprop%ffhh, fm10, fh2)
+      call sfc_diag_run(im, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                     Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
+                     Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
+                     Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
+                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
 
         if (Model%lssav) then
           Diag%tmpmax (:) = max(Diag%tmpmax (:),Sfcprop%t2m(:))
