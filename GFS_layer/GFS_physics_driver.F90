@@ -16,6 +16,10 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
+  use lsm_noah
+  use surface_exchange_coefficients
+  use surface_diagnose
+
   implicit none
 
 
@@ -872,7 +876,7 @@ module module_physics_driver
                        Sfcprop%snowd, Sfcprop%tsfc,  Sfcprop%zorl, cd,    &
                        cdq, rb, Statein%prsl(:,1), work3, islmsk, stress, &
                        Sfcprop%ffmm,  Sfcprop%ffhh, Sfcprop%uustar,       &
-                       wind,  Tbd%phy_f2d(1,Model%num_p2d), fm10, fh2,    &
+                       wind,  Tbd%phy_f2d(:,Model%num_p2d), fm10, fh2,    &
                        sigmaf, vegtype, Sfcprop%shdmax, Model%ivegsrc,    &
                        tsurf, flag_iter, Model%redrag)
 
@@ -973,7 +977,7 @@ module module_physics_driver
             Statein%tgrs(:,1), Statein%qgrs(:,1,1), soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
             Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, DIag%zlvl, &
-            islmsk, Tbd%phy_f2d(1,Model%num_p2d), slopetyp,            &
+            islmsk, Tbd%phy_f2d(:,Model%num_p2d), slopetyp,            &
             Sfcprop%shdmin, Sfcprop%shdmax, Sfcprop%snoalb,            &
             Radtend%sfalb, flag_iter, flag_guess, Model%isot,          &
             Model%ivegsrc,                                             &
