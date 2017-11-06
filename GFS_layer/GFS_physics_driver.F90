@@ -894,13 +894,13 @@ module module_physics_driver
 !  ---  outputs:
                                tseal)
 
-          call sfc_nst_run (im, Model%lsoil, Statein%pgr, Statein%ugrs,        &
-                            Statein%vgrs, Statein%tgrs, Statein%qgrs,          &
-                            Sfcprop%tref, cd, cdq, Statein%prsl(:,1), work3,   &
-                            islmsk, Grid%xlon, Grid%sinlat, stress,            &
-                            Radtend%semis, gabsbdlw, adjsfcnsw, Sfcprop%tprcp, &
-                            dtf, kdt, Model%solhr, xcosz,                      &
-                            Tbd%phy_f2d(:,Model%num_p2d), flag_iter,           &
+          call sfc_nst_run (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1),   &
+                            Statein%vgrs(:,1), Statein%tgrs(:,1),              &
+                            Statein%qgrs(:,1,1), Sfcprop%tref, cd, cdq,        &
+                            Statein%prsl(:,1), work3, islmsk, Grid%xlon,       &
+                            Grid%sinlat, stress, Radtend%semis, gabsbdlw,      &
+                            adjsfcnsw, Sfcprop%tprcp, dtf, kdt, Model%solhr,   &
+                            xcosz, Tbd%phy_f2d(:,Model%num_p2d), flag_iter,    &
                             flag_guess, Model%nstf_name(1), Model%nstf_name(4),&
                             Model%nstf_name(5), lprnt, ipr,                    &
 !  --- Input/output

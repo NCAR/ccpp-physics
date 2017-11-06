@@ -58,7 +58,7 @@
 !!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
-!!| km             | vertical_dimension                                                           | vertical layer dimension                       | index         | 0    | integer |           | in     | F        |
+!!| km             | soil_vertical_dimension                                                      | vertical layer dimension                       | index         | 0    | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                                         | surface pressure                               | Pa            | 1    | real    | kind_phys | in     | F        |
 !!| u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind              | m s-1         | 1    | real    | kind_phys | in     | F        |
 !!| v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind              | m s-1         | 1    | real    | kind_phys | in     | F        |
