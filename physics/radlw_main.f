@@ -472,31 +472,31 @@
 !! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | olyr            | ozone_concentration_layer               | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_o2       | volumetric_mixing_ratio_o2              | volumetric mixing ratio o2                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_co       | volumetric_mixing_ratio_co              | volumetric mixing ratio co                             ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_cfc11    | volumetric_mixing_ratio_cfc11           | volumetric mixing ratio cfc11                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_cfc12    | volumetric_mixing_ratio_cfc12           | volumetric mixing ratio cfc12                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_cfc22    | volumetric_mixing_ratio_cfc22           | volumetric mixing ratio cfc22                          ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
-!! | gasvmr_ccl4     | volumetric_mixing_ratio_ccl4            | volumetric mixing ratio ccl4                           ! gm gm-1 !    2 ! real        ! kind_phys ! in     ! F        !
+!! | olyr            | ozone_concentration                     | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_o2       | volumetric_mixing_ratio_o2              | volumetric mixing ratio o2                             | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co       | volumetric_mixing_ratio_co              | volumetric mixing ratio co                             | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc11    | volumetric_mixing_ratio_cfc11           | volumetric mixing ratio cfc11                          | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc12    | volumetric_mixing_ratio_cfc12           | volumetric mixing ratio cfc12                          | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc22    | volumetric_mixing_ratio_cfc22           | volumetric mixing ratio cfc22                          | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ccl4     | volumetric_mixing_ratio_ccl4            | volumetric mixing ratio ccl4                           | gm gm-1 |    2 | real        | kind_phys | in     | F        |
 !! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
 !! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
 !! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
-!! | sfemis          | surface_emissivity                      | surface emissivity                                     |         |    1 | real        | kind_phys | in     | F        |
+!! | sfemis          | surface_longwave_emissivity             | surface emissivity                                     |         |    1 | real        | kind_phys | in     | F        |
 !! | sfgtmp          | surface_groud_temperature               | surface ground temperature                             | K       |    1 | real        | kind_phys | in     | F        |
-!! | npts            | horizontal_dimension                    | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
+!! | npts            | horizontal_loop_extent                  | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
 !! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
 !! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
-!! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | K s-1???|    2 | real        | kind_phys | out    | F        |
+!! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | K s-1   |    2 | real        | kind_phys | out    | F        |
 !! | topflx          | lw_fluxes_top_atmosphere                | longwave total sky fluxes at the top of the atm        | W m-2   |    1 | topflw_type | kind_phys | out    | F        |
 !! | sfcflx          | lw_fluxes_sfc                           | longwave total sky fluxes at the Earth surface         | W m-2   |    1 | sfcflw_type | kind_phys | out    | F        |
-!! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | K s-1???|    2 | real        | kind_phys | out    | T        |
-!! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | K s-1???|    3 | real        | kind_phys | out    | T        |
+!! | hlw0            | lw_heating_rate_csk                     | longwave clear sky heating rate                        | K s-1   |    2 | real        | kind_phys | out    | T        |
+!! | hlwb            | lw_heating_rate_spectral                | longwave total sky heating rate (spectral)             | K s-1   |    3 | real        | kind_phys | out    | T        |
 !! | flxprf          | lw_fluxes                               | lw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | proflw_type | kind_phys | out    | T        |
 !! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
