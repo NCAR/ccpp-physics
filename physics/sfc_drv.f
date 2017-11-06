@@ -132,7 +132,7 @@
 !!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | index      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                        | surface pressure                           | Pa         | 1    | real    | kind_phys | in     | F        |
 !!| u1             | x_wind_at_lowest_layer                                      | x component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| v1             | y_wind_at_lowest__layer                                     | y component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_layer                                      | y component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| t1             | air_temperature_at_lowest_layer                             | 1st model layer air temperature            | K          | 1    | real    | kind_phys | in     | F        |
 !!| q1             | specific_humidity_at_lowest_layer                           | 1st model layer specific humidity          | kg kg-1    | 1    | real    | kind_phys | in     | F        |
 !!| soiltyp        | cell_soil_type                                              | soil type at each grid cell                | index      | 1    | integer |           | in     | F        |
@@ -146,8 +146,8 @@
 !!| tg3            | deep_soil_temperature                                       | bottom soil temperature                    | K          | 1    | real    | kind_phys | in     | F        |
 !!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum        | none       | 1    | real    | kind_phys | in     | F        |
 !!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture     | none       | 1    | real    | kind_phys | in     | F        |
-!!| prsl1          | air_pressure_at_lowest_layer                                | Model layer 1 mean pressure                | Pa         | 1    | real    | kind_phys | in     | F        |        
-!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
+!!| prsl1          | air_pressure_at_lowest_model_layer                          | Model layer 1 mean pressure                | Pa         | 1    | real    | kind_phys | in     | F        |        
+!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
 !!| zf             | height_above_mean_sea_level_at_lowest_layer                 | height above MSL at 1st model layer        | m          | 1    | real    | kind_phys | in     | F        |
 !!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2               | flag       | 1    | integer |           | in     | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection | m s-1      | 1    | real    | kind_phys | in     | F        |
@@ -163,8 +163,8 @@
 !!| weasd          | water_equivalent_accumulated_snow_depth                     | water equivalent accumulated snow depth    | mm         | 1    | real    | kind_phys | inout  | F        |
 !!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent snow depth over land      | mm         | 1    | real    | kind_phys | inout  | F        |
 !!| tskin          | surface_skin_temperature                                    | surface skin temperature                   | K          | 1    | real    | kind_phys | inout  | F        |
-!!| tprcp          | precipitation_amount_in_one_dynamic_time_step               | total precipitation in each time step      | kg m-2     | 1    | real    | kind_phys | inout  | F        |
-!!| srflag         | flag_for_snow_or_rain_precipitation                         | flag for snow or rain precipitation        | flag       | 1    | real    | kind_phys | inout  | F        |
+!!| tprcp          | precipitation_amount_in_one_dynamics_time_step              | total precipitation in each time step      | kg m-2     | 1    | real    | kind_phys | inout  | F        |
+!!| srflag         | flag_for_precipitation_type                                 | flag for snow or rain precipitation        | flag       | 1    | real    | kind_phys | inout  | F        |
 !!| smc            | volume_fraction_of_soil_moisture                            | volumetric fraction of soil moisture       | frac       | 2    | real    | kind_phys | inout  | F        | 
 !!| stc            | soil_temperature                                            | soil temperature                           | K          | 2    | real    | kind_phys | inout  | F        | 
 !!| slc            | volume_fraction_of_unfrozen_soil_moisture                   | volume fraction of unfrozen soil moisture  | frac       | 2    | real    | kind_phys | inout  | F        | 

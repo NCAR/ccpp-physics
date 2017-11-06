@@ -34,7 +34,7 @@
 !!| v10m           | y_wind_at_10m                                               | y component of wind at 10 m                     | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| t2m            | temperature_at_2m                                           | temperature at 2 m                              | K          | 1    | real    | kind_phys |   out  | F        |
 !!| q2m            | specific_humidity_at_2m                                     | specific humidity at 2 m                        | kg kg-1    | 1    | real    | kind_phys |   out  | F        |
-!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
+!!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
 !!| evap           | kinematic_surface_upward_latent_heat_flux                   | surface upward evaporation flux                 | kg kg-1 m s-1 | 1    | real    | kind_phys | in     | F        |
 !!| fm             | Monin-Obukhov_similarity_function_for_momentum              | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys | in     | F        |
 !!| fh             | Monin-Obukhov_similarity_function_for_heat                  | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys | in     | F        |
