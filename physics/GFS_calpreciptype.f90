@@ -5,11 +5,12 @@
       module GFS_calpreciptype
       contains
 
-!>\section arg_table_calpreciptype_init Argument Table
+!>\section arg_table_GFS_calpreciptype_init Argument Table
+!!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
 
-!!\section arg_table_calpreciptype_run Argument Table
+!!\section arg_table_GFS_calpreciptype_run Argument Table
 !!| local var name | longname                                       |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !!|    kdt         | index_of_time_step                             | current time step index                                  | index   | 0    | integer |           | in     |  F       |
@@ -22,7 +23,7 @@
 !!|    cal_pre     | flag_for_precipitation_type_algorithm          | flag controls precip type algorithm                      | flag    | 0    | logical |           | in     |  F       |
 !!|    gt0         | air_temperature_updated_by_physics             | layer mean air temperature                               | K       | 2    | real    | kind_phys | in     |  F       |
 !!|    gq0         | water_vapor_specific_humidity                  | water vapor specific humidity                            | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
-!!|    prsl        | air_pressure                                   | layer mean pressure                                      | Pa      | 2    | real    | kind_phys | in     |  F       | 
+!!|    prsl        | air_pressure                                   | layer mean pressure                                      | Pa      | 2    | real    | kind_phys | in     |  F       |
 !!|    prsi        | air_pressure_at_interface                      | pressure at layer interface                              | Pa      | 2    | real    | kind_phys | in     |  F       |
 !!|    prec        | total_rainfall_amount                          | instantaneous total precipitation at surface             | m       | 1    | real    | kind_phys | in     |  F       |
 !!|    phii        | geopotential_at_interface                      | geopotential at model layer interfaces                   | m2 s-2  | 2    | real    | kind_phys | in     |  F       |
@@ -34,8 +35,9 @@
 !!|    domzr       | dominant_freezing_rain_type                    | dominant freezing rain type                              | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    domip       | dominant_sleet_type                            | dominant sleet type                                      | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    doms        | dominant_snow_type                             | dominant snow type                                       | none    | 1    | real    | kind_phys | out    |  F       |
-!!|    srflag      | flag_for_preciptation_type                     | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
+!!|    srflag      | flag_for_precipitation_type                     | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
 !!|    tprcp       | precipitation_amount_in_one_dynamics_time_step | precipitation amount in one dynamics time step           | m       | 1    | real    | kind_phys | out    |  F       |
+!!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &
                                gt0,gq0,prsl,prsi,prec,              & !input
@@ -43,15 +45,15 @@
                                domr,domzr,domip,doms,srflag,tprcp)    !output
 
 !$$$  subprogram documentation block
-!                .      .    .     
+!                .      .    .
 ! subprogram:    calpreciptype      compute dominant precip type
 !   prgrmmr: chuang         org: w/np2      date: 2008-05-28
-!          
-!     
+!
+!
 ! abstract:
 !     this routine computes precipitation type.
-!   . it is adopted from post but was made into a column to used by gfs model    
-!     
+!   . it is adopted from post but was made into a column to used by gfs model
+!
 !  --------------------------------------------------------------------
       use funcphys, only : fpvs,ftdp,fpkap,ftlcl,stma,fthe
       use physcons
@@ -60,9 +62,9 @@
 !
       real,   parameter :: pthresh = 0.0, oneog = 1.0/con_g
       integer,parameter :: nalg    = 5
-!     
+!
 !     declare variables.
-!     
+!
       integer,intent(in) :: kdt,nrcm,im,ix,lm,lp1,n3dfercld
       logical            :: cal_pre
       real,intent(in)    :: randomno(ix,nrcm)
@@ -73,7 +75,7 @@
       real(kind=kind_phys),dimension(im),    intent(out) :: srflag,tprcp
       real(kind=kind_phys),dimension(im)                 :: t850
       real(kind=kind_phys), parameter :: p850    = 85000.0
-      
+
       integer,             dimension(nalg) :: sleet,rain,freezr,snow
       real(kind=kind_phys),dimension(lm)   :: t,q,pmid,f_rimef
       real(kind=kind_phys),dimension(lp1)  :: pint,zint
@@ -84,14 +86,14 @@
                            time_vert,time_ncep,time_ramer,time_bourg,time_revised,&
                            time_dominant,btim,timef,ranl(2)
 
-!     
+!
 !     computes wet bulb here since two algorithms use it
 !      lp1=lm+1
 ! convert geopotential to height
 !      do l=1,lp1
 !        zint(l)=zint(l)/con_g
 !      end do
-! don't forget to flip 3d arrays around because gfs counts from bottom up      
+! don't forget to flip 3d arrays around because gfs counts from bottom up
 
 !--- original GFS calpreciptype_pre interstitial-------------------
       if (cal_pre) then  !hchuang: add dominant precipitation type algorithm
@@ -115,7 +117,7 @@
             t(k1)       = gt0(i,k)
             q(k1)       = gq0(i,k)
             pmid(k1)    = prsl(i,k)                      ! pressure in pascals
-            f_rimef(k1) = phy_f3d(i,k) 
+            f_rimef(k1) = phy_f3d(i,k)
 !
 !         compute wet bulb temperature
 !
@@ -133,11 +135,11 @@
               else
                 twet(k1) = t(k1)
               endif
-!           endif 
+!           endif
             es     = min(fpvs(t(k1)), pmid(k1))
             qc     = con_eps*es / (pmid(k1)+con_epsm1*es)
             rh(k1) = max(con_epsq,q(k1)) / qc
-  
+
             k1       = lp1-k+1
             pint(k1) = prsi(i,k)
             zint(k1) = phii(i,k) * oneog
@@ -145,7 +147,7 @@
           enddo
           pint(1) = prsi(i,lp1)
           zint(1) = phii(i,lp1) * oneog
- 
+
 !-------------------------------------------------------------------------------
 !	 if(kdt>15.and.kdt<20) time_vert = time_vert + (timef() - btim)
 ! debug print statement
@@ -160,10 +162,10 @@
 !          pmid(l),pint(l),zint(l),twet(l)
 !         end do
 !	 print*,'debug in calpreciptype: lp1,pint,z ', lp1,pint(lp1),zint(lp1)
-!        end if  
-! end debug print statement		
-!        call wetbulb(lm,con_rocp,con_epsq,t,q,pmid,twet)       
-!        if(kdt>10.and.kdt<20)btim = timef() 
+!        end if
+! end debug print statement
+!        call wetbulb(lm,con_rocp,con_epsq,t,q,pmid,twet)
+!        if(kdt>10.and.kdt<20)btim = timef()
 !-------------------------------------------------------------------------------
 !
 !     instantaneous precipitation type.
@@ -189,7 +191,7 @@
 !          rh(l)=max(con_epsq,q(l))/qc
 !	  pv   = pmid(l)*q(l)/(con_eps-con_epsm1*q(l))
 !	  td(l)=ftdp(pv)
-!        end do	
+!        end do
 !        if(kdt>10.and.kdt<20)btim = timef()
 
 !     write(0,*)' i=',i,' lm=',lm,' lp1=',lp1,' t=',t(1),q(1),pmid(1) &
@@ -227,7 +229,7 @@
         rain(4)   = iwx/8
 !
 ! explicit algorithm (under 18 not admitted without parent or guardian)
- 
+
         if(n3dfercld == 3) then ! ferrier's scheme
           call calwxt_explicit(lm,tskin(i),sr(i),f_rimef,iwx)
           snow(5)   = mod(iwx,2)
@@ -240,7 +242,7 @@
           freezr(5) = 0
           rain(5)   = 0
         endif
-!               
+!
          call calwxt_dominant(nalg,rain(1),freezr(1),sleet(1),         &
                             snow(1),domr(i),domzr(i),domip(i),doms(i))
 
@@ -252,7 +254,7 @@
         end if
       enddo ! end loop for i
 
-      deallocate (twet,rh,td)        
+      deallocate (twet,rh,td)
 
 !!--- below is the original calpreciptype_post
       do i=1,im
@@ -288,7 +290,7 @@
       else
         do i = 1, im
           tprcp(i)  = max(0.0,prec(i))      ! clu: rain -> tprcp
-          srflag(i) = 0.                    ! clu: default srflag as 'rain' (i.e. 0)         
+          srflag(i) = 0.                    ! clu: default srflag as 'rain' (i.e. 0)
           if (t850(i) <= 273.16) then
             srflag(i) = 1.                  ! clu: set srflag to 'snow' (i.e. 1)
           endif
@@ -302,7 +304,7 @@
 !
        subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
                          d608,rog,epsq,zint,iwx,twet)
-! 
+!
 !     file: calwxt.f
 !     written: 11 november 1993, michael baldwin
 !     revisions:
@@ -310,7 +312,7 @@
 !               12 june 1998-conversion to 2-d (t black)
 !     01-10-25  h chuang - modified to process hybrid model output
 !     02-01-15  mike baldwin - wrf version
-!                              
+!
 !
 !     routine to compute precipitation type using a decision tree
 !     approach that uses variables such as integrated wet bulb temp
@@ -319,7 +321,7 @@
 !     see baldwin and contorno preprint from 13th weather analysis
 !     and forecasting conference for more details
 !     (or baldwin et al, 10th nwp conference preprint)
-! 
+!
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
@@ -345,18 +347,18 @@
 !    internal:
 !
 !     real, allocatable :: twet(:)
-      real, parameter :: d00=0.0 
+      real, parameter :: d00=0.0
       integer karr,licee
       real    tcold,twarm
 
 !    subroutines called:
 !     wetbulb
-!     
+!
 !
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want iwx to represent the
 !     instantaneous weather type on return.
-!     
+!
 !
 !     allocate local storage
 !
@@ -455,7 +457,7 @@
 !     pintk1 is the pressure at the bottom of the layer
 !     pintk2 is the pressure at the top of the layer
 !
-!     areap4 is the area of twet above -4 c below highest sat lyr 
+!     areap4 is the area of twet above -4 c below highest sat lyr
 !
         areas8 = d00
         areap4 = d00
@@ -562,13 +564,13 @@
 !     +    ptyp) !  output(2) phase 2=rain, 3=frzg, 4=solid,
 !                                               6=ip     jc  9/16/99
 !      use params_mod
-!      use ctlblk_mod 
+!      use ctlblk_mod
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
       real,parameter :: twice=266.55,rhprcp=0.80,deltag=1.02,             &
      &                  emelt=0.045,rlim=0.04,slim=0.85
-      real,parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now 
+      real,parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now
 !
       integer*4 i, k1, lll, k2, toodry
 !
@@ -597,7 +599,7 @@
 !        qc=pq0/p(l) * exp(a2*(t(l)-a3)/(t(l)-a4))
 !gsm forcing q (qtmp) to be positive to deal with negative q values
 !       causing problems later in this subroutine
-!        qtmp=max(h1m12,q(l))	
+!        qtmp=max(h1m12,q(l))
 !        rhqtmp(lev)=qtmp/qc
 	rhq(lev) = rh(l)
         pq(lev)  = pmid(l) * 0.01
@@ -751,7 +753,7 @@
         dpk     = log(pq(k1)/ptop)       !lin   dpk=pq(k1)-ptop
 !       mye     = emelt*(1.0-(1.0-rhavg)*efac)
         mye     = emelt * rhavg ** efac
-        icefrac = icefrac + dpk * dtavg / mye           
+        icefrac = icefrac + dpk * dtavg / mye
       else                 ! mix where tw curve crosses twmelt in layer
         if (twq(k1) == twtop) go to 40   ! both equal twmelt, nothing h
         wgt1    = (twmelt-twq(k1)) / (twtop-twq(k1))
@@ -762,7 +764,7 @@
 !       mye     = emelt*(1.0-(1.0-rhavg)*efac)
         mye     = emelt * rhavg ** efac
         icefrac = icefrac + dpk * dtavg / mye
-        icefrac = min(1.0,max(icefrac,0.0))   
+        icefrac = min(1.0,max(icefrac,0.0))
         if (icefrac <= 0.0) then
 !           goto 1020
             if (twq(k1) > twice) go to 40    ! cannot commence freezin
@@ -814,12 +816,12 @@
 !gsm   algorithms to provide an answer, i will not declare a
 !gsm   type from the ramer in this situation and allow the
 !gsm   other algorithms to make the call.
-      
-           ptyp = 0       !  don't know 
+
+           ptyp = 0       !  don't know
 !          ptyp = 5       !  mix
         else
 !          ptyp = 5       !  mix
-           ptyp = 0       !  don't know 
+           ptyp = 0       !  don't know
         end if
       end if
 
@@ -970,7 +972,7 @@
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want ptype to represent the
 !     instantaneous weather type on return.
-!     
+!
       ptype = 0
       psfck = pint(lm+1)
 
@@ -994,7 +996,7 @@
       lhiwrm = lm + 1
       do l = lm, 1, -1
 ! gsm  added 250 mb check to prevent stratospheric warming situations
-!       from counting as warm layers aloft      
+!       from counting as warm layers aloft
           if (t(l) >= 273.15 .and. pmid(l) > 25000.) lhiwrm = l
       end do
 
@@ -1018,7 +1020,7 @@
       ifrzl  = 0
       areane = 0.0
       areape = 0.0
-      surfw  = 0.0                                         
+      surfw  = 0.0
 
       do l = lm, 1, -1
         if (ifrzl == 0 .and. t(l) <= 273.15) ifrzl = 1
@@ -1037,7 +1039,7 @@
         endif
         pintk1 = pintk2
       enddo
-      
+
 !
 !     decision tree time
 !
@@ -1118,7 +1120,7 @@
 !
        subroutine calwxt_revised(lm,lp1,t,q,pmid,pint,         &
                                  d608,rog,epsq,zint,twet,iwx)
-! 
+!
 !     file: calwxt.f
 !     written: 11 november 1993, michael baldwin
 !     revisions:
@@ -1128,8 +1130,8 @@
 !     02-01-15  mike baldwin - wrf version
 !     05-07-07  binbin zhou  - add prec for rsm
 !     05-08-24  geoff manikin - modified the area requirements
-!                to make an alternate algorithm 
-!                              
+!                to make an alternate algorithm
+!
 !
 !     routine to compute precipitation type using a decision tree
 !     approach that uses variables such as integrated wet bulb temp
@@ -1158,7 +1160,7 @@
 
       integer,intent(in)             :: lm,lp1
       real,dimension(lm),intent(in)  ::  t,q,pmid,twet
-      real,dimension(lp1),intent(in) ::  pint,zint 
+      real,dimension(lp1),intent(in) ::  pint,zint
       real,intent(in)                ::  d608,rog,epsq
 !    output:
 !      iwx - instantaneous weather type.
@@ -1171,7 +1173,7 @@
       integer, intent(out) ::  iwx
 !    internal:
 !
-      real, parameter :: d00=0.0  
+      real, parameter :: d00=0.0
       integer karr,licee
       real    tcold,twarm
 !
@@ -1181,12 +1183,12 @@
 
 !    subroutines called:
 !     wetbulb
-!     
+!
 !
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want iwx to represent the
 !     instantaneous weather type on return.
-!     
+!
 !
 !     allocate local storage
 !
@@ -1276,7 +1278,7 @@
 !     pintk1 is the pressure at the bottom of the layer
 !     pintk2 is the pressure at the top of the layer
 !
-!     areap4 is the area of twet above -4 c below highest sat lyr 
+!     areap4 is the area of twet above -4 c below highest sat lyr
 !     areap0 is the area of twet above 0 c below highest sat lyr
 !
         areas8 = d00
@@ -1284,7 +1286,7 @@
         areap0 = d00
         surfw  = d00
         surfc  = d00
-        
+
 !
         do l=lmhk,lice,-1
           dzkl  = zint(l)-zint(l+1)
@@ -1373,9 +1375,9 @@
 !
 !
       subroutine calwxt_explicit(lm,tskin,sr,f_rimef,iwx)
-! 
+!
 !     file: calwxt.f
-!     written: 24 august 2005, g manikin and b ferrier 
+!     written: 24 august 2005, g manikin and b ferrier
 !
 !     routine to compute precipitation type using explicit fields
 !       from the model microphysics
@@ -1407,11 +1409,11 @@
 !   use the skin temperature to distinguish rain from freezing rain
 !   note that 2-m temperature may be a better choice if the model
 !   has a cold bias for skin temperature
-! 
+!
       if (sr < 0.5) then
 !        surface (skin) potential temperature and temperature.
 !        psfc=pmid(lm)
-!        tskin=ths*(psfc/p1000)**capa 
+!        tskin=ths*(psfc/p1000)**capa
 
          if (tskin < 273.15) then !          freezing rain = 4
            iwx = iwx + 4
@@ -1419,14 +1421,14 @@
            iwx = iwx + 8
          endif
       else
-!  
+!
 !  distinguish snow from sleet with the rime factor
-! 
+!
         if(f_rimef(lm) >= 10) then !          sleet = 2
            iwx = iwx + 2
         else
            snow = 1
-           iwx  = iwx + 1 
+           iwx  = iwx + 1
         endif
       endif
       end
@@ -1435,8 +1437,8 @@
        subroutine calwxt_dominant(nalg,rain,freezr,sleet,snow, &
      &                            domr,domzr,domip,doms)
 !
-!     written: 24 august 2005, g manikin 
-!      
+!     written: 24 august 2005, g manikin
+!
 !     this routine takes the precip type solutions from different
 !       algorithms and sums them up to give a dominant type
 !
@@ -1459,7 +1461,7 @@
       totsn = 0
       totip = 0
       totr  = 0
-      totzr = 0 
+      totzr = 0
 !   loop over the number of different algorithms that are used
       do l = 1, nalg
         if (rain(l)       > 0) then
@@ -1474,19 +1476,19 @@
       enddo
 
 !   ties are broken to favor the most dangerous form of precip
-!     freezing rain > snow > sleet > rain 
+!     freezing rain > snow > sleet > rain
       if (totsn > totip) then
         if (totsn > totzr) then
           if (totsn >= totr) then
             doms = 1
           else
-            domr = 1 
+            domr = 1
           endif
         elseif (totzr >= totr) then
           domzr = 1
         else
           domr = 1
-        endif 
+        endif
       else if (totip > totzr) then
         if (totip >= totr) then
           domip = 1
@@ -1502,9 +1504,9 @@
       return
       end
 
-!> \section arg_table_calpreciptype_finalize Argument table
+!> \section arg_table_GFS_calpreciptype_finalize Argument table
 !!
       subroutine GFS_calpreciptype_finalize
       end subroutine GFS_calpreciptype_finalize
-     
-      end module GFS_calpreciptype 
+
+      end module GFS_calpreciptype
