@@ -592,7 +592,7 @@
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
-     &       cld_cf,                                                    &
+     &       cld_cf, lsswr,                                             &
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
@@ -629,6 +629,7 @@
 !! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
 !! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
+!! | lsswr           | flag_to_calc_sw                         | logical flag to calculate SW irradiances               | logical |    0 | logical     |           | in     | F        |
 !! | hswc            | sw_heating_rate_total_sky               | shortwave total sky heating rate                       | k s-1   |    2 | real        | kind_phys | out    | F        |
 !! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
 !! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
@@ -829,7 +830,7 @@
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
-      logical, intent(in) :: lprnt
+      logical, intent(in) :: lprnt, lsswr
 
       real (kind=kind_phys), dimension(npts,nlp1), intent(in) ::        &
      &       plvl, tlvl
@@ -914,6 +915,7 @@
 !
 !===> ... begin here
 !
+      if (.not. lsswr) return
       if (nday <= 0) return
 
       lhswb  = present ( hswb )

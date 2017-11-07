@@ -1886,7 +1886,7 @@
         end if
 
 
-        if_lsswr: if (Model%lsswr) then
+!        if_lsswr: if (Model%lsswr) then
 
             ! Setup surface albedo for SW calculation
           call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
@@ -1894,10 +1894,8 @@
                        tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
                        Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
                        Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                       Sfcprop%tisfc, im,                           &
+                       Sfcprop%tisfc, im, Model%lsswr,                    &
                        sfcalb, Radtend%sfalb)                            !  ---  outputs
-
-!          if_nday: if (nday > 0) then
 
                 call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4,   &
@@ -1908,7 +1906,7 @@
                           sfcalb(:,3), sfcalb(:,4),     &
                           Radtend%coszen, Model%solcon,         &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
-                          cld_cf,                            &
+                          cld_cf, Model%lsswr,                           &
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
                           hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
                           cld_lwp=cld_lwp,                      &    ! Optional input
@@ -1917,24 +1915,20 @@
                           cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
                           cld_ref_snow=cld_ref_snow)
 
-            call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
+          call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, Model%lsswr)
 
-            call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
+          call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd, Model%lsswr)
 
-              ! Surface down and up spectral component fluxes
-              ! Save two spectral bands' surface downward and upward fluxes for output.
-            call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
+            ! Surface down and up spectral component fluxes
+            ! Save two spectral bands' surface downward and upward fluxes for output.
+          call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
 
-!          else
+            ! Night time: set SW heating rates and fluxes to zero
+          call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday, Model%lsswr)
 
-              ! Night time: set SW heating rates and fluxes to zero
-            call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday)
+          call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
 
-!          end if if_nday
-
-           call Save_more_sw_fluxes (Radtend, Coupling)
-
-        end if if_lsswr
+!        end if if_lsswr
 
       end subroutine Do_sw_rad
 
@@ -2191,7 +2185,7 @@
       end subroutine Organize_output
 
 
-      subroutine Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday)
+      subroutine Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday, lsswr)
 
         implicit none
 
@@ -2202,7 +2196,9 @@
         type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
         type(GFS_control_type), intent(in) :: Model
         integer, intent(in) :: nday
+        logical, intent(in) :: lsswr
 
+        if (.not. lsswr) return
 
         if (nday > 0) then
           return
@@ -2233,7 +2229,7 @@
 
       subroutine Set_sfc_albedo (slmsk, snowf, sncovr, snoalb, zorlf, &
           coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf,     &
-          facsf, facwf, fice, tisfc, IMAX, sfcalb, sfalb)
+          facsf, facwf, fice, tisfc, IMAX, lsswr, sfcalb, sfalb)
 
         implicit none
 
@@ -2241,10 +2237,12 @@
         real (kind = kind_phys), dimension(:), intent(in) :: slmsk, snowf, &
             zorlf, coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf,      &
             alnwf, facsf, facwf, fice, tisfc, sncovr, snoalb
+        logical, intent(in) :: lsswr
 
         real (kind = kind_phys), dimension(IMAX, NF_ALBD), intent(out) ::  sfcalb
         real (kind = kind_phys), dimension(:), intent(out) :: sfalb
 
+        if (.not. lsswr) return
 
         call setalb (slmsk, snowf, sncovr, snoalb, zorlf,           &
             coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf, &
@@ -2256,7 +2254,7 @@
       end subroutine Set_sfc_albedo
 
 
-      subroutine Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
+      subroutine Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, lsswr)
 
         implicit none
 
@@ -2264,7 +2262,10 @@
         type(GFS_grid_type), intent(in) :: Grid
         type(cmpfsw_type), dimension(Size (Grid%xlon, 1)), intent(in) :: scmpsw
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD), intent(in) :: sfcalb
+        logical, intent(in) :: lsswr
 
+
+        if (.not. lsswr) return
 
         Coupling%nirbmdi(:) = scmpsw(:)%nirbm
         Coupling%nirdfdi(:) = scmpsw(:)%nirdf
@@ -2279,7 +2280,7 @@
       end subroutine Save_sw_fluxes
 
 
-      subroutine Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
+      subroutine Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, lsswr)
 
         implicit none
 
@@ -2289,10 +2290,13 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
             LTP), intent(in) :: htswc
         integer, intent(in) :: lm, kd
+        logical, intent(in) :: lsswr
 
           ! Local vars
         integer :: k, k1
 
+
+        if (.not. lsswr) return
 
         do k = 1, lm
           k1 = k + kd
@@ -2309,7 +2313,7 @@
       end subroutine Save_sw_heating_rate
 
 
-      subroutine Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd)
+      subroutine Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd, lsswr)
 
         implicit none
 
@@ -2319,9 +2323,13 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
             LTP), intent(in) :: htsw0
         integer, intent(in) :: lm, kd
+        logical, intent(in) :: lsswr
 
           ! Local vars
         integer :: k, k1
+
+
+        if (.not. lsswr) return
 
         if (Model%swhtr) then
           do k = 1, lm
@@ -2339,12 +2347,16 @@
       end subroutine Save_sw_heating_rate_csk
 
 
-      subroutine Save_more_sw_fluxes (Radtend, Coupling)
+      subroutine Save_more_sw_fluxes (Radtend, Coupling, lsswr)
 
         implicit none
 
         type(GFS_radtend_type), intent(in) :: Radtend
         type(GFS_coupling_type), intent(inout) :: Coupling
+        logical, intent(in) :: lsswr
+
+
+        if (.not. lsswr) return
 
           ! Radiation fluxes for other physics processes
         Coupling%sfcnsw(:) = Radtend%sfcfsw(:)%dnfxc - Radtend%sfcfsw(:)%upfxc
