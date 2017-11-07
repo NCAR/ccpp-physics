@@ -719,7 +719,6 @@ module module_physics_driver
 !  ---  inputs:
            ( Model%solhr, Model%slag, Model%sdec, Model%cdec, Grid%sinlat,  &
              Grid%coslat, Grid%xlon, Radtend%coszen, Sfcprop%tsfc,          &
-!             Statein%tgrs(1,1), Radtend%tsflw, Radtend%semis,               &
              Statein%tgrs(:,1), Radtend%tsflw, Radtend%semis,               &
              Coupling%sfcdsw, Coupling%sfcnsw, Coupling%sfcdlw,             &
              Radtend%htrsw, Radtend%swhc, Radtend%htrlw, Radtend%lwhc,      &
