@@ -1897,12 +1897,8 @@
                        Sfcprop%tisfc, im,                           &
                        sfcalb, Radtend%sfalb)                            !  ---  outputs
 
-          if_nday: if (nday > 0) then
+!          if_nday: if (nday > 0) then
 
-              ! Daytime: Compute SW heating rates and fluxes.
-!            if (Model%swhtr) then
-!                ! Output SW heating rate for clear skies (htsw0)
-!              if (ISWCLIQ > 0) then
                 call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
                           gasvmr_co2, gasvmr_n2o, gasvmr_ch4,   &
                           gasvmr_o2,                            &
@@ -1912,7 +1908,7 @@
                           sfcalb(:,3), sfcalb(:,4),     &
                           Radtend%coszen, Model%solcon,         &
                           nday, idxday, im, lmk, lmp, Model%lprnt,&
-                          cld_cf,                                 &
+                          cld_cf,                            &
                           htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
                           hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
                           cld_lwp=cld_lwp,                      &    ! Optional input
@@ -1920,59 +1916,6 @@
                           cld_ref_ice=cld_ref_ice, cld_rwp=cld_rwp, &
                           cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
                           cld_ref_snow=cld_ref_snow)
-!              else
-!                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs
-!                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
-!                          gasvmr_o2,                                  &
-!                          Tbd%icsdsw, aeraod,     &
-!                          aerssa, aerasy,     &
-!                          sfcalb(:,1), sfcalb(:,2),          &
-!                          sfcalb(:,3), sfcalb(:,4),          &
-!                          Radtend%coszen, Model%solcon,   &
-!                          nday, idxday, im, lmk, lmp, Model%lprnt,&
-!                          cld_cf,                                 &
-!                          htswc, Diag%topfsw, Radtend%sfcfsw,     &     !  ---  outputs
-!                          hsw0=htsw0, fdncmp=scmpsw,              &     ! Optional optputs
-!                          cld_od=cld_od, cld_ssa=cld_ssa, cld_asy=cld_asy) ! Optional input
-!              end if
-!            else
-!                ! Does not output SW heating rates for clear skies.
-!              if (ISWCLIQ > 0) then
-!                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
-!                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
-!                          gasvmr_o2,                                  & 
-!                          Tbd%icsdsw, aeraod,     &
-!                          aerssa, aerasy,           &
-!                          sfcalb(:,1), sfcalb(:,2),          &
-!                          sfcalb(:,3), sfcalb(:,4),          &
-!                          Radtend%coszen, Model%solcon,   &
-!                          nday, idxday, IM, LMK, LMP, Model%lprnt,&
-!                          cld_cf,                                 &
-!                          htswc, Diag%topfsw, Radtend%sfcfsw,     &    !  ---  outputs 
-!                          FDNCMP=scmpsw,                          &    ! ---  optional outputs
-!                          cld_lwp=cld_lwp,                        &    ! Optional input
-!                          cld_ref_liq=cld_ref_liq, cld_iwp=cld_iwp, &
-!                          cld_ref_ice=cld_ref_ice, cld_rwp=cld_rwp, &
-!                          cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
-!                          cld_ref_snow=cld_ref_snow)
-!
-!              else
-!                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,     &      !  ---  inputs 
-!                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4, &
-!                          gasvmr_o2,                                  & 
-!                          Tbd%icsdsw, aeraod,     &
-!                          aerssa, aerasy,           &
-!                          sfcalb(:,1), sfcalb(:,2),          &
-!                          sfcalb(:,3), sfcalb(:,4),          &
-!                          Radtend%coszen, Model%solcon,   &
-!                          nday, idxday, IM, LMK, LMP, Model%lprnt,&
-!                          cld_cf,                                 &
-!                          htswc, Diag%topfsw, Radtend%sfcfsw,     &     !  ---  outputs 
-!                          FDNCMP=scmpsw,                          &     ! ---  optional  outputs
-!                          cld_od=cld_od, cld_ssa=cld_ssa, cld_asy=cld_asy)    ! Optional input
-!              end if
-!            end if
-
 
             call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd)
 
@@ -1982,12 +1925,12 @@
               ! Save two spectral bands' surface downward and upward fluxes for output.
             call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb)
 
-          else
+!          else
 
               ! Night time: set SW heating rates and fluxes to zero
-            call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
+            call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday)
 
-          end if if_nday
+!          end if if_nday
 
            call Save_more_sw_fluxes (Radtend, Coupling)
 
@@ -2248,7 +2191,7 @@
       end subroutine Organize_output
 
 
-      subroutine Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model)
+      subroutine Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday)
 
         implicit none
 
@@ -2258,27 +2201,32 @@
         type(GFS_grid_type), intent(in) :: Grid
         type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
         type(GFS_control_type), intent(in) :: Model
+        integer, intent(in) :: nday
 
 
-        Radtend%htrsw(:,:) = 0.0
+        if (nday > 0) then
+          return
+        else
+          Radtend%htrsw(:,:) = 0.0
 
-        Radtend%sfcfsw = sfcfsw_type(0.0, 0.0, 0.0, 0.0)
-        Diag%topfsw = topfsw_type(0.0, 0.0, 0.0)
-        scmpsw = cmpfsw_type(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+          Radtend%sfcfsw = sfcfsw_type(0.0, 0.0, 0.0, 0.0)
+          Diag%topfsw = topfsw_type(0.0, 0.0, 0.0)
+          scmpsw = cmpfsw_type(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        Coupling%nirbmdi(:) = 0.0
-        Coupling%nirdfdi(:) = 0.0
-        Coupling%visbmdi(:) = 0.0
-        Coupling%visdfdi(:) = 0.0
+          Coupling%nirbmdi(:) = 0.0
+          Coupling%nirdfdi(:) = 0.0
+          Coupling%visbmdi(:) = 0.0
+          Coupling%visdfdi(:) = 0.0
 
-        Coupling%nirbmui(:) = 0.0
-        Coupling%nirdfui(:) = 0.0
-        Coupling%visbmui(:) = 0.0
-        Coupling%visdfui(:) = 0.0
+          Coupling%nirbmui(:) = 0.0
+          Coupling%nirdfui(:) = 0.0
+          Coupling%visbmui(:) = 0.0
+          Coupling%visdfui(:) = 0.0
 
-        if (Model%swhtr) then
-          Radtend%swhc(:,:) = 0
-        endif
+          if (Model%swhtr) then
+            Radtend%swhc(:,:) = 0
+          endif
+        end if
 
       end subroutine Zero_out_heatrate_flux
 

@@ -914,6 +914,7 @@
 !
 !===> ... begin here
 !
+      if (nday <= 0) return
 
       lhswb  = present ( hswb )
       lhsw0  = present ( hsw0 )
