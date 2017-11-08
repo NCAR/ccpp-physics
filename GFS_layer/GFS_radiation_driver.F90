@@ -1844,93 +1844,84 @@
       end subroutine Get_cloud_info
 
 
-      subroutine Do_sw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
-          Coupling, im, lm, kd, lmk, lmp, tsfg, tsfa, nday, idxday,   &
-          plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faersw, &
-          scmpsw)
-
-        implicit none
-
-        type(GFS_control_type), intent(in) :: Model
-        type(GFS_grid_type),    intent(in) :: Grid
-        type(GFS_sfcprop_type), intent(in) :: Sfcprop
-        type(GFS_radtend_type), intent(inout) :: Radtend
-        type(GFS_tbd_type),     intent(in) :: Tbd
-        type(GFS_diag_type), intent(inout) :: Diag
-        type(GFS_coupling_type), intent(inout) :: Coupling
-
-        integer, intent(in) :: im, lm, kd, lmk, lmp, nday
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfg, tsfa
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP), intent(in) :: plyr, tlyr, qlyr, olyr 
-        integer, dimension(Size (Grid%xlon, 1)), intent(in) :: idxday
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NF_VGAS), intent(in) :: gasvmr
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NF_CLDS), intent(in) :: clouds
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NBDSW, NF_AESW), intent(in)::faersw
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            1 + LTP), intent(in) :: plvl, tlvl
-
-        type (cmpfsw_type), dimension(size(Grid%xlon, 1)), intent(out) :: scmpsw
-
-          ! Local vars
-        integer :: k, k1
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP) :: htswc, htsw0
-
-            ! Setup surface albedo for SW calculation
-          call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                       Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                       tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                       Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                       Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                       Sfcprop%tisfc, im, Model%lsswr,                    &
-                       sfcalb, Radtend%sfalb)                            !  ---  outputs
-
-                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
-!                          gasvmr_co2, gasvmr_n2o, gasvmr_ch4,   &
-                          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3), &
-!                          gasvmr_o2,                            &
-                          gasvmr(:, :, 4),                      &
-!                          Tbd%icsdsw, aeraod,                   &
-                          Tbd%icsdsw, faersw(:, :, :, 1),                   &
-                          faersw(:, :, :, 2), faersw(:, :, :, 3),                       &
-                          sfcalb(:, 1), sfcalb(:,2),       &
-                          sfcalb(:,3), sfcalb(:,4),     &
-                          Radtend%coszen, Model%solcon,         &
-                          nday, idxday, im, lmk, lmp, Model%lprnt,&
-!                          cld_cf, Model%lsswr,                           &
-                          clouds(:,:,1), Model%lsswr,                           &
-                          htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
-                          hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
-!                          cld_lwp=cld_lwp,                      &    ! Optional input
-                          cld_lwp=clouds(:, :, 2),                      &    ! Optional input
-!                          cld_ref_liq=cld_ref_liq, cld_iwp=cld_iwp, &
-                          cld_ref_liq=clouds(:, :, 3), cld_iwp=clouds(:, :, 4), &
-!                          cld_ref_ice=cld_ref_ice, cld_rwp=cld_rwp, &
-                          cld_ref_ice=clouds(:, :, 5), cld_rwp=clouds(:, :, 6), &
-!                          cld_ref_rain=cld_ref_rain, cld_swp=cld_swp, &
-                          cld_ref_rain=clouds(:, :, 7), cld_swp=clouds(:, :, 8), &
-!                          cld_ref_snow=cld_ref_snow)
-                          cld_ref_snow=clouds(:, :, 9))
-
-          call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, Model%lsswr)
-
-          call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd, Model%lsswr)
-
-            ! Surface down and up spectral component fluxes
-            ! Save two spectral bands' surface downward and upward fluxes for output.
-          call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
-
-            ! Night time: set SW heating rates and fluxes to zero
-          call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday, Model%lsswr)
-
-          call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
-
-      end subroutine Do_sw_rad
+!      subroutine Do_sw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
+!          Coupling, im, lm, kd, lmk, lmp, tsfg, tsfa, nday, idxday,   &
+!          plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faersw, &
+!          scmpsw)
+!
+!        implicit none
+!
+!        type(GFS_control_type), intent(in) :: Model
+!        type(GFS_grid_type),    intent(in) :: Grid
+!        type(GFS_sfcprop_type), intent(in) :: Sfcprop
+!        type(GFS_radtend_type), intent(inout) :: Radtend
+!        type(GFS_tbd_type),     intent(in) :: Tbd
+!        type(GFS_diag_type), intent(inout) :: Diag
+!        type(GFS_coupling_type), intent(inout) :: Coupling
+!
+!        integer, intent(in) :: im, lm, kd, lmk, lmp, nday
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfg, tsfa
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            LTP), intent(in) :: plyr, tlyr, qlyr, olyr 
+!        integer, dimension(Size (Grid%xlon, 1)), intent(in) :: idxday
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            LTP, NF_VGAS), intent(in) :: gasvmr
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            LTP, NF_CLDS), intent(in) :: clouds
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            LTP, NBDSW, NF_AESW), intent(in)::faersw
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            1 + LTP), intent(in) :: plvl, tlvl
+!
+!        type (cmpfsw_type), dimension(size(Grid%xlon, 1)), intent(out) :: scmpsw
+!
+!          ! Local vars
+!        integer :: k, k1
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!            LTP) :: htswc, htsw0
+!
+!            ! Setup surface albedo for SW calculation
+!          call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+!                       Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
+!                       tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
+!                       Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
+!                       Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
+!                       Sfcprop%tisfc, im, Model%lsswr,                    &
+!                       sfcalb, Radtend%sfalb)                            !  ---  outputs
+!
+!                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
+!                          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3), &
+!                          gasvmr(:, :, 4),                      &
+!                          Tbd%icsdsw, faersw(:, :, :, 1),                   &
+!                          faersw(:, :, :, 2), faersw(:, :, :, 3),                       &
+!                          sfcalb(:, 1), sfcalb(:,2),       &
+!                          sfcalb(:,3), sfcalb(:,4),     &
+!                          Radtend%coszen, Model%solcon,         &
+!                          nday, idxday, im, lmk, lmp, Model%lprnt,&
+!                          clouds(:,:,1), Model%lsswr,                           &
+!                          htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
+!                          hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
+!                          cld_lwp=clouds(:, :, 2),                      &    ! Optional input
+!                          cld_ref_liq=clouds(:, :, 3), cld_iwp=clouds(:, :, 4), &
+!                          cld_ref_ice=clouds(:, :, 5), cld_rwp=clouds(:, :, 6), &
+!                          cld_ref_rain=clouds(:, :, 7), cld_swp=clouds(:, :, 8), &
+!                          cld_ref_snow=clouds(:, :, 9))
+!
+!          call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, Model%lsswr)
+!
+!          call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd, Model%lsswr)
+!
+!            ! Surface down and up spectral component fluxes
+!            ! Save two spectral bands' surface downward and upward fluxes for output.
+!          call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+!
+!            ! Night time: set SW heating rates and fluxes to zero
+!          call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday, Model%lsswr)
+!
+!          call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+!
+!      end subroutine Do_sw_rad
 
 
       subroutine Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
@@ -1974,8 +1965,8 @@
                         Radtend%semis)                                              !  ---  outputs
 
             ! Compute LW heating rates and fluxes.
-          if (Model%lwhtr) then
-            if (ilwcliq > 0 ) then
+!          if (Model%lwhtr) then
+!            if (ilwcliq > 0 ) then
               call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
                  gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
                  gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
@@ -1989,41 +1980,41 @@
                  cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
                  cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
-            else
-              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
-                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
-                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
-                 hlw0=htlw0,                                           & !  ---  optional output
-                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
-            end if
-          else
-            if (ilwcliq > 0 ) then
-              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
-                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
-                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
-                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
-                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
-                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
-                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
-            else
-              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
-                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
-                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
-                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
-            end if
-          end if
+!            else
+!              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+!                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+!                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+!                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+!                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
+!                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+!                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
+!                 hlw0=htlw0,                                           & !  ---  optional output
+!                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
+!            end if
+!          else
+!            if (ilwcliq > 0 ) then
+!              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+!                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+!                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+!                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+!                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
+!                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+!                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
+!                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
+!                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
+!                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
+!                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+!            else
+!              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+!                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+!                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+!                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+!                 Tbd%icsdlw, faerlw(:,:,:,1),faerlw(:,:,:,2), Radtend%semis,   &
+!                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+!                 htlwc, Diag%topflw, Radtend%sfcflw,                   &  !  ---  outputs
+!                 cld_od=clouds(:, :, 2))                                 !  ---  optional input
+!            end if
+!          end if
 
             ! Save calculation results
             ! Save surface air temp for diurnal adjustment at model t-steps
@@ -2041,7 +2032,7 @@
             end do
           end if
 
-          if (Model%lwhtr) then
+!          if (Model%lwhtr) then
             do k = 1, lm
               k1 = k + kd
               Radtend%lwhc(:, k) = htlw0(:, k1)
@@ -2053,7 +2044,7 @@
                 Radtend%lwhc(:, k) = Radtend%lwhc(:, lm)
               end do
             end if
-          end if
+!          end if
 
 
             ! Radiation fluxes for other physics processes
