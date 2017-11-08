@@ -82,20 +82,20 @@
 !! \brief Brief description of the subroutine
 !!
 !! \section arg_table_gwdc_pre_run Argument Table
-!! | local var name     | longname                                         | description                                   | units | rank | type    | kind      | intent | optional |
-!! |--------------------|--------------------------------------------------|-----------------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | im                 | horizontal_loop_extent                           | horizontal loop extent                        | index | 0    | integer | default   | in     | F        |
-!! | levs               | vertical_dimension                               | number of vertical layers                     | index | 0    | integer | default   | in     | F        |
-!! | kbot               | vertical_index_at_cloud_base                     | vertical index at cloud base                  | index | 1    | integer | default   | in     | F        |
-!! | ktop               | vertical_index_at_cloud_top                      | vertical index at cloud top                   | index | 1    | integer | default   | in     | F        |
-!! | dtp                | time_step_for_physics                            | physics time step                             | s     | 0    | real    | kind_phys | in     | F        |
-!! | gt0                | air_temperature_updated_by_physics               | updated air temperature                       | m s-1 | 2    | real    | kind_phys | inout  | F        |
-!! | dtdt  misleading?? | tendency_of_air_temperature_due_to_model_physics | air temperature tendency due to model physics | K s-1 | 2    | real    | kind_phys | in     | F        |
-!! | del                | air_pressure_difference_between_midlayers        | difference between mid-layer pressures        | Pa    | 2    | real    | kind_phys | in     | F        |
-!! | cumabs             | maximum_column_heating_rate                      | maximum heating rate in column                | K s-1 | 1    | real    | kind_phys | in     | F        |
+!! | local var name    | longname                                  | description                                                        | units | rank | type    | kind      | intent | optional |
+!! |-------------------|-------------------------------------------|--------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
+!! | im                | horizontal_loop_extent                    | horizontal loop extent                                             | index | 0    | integer | default   | in     | F        |
+!! | levs              | vertical_dimension                        | number of vertical layers                                          | index | 0    | integer | default   | in     | F        |
+!! | kbot              | vertical_index_at_cloud_base              | vertical index at cloud base                                       | index | 1    | integer | default   | in     | F        |
+!! | ktop              | vertical_index_at_cloud_top               | vertical index at cloud top                                        | index | 1    | integer | default   | in     | F        |
+!! | dtp               | time_step_for_physics                     | physics time step                                                  | s     | 0    | real    | kind_phys | in     | F        |
+!! | gt0               | air_temperature_updated_by_physics        | updated air temperature                                            | m s-1 | 2    | real    | kind_phys | in     | F        |
+!! | gt0_no_convec  ?? | air_temperature_before_deep_convection    | air temperature before considering tendency due to deep convection | K     | 2    | real    | kind_phys | in     | F        |
+!! | del               | air_pressure_difference_between_midlayers | difference between mid-layer pressures                             | Pa    | 2    | real    | kind_phys | in     | F        |
+!! | cumabs            | maximum_column_heating_rate               | maximum heating rate in column                                     | K s-1 | 1    | real    | kind_phys | out    | F        |
 !!
       subroutine gwdc_pre_run (                                         &
-     &  im, levs, kbot, ktop, dtp, gt0, dtdt, del, cumabs)
+     &  im, levs, kbot, ktop, dtp, gt0, gt0_no_convec, del, cumabs)
 
       use machine, only : kind_phys
       implicit none
@@ -104,7 +104,7 @@
       integer, intent(in) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(in) :: dtp
       real(kind=kind_phys), intent(in) ::                               &
-     &  gt0(:,:), dtdt(:,:), del(:,:)
+     &  gt0(:,:), gt0_no_convec(:,:), del(:,:)
 
       real(kind=kind_phys), intent(out) :: cumabs(:)
 
@@ -119,7 +119,7 @@
       do k = 1, levs
         do i = 1, im
           if (k >= kbot(i) .and. k <= ktop(i)) then
-            cumabs(i) = cumabs(i) + (gt0(i,k)-dtdt(i,k)) * del(i,k)
+            cumabs(i) = cumabs(i) + (gt0(i,k) - gt0_no_convec(i,k)) * del(i,k)
             work3(i)  = work3(i)  + del(i,k)
           endif
         enddo
@@ -1579,10 +1579,10 @@
 !! | taucty         | instantaneous_y_stress_due_to_gravity_wave_drag                 | meridional stress at cloud top due to convective gravity wave drag       | Pa         | 1    | real    | kind_phys | in     | F        |
 !! | gwdcu          | tendency_of_x_wind_due_to_convective_gravity_wave_drag          | zonal wind tendency due to convective gravity wave drag                  | m s-2      | 2    | real    | kind_phys | in     | F        |
 !! | gwdcv          | tendency_of_y_wind_due_to_convective_gravity_wave_drag          | meridional wind tendency due to convective gravity wave drag             | m s-2      | 2    | real    | kind_phys | in     | F        |
-!! | dugwd  ??      | time_integral_of_x_stress_due_to_gravity_wave_drag  ??          | integral over time of zonal stress due to gravity wave drag              | Pa s  ??   | 2    | real    | kind_phys | inout  | F        |
-!! | dvgwd  ??      | time_integral_of_y_stress_due_to_gravity_wave_drag  ??          | integral over time of meridional stress due to gravity wave drag         | Pa s  ??   | 2    | real    | kind_phys | inout  | F        |
-!! | du3dt  ??      | cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag | cumulative change in zonal wind due to convective gravity wave drag      | m s-1  ??  | 2    | real    | kind_phys | inout  | F        |
-!! | dv3dt  ??      | cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag | cumulative change in meridional wind due to convective gravity wave drag | m s-1  ??  | 2    | real    | kind_phys | inout  | F        |
+!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag              | integral over time of zonal stress due to gravity wave drag              | Pa s       | 2    | real    | kind_phys | inout  | F        |
+!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag              | integral over time of meridional stress due to gravity wave drag         | Pa s       | 2    | real    | kind_phys | inout  | F        |
+!! | du3dt          | cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag | cumulative change in zonal wind due to convective gravity wave drag      | m s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | dv3dt          | cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag | cumulative change in meridional wind due to convective gravity wave drag | m s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | gu0            | x_wind_updated_by_physics                                       | updated zonal wind                                                       | m s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | gv0            | y_wind_updated_by_physics                                       | updated meridional wind                                                  | m s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | gt0            | air_temperature_updated_by_physics                              | updated air temperature                                                  | m s-1      | 2    | real    | kind_phys | inout  | F        |

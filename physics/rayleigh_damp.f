@@ -10,6 +10,7 @@
 !! \section arg_table_rayleigh_damp_run Argument Table
 !! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
 !! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       | 0    | logical | default   | in     | F        |
 !! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
 !! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
 !! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
@@ -27,8 +28,9 @@
 !! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
 !! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
 !!
-      subroutine rayleigh_damp_run (IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
-     &                              LEVR,pgr,PRSL,PRSLRD0,ral_ts)
+      subroutine rayleigh_damp_run (
+     &           lsidea,IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
+     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -69,6 +71,7 @@
       USE MACHINE , ONLY : kind_phys
       implicit none
 !
+      logical,intent(in)                 :: lsidea
       integer,intent(in)                 :: im, ix, iy, km,levr
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
       real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
@@ -82,7 +85,7 @@
       real(kind=kind_phys) tx1(im)
       integer              i, k
 !
-      if (ral_ts <= 0.0 .or. prslrd0 == 0.0) return
+      if (lsidea .or. ral_ts <= 0.0 .or. prslrd0 == 0.0) return
 !
       RTRD1 = 1.0/(ral_ts*86400) ! RECIPROCAL OF TIME SCALE PER SCALE HEIGHT
                                  ! ABOVE BEGINNING SIGMA LEVEL FOR RAYLEIGH DAMPING

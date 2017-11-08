@@ -1431,13 +1431,13 @@ module module_physics_driver
 
 
 !    Rayleigh damping  near the model top
-      if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
-        call rayleigh_damp_run (                      &
-             im, ix, im, levs, dvdt, dudt, dtdt,      &
-             Statein%ugrs, Statein%vgrs, dtp, con_cp, &
-             Model%levr, Statein%pgr, Statein%prsl,   &
-             Model%prslrd0, Model%ral_ts)
-      endif
+!      if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
+      call rayleigh_damp_run (                               &
+           Model%lsidea, im, ix, im, levs, dvdt, dudt, dtdt, &
+           Statein%ugrs, Statein%vgrs, dtp, con_cp,          &
+           Model%levr, Statein%pgr, Statein%prsl,            &
+           Model%prslrd0, Model%ral_ts)
+!      endif
 
 !     if (lprnt) then
 !       write(0,*)' tgrs1=',(tgrs(ipr,ik),k=1,10)

@@ -115,20 +115,20 @@
 !! \brief Brief description of the subroutine
 !!
 !! \section arg_table_gwdps_pre_run Argument Table
-!! | local var name | longname                                                                | description                                                                              | units       | rank | type    | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | index       | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | index       | 0    | integer | default   | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count       | 0    | integer | default   | in     | F        |
-!! | mntvar  ??     | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various  ?? | 2    | real    | kind_phys | in     | F        |
-!! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m           | 1    | real    | kind_phys | out    | F        |
-!! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none        | 1    | real    | kind_phys | out    | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                          | asymmetry of subgrid orography                                                           | none        | 2    | real    | kind_phys | out    | F        |
-!! | clx            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac        | 2    | real    | kind_phys | out    | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                | angle with_respect to east of maximum subgrid orographic variations                      | degrees     | 1    | real    | kind_phys | out    | F        |
-!! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none        | 1    | real    | kind_phys | out    | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none        | 1    | real    | kind_phys | out    | F        |
-!! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m           | 1    | real    | kind_phys | out    | F        |
+!! | local var name | longname                                                                | description                                                                              | units   | rank | type    | kind      | intent | optional |
+!! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | index   | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | index   | 0    | integer | default   | in     | F        |
+!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   | 0    | integer | default   | in     | F        |
+!! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various | 2    | real    | kind_phys | in     | F        |
+!! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       | 1    | real    | kind_phys | out    | F        |
+!! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none    | 1    | real    | kind_phys | out    | F        |
+!! | oa4            | asymmetry_of_subgrid_orography                                          | asymmetry of subgrid orography                                                           | none    | 2    | real    | kind_phys | out    | F        |
+!! | clx            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2    | real    | kind_phys | out    | F        |
+!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1    | real    | kind_phys | out    | F        |
+!! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    | 1    | real    | kind_phys | out    | F        |
+!! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    | 1    | real    | kind_phys | out    | F        |
+!! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       | 1    | real    | kind_phys | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
@@ -1414,21 +1414,21 @@
 !> \ingroup GFS_ogwd
 !! \brief Brief description of the subroutine
 !! \section arg_table_gwdps_post_run Argument Table
-!! | local var name | longname                                               | description                                                      | units     | rank | type    | kind      | intent | optional |
-!! |----------------|--------------------------------------------------------|------------------------------------------------------------------|-----------|------|---------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                       | flag for calculating diagnostic fields                           | flag      | 0    | logical | default   | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                    | flag for calculating 3-D diagnostic fields                       | flag      | 0    | logical | default   | in     | F        |
-!! | dtf            | time_step_for_dynamics                                 | dynamics time step                                               | s         | 0    | real    | kind_phys | in     | F        |
-!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag        | zonal surface stress due to orographic gravity wave drag         | Pa        | 1    | real    | kind_phys | in     | F        |
-!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag        | meridional surface stress due to orographic gravity wave drag    | Pa        | 1    | real    | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                | zonal wind tendency due to model physics                         | m s-2     | 2    | real    | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                | meridional wind tendency due to model physics                    | m s-2     | 2    | real    | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | air temperature tendency due to model physics                    | K s-1     | 2    | real    | kind_phys | in     | F        |
-!! | dugwd  ??      | time_integral_of_x_stress_due_to_gravity_wave_drag  ?? | integral over time of zonal stress due to gravity wave drag      | Pa s  ??  | 2    | real    | kind_phys | inout  | F        |
-!! | dvgwd  ??      | time_integral_of_y_stress_due_to_gravity_wave_drag  ?? | integral over time of meridional stress due to gravity wave drag | Pa s  ??  | 2    | real    | kind_phys | inout  | F        |
-!! | du3dt  ??      | cumulative_change_in_x_wind_due_to_model_physics       | cumulative change in zonal wind due to model physics             | m s-1  ?? | 2    | real    | kind_phys | inout  | F        |
-!! | dv3dt  ??      | cumulative_change_in_y_wind_due_to_model_physics       | cumulative change in meridional wind due to model physics        | m s-1  ?? | 2    | real    | kind_phys | inout  | F        |
-!! | dt3dt  ??      | cumulative_change_in_temperature_due_to_model_physics  | cumulative change in temperature due to model physics            | K  ??     | 2    | real    | kind_phys | inout  | F        |
+!! | local var name | longname                                                  | description                                                      | units | rank | type    | kind      | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
+!! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  | 0    | logical | default   | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                       | flag for calculating 3-D diagnostic fields                       | flag  | 0    | logical | default   | in     | F        |
+!! | dtf            | time_step_for_dynamics                                    | dynamics time step                                               | s     | 0    | real    | kind_phys | in     | F        |
+!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag           | zonal surface stress due to orographic gravity wave drag         | Pa    | 1    | real    | kind_phys | in     | F        |
+!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag           | meridional surface stress due to orographic gravity wave drag    | Pa    | 1    | real    | kind_phys | in     | F        |
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                   | zonal wind tendency due to model physics                         | m s-2 | 2    | real    | kind_phys | in     | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                   | meridional wind tendency due to model physics                    | m s-2 | 2    | real    | kind_phys | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics          | air temperature tendency due to model physics                    | K s-1 | 2    | real    | kind_phys | in     | F        |
+!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag        | integral over time of zonal stress due to gravity wave drag      | Pa s  | 2    | real    | kind_phys | inout  | F        |
+!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag        | integral over time of meridional stress due to gravity wave drag | Pa s  | 2    | real    | kind_phys | inout  | F        |
+!! | du3dt          | cumulative_change_in_x_wind_due_to_surface_processes      | cumulative change in zonal wind due to surface processes         | m s-1 | 2    | real    | kind_phys | inout  | F        |
+!! | dv3dt          | cumulative_change_in_y_wind_due_to_surface_processes      | cumulative change in meridional wind due to surface processes    | m s-1 | 2    | real    | kind_phys | inout  | F        |
+!! | dt3dt          | cumulative_change_in_temperature_due_to_surface_processes | cumulative change in temperature due to surface processes        | K     | 2    | real    | kind_phys | inout  | F        |
 !!
       subroutine gwdps_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
