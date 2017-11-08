@@ -14,9 +14,9 @@
 !! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
 !! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
 !! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_physics                    | meridional wind tendency due to physics              | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_physics                    | zonal wind tendency due to physics                   | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_physics           | air temperature tendency due to physics              | K s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | C              | tendency_of_air_temperature_due_to_model_physics     | air temperature tendency due to model physics        | K s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
 !! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
 !! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
