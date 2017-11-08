@@ -10,6 +10,64 @@
       module lsm_noah
       contains
 
+      subroutine lsmnoah_pre_run                                        &
+     &  (im,km,smsoil,slsoil,smsoilin,slsoilin,drain,runof,evbs,evcw,   &
+     &   trans,sbsno,snowc,snohf,smcwlt2,smcref2                        &
+     &  )
+
+      use machine,           only: kind_phys
+
+!  ---  interface variables
+      integer, intent(in) :: im, km
+
+      real(kind=kind_phys), dimension(im,km), intent(inout) ::          &
+     &    smsoil,slsoil
+
+      real(kind=kind_phys), dimension(im,km), intent(in) ::             &
+     &    smsoilin,slsoilin
+
+      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+     &    drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,smcref2
+
+      smsoil(:,:) = smsoilin(:,:)
+      slsoil(:,:) = slsoilin(:,:)
+
+      drain(:)      = 0.0
+      runof(:)      = 0.0
+      evbs(:)       = 0.0
+      evcw(:)       = 0.0
+      trans(:)      = 0.0
+      sbsno(:)      = 0.0
+      snowc(:)      = 0.0
+      snohf(:)      = 0.0
+      smcwlt2(:) = 0.0
+      smcref2(:) = 0.0
+
+      end subroutine lsmnoah_pre_run
+
+      subroutine lsmnoah_post_run                                       &
+     &  (im,lssav,dtf,drain,runof,runoff,srunoff                        &
+     &  )
+      use machine,           only: kind_phys
+
+!  ---  interface variables
+      integer, intent(in) :: im
+      logical, intent(in) :: lssav
+      real, intent (in)   :: dtf
+
+      real(kind=kind_phys), dimension(im), intent(in   )  ::            &
+     &    drain, runof
+
+      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+     &    runoff, srunoff
+
+      if(lssav) then
+        runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 0.001
+        srunoff(:) = srunoff(:) + runof(:) * dtf * 0.001
+      end if
+
+      end subroutine lsmnoah_post_run
+
       subroutine lsmnoah_init
       end subroutine lsmnoah_init
 

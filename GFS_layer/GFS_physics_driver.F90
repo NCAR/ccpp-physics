@@ -667,9 +667,9 @@ module module_physics_driver
       endif
 
 !  --- ...  transfer soil moisture and temperature from global to local variables
-      smsoil(:,:) = Sfcprop%smc(:,:)
+!      smsoil(:,:) = Sfcprop%smc(:,:)
       stsoil(:,:) = Sfcprop%stc(:,:)
-      slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
+!      slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
       dudt(:,:)  = 0.
       dvdt(:,:)  = 0.
       dtdt(:,:)  = 0.
@@ -847,20 +847,22 @@ module module_physics_driver
       tsurf(:)      = Sfcprop%tsfc(:)
       flag_guess(:) = .false.
       flag_iter(:)  = .true.
-      drain(:)      = 0.0
+!      drain(:)      = 0.0
       ep1d(:)       = 0.0
-      runof(:)      = 0.0
+!      runof(:)      = 0.0
       hflx(:)       = 0.0
       evap(:)       = 0.0
-      evbs(:)       = 0.0
-      evcw(:)       = 0.0
-      trans(:)      = 0.0
-      sbsno(:)      = 0.0
-      snowc(:)      = 0.0
-      snohf(:)      = 0.0
+!      evbs(:)       = 0.0
+!      evcw(:)       = 0.0
+!      trans(:)      = 0.0
+!      sbsno(:)      = 0.0
+!      snowc(:)      = 0.0
+!      snohf(:)      = 0.0
       Diag%zlvl(:)    = Statein%phil(:,1) * onebg
-      Diag%smcwlt2(:) = 0.0
-      Diag%smcref2(:) = 0.0
+!      Diag%smcwlt2(:) = 0.0
+!      Diag%smcref2(:) = 0.0
+      call lsmnoah_pre_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
+            drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
@@ -2674,11 +2676,12 @@ module module_physics_driver
 
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
-      if (Model%lssav) then
-        tem = dtf * 0.001
-        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
-        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
-      endif
+!      if (Model%lssav) then
+!        tem = dtf * 0.001
+!        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
+!        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
+!      endif
+      call lsmnoah_post_run(im,Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       do i = 1, im
