@@ -2018,37 +2018,39 @@
 
             ! Save calculation results
             ! Save surface air temp for diurnal adjustment at model t-steps
-          Radtend%tsflw (:) = tsfa(:)
+          call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
 
-          do k = 1, lm
-            k1 = k + kd
-              Radtend%htrlw(:,k) = htlwc(:, k1)
-          end do
+!          Radtend%tsflw (:) = tsfa(:)
 
-            ! Repopulate the points above levr
-          if (Model%levr < Model%levs) then
-            do k = lm, Model%levs
-              Radtend%htrlw (:, k) = Radtend%htrlw (:, lm)
-            end do
-          end if
-
-!          if (Model%lwhtr) then
-            do k = 1, lm
-              k1 = k + kd
-              Radtend%lwhc(:, k) = htlw0(:, k1)
-            end do
-
-            ! --- repopulate the points above levr
-            if (Model%levr < Model%levs) then
-              do k = lm, Model%levs
-                Radtend%lwhc(:, k) = Radtend%lwhc(:, lm)
-              end do
-            end if
+!          do k = 1, lm
+!            k1 = k + kd
+!              Radtend%htrlw(:,k) = htlwc(:, k1)
+!          end do
+!
+!            ! Repopulate the points above levr
+!          if (Model%levr < Model%levs) then
+!            do k = lm, Model%levs
+!              Radtend%htrlw (:, k) = Radtend%htrlw (:, lm)
+!            end do
 !          end if
-
-
-            ! Radiation fluxes for other physics processes
-          Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+!
+!!          if (Model%lwhtr) then
+!            do k = 1, lm
+!              k1 = k + kd
+!              Radtend%lwhc(:, k) = htlw0(:, k1)
+!            end do
+!
+!            ! --- repopulate the points above levr
+!            if (Model%levr < Model%levs) then
+!              do k = lm, Model%levs
+!                Radtend%lwhc(:, k) = Radtend%lwhc(:, lm)
+!              end do
+!            end if
+!!          end if
+!
+!
+!            ! Radiation fluxes for other physics processes
+!          Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
 
         end if if_lslwr
 
@@ -2354,6 +2356,57 @@
         Coupling%sfcdsw(:) = Radtend%sfcfsw(:)%dnfxc
 
       end subroutine Save_more_sw_fluxes
+
+
+      subroutine Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
+
+        implicit none
+
+        integer, intent(in) :: lm, kd
+        type(GFS_grid_type),    intent(in) :: Grid
+        type(GFS_radtend_type), intent(inout) :: Radtend
+        type(GFS_coupling_type), intent(inout) :: Coupling
+        type(GFS_control_type), intent(in) :: Model
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+          LTP), intent(in) :: htlw0, htlwc
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfa
+
+          ! Local vars
+        integer :: k, k1
+        
+
+        Radtend%tsflw (:) = tsfa(:)
+
+        do k = 1, lm
+          k1 = k + kd
+            Radtend%htrlw(:,k) = htlwc(:, k1)
+        end do
+
+          ! Repopulate the points above levr
+        if (Model%levr < Model%levs) then
+          do k = lm, Model%levs
+            Radtend%htrlw (:, k) = Radtend%htrlw (:, lm)
+          end do
+        end if
+
+        do k = 1, lm
+          k1 = k + kd
+          Radtend%lwhc(:, k) = htlw0(:, k1)
+        end do
+
+        ! --- repopulate the points above levr
+        if (Model%levr < Model%levs) then
+          do k = lm, Model%levs
+            Radtend%lwhc(:, k) = Radtend%lwhc(:, lm)
+          end do
+        end if
+
+
+          ! Radiation fluxes for other physics processes
+        Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+
+      end subroutine Post_lw
+
 
 !
 !> @}
