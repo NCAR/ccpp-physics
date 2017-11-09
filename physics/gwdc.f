@@ -111,7 +111,7 @@
       integer, intent(in) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(in) :: dtp
       real(kind=kind_phys), intent(in) :: cgwf(2)
-      real(kind=kind_phys), intent(in) :: work1(:), work2(:)
+      real(kind=kind_phys), intent(in) :: dx(:), work1(:), work2(:)
       real(kind=kind_phys), intent(in) ::                               &
      &  gt0(:,:), gt0_no_convec(:,:), del(:,:)
 
@@ -137,7 +137,8 @@
       do k = 1, levs
         do i = 1, im
           if (k >= kbot(i) .and. k <= ktop(i)) then
-            cumabs(i) = cumabs(i) + (gt0(i,k) - gt0_no_convec(i,k)) * del(i,k)
+            cumabs(i)                                                   &
+     &        = cumabs(i) + (gt0(i,k) - gt0_no_convec(i,k)) * del(i,k)
             work3(i)  = work3(i)  + del(i,k)
           endif
         enddo
