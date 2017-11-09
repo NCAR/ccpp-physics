@@ -653,11 +653,11 @@ module module_physics_driver
 !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
 !GFDL        garea(i)   = tem1 * tem2
-        tem1       = Grid%dx(i)
-        tem2       = Grid%dx(i)
+!        tem1       = Grid%dx(i)
+!        tem2       = Grid%dx(i)
         garea(i)   = Grid%area(i)
-        dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
-        cldf(i)    = Model%cgwf(1)*work1(i) + Model%cgwf(2)*work2(i)
+!        dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
+!        cldf(i)    = Model%cgwf(1)*work1(i) + Model%cgwf(2)*work2(i)
         wcbmax(i)  = Model%cs_parm(1)*work1(i) + Model%cs_parm(2)*work2(i)
       enddo
 !
@@ -1963,7 +1963,9 @@ module module_physics_driver
 !          if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
 !        enddo
 
-        call gwdc_pre_run (im, levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
+        call gwdc_pre_run (                                         &
+             im, Model%cgwf, Grid%dx, work1, work2, dlength, cldf,  &
+             levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
 
 
 !       do i = 1, im
