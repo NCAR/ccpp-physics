@@ -34,8 +34,8 @@
 !!|   cwm          | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !!|   t            | air_temperature_updated_by_physics                     | layer mean air temperature                               | K           | 2    | real    | kind_phys | in     |  F       |
 !!|   q            | water_vapor_specific_humidity                          | water vapor specific humidity                            | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!!|   dtdt         | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                      | K s-1       | 2    | real    | kind_phys | in     |  F       |
-!!|   dqdt1        | tendency_of_specific_humidity_due_to_model_physics     | updated tendency of the specific humidity                | kg kg-1 s-1 | 2    | real    | kind_phys | in     |  F       |
+!!|   dtdt         | air_temperature_before_microphysics_scheme             | air temperature saved before micophysics scheme          | K           | 2    | real    | kind_phys | in     |  F       |
+!!|   dqdt1        | specific_humidity_before_microphysics_scheme           | specific humidity saved before microphysics schme        | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !!|   totprcp      | precipitation_rate_at_surface                          | precipitation rate at surface                            | kg m-2 s-1  | 1    | real    | kind_phys | inout  |  F       |
 !!|   dt3dt6       | large_scale_condensate_heating_rate_at_model_layers    | large scale condensate heating rate at model layers      | K s-1       | 2    | real    | kind_phys | inout  |  F       |
 !!|   dq3dt4       | large_scale_condensate_moistening_rate_at_model_layers | large scale condensate moistening rate at model layers   | kg kg-1 s-1 | 2    | real    | kind_phys | inout  |  F       |
