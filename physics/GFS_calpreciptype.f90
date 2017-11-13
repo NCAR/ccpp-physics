@@ -35,7 +35,7 @@
 !!|    domzr       | dominant_freezing_rain_type                    | dominant freezing rain type                              | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    domip       | dominant_sleet_type                            | dominant sleet type                                      | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    doms        | dominant_snow_type                             | dominant snow type                                       | none    | 1    | real    | kind_phys | out    |  F       |
-!!|    srflag      | flag_for_precipitation_type                     | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
+!!|    srflag      | flag_for_precipitation_type                    | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
 !!|    tprcp       | precipitation_amount_in_one_dynamics_time_step | precipitation amount in one dynamics time step           | m       | 1    | real    | kind_phys | out    |  F       |
 !!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
