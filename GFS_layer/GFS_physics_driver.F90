@@ -16,8 +16,8 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
   use edmf,                  only: edmf_run
-  use GFS_PBL_generic,       only: GFS_PBL_generic_pre,                 &
-                                   GFS_PBL_generic_post
+  use GFS_PBL_generic_pre,   only: GFS_PBL_generic_pre_run
+  use GFS_PBL_generic_post,  only: GFS_PBL_generic_post_run
 
   implicit none
 
@@ -792,7 +792,7 @@ module module_physics_driver
         endif
       endif    ! end if_lssav_block
 
-      call GFS_PBL_generic_pre (im, levs, kinver)
+      call GFS_PBL_generic_pre_run (im, levs, kinver)
 
       kcnv(:)   = 0
       !kinver(:) = levs
@@ -1274,7 +1274,7 @@ module module_physics_driver
         Coupling%dqsfci_cpl(:) = dqsfc1(:)
       endif
 
-      call GFS_PBL_generic_post (Grid, Model, Radtend, dusfc1, dvsfc1,   &
+      call GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1,   &
         dtsfc1, dqsfc1, dudt, dvdt, dtdt, dqdt, xmu, Diag)
 ! !-------------------------------------------------------lssav if loop ----------
 !       if (Model%lssav) then
