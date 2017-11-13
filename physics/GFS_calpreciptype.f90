@@ -5,11 +5,12 @@
       module GFS_calpreciptype
       contains
 
-!>\section arg_table_calpreciptype_init Argument Table
+!>\section arg_table_GFS_calpreciptype_init Argument Table
+!!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
 
-!!\section arg_table_calpreciptype_run Argument Table
+!!\section arg_table_GFS_calpreciptype_run Argument Table
 !!| local var name | longname                                       |description                                               | units   | rank |  type   |   kind    | intent | optional |
 !!|----------------|------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !!|    kdt         | index_of_time_step                             | current time step index                                  | index   | 0    | integer |           | in     |  F       |
@@ -36,6 +37,7 @@
 !!|    doms        | dominant_snow_type                             | dominant snow type                                       | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    srflag      | flag_for_preciptation_type                     | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
 !!|    tprcp       | precipitation_amount_in_one_dynamics_time_step | precipitation amount in one dynamics time step           | m       | 1    | real    | kind_phys | out    |  F       |
+!!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &
                                gt0,gq0,prsl,prsi,prec,              & !input
@@ -1502,7 +1504,7 @@
       return
       end
 
-!> \section arg_table_calpreciptype_finalize Argument table
+!> \section arg_table_GFS_calpreciptype_finalize Argument table
 !!
       subroutine GFS_calpreciptype_finalize
       end subroutine GFS_calpreciptype_finalize

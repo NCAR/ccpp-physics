@@ -19,6 +19,7 @@ module module_physics_driver
   use GFS_zhaocarr_gscond,       only: gscond_run
   use GFS_zhaocarr_precpd,       only: precpd_run
   use GFS_calpreciptype,         only: GFS_calpreciptype_run
+  use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   implicit none
 
 
@@ -2579,6 +2580,13 @@ module module_physics_driver
                             domr, domzr, domip, doms, Sfcprop%srflag,     &   ! output
                             Sfcprop%tprcp)        
 
+      call GFS_MP_generic_post_run (im, ix, levs, dtf, del,               &
+                         Model%lssav, Model%ldiag3d, Diag%rain,frain,     &
+                         Model%ntcw, Model%ncld,                          &
+                         Stateout%gq0(:,:,Model%ntcw),                    &
+                         Stateout%gt0, Stateout%gq0(:,:,1),               &
+                         dtdt,dqdt(:,:,1),Diag%totprcp, Diag%dt3dt(:,:,6),&
+                         Diag%dq3dt(:,:,6), Diag%pwat    )
 
 !      if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !        i = min(3,Model%num_p3d)
@@ -2608,14 +2616,14 @@ module module_physics_driver
 !        enddo
 !      endif
 
-      if (Model%lssav) then
-        Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
+!      if (Model%lssav) then
+!        Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
 
-        if (Model%ldiag3d) then
-          Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-          Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-        endif
-      endif
+!        if (Model%ldiag3d) then
+!          Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
+!          Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+!        endif
+!      endif
 
 !  --- ...  estimate t850 for rain-snow decision
 
@@ -2704,20 +2712,20 @@ module module_physics_driver
       Sfcprop%slc(:,:) = slsoil(:,:)
 
 !  --- ...  calculate column precipitable water "pwat"
-      Diag%pwat(:) = 0.0
-      tem = dtf * 0.03456 / 86400.0
-      do k = 1, levs
-        work1(:) = 0.0
-        if (Model%ncld > 0) then
-          do ic = Model%ntcw, Model%ntcw+Model%ncld-1
-            work1(:) = work1(:) +  Stateout%gq0(:,k,ic)
-          enddo
-        endif
-        Diag%pwat(:) = Diag%pwat(:) + del(:,k)*(Stateout%gq0(:,k,1)+work1(:))
+!      Diag%pwat(:) = 0.0
+!      tem = dtf * 0.03456 / 86400.0
+!      do k = 1, levs
+!        work1(:) = 0.0
+!        if (Model%ncld > 0) then
+!          do ic = Model%ntcw, Model%ntcw+Model%ncld-1
+!            work1(:) = work1(:) +  Stateout%gq0(:,k,ic)
+!          enddo
+!        endif
+!        Diag%pwat(:) = Diag%pwat(:) + del(:,k)*(Stateout%gq0(:,k,1)+work1(:))
 !     if (lprnt .and. i == ipr) write(0,*)' gq0=',
 !    &gq0(i,k,1),' qgrs=',qgrs(i,k,1),' work2=',work2(i),' k=',k
-      enddo
-      Diag%pwat(:) = Diag%pwat(:) * onebg
+!      enddo
+!      Diag%pwat(:) = Diag%pwat(:) * onebg
 
 !       write(1000+me,*)' pwat=',pwat(i),'i=',i,',
 !    &' rain=',rain(i)*1000.0,' dqsfc1=',dqsfc1(i)*tem,' kdt=',kdt
