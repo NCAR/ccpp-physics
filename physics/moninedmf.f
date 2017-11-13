@@ -58,7 +58,7 @@
 !! | evap           | kinematic_surface_upward_latent_heat_flux              | kinematic surface upward latent heat flux          | kg kg-1 m s-1 |    1 | real    | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                    | surface wind stress                                | m2 s-2        |    1 | real    | kind_phys | in     | F        |
 !! | spd1           | wind_speed_at_lowest_model_layer                       | wind speed at lowest model level                   | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_of_top_of_atmosphere_boundary_layer     | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
+!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer     | PBL top model level index                          | index         |    1 | integer |           | out    | F        |
 !! | prsi           | air_pressure_at_interface                              | air pressure at model layer interfaces             | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers              | pres(k) - pres(k+1)                                | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                           | mean layer pressure                                | Pa            |    2 | real    | kind_phys | in     | F        |
@@ -67,10 +67,10 @@
 !! | phil           | geopotential                                           | geopotential at model layer centers                | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | delt           | time_step_for_physics                                  | time step for physics                              | s             |    0 | real    | kind_phys | in     | F        |
 !! | dspheat        | flag_TKE_dissipation_heating                           | flag for using TKE dissipation heating             | flag          |    0 | logical |           | in     | F        |
-!! | dusfc          | x_momentum_flux                                        | x momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
-!! | dvsfc          | y_momentum_flux                                        | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
-!! | dtsfc          | surface_upward_sensible_heat_flux                      | surface upward sensible heat flux                  | W m-2         |    1 | real    | kind_phys | out    | F        |
-!! | dqsfc          | surface_upward_latent_heat_flux                        | surface upward latent heat flux                    | W m-2         |    1 | real    | kind_phys | out    | F        |
+!! | dusfc          | instantaneous_x_momentum_flux                          | x momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dvsfc          | instantaneous_y_momentum_flux                          | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux        | surface upward sensible heat flux                  | W m-2         |    1 | real    | kind_phys | out    | F        |
+!! | dqsfc          | instantaneous_surface_upward_latent_heat_flux          | surface upward latent heat flux                    | W m-2         |    1 | real    | kind_phys | out    | F        |
 !! | hpbl           | atmosphere_boundary_layer_thickness                    | PBL thickness                                      | m             |    1 | real    | kind_phys | out    | F        |
 !! | hgamt          | countergradient_mixing_term_for_temperature            | countergradient mixing term for temperature        | K             |    1 | real    | kind_phys | out    | F        |
 !! | hgamq          | countergradient_mixing_term_for_water_vapor            | countergradient mixing term for water vapor        | kg kg-1       |    1 | real    | kind_phys | out    | F        |
