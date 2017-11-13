@@ -71,7 +71,7 @@
 !!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function at 1st layer                    | ratio         | 1    | real    | kind_phys | in     | F        |
 !!| islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
 !!| xlon           | longitude                                                                    | longitude                                      | radians       | 1    | real    | kind_phys | in     | F        |
-!!| sinlat         | sin_of_latitude                                                              | sin of latitude                                | none          | 1    | real    | kind_phys | in     | F        |
+!!| sinlat         | sine_of_latitude                                                              | sin of latitude                                | none          | 1    | real    | kind_phys | in     | F        |
 !!| stress         | surface_wind_stress                                                          | wind stress                                    | m2 s-2        | 1    | real    | kind_phys | in     | F        |
 !!| sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                    | frac          | 1    | real    | kind_phys | in     | F        |
 !!| dlwflx         | surface_downwelling_longwave_flux                                            | total sky surface downward longwave flux       | W m-2         | 1    | real    | kind_phys | in     | F        |
@@ -742,7 +742,7 @@ cc
 !!| oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          |               | 1    | real    | kind_phys | in     | F        |
 !!| tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | in     | F        |
 !!| tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
-!!| tskin          | surface_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!!| tskin          | surface_skin_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
 !!
 !! \section NSST_general_algorithm General Algorithm
 !!
