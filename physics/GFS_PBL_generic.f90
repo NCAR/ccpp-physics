@@ -9,7 +9,7 @@
       end subroutine GFS_PBL_generic_pre_init
 
       subroutine GFS_PBL_generic_pre_finalize()
-      subroutine GFS_PBL_generic_pre_finalize
+      end subroutine GFS_PBL_generic_pre_finalize
 
 !> \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! | local var name | longname                                               | description                                        | units         | rank | type    |    kind   | intent | optional |
