@@ -62,7 +62,7 @@
         dudt, dvdt, dtdt, dqdt, xmu, Diag)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_diag_type, GFS_radtend_type, GFS_model_type, GFS_grid_type
+      use GFS_typedefs,          only: GFS_diag_type, GFS_radtend_type, GFS_control_type, GFS_grid_type
 
       type(GFS_grid_type),            intent(in) :: Grid
       type(GFS_radtend_type),         intent(in) :: Radtend
