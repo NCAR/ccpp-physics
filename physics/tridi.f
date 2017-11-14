@@ -5,9 +5,9 @@ cc
       integer             k,n,l,i
       real(kind=kind_phys) fk
 cc
-      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n),        &
-      &          au(l,n-1),a1(l,n),a2(l,n)
-c-----------------------------------------------------------------------
+      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n),&
+     &          au(l,n-1),a1(l,n),a2(l,n)
+c----------------------------------------------------------------------
       do i=1,l
         fk      = 1./cm(i,1)
         au(i,1) = fk*cu(i,1)
@@ -47,9 +47,9 @@ cc
       real(kind=kind_phys) fk(l)
 cc
       real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
-      &                     r1(l,n),   r2(l,n*nt),                       &
-      &                     au(l,n-1), a1(l,n), a2(l,n*nt),              &
-      &                     fkk(l,2:n-1)
+     &                     r1(l,n),   r2(l,n*nt),                       &
+     &                     au(l,n-1), a1(l,n), a2(l,n*nt),              &
+     &                     fkk(l,2:n-1)
 c-----------------------------------------------------------------------
       do i=1,l
         fk(i)   = 1./cm(i,1)
