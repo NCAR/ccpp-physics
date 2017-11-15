@@ -22,14 +22,14 @@
 !! | initial_t      | air_temperature_initial                                | air temperature before entering a physics scheme                      | K             |    2 | real                          | kind_phys | inout  | F        |
 !! | initial_qv     | water_vapor_specific_humidity_initial                  | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !!
-      subroutine GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, intial_qv)
+      subroutine GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, initial_qv)
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_stateout_type, GFS_grid_type
 
         type(GFS_control_type),           intent(in) :: Model
         type(GFS_stateout_type),          intent(in) :: Stateout
         type(GFS_grid_type),              intent(in) :: Grid
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(inout) :: initial_u, initial_v, intial_t, intial_qv
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(inout) :: initial_u, initial_v, initial_t, initial_qv
 
         if (Model%ldiag3d) then
           initial_t(:,:) = Stateout%gt0(:,:)
@@ -74,7 +74,7 @@
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                        | kg m-2        |    2 | real                          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !!
-      subroutine GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, intial_v, intial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
+      subroutine GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, initial_v, initial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
 
       use machine,               only: kind_phys
       use GFS_typedefs,          only: GFS_grid_type, GFS_control_type, GFS_stateout_type, GFS_diag_type
@@ -87,7 +87,7 @@
 
       real(kind=kind_phys), intent(in) :: frain
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: rain1, cld1d
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: initial_u, initial_v, intial_t, intial_qv
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: initial_u, initial_v, initial_t, initial_qv
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: ud_mf, dd_mf, dt_mf
 
       integer :: i
