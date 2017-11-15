@@ -25,12 +25,12 @@
 !!|   levs         | vertical_dimension                                     | vertical layer dimension                                 | index       | 0    | integer |           | in     |  F       |           
 !!|   dtf          | time_step_for_dynamics                                 | dynamics time step                                       | s           | 0    | real    | kind_phys | in     |  F       |
 !!|   del          | air_pressure_difference_between_midlayers              | air pressure difference between midlayers                | Pa          | 2    | real    | kind_phys | in     |  F       |
-!!|   lssav        | logical_flag_for_physics_diagnostics                   | logical flag for model physics diagnostics               | flag        | 0    | logical |           | in     |  F       |
-!!|   ldiag3d      | logical_flag_for_3D_diagnostics                        | logical flag for 3D diagnostics                          | flag        | 0    | logical |           | in     |  F       |
-!!|   rain         | total_rainfall_at_surface                              | instantaneous total precipitation at surface (APCP)      | m           | 1    | real    | kind_phys | in     |  F       |
+!!|   lssav        | flag_diagnostics                                       | logical flag for model physics diagnostics               | flag        | 0    | logical |           | in     |  F       |
+!!|   ldiag3d      | flag_diagnostics_3D                                    | logical flag for 3D diagnostics                          | flag        | 0    | logical |           | in     |  F       |
+!!|   rain         | total_rainfall_amount                                  | instantaneous total precipitation at surface (APCP)      | m           | 1    | real    | kind_phys | in     |  F       |
 !!|   frain        | factor_for_centered_difference_scheme                  | dtf/dtp; factor for centered difference scheme correction| none        | 0    | real    | kind_phys | in     |  F       |
 !!|   ntcw         | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array(3)                | index       | 0    | integer |           | in     |  F       |
-!!|   ncld         | choice_of_cloud_scheme                                 | choice of cloud scheme(1 for Z-C)                        | none        | 0    | integer |           | in     |  F       |
+!!|   ncld         | number_of_hydrometeors                                 | number_of_hydrometeors(1 for Z-C)                        | none        | 0    | integer |           | in     |  F       |
 !!|   cwm          | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !!|   t            | air_temperature_updated_by_physics                     | layer mean air temperature                               | K           | 2    | real    | kind_phys | in     |  F       |
 !!|   q            | water_vapor_specific_humidity                          | water vapor specific humidity                            | kg kg-1     | 2    | real    | kind_phys | in     |  F       |

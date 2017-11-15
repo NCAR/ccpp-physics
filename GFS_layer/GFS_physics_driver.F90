@@ -20,6 +20,7 @@ module module_physics_driver
   use GFS_zhaocarr_precpd,       only: precpd_run
   use GFS_calpreciptype,         only: GFS_calpreciptype_run
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
+  use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
   implicit none
 
 
@@ -2279,7 +2280,8 @@ module module_physics_driver
           Stateout%gq0(:,:,Model%ntiw) = clw(:,:,1)                     ! ice
           Stateout%gq0(:,:,Model%ntcw) = clw(:,:,2)                     ! water
         elseif (Model%num_p3d == 4) then    ! if_num_p3d
-!zhao-carr interstitial          Stateout%gq0(:,:,Model%ntcw) = clw(:,:,1) + clw(:,:,2)
+! 2275 zhang: Z-C_pre
+!          Stateout%gq0(:,:,Model%ntcw) = clw(:,:,1) + clw(:,:,2)
         endif   ! end if_num_p3d
 
       else    ! if_ntcw
@@ -2337,13 +2339,19 @@ module module_physics_driver
          endif
       endif               !       moist convective adjustment over
 !
-      if (Model%ldiag3d .or. Model%do_aw) then
-        dtdt(:,:)   = Stateout%gt0(:,:)
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
-        do n=Model%ntcw,Model%ntcw+Model%ncld-1
-          dqdt(:,:,n) = Stateout%gq0(:,:,n)
-        enddo
-      endif
+!zhang
+!      if (Model%ldiag3d .or. Model%do_aw) then
+!        dtdt(:,:)   = Stateout%gt0(:,:)
+!        dqdt(:,:,1) = Stateout%gq0(:,:,1)
+!        do n=Model%ntcw,Model%ntcw+Model%ncld-1
+!          dqdt(:,:,n) = Stateout%gq0(:,:,n)
+!        enddo
+!      endif
+       call GFS_MP_generic_pre_run (im, ix,levs,clw(:,:,1),clw(:,:,2),            &
+                              Model%ldiag3d, Model%ntcw, Model%ncld,              & 
+                             Model%num_p3d, Stateout%gt0,Stateout%gq0(:,:,1),     &
+                             dtdt,dqdt(:,:,1),dqdt(:,:,2) )
+
 
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)
       if (Model%lgocart) then

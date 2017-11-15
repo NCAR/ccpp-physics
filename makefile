@@ -116,6 +116,7 @@ SRCS_f   =  \
 SRCS_f90 = \
 	   ./physics/GFS_calpreciptype.f90                                           \
            ./physics/GFS_MP_generic_post.f90                                         \
+           ./physics/GFS_MP_generic_pre.f90                                          \
 	   ./physics/cs_conv.f90                                                     \
 	   ./physics/funcphys.f90                                                    \
 	   ./physics/gcm_shoc.f90                                                    \
