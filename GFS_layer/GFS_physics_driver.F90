@@ -18,6 +18,9 @@ module module_physics_driver
   use edmf,                  only: edmf_run
   use GFS_PBL_generic_pre,   only: GFS_PBL_generic_pre_run
   use GFS_PBL_generic_post,  only: GFS_PBL_generic_post_run
+!  use sasas_deep,             only: sasasdeep_run
+  use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
+  use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
 
   implicit none
 
@@ -462,6 +465,9 @@ module module_physics_driver
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
           del, rhc, dtdt, dudt, dvdt, gwdcu, gwdcv, dtdtc, rainp,       &
           ud_mf, dd_mf, dt_mf, prnum, dkt, sigmatot, sigmafrac
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
+          initial_u, initial_v, initial_t, initial_qv
 
       !--- GFDL modification for FV3
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs+1) ::&
@@ -1501,17 +1507,19 @@ module module_physics_driver
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !     if (lprnt) write(7000,*)' bef convection gv0=',gv0(ipr,:)
 
-      if (Model%ldiag3d) then
-        dtdt(:,:) = Stateout%gt0(:,:)
-        dudt(:,:) = Stateout%gu0(:,:)
-        dvdt(:,:) = Stateout%gv0(:,:)
-      elseif (Model%cnvgwd) then
-        dtdt(:,:) = Stateout%gt0(:,:)
-      endif   ! end if_ldiag3d/cnvgwd
+      ! if (Model%ldiag3d) then
+      !   dtdt(:,:) = Stateout%gt0(:,:)
+      !   dudt(:,:) = Stateout%gu0(:,:)
+      !   dvdt(:,:) = Stateout%gv0(:,:)
+      ! elseif (Model%cnvgwd) then
+      !   dtdt(:,:) = Stateout%gt0(:,:)
+      ! endif   ! end if_ldiag3d/cnvgwd
+      !
+      ! if (Model%ldiag3d .or. Model%lgocart) then
+      !   dqdt(:,:,1) = Stateout%gq0(:,:,1)
+      ! endif   ! end if_ldiag3d/lgocart
 
-      if (Model%ldiag3d .or. Model%lgocart) then
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
-      endif   ! end if_ldiag3d/lgocart
+      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, intial_qv)
 
 #ifdef GFS_HYDRO
       call get_phi(im, ix, levs, ntrac, Stateout%gt0, Stateout%gq0,    &
@@ -1864,26 +1872,28 @@ module module_physics_driver
 !       write(0,*)' aftcnvgq1=',(gq0(ipr,k,ntcw),k=1,levs)
 !     endif
 !
-      do i = 1, im
-        Diag%rainc(:) = frain * rain1(:)
-      enddo
+!       do i = 1, im
+!         Diag%rainc(:) = frain * rain1(:)
+!       enddo
+! !
+!       if (Model%lssav) then
+!         Diag%cldwrk (:) = Diag%cldwrk (:) + cld1d(:) * dtf
+!         Diag%cnvprcp(:) = Diag%cnvprcp(:) + Diag%rainc(:)
 !
-      if (Model%lssav) then
-        Diag%cldwrk (:) = Diag%cldwrk (:) + cld1d(:) * dtf
-        Diag%cnvprcp(:) = Diag%cnvprcp(:) + Diag%rainc(:)
+!         if (Model%ldiag3d) then
+!           Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
+!           Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+!           Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-dudt(:,:)) * frain
+!           Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-dvdt(:,:)) * frain
+!
+!           Diag%upd_mf(:,:)  = Diag%upd_mf(:,:)  + ud_mf(:,:) * (con_g*frain)
+!           Diag%dwn_mf(:,:)  = Diag%dwn_mf(:,:)  + dd_mf(:,:) * (con_g*frain)
+!           Diag%det_mf(:,:)  = Diag%det_mf(:,:)  + dt_mf(:,:) * (con_g*frain)
+!         endif ! if (ldiag3d)
+!
+!       endif   ! end if_lssav
 
-        if (Model%ldiag3d) then
-          Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-          Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-          Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-dudt(:,:)) * frain
-          Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-dvdt(:,:)) * frain
-
-          Diag%upd_mf(:,:)  = Diag%upd_mf(:,:)  + ud_mf(:,:) * (con_g*frain)
-          Diag%dwn_mf(:,:)  = Diag%dwn_mf(:,:)  + dd_mf(:,:) * (con_g*frain)
-          Diag%det_mf(:,:)  = Diag%det_mf(:,:)  + dt_mf(:,:) * (con_g*frain)
-        endif ! if (ldiag3d)
-
-      endif   ! end if_lssav
+      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, intial_v, intial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
