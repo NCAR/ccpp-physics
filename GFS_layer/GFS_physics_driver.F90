@@ -1893,7 +1893,7 @@ module module_physics_driver
 !
 !       endif   ! end if_lssav
 
-      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, initial_v, initial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
+      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, initial_v, initial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag, Tbd)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
