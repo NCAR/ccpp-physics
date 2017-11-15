@@ -1897,7 +1897,7 @@ module module_physics_driver
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
-        Coupling%dqdti  (:,:)  = (Stateout%gq0(:,:,1) - dqdt(:,:,1))  * frain
+        Coupling%dqdti  (:,:)  = (Stateout%gq0(:,:,1) - initial_qv(:,:))  * frain
         Coupling%upd_mfi(:,:)  = Coupling%upd_mfi(:,:) + ud_mf(:,:) * frain
         Coupling%dwn_mfi(:,:)  = Coupling%dwn_mfi(:,:) + dd_mf(:,:) * frain
         Coupling%det_mfi(:,:)  = Coupling%det_mfi(:,:) + dt_mf(:,:) * frain
@@ -1930,7 +1930,7 @@ module module_physics_driver
         do k = 1, levs
           do i = 1, im
             if (k >= kbot(i) .and. k <= ktop(i)) then
-              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-dtdt(i,k)) * del(i,k)
+              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-initial_t(i,k)) * del(i,k)
               work3(i)  = work3(i)  + del(i,k)
             endif
           enddo
@@ -2088,10 +2088,10 @@ module module_physics_driver
 !----------------Convective gravity wave drag parameterization over --------
 
       if (Model%ldiag3d) then
-        dtdt(:,:)   = Stateout%gt0(:,:)
+        initial_t(:,:)   = Stateout%gt0(:,:)
       endif
       if (Model%ldiag3d .or. Model%lgocart) then
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
+        initial_qv(:,:) = Stateout%gq0(:,:,1)
       endif
 
 !     write(0,*)' before do_shoc shal clstp=',clstp,' kdt=',kdt,
@@ -2188,14 +2188,14 @@ module module_physics_driver
           if (Model%lgocart) then
             do k = 1, levs
               do i = 1, im
-                tem  = (Stateout%gq0(i,k,1)-dqdt(i,k,1)) * frain
+                tem  = (Stateout%gq0(i,k,1)-initial_qv(i,k)) * frain
                 Coupling%dqdti(i,k) = Coupling%dqdti(i,k)  + tem
               enddo
             enddo
           endif
           if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-            Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
+            Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
           endif
         endif   ! end if_lssav
 !
@@ -2342,15 +2342,15 @@ module module_physics_driver
 !            enddo
 !          endif
           if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)  -dtdt(:,:)  ) * frain
-            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)  -initial_t(:,:)  ) * frain
+            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
           endif
          endif
       endif               !       moist convective adjustment over
 !
       if (Model%ldiag3d .or. Model%do_aw) then
-        dtdt(:,:)   = Stateout%gt0(:,:)
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
+        initial_t(:,:)   = Stateout%gt0(:,:)
+        initial_qv(:,:) = Stateout%gq0(:,:,1)
         do n=Model%ntcw,Model%ntcw+Model%ncld-1
           dqdt(:,:,n) = Stateout%gq0(:,:,n)
         enddo
@@ -2558,8 +2558,8 @@ module module_physics_driver
         do k = 1,levs
           do i = 1,im
             tem1        = sigmafrac(i,k)
-            Stateout%gt0(i,k)    = Stateout%gt0(i,k) - tem1 * (Stateout%gt0(i,k)-dtdt(i,k))
-            tem2        = tem1 * (Stateout%gq0(i,k,1)-dqdt(i,k,1))
+            Stateout%gt0(i,k)    = Stateout%gt0(i,k) - tem1 * (Stateout%gt0(i,k)-initial_t(i,k))
+            tem2        = tem1 * (Stateout%gq0(i,k,1)-initial_qv(i,k))
             Stateout%gq0(i,k,1)  = Stateout%gq0(i,k,1) - tem2
             temrain1(i) = temrain1(i) - (Statein%prsi(i,k)-Statein%prsi(i,k+1)) &
                                       * tem2 * onebg
@@ -2613,8 +2613,8 @@ module module_physics_driver
         Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
 
         if (Model%ldiag3d) then
-          Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-          Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+          Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
+          Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
         endif
       endif
 
