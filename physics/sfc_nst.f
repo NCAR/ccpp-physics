@@ -80,7 +80,7 @@
 !!| timestep       | time_step_for_dynamics                                                       | timestep interval                              | s             | 0    | real    | kind_phys | in     | F        |
 !!| kdt            | index_of_time_step                                                           | time step counter                              | count         | 0    | integer |           | in     | F        |
 !!| solhr          | forecast_hour                                                                | fcst hour at the end of prev time step         | none          | 0    | real    | kind_phys | in     | F        |
-!!| xcosz          | cosine_of_solar_zenith_angle                                                 | cosine of solar zenith angle                   | none          | 1    | real    | kind_phys | in     | F        |
+!!| xcosz          | instantaneous_cosine_of_zenith_angle                                         | cosine of solar zenith angle                   | none          | 1    | real    | kind_phys | in     | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection             | m s-1         | 1    | real    | kind_phys | in     | F        |
 !!| flag_iter      | flag_for_iteration                                                           | flag for iteration                             | flag          | 1    | logical |           | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                                           | flag for guess run                             | flag          | 1    | logical |           | in     | F        |
