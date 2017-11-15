@@ -79,7 +79,7 @@
         ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_grid_type, GFS_control_type, GFS_stateout_type, GFS_diag_type
+      use GFS_typedefs,          only: GFS_grid_type, GFS_control_type, GFS_stateout_type, GFS_diag_type, GFS_tbd_type
       use physcons,              only: con_g
 
       type(GFS_grid_type),            intent(in) :: Grid
