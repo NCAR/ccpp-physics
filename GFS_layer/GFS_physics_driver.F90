@@ -1904,15 +1904,15 @@ module module_physics_driver
         Coupling%cnvqci (:,:)  = Coupling%cnvqci (:,:) + (clw(:,:,1)+clw(:,:,2))*frain
       endif ! if (lgocart)
 !
-      if ((Model%npdf3d == 3) .and. (Model%num_p3d == 4)) then
-        num2 = Model%num_p3d + 2
-        num3 = num2 + 1
-        Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-        Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
-      elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
-        num2 = Model%num_p3d + 1
-        Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-      endif
+      ! if ((Model%npdf3d == 3) .and. (Model%num_p3d == 4)) then
+      !   num2 = Model%num_p3d + 2
+      !   num3 = num2 + 1
+      !   Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+      !   Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+      ! elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+      !   num2 = Model%num_p3d + 1
+      !   Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+      ! endif
 
 !     if (lprnt) write(7000,*)' bef cnvgwd gu0=',gu0(ipr,:)
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
