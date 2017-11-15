@@ -1519,7 +1519,7 @@ module module_physics_driver
       !   dqdt(:,:,1) = Stateout%gq0(:,:,1)
       ! endif   ! end if_ldiag3d/lgocart
 
-      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, intial_qv)
+      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, initial_qv)
 
 #ifdef GFS_HYDRO
       call get_phi(im, ix, levs, ntrac, Stateout%gt0, Stateout%gq0,    &
@@ -1893,7 +1893,7 @@ module module_physics_driver
 !
 !       endif   ! end if_lssav
 
-      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, intial_v, intial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
+      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, initial_v, initial_t, initial_qv, ud_mf, dd_mf, dt_mf, Diag)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
