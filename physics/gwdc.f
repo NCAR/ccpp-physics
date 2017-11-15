@@ -86,17 +86,17 @@
 !! |----------------|---------------------------------------------------------|--------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                  | horizontal loop extent                                             | index | 0    | integer | default   | in     | F        |
 !! | cgwf           | multiplication_factors_for_convective_gravity_wave_drag | multiplication factors for convective gravity wave drag            | none  | 1    | real    | kind_phys | in     | F        |
-!! | dx             | grid_size_in_x??                                        | grid size in zonal direction                                       | m     | 1    | real    | kind_phys | in     | F        |
-!! | work1          | work_array_1??                                          | work array #1                                                      | none  | 1    | real    | kind_phys | in     | F        |
-!! | work2          | work_array_2??                                          | work array #2                                                      | none  | 1    | real    | kind_phys | in     | F        |
-!! | dlength        | characteristic_grid_scale                               | characteristic grid scale                                          | m     | 1    | real    | kind_phys | out    | F        |
+!! | dx             | grid_size_in_x  ??                                      | grid size in zonal direction                                       | m     | 1    | real    | kind_phys | in     | F        |
+!! | work1          | work_array_1  ??                                        | work array #1                                                      | none  | 1    | real    | kind_phys | in     | F        |
+!! | work2          | work_array_2  ??                                        | work array #2                                                      | none  | 1    | real    | kind_phys | in     | F        |
+!! | dlength        | characteristic_grid_length_scale                        | representative horizontal length scale of grid box                 | m     | 1    | real    | kind_phys | out    | F        |
 !! | cldf           | cloud_area_fraction                                     | fraction of grid box area in which updrafts occur                  | frac  | 1    | real    | kind_phys | out    | F        |
 !! | levs           | vertical_dimension                                      | number of vertical layers                                          | index | 0    | integer | default   | in     | F        |
 !! | kbot           | vertical_index_at_cloud_base                            | vertical index at cloud base                                       | index | 1    | integer | default   | in     | F        |
 !! | ktop           | vertical_index_at_cloud_top                             | vertical index at cloud top                                        | index | 1    | integer | default   | in     | F        |
 !! | dtp            | time_step_for_physics                                   | physics time step                                                  | s     | 0    | real    | kind_phys | in     | F        |
 !! | gt0            | air_temperature_updated_by_physics                      | updated air temperature                                            | m s-1 | 2    | real    | kind_phys | in     | F        |
-!! | gt0_no_convec  | air_temperature_before_deep_convection??                | air temperature before considering tendency due to deep convection | K     | 2    | real    | kind_phys | in     | F        |
+!! | gt0_no_convec  | air_temperature_before_deep_convection  ??              | air temperature before considering tendency due to deep convection | K     | 2    | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers               | difference between mid-layer pressures                             | Pa    | 2    | real    | kind_phys | in     | F        |
 !! | cumabs         | maximum_column_heating_rate                             | maximum heating rate in column                                     | K s-1 | 1    | real    | kind_phys | out    | F        |
 !!
@@ -262,7 +262,7 @@
 !! | rd             | gas_constant_dry_air                                   | ideal gas constant for dry air                                     | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
 !! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one      | rv/rd - 1 (rv = ideal gas constant for water vapor)                | none       | 0    | real    | kind_phys | in     | F        |
 !! | pi             | pi                                                     | ratio of a circle's circumference to its diameter                  | radians    | 0    | real    | kind_phys | in     | F        |
-!! | dlength        | grid_box_horizontal_length_scale                       | representative horizontal length scale of grid box                 | m          | 1    | real    | kind_phys | in     | F        |
+!! | dlength        | characteristic_grid_length_scale                       | representative horizontal length scale of grid box                 | m          | 1    | real    | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                             | flag for debugging printouts                                       | flag       | 0    | logical | default   | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                     | horizontal index of column used in debugging printouts             | index      | 0    | integer | default   | in     | F        |
 !! | fhour          | forecast_time                                          | forecast hour                                                      | hr         | 0    | real    | kind_phys | in     | F        |
