@@ -67,8 +67,8 @@
 !! | phil           | geopotential                                           | geopotential at model layer centers                | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | delt           | time_step_for_physics                                  | time step for physics                              | s             |    0 | real    | kind_phys | in     | F        |
 !! | dspheat        | flag_TKE_dissipation_heating                           | flag for using TKE dissipation heating             | flag          |    0 | logical |           | in     | F        |
-!! | dusfc          | instantaneous_x_momentum_flux                          | x momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_y_momentum_flux                          | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dusfc          | instantaneous_surface_x_momentum_flux                          | x momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
+!! | dvsfc          | instantaneous_surface_y_momentum_flux                          | y momentum flux                                    | Pa            |    1 | real    | kind_phys | out    | F        |
 !! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux        | surface upward sensible heat flux                  | W m-2         |    1 | real    | kind_phys | out    | F        |
 !! | dqsfc          | instantaneous_surface_upward_latent_heat_flux          | surface upward latent heat flux                    | W m-2         |    1 | real    | kind_phys | out    | F        |
 !! | hpbl           | atmosphere_boundary_layer_thickness                    | PBL thickness                                      | m             |    1 | real    | kind_phys | out    | F        |
