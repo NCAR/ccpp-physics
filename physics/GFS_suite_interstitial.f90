@@ -22,6 +22,7 @@
 !!
       subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 
+        use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type
 
         type(GFS_control_type),           intent(in) :: Model
