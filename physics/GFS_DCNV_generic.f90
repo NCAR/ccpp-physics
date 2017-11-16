@@ -57,7 +57,7 @@
     subroutine GFS_DCNV_generic_post_finalize ()
     end subroutine GFS_DCNV_generic_post_finalize
 
-!> \section arg_table_GFS_PBL_generic_post_run Argument Table
+!> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! | local var name | longname                                                  | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Grid           | FV3-GFS_Grid_type                                         | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |

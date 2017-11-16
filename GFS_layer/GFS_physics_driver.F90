@@ -21,6 +21,7 @@ module module_physics_driver
 !  use sasas_deep,             only: sasasdeep_run
   use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
   use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
+  use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
 
   implicit none
 
@@ -525,25 +526,26 @@ module module_physics_driver
 !
 !  --- ...                       figure out number of extra tracers
 !
-      tottracer = 0            ! no convective transport of tracers
-      if (Model%trans_trac .or. Model%cscnv) then
-        if (Model%ntcw > 0) then
-          if (Model%ntoz < Model%ntcw) then
-            trc_shft = Model%ntcw + Model%ncld - 1
-          else
-            trc_shft = Model%ntoz
-          endif
-        elseif (Model%ntoz > 0) then
-          trc_shft = Model%ntoz
-        else
-          trc_shft = 1
-        endif
+      ! tottracer = 0            ! no convective transport of tracers
+      ! if (Model%trans_trac .or. Model%cscnv) then
+      !   if (Model%ntcw > 0) then
+      !     if (Model%ntoz < Model%ntcw) then
+      !       trc_shft = Model%ntcw + Model%ncld - 1
+      !     else
+      !       trc_shft = Model%ntoz
+      !     endif
+      !   elseif (Model%ntoz > 0) then
+      !     trc_shft = Model%ntoz
+      !   else
+      !     trc_shft = 1
+      !   endif
+      !
+      !   tracers   = Model%ntrac - trc_shft
+      !   tottracer = tracers
+      !   if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
+      ! endif
+      ! if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
 
-        tracers   = Model%ntrac - trc_shft
-        tottracer = tracers
-        if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
-      endif
-      if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
 
 !     if (lprnt) write(0,*)' trans_trac=',trans_trac,' tottracer=',     &
 !                write(0,*)' trans_trac=',trans_trac,' tottracer=',     &
@@ -551,12 +553,14 @@ module module_physics_driver
 !    &,                  ntrac-ncld+2,' clstp=',clstp,' kdt=',kdt
 !    &,' ntk=',ntk,' lat=',lat
 
-      skip_macro = .false.
+      ! skip_macro = .false.
+      !
+      ! allocate ( clw(ix,levs,tottracer+2) )
+      ! if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
+      !   allocate (cnvc(ix,levs), cnvw(ix,levs))
+      ! endif
 
-      allocate ( clw(ix,levs,tottracer+2) )
-      if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
-        allocate (cnvc(ix,levs), cnvw(ix,levs))
-      endif
+      call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 !
 !  ---  set initial quantities for stochastic physics deltas
       if (Model%do_sppt) then
