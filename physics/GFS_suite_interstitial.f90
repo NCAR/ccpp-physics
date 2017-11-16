@@ -15,10 +15,15 @@
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
 !! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
 !! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
 !! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | index         |    0 | integer                       |           |   out  | F        |
 !! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
+!! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
+!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
 !!
       subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 
