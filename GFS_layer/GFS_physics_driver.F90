@@ -23,6 +23,7 @@ module module_physics_driver
   use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
   use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
   use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
+  use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
 
   implicit none
 
@@ -807,7 +808,7 @@ module module_physics_driver
 !         endif
 !       endif    ! end if_lssav_block
       call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
-        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, kcnv, hflx, evap, Diag)
+        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
       call GFS_PBL_generic_pre_run (im, levs, kinver)
 
       !kcnv(:)   = 0

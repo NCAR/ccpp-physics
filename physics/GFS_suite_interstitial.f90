@@ -153,20 +153,23 @@
   end subroutine GFS_suite_interstitial_3_finalize
 
 !> \section arg_table_GFS_suite_interstitial_3_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
-!! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
-!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | index         |    0 | integer                       |           |   out  | F        |
-!! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
-!! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
+!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! | Radtend        | FV3-GFS_Radtend_type                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT           |    0 | GFS_typedefs%GFS_radtend_type |           | in     | F        |
+!! | xcosz          | instantaneous_cosine_of_zenith_angle                         | cosine of zenith angle at current time                                | none          | 1    | real                          | kind_phys | in     | F        |
+!! | adjsfcdsw      | surface_downwelling_shortwave_flux                           | surface downwelling shortwave flux at current time                    | W m-2         | 1    | real                          | kind_phys | in     | F        |
+!! | adjsfcdlw      | surface_downwelling_longwave_flux                            | surface downwelling longwave flux at current time                     | W m-2         | 1    | real                          | kind_phys | in     | F        |
+!! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         | 1    | real                          | kind_phys | in     | F        |
+!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          | 1    | real                          | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | index         | 1    | integer                       |           |   out  | F        |
+!! | heat           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
 !!
-  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, kcnv, hflx, evap, Diag)
+  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
 
     use machine,               only: kind_phys
     use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type, GFS_radtend_type, GFS_diag_type
@@ -178,7 +181,7 @@
     type(GFS_diag_type),              intent(inout) :: Diag
 
     integer, dimension(size(Grid%xlon,1)), intent(out) :: kcnv
-    real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu 
+    real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu
     real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: hflx, evap
 
     real(kind=kind_phys), parameter :: czmin   = 0.0001      ! cos(89.994)
