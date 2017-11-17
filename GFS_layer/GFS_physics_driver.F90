@@ -25,6 +25,7 @@ module module_physics_driver
   use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
   use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
   use GFS_suite_update_stateout, only: GFS_suite_update_stateout_run
+  use GFS_suite_interstitial_4, only: GFS_suite_interstitial_4_run
 
   implicit none
 
@@ -1550,13 +1551,14 @@ module module_physics_driver
 !       print *,' phii2=',phii(ipr,k=1,levs)
 !       print *,' phil2=',phil(ipr,:)
 !     endif
-
-      clw(:,:,1) = 0.0
-      clw(:,:,2) = -999.9
-      if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
-        cnvc(:,:)  = 0.0
-        cnvw(:,:)  = 0.0
-      endif
+      call GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, &
+        rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+      ! clw(:,:,1) = 0.0
+      ! clw(:,:,2) = -999.9
+      ! if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
+      !   cnvc(:,:)  = 0.0
+      !   cnvw(:,:)  = 0.0
+      ! endif
 
 !     write(0,*)' before cnv clstp=',clstp,' kdt=',kdt,' lat=',lat
 
@@ -1586,13 +1588,13 @@ module module_physics_driver
 !           --------------------------------------------
 
       if (Model%ntcw > 0) then
-        do k=1,levs
-          do i=1,im
-            tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
-            tem      = rhc_max * work1(i) + tem * work2(i)
-            rhc(i,k) = max(0.0, min(1.0,tem))
-          enddo
-        enddo
+        ! do k=1,levs
+        !   do i=1,im
+        !     tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
+        !     tem      = rhc_max * work1(i) + tem * work2(i)
+        !     rhc(i,k) = max(0.0, min(1.0,tem))
+        !   enddo
+        ! enddo
         if (Model%ncld == 2) then
           clw(:,:,1) = Stateout%gq0(:,:,Model%ntiw)                    ! ice
           clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)                    ! water

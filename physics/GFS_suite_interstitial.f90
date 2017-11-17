@@ -240,6 +240,8 @@
 
   end subroutine GFS_suite_interstitial_3_run
 
+  end module
+
   module GFS_suite_update_stateout
 
   contains
@@ -281,5 +283,65 @@
     Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * Model%dtp
 
   end subroutine GFS_suite_update_stateout_run
+
+end module
+
+module GFS_suite_interstitial_4
+
+contains
+
+subroutine GFS_suite_interstitial_4_init ()
+end subroutine GFS_suite_interstitial_4_init
+
+subroutine GFS_suite_interstitial_4_finalize()
+end subroutine GFS_suite_interstitial_4_finalize
+
+!> \section arg_table_GFS_suite_interstitial_4_run Argument Table
+!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
+!!
+subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+
+  use machine,               only: kind_phys
+  use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
+  use physcons,              only: rhc_max
+
+  type(GFS_control_type),           intent(in)    :: Model
+  type(GFS_grid_type),              intent(in)    :: Grid
+  type(GFS_statein_type),           intent(in)    :: Statein
+
+  real(kind=kind_phys), intent(in)                                           :: rhbbot, rhbtop
+  real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)             :: work1, work2
+  real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+  integer, dimension(size(Grid%xlon,1)), intent(inout)                       :: ktop, kbot
+  real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: rhc
+
+  integer :: i,k
+  real(kind=kind_phys) :: tem
+
+  clw(:,:,1) = 0.0
+  clw(:,:,2) = -999.9
+  if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
+    cnvc(:,:)  = 0.0
+    cnvw(:,:)  = 0.0
+  endif
+
+  ktop(:)  = 1
+  kbot(:)  = Model%levs
+
+  if (Model%ntcw > 0) then
+    do k=1,Model%levs
+      do i=1, size(Grid%xlon,1)
+        tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
+        tem      = rhc_max * work1(i) + tem * work2(i)
+        rhc(i,k) = max(0.0, min(1.0,tem))
+      enddo
+    enddo
+  endif
+
+end subroutine GFS_suite_interstitial_4_run
 
 end module
