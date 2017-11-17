@@ -251,12 +251,16 @@
   end subroutine GFS_suite_update_stateout_finalize
 
 !> \section arg_table_GFS_suite_update_stateout_run Argument Table
-!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Statein        | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
 !! | dudt           | tendency_of_x_wind_due_to_model_physics                | updated tendency of the x wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
 !! | dvdt           | tendency_of_y_wind_due_to_model_physics                | updated tendency of the y wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | inout  | F        |
 !!
   subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
 
