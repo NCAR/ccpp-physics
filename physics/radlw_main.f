@@ -456,7 +456,7 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       npts, nlay, nlp1, lprnt, cld_cf,                           &
+     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
@@ -492,6 +492,7 @@
 !! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
 !! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
+!! | lslwr           | flag_to_calc_lw                         | logical flag to calculate LW irradiances               | logical |    0 | logical     |           | in     | F        |
 !! | hlwc            | lw_heating_rate_total_sky               | longwave total sky heating rate                        | K s-1   |    2 | real        | kind_phys | out    | F        |
 !! | topflx          | lw_fluxes_top_atmosphere                | longwave total sky fluxes at the top of the atm        | W m-2   |    1 | topflw_type | kind_phys | out    | F        |
 !! | sfcflx          | lw_fluxes_sfc                           | longwave total sky fluxes at the Earth surface         | W m-2   |    1 | sfcflw_type | kind_phys | out    | F        |
@@ -719,6 +720,7 @@
      &       intent(out) :: hlw0
       type (proflw_type),    dimension(npts,nlp1),       optional,      &
      &       intent(out) :: flxprf
+      logical, intent(in) :: lslwr
 
 !  ---  locals:
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
@@ -765,6 +767,7 @@
 !
 !===> ... begin here
 !
+      if (.not. lslwr) return
 
 !  --- ...  initialization
 

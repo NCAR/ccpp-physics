@@ -639,7 +639,7 @@
 !-----------------------------------
       subroutine setemis                                                &
      &     ( xlon,xlat,slmsk,snowf,sncovr,zorlf,tsknf,tairf,hprif,      &  !  ---  inputs:
-     &       IMAX,                                                      &
+     &       IMAX, lslwr,                                               &
      &       sfcemis                                                    &  !  ---  outputs:
      &     )
 
@@ -689,6 +689,7 @@
 
       real (kind=kind_phys), dimension(:), intent(in) ::                & 
      &       xlon,xlat, slmsk, snowf,sncovr, zorlf, tsknf, tairf, hprif
+      logical, intent(in) :: lslwr
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:), intent(out) :: sfcemis
@@ -709,6 +710,9 @@
 !
 !===> ...  begin here
 !
+
+      if (.not. lslwr) return
+
 !> -# Set sfcemis default to 1.0 or by surface type and condition.
       if ( iemslw == 0 ) then        ! sfc emiss default to 1.0
 
