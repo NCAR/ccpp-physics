@@ -84,12 +84,20 @@
     subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, garea, dudt, dvdt, dtdt, dtdtc, dqdt)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_control_type, GFS_grid_type
+      use use physcons,          only: dxmin, dxinv
+      use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_statein_type, GFS_diag_type
 
       type(GFS_control_type),           intent(in) :: Model
       type(GFS_grid_type),              intent(in) :: Grid
+      type(GFS_sfcprop_type),           intent(in) :: Sfcprop
+      type(GFS_statein_type),           intent(in) :: Statein
+      type(GFS_diag_type),              intent(inout) :: Diag
 
-      real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop
+      real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop, frain
+      integer, dimension(size(Grid%xlon,1)), intent(out) :: islmsk
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out)  :: work1, work2, garea
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
 
       integer i
 

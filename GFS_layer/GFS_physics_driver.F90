@@ -22,6 +22,7 @@ module module_physics_driver
   use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
   use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
   use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
+  use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
 
   implicit none
 
@@ -605,18 +606,22 @@ module module_physics_driver
       call get_prs_fv3 (ix, levs, ntrac, Statein%phii, Statein%prsi, &
                         Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
+
+      call GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, &
+        Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, garea, &
+        dudt, dvdt, dtdt, dtdtc, dqdt )
 !
-      rhbbot = Model%crtrh(1)
-      rhpbl  = Model%crtrh(2)
-      rhbtop = Model%crtrh(3)
+      ! rhbbot = Model%crtrh(1)
+      ! rhpbl  = Model%crtrh(2)
+      ! rhbtop = Model%crtrh(3)
 !
 !  --- ...  frain=factor for centered difference scheme correction of rain amount.
 
-      frain = dtf / dtp
+      ! frain = dtf / dtp
 
       do i = 1, im
         sigmaf(i)   = max( Sfcprop%vfrac(i),0.01 )
-        islmsk(i)   = nint(Sfcprop%slmsk(i))
+    !    islmsk(i)   = nint(Sfcprop%slmsk(i))
 
         if (islmsk(i) == 2) then
           if (Model%isot == 1) then
@@ -642,17 +647,17 @@ module module_physics_driver
 !
 !GFDL        work1(i)   = (log(coslat(i) / (nlons(i)*latr)) - dxmin) * dxinv
 !       work1(i)   = (log(Grid%dx(i)) - dxmin) * dxinv
-        work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
-        work1(i)   = max(0.0, min(1.0,work1(i)))
-        work2(i)   = 1.0 - work1(i)
-        Diag%psurf(i)   = Statein%pgr(i)
+        ! work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
+        ! work1(i)   = max(0.0, min(1.0,work1(i)))
+        ! work2(i)   = 1.0 - work1(i)
+        ! Diag%psurf(i)   = Statein%pgr(i)
         work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
 !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
 !GFDL        garea(i)   = tem1 * tem2
         tem1       = Grid%dx(i)
         tem2       = Grid%dx(i)
-        garea(i)   = Grid%area(i)
+      !  garea(i)   = Grid%area(i)
         dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
         cldf(i)    = Model%cgwf(1)*work1(i) + Model%cgwf(2)*work2(i)
         wcbmax(i)  = Model%cs_parm(1)*work1(i) + Model%cs_parm(2)*work2(i)
@@ -679,11 +684,11 @@ module module_physics_driver
       smsoil(:,:) = Sfcprop%smc(:,:)
       stsoil(:,:) = Sfcprop%stc(:,:)
       slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
-      dudt(:,:)  = 0.
-      dvdt(:,:)  = 0.
-      dtdt(:,:)  = 0.
-      dtdtc(:,:) = 0.
-      dqdt(:,:,:) = 0.
+      ! dudt(:,:)  = 0.
+      ! dvdt(:,:)  = 0.
+      ! dtdt(:,:)  = 0.
+      ! dtdtc(:,:) = 0.
+      ! dqdt(:,:,:) = 0.
 
 !  --- ...  initialize dtdt with heating rate from dcyc2
 
