@@ -733,7 +733,7 @@ cc
 !!
 !! Blah blah description of subroutine
 !!
-!!\section arg_table_sfc_nst_run Argument Table
+!!\section arg_table_sfc_nst_pre_run Argument Table
 !!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
@@ -834,7 +834,7 @@ cc
 !!
 !! Blah blah description of subroutine
 !!
-!!\section arg_table_sfc_nst_run Argument Table
+!!\section arg_table_sfc_nst_post_run Argument Table
 !!| local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
