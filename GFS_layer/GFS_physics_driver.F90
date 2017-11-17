@@ -24,6 +24,7 @@ module module_physics_driver
   use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
   use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
   use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
+  use GFS_suite_update_stateout, only: GFS_suite_update_stateout_run
 
   implicit none
 
@@ -1085,10 +1086,10 @@ module module_physics_driver
       Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
       Diag%dswsfci(:) = adjsfcdsw(:)
       Diag%gfluxi(:)  = gflx(:)
-      Diag%t1(:)      = Statein%tgrs(:,1)
-      Diag%q1(:)      = Statein%qgrs(:,1,1)
-      Diag%u1(:)      = Statein%ugrs(:,1)
-      Diag%v1(:)      = Statein%vgrs(:,1)
+      ! Diag%t1(:)      = Statein%tgrs(:,1)
+      ! Diag%q1(:)      = Statein%qgrs(:,1,1)
+      ! Diag%u1(:)      = Statein%ugrs(:,1)
+      ! Diag%v1(:)      = Statein%vgrs(:,1)
 
 !  --- ...  update near surface fields
 
@@ -1428,10 +1429,12 @@ module module_physics_driver
 !       write(0,*)' dtdt=',(dtdt(ipr,ik),k=1,10)
 !     endif
 
-      Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * dtp
-      Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * dtp
-      Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * dtp
-      Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * dtp
+      ! Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * dtp
+      ! Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * dtp
+      ! Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * dtp
+      ! Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * dtp
+
+      call GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
 
 !     if (lprnt) then
 !                write(7000,*)' ugrs=',ugrs(ipr,:)

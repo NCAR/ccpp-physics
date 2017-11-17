@@ -233,6 +233,49 @@
     hflx(:)       = 0.0
     evap(:)       = 0.0
 
+    Diag%t1(:)      = Statein%tgrs(:,1)
+    Diag%q1(:)      = Statein%qgrs(:,1,1)
+    Diag%u1(:)      = Statein%ugrs(:,1)
+    Diag%v1(:)      = Statein%vgrs(:,1)
+
   end subroutine GFS_suite_interstitial_3_run
+
+  module GFS_suite_update_stateout
+
+  contains
+
+  subroutine GFS_suite_update_stateout_init ()
+  end subroutine GFS_suite_update_stateout_init
+
+  subroutine GFS_suite_update_stateout_finalize()
+  end subroutine GFS_suite_update_stateout_finalize
+
+!> \section arg_table_GFS_suite_update_stateout_run Argument Table
+!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                | updated tendency of the x wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                | updated tendency of the y wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
+!! | dqdt           | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
+!!
+  subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
+
+    use machine,               only: kind_phys
+    use GFS_typedefs,          only: GFS_control_type, GFS_statein_type, GFS_grid_type, GFS_stateout_type
+
+    type(GFS_control_type),           intent(in)    :: Model
+    type(GFS_statein_type),           intent(in)    :: Statein
+    type(GFS_grid_type),              intent(in)    :: Grid
+    type(GFS_stateout_type),          intent(inout) :: Stateout
+
+    real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs), intent(in) :: dudt, dvdt, dtdt
+    real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs, Model%ntrac), intent(in) :: dqdt
+
+    Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * Model%dtp
+    Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * Model%dtp
+    Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * Model%dtp
+    Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * Model%dtp
+
+  end subroutine GFS_suite_update_stateout_run
 
 end module
