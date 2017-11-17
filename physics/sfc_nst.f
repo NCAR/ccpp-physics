@@ -9,7 +9,7 @@
 !! @{
 !! \brief Near Sea Surface Temperature (NSST) is a temperature profile just below the sea surface. The GFS NSST scheme is used to forecast the NSST for two main purposes: supply SSTs to the atmospheric model for the calculation of air-sea heat and moisture fluxes and providing a sub-layer temperature profile forecast for use as a first guess in the Gridpoint Statistical Interpolator (GSI) data assimilation code.
 !!
-!! The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li 2015, Li and Derber 2008 and 2009). The GFS NSST scheme predicts the vertical profile of sea temperature between the surface and a reference level (zr), which is on the order of 5 m.  Only two physical process are considered in this scheme: diurnal thermocline layer warming and thermal skin layer (also known as sub-layer) cooling. All other process that could influence NSST are ignored in this simple scheme.
+!! The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li 2015 \cite Li_2015, and Li and Derber 2009 \cite Li_Derber_2009). The GFS NSST scheme predicts the vertical profile of sea temperature between the surface and a reference level (zr), which is on the order of 5 m.  Only two physical process are considered in this scheme: diurnal thermocline layer warming and thermal skin layer (also known as sub-layer) cooling. All other process that could influence NSST are ignored in this simple scheme.
 !!
 !!This profile is a composed by subdividing the near-surface layer in three parts
 !!
@@ -22,9 +22,11 @@
 !!Tr is the reference temperature
 !!zc is the depth of the skin layer
 !!
-!!Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996). Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
+!!Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
 !!
-!! \section  Calling Hierarchy Diagram
+!! \htmlonly <style>div.image img[src="NNST.png"]{width:10px;}</style>
+!! \endhtmlonly 
+!! @image html NSST.png "Figure 1: NSST profile."
 !!
 !! \section intraphysics Intraphysics Communication
 !!
@@ -80,7 +82,7 @@
 !!| timestep       | time_step_for_dynamics                                                       | timestep interval                              | s             | 0    | real    | kind_phys | in     | F        |
 !!| kdt            | index_of_time_step                                                           | time step counter                              | count         | 0    | integer |           | in     | F        |
 !!| solhr          | forecast_hour                                                                | fcst hour at the end of prev time step         | none          | 0    | real    | kind_phys | in     | F        |
-!!| xcosz          | cosine_of_solar_zenith_angle                                                 | cosine of solar zenith angle                   | none          | 1    | real    | kind_phys | in     | F        |
+!!| xcosz          | instantaneous_cosine_of_zenith_angle                                         | cosine of solar zenith angle                   | none          | 1    | real    | kind_phys | in     | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection             | m s-1         | 1    | real    | kind_phys | in     | F        |
 !!| flag_iter      | flag_for_iteration                                                           | flag for iteration                             | flag          | 1    | logical |           | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                                           | flag for guess run                             | flag          | 1    | logical |           | in     | F        |
@@ -120,7 +122,10 @@
 !!
 !! This is the main subroutine for the NSST scheme, and it calls the DTM and TSM.
 !!
-!! \section NSST_detailed_algorithm Under construction
+!! \section NSST_detailed_algorithm 
+!!
+!! Under construction
+!!
 !! @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
@@ -707,8 +712,10 @@ cc
 !!
 !! \section intraphysics Intraphysics Communication
 !!
-!! Blah blah blah intraphysics communication
-
+!! The NSST scheme is one of the three schemes used to represent the
+!! surface in the GFS physics suite. The other two are the Noah land
+!! surface model and the sice simplified ice model.
+!!
 !> \brief Brief description of the subroutine
 !!
 !! Blah blah description of subroutine
