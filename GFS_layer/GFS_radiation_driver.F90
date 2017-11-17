@@ -1264,63 +1264,60 @@
           deltaq, plvl, plyr, tlyr, qlyr, tvly,   &
           rhly, qstl, clouds, cldsa, mtopa, mbota)
 
-
-        ! Start SW radiation calculations
-            ! Setup surface albedo for SW calculation
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-           Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa,     &
-           Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf,   &
-           Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,    &
-           Sfcprop%tisfc, im, Model%lsswr,                               &
-           sfcalb, Radtend%sfalb)                            !  ---  outputs
-
-       call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
-           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
-           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
-           faersw(:, :, :, 3), sfcalb(:, 1), sfcalb(:,2), sfcalb(:,3),  &
-           sfcalb(:,4), Radtend%coszen, Model%solcon,  nday, idxday, im,&
-           lmk, lmp, Model%lprnt, clouds(:,:,1), Model%lsswr,           &
-           htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs 
-           hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional outputs
-           cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! Optional input
-           cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
-           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
-           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
-
-       call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
-           Model%lsswr)
-
-       call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
-           kd, Model%lsswr)
-
-         ! Surface down and up spectral component fluxes
-         ! Save two spectral bands' surface downward and upward fluxes for output.
-       call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
-
-         ! Night time: set SW heating rates and fluxes to zero
-       call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
-           Grid, Model, nday, Model%lsswr)
-
-       call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
-
-        ! Start LW radiation calculations
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!      call Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag,   &
-!          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, &
-!          tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
-
-!           ! Local vars
-!        integer :: k, k1
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!          LTP) :: htlw0, htlwc
-
+          ! Setup surface albedo for SW calculation
+      call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+          Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa,     &
+          Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf,   &
+          Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,    &
+          Sfcprop%tisfc, im, Model%lsswr,                               &
+          sfcalb, Radtend%sfalb)                            !  ---  outputs
 
             ! Setup surface emissivity for LW radiation.
           call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
                         Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
                         tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,  &
                         Radtend%semis)                                              !  ---  outputs
+
+      call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
+          gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
+          Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
+          faersw(:, :, :, 3), sfcalb(:, 1), sfcalb(:,2), sfcalb(:,3),  &
+          sfcalb(:,4), Radtend%coszen, Model%solcon,  nday, idxday, im,&
+          lmk, lmp, Model%lprnt, clouds(:,:,1), Model%lsswr,           &
+          htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs 
+          hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional outputs
+          cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! Optional input
+          cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
+          cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
+          cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+
+        ! Start SW radiation calculations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!       call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
+!           Model%lsswr)
+!
+!       call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
+!           kd, Model%lsswr)
+!
+!         ! Surface down and up spectral component fluxes
+!         ! Save two spectral bands' surface downward and upward fluxes for output.
+!       call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+!
+!         ! Night time: set SW heating rates and fluxes to zero
+!       call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
+!           Grid, Model, nday, Model%lsswr)
+!
+!       call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+!
+        ! Start LW radiation calculations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!            ! Setup surface emissivity for LW radiation.
+!          call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
+!                        Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
+!                        tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,  &
+!                        Radtend%semis)                                              !  ---  outputs
 
             ! Compute LW heating rates and fluxes.
               call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
@@ -1341,6 +1338,28 @@
           call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! post SW
+       call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
+           Model%lsswr)
+
+       call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
+           kd, Model%lsswr)
+
+         ! Surface down and up spectral component fluxes
+         ! Save two spectral bands' surface downward and upward fluxes for output.
+       call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+
+         ! Night time: set SW heating rates and fluxes to zero
+       call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
+           Grid, Model, nday, Model%lsswr)
+
+       call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+
+        ! Start LW radiation calculations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 
         ! Collect the fluxr data for wrtsfc
