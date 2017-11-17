@@ -1,3 +1,29 @@
+      module dcyc2t3_pre
+
+      contains
+
+!! \section arg_table_dcyc2t3_pre_init Argument Table
+!!
+      subroutine dcyc2t3_pre_init()
+      end subroutine dcyc2t3_pre_init
+
+
+!! \section arg_table_dcyc2t3_pre_run Argument Table
+!!
+      subroutine dcyc2t3_pre_run()
+      end subroutine dcyc2t3_pre_run
+
+
+!! \section arg_table_dcyc2t3_pre_finalize Argument Table
+!!
+      subroutine dcyc2t3_pre_finalize()
+      end subroutine dcyc2t3_pre_finalize
+
+      end module dcyc2t3_pre
+
+
+
+
       module dcyc2t3
 
       contains
@@ -307,3 +333,36 @@
       end subroutine dcyc2t3_finalize
 
       end module dcyc2t3
+
+
+
+
+
+      module dcyc2t3_post
+
+      contains
+
+!! \section arg_table_dcyc2t3_post_init Argument Table
+!!
+      subroutine dcyc2t3_post_init()
+      end subroutine dcyc2t3_post_init
+
+
+!! \section arg_table_dcyc2t3_post_run Argument Table
+!!
+      subroutine dcyc2t3_post_run()
+
+
+
+      end subroutine dcyc2t3_post_run
+
+
+!! \section arg_table_dcyc2t3_post_finalize Argument Table
+!!
+      subroutine dcyc2t3_post_finalize()
+      end subroutine dcyc2t3_post_finalize
+
+      end module dcyc2t3_post
+
+
+
