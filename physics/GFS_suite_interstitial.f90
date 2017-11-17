@@ -66,3 +66,54 @@
       end subroutine GFS_suite_interstitial_1_run
 
     end module
+
+    module GFS_suite_interstitial_2
+
+    contains
+
+    subroutine GFS_suite_interstitial_2_init ()
+    end subroutine GFS_suite_interstitial_2_init
+
+    subroutine GFS_suite_interstitial_2_finalize()
+    end subroutine GFS_suite_interstitial_2_finalize
+
+!> \section arg_table_GFS_suite_interstitial_2_run Argument Table
+!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!!
+    subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, garea, dudt, dvdt, dtdt, dtdtc, dqdt)
+
+      use machine,               only: kind_phys
+      use GFS_typedefs,          only: GFS_control_type, GFS_grid_type
+
+      type(GFS_control_type),           intent(in) :: Model
+      type(GFS_grid_type),              intent(in) :: Grid
+
+      real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop
+
+      integer i
+
+      rhbbot = Model%crtrh(1)
+      rhpbl  = Model%crtrh(2)
+      rhbtop = Model%crtrh(3)
+
+      frain = Model%dtf / Model%dtp
+
+      do i = 1, size(Grid%xlon,1)
+        islmsk(i)   = nint(Sfcprop%slmsk(i))
+        work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
+        work1(i)   = max(0.0, min(1.0,work1(i)))
+        work2(i)   = 1.0 - work1(i)
+        Diag%psurf(i)   = Statein%pgr(i)
+        garea(i)   = Grid%area(i)
+      end do
+
+      dudt(:,:)  = 0.
+      dvdt(:,:)  = 0.
+      dtdt(:,:)  = 0.
+      dtdtc(:,:) = 0.
+      dqdt(:,:,:) = 0.
+
+    end subroutine GFS_suite_interstitial_2_run
+
+  end module
