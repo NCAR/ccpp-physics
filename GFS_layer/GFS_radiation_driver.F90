@@ -1185,7 +1185,7 @@
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
           LTP) :: plyr, tlyr, qlyr, olyr, rhly, tvly, qstl, prslk1, deltaq, &
-          htswc, htsw0 
+          htswc, htsw0, htlw0, htlwc
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
           1 + LTP) :: plvl, tlvl
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
@@ -1267,6 +1267,7 @@
 
         ! Start SW radiation calculations
             ! Setup surface albedo for SW calculation
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
        call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
            Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa,     &
            Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf,   &
@@ -1304,9 +1305,42 @@
        call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
 
         ! Start LW radiation calculations
-      call Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag,   &
-          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, &
-          tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      call Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag,   &
+!          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, &
+!          tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
+
+!           ! Local vars
+!        integer :: k, k1
+!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+!          LTP) :: htlw0, htlwc
+
+
+            ! Setup surface emissivity for LW radiation.
+          call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
+                        Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
+                        tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,  &
+                        Radtend%semis)                                              !  ---  outputs
+
+            ! Compute LW heating rates and fluxes.
+              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
+                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
+                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
+                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
+                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
+                 Model%lslwr,                                          &
+                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
+                 hlw0=htlw0,                                           & !  ---  optional output
+                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
+                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
+                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
+                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+
+            ! Save calculation results
+          call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 
 
         ! Collect the fluxr data for wrtsfc
@@ -1957,7 +1991,6 @@
           LTP) :: htlw0, htlwc
 
 
-!        if_lslwr: if (Model%lslwr) then
             ! Setup surface emissivity for LW radiation.
           call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
                         Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
@@ -1982,7 +2015,6 @@
             ! Save calculation results
           call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
 
-!        end if if_lslwr
 
       end subroutine Do_lw_rad
 
