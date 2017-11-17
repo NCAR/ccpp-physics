@@ -84,7 +84,7 @@
     subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, garea, dudt, dvdt, dtdt, dtdtc, dqdt)
 
       use machine,               only: kind_phys
-      use use physcons,          only: dxmin, dxinv
+      use physcons,              only: dxmin, dxinv
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_statein_type, GFS_diag_type
 
       type(GFS_control_type),           intent(in) :: Model
