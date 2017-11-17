@@ -297,11 +297,21 @@ subroutine GFS_suite_interstitial_4_finalize()
 end subroutine GFS_suite_interstitial_4_finalize
 
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
-!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
+!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! | rhbbot         | critical_relative_humidity_at_surface                  | critical relative humidity at the surface                             | frac          |    0 | real                          | kind_phys | in     | F        |
+!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere        | critical relative humidity at the top of atmosphere                   | frac          |    0 | real                          | kind_phys | in     | F        |
+!! | work1          | grid_related_coefficient                               | grid size related coefficient used in scale-sensitive schemes         | none          |    1 | real                          | kind_phys | in     | F        |
+!! | work2          | grid_related_coefficient_complement                    | complement to work1                                                   | none          |    1 | real                          | kind_phys | in     | F        |
+!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
+!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
+!! | ktop           | vertical_index_at_cloud_top                            | vertical index at cloud top                                           | index         |    1 | integer                       |           | inout  | F        |
+!! | kbot           | vertical_index_at_cloud_base                           | vertical index at cloud base                                          | index         |    1 | integer                       |           | inout  | F        |
+!! | rhc            | critical_relative_humidity                             | critical relative humidity                                            | frac          |    2 | real                          | kind_phys |   out  | F        |
 !!
 subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
 
