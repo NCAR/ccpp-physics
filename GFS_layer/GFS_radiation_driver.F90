@@ -2292,31 +2292,31 @@
         real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(in) :: aerodp
 
 
-          ! Save LW results
-      call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
+            ! Save LW results
+        call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
 
-          ! post SW
-      call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
-          Model%lsswr)
+            ! post SW
+        call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
+            Model%lsswr)
 
-      call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
-          kd, Model%lsswr)
+        call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
+            kd, Model%lsswr)
 
-          ! Surface down and up spectral component fluxes
-          ! Save two spectral bands' surface downward and upward fluxes for output.
-      call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+            ! Surface down and up spectral component fluxes
+            ! Save two spectral bands' surface downward and upward fluxes for output.
+        call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
 
-          ! Night time: set SW heating rates and fluxes to zero
-      call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
-          Grid, Model, nday, Model%lsswr)
+            ! Night time: set SW heating rates and fluxes to zero
+        call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
+            Grid, Model, nday, Model%lsswr)
 
-      call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+        call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
 
 
-        ! Collect the fluxr data for wrtsfc
-      call Organize_output (Diag, Model, Grid, Radtend, Statein, &
-          Coupling, im, kd, kt, kb, lm, scmpsw, raddt, cldsa,    &
-          mtopa, mbota, clouds, aerodp)
+          ! Collect the fluxr data for wrtsfc
+        call Organize_output (Diag, Model, Grid, Radtend, Statein, &
+            Coupling, im, kd, kt, kb, lm, scmpsw, raddt, cldsa,    &
+            mtopa, mbota, clouds, aerodp)
 
       end subroutine Post_radiation
 

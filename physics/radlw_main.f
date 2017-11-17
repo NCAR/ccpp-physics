@@ -448,25 +448,10 @@
 !!\n                    upfxc - total sky upward flux
 !!\n                    dnfx0 - clear sky downward flux
 !!\n                    upfx0 - clear sky upward flux
-!> \section gen_lwrad General Algorithm
-!> @{
-! --------------------------------
-      subroutine lwrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
-     &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
-     &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
-     &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
-     &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
-     &       HLW0,HLWB,FLXPRF,                                          &   !! ---  optional
-     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
-     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od                                                     &
-     &     )
 
 !! \section arg_table_swrad
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
+!! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
@@ -508,6 +493,24 @@
 !! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+
+
+!> \section gen_lwrad General Algorithm
+!> @{
+! --------------------------------
+      subroutine lwrad                                                  &
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
+     &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
+     &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
+     &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
+     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
+     &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
+     &       HLW0,HLWB,FLXPRF,                                          &   !! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od                                                     &
+     &     )
+
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !

@@ -579,29 +579,12 @@
 !!\n                    nirdf - downward surface nir diffused flux
 !!\n                    visbm - downward surface uv+vis direct beam flux
 !!\n                    visdf - downward surface uv+vis diffused flux
-!> \section General_swrad General Algorithm
-!> @{
-!-----------------------------------
-      subroutine swrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
-     &       gasvmr_co2,                                                &
-     &       gasvmr_n2o, gasvmr_ch4,                                    &
-     &       gasvmr_o2,                                                 &    !  ---  inputs
-     &       icseed, aeraod, aerssa, aerasy,                            &
-     &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
-     &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
-     &       cosz,solcon,NDAY,idxday,                                   &
-     &       npts, nlay, nlp1, lprnt,                                   &
-     &       cld_cf, lsswr,                                             &
-     &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
-     &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
-     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
-     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, cld_ssa, cld_asy
-     &     )
+
+
+
 !! \section arg_table_swrad
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------|------------------------------------------------------=-|---------|------|-------------|-----------|--------|----------|
+!! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
@@ -649,6 +632,30 @@
 !! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
 
+
+
+
+
+!> \section General_swrad General Algorithm
+!> @{
+!-----------------------------------
+      subroutine swrad                                                  &
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
+     &       gasvmr_co2,                                                &
+     &       gasvmr_n2o, gasvmr_ch4,                                    &
+     &       gasvmr_o2,                                                 &    !  ---  inputs
+     &       icseed, aeraod, aerssa, aerasy,                            &
+     &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
+     &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
+     &       cosz,solcon,NDAY,idxday,                                   &
+     &       npts, nlay, nlp1, lprnt,                                   &
+     &       cld_cf, lsswr,                                             &
+     &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
+     &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od, cld_ssa, cld_asy
+     &     )
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
