@@ -608,7 +608,7 @@ module module_physics_driver
 #endif
 
       call GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, &
-        Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, garea, &
+        Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, &
         dudt, dvdt, dtdt, dtdtc, dqdt )
 !
       ! rhbbot = Model%crtrh(1)
@@ -657,7 +657,7 @@ module module_physics_driver
 !GFDL        garea(i)   = tem1 * tem2
         tem1       = Grid%dx(i)
         tem2       = Grid%dx(i)
-      !  garea(i)   = Grid%area(i)
+        garea(i)   = Grid%area(i)
         dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
         cldf(i)    = Model%cgwf(1)*work1(i) + Model%cgwf(2)*work2(i)
         wcbmax(i)  = Model%cs_parm(1)*work1(i) + Model%cs_parm(2)*work2(i)
@@ -764,52 +764,53 @@ module module_physics_driver
 
       gabsbdlw(:) = Radtend%semis(:) * adjsfcdlw(:)
 
-      if (Model%lssav) then      !  --- ...  accumulate/save output variables
-
-!  --- ...  sunshine duration time is defined as the length of time (in mdl output
-!           interval) that solar radiation falling on a plane perpendicular to the
-!           direction of the sun >= 120 w/m2
-
-        do i = 1, im
-          if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
-            tem1 = adjsfcdsw(i) / xcosz(i)
-            if ( tem1 >= 120.0 ) then
-              Diag%suntim(i) = Diag%suntim(i) + dtf
-            endif
-          endif
-        enddo
-
-!  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-
-        if (Model%cplflx) then
-          do i = 1, im
-            if (flag_cice(i)) adjsfculw(i) = ulwsfc_cice(i)
-          enddo
-        endif
-        Diag%dlwsfc(:) = Diag%dlwsfc(:) +   adjsfcdlw(:)*dtf
-        Diag%ulwsfc(:) = Diag%ulwsfc(:) +   adjsfculw(:)*dtf
-        Diag%psmean(:) = Diag%psmean(:) + Statein%pgr(:)*dtf        ! mean surface pressure
-
-        if (Model%ldiag3d) then
-          if (Model%lsidea) then
-            Diag%dt3dt(:,:,1) = Diag%dt3dt(:,:,1) + Radtend%lwhd(:,:,1)*dtf
-            Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + Radtend%lwhd(:,:,2)*dtf
-            Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + Radtend%lwhd(:,:,3)*dtf
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + Radtend%lwhd(:,:,4)*dtf
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + Radtend%lwhd(:,:,5)*dtf
-            Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + Radtend%lwhd(:,:,6)*dtf
-          else
-            do k = 1, levs
-              Diag%dt3dt(:,k,1) = Diag%dt3dt(:,k,1) + Radtend%htrlw(:,k)*dtf
-              Diag%dt3dt(:,k,2) = Diag%dt3dt(:,k,2) + Radtend%htrsw(:,k)*dtf*xmu(:)
-            enddo
-          endif
-        endif
-      endif    ! end if_lssav_block
-
+!       if (Model%lssav) then      !  --- ...  accumulate/save output variables
+!
+! !  --- ...  sunshine duration time is defined as the length of time (in mdl output
+! !           interval) that solar radiation falling on a plane perpendicular to the
+! !           direction of the sun >= 120 w/m2
+!
+!         do i = 1, im
+!           if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
+!             tem1 = adjsfcdsw(i) / xcosz(i)
+!             if ( tem1 >= 120.0 ) then
+!               Diag%suntim(i) = Diag%suntim(i) + dtf
+!             endif
+!           endif
+!         enddo
+!
+! !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
+!
+!         if (Model%cplflx) then
+!           do i = 1, im
+!             if (flag_cice(i)) adjsfculw(i) = ulwsfc_cice(i)
+!           enddo
+!         endif
+!         Diag%dlwsfc(:) = Diag%dlwsfc(:) +   adjsfcdlw(:)*dtf
+!         Diag%ulwsfc(:) = Diag%ulwsfc(:) +   adjsfculw(:)*dtf
+!         Diag%psmean(:) = Diag%psmean(:) + Statein%pgr(:)*dtf        ! mean surface pressure
+!
+!         if (Model%ldiag3d) then
+!           if (Model%lsidea) then
+!             Diag%dt3dt(:,:,1) = Diag%dt3dt(:,:,1) + Radtend%lwhd(:,:,1)*dtf
+!             Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + Radtend%lwhd(:,:,2)*dtf
+!             Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + Radtend%lwhd(:,:,3)*dtf
+!             Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + Radtend%lwhd(:,:,4)*dtf
+!             Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + Radtend%lwhd(:,:,5)*dtf
+!             Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + Radtend%lwhd(:,:,6)*dtf
+!           else
+!             do k = 1, levs
+!               Diag%dt3dt(:,k,1) = Diag%dt3dt(:,k,1) + Radtend%htrlw(:,k)*dtf
+!               Diag%dt3dt(:,k,2) = Diag%dt3dt(:,k,2) + Radtend%htrsw(:,k)*dtf*xmu(:)
+!             enddo
+!           endif
+!         endif
+!       endif    ! end if_lssav_block
+      call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
+        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, kcnv, hflx, evap, Diag)
       call GFS_PBL_generic_pre_run (im, levs, kinver)
 
-      kcnv(:)   = 0
+      !kcnv(:)   = 0
       !kinver(:) = levs
       invrsn(:) = .false.
       tx1(:)    = 0.0
@@ -866,8 +867,8 @@ module module_physics_driver
       drain(:)      = 0.0
       ep1d(:)       = 0.0
       runof(:)      = 0.0
-      hflx(:)       = 0.0
-      evap(:)       = 0.0
+      !hflx(:)       = 0.0
+      !evap(:)       = 0.0
       evbs(:)       = 0.0
       evcw(:)       = 0.0
       trans(:)      = 0.0
