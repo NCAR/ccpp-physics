@@ -1202,83 +1202,13 @@
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
 
-        ! Set commonly used integers
-      call Set_common_int (Model, Grid, lm, me, im, lp1, ntrac)
-
-
-        !Set local /level/layer indexes corresponding
-        ! to in/out variables
-      call Set_local_int (lmk, lm, lmp, kd, kt, &
-          kb, lla, llb, lya, lyb, lp1, raddt, Model)
-
-
-        ! Setup surface ground temperature and 
-        ! ground/air skin temperature if required.
-      call Set_sfc_vars (IM, tskn, tsfg, Sfcprop, Grid)
-
-
-        ! Prepare atmospheric profiles.
-        ! Convert pressure unit from pa to mb
-      call Prep_profiles (lm, kd, im, Statein, plvl, plyr, tlyr, &
-          prslk1, rhly, qstl, Model, Grid)
-
-
-        ! Recast remaining all tracers (except sphum)
-        ! forcing them all to be positive
-      call Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, rhly, &
-          qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, llb,    &
-          lla, lya, lyb)
-
-
-        ! Get layer ozone mass mixing ratio
-      call Prep_ozone  (Model, Grid, im, lmk, tracer1, olyr, prslk1)
-
-
-        ! Compute cosine of zenith angle.
-      call coszmn (Grid%xlon,Grid%sinlat, Grid%coslat, Model%solhr, &
-          im, me, Radtend%coszen, Radtend%coszdg)
-
-
-        ! Set up non-prognostic gas volume mixing ratioes
-      call getgases (plvl, Grid%xlon, Grid%xlat, im, lmk, gasvmr)
-
-
-        ! Get temperature at layer interface, and layer moisture.
-      call Prep_t_and_moist (Grid, Model, Statein, lmp, kd, lmk, lm, &
-          im, lya, lyb, plyr, tlyr, tlvl, plvl, tsfa, tskn, tvly, qlyr)
-
-
-        ! Check for daytime points for SW radiation.
-      call Find_daytime (im, Radtend, Grid, nday, idxday)
-
-
-        ! Setup aerosols
-      call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk,   & 
-          tracer1, Grid%xlon, Grid%xlat, im, lmk, lmp, Model%lsswr, &
-          Model%lslwr, faersw,faerlw,aerodp)
-
-
-        !  Obtain cloud information
-      call Get_cloud_info (Model, Grid, Tbd, Sfcprop, Cldprop,  &
-          Statein, tracer1, lmk, lmp, lm, lya, lyb, im, me, kd, &
-          deltaq, plvl, plyr, tlyr, qlyr, tvly,   &
-          rhly, qstl, clouds, cldsa, mtopa, mbota)
-
-
-          ! Setup surface albedo for SW calculation
-      call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-          Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa,     &
-          Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf,   &
-          Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,    &
-          Sfcprop%tisfc, im, Model%lsswr,                               &
-          sfcalb, Radtend%sfalb)                            !  ---  outputs
-
-
-          ! Setup surface emissivity for LW radiation.
-      call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  ---  inputs
-          Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
-          tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
-          Radtend%semis)                                   !  ---  outputs
+      call Pre_radiation (Model, Grid, lm, me, im,  ntrac, &
+          lmk, lmp, kd, kt, kb, lla, llb, lya, lyb, lp1, raddt,  &
+           tskn, tsfg, Sfcprop,  Statein, plvl, plyr,            &
+          tlyr, prslk1, rhly, qstl, tracer1, olyr, Radtend,      &
+          gasvmr, tlvl, tsfa, tvly, qlyr, nday, idxday, faersw,  &
+          faerlw, aerodp, Tbd, Cldprop, deltaq, clouds, cldsa,   &
+          mtopa, mbota, sfcalb)
 
 
           ! Calculate SW heating and fluxes
@@ -1311,31 +1241,10 @@
           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
-          ! Save LW results
-      call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
-
-          ! post SW
-      call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
-          Model%lsswr)
-
-      call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
-          kd, Model%lsswr)
-
-          ! Surface down and up spectral component fluxes
-          ! Save two spectral bands' surface downward and upward fluxes for output.
-      call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
-
-          ! Night time: set SW heating rates and fluxes to zero
-      call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
-          Grid, Model, nday, Model%lsswr)
-
-      call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
-
-
-        ! Collect the fluxr data for wrtsfc
-      call Organize_output (Diag, Model, Grid, Radtend, Statein, &
-          Coupling, im, kd, kt, kb, lm, scmpsw, raddt, cldsa,    &
-          mtopa, mbota, clouds, aerodp)
+      call Post_radiation (Radtend, tsfa, lm, kd, htlwc, htlw0,       &
+          Model, Coupling, Grid, htswc, htsw0, scmpsw, sfcalb, Diag,  &
+          nday, Statein, im, kt, kb, raddt, cldsa, mtopa, mbota,      &
+          clouds, aerodp)
 
       end subroutine GFS_radiation_driver
 
@@ -1867,147 +1776,6 @@
       end subroutine Get_cloud_info
 
 
-!      subroutine Do_sw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
-!          Coupling, im, lm, kd, lmk, lmp, tsfg, tsfa, nday, idxday,   &
-!          plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr, clouds, faersw, &
-!          scmpsw)
-!
-!        implicit none
-!
-!        type(GFS_control_type), intent(in) :: Model
-!        type(GFS_grid_type),    intent(in) :: Grid
-!        type(GFS_sfcprop_type), intent(in) :: Sfcprop
-!        type(GFS_radtend_type), intent(inout) :: Radtend
-!        type(GFS_tbd_type),     intent(in) :: Tbd
-!        type(GFS_diag_type), intent(inout) :: Diag
-!        type(GFS_coupling_type), intent(inout) :: Coupling
-!
-!        integer, intent(in) :: im, lm, kd, lmk, lmp, nday
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfg, tsfa
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            LTP), intent(in) :: plyr, tlyr, qlyr, olyr 
-!        integer, dimension(Size (Grid%xlon, 1)), intent(in) :: idxday
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            LTP, NF_VGAS), intent(in) :: gasvmr
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            LTP, NF_CLDS), intent(in) :: clouds
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            LTP, NBDSW, NF_AESW), intent(in)::faersw
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            1 + LTP), intent(in) :: plvl, tlvl
-!
-!        type (cmpfsw_type), dimension(size(Grid%xlon, 1)), intent(out) :: scmpsw
-!
-!          ! Local vars
-!        integer :: k, k1
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
-!        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-!            LTP) :: htswc, htsw0
-!
-!            ! Setup surface albedo for SW calculation
-!          call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-!                       Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-!                       tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-!                       Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-!                       Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-!                       Sfcprop%tisfc, im, Model%lsswr,                    &
-!                       sfcalb, Radtend%sfalb)                            !  ---  outputs
-!
-!                call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, & 
-!                          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3), &
-!                          gasvmr(:, :, 4),                      &
-!                          Tbd%icsdsw, faersw(:, :, :, 1),                   &
-!                          faersw(:, :, :, 2), faersw(:, :, :, 3),                       &
-!                          sfcalb(:, 1), sfcalb(:,2),       &
-!                          sfcalb(:,3), sfcalb(:,4),     &
-!                          Radtend%coszen, Model%solcon,         &
-!                          nday, idxday, im, lmk, lmp, Model%lprnt,&
-!                          clouds(:,:,1), Model%lsswr,                           &
-!                          htswc, Diag%topfsw, Radtend%sfcfsw,     &  ! outputs 
-!                          hsw0=htsw0, fdncmp=scmpsw,             &   ! optional outputs
-!                          cld_lwp=clouds(:, :, 2),                      &    ! Optional input
-!                          cld_ref_liq=clouds(:, :, 3), cld_iwp=clouds(:, :, 4), &
-!                          cld_ref_ice=clouds(:, :, 5), cld_rwp=clouds(:, :, 6), &
-!                          cld_ref_rain=clouds(:, :, 7), cld_swp=clouds(:, :, 8), &
-!                          cld_ref_snow=clouds(:, :, 9))
-!
-!          call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, Model%lsswr)
-!
-!          call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, kd, Model%lsswr)
-!
-!            ! Surface down and up spectral component fluxes
-!            ! Save two spectral bands' surface downward and upward fluxes for output.
-!          call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
-!
-!            ! Night time: set SW heating rates and fluxes to zero
-!          call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, Grid, Model, nday, Model%lsswr)
-!
-!          call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
-!
-!      end subroutine Do_sw_rad
-
-
-      subroutine Do_lw_rad (Model, Grid, Sfcprop, Radtend, Tbd, Diag, &
-          Coupling, tsfg, tsfa, im, lmk, lmp, lm, kd, plyr, plvl, tlyr,   &
-          tlvl, qlyr, olyr, gasvmr, clouds, faerlw)
-
-        implicit none
-
-        type(GFS_control_type), intent(in) :: Model
-        type(GFS_grid_type),    intent(in) :: Grid
-        type(GFS_sfcprop_type), intent(in) :: Sfcprop
-        type(GFS_radtend_type), intent(inout) :: Radtend
-        type(GFS_tbd_type),     intent(in) :: Tbd
-        type(GFS_diag_type), intent(inout) :: Diag
-        type(GFS_coupling_type), intent(inout) :: Coupling
-
-        integer, intent(in) :: im, lmk, lmp, kd, lm
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP), intent(in) :: plyr, tlyr, qlyr, olyr
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfg, tsfa
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            1 + LTP), intent(in) :: plvl, tlvl
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NF_VGAS), intent(in) :: gasvmr
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NF_CLDS), intent(in) :: clouds
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NBDLW, NF_AELW), intent(in)::faerlw
-
-          ! Local vars
-        integer :: k, k1
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP) :: htlw0, htlwc
-
-
-            ! Setup surface emissivity for LW radiation.
-          call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,         &        !  ---  inputs
-                        Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
-                        tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,  &
-                        Radtend%semis)                                              !  ---  outputs
-
-            ! Compute LW heating rates and fluxes.
-              call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-                 gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-                 gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-                 gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-                 Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
-                 tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
-                 Model%lslwr,                                          &
-                 htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
-                 hlw0=htlw0,                                           & !  ---  optional output
-                 cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
-                 cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
-                 cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
-                 cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
-
-            ! Save calculation results
-          call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
-
-
-      end subroutine Do_lw_rad
-
-
         !>  - For time averaged output quantities (including total-sky and
         !!    clear-sky SW and LW fluxes at TOA and surface; conventional
         !!    3-domain cloud amount, cloud top and base pressure, and cloud top
@@ -2359,6 +2127,198 @@
         Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
 
       end subroutine Post_lw
+
+
+      subroutine Pre_radiation (Model, Grid, lm, me, im,  ntrac, &
+          lmk, lmp, kd, kt, kb, lla, llb, lya, lyb, lp1, raddt,  &
+           tskn, tsfg, Sfcprop,  Statein, plvl, plyr,            &
+          tlyr, prslk1, rhly, qstl, tracer1, olyr, Radtend,      &
+          gasvmr, tlvl, tsfa, tvly, qlyr, nday, idxday, faersw,  &
+          faerlw, aerodp, Tbd, Cldprop, deltaq, clouds, cldsa,   &
+          mtopa, mbota, sfcalb)
+
+
+        implicit none
+
+        integer, intent(inout) :: me, lm, im, lp1, ntrac
+        integer, intent(inout) :: lmk, lmp, kd, kt, kb, lla, llb, lya, lyb
+        type(GFS_control_type),   intent(in) :: Model
+        type(GFS_grid_type),      intent(in) :: Grid
+        type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
+        type(GFS_statein_type), intent(in) :: Statein
+        type(GFS_radtend_type), intent(in) :: Radtend
+        type(GFS_tbd_type),     intent(in) :: Tbd
+        type(GFS_cldprop_type), intent(in) :: Cldprop
+
+        integer, intent(out) :: nday
+        integer, dimension(Size (Grid%xlon, 1)), intent(inout) :: idxday
+        real(kind=kind_phys), intent(out)    :: raddt
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(inout) :: tsfg, tskn
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(inout) :: plvl
+        real(kind=kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+             LTP), intent(inout) :: plyr, tlyr, prslk1, rhly, qstl
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, 2:Model%ntrac), intent(inout) :: tracer1
+        real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+             LTP), intent(inout) :: olyr
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+             LTP, NF_VGAS), intent(inout) :: gasvmr
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            1 + LTP), intent(inout) :: tlvl
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(inout) :: tsfa
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP), intent(inout) :: qlyr, tvly
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NBDSW, NF_AESW), intent(inout) :: faersw
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NBDLW, NF_AELW), intent(inout) :: faerlw
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(inout) :: aerodp
+        real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
+            LTP), intent(out) :: deltaq
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_CLDS), intent(inout) :: clouds
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(out) :: cldsa
+        integer, dimension(size(Grid%xlon, 1), 3), intent(out) :: mbota, mtopa
+        real (kind = kind_phys), dimension(im, NF_ALBD), intent(out) ::  sfcalb
+
+
+          ! Set commonly used integers
+        call Set_common_int (Model, Grid, lm, me, im, lp1, ntrac)
+
+          !Set local /level/layer indexes corresponding
+          ! to in/out variables
+        call Set_local_int (lmk, lm, lmp, kd, kt, &
+            kb, lla, llb, lya, lyb, lp1, raddt, Model)
+  
+
+          ! Setup surface ground temperature and 
+          ! ground/air skin temperature if required.
+        call Set_sfc_vars (im, tskn, tsfg, Sfcprop, Grid)
+
+
+          ! Prepare atmospheric profiles.
+          ! Convert pressure unit from pa to mb
+        call Prep_profiles (lm, kd, im, Statein, plvl, plyr, tlyr, &
+            prslk1, rhly, qstl, Model, Grid)
+
+
+          ! Recast remaining all tracers (except sphum)
+          ! forcing them all to be positive
+        call Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, rhly, &
+            qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, llb,    &
+            lla, lya, lyb)
+
+
+          ! Get layer ozone mass mixing ratio
+        call Prep_ozone  (Model, Grid, im, lmk, tracer1, olyr, prslk1)
+
+
+          ! Compute cosine of zenith angle.
+        call coszmn (Grid%xlon,Grid%sinlat, Grid%coslat, Model%solhr, &
+            im, me, Radtend%coszen, Radtend%coszdg)
+
+
+          ! Set up non-prognostic gas volume mixing ratioes
+        call getgases (plvl, Grid%xlon, Grid%xlat, im, lmk, gasvmr)
+
+
+          ! Get temperature at layer interface, and layer moisture.
+        call Prep_t_and_moist (Grid, Model, Statein, lmp, kd, lmk, lm, &
+            im, lya, lyb, plyr, tlyr, tlvl, plvl, tsfa, tskn, tvly, qlyr)
+
+
+          ! Check for daytime points for SW radiation.
+        call Find_daytime (im, Radtend, Grid, nday, idxday)
+
+
+          ! Setup aerosols
+        call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk,   &
+            tracer1, Grid%xlon, Grid%xlat, im, lmk, lmp, Model%lsswr, &
+            Model%lslwr, faersw,faerlw,aerodp)
+
+
+          !  Obtain cloud information
+        call Get_cloud_info (Model, Grid, Tbd, Sfcprop, Cldprop,  &
+            Statein, tracer1, lmk, lmp, lm, lya, lyb, im, me, kd, &
+            deltaq, plvl, plyr, tlyr, qlyr, tvly,   &
+            rhly, qstl, clouds, cldsa, mtopa, mbota)
+
+
+            ! Setup surface albedo for SW calculation
+        call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+            Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa,     &
+            Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf,   &
+            Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,    &
+            Sfcprop%tisfc, im, Model%lsswr,                               &
+            sfcalb, Radtend%sfalb)                            !  ---  outputs
+
+
+            ! Setup surface emissivity for LW radiation.
+        call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  ---  inputs
+            Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
+            tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
+            Radtend%semis)                                   !  ---  outputs
+
+
+      end subroutine Pre_radiation
+
+      subroutine Post_radiation (Radtend, tsfa, lm, kd, htlwc, htlw0, &
+          Model, Coupling, Grid, htswc, htsw0, scmpsw, sfcalb, Diag,  &
+          nday, Statein, im, kt, kb, raddt, cldsa, mtopa, mbota,      &
+          clouds, aerodp)
+
+        implicit none
+
+        integer, intent(in) :: lm, kd, im, kt, kb
+        type(GFS_grid_type),    intent(in)     :: Grid
+        type(GFS_control_type), intent(in)     :: Model
+        type(GFS_statein_type), intent(in)     :: Statein
+        type(GFS_radtend_type), intent(inout)  :: Radtend
+        type(GFS_coupling_type), intent(inout) :: Coupling
+        type(GFS_diag_type), intent(inout)     :: Diag
+
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+          LTP), intent(in) :: htlw0, htlwc, htswc, htsw0
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfa
+        type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD), intent(in) :: sfcalb
+        integer, intent(in) :: nday
+        real(kind = kind_phys), intent(in) :: raddt
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(in) :: cldsa
+        integer, dimension(size(Grid%xlon, 1), 3), intent(in) :: mbota, mtopa
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+            LTP, NF_CLDS), intent(in) :: clouds
+        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(in) :: aerodp
+
+
+          ! Save LW results
+      call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
+
+          ! post SW
+      call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
+          Model%lsswr)
+
+      call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
+          kd, Model%lsswr)
+
+          ! Surface down and up spectral component fluxes
+          ! Save two spectral bands' surface downward and upward fluxes for output.
+      call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+
+          ! Night time: set SW heating rates and fluxes to zero
+      call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
+          Grid, Model, nday, Model%lsswr)
+
+      call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+
+
+        ! Collect the fluxr data for wrtsfc
+      call Organize_output (Diag, Model, Grid, Radtend, Statein, &
+          Coupling, im, kd, kt, kb, lm, scmpsw, raddt, cldsa,    &
+          mtopa, mbota, clouds, aerodp)
+
+      end subroutine Post_radiation
 
 
 !
