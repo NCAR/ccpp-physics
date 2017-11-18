@@ -326,11 +326,11 @@
 
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
-      use module_radsw_main,         only: rswinit,  swrad
+      use module_radsw_main,         only: rswinit,  swrad_run
 
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-      use module_radlw_main,         only: rlwinit,  lwrad
+      use module_radlw_main,         only: rlwinit,  lwrad_run
       use GFS_typedefs,              only: GFS_statein_type,             &
                                            GFS_stateout_type,            &
                                            GFS_sfcprop_type,             &
@@ -1018,7 +1018,7 @@
       type(GFS_cldprop_type),         intent(in)    :: Cldprop
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_diag_type),            intent(inout) :: Diag
-        
+
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -1212,13 +1212,13 @@
 
 
           ! Calculate SW heating and fluxes
-      call swrad (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
+      call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
           faersw(:, :, :, 3), sfcalb(:, 1), sfcalb(:,2), sfcalb(:,3),  &
           sfcalb(:,4), Radtend%coszen, Model%solcon,  nday, idxday, im,&
           lmk, lmp, Model%lprnt, clouds(:,:,1), Model%lsswr,           &
-          htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs 
+          htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs
           hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional outputs
           cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! Optional input
           cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
@@ -1227,7 +1227,7 @@
 
 
           ! Calculate LW heating rates and fluxes.
-      call lwrad (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
+      call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
           gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
           gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
           gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
@@ -1278,7 +1278,7 @@
         integer, intent(in) :: lm, lp1
         type(GFS_control_type),   intent(in) :: Model
         real(kind=kind_phys), intent(out)    :: raddt
-       
+
 
           ! PAJ: LTP is a global parameter
         lmk = lm + LTP             ! num of local layers
@@ -1386,12 +1386,12 @@
       end subroutine Prep_profiles
 
 
-      subroutine Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, & 
+      subroutine Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, &
           rhly, qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, &
           llb, lla, lya, lyb)
 
         implicit none
- 
+
         type(GFS_statein_type), intent(in) :: Statein
         type(GFS_grid_type),    intent(in) :: Grid
         type(GFS_control_type), intent(in) :: Model
@@ -1410,7 +1410,7 @@
 
 
         do j = 2, ntrac
-          do k = 1, lm 
+          do k = 1, lm
             k1 = k + kd
             tracer1(:, k1, j) = Max (0.0, Statein%qgrs(:, k, j))
           end do
@@ -1683,7 +1683,7 @@
             !      it is to enhance cloudiness due to suspended convec cloud water
             !      for zhao/moorthi's (icmphys=1) &
             !          ferrier's (icmphys=2) microphysics schemes
-            !                                       
+            !
 
           if (Model%shoc_cld) then
               ! all but MG microphys
@@ -1806,7 +1806,7 @@
 
           ! Local vars
         integer :: i, j, k1, k, itop, ibtc
-        real(kind = kind_phys) :: tem0d 
+        real(kind = kind_phys) :: tem0d
 
 
         if_lssav: if (Model%lssav) then
@@ -2092,7 +2092,7 @@
 
           ! Local vars
         integer :: k, k1
-        
+
 
         if (.not. Model%lslwr) return
 
@@ -2190,9 +2190,9 @@
           ! to in/out variables
         call Set_local_int (lmk, lm, lmp, kd, kt, &
             kb, lla, llb, lya, lyb, lp1, raddt, Model)
-  
 
-          ! Setup surface ground temperature and 
+
+          ! Setup surface ground temperature and
           ! ground/air skin temperature if required.
         call Set_sfc_vars (im, tskn, tsfg, Sfcprop, Grid)
 

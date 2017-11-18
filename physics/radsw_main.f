@@ -504,7 +504,7 @@
 
 !  ---  public accessable subprograms
 
-      public swrad, rswinit
+      public swrad_run, rswinit
 
 
 ! =================
@@ -582,7 +582,7 @@
 
 
 
-!! \section arg_table_swrad
+!! \section arg_table_swrad_run Argument Table
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -631,15 +631,11 @@
 !! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
 !! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
-
-
-
-
-
+!!
 !> \section General_swrad General Algorithm
 !> @{
 !-----------------------------------
-      subroutine swrad                                                  &
+      subroutine swrad_run                                                  &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
      &       gasvmr_co2,                                                &
      &       gasvmr_n2o, gasvmr_ch4,                                    &
@@ -854,7 +850,7 @@
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
 
-      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf   
+      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
@@ -1459,7 +1455,7 @@
 
       return
 !...................................
-      end subroutine swrad
+      end subroutine swrad_run
 !-----------------------------------
 !> @}
 
