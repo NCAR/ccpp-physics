@@ -56,7 +56,7 @@
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
 !! | xmu            | time_step_zenith_angle_adjust_factor_for_sw            | time step zenith angle adjust factor for shortwave                    | none          |    2 | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | in     | F        |
 !!
       subroutine GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
         dudt, dvdt, dtdt, dqdt, xmu, Diag)

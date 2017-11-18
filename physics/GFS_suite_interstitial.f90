@@ -22,8 +22,8 @@
 !! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
 !! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
 !! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
 !! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
 !!
       subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 
@@ -84,7 +84,7 @@
 !! | Grid           | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                                    | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
 !! | Statein        | FV3-GFS_Statein_type                                                    | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
-!! | Diag           | FV3-GFS_diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !! | rhbbot         | critical_relative_humidity_at_surface                                   | critical relative humidity at the surface                               | frac          |    0 | real                          | kind_phys |   out  | F        |
 !! | rhpbl          | critical_relative_humidity_at_PBL_top                                   | critical relative humidity at the PBL top                               | frac          |    0 | real                          | kind_phys |   out  | F        |
 !! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                         | critical relative humidity at the top of atmosphere                     | frac          |    0 | real                          | kind_phys |   out  | F        |
@@ -164,7 +164,7 @@
 !! | adjsfcdlw      | surface_downwelling_longwave_flux                            | surface downwelling longwave flux at current time                     | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          | 1    | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | index         | 1    | integer                       |           |   out  | F        |
 !! | heat           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
@@ -307,8 +307,8 @@ end subroutine GFS_suite_interstitial_4_finalize
 !! | work1          | grid_related_coefficient                               | grid size related coefficient used in scale-sensitive schemes         | none          |    1 | real                          | kind_phys | in     | F        |
 !! | work2          | grid_related_coefficient_complement                    | complement to work1                                                   | none          |    1 | real                          | kind_phys | in     | F        |
 !! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !! | ktop           | vertical_index_at_cloud_top                            | vertical index at cloud top                                           | index         |    1 | integer                       |           | inout  | F        |
 !! | kbot           | vertical_index_at_cloud_base                           | vertical index at cloud base                                          | index         |    1 | integer                       |           | inout  | F        |
 !! | rhc            | critical_relative_humidity                             | critical relative humidity                                            | frac          |    2 | real                          | kind_phys |   out  | F        |
@@ -370,8 +370,8 @@ end subroutine GFS_suite_interstitial_5_finalize
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !!
 subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
 
