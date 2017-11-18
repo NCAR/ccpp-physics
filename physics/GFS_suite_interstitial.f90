@@ -377,7 +377,7 @@ subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
 
   use machine,               only: kind_phys
 
-  real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+  real(kind=kind_phys), allocatable, intent(inout) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
 
   deallocate (clw)
   if (allocated(cnvc)) deallocate(cnvc)
