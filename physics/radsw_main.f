@@ -603,7 +603,7 @@
 !! | sfcalb_nir_dif  | albedo_sfc_nir_dif                      | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
 !! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                     | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
 !! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                     | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
-!! | cosz            | cosine_zenit_angle                      | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
+!! | cosz            | cosine_of_zenith_angle                  | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
 !! | solcon          | solar_constant                          | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
 !! | nday            | daytime_points_dimension                | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | idxday          | daytime_points                          | daytime points                                         |         |    1 | integer     |           | in     | F        |
