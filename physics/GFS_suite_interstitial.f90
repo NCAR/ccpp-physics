@@ -354,6 +354,8 @@ subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, w
 
 end subroutine GFS_suite_interstitial_4_run
 
+end module GFS_suite_interstitial_4
+
 module GFS_suite_interstitial_5
 
 contains
