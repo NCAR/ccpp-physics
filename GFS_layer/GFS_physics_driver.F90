@@ -26,6 +26,7 @@ module module_physics_driver
   use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
   use GFS_suite_update_stateout, only: GFS_suite_update_stateout_run
   use GFS_suite_interstitial_4, only: GFS_suite_interstitial_4_run
+  use GFS_suite_interstitial_5, only: GFS_suite_interstitial_5_run
 
   implicit none
 
@@ -2773,12 +2774,13 @@ module module_physics_driver
         enddo
       endif
 
-      deallocate (clw)
+      call GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
+      !deallocate (clw)
       if (Model%do_shoc) then
         deallocate (qpl, qpi, ncpl, ncpi)
       endif
-      if (allocated(cnvc)) deallocate(cnvc)
-      if (allocated(cnvw)) deallocate(cnvw)
+      ! if (allocated(cnvc)) deallocate(cnvc)
+      ! if (allocated(cnvw)) deallocate(cnvw)
 
 !     deallocate (fscav, fswtr)
 !

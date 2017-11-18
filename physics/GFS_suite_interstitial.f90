@@ -354,4 +354,33 @@ subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, w
 
 end subroutine GFS_suite_interstitial_4_run
 
+module GFS_suite_interstitial_5
+
+contains
+
+subroutine GFS_suite_interstitial_5_init ()
+end subroutine GFS_suite_interstitial_5_init
+
+subroutine GFS_suite_interstitial_5_finalize()
+end subroutine GFS_suite_interstitial_5_finalize
+
+!> \section arg_table_GFS_suite_interstitial_5_run Argument Table
+!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
+!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
+!!
+subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
+
+  use machine,               only: kind_phys
+
+  real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+
+  deallocate (clw)
+  if (allocated(cnvc)) deallocate(cnvc)
+  if (allocated(cnvw)) deallocate(cnvw)
+
+end subroutine GFS_suite_interstitial_5_run
+
 end module
