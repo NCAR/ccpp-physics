@@ -123,7 +123,7 @@
       real(kind=kind_phys) :: work3(im)
 
       do i = 1, im
-        tem1       = dx(i)*dx(i)
+        tem1       = dx(i)
         tem2       = tem1
         dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
         cldf(i)    = cgwf(1)*work1(i) + cgwf(2)*work2(i)

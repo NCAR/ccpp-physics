@@ -1963,10 +1963,9 @@ module module_physics_driver
 !          if (work3(i) > 0.0) cumabs(i) = cumabs(i) / (dtp*work3(i))
 !        enddo
 
-        call gwdc_pre_run (                                         &
-             im, Model%cgwf, Grid%dx, work1, work2, dlength, cldf,  &
+        call gwdc_pre_run (                                             &
+             im, Model%cgwf, Grid%dx, work1, work2, dlength, cldf,      &
              levs, kbot, ktop, dtp, Stateout%gt0, dtdt, del, cumabs)
-
 
 !       do i = 1, im
 !         do k = kbot(i), ktop(i)
