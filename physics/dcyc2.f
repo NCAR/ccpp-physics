@@ -350,9 +350,25 @@
 
 !! \section arg_table_dcyc2t3_post_run Argument Table
 !!
-      subroutine dcyc2t3_post_run()
+      subroutine dcyc2t3_post_run(                                      &
+     &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)
 
+      use GFS_typedefs, only: GFS_diag_type
+      use machine,      only: kind_phys
 
+      implicit none
+
+      integer, intent(in) :: im
+      real(kind=kind_phys), dimension(im), intent(in) ::                &
+     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw
+      type(GFS_diag_type), intent(inout) :: Diag
+
+      Diag%dlwsfci(:) = adjsfcdlw(:)
+      Diag%ulwsfci(:) = adjsfculw(:)
+      Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
+      Diag%dswsfci(:) = adjsfcdsw(:)
+
+      return
 
       end subroutine dcyc2t3_post_run
 

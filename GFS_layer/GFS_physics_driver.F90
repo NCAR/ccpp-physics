@@ -24,6 +24,7 @@ module module_physics_driver
   use gwdc_post,             only: gwdc_post_run
   use rayleigh_damp,         only: rayleigh_damp_run
   use dcyc2t3,               only: dcyc2t3_run
+  use dcyc2t3_post,          only: dcyc2t3_post_run
   use cnvc90,                only: cnvc90_run
 
   implicit none
@@ -40,6 +41,7 @@ module module_physics_driver
   real(kind=kind_phys), parameter :: albdf   = 0.06 
   real(kind=kind_phys) tf, tcr, tcrf
   parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf))
+  integer, parameter :: intgr_one = 1
 
 
 !> GFS Physics Implementation Layer
@@ -1073,11 +1075,15 @@ module module_physics_driver
 
       enddo   ! end iter_loop
 
+      call dcyc2t3_post_run (                                           &
+           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)
+
+
       Diag%epi(:)     = ep1d(:)
-      Diag%dlwsfci(:) = adjsfcdlw(:)
-      Diag%ulwsfci(:) = adjsfculw(:)
-      Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
-      Diag%dswsfci(:) = adjsfcdsw(:)
+!      Diag%dlwsfci(:) = adjsfcdlw(:)
+!      Diag%ulwsfci(:) = adjsfculw(:)
+!      Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
+!      Diag%dswsfci(:) = adjsfcdsw(:)
       Diag%gfluxi(:)  = gflx(:)
       Diag%t1(:)      = Statein%tgrs(:,1)
       Diag%q1(:)      = Statein%qgrs(:,1,1)
@@ -2035,11 +2041,11 @@ module module_physics_driver
 
 !GFDL replacing lat with "1"
 !       call gwdc (im, ix, im, levs, lat, gu0, gv0, gt0, gq0, dtp,       &
-        call gwdc_run (                                             & 
-             im, ix, im, levs, 1, Statein%ugrs, Statein%vgrs,       &
-             Statein%tgrs, Statein%qgrs(:,:,1), dtp, Statein%prsl,  &
-             Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,     &
-             con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,     &
+        call gwdc_run (                                                 & 
+             im, ix, im, levs, intgr_one, Statein%ugrs, Statein%vgrs,   &
+             Statein%tgrs, Statein%qgrs(:,:,1), dtp, Statein%prsl,      &
+             Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,         &
+             con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,         &
              lprnt, ipr, Model%fhour, gwdcu, gwdcv, dusfcg, dvsfcg)
 
 !       if (lprnt) then
