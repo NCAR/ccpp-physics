@@ -21,6 +21,7 @@ module module_physics_driver
   use GFS_calpreciptype,         only: GFS_calpreciptype_run
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
+  use GFS_zhao_carr_pre,         only: GFS_zhao_carr_pre_run
   implicit none
 
 
@@ -1578,7 +1579,9 @@ module module_physics_driver
 !zhang: precpd interstitial
 !            psautco_l(:) = Model%psautco(1)*work1(:) + Model%psautco(2)*work2(:)
 !            prautco_l(:) = Model%prautco(1)*work1(:) + Model%prautco(2)*work2(:)
-            clw(:,:,1) = Stateout%gq0(:,:,Model%ntcw)
+!zhang: zhao_carr_pre
+!            clw(:,:,1) = Stateout%gq0(:,:,Model%ntcw)
+             call GFS_zhao_carr_pre_run (im,ix, levs,Stateout%gq0(:,:,Model%ntcw),clw(:,:,1))
           endif  ! end if_num_p3d
         endif    ! end if (ncld == 2)
       else    ! if_ntcw
@@ -2348,9 +2351,9 @@ module module_physics_driver
 !        enddo
 !      endif
        call GFS_MP_generic_pre_run (im, ix,levs,clw(:,:,1),clw(:,:,2),            &
-                              Model%ldiag3d, Model%ntcw, Model%ncld,              & 
+                             Model%ldiag3d, Model%ntcw, Model%ncld,               & 
                              Model%num_p3d, Stateout%gt0,Stateout%gq0(:,:,1),     &
-                             dtdt,dqdt(:,:,1),dqdt(:,:,2) )
+                             dtdt,dqdt(:,:,1),dqdt(:,:,3) )
 
 
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)

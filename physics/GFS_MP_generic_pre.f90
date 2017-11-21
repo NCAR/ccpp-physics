@@ -29,11 +29,11 @@
 !!|   q            | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity                            | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !!|   dtdt         | ??? change meaning in _pre and _post                   |                                                          | K           | 2    | real    | kind_phys | out    |  F       |
 !!|   dqdt1        | ??? change meaning                                     |                                                          | kg kg-1     | 2    | real    | kind_phys | out    |  F       |
-!!|   dqdt2        | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | out    |  F       |
+!!|   dqdt3        | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | out    |  F       |
 !!
       subroutine GFS_MP_generic_pre_run(im, ix, levs, clw1, clw2,     &
                   ldiag3d, ntcw, ncld, num_p3d, t, q,           & !input
-                 dtdt,dqdt1, dqdt2)                                     !output
+                 dtdt,dqdt1, dqdt3)                                     !output
      
 !
       use machine,               only: kind_phys
@@ -49,7 +49,7 @@
       real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,  &
                                                      clw1,clw2
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::  dtdt, &
-                                                     dqdt1, dqdt2
+                                                     dqdt1, dqdt3
 
        if (ldiag3d) then
          do i = 1, im
@@ -58,12 +58,12 @@
              dqdt1(i,k) =  q(i,k)                 
            enddo
          end do
-         !in FV3GFS v0 OP: ntcw=2, ncld=1, num_p3d=4, ntrac=3
+         !in FV3GFS v0 OP: ntcw=3, ncld=1, num_p3d=4, ntrac=3
          do n=ntcw,ntcw+ncld-1     
            if (n == ntcw .and. num_p3d == 4 ) then
                do i = 1, im
                  do k = 1, levs
-                    dqdt2(i,k) = clw1(i,k)+clw2(i,k)   !
+                    dqdt3(i,k) = clw1(i,k)+clw2(i,k)   !
                  enddo
                 enddo
            endif
