@@ -16,9 +16,10 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
-  use lsm_noah
-  use surface_exchange_coefficients
+  use lsm_noah, lsm_noah_pre, lsm_noah_post
+  use surface_exchange_coefficients, surface_exchange_coefficients_post
   use surface_diagnose
+  use GFS_surface_loop_control
 
   implicit none
 
@@ -884,11 +885,12 @@ module module_physics_driver
 
 !  --- ...  lu: update flag_guess
 
-        do i = 1, im
-          if (iter == 1 .and. wind(i) < 2.0) then
-            flag_guess(i) = .true.
-          endif
-        enddo
+!        do i = 1, im
+!          if (iter == 1 .and. wind(i) < 2.0) then
+!            flag_guess(i) = .true.
+!          endif
+!        enddo
+        call GFS_surface_loop_control_part1_run(im,iter,wind,flag_guess)
 
         if (Model%nstf_name(1) > 0) then
 
@@ -1044,16 +1046,16 @@ module module_physics_driver
 
 !  --- ...  lu: update flag_iter and flag_guess
 
-        do i = 1, im
-          flag_iter(i)  = .false.
-          flag_guess(i) = .false.
-
-          if (iter == 1 .and. wind(i) < 2.0) then
-            if ((islmsk(i) == 1) .or. ((islmsk(i) == 0) .and.           &
-                                       (Model%nstf_name(1) > 0))) then
-              flag_iter(i) = .true.
-            endif
-          endif
+!        do i = 1, im
+!          flag_iter(i)  = .false.
+!          flag_guess(i) = .false.
+!
+!          if (iter == 1 .and. wind(i) < 2.0) then
+!            if ((islmsk(i) == 1) .or. ((islmsk(i) == 0) .and.           &
+!                                       (Model%nstf_name(1) > 0))) then
+!              flag_iter(i) = .true.
+!            endif
+!          endif
 
 !         if(islmsk(i) == 1 .and. iter == 1) then
 !           if (wind(i) < 2.0) flag_iter(i) = .true.
@@ -1061,7 +1063,9 @@ module module_physics_driver
 !    &                           .and. nstf_name(1) > 0) then
 !           if (wind(i) < 2.0) flag_iter(i) = .true.
 !         endif
-        enddo
+!        enddo
+        call GFS_surface_loop_control_part2_run(im,iter,wind,flag_guess,&
+             islmsk,Model%nstf_name(1))
 
       enddo   ! end iter_loop
 

@@ -42,10 +42,10 @@
 !!| fm             | Monin-Obukhov_similarity_function_for_momentum              | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out? | F        |
 !!| fh             | Monin-Obukhov_similarity_function_for_heat                  | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out? | F        |
 !!| ustar          | surface_friction_velocity                                   | surface friction velocity                       | m s-1      | 1    | real    | kind_phys |   out? | F        |
-!!| wind           | surface_wind_speed                                          | surface wind speed                              | m s-1      | 1    | real    | kind_phys |   out? | F        |
+!!| wind           | surface_wind_speed                                          | surface wind speed                              | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection      | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m       | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out? | F        |
-!!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m            | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out? | F        |
+!!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m       | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out  | F        |
+!!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m            | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out  | F        |
 !!| sigmaf         | vegetation_area_fraction                                    | areal fractional cover of green vegetation      | frac       | 1    | real    | kind_phys | in     | F        |
 !!| vegtype        | cell_vegetation_type                                        | vegetation type at each grid cell               | index      | 1    | integer |           | in     | F        |
 !!| shdmax         | maximum_vegetation_area_fraction                            | max fractnl cover of green veg                  | frac       | 1    | real    | kind_phys | in     | F        |
