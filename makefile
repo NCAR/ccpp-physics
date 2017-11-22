@@ -125,28 +125,29 @@ SRCS_f90 = \
 	   ./physics/module_nst_parameters.f90                                       \
 	   ./physics/module_nst_water_prop.f90                                       \
 	   ./physics/ozinterp.f90                                                    \
-	   ./physics/physcons.f90						     \
-	   ./physics/wam_f107_kp_mod.f90                                             \
-	   ./IPD_layer/IPD_driver_cap.f90
+	   ./physics/physcons.f90                                                    \
+	   ./physics/wam_f107_kp_mod.f90
 
-SRCS_F   = ./physics/aer_cloud.F						     \
-	   ./physics/cldmacro.F   						     \
+SRCS_F   = ./physics/aer_cloud.F                                                 \
+	   ./physics/cldmacro.F                                                      \
 	   ./physics/cldwat2m_micro.F                                                \
 	   ./physics/machine.F                                                       \
-	   ./physics/num_parthds.F						     \
+	   ./physics/num_parthds.F                                                   \
 	   ./physics/wv_saturation.F
 
 SRCS_F90 = \
-	   ./physics/GFDL_parse_tracers.F90					     \
-	   ./GFS_layer/GFS_abstraction_layer.F90 				     \
-	   ./GFS_layer/GFS_diagnostics.F90       				     \
-	   ./GFS_layer/GFS_driver.F90            				     \
-	   ./GFS_layer/GFS_physics_driver.F90    				     \
-	   ./GFS_layer/GFS_radiation_driver.F90  				     \
-	   ./GFS_layer/GFS_restart.F90           				     \
-	   ./GFS_layer/GFS_typedefs.F90          				     \
-	   ./IPD_layer/IPD_driver.F90						     \
+	   ./physics/GFDL_parse_tracers.F90                                          \
+	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
+	   ./GFS_layer/GFS_diagnostics.F90                                           \
+	   ./GFS_layer/GFS_driver.F90                                                \
+	   ./GFS_layer/GFS_physics_driver.F90                                        \
+	   ./GFS_layer/GFS_radiation_driver.F90                                      \
+	   ./GFS_layer/GFS_restart.F90                                               \
+	   ./GFS_layer/GFS_typedefs.F90                                              \
+	   ./IPD_layer/IPD_driver_cap.F90                                            \
+	   ./IPD_layer/IPD_driver.F90                                                \
 	   ./IPD_layer/IPD_typedefs.F90
+
 
 SRCS_c   =
 
@@ -172,6 +173,9 @@ $(LIBRARY): $(OBJS)
 
 ./radiation_aerosols.o : ./gfsphys/radiation_aerosols.f
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
+
+./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
 
 .PHONY: clean
 clean:
