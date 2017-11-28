@@ -1523,10 +1523,12 @@ c
 !! | Diag           | FV3-GFS_Diag_type                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_typedefs%GFS_tbd_type     |           | inout  | F        |
 !!
-      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model, Grid, Diag, Tbd)
+      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+     &                               Grid, Diag, Tbd)
 
         use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_diag_type, GFS_tbd_type
+        use GFS_typedefs,          only: GFS_control_type,              &
+     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
 
         type(GFS_grid_type),            intent(in) :: Grid
         type(GFS_control_type),         intent(in) :: Model
@@ -1534,8 +1536,10 @@ c
         type(GFS_tbd_type),          intent(inout) :: Tbd
 
         real(kind=kind_phys), intent(in) :: frain
-        real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: rain1
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: cnvw, cnvc
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
+     &     intent(in) :: rain1
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
+     &     intent(in) :: cnvw, cnvc
 
         real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
         integer :: num2, num3
@@ -1545,7 +1549,8 @@ c
         if (Model%lssav) then
           Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
         endif
-        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then
+        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
+     &                             (Model%npdf3d == 3)) then
           num2 = Model%num_p3d + 2
           num3 = num2 + 1
           Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
