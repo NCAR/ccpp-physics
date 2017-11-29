@@ -327,6 +327,7 @@
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
       use module_radsw_main,         only: rswinit,  swrad_run
+      use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
 
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
@@ -1006,6 +1007,8 @@
          (Model, Statein, Stateout, Sfcprop, Coupling, Grid, Tbd, &
           Cldprop, Radtend, Diag)
 
+!      use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
+
       implicit none
 
       type(GFS_control_type),         intent(in)    :: Model
@@ -1186,23 +1189,19 @@
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
           LTP) :: plyr, tlyr, qlyr, olyr, rhly, tvly, qstl, prslk1, deltaq, &
           htswc, htsw0, htlw0, htlwc
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          1 + LTP) :: plvl, tlvl
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP, 2:Model%ntrac) :: tracer1
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP, NF_CLDS) :: clouds
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-           LTP, NF_VGAS) :: gasvmr
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP, NBDSW, NF_AESW) :: faersw
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP, NBDLW, NF_AELW) :: faerlw
+      real(kind = kind_phys), dimension(Size(Grid%xlon, 1), Model%levr+1+LTP) :: plvl, tlvl
+
+      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, 2:Model%ntrac) :: tracer1
+      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NF_CLDS) :: clouds
+      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NF_VGAS) :: gasvmr
+
+      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDSW, NF_AESW) :: faersw
+      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
 
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
 
-      call Pre_radiation (Model, Grid, lm, me, im,  ntrac, &
+      call GFS_RRTMG_pre_run (Model, Grid, lm, me, im,  ntrac, &
           lmk, lmp, kd, kt, kb, lla, llb, lya, lyb, lp1, raddt,  &
            tskn, tsfg, Sfcprop,  Statein, plvl, plyr,            &
           tlyr, prslk1, rhly, qstl, tracer1, olyr, Radtend,      &
@@ -1226,6 +1225,7 @@
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
 
+!zhang: move setemis here
           ! Calculate LW heating rates and fluxes.
       call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
           gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
