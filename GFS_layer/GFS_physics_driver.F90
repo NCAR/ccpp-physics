@@ -21,6 +21,8 @@ module module_physics_driver
 !  use sasas_deep,             only: sasasdeep_run
   use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
   use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
+  use GFS_SCNV_generic_pre,   only: GFS_SCNV_generic_pre_run
+  use GFS_SCNV_generic_post,  only: GFS_SCNV_generic_post_run
   use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
   use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
   use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
@@ -2105,12 +2107,14 @@ module module_physics_driver
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !----------------Convective gravity wave drag parameterization over --------
 
-      if (Model%ldiag3d) then
-        initial_t(:,:)   = Stateout%gt0(:,:)
-      endif
-      if (Model%ldiag3d .or. Model%lgocart) then
-        initial_qv(:,:) = Stateout%gq0(:,:,1)
-      endif
+      ! if (Model%ldiag3d) then
+      !   initial_t(:,:)   = Stateout%gt0(:,:)
+      ! endif
+      ! if (Model%ldiag3d .or. Model%lgocart) then
+      !   initial_qv(:,:) = Stateout%gq0(:,:,1)
+      ! endif
+
+      call GFS_SCNV_generic_pre_run (Model, Stateout, Grid, initial_t, initial_qv)
 
 !     write(0,*)' before do_shoc shal clstp=',clstp,' kdt=',kdt,
 !    &         ' lat=',lat
@@ -2201,27 +2205,29 @@ module module_physics_driver
           endif   ! end if_imfshalcnv
         endif     ! end if_shal_cnv
 
-        if (Model%lssav) then
-!          update dqdt_v to include moisture tendency due to shallow convection
-          if (Model%lgocart) then
-            do k = 1, levs
-              do i = 1, im
-                tem  = (Stateout%gq0(i,k,1)-initial_qv(i,k)) * frain
-                Coupling%dqdti(i,k) = Coupling%dqdti(i,k)  + tem
-              enddo
-            enddo
-          endif
-          if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
-            Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
-          endif
-        endif   ! end if_lssav
-!
-        do k = 1, levs
-          do i = 1, im
-            if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
-          enddo
-        enddo
+!         if (Model%lssav) then
+! !          update dqdt_v to include moisture tendency due to shallow convection
+!           if (Model%lgocart) then
+!             do k = 1, levs
+!               do i = 1, im
+!                 tem  = (Stateout%gq0(i,k,1)-initial_qv(i,k)) * frain
+!                 Coupling%dqdti(i,k) = Coupling%dqdti(i,k)  + tem
+!               enddo
+!             enddo
+!           endif
+!           if (Model%ldiag3d) then
+!             Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
+!             Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
+!           endif
+!         endif   ! end if_lssav
+! !
+!         do k = 1, levs
+!           do i = 1, im
+!             if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
+!           enddo
+!         enddo
+
+        call GFS_SCNV_generic_post_run (Model, Stateout, Grid, initial_t, initial_qv, frain, Diag, clw)
 
 !       if (lprnt) then
 !         write(0,*)' prsl=',prsl(ipr,:)

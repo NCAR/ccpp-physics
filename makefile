@@ -122,6 +122,7 @@ SRCS_f90 = \
 	   ./physics/gcycle.f90                                                      \
 	   ./physics/get_prs_fv3.f90                                                 \
 		 ./physics/GFS_DCNV_generic.f90                                            \
+		 ./physics/GFS_SCNV_generic.f90                                            \
 		 ./physics/GFS_PBL_generic.f90                                             \
 		 ./physics/GFS_suite_interstitial.f90                                      \
 	   ./physics/h2ointerp.f90                                                   \
