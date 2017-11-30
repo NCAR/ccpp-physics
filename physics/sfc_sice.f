@@ -739,8 +739,8 @@ contains
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        | 
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
-!! | prslk          | air_pressure_at_lowest_model_layer                    | surface layer mean pressure                 | Pa            |    1 | real    | kind_phys | in     | F        |
-!! | prslki         |                                                       |  |  |    1 | real    | kind_phys | in     | F        |
+!! | prsik          | exter_function_at_lowest_model_interface              |                                             | none          |    1 | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function                          |                                             | none          |    1 | real    | kind_phys | in     | F        |
 !! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | inout  | F        |
 !! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | inout  | F        | 
 !! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | inout  | F        |
@@ -755,7 +755,7 @@ contains
 
 ! --- inputs 
       integer :: im
-      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice, tisfc, prslk, prslki
+      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice, tisfc, prsik, prslk
       
 ! --- input/output 
       real(kind=kind_phys), dimension(im), intent(inout) :: cice, zice, tice, work3
@@ -787,7 +787,7 @@ contains
 !! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
 !! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        | 
 !! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
-!! | tsfc           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K             |    1 | real    | kind_phys | in     | F        |
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        | 
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
@@ -810,6 +810,7 @@ contains
       integer :: i
 
 !--- return updated ice thickness & concentration to global arrays
+!    where there is no ice, set temperature to surface skin temperature. 
       do i = 1, im
 
         if (islmsk(i) == 2) then
