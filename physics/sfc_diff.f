@@ -24,11 +24,11 @@
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1              | index      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                        | surface pressure                                | Pa         | 1    | real    | kind_phys | in     | F        |
-!!| u1             | x_wind_at_lowest_layer                                      | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| v1             | y_wind_at_lowest_layer                                      | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| t1             | air_temperature_at_lowest_layer                             | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
-!!| q1             | specific_humidity_at_lowest_layer                           | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
-!!| z1             | height_above_mean_sea_level_at_lowest_layer                 | height above mean sea level at 1st model layer  | m          | 1    | real    | kind_phys | in     | F        |
+!!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!| z1             | height_above_mean_sea_level_at_lowest_model_layer           | height above mean sea level at 1st model layer  | m          | 1    | real    | kind_phys | in     | F        |
 !!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent surface snow thickness         | m          | 1    | real    | kind_phys | in     | F        |
 !!| tskin          | surface_skin_temperature                                    | surface skin temperature                        | K          | 1    | real    | kind_phys | in     | F        |
 !!| z0rl           | surface_roughness_length                                    | surface roughness length                        | m          | 1    | real    | kind_phys | inout  | F        |
@@ -53,6 +53,7 @@
 !!| tsurf          | surface_skin_temperature_after_iteration                    | surface skin temperature after iteration        | K          | 1    | real    | kind_phys | in     | F        |
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
 !!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 1    | logical |           | in     | F        |
+!!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{

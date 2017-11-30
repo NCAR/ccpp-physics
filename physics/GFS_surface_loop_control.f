@@ -7,8 +7,14 @@
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
-      module GFS_surface_loop_control
+      module GFS_surface_loop_control_part1
       contains
+
+      subroutine GFS_surface_loop_control_part1_init
+      end subroutine GFS_surface_loop_control_part1_init
+
+      subroutine GFS_surface_loop_control_part1_finalize
+      end subroutine GFS_surface_loop_control_part1_finalize
 
 !> \brief Brief description of the subroutine
 !!
@@ -45,6 +51,23 @@
 
       end subroutine GFS_surface_loop_control_part1_run
 !> @}
+      end module  GFS_surface_loop_control_part1
+!> @}
+
+!> \defgroup GFS_surface_loop_control GFS_surface_loop_control scheme
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+      module GFS_surface_loop_control_part2
+      contains
+
+      subroutine GFS_surface_loop_control_part2_init
+      end subroutine GFS_surface_loop_control_part2_init
+
+      subroutine GFS_surface_loop_control_part2_finalize
+      end subroutine GFS_surface_loop_control_part2_finalize
 
 !> \brief Brief description of the subroutine
 !!
@@ -91,5 +114,5 @@
       end subroutine GFS_surface_loop_control_part2_run
 !> @}
 
-      end module GFS_surface_loop_control
+      end module GFS_surface_loop_control_part2
 !> @}

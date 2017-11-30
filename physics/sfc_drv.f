@@ -10,9 +10,15 @@
       module lsm_noah_pre
       contains
 
+      subroutine lsm_noah_pre_init
+      end subroutine lsm_noah_pre_init
+
+      subroutine lsm_noah_pre_finalize
+      end subroutine lsm_noah_pre_finalize
+
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsmnoah_pre_run Arguments
+!! \section arg_table_lsm_noah_pre_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
@@ -35,7 +41,7 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine lsmnoah_pre_run                                        &
+      subroutine lsm_noah_pre_run                                        &
      &  (im,km,smsoil,slsoil,smsoilin,slsoilin,drain,runof,evbs,evcw,   &
      &   trans,sbsno,snowc,snohf,smcwlt2,smcref2                        &
      &  )
@@ -68,7 +74,7 @@
       smcwlt2(:) = 0.0
       smcref2(:) = 0.0
 
-      end subroutine lsmnoah_pre_run
+      end subroutine lsm_noah_pre_run
 
 !> @}
       end module lsm_noah_pre
@@ -84,9 +90,15 @@
       module lsm_noah_post
       contains
 
+      subroutine lsm_noah_post_init
+      end subroutine lsm_noah_post_init
+
+      subroutine lsm_noah_pre_finalize
+      end subroutine lsm_noah_pre_finalize
+
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsmnoah_post_run Arguments
+!! \section arg_table_lsm_noah_post_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
@@ -101,7 +113,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine lsmnoah_post_run                                       &
+      subroutine lsm_noah_post_run                                       &
      &  (im,flag_lssav,dtf,drain,runof,runoff,srunoff                   &
      &  )
       use machine,           only: kind_phys
@@ -122,7 +134,7 @@
         srunoff(:) = srunoff(:) + runof(:) * dtf * 0.001
       end if
 
-      end subroutine lsmnoah_post_run
+      end subroutine lsm_noah_post_run
  
 !> @}
       end module lsm_noah_post
@@ -137,11 +149,11 @@
       module lsm_noah
       contains
 
-      subroutine lsmnoah_init
-      end subroutine lsmnoah_init
+      subroutine lsm_noah_init
+      end subroutine lsm_noah_init
 
-      subroutine lsmnoah_finalize
-      end subroutine lsmnoah_finalize
+      subroutine lsm_noah_finalize
+      end subroutine lsm_noah_finalize
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -252,30 +264,30 @@
 !      subroutine sfc_drv                                                &
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsmnoah_run Arguments
+!! \section arg_table_lsm_noah_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
 !!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | index      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                        | surface pressure                           | Pa         | 1    | real    | kind_phys | in     | F        |
-!!| u1             | x_wind_at_lowest_layer                                      | x component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| v1             | y_wind_at_lowest_layer                                      | y component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| t1             | air_temperature_at_lowest_layer                             | 1st model layer air temperature            | K          | 1    | real    | kind_phys | in     | F        |
-!!| q1             | specific_humidity_at_lowest_layer                           | 1st model layer specific humidity          | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind        | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature            | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity          | kg kg-1    | 1    | real    | kind_phys | in     | F        |
 !!| soiltyp        | cell_soil_type                                              | soil type at each grid cell                | index      | 1    | integer |           | in     | F        |
 !!| vegtype        | cell_vegetation_type                                        | vegetation type at each grid cell          | index      | 1    | integer |           | in     | F        |
 !!| sigmaf         | vegetation_area_fraction                                    | areal fractional cover of green vegetation | frac       | 1    | real    | kind_phys | in     | F        |
 !!| sfcemis        | surface_longwave_emissivity                                 | surface longwave emissivity                | frac       | 1    | real    | kind_phys | in     | F        |
 !!| dlwflx         | surface_downwelling_longwave_flux                           | total sky surface downward longwave flux   | W m-2      | 1    | real    | kind_phys | in     | F        |
 !!| dswsfc         | surface_downwelling_shortwave_flux                          | total sky surface downward shortwave flux  | W m-2      | 1    | real    | kind_phys | in     | F        |
-!!| snet           | surface_net_downward_shortwave_flux                         | total sky surface net shortwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
+!!| snet           | surface_net_downwelling_shortwave_flux                      | total sky surface net shortwave flux       | W m-2      | 1    | real    | kind_phys | in     | F        |
 !!| delt           | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real    | kind_phys | in     | F        |
 !!| tg3            | deep_soil_temperature                                       | bottom soil temperature                    | K          | 1    | real    | kind_phys | in     | F        |
 !!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum        | none       | 1    | real    | kind_phys | in     | F        |
 !!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture     | none       | 1    | real    | kind_phys | in     | F        |
 !!| prsl1          | air_pressure_at_lowest_model_layer                          | Model layer 1 mean pressure                | Pa         | 1    | real    | kind_phys | in     | F        |        
 !!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
-!!| zf             | height_above_mean_sea_level_at_lowest_layer                 | height above MSL at 1st model layer        | m          | 1    | real    | kind_phys | in     | F        |
+!!| zf             | height_above_mean_sea_level_at_lowest_model_layer           | height above MSL at 1st model layer        | m          | 1    | real    | kind_phys | in     | F        |
 !!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2               | flag       | 1    | integer |           | in     | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| slopetyp       | surface_slope_classification                                | class of sfc slope                         | index      | 1    | integer |           | in     | F        |
@@ -322,7 +334,7 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine lsmnoah_run                                            &
+      subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, islimsk, ddvel, slopetyp,               &
@@ -761,7 +773,7 @@
       return
 !...................................
 !      end subroutine sfc_drv
-      end subroutine lsmnoah_run
+      end subroutine lsm_noah_run
 !-----------------------------------
 !> @}
 

@@ -23,13 +23,13 @@
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1              | index      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                        | surface pressure                                | Pa         | 1    | real    | kind_phys | in     | F        |
-!!| u1             | x_wind_at_lowest_layer                                      | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| v1             | y_wind_at_lowest_layer                                      | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| t1             | air_temperature_at_lowest_layer                             | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
-!!| q1             | specific_humidity_at_lowest_layer                           | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
 !!| tskin          | surface_skin_temperature                                    | surface skin temperature                        | K          | 1    | real    | kind_phys | in     | F        |
 !!| qsurf          | surface_specific_humidity                                   | surface specific humidity                       | kg kg-1    | 1    | real    | kind_phys | in     | F        |
-!!| f10m           | ratio_of_wind_at_lowest_layer_and_wind_at_10m               | ratio of fm10 and fm                            | ratio      | 1    | real    | kind_phys |   out  | F        |
+!!| f10m           | ratio_of_wind_at_lowest_model_layer_and_wind_at_10m         | ratio of fm10 and fm                            | ratio      | 1    | real    | kind_phys |   out  | F        |
 !!| u10m           | x_wind_at_10m                                               | x component of wind at 10 m                     | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| v10m           | y_wind_at_10m                                               | y component of wind at 10 m                     | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| t2m            | temperature_at_2m                                           | temperature at 2 m                              | K          | 1    | real    | kind_phys |   out  | F        |
@@ -40,6 +40,7 @@
 !!| fh             | Monin-Obukhov_similarity_function_for_heat                  | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys | in     | F        |
 !!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m       | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys | in     | F        |
 !!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m            | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys | in     | F        |
+!!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{

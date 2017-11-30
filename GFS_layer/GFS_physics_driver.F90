@@ -17,9 +17,9 @@ module module_physics_driver
                                    GFS_radtend_type, GFS_diag_type
 
   use lsm_noah, lsm_noah_pre, lsm_noah_post
-  use surface_exchange_coefficients, surface_exchange_coefficients_post
+  use surface_exchange_coefficients
   use surface_diagnose
-  use GFS_surface_loop_control
+  use GFS_surface_loop_control_part1, GFS_surface_loop_control_part2
 
   implicit none
 
@@ -862,7 +862,7 @@ module module_physics_driver
       Diag%zlvl(:)    = Statein%phil(:,1) * onebg
 !      Diag%smcwlt2(:) = 0.0
 !      Diag%smcref2(:) = 0.0
-      call lsmnoah_pre_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
+      call lsm_noah_pre_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
             drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
@@ -975,7 +975,7 @@ module module_physics_driver
 !    &,' pgr=',pgr(ipr),' sfcemis=',sfcemis(ipr)
 
 !          call sfc_drv                                                 &
-          call lsmnoah_run                                             &
+          call lsm_noah_run                                             &
 !  ---  inputs:
            (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
             Statein%tgrs(:,1), Statein%qgrs(:,1,1), soiltyp, vegtype, sigmaf,      &
@@ -2685,7 +2685,7 @@ module module_physics_driver
 !        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
 !        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
 !      endif
-      call lsmnoah_post_run(im,Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
+      call lsm_noah_post_run(im,Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       do i = 1, im
