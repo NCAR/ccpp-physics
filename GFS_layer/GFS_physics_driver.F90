@@ -16,10 +16,13 @@ module module_physics_driver
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
 
-  use lsm_noah, lsm_noah_pre, lsm_noah_post
+  use lsm_noah
+  use lsm_noah_pre
+  use lsm_noah_post
   use surface_exchange_coefficients
   use surface_diagnose
-  use GFS_surface_loop_control_part1, GFS_surface_loop_control_part2
+  use GFS_surface_loop_control_part1
+  use GFS_surface_loop_control_part2
 
   implicit none
 
@@ -1065,7 +1068,7 @@ module module_physics_driver
 !         endif
 !        enddo
         call GFS_surface_loop_control_part2_run(im,iter,wind,flag_guess,&
-             islmsk,Model%nstf_name(1))
+             flag_iter,islmsk,Model%nstf_name(1))
 
       enddo   ! end iter_loop
 

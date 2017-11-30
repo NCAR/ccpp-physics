@@ -40,7 +40,7 @@
       integer, intent(in) :: im, iter
       real(kind=kind_phys), dimension(im), intent(in)  ::               &
      &   wind 
-      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+      logical, dimension(im), intent(inout)  ::                         &
      &   flag_guess 
 
       do i = 1, im
@@ -90,12 +90,15 @@
      $ (im,iter,wind,flag_guess,flag_iter,islmsk,nstf_name1
      $ ) 
 
+      use machine,           only: kind_phys
+
 !  ---  interface variables
       integer, intent(in) :: im, iter, nstf_name1
       integer, dimension(im), intent(in) :: islmsk
+!      integer, dimension(im) :: islmsk
       real(kind=kind_phys), dimension(im), intent(in)  ::               &
      &   wind
-      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+      logical, dimension(im), intent(inout)  ::                         &
      &   flag_guess,flag_iter 
 
       do i = 1, im
@@ -104,7 +107,7 @@
 
         if (iter == 1 .and. wind(i) < 2.0) then
           if ((islmsk(i) == 1) .or. ((islmsk(i) == 0) .and.             &
-                                     (nstf_name1 > 0))) then
+     &                               (nstf_name1 > 0))) then
             flag_iter(i) = .true.
           endif
         endif
