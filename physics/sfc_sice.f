@@ -729,6 +729,20 @@ contains
 
       contains
 
+!!
+!> \brief This subroutine is empty since there are no procedures needed 
+!! \section arg_table_sfc_sice_pre_init  Argument Table
+!!
+      subroutine sfc_sice_pre_init
+      end sfc_sice_pre_init
+
+!!
+!> \brief This subroutine is empty since there are no procedures needed 
+!! \section arg_table_sfc_sice_pre_finalize  Argument Table
+!!
+      subroutine sfc_sice_pre_finalize
+      end sfc_sice_pre_finalize
+
 
 
 !!
@@ -776,9 +790,25 @@ contains
 
       end module sfc_sice_pre
 
-      module sfc_sice_post_run
+      module sfc_sice_post
 
       contains
+
+!!
+!> \brief This subroutine is empty since there are no procedures needed 
+!! \section arg_table_sfc_sice_post_init  Argument Table
+!!
+      subroutine sfc_sice_post_init
+      end sfc_sice_post_init
+
+!!
+!> \brief This subroutine is empty since there are no procedures needed 
+!! \section arg_table_sfc_sice_post_finalize  Argument Table
+!!
+      subroutine sfc_sice_post_finalize
+      end sfc_sice_post_finalize
+
+
 !!
 !! \section arg_table_sice_post  Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
@@ -793,7 +823,7 @@ contains
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
-      subroutine sfc_sice_post(im, islmsk, fice, hice, tisfc, cice, zice, tice, tisfc)
+      subroutine sfc_sice_post_run(im, islmsk, fice, hice, tisfc, cice, zice, tice, tisfc)
 
       use machine, only : kind_phys
 
@@ -824,7 +854,7 @@ contains
         endif
       enddo
 
-      end
+      end sfc_sice_post_run
 
       end module  sfc_sice_post
 !> @}
