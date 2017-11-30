@@ -93,8 +93,8 @@
       subroutine lsm_noah_post_init
       end subroutine lsm_noah_post_init
 
-      subroutine lsm_noah_pre_finalize
-      end subroutine lsm_noah_pre_finalize
+      subroutine lsm_noah_post_finalize
+      end subroutine lsm_noah_post_finalize
 
 !> \brief Brief description of the subroutine
 !!
