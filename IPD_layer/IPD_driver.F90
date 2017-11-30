@@ -12,7 +12,26 @@ module IPD_driver
 
   use physics_restart_layer,      only: restart_populate
 
+#ifdef CCPP_IPD
+  use fms_mod,            only: error_mesg
+  use ccpp_types,         only: ccpp_t
+  use ccpp,               only: ccpp_init
+  use ccpp_fcall,         only: ccpp_run
+  use ccpp_fields,        only: ccpp_fields_add
+! Begin include auto-generated list of modules for ccpp
+! DH* #include "ccpp_modules.inc"
+! End include auto-generated list of modules for ccpp
+  use iso_c_binding,      only: c_loc
+#endif
+
        implicit none
+
+#ifdef CCPP_IPD
+!------------------------------------------------------!
+!  CCPP container                                      !
+!------------------------------------------------------!
+type(ccpp_t), save, target :: cdata
+#endif
 
 !------------------------------------------------------!
 !  IPD containers                                      !
@@ -32,6 +51,9 @@ module IPD_driver
   public IPD_radiation_step
   public IPD_physics_step1
   public IPD_physics_step2
+#ifdef CCPP_IPD
+  public IPD_step
+#endif
 
   CONTAINS
 !*******************************************************************************************
@@ -137,5 +159,86 @@ module IPD_driver
                         IPD_Data%Intdiag)
 
   end subroutine IPD_physics_step2
+
+
+#ifdef CCPP_IPD
+  !----------------------
+  !  IPD step generalized
+  !----------------------
+  subroutine IPD_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Atm_block, Init_parm, l_salp_data, l_snupx, ccpp_suite, step)
+
+    use namelist_soilveg,  only: salp_data, snupx, max_vegtyp
+    use block_control_mod, only: block_control_type
+    use IPD_typedefs,      only: kind_phys
+
+    implicit none
+
+    type(IPD_control_type),    intent(inout)           :: IPD_Control
+    type(IPD_data_type),       intent(inout)           :: IPD_Data(:)
+    type(IPD_diag_type),       intent(inout)           :: IPD_Diag(:)
+    type(IPD_restart_type),    intent(inout)           :: IPD_Restart
+    type (block_control_type), intent(in)   , optional :: Atm_block
+    type(IPD_init_type),       intent(in)   , optional :: Init_parm
+    real(kind=kind_phys),      intent(inout), optional :: l_salp_data
+    real(kind=kind_phys),      intent(inout), optional :: l_snupx(max_vegtyp)
+    character(len=256),        intent(in),    optional :: ccpp_suite
+    integer,                   intent(in)              :: step
+    ! Local variables
+    integer                      :: ierr
+
+    if (step==0) then
+      if (.not. present(Atm_block)) then
+        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
+        print *, "IPD init step called without mandatory Atm_block argument"
+        stop
+      else if (.not. present(Init_parm)) then
+        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
+        print *, "IPD init step called without mandatory Init_parm argument"
+        stop
+      else if (.not. present(l_salp_data)) then
+          ! DH* TODO - NEED PROPER ERROR HANDLING HERE
+          print *, "IPD init step called without mandatory l_salp_data argument"
+          stop
+      else if (.not. present(l_snupx)) then
+          ! DH* TODO - NEED PROPER ERROR HANDLING HERE
+          print *, "IPD init step called without mandatory l_snupx argument"
+          stop
+      else if (.not. present(ccpp_suite)) then
+        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
+        print *, "IPD init step called without mandatory ccpp_suite argument"
+        stop
+      end if
+
+      !--- Initialize CCPP
+      call ccpp_init(ccpp_suite, cdata, ierr)
+
+! Begin include auto-generated list of calls to ccpp_fields_add
+! DH* #include "ccpp_fields.inc"
+! End include auto-generated list of calls to ccpp_fields_add
+
+      !--- Add the DDTs to the CCPP data structure
+      call ccpp_fields_add(cdata, 'IPD_Control', '', c_loc(IPD_Control), &
+                           ierr=ierr)
+      call ccpp_fields_add(cdata, 'IPD_Data', '', c_loc(IPD_Data), &
+                           size(IPD_Data), shape(IPD_Data), ierr)
+      call ccpp_fields_add(cdata, 'IPD_Diag', '', c_loc(IPD_Diag), &
+                           size(IPD_Diag), shape(IPD_Diag), ierr)
+      call ccpp_fields_add(cdata, 'IPD_Restart', '', c_loc(IPD_Restart), ierr=ierr)
+      call ccpp_fields_add(cdata, 'Atm_block', '', c_loc(Atm_block), ierr=ierr)
+      call ccpp_fields_add(cdata, 'Init_parm', '', c_loc(Init_parm), ierr=ierr)
+      call ccpp_fields_add(cdata, 'nblks', Atm_block%nblks, ierr, '')
+      call ccpp_fields_add(cdata, 'salp_data', l_salp_data, ierr)
+      call ccpp_fields_add(cdata, 'snupx', l_snupx, ierr)
+
+      call ccpp_run(cdata%suite%init, cdata, ierr)
+    !else if (step==X) then
+    !  !--- Finalize CCPP
+    !  call ccpp_init(ccpp_suite, cdata, ierr)
+    else
+      call ccpp_run(cdata%suite%ipds(1)%subcycles(1)%schemes(step), cdata, ierr)
+    end if
+  end subroutine IPD_step
+#endif
+
 
 end module IPD_driver

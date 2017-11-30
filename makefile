@@ -22,7 +22,20 @@ VER_PATCH = 0
 
 FFLAGS   += -I../fms -I../fms/include -fPIC
 
-CPPDEFS = -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
+CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
+
+
+ifneq (,$(findstring CCPP_DIRECT,$(CPPDEFS)))
+    # CCPP without IPD
+    IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
+else ifneq (,$(findstring CCPP_IPD,$(CPPDEFS)))
+    # IPD with CCPP
+    IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
+else
+    # IPD without CCPP
+    IPD_DRIVER_CAP =
+endif
+
 
 SRCS_f   =  \
 	   ./physics/cnvc90.f                                                        \
@@ -144,14 +157,15 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_radiation_driver.F90                                      \
 	   ./GFS_layer/GFS_restart.F90                                               \
 	   ./GFS_layer/GFS_typedefs.F90                                              \
-	   ./IPD_layer/IPD_driver_cap.F90                                            \
 	   ./IPD_layer/IPD_driver.F90                                                \
 	   ./IPD_layer/IPD_typedefs.F90
 
-
 SRCS_c   =
 
-DEPEND_FILES = $(SRCS_f) $(SRCS_f90) $(SRCS_F) $(SRCS_F90)
+CAPS_F90 = \
+	   $(IPD_DRIVER_CAP)
+
+DEPEND_FILES = $(SRCS_f) $(SRCS_f90) $(SRCS_F) $(SRCS_F90) $(CAPS_F90)
 
 OBJS_f   = $(SRCS_f:.f=.o)
 OBJS_f90 = $(SRCS_f90:.f90=.o)
@@ -161,10 +175,13 @@ OBJS_c   = $(SRCS_c:.c=.o)
 
 OBJS = $(OBJS_f) $(OBJS_f90) $(OBJS_F) $(OBJS_F90) $(OBJS_c)
 
+CAPS = $(CAPS_F90:.F90=.o)
+
 all default: depend $(LIBRARY)
 
-$(LIBRARY): $(OBJS)
-	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+$(LIBRARY): $(OBJS) $(CAPS)
+	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) $(CAPS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
+	# DH* placeholder for PGI fix of cap object names in shared library
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
 
