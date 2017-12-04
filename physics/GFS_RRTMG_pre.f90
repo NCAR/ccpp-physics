@@ -14,26 +14,81 @@
       end subroutine GFS_RRTMG_pre_init      
 
 !!\section arg_table_GFS_RRTMG_pre_run Argument Table
-!!| local var name | longname                                      | description                                                          | units       | rank |  type                         |   kind    | intent | optional |
-!!|----------------|----------------------------------- -----------|----------------------------------------------------------------------|-------------|------|-------------------------------|-----------|--------|----------|
-!!|   Model        | FV3-GFS_Control_type                          | Fortran DDT containing FV3-GFS model control parameters              |  DDT        |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
-!!|   Grid         | FV3-GFS_Grid_type                             | Fortran DDT containing FV3-GFS grid and interpolation related data   |  DDT        |  0   | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!!|   lm
-!!|   me
-!!|   im
-!!|   ntrac
-!!|  lmk
-      subroutine GFS_RRTMG_pre_run (Model, Grid, lm, me, im,  ntrac, &
-          lmk, lmp, kd, kt, kb, lla, llb, lya, lyb, lp1, raddt,  &
-           tskn, tsfg, Sfcprop,  Statein, plvl, plyr,            &
-          tlyr, prslk1, rhly, qstl, tracer1, olyr, Radtend,      &
-          gasvmr, tlvl, tsfa, tvly, qlyr, nday, idxday, faersw,  &
-          faerlw, aerodp, Tbd, Cldprop, deltaq, clouds, cldsa,   &
-          mtopa, mbota, sfcalb)
+!!| local var name    | longname                                                    | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
+!!|-------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
+!!|   Model           | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
+!!|   Grid            | FV3-GFS_Grid_type                                           | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!!|   Sfcprop         | FV3-GFS_Sfcprop_type                                        | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |  0   | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
+!!|   Statein         | FV3-GFS_Stateout_type                                       | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_stateout_type|           | in     | F        |
+!!|   Tbd             | FV3-GFS_Tbd_type                                            | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |           | in     | F        |
+!!|   Cldprop         | FV3-GFS_Cldprop_type                                        | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |  0   | GFS_typedefs%GFS_cldprop_type |           | in     | F        |
+!!|   Radtend         | FV3-GFS_Radtend_type                                        | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in     | F        |
+!!|   lm              | vertical_layer_dimension_for_radiation                      | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | out    | F        |           
+!!|   im              | horizontal_loop_extent                                      | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | out    | F        |     
+!!|   lmk             | vertical_layer_dimension_with_extra_top_layer               | number of vertical layers with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
+!!|   lmp             | vertical_level_dimension_with_extra_top_layer               | number of vertical levels with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
+!!|   kd              | vertical_index_difference_between_in-out_and_local          | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | out    | F        |
+!!|   kt              | vertical_index_difference_between_layer_and_upper_bound     | vertical index difference between layer and upper bound                       | index    |  0   | integer                       |           | out    | F        |
+!!|   kb              | vertical_index_difference_between_layer_and_lower_bound     | vertical index difference between layer and lower bound                       | index    |  0   | integer                       |           | out    | F        |
+!!|   raddt           | time_step_for_radiation                                     | radiation time step                                                           | s        |  0   | real                          | kind_phys | out    | F        |
+!!|   plvl            | air_pressure_at_interface_for_radiation                     | air pressure at vertical interface for radiation calculation                  | mb       |  2   | real                          | kind_phys | out    | F        |
+!!|   plyr            | air_pressure_at_layer_for_radiation                         | air pressure at vertical layer for radiation calculation                      | mb       |  2   | real                          | kind_phys | out    | F        |
+!!|   tlvl            | air_temperature_at_interface_for_radiation                  | air temperature at vertical interface for radiation calculation               | K        |  2   | real                          | kind_phys | out    | F        |
+!!|   tlyr            | air_temperature_at_layer_for_radiation                      | air temperature at vertical layer for radiation calculation                   | K        |  2   | real                          | kind_phys | out    | F        |
+!!|   tsfg            | surface_ground_temperature_for_radiation                    | surface ground temperature                                                    | K        |  1   | real                          | kind_phys | out    | F        |
+!!|   tsfa            | surface_layer_temperature_for_radiation                     | air temperature at the first layer                                            | K        |  1   | real                          | kind_phys | out    | F        |           
+!!|   qlyr            | water_vapor_specific_humidity_at_layer_for_radiation        | water vapor specific humidity at vertical layer for radiation calculation     | kg kg-1  |  2   | real                          | kind_phys | out    | F        | 
+!!|   nday            | daytime_points_dimension                                    | daytime points dimension                                                      | index    |  0   | integer                       |           | out    | F        |
+!!|   idxday          | daytime_points                                              | daytime points                                                                | none     |  1   | integer                       |           | out    | F        |
+!!|   olyr            | ozone_mixing_ratio_for_radiation                            | ozone mixing ratio                                                            | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_co2      | volume_mixing_ratio_co2                                     | CO2 volumic mixing ratio                                                      | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_n2o      | volume_mixing_ratio_n2o                                     | N2O volumic mixing ratio                                                      | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_ch4      | volume_mixing_ratio_ch4                                     | CH4 volumic mixing ratio                                                      | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_o2       | volume_mixing_ratio_o2                                      | O2 volumic mixing ratio                                                       | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_co       | volume_mixing_ratio_co                                      | CO volumic mixing ratio                                                       | gm gm-1  |  2   | real                          | kind_phys | out    | F        | 
+!!|   gasvmr_cfc11    | volume_mixing_ratio_cfc11                                   | CFC11 volumic mixing ratio                                                    | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_cfc12    | volume_mixing_ratio_cfc12                                   | CFC12 volumic mixing ratio                                                    | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_cfc22    | volume_mixing_ratio_cfc22                                   | CFC22 volumic mixing ratio                                                    | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_ccl4     | volume_mixing_ratio_ccl4                                    | CCL4 volumic mixing ratio                                                     | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   gasvmr_cfc113   | volume_mixing_ratio_cfc113                                  | CFC113 volumic mixing ratio                                                   | gm gm-1  |  2   | real                          | kind_phys | out    | F        |
+!!|   faersw1         | aerosol_optical_depth_for_shortwave_bands_01-16             | aerosol optical depth for shortwave bands 01-16                               | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   faersw2         | aerosol_single_scattering_albedo_for_shortwave_bands_01-16  | aerosol single scattering albedo for shortwave bands 01-16                    | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   faersw3         | aerosol_asymmetry_parameter_for_shortwave_bands_01-16       | aerosol asymmetry parameter for shortwave bands 01-16                         | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   faerlw1         | aerosol_optical_depth_for_longwave_bands_01-16              | aerosol optical depth for longwave bands 01-16                                | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   faerlw2         | aerosol_single_scattering_albedo_for_longwave_bands_01-16   | aerosol single scattering albedo for longwave bands 01-16                     | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   faerlw3         | aerosol_asymmetry_parameter_for_longwave_bands_01-16        | aerosol asymmetry parameter for longwave bands 01-16                          | none     |  3   | real                          | kind_phys | out    | F        |
+!!|   aerodp          | vertical_integrated_aerosol_optical_depth                   | vertical integrated aerosol optical depth                                     |          |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds1         | total_cloud_fraction                                        | layer total cloud fraction                                                    | frac     |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds2         | cloud_liquid_water_path                                     | layer cloud liquid water path                                                 | g m-2    |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds3         | mean_effective_radius_for_liquid_cloud                      | mean effective radius for liquid cloud                                        | micron   |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds4         | cloud_ice_water_path                                        | layer cloud ice water path                                                    | g m-2    |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds5         | mean_effective_radius_for_ice_cloud                         | mean effective radius for ice cloud                                           | micron   |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds6         | rain_water_path                                             | layer rain drop water path                                                    | g m-2    |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds7         | mean_effective_radius_for_rain_drop                         | mean effective radius for rain drop                                           | micron   |  2   | real                          | kind_phys | out    | F        |
+!!|   clouds8         | snow_water_path                                             | layer snow flake water path                                                   | g m-2    |  2   | real                          | kind_phys | out    | F        | 
+!!|   clouds9         | mean_effective_radius_for_snow_flake                        | mean effective radius for snow flake                                          | micron   |  2   | real                          | kind_phys | out    | F        |
+!!|   cldsa           | level_cloud_fraction                                        | fraction of clouds for low, middle,high, total and bl (IX,5)                  | frac     |  2   | real                          | kind_phys | out    | F        |
+!!|   mtopa           | vertical_indices_for_cloud_tops                             | vertical indices for low, middle and high cloud tops (IX, 3)                  | index    |  2   | integer                       |           | out    | F        |        
+!!|   mbota           | vertical_indices_for_cloud_bases                            | vertical indices for low, middle and high cloud bases (IX, 3)                 | index    |  2   | integer                       |           | out    | F        |
+!!|   sfcalb1         | surface_near_IR_direct_albedo                               | the near IR direct beam component of mean surface albedo                      | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb2         | surface_near_IR_diffused_albedo                             | the near IR diffused component of mean surface albedo                         | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb3         | surface_UV-VIS_direct_albedo                                | the UV+VIS direct beam component of mean surface albedo                       | none     |  1   | real                          | kind_phys | out    | F        | 
+!!|   sfcalb4         | surface_UV-VIS_diffused_albedo                              | the UV+VIS diffused component of mean surface albedo                          | none     |  1   | real                          | kind_phys | out    | F        |
+!!
+      subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
+          Tbd, Cldprop, Radtend,                                     &
+          lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
+          tlvl, tlyr, tsfg, tsfa, qlyr, nday, idxday,  olyr,         &
+          gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
+          gasvmr_co,    gasvmr_cfc11, gasvmr_cfc12,                  &
+          gasvmr_cfc22, gasvmr_ccl4,  gasvmr_cfc113,                 &
+          faersw1,  faersw2,  faersw3,                               &
+          faerlw1, faerlw2, faerlw3, aerodp,                         &
+          clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
+          clouds7, clouds8, clouds9, cldsa, mtopa, mbota,            &
+          sfcalb1, sfcalb2, sfcalb3, sfcalb4 )
 
 
-
-!zhang        implicit none
       use machine,                   only: kind_phys
       use GFS_typedefs,              only: GFS_statein_type,   &
                                            GFS_stateout_type,  &
@@ -66,57 +121,19 @@
 
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
      &                                     profsw_type,cmpfsw_type,NBDSW
-!zhang      use module_radsw_main,         only: rswinit,  swrad
 
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-!zhang      use module_radlw_main,         only: rlwinit,  lwrad
 
 
       implicit none
-        !integer, intent(inout) :: me, lm, im, lp1, ntrac
-        !integer, intent(inout) :: lmk, lmp, kd, kt, kb, lla, llb, lya, lyb
-        type(GFS_control_type),   intent(in) :: Model
-        type(GFS_grid_type),      intent(in) :: Grid
-        type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
-        type(GFS_statein_type), intent(in) :: Statein
-        type(GFS_radtend_type), intent(in) :: Radtend
-        type(GFS_tbd_type),     intent(in) :: Tbd
-        type(GFS_cldprop_type), intent(in) :: Cldprop
-
-        !integer, intent(out) :: nday
-        !integer, dimension(Size (Grid%xlon, 1)), intent(inout) :: idxday
-        !real(kind=kind_phys), intent(out)    :: raddt
-        !real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(inout) :: tsfg, tskn
-        !real(kind=kind_phys), dimension(Size(Grid%xlon, 1), Model%levr+1+LTP), intent(inout) :: plvl
-        !real(kind=kind_phys), dimension(size(Grid%xlon, 1), Model%levr+LTP), intent(inout) :: plyr, tlyr, prslk1, rhly, qstl
-        !real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !    LTP, 2:Model%ntrac), intent(inout) :: tracer1
-        !real(kind=kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !     LTP), intent(inout) :: olyr
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !     LTP, NF_VGAS), intent(inout) :: gasvmr
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !    1 + LTP), intent(inout) :: tlvl
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1)) :: tsfa,tem1d
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr+LTP), intent(inout) :: qlyr, tvly
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !    LTP, NBDSW, NF_AESW), intent(inout) :: faersw
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !    LTP, NBDLW, NF_AELW), intent(inout) :: faerlw
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(inout) :: aerodp
-        !real(kind = kind_phys), dimension(size(Grid%xlon, 1), Model%levr + &
-        !    LTP), intent(out) :: deltaq
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-        !    LTP, NF_CLDS), intent(inout) :: clouds
-        !real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(out) :: cldsa
-        !integer, dimension(size(Grid%xlon, 1), 3), intent(out) :: mbota, mtopa
-        !real (kind = kind_phys), dimension(im, NF_ALBD), intent(out) :: sfcalb
-        !real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
-        !   htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr,     &
-        !   qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da,     &
-        !   tem2db, cldcov, deltaq, cnvc, cnvw
-
+        type(GFS_control_type),              intent(in)    :: Model
+        type(GFS_grid_type),                 intent(in)    :: Grid
+        type(GFS_sfcprop_type),              intent(in)    :: Sfcprop
+        type(GFS_statein_type),              intent(in)    :: Statein
+        type(GFS_radtend_type),              intent(in)    :: Radtend
+        type(GFS_tbd_type),                  intent(in)    :: Tbd
+        type(GFS_cldprop_type),              intent(in)    :: Cldprop
 
 !  ---  version tag and last revision date
       character(40), parameter ::                                    &
@@ -179,8 +196,11 @@
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5)       :: cldsa
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
+!CCPP: NSPC1=NSPC+1; NSPC: num of species for optional aod output fields
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
-
+!CCPP: NF_ALBD=4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::      &
+             sfcalb1, sfcalb2, sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
            htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
            qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
@@ -189,19 +209,25 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP) :: plvl, tlvl
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,2:Model%ntrac) :: tracer1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
+!CCPP: ntrac= 3; # meteorological tracers
 
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
+!CCPP: NF_CLDS = 9
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) ::  &
+            clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,           &
+            clouds7, clouds8, clouds9
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
+!CCPP: NF_VGAS=10; # gases species
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) ::    &
+           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,          &   
+           gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
 
       !--- TYPED VARIABLES
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
-
-
-          !pedro Set commonly used integers
-          !pedro call Set_common_int (Model, Grid, lm, me, im, lp1, ntrac)
 
 !
 !===> ...  begin here
@@ -215,11 +241,6 @@
 
       LP1 = LM + 1               ! num of in/out levels
 
-
-          !pedro Set local /level/layer indexes corresponding
-          !pedro  to in/out variables
-        !pedro call Set_local_int (lmk, lm, lmp, kd, kt, &
-        !pedro    kb, lla, llb, lya, lyb, lp1, raddt, Model)
 
 !  --- ...  set local /level/layer indexes corresponding to in/out
 !  variables
@@ -259,9 +280,6 @@
       raddt = min(Model%fhswr, Model%fhlwr)
 !     print *,' in grrad : raddt=',raddt
 
-          !pedro Setup surface ground temperature and
-          !pedro ground/air skin temperature if required.
-          !pedro call Set_sfc_vars (im, tskn, tsfg, Sfcprop, Grid)
 
 !> -# Setup surface ground temperature and ground/air skin temperature
 !! if required.
@@ -278,12 +296,6 @@
         enddo
       endif
 
-
-
-          !pedro Prepare atmospheric profiles.
-          !pedro Convert pressure unit from pa to mb
-          !pedro call Prep_profiles (lm, kd, im, Statein, plvl, plyr, tlyr, &
-          !  prslk1, rhly, qstl, Model, Grid)
 
 !> -# Prepare atmospheric profiles for radiation input.
 !
@@ -304,14 +316,6 @@
           qstl(i,k1) = qs
         enddo
       enddo
-
-
-
-          !pedro Recast remaining all tracers (except sphum)
-          !pedro  forcing them all to be positive
-        !pedro call Recast_tracers (tracer1, plvl, plyr, tlyr, prslk1, rhly, &
-        !    qstl, Statein, Grid, Model, ntrac, lm, im, kd, lp1, llb, &
-        !    lla, lya, lyb)
 
       !--- recast remaining all tracers (except sphum) forcing them all
       !to be positive
@@ -342,9 +346,6 @@
       endif
 
 
-          !pedro Get layer ozone mass mixing ratio
-        !pedro call Prep_ozone  (Model, Grid, im, lmk, tracer1, olyr, prslk1)
-
 !>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
 !!    call getozn()).
 
@@ -355,19 +356,11 @@
                      olyr)                                !  ---  outputs
       endif                               ! end_if_ntoz
 
-
-
-         !pedro Compute cosine of zenith angle.
-        !pedro call coszmn (Grid%xlon,Grid%sinlat, Grid%coslat, Model%solhr, &
-        !pedor    im, me, Radtend%coszen, Radtend%coszdg)
 !>  - Call coszmn(), to compute cosine of zenith angle.
       call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
                    Grid%coslat,Model%solhr, IM, me, &
                    Radtend%coszen, Radtend%coszdg)        !  --- outputs
 
-
-          !pedro Set up non-prognostic gas volume mixing ratioes
-        !pedro call getgases (plvl, Grid%xlon, Grid%xlat, im, lmk, gasvmr)
 
 !>  - Call getgases(), to set up non-prognostic gas volume mixing
 !!    ratioes (gasvmr).
@@ -380,17 +373,28 @@
 !  - gasvmr(:,:,7)  -  cf12 volume mixing ratio
 !  - gasvmr(:,:,8)  -  cf22 volume mixing ratio
 !  - gasvmr(:,:,9)  -  ccl4 volume mixing ratio
+!  - gasvmr(:,:,10) -  cfc113 volumne mixing ratio
 
 !  --- ...  set up non-prognostic gas volume mixing ratioes
 
       call getgases (plvl, Grid%xlon, Grid%xlat, IM, LMK,  & !  --- inputs
                      gasvmr)                                 !  --- outputs
 
-
-
-       !pedro Get temperature at layer interface, and layer moisture.
-       !pedro call Prep_t_and_moist (Grid, Model, Statein, lmp, kd, lmk, lm, &
-       !pedro     im, lya, lyb, plyr, tlyr, tlvl, plvl, tsfa, tskn, tvly, qlyr)
+!CCPP: re-assign gasvmr(:,:,NF_VGAS) to gasvmr_X(:,:)
+      do k = 1, LMK
+        do i = 1, IM
+           gasvmr_co2    (i,k)  = gasvmr(i,k,1)
+           gasvmr_n2o    (i,k)  = gasvmr(i,k,2)
+           gasvmr_ch4    (i,k)  = gasvmr(i,k,3)
+           gasvmr_o2     (i,k)  = gasvmr(i,k,4)
+           gasvmr_co     (i,k)  = gasvmr(i,k,5)
+           gasvmr_cfc11  (i,k)  = gasvmr(i,k,6)
+           gasvmr_cfc12  (i,k)  = gasvmr(i,k,7)   
+           gasvmr_cfc22  (i,k)  = gasvmr(i,k,8)    
+           gasvmr_ccl4   (i,k)  = gasvmr(i,k,9)  
+           gasvmr_cfc113 (i,k)  = gasvmr(i,k,10) 
+         enddo
+      enddo
 
 !>  - Get temperature at layer interface, and layer moisture.
       do k = 2, LMK
@@ -470,9 +474,6 @@
 
       endif                              ! end_if_ivflip
 
-       !pedro Check for daytime points for SW radiation.
-       !pedro call Find_daytime (im, Radtend, Grid, nday, idxday)
-
 !>  - Check for daytime points for SW radiation.
 
       nday = 0
@@ -483,10 +484,6 @@
         endif
       enddo
 
-      !pedro Setup aerosols
-      !pedro  call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk,   &
-      !pedro      tracer1, Grid%xlon, Grid%xlat, im, lmk, lmp, Model%lsswr, &
-      !pedro      Model%lslwr, faersw,faerlw,aerodp)
 
 !>  - Call module_radiation_aerosols::setaer(),to setup aerosols
 !! property profile for radiation.
@@ -498,13 +495,6 @@
                    Model%lsswr,Model%lslwr,                        &
                    faersw,faerlw,aerodp)                              !  ---  outputs
 
-
-
-          !pedro  Obtain cloud information
-        !pedro call Get_cloud_info (Model, Grid, Tbd, Sfcprop, Cldprop,  &
-        !pedro    Statein, tracer1, lmk, lmp, lm, lya, lyb, im, me, kd, &
-        !pedro    deltaq, plvl, plyr, tlyr, qlyr, tvly,   &
-        !pedro    rhly, qstl, clouds, cldsa, mtopa, mbota)
 
 !>  - Obtain cloud information for radiation calculations
 !!    (clouds,cldsa,mtopa,mbota)
@@ -636,13 +626,15 @@
 
       endif                                ! end_if_ntcw
 
-      !pedro Setup surface albedo for SW calculation
-      !pedro  call Set_sfc_albedo (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-      !pedro      Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen, tsfg, tsfa, &
-      !pedro      Sfcprop%hprim, Sfcprop%alvsf, Sfcprop%alnsf, Sfcprop%alvwf, &
-      !pedro      Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-      !pedro      Sfcprop%tisfc, im, Model%lsswr,  &
-      !pedro      sfcalb, Radtend%sfalb)                            !  --- outputs
+!CCPP
+      do i = 1, IM
+        cldsa_lo(i) = cldsa(i,1)
+        cldsa_md(i) = cldsa(i,2)
+        cldsa_hi(i) = cldsa(i,3)
+        cldsa_tot(i) = cldsa(i,4)
+        cldsa_bl(i)  = cldsa(i,5)
+       enddo
+
 
 !  --- ...  start radiation calculations
 !           remember to set heating rate unit to k/sec!
