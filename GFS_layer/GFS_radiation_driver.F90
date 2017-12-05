@@ -1200,6 +1200,7 @@
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
 
+! L1211-1596
       call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,         &  ! input 
           Tbd, Cldprop, Radtend,                                      &
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,            &  ! output
@@ -1207,20 +1208,20 @@
           gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
           gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 & 
           gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10), &
-          faersw(:,:,1), faersw(:,:,2), faersw(:,:,3),                 &
-          faerlw(:,:,1), faerlw(:,:,2), faerlw(:,:,3), aerodp,         &
+          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),           &
+          faerlw(:,:,:,1), faerlw(:,:,:,2), faerlw(:,:,:,3), aerodp,   &
           clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                 &
           clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
           clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
-          cldsa, mtopa, mbota, sfcalb, Radtend%sfcalb )
+          cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),               &
+          sfcalb(:,3), sfcalb(:,4), Radtend%sfalb )
 
-
-          ! Calculate SW heating and fluxes
+! L1598-1618
       call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
-          faersw(:, :, :, 3), sfcalb,                                   &
-          Radtend%coszen, Model%solcon,  nday, idxday, im,            &
+          faersw(:, :, :, 3), sfcalb(:,1), sfcalb(:,2),sfcalb(:,3),    &
+          sfcalb(:,4),Radtend%coszen, Model%solcon,  nday, idxday, im, &
           lmk, lmp, Model%lprnt, clouds(:,:,1), Model%lsswr,           &
           htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs
           hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional outputs
@@ -1229,9 +1230,13 @@
           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
+! L1620-1686
+!      call swrad_post_run ()
 
-!CCPP todo list: move setemis here
-          ! Calculate LW heating rates and fluxes.
+! L1689-1698
+!      call lwrad_pre_run ()
+
+! L1703-1714
       call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
           gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
           gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
@@ -1245,6 +1250,12 @@
           cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+
+! L1718-1747
+!       call lwrad_post_run ()
+
+! L1757-1841
+!       call GFS_RRTMG_post_run ()
 
       call Post_radiation (Radtend, tsfa, lm, kd, htlwc, htlw0,       &
           Model, Coupling, Grid, htswc, htsw0, scmpsw, sfcalb, Diag,  &
