@@ -16,18 +16,45 @@
 !! - Routine OZPHYS is called from GBPHYS after call to RAYLEIGH_DAMP
 !! @{
 
+      module ozphys
+
+      contains
+
+!> \ingroup GFS_ozphys
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_ozphys_init Argument Table
+!!
+      subroutine ozphys_init()
+      end subroutine ozphys_init
+
 !>
-!! \section arg_table_ozphys_run Arguments
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!! \section arg_table_ozphys_run Argument Table
+!! | local var name | longname                                          | description                                       | units    | rank | type    | kind      | intent | optional |
+!! |----------------|---------------------------------------------------|---------------------------------------------------|----------|------|---------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | index    | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | index    | 0    | integer | default   | in     | F        |
+!! | levs           | vertical_dimension                                | number of vertical layers                         | index    | 0    | integer | default   | in     | F        |
+!! | ko3            | vertical_dimension_for_ozone_data                 | number of vertical layers for ozone data          | index    | 0    | integer | default   | in     | F        |
+!! | dtp            | time_step_for_physics                             | physics time step                                 | s        | 0    | real    | kind_phys | in     | F        |
+!! | ozi            | ozone_concentration_updated_by_physics            | ozone concentration                               | kg kg^-1 | 2    | real    | kind_phys | in     | F        |
+!! | ozo            | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg^-1 | 2    | real    | kind_phys | out    | F        |
+!! | tin            | air_temperature_updated_by_physics                | updated air temperature                           | K        | 2    | real    | kind_phys | in     | F        |
+!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa)  | 1    | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa       | 2    | real    | kind_phys | in     | F        |
+!! | prdout         | ozone_forcing                                     | ozone forcing data                                |          | 3    | real    | kind_phys | in     | F        |
+!! | pl_coeff       | number_of_ozone_forcing_coefficients              | number of ozone forcing coefficients              | index    | 0    | integer | default   | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa       | 2    | real    | kind_phys | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag     | 0    | logical | default   | in     | F        |
+!! | ozp            | ozone_change                                      | ozone change due to physics                       |          | 3    | real    | kind_phys | out    | F        |
+!! | me             | mpi_rank                                          | rank of the current MPI task                      | index    | 0    | integer | default   | in     | F        |
 !!
 !! \param[in] ix,im     integer, horizontal dimension and num of used pts
 !! \param[in] levs      integer, vertical layer dimension
 !! \param[in] ko3       integer, number of layers for ozone data
 !! \param[in] dt        real, physics time step in seconds
 !! \param[in] ozi       real, updated ozone
-!! \param[in] ozo       real, updated ozone
+!! \param[out] ozo      real, updated ozone
 !! \param[in] tin       real, updated temperature
 !! \param[in] po3       real, (ko3), ozone forcing data level pressure
 !!                      (ln(Pa))
@@ -36,13 +63,14 @@
 !! \param[in] pl_coeff  integer, number coefficients in ozone forcing
 !! \param[in] delp      real, (ix,levs)
 !! \param[in] ldiag3d   logical, flag for 3d diagnostic fields
-!! \param[out] ozp       real, ozone change due to physics
+!! \param[out] ozp      real, ozone change due to physics
 !! \param[in] me        integer, pe number - used for debug prints
 !! \section gen_al General Algorithm
 !> @{
-      subroutine ozphys (ix, im, levs, ko3, dt, ozi, ozo, tin, po3,     &
-     &                   prsl, prdout, pl_coeff, delp, ldiag3d,         &
-     &                   ozp,me)
+      subroutine ozphys_run (                                           &
+     &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,                      &
+     &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
+     &  ozp, me)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -120,6 +148,7 @@
             endif
           enddo
         enddo
+
         if (pl_coeff == 2) then
           do i=1,im
             ozib(i)   = ozi(i,l)           ! no filling
@@ -133,6 +162,7 @@
             enddo
           endif
         endif
+
         if (pl_coeff == 4) then
           do i=1,im
             ozib(i)  = ozi(i,l)            ! no filling
@@ -151,9 +181,21 @@
             enddo
           endif
         endif
+
       enddo                                ! vertical loop
 !
       return
-      end
+      end subroutine ozphys_run
 !! @}
 !> @}
+
+!> \ingroup GFS_ozphys
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_ozphys_finalize Argument Table
+!!
+      subroutine ozphys_finalize()
+      end subroutine ozphys_finalize
+
+
+      end module ozphys

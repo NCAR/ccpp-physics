@@ -26,6 +26,7 @@ module module_physics_driver
   use dcyc2t3,               only: dcyc2t3_run
   use dcyc2t3_post,          only: dcyc2t3_post_run
   use cnvc90,                only: cnvc90_run
+  use ozphys,                only: ozphys_run
 
   implicit none
 
@@ -1486,12 +1487,16 @@ module module_physics_driver
             Diag%dq3dt(:,:,9) = dq3dt_loc(:,:,9)
           endif
         else
-          call ozphys (ix, im, levs, levozp, dtp,                 &
-                       Stateout%gq0(1,1,Model%ntoz),              &
-                       Stateout%gq0(1,1,Model%ntoz),              &
-                       Stateout%gt0, oz_pres, Statein%prsl,       &
-                       Tbd%ozpl, oz_coeff, del, Model%ldiag3d,    &
-                       dq3dt_loc(1,1,6), me)
+          call ozphys_run (                                             &
+               ix, im, levs, levozp, dtp,                               &
+!               Stateout%gq0(1,1,Model%ntoz),                            &
+!               Stateout%gq0(1,1,Model%ntoz),                            &
+               Stateout%gq0(:,:,Model%ntoz),                            &
+               Stateout%gq0(:,:,Model%ntoz),                            &
+               Stateout%gt0, oz_pres, Statein%prsl,                     &
+               Tbd%ozpl, oz_coeff, del, Model%ldiag3d,                  &
+!               dq3dt_loc(1,1,6), me)
+               dq3dt_loc(:,:,6:6+oz_coeff-1), me)
           if (Model%ldiag3d) then
             Diag%dq3dt(:,:,6) = dq3dt_loc(:,:,6)
             Diag%dq3dt(:,:,7) = dq3dt_loc(:,:,7)

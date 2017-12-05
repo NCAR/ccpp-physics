@@ -95,7 +95,7 @@
 !! | kbot           | vertical_index_at_cloud_base                            | vertical index at cloud base                                       | index | 1    | integer | default   | in     | F        |
 !! | ktop           | vertical_index_at_cloud_top                             | vertical index at cloud top                                        | index | 1    | integer | default   | in     | F        |
 !! | dtp            | time_step_for_physics                                   | physics time step                                                  | s     | 0    | real    | kind_phys | in     | F        |
-!! | gt0            | air_temperature_updated_by_physics                      | updated air temperature                                            | m s-1 | 2    | real    | kind_phys | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                      | updated air temperature                                            | K     | 2    | real    | kind_phys | in     | F        |
 !! | gt0_no_convec  | air_temperature_before_deep_convection  ??              | air temperature before considering tendency due to deep convection | K     | 2    | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers               | difference between mid-layer pressures                             | Pa    | 2    | real    | kind_phys | in     | F        |
 !! | cumabs         | maximum_column_heating_rate                             | maximum heating rate in column                                     | K s-1 | 1    | real    | kind_phys | out    | F        |
@@ -1604,7 +1604,7 @@
 !! | dv3dt          | cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag | cumulative change in meridional wind due to convective gravity wave drag | m s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | gu0            | x_wind_updated_by_physics                                       | updated zonal wind                                                       | m s-1      | 2    | real    | kind_phys | inout  | F        |
 !! | gv0            | y_wind_updated_by_physics                                       | updated meridional wind                                                  | m s-1      | 2    | real    | kind_phys | inout  | F        |
-!! | gt0            | air_temperature_updated_by_physics                              | updated air temperature                                                  | m s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | gt0            | air_temperature_updated_by_physics                              | updated air temperature                                                  | K          | 2    | real    | kind_phys | inout  | F        |
 !!
       subroutine gwdc_post_run(                                         &
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp,                     &
