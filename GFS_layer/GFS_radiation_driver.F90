@@ -1418,34 +1418,6 @@
 
       end subroutine Zero_out_heatrate_flux
 
-
-!      subroutine Set_sfc_albedo (slmsk, snowf, sncovr, snoalb, zorlf, &
-!          coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf,     &
-!          facsf, facwf, fice, tisfc, IMAX, lsswr, sfcalb, sfalb)
-
-!        implicit none
-
-!        integer, intent(in) :: IMAX
-!        real (kind = kind_phys), dimension(:), intent(in) :: slmsk, snowf, &
-!            zorlf, coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf,      &
-!            alnwf, facsf, facwf, fice, tisfc, sncovr, snoalb
-!        logical, intent(in) :: lsswr
-
-!        real (kind = kind_phys), dimension(IMAX, NF_ALBD), intent(out) ::  sfcalb
-!        real (kind = kind_phys), dimension(:), intent(out) :: sfalb
-
-!        if (.not. lsswr) return
-
-!        call setalb (slmsk, snowf, sncovr, snoalb, zorlf,           &
-!            coszf, tsknf, tairf, hprif, alvsf, alnsf, alvwf, alnwf, &
-!            facsf, facwf, fice, tisfc, IMAX, sfcalb)
-
-          ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-!        sfalb(:) = Max (0.01, 0.5 * (sfcalb(:, 2) + sfcalb(:, 4)))
-
-!      end subroutine Set_sfc_albedo
-
-
       subroutine Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, lsswr)
 
         implicit none
