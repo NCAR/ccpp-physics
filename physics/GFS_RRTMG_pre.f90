@@ -70,10 +70,8 @@
 !!|   cldsa           | level_cloud_fraction                                        | fraction of clouds for low, middle,high, total and bl (IX,5)                  | frac     |  2   | real                          | kind_phys | out    | F        |
 !!|   mtopa           | vertical_indices_for_cloud_tops                             | vertical indices for low, middle and high cloud tops (IX, 3)                  | index    |  2   | integer                       |           | out    | F        |        
 !!|   mbota           | vertical_indices_for_cloud_bases                            | vertical indices for low, middle and high cloud bases (IX, 3)                 | index    |  2   | integer                       |           | out    | F        |
-!!|   sfcalb1         | surface_near_IR_direct_albedo                               | the near IR direct beam component of mean surface albedo                      | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb2         | surface_near_IR_diffused_albedo                             | the near IR diffused component of mean surface albedo                         | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb3         | surface_UV-VIS_direct_albedo                                | the UV+VIS direct beam component of mean surface albedo                       | none     |  1   | real                          | kind_phys | out    | F        | 
-!!|   sfcalb4         | surface_UV-VIS_diffused_albedo                              | the UV+VIS diffused component of mean surface albedo                          | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb          | surface_albedoes                                            | four-component surface albedoes                                               | none     |  2   | real                          | kind_phys | out    | F        |
+!!|   radsfcalb       | mean_surface_albedo                                         | mean surface albedo from vis- and nir- diffuse values                         | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend,                                     &
@@ -86,7 +84,7 @@
           faerlw1, faerlw2, faerlw3, aerodp,                         &
           clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
           clouds7, clouds8, clouds9, cldsa, mtopa, mbota,            &
-          sfcalb1, sfcalb2, sfcalb3, sfcalb4 )
+          sfcalb, radsfcalb )
 
 
       use machine,                   only: kind_phys
@@ -199,8 +197,7 @@
 !CCPP: NSPC1=NSPC+1; NSPC: num of species for optional aod output fields
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
 !CCPP: NF_ALBD=4
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::      &
-             sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: radsfcalb  
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
            htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
            qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
@@ -223,6 +220,8 @@
            gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,          &   
            gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW):: &
+           faersw1,  faersw2, faersw3, faerlw1, faerlw2, faerlw3
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
 
       !--- TYPED VARIABLES
@@ -495,6 +494,29 @@
                    Model%lsswr,Model%lslwr,                        &
                    faersw,faerlw,aerodp)                              !  ---  outputs
 
+! CCPP
+      do j = 1,NBDSW
+        do k = 1, LMK
+          do i = 1, IM 
+            ! NF_AESW = 3
+            faersw1(i,k,j) = faersw(i,k,j,1)
+            faersw2(i,k,j) = faersw(i,k,j,2)
+            faersw3(i,k,j) = faersw(i,k,j,3)
+          enddo 
+        enddo
+       enddo
+
+      do j = 1,NBDLW
+        do k = 1, LMK
+          do i = 1, IM
+            ! NF_AELW = 3
+            faerlw1(i,k,j) = faerlw(i,k,j,1)
+            faerlw2(i,k,j) = faerlw(i,k,j,2)
+            faerlw3(i,k,j) = faerlw(i,k,j,3)
+          enddo
+        enddo
+       enddo
+            
 
 !>  - Obtain cloud information for radiation calculations
 !!    (clouds,cldsa,mtopa,mbota)
@@ -653,13 +675,14 @@
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
-        Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+        !Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+        radsfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
 
 
       endif  ! Model%lsswr
 
-       !zhang: should called before 
-            !pedro Setup surface emissivity for LW radiation.
+       !zhang: should called before LW radiation 
+      ! Setup surface emissivity for LW radiation.
        call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  --- inputs
            Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
            tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
