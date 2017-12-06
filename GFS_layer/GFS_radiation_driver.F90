@@ -1174,31 +1174,26 @@
 !  ======================  end of definitions  =======================  !
 !
         ! Local Vars
-      integer :: me, im, lm, nday, lp1, lmk, lmp, kd, lla, llb, lya, &
-          lyb, kt, kb, ntrac
+      integer :: me, im, lm, nday, lmk, lmp, kd, kt, kb
       integer, dimension(size(Grid%xlon, 1)) :: idxday
       integer, dimension(size(Grid%xlon, 1), 3) :: mbota, mtopa
 
       real(kind = kind_phys) :: raddt
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1)) :: tsfa, &
-          tsfg, tskn
+      real(kind = kind_phys), dimension(Size (Grid%xlon, 1)) :: tsfa, tsfg
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5) :: cldsa
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1) :: aerodp
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD) :: sfcalb
       real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP) :: plyr, tlyr, qlyr, olyr, rhly, tvly, qstl, prslk1, deltaq, &
-          htswc, htsw0, htlw0, htlwc
+          LTP) :: plyr, tlyr, qlyr, olyr, htswc, htsw0, htlw0, htlwc
       real(kind = kind_phys), dimension(Size(Grid%xlon, 1), Model%levr+1+LTP) :: plvl, tlvl
-
-      real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, 2:Model%ntrac) :: tracer1
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NF_CLDS) :: clouds
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NF_VGAS) :: gasvmr
-
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDSW, NF_AESW) :: faersw
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
-
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
+!      call GFS_RRTMG_pre_init (vtagrad, qmin, qme5,qme6, epsq, prsmin, &
+!         itsfc, month0, iyear0, monthd,loz1st, ltp,lextop)
 
 ! L1211-1596
       call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,         &  ! input 

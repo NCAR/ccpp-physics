@@ -199,9 +199,6 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
 !CCPP: NSPC1=NSPC+1; NSPC: num of species for optional aod output fields
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
-!CCPP: NF_ALBD=4
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: &
-           sfcalb1, sfcalb2, sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: radsfalb  
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
            htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
@@ -214,20 +211,21 @@
 !CCPP: ntrac= 3; # meteorological tracers
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
-!CCPP: NF_CLDS = 9
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) ::  &
-            clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,           &
-            clouds7, clouds8, clouds9
-
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
-!CCPP: NF_VGAS=10; # gases species
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) ::    &
-           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,          &   
-           gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
+
+! CCPP-compliant
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::                &
+           sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP)::  &
+            clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,          &
+            clouds7, clouds8, clouds9
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP)::  &
+           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,       &   
+           gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW):: &
            faersw1,  faersw2, faersw3
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW):: &
            faerlw1, faerlw2, faerlw3
 
@@ -674,12 +672,6 @@
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         !Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
         radsfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-       
-! CCPP
-        sfcalb1(:) = sfcalb(:,1)
-        sfcalb2(:) = sfcalb(:,2)
-        sfcalb3(:) = sfcalb(:,3)
-        sfcalb4(:) = sfcalb(:,4)
 
       endif  ! Model%lsswr
 
@@ -689,6 +681,28 @@
            Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
            tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
            Radtend%semis)                                   !  --- outputs
+
+! CCPP
+       do k = 1, LMK
+         do i = 1, IM
+            clouds1(i,k) = clouds(i,k,1)
+            clouds2(i,k) = clouds(i,k,2)
+            clouds3(i,k) = clouds(i,k,3)
+            clouds4(i,k) = clouds(i,k,4)
+            clouds5(i,k) = clouds(i,k,5)
+            clouds6(i,k) = clouds(i,k,6)
+            clouds7(i,k) = clouds(i,k,7)
+            clouds8(i,k) = clouds(i,k,8)
+            clouds9(i,k) = clouds(i,k,9)
+         enddo
+       enddo
+
+       do i = 1, im
+        sfcalb1(i) = sfcalb(i,1)
+        sfcalb2(i) = sfcalb(i,2)
+        sfcalb3(i) = sfcalb(i,3)
+        sfcalb4(i) = sfcalb(i,4)
+       enddo
 
 
       end subroutine GFS_RRTMG_pre_run
