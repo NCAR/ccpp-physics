@@ -1209,7 +1209,7 @@
           clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
           clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
           cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),               &
-          sfcalb(:,3), sfcalb(:,4), Radtend%sfalb )
+          sfcalb(:,3), sfcalb(:,4) )
 
 ! L1598-1618
       call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:

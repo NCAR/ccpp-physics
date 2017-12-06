@@ -74,7 +74,6 @@
 !!|   sfcalb2         | surface_nir_diffused_albedo                                 | surface albedo in fraction of near IR diffused                                | none     |  1   | real                          | kind_phys | out    | F        |
 !!|   sfcalb3         | surface_uvis_direct_albedo                                  | surface albedo in fraction of uv+vis direct beam                              | none     |  1   | real                          | kind_phys | out    | F        |
 !!|   sfcalb4         | surface_uvis_diffused_albedo                                | surface albedo in fraction of uv+vis diffused                                 | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   radsfalb        | mean_surface_albedo                                         | mean surface albedo from vis- and nir- diffuse values                         | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend,                                     &
@@ -87,7 +86,7 @@
           faerlw1, faerlw2, faerlw3, aerodp,                         &
           clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
           clouds7, clouds8, clouds9, cldsa, mtopa, mbota,            &
-          sfcalb1, sfcalb2, sfcalb3, sfcalb4, radsfalb )
+          sfcalb1, sfcalb2, sfcalb3, sfcalb4)
 
 
       use machine,                   only: kind_phys
@@ -199,7 +198,6 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
 !CCPP: NSPC1=NSPC+1; NSPC: num of species for optional aod output fields
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: radsfalb  
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
            htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
            qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
@@ -670,8 +668,7 @@
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
-        !Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-        radsfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+        Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
 
       endif  ! Model%lsswr
 
