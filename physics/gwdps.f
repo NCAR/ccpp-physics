@@ -1384,7 +1384,7 @@
 !      print *,' in gwdps_lm.f 18  =',A(ipt(1),idxzb(1))
 !    &,                          B(ipt(1),idxzb(1)),me
       RETURN
-      end subroutine GWDPS_run
+      end subroutine gwdps_run
 !> @}
 
 !> \ingroup GFS_ogwd

@@ -27,7 +27,7 @@
 !! | cvb            | pressure_at_bottom_of_convective_cloud                  | pressure at bottom of convective cloud                  | Pa    | 1    | real    | kind_phys | inout  | F        |
 !! | cvt            | pressure_at_top_of_convective_cloud                     | pressure at top of convective cloud                     | Pa    | 1    | real    | kind_phys | inout  | F        |
 !!
-      SUBROUTINE CNVC90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,
+      SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,
      1                      ACV,ACVB,ACVT,CV,CVB,CVT)
 cc
       USE MACHINE, ONLY :kind_phys
@@ -115,7 +115,7 @@ c....   convert cvt and cvb to pressures
         ENDDO
       ENDIF
       RETURN
-      END SUBROUTINE CNVC90_run
+      END SUBROUTINE cnvc90_run
 
 
 !! \section arg_table_cnvc90_finalize Argument Table

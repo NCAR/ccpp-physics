@@ -256,7 +256,7 @@
 !! | qmax           | maximum_column_heating_rate                            | maximum heating rate in column                                     | K s-1      | 1    | real    | kind_phys | in     | F        |
 !! | ktop           | vertical_index_at_cloud_top                            | vertical index at cloud top                                        | index      | 1    | integer | default   | in     | F        |
 !! | kbot           | vertical_index_at_cloud_base                           | vertical index at cloud base                                       | index      | 1    | integer | default   | in     | F        |
-!! | kcnv           | flag_deep_convection                                   | flag indicating whether convection occurs in column (0 or 1)       | index      | 1    | integer | default   | in     | F        |
+!! | kcnv           | flag_deep_convection                                   | flag indicating whether convection occurs in column (0 or 1)       | flag       | 1    | integer | default   | in     | F        |
 !! | cldf           | cloud_area_fraction                                    | fraction of grid box area in which updrafts occur                  | frac       | 1    | real    | kind_phys | in     | F        |
 !! | grav           | gravitational_acceleration                             | gravitational acceleration                                         | m s-2      | 0    | real    | kind_phys | in     | F        |
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure          | specific heat of dry air at constant pressure                      | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
