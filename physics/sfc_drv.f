@@ -105,7 +105,7 @@
 !!| flag_lssav     | flag_for_saving_diagnoses                                   | flag for saving diagnoses                  | flag       |    0 | logical |           | in     | F        |
 !!| dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real    | kind_phys | in     | F        |
 !!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
-!!| runof          | surface_runoff_flux                                         | surface runoff flux                        | kg m-2 s-1 | 1    | real    | kind_phys | inout  | F        |
+!!| runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
 !!| runoff         | total_runoff                                                | total runoff                               | kg m-2     | 1    | real    | kind_phys | inout  | F        |
 !!| srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     | 1    | real    | kind_phys | inout  | F        |
 !!
@@ -316,7 +316,7 @@
 !!| gflux          | upward_heat_flux_in_soil                                    | upward soil heat flux                      | W m-2      | 1    | real    | kind_phys |   out  | F        |
 !!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys |   out  | F        |
 !!| evap           | kinematic_surface_upward_latent_heat_flux                   | surface upward evaporation flux            | kg kg-1 m s-1 | 1    | real    | kind_phys |   out  | F        |
-!!| hflx           | kinematic_surface_upward_sensible_heat_flux                 | surface upward sensible heat flux          | K kg-1 m s-1  | 1    | real    | kind_phys |   out  | F        | 
+!!| hflx           | kinematic_surface_upward_sensible_heat_flux                 | surface upward sensible heat flux          | K m s-1    | 1    | real    | kind_phys |   out  | F        | 
 !!| ep             | surface_upward_potential_latent_heat_flux                   | surface upward potential latent heat flux  | W m-2      | 1    | real    | kind_phys |   out  | F        |
 !!| runoff         | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  | 1    | real    | kind_phys |   out  | F        |
 !!| cmm            | surface_drag_wind_speed_for_momentum_in_air                 | surf mom exch coef time mean surf wind     | m s-1      | 1    | real    | kind_phys |   out  | F        |
