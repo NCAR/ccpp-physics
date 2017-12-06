@@ -3,7 +3,7 @@
 
 !> \defgroup Sfc_ex_cal Surface Exchange Coefficient Calculation
 !! @{
-!!  \brief Brief description of the scheme 
+!!  \brief Brief description of the scheme
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
@@ -42,7 +42,7 @@
 !!| fm             | Monin-Obukhov_similarity_function_for_momentum              | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out? | F        |
 !!| fh             | Monin-Obukhov_similarity_function_for_heat                  | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out? | F        |
 !!| ustar          | surface_friction_velocity                                   | surface friction velocity                       | m s-1      | 1    | real    | kind_phys |   out? | F        |
-!!| wind           | surface_wind_speed                                          | surface wind speed                              | m s-1      | 1    | real    | kind_phys |   out  | F        |
+!!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level                | m s-1      | 1    | real    | kind_phys |   out  | F        |
 !!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection      | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m       | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out  | F        |
 !!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m            | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out  | F        |
@@ -65,14 +65,14 @@
      &                    ustar,wind,ddvel,fm10,fh2,                    &
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &
      &                    tsurf,flag_iter,redrag                        &
-     &                   ) 
+     &                   )
 !!
 
       use machine , only : kind_phys
-      use funcphys, only : fpvs    
+      use funcphys, only : fpvs
       use physcons, grav => con_g,       cp => con_cp                   &
      &,             rvrdm1 => con_fvirt, rd => con_rd                   &
-     &,             eps => con_eps, epsm1 => con_epsm1                  
+     &,             eps => con_eps, epsm1 => con_epsm1
 
       implicit none
 !
@@ -82,7 +82,7 @@
      &,                                      prsl1, prslki, stress      &
      &,                                      fm, fh, ustar, wind, ddvel &
      &,                                      fm10, fh2, sigmaf, shdmax  &
-     &,                                      tsurf, snwdph              
+     &,                                      tsurf, snwdph
       integer, dimension(im)              ::  vegtype, islimsk
 
       logical   flag_iter(im) ! added by s.lu
@@ -128,11 +128,11 @@
 !     parameter (rnu=1.51e-5,arnu=0.11*rnu)
 !
 !  initialize variables. all units are supposedly m.k.s. unless specified
-!  ps is in pascals, wind is wind speed, 
+!  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
       do i=1,im
-        if(flag_iter(i)) then 
+        if(flag_iter(i)) then
           wind(i) = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))
      &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
           tem1    = 1.0 + rvrdm1 * max(q1(i),1.e-8)
@@ -173,7 +173,7 @@
             tem1 = 1.0 - shdmax(i)
             tem2 = tem1 * tem1
             tem1 = 1.0  - tem2
-          
+
             if( ivegsrc == 1 ) then
 
               if (vegtype(i) == 10) then
