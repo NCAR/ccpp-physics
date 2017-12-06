@@ -29,9 +29,9 @@
 !!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
 !!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
 !!| z1             | height_above_mean_sea_level_at_lowest_model_layer           | height above mean sea level at 1st model layer  | m          | 1    | real    | kind_phys | in     | F        |
-!!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent surface snow thickness         | m          | 1    | real    | kind_phys | in     | F        |
+!!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent surface snow thickness         | mm         | 1    | real    | kind_phys | in     | F        |
 !!| tskin          | surface_skin_temperature                                    | surface skin temperature                        | K          | 1    | real    | kind_phys | in     | F        |
-!!| z0rl           | surface_roughness_length                                    | surface roughness length                        | m          | 1    | real    | kind_phys | inout  | F        |
+!!| z0rl           | surface_roughness_length                                    | surface roughness length                        | cm         | 1    | real    | kind_phys | inout  | F        |
 !!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum             | none       | 1    | real    | kind_phys |   out? | F        |
 !!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture          | none       | 1    | real    | kind_phys |   out? | F        |
 !!| rb             | bulk_richardson_number_at_lowest_model_level                | bulk Richardson number at the surface           | none       | 1    | real    | kind_phys |   out? | F        |
