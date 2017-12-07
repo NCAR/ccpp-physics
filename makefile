@@ -179,6 +179,14 @@ CAPS = $(CAPS_F90:.F90=.o)
 
 all default: depend $(LIBRARY)
 
+./IPD_layer/IPD_driver_cap.o: ./IPD_layer/IPD_driver_cap.F90
+	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
+	$(FC) $(FFLAGS) -c $*.f90 -o $@
+
+./IPD_layer/IPD_driver.o: ./IPD_layer/IPD_driver.F90
+	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
+	$(FC) $(FFLAGS) -c $*.f90 -o $@
+
 $(LIBRARY): $(OBJS) $(CAPS)
 	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) $(CAPS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 	# DH* placeholder for PGI fix of cap object names in shared library
