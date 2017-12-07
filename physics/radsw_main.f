@@ -504,7 +504,7 @@
 
 !  ---  public accessable subprograms
 
-      public swrad_run, rswinit
+      public swrad_init, swrad_run, swrad_finalize, rswinit 
 
 
 ! =================
@@ -580,6 +580,8 @@
 !!\n                    visbm - downward surface uv+vis direct beam flux
 !!\n                    visdf - downward surface uv+vis diffused flux
 
+      subroutine swrad_init ()
+      end subroutine swrad_init
 
 
 !! \section arg_table_swrad_run Argument Table
@@ -1458,6 +1460,9 @@
       end subroutine swrad_run
 !-----------------------------------
 !> @}
+
+      subroutine swrad_finalize ()
+      end subroutine swrad_finalize
 
 
 !> This subroutine initializes non-varying module variables, conversion

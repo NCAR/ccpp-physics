@@ -382,7 +382,7 @@
 
 !  ---  public accessable subprograms
 
-      public lwrad_run, rlwinit
+      public lwrad_init, lwrad_run, lwrad_finalize, rlwinit
 
 
 ! ================
@@ -448,6 +448,8 @@
 !!\n                    upfxc - total sky upward flux
 !!\n                    dnfx0 - clear sky downward flux
 !!\n                    upfx0 - clear sky upward flux
+         subroutine lwrad_init ()
+         end subroutine lwrad_init
 
 !! \section arg_table_lwrad_run Argument Table
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
@@ -1310,6 +1312,8 @@
       end subroutine lwrad_run
 !-----------------------------------
 !> @}
+      subroutine lwrad_finalize ()
+      end subroutine lwrad_finalize 
 
 
 

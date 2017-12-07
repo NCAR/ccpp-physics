@@ -10,7 +10,7 @@
 !! @{
 !!\section arg_table_GFS_RRTMG_pre_init Argument Table
 !!
-      subroutine GFS_RRTMG_pre_init
+      subroutine GFS_RRTMG_pre_init ()
       end subroutine GFS_RRTMG_pre_init      
 
 !!\section arg_table_GFS_RRTMG_pre_run Argument Table
@@ -23,7 +23,10 @@
 !!|   Tbd             | FV3-GFS_Tbd_type                                            | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |           | in     | F        |
 !!|   Cldprop         | FV3-GFS_Cldprop_type                                        | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |  0   | GFS_typedefs%GFS_cldprop_type |           | in     | F        |
 !!|   Radtend         | FV3-GFS_Radtend_type                                        | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in     | F        |
-!!|   lm              | vertical_layer_dimension_for_radiation                      | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | out    | F        |           
+!!|   itsfc           | flag_for_surface_temperature                                | control flag for surface temperature                                          | none     |  0   | integer                       |           | in     | F        |
+!!|   ltp             | extra_top_layer                                             | extra top layers                                                              | none     |  0   | integer                       |           | in     | F        |
+!!|   lextop          | flag_for_extra_top_layer                                    | control flag for extra top layer                                              | none     |  0   | logical                       |           | in     | F        |
+!!|   lm              | vertical_layer_dimension_for_radiation                      | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | out    | F        |   
 !!|   im              | horizontal_loop_extent                                      | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | out    | F        |     
 !!|   lmk             | vertical_layer_dimension_with_extra_top_layer               | number of vertical layers with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
 !!|   lmp             | vertical_level_dimension_with_extra_top_layer               | number of vertical levels with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
@@ -57,7 +60,7 @@
 !!|   faerlw1         | aerosol_optical_depth_for_longwave_bands_01-16              | aerosol optical depth for longwave bands 01-16                                | none     |  3   | real                          | kind_phys | out    | F        |
 !!|   faerlw2         | aerosol_single_scattering_albedo_for_longwave_bands_01-16   | aerosol single scattering albedo for longwave bands 01-16                     | none     |  3   | real                          | kind_phys | out    | F        |
 !!|   faerlw3         | aerosol_asymmetry_parameter_for_longwave_bands_01-16        | aerosol asymmetry parameter for longwave bands 01-16                          | none     |  3   | real                          | kind_phys | out    | F        |
-!!|   aerodp          | vertical_integrated_aerosol_optical_depth                   | vertical integrated aerosol optical depth                                     |          |  2   | real                          | kind_phys | out    | F        |
+!!|   aerodp          | vertical_integrated_aerosol_optical_depth                   | vertical integrated aerosol optical depth                                     | none     |  2   | real                          | kind_phys | out    | F        |
 !!|   clouds1         | total_cloud_fraction                                        | layer total cloud fraction                                                    | frac     |  2   | real                          | kind_phys | out    | F        |
 !!|   clouds2         | cloud_liquid_water_path                                     | layer cloud liquid water path                                                 | g m-2    |  2   | real                          | kind_phys | out    | F        |
 !!|   clouds3         | mean_effective_radius_for_liquid_cloud                      | mean effective radius for liquid cloud                                        | micron   |  2   | real                          | kind_phys | out    | F        |
@@ -76,7 +79,7 @@
 !!|   sfcalb4         | surface_uvis_diffused_albedo                                | surface albedo in fraction of uv+vis diffused                                 | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
-          Tbd, Cldprop, Radtend,                                     &
+          Tbd, Cldprop, Radtend, itsfc, ltp, lextop,                                     &
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, nday, idxday,  olyr,         &
           gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
@@ -160,7 +163,7 @@
 
 !> control flag for LW surface temperature at air/ground interface
 !! (default=0, the value will be set in subroutine radinit)
-      integer :: itsfc  =0
+      !integer :: itsfc  =0
 
 !> new data input control variables (set/reset in subroutines
 !radinit/radupdate):
@@ -173,16 +176,17 @@
 
 !> optional extra top layer on top of low ceiling models
 !!\n LTP=0: no extra top layer
-      integer, parameter :: LTP = 0   ! no extra top layer
+      !integer, parameter :: LTP = 0   ! no extra top layer
 !     integer, parameter :: LTP = 1   ! add an extra top layer
 
 !> control flag for extra top layer
-      logical, parameter :: lextop = (LTP > 0)
+      !logical, parameter :: lextop = (LTP > 0)
 
 !
 !  ---  local variables: (horizontal dimensioned by IM)
       !--- INTEGER VARIABLES
-      integer :: me, im, lm, nfxr, ntrac
+      logical :: lextop
+      integer :: me, im, lm, nfxr, ntrac,ltp, itsfc
       integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, LMK, LMP, kd, &
                  lla, llb, lya, lyb, kt, kb
       integer, dimension(size(Grid%xlon,1)) :: idxday
@@ -706,7 +710,7 @@
    
 !!\section arg_table_GFS_RRTMG_pre_finalize Argument Table
 !!
-      subroutine GFS_RRTMG_pre_finalize
+      subroutine GFS_RRTMG_pre_finalize ()
       end subroutine GFS_RRTMG_pre_finalize
 
 !! @}

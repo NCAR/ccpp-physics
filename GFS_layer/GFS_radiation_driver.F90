@@ -327,7 +327,9 @@
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
       use module_radsw_main,         only: rswinit,  swrad_run
+
       use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
+      use GFS_radsw_post,            only: GFS_radsw_post_run
 
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
@@ -1192,23 +1194,24 @@
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
+! CCPP: L349-390
 !      call GFS_RRTMG_pre_init (vtagrad, qmin, qme5,qme6, epsq, prsmin, &
 !         itsfc, month0, iyear0, monthd,loz1st, ltp,lextop)
 
-! L1211-1596
+! CCPP: L1211-1596
       call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,         &  ! input 
-          Tbd, Cldprop, Radtend,                                      &
-          lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,            &  ! output
-          tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,            &
-          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
-          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 & 
-          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10), &
-          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),           &
-          faerlw(:,:,:,1), faerlw(:,:,:,2), faerlw(:,:,:,3), aerodp,   &
-          clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                 &
-          clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
-          clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
-          cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),               &
+          Tbd, Cldprop, Radtend,itsfc, ltp, lextop,                   &
+          lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,           &  ! output
+          tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,           &
+          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                &
+          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                & 
+          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10),&
+          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),          &
+          faerlw(:,:,:,1), faerlw(:,:,:,2), faerlw(:,:,:,3), aerodp,  &
+          clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                &
+          clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                &
+          clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                &
+          cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),              &
           sfcalb(:,3), sfcalb(:,4) )
 
 ! L1598-1618
@@ -1225,11 +1228,13 @@
           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
-! L1620-1686
-!      call swrad_post_run ()
+!CCPP: L1620-1686
+      call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
+          ltp, nday, lm, kd, htswc, htsw0,                            & 
+          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
 
-! L1689-1698
-!      call lwrad_pre_run ()
+!CCPP: L1689-1698
+!      call GFS_radlw_pre_run ()
 
 ! L1703-1714
       call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
@@ -1247,7 +1252,7 @@
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
 ! L1718-1747
-!       call lwrad_post_run ()
+!       call GFS_radlw_post_run ()
 
 ! L1757-1841
 !       call GFS_RRTMG_post_run ()
@@ -1618,22 +1623,24 @@
             ! Save LW results
         call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
 
+! CCPP: this part is in GFS_radsw_post_run
             ! post SW
-        call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
-            Model%lsswr)
+        !call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
+        !    Model%lsswr)
 
-        call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
-            kd, Model%lsswr)
+        !call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
+        !    kd, Model%lsswr)
 
             ! Surface down and up spectral component fluxes
             ! Save two spectral bands' surface downward and upward fluxes for output.
-        call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
+        !call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
 
             ! Night time: set SW heating rates and fluxes to zero
-        call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
-            Grid, Model, nday, Model%lsswr)
+        !call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
+        !    Grid, Model, nday, Model%lsswr)
 
-        call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+        !call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
+!CCPP
 
 
           ! Collect the fluxr data for wrtsfc
