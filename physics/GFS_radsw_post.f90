@@ -11,51 +11,23 @@
       end subroutine GFS_radsw_post_init
 
 !>\section arg_table_GFS_radsw_post_run Argument Table
-!!| local var name    | longname                                                    | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
-!!|-------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
-!!|   Model           | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
-!!|   Grid            | FV3-GFS_Grid_type                                           | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
-!!|   Sfcprop         | FV3-GFS_Sfcprop_type                                        | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |  0   | GFS_typedefs%GFS_sfcprop_type |           | in        | F        |
-!!|   Statein         | FV3-GFS_Stateout_type                                       | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_stateout_type|           | in        | F        |
-!!|   Tbd             | FV3-GFS_Tbd_type                                            | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |
-!| in     | F        |
-!!|   Cldprop         | FV3-GFS_Cldprop_type
-!| Fortran DDT containing FV3-GFS cloud fields needed by radiation from
-!physics  | DDT      |  0   | GFS_typedefs%GFS_cldprop_type |
-!| in     | F        |
-!!|   Radtend         | FV3-GFS_Radtend_type
-!| Fortran DDT containing FV3-GFS radiation tendencies
-!| DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in
-!| F        |
-!!|   itsfc           | flag_for_surface_temperature
-!| control flag for surface temperature
-!| none     |  0   | integer                       |           | in
-!| F        |
-!!|   ltp             | extra_top_layer
-!| extra top layers
-!| none     |  0   | integer                       |           | in
-!| F        |
-!!|   lextop          | flag_for_extra_top_layer
-!| control flag for extra top layer
-!| none     |  0   | logical                       |           | in
-!| F        |
-!!|   lm              | vertical_layer_dimension_for_radiation
-!| number of vertical layers for radiation calculation
-!| index    |  0   | integer                       |           | out
-!| F        |   
-!!|   im              | horizontal_loop_extent
-!| horizontal loop extent, start at 1
-!| index    |  0   | integer                       |           | out
-!| F        |     
-!!|   lmk             | vertical_layer_dimension_with_extra_top_layer
-!| number of vertical layers with extra top layer
-!| index    |  0   | integer                       |           | out
-!| F        |
-!!|   lmp             | vertical_level_dimension_with_extra_top_layer
-!| number of vertical levels with extra top layer
-!| index    |  0   | integer                       |           | out
-!| F        |
-
+!!| local var name    | longname                                                                | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
+!!|-------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
+!!|   Model           | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
+!!|   Grid            | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
+!!|   Diag            | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |  0   | GFS_typedefs%GFS_diag_type    |           | inout     | F        |
+!!|   Radtend         | FV3-GFS_Radtend_type                                                    | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
+!!|   Coupling        | FV3-GFS_Coupling_type                                                   | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
+!!|   ltp             | extra_top_layer                                                         | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
+!!|   lm              | vertical_layer_dimension_for_radiation                                  | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |   
+!!|   kd              | vertical_index_difference_between_in-out_and_local                      | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
+!!|   htswc           | tendency_of_air_temperature_due_to_shortwave_heating                    | total sky heating rate due to shortwave radiation                             | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!!|   htsw0           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky | clear sky heating rates due to shortwave radiation                            | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct
+!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused
+!!|   sfcalb3
+!!|   sfcalb4
+!!|   scmpsw
 
       subroutine GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling, &
                  ltp, nday, lm, kd, htswc, htsw0,                          &  ! --input
