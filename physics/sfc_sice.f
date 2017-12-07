@@ -755,10 +755,10 @@ contains
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
 !! | prsik          | exter_function_at_lowest_model_interface              |                                             | none          |    1 | real    | kind_phys | in     | F        |
 !! | prslk          | dimensionless_exner_function                          |                                             | none          |    1 | real    | kind_phys | in     | F        |
-!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | inout  | F        |
-!! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | inout  | F        | 
-!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | inout  | F        |
-!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function at 1st layer | ratio  |    1 | real    | kind_phys | in     | F        |
+!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
+!! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        | 
+!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
+!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function at 1st layer | ratio  |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
       subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prslk, prslki, cice, zice, tice, work3)
@@ -772,7 +772,7 @@ contains
       real(kind=kind_phys), dimension(im), intent(in) :: fice, hice, tisfc, prsik, prslk
       
 ! --- input/output 
-      real(kind=kind_phys), dimension(im), intent(inout) :: cice, zice, tice, work3
+      real(kind=kind_phys), dimension(im), intent(  out) :: cice, zice, tice, work3
 
 ! --- locals
       integer :: i
@@ -823,14 +823,14 @@ contains
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
-      subroutine sfc_sice_post_run(im, islmsk, fice, hice, tisfc, cice, zice, tice, tisfc)
+      subroutine sfc_sice_post_run(im, islmsk, fice, hice, tisfc, cice, zice, tice, tsfc)
 
       use machine, only : kind_phys
 
       implicit none
 
 ! --- input/output 
-      real(kind=kind_phys), dimension(im), intent(inout) :: cice, zice, tice, tisfc
+      real(kind=kind_phys), dimension(im), intent(in   ) :: cice, zice, tice, tsfc
 
 ! --- outputs
       integer :: im
