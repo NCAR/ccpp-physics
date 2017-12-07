@@ -58,7 +58,7 @@
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt       | kg m-2  | 2    | real    | kind_phys |   out  | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt     | kg m-2  | 2    | real    | kind_phys |   out  | F        |
 !! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water             | kg kg-1 | 2    | real    | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover             | flag    | 2    | real    | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover             | frac    | 2    | real    | kind_phys |   out  | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
