@@ -601,6 +601,9 @@ module module_physics_driver
 
       frain = dtf / dtp
 
+!  --- ...  xw: transfer ice thickness & concentration from global to local variables
+      call sfc_sice_pre_run(im, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc, Statein%prsik(:,1), Statein%prslk(:,1),     &
+                              cice, zice, tice, work3)
       do i = 1, im
         sigmaf(i)   = max( Sfcprop%vfrac(i),0.01 )
         islmsk(i)   = nint(Sfcprop%slmsk(i))
@@ -623,9 +626,9 @@ module module_physics_driver
           slopetyp(i) = int( Sfcprop%slope(i)+0.5 )    !! clu: slope -> slopetyp
         endif
 !  --- ...  xw: transfer ice thickness & concentration from global to local variables
-        zice(i) = Sfcprop%hice(i)
-        cice(i) = Sfcprop%fice(i)
-        tice(i) = Sfcprop%tisfc(i)
+!DRS    zice(i) = Sfcprop%hice(i)
+!DRS    cice(i) = Sfcprop%fice(i)
+!DRS    tice(i) = Sfcprop%tisfc(i)
 !
 !GFDL        work1(i)   = (log(coslat(i) / (nlons(i)*latr)) - dxmin) * dxinv
 !       work1(i)   = (log(Grid%dx(i)) - dxmin) * dxinv
@@ -633,7 +636,7 @@ module module_physics_driver
         work1(i)   = max(0.0, min(1.0,work1(i)))
         work2(i)   = 1.0 - work1(i)
         Diag%psurf(i)   = Statein%pgr(i)
-        work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
+!DRS    work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
 !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
 !GFDL        garea(i)   = tem1 * tem2
@@ -2669,17 +2672,18 @@ module module_physics_driver
       endif
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
-      do i = 1, im
-        if (islmsk(i) == 2) then
-          Sfcprop%hice(i)  = zice(i)
-          Sfcprop%fice(i)  = cice(i)
-          Sfcprop%tisfc(i) = tice(i)
-        else
-          Sfcprop%hice(i)  = 0.0
-          Sfcprop%fice(i)  = 0.0
-          Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
-        endif
-      enddo
+      call sfc_sice_post_run(im, islmsk, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc, cice, zice, tice, Sfcprop%tsfc)
+!DRS  do i = 1, im
+!DRS
+!DRS      Sfcprop%hice(i)  = zice(i)
+!DRS      Sfcprop%fice(i)  = cice(i)
+!DRS      Sfcprop%tisfc(i) = tice(i)
+!DRS    else
+!DRS      Sfcprop%hice(i)  = 0.0
+!DRS      Sfcprop%fice(i)  = 0.0
+!DRS      Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
+!DRS    endif
+!DRS  enddo
 
 !  --- ...  return updated smsoil and stsoil to global arrays
       Sfcprop%smc(:,:) = smsoil(:,:)
