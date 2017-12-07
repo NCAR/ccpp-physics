@@ -13,13 +13,13 @@ module IPD_driver
   use physics_restart_layer,      only: restart_populate
 
 #ifdef CCPP_IPD
-  use fms_mod,            only: error_mesg
+  use fms_mod,            only: error_mesg, FATAL
   use ccpp_types,         only: ccpp_t
   use ccpp,               only: ccpp_init
   use ccpp_fcall,         only: ccpp_run
   use ccpp_fields,        only: ccpp_fields_add
 ! Begin include auto-generated list of modules for ccpp
-! DH* #include "ccpp_modules.inc"
+#include "ccpp_modules.inc"
 ! End include auto-generated list of modules for ccpp
   use iso_c_binding,      only: c_loc
 #endif
@@ -31,6 +31,7 @@ module IPD_driver
 !  CCPP container                                      !
 !------------------------------------------------------!
 type(ccpp_t), save, target :: cdata
+type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
 #endif
 
 !------------------------------------------------------!
@@ -165,7 +166,7 @@ type(ccpp_t), save, target :: cdata
   !----------------------
   !  IPD step generalized
   !----------------------
-  subroutine IPD_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Atm_block, Init_parm, l_salp_data, l_snupx, ccpp_suite, step)
+  subroutine IPD_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, nBlocks, Atm_block, Init_parm, l_salp_data, l_snupx, ccpp_suite, step)
 
     use namelist_soilveg,  only: salp_data, snupx, max_vegtyp
     use block_control_mod, only: block_control_type
@@ -177,6 +178,7 @@ type(ccpp_t), save, target :: cdata
     type(IPD_data_type),       intent(inout)           :: IPD_Data(:)
     type(IPD_diag_type),       intent(inout)           :: IPD_Diag(:)
     type(IPD_restart_type),    intent(inout)           :: IPD_Restart
+    integer,                   intent(in)              :: nBlocks
     type (block_control_type), intent(in)   , optional :: Atm_block
     type(IPD_init_type),       intent(in)   , optional :: Init_parm
     real(kind=kind_phys),      intent(inout), optional :: l_salp_data
@@ -184,61 +186,84 @@ type(ccpp_t), save, target :: cdata
     character(len=256),        intent(in),    optional :: ccpp_suite
     integer,                   intent(in)              :: step
     ! Local variables
+    integer                      :: nb
     integer                      :: ierr
 
     if (step==0) then
       if (.not. present(Atm_block)) then
-        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
-        print *, "IPD init step called without mandatory Atm_block argument"
-        stop
+        call error_mesg('ccpp-ipd', 'IPD init step called without mandatory Atm_block argument', FATAL)
       else if (.not. present(Init_parm)) then
-        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
-        print *, "IPD init step called without mandatory Init_parm argument"
-        stop
+        call error_mesg('ccpp-ipd', 'IPD init step called without mandatory Init_parm argument', FATAL)
       else if (.not. present(l_salp_data)) then
-          ! DH* TODO - NEED PROPER ERROR HANDLING HERE
-          print *, "IPD init step called without mandatory l_salp_data argument"
-          stop
+        call error_mesg('ccpp-ipd', 'IPD init step called without mandatory l_salp_data argument', FATAL)
       else if (.not. present(l_snupx)) then
-          ! DH* TODO - NEED PROPER ERROR HANDLING HERE
-          print *, "IPD init step called without mandatory l_snupx argument"
-          stop
+        call error_mesg('ccpp-ipd', 'IPD init step called without mandatory l_snupx argument', FATAL)
       else if (.not. present(ccpp_suite)) then
-        ! DH* TODO - NEED PROPER ERROR HANDLING HERE
-        print *, "IPD init step called without mandatory ccpp_suite argument"
-        stop
+        call error_mesg('ccpp-ipd', 'IPD init step called without mandatory ccpp_suite argument', FATAL)
       end if
 
-      !--- Initialize CCPP
       call ccpp_init(ccpp_suite, cdata, ierr)
 
-! Begin include auto-generated list of calls to ccpp_fields_add
-! DH* #include "ccpp_fields.inc"
-! End include auto-generated list of calls to ccpp_fields_add
-
       !--- Add the DDTs to the CCPP data structure
-      call ccpp_fields_add(cdata, 'IPD_Control', '', c_loc(IPD_Control), &
-                           ierr=ierr)
-      call ccpp_fields_add(cdata, 'IPD_Data', '', c_loc(IPD_Data), &
-                           size(IPD_Data), shape(IPD_Data), ierr)
-      call ccpp_fields_add(cdata, 'IPD_Diag', '', c_loc(IPD_Diag), &
-                           size(IPD_Diag), shape(IPD_Diag), ierr)
+      call ccpp_fields_add(cdata, 'IPD_Control', '', c_loc(IPD_Control), ierr=ierr)
+      call ccpp_fields_add(cdata, 'IPD_Data',    '', c_loc(IPD_Data), size(IPD_Data), shape(IPD_Data), ierr=ierr)
+      call ccpp_fields_add(cdata, 'IPD_Diag',    '', c_loc(IPD_Diag), size(IPD_Diag), shape(IPD_Diag), ierr=ierr)
       call ccpp_fields_add(cdata, 'IPD_Restart', '', c_loc(IPD_Restart), ierr=ierr)
-      call ccpp_fields_add(cdata, 'Atm_block', '', c_loc(Atm_block), ierr=ierr)
-      call ccpp_fields_add(cdata, 'Init_parm', '', c_loc(Init_parm), ierr=ierr)
-      call ccpp_fields_add(cdata, 'nblks', Atm_block%nblks, ierr, '')
-      call ccpp_fields_add(cdata, 'salp_data', l_salp_data, ierr)
-      call ccpp_fields_add(cdata, 'snupx', l_snupx, ierr)
+      call ccpp_fields_add(cdata, 'Atm_block',   '', c_loc(Atm_block),   ierr=ierr)
+      call ccpp_fields_add(cdata, 'Init_parm',   '', c_loc(Init_parm),   ierr=ierr)
+      call ccpp_fields_add(cdata, 'salp_data',       l_salp_data,        ierr=ierr)
+      call ccpp_fields_add(cdata, 'snupx',           l_snupx,            ierr=ierr)
 
       call ccpp_run(cdata%suite%init, cdata, ierr)
-    !else if (step==X) then
-    !  !--- Finalize CCPP
-    !  call ccpp_init(ccpp_suite, cdata, ierr)
+
+      ! Allocate cdata structures
+      allocate(cdata_block(1:nBlocks))
+
+!$OMP parallel do default (none) &
+!$OMP            schedule (dynamic,1), &
+!$OMP            shared   (nBlocks, cdata_block, step, ccpp_suite, IPD_Control, IPD_Data, IPD_Diag, &
+!$OMP                      IPD_Restart, Atm_Block, Init_parm, l_salp_data, l_snupx) &
+!$OMP            private  (nb, ierr)
+      do nb = 1,nBlocks
+         !--- Initialize CCPP
+         call ccpp_init(ccpp_suite, cdata_block(nb), ierr)
+
+! Begin include auto-generated list of calls to ccpp_fields_add
+#include "ccpp_fields.inc"
+! End include auto-generated list of calls to ccpp_fields_add
+
+         !--- Add the DDTs to the CCPP data structure for this block
+         call ccpp_fields_add(cdata_block(nb), 'IPD_Control', '', c_loc(IPD_Control), ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'IPD_Data',    '', c_loc(IPD_Data(nb:nb)), size(IPD_Data(nb:nb)), shape(IPD_Data(nb:nb)), ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'IPD_Diag',    '', c_loc(IPD_Diag(nb:nb)), size(IPD_Diag(nb:nb)), shape(IPD_Diag(nb:nb)), ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'IPD_Restart', '', c_loc(IPD_Restart), ierr=ierr)
+         ! DH* do we need those?
+         call ccpp_fields_add(cdata_block(nb), 'Atm_block',   '', c_loc(Atm_block),   ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'Init_parm',   '', c_loc(Init_parm),   ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'salp_data',       l_salp_data,        ierr=ierr)
+         call ccpp_fields_add(cdata_block(nb), 'snupx',           l_snupx,            ierr=ierr)
+         ! *DH
+
+      end do
+!$OMP end parallel do
+    else if (step==1) then
+        call ccpp_run(cdata%suite%ipds(1)%subcycles(1)%schemes(step), cdata, ierr)
+    else if (step==2 .or. step==3 .or. step==4) then ! DH* is the number of steps available from CCPP? then do step>1 and step < N-1 here
+!$OMP parallel do default (none) &
+!$OMP            schedule (dynamic,1), &
+!$OMP            shared   (nBlocks, cdata_block, step) &
+!$OMP            private  (nb, ierr)
+      do nb = 1,nBlocks
+         call ccpp_run(cdata_block(nb)%suite%ipds(1)%subcycles(1)%schemes(step), cdata_block(nb), ierr)
+      end do
+!$OMP end parallel do
+    else if (step==5) then ! DH* is the number of steps available from CCPP? then do step=N here
+      ! DH* ccpp_run(cdata%suite%finalize, ...) not yet implemented
+      deallocate(cdata_block)
     else
-      call ccpp_run(cdata%suite%ipds(1)%subcycles(1)%schemes(step), cdata, ierr)
+      call error_mesg('ccpp-ipd', 'IPD init step called without mandatory ccpp_suite argument', FATAL)
     end if
   end subroutine IPD_step
 #endif
-
 
 end module IPD_driver
