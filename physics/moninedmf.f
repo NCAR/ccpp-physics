@@ -45,7 +45,7 @@
 !! | q1             | tracer_concentration                                         | layer mean tracer concentration                    | kg kg-1       |    3 | real    | kind_phys | in     | F        |
 !! | swh            | tendency_of_air_temperature_due_to_shortwave_heating         | total sky shortwave heating rate                   | K s-1         |    2 | real    | kind_phys | in     | F        |
 !! | hlw            | tendency_of_air_temperature_due_to_longwave_heating          | total sky longwave heating rate                    | K s-1         |    2 | real    | kind_phys | in     | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave | none          |    2 | real    | kind_phys | in     | F        |
+!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave | none       |    1 | real    | kind_phys | in     | F        |
 !! | psk            | exner_function_at_lowest_model_interface                     | exner function at the surface interface            | none          |    1 | real    | kind_phys | in     | F        |
 !! | rbsoil         | bulk_richardson_number_at_lowest_model_level                 | bulk Richardson number at the surface              | none          |    1 | real    | kind_phys | in     | F        |
 !! | zorl           | surface_roughness_length                                     | surface roughness length in cm                     | cm            |    1 | real    | kind_phys | in     | F        |
