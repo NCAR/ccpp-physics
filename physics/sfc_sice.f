@@ -753,8 +753,8 @@ contains
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        | 
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
-!! | prsik          | exter_function_at_lowest_model_interface              |                                             | none          |    1 | real    | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function                          |                                             | none          |    1 | real    | kind_phys | in     | F        |
+!! | prsik          | exter_function_at_lowest_model_interface              | external function at lowest model interface | none          |    1 | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function                          | dimensionless_exner_function                | none          |    1 | real    | kind_phys | in     | F        |
 !! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
 !! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        | 
 !! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
