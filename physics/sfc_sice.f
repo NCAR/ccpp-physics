@@ -772,7 +772,7 @@ contains
       real(kind=kind_phys), dimension(im), intent(in) :: fice, hice, tisfc, prsik, prslk
       
 ! --- input/output 
-      real(kind=kind_phys), dimension(im), intent(  out) :: cice, zice, tice, work3
+      real(kind=kind_phys), dimension(im), intent(out) :: cice, zice, tice, work3
 
 ! --- locals
       integer :: i
@@ -830,7 +830,7 @@ contains
       implicit none
 
 ! --- input/output 
-      real(kind=kind_phys), dimension(im), intent(in   ) :: cice, zice, tice, tsfc
+      real(kind=kind_phys), dimension(im), intent(in) :: cice, zice, tice, tsfc
 
 ! --- outputs
       integer :: im
