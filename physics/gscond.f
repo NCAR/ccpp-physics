@@ -537,7 +537,7 @@
       endif
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine gscond_run
 !> @}
 
 !> \ingroup condense

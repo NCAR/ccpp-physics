@@ -736,7 +736,7 @@
       enddo
 !
       return
-      end
+      end subroutine precpd_run
 !> @}
 
 !> \ingroup precip
