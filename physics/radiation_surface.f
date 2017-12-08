@@ -1,5 +1,5 @@
 !>  \file radiation_surface.f
-!!  This file contains routines that set up surface albedo for SW 
+!!  This file contains routines that set up surface albedo for SW
 !!  radiation and surface emissivity for LW radiation.
 
 !  ==========================================================  !!!!!
@@ -74,7 +74,7 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!> \ingroup rad
+!> \ingroup RRTMG
 !! \defgroup module_radiation_surface module_radiation_surface
 !! @{
 !> This module sets up surface albedo for sw radiation and surface
@@ -100,13 +100,13 @@
 
 !  ---  constant parameters
 !> num of sfc albedo components
-      integer, parameter, public :: NF_ALBD = 4 
+      integer, parameter, public :: NF_ALBD = 4
 
 !> num of longitude points in global emis-type map
-      integer, parameter, public :: IMXEMS = 360 
+      integer, parameter, public :: IMXEMS = 360
 
 !> num of latitude points in global emis-type map
-      integer, parameter, public :: JMXEMS = 180 
+      integer, parameter, public :: JMXEMS = 180
 
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
@@ -180,7 +180,7 @@
       if ( me == 0 ) print *, VTAGSFC   ! print out version tag
 
 !> - Initialization of surface albedo section
-!! \n physparam::ialbflg 
+!! \n physparam::ialbflg
 !!  - = 0: using climatology surface albedo scheme for SW
 !!  - = 1: using MODIS based land surface albedo for SW
 
@@ -502,11 +502,11 @@
         enddo    ! end_do_i_loop
 
 !> -# If use modis based albedo for land area:
-      else                      
+      else
 
         do i = 1, IMAX
 
-!>    - Calculate snow cover input directly for land model, no 
+!>    - Calculate snow cover input directly for land model, no
 !!      conversion needed.
 
          fsno0 = sncovr(i)
@@ -541,7 +541,7 @@
             asend = 0.65 - 3.6875*a1
          endif
 
-!>    - Calculate diffused snow albedo, land area use input max snow 
+!>    - Calculate diffused snow albedo, land area use input max snow
 !!      albedo.
 
          if (nint(slmsk(i)) == 2) then
@@ -586,7 +586,7 @@
 
 !           rfcs = 1.89 - 3.34*coszf(i) + 4.13*coszf(i)*coszf(i)        &
 !    &           - 2.02*coszf(i)*coszf(i)*coszf(i)
-            rfcs = 1.775/(1.0+1.55*coszf(i))      
+            rfcs = 1.775/(1.0+1.55*coszf(i))
 
             if (tsknf(i) >= con_t0c) then
               asevb = max(asevd, 0.026/(coszf(i)**1.7+0.065)            &
@@ -627,7 +627,7 @@
 !!                  -pi/2 range, otherwise see in-line comment
 !!\param slmsk     (IMAX), sea(0),land(1),ice(2) mask on fcst model grid
 !!\param snowf     (IMAX), snow depth water equivalent in mm
-!!\param sncovr    (IMAX), snow cover over land 
+!!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
 !!\param tsknf     (IMAX), ground surface temperature in K
 !!\param tairf     (IMAX), lowest model layer air temperature in K
@@ -639,7 +639,7 @@
 !-----------------------------------
       subroutine setemis                                                &
      &     ( xlon,xlat,slmsk,snowf,sncovr,zorlf,tsknf,tairf,hprif,      &  !  ---  inputs:
-     &       IMAX, lslwr,                                               &
+     &       IMAX,                                                      &
      &       sfcemis                                                    &  !  ---  outputs:
      &     )
 
@@ -687,9 +687,8 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
 
-      real (kind=kind_phys), dimension(:), intent(in) ::                & 
+      real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, zorlf, tsknf, tairf, hprif
-      logical, intent(in) :: lslwr
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:), intent(out) :: sfcemis
@@ -710,9 +709,6 @@
 !
 !===> ...  begin here
 !
-
-      if (.not. lslwr) return
-
 !> -# Set sfcemis default to 1.0 or by surface type and condition.
       if ( iemslw == 0 ) then        ! sfc emiss default to 1.0
 

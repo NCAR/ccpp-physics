@@ -330,6 +330,7 @@
 
       use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
       use GFS_radsw_post,            only: GFS_radsw_post_run
+      use GFS_radlw_pre,             only: GFS_radlw_pre_run
 
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
@@ -1214,7 +1215,7 @@
           cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),              &
           sfcalb(:,3), sfcalb(:,4) )
 
-! L1598-1618
+! CCPP: L1598-1618
       call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
@@ -1234,7 +1235,8 @@
           sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
 
 !CCPP: L1689-1698
-!      call GFS_radlw_pre_run ()
+      call GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend,          &
+          im, tsfg, tsfa)
 
 ! L1703-1714
       call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs

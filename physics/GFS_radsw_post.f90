@@ -23,12 +23,12 @@
 !!|   kd              | vertical_index_difference_between_in-out_and_local                      | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
 !!|   htswc           | tendency_of_air_temperature_due_to_shortwave_heating                    | total sky heating rate due to shortwave radiation                             | K s-1    |  2   | real                          | kind_phys | in        | F        |
 !!|   htsw0           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky | clear sky heating rates due to shortwave radiation                            | K s-1    |  2   | real                          | kind_phys | in        | F        |
-!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct
-!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused
-!!|   sfcalb3
-!!|   sfcalb4
-!!|   scmpsw
-
+!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct                                    | surface albedo due to near IR direct beam                                     | none     |  1   | real                          | kind_phys | in        | F        |
+!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused                                  | surface albedo due to near IR diffused beam                                   | none     |  1   | real                          | kind_phys | in        | F        |
+!!|   sfcalb3         | surface_albedo_due_to_uv+vis_direct                                     | surface albedo due to UV+VIS direct beam                                      | none     |  1   | real                          | kind_phys | in        | F        |
+!!|   sfcalb4         | surface_albedo_due_to_uv+vis_diffused                                   | surface albedo due to UV+VIS diffused beam                                    | none     |  1   | real                          | kind_phys | in        | F        |
+!!|   scmpsw          | surface_downward_shortwave_flux_type                                    | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | out       | F        |
+!!
       subroutine GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling, &
                  ltp, nday, lm, kd, htswc, htsw0,                          &  ! --input
                  sfcalb1, sfcalb2, sfcalb3, sfcalb4, scmpsw   )   

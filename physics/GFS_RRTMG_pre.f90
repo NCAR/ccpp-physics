@@ -39,7 +39,7 @@
 !!|   tlvl            | air_temperature_at_interface_for_radiation                  | air temperature at vertical interface for radiation calculation               | K        |  2   | real                          | kind_phys | out    | F        |
 !!|   tlyr            | air_temperature_at_layer_for_radiation                      | air temperature at vertical layer for radiation calculation                   | K        |  2   | real                          | kind_phys | out    | F        |
 !!|   tsfg            | surface_ground_temperature_for_radiation                    | surface ground temperature                                                    | K        |  1   | real                          | kind_phys | out    | F        |
-!!|   tsfa            | surface_layer_temperature_for_radiation                     | air temperature at the first layer                                            | K        |  1   | real                          | kind_phys | out    | F        |           
+!!|   tsfa            | surface_air_temperature_for_radiation                       | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | out    | F        |           
 !!|   qlyr            | water_vapor_specific_humidity_at_layer_for_radiation        | water vapor specific humidity at vertical layer for radiation calculation     | kg kg-1  |  2   | real                          | kind_phys | out    | F        | 
 !!|   nday            | daytime_points_dimension                                    | daytime points dimension                                                      | index    |  0   | integer                       |           | out    | F        |
 !!|   idxday          | daytime_points                                              | daytime points                                                                | none     |  1   | integer                       |           | out    | F        |
@@ -73,10 +73,10 @@
 !!|   cldsa           | level_cloud_fraction                                        | fraction of clouds for low, middle,high, total and bl (IX,5)                  | frac     |  2   | real                          | kind_phys | out    | F        |
 !!|   mtopa           | vertical_indices_for_cloud_tops                             | vertical indices for low, middle and high cloud tops (IX, 3)                  | index    |  2   | integer                       |           | out    | F        |        
 !!|   mbota           | vertical_indices_for_cloud_bases                            | vertical indices for low, middle and high cloud bases (IX, 3)                 | index    |  2   | integer                       |           | out    | F        |
-!!|   sfcalb1         | surface_nir_direct_albedo                                   | surface albedo in fraction of near IR direct beam                             | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb2         | surface_nir_diffused_albedo                                 | surface albedo in fraction of near IR diffused                                | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb3         | surface_uvis_direct_albedo                                  | surface albedo in fraction of uv+vis direct beam                              | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb4         | surface_uvis_diffused_albedo                                | surface albedo in fraction of uv+vis diffused                                 | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct                        | surface albedo due to near IR direct beam                                     | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused                      | surface albedo due to near IR diffused beam                                   | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb3         | surface_albedo_due_to_uv+vis_direct                         | surface albedo due to UV+VIS direct beam                                      | none     |  1   | real                          | kind_phys | out    | F        |
+!!|   sfcalb4         | surface_albedo_due_to_uv+vis_diffused                       | surface albedo due to UV+VIS diffused beam                                    | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend, itsfc, ltp, lextop,                                     &
@@ -110,24 +110,19 @@
      &,                                    rocp  => con_rocp
       use funcphys,                  only: fpvs
 
-      use module_radiation_astronomy,only: sol_init, sol_update, coszmn
-      use module_radiation_gases,    only: NF_VGAS, getgases, getozn,  &
-     &                                     gas_init, gas_update
-      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,   &
-     &                                     aer_init, aer_update,       &
+      use module_radiation_astronomy,only: coszmn                         ! sol_init, sol_update
+      use module_radiation_gases,    only: NF_VGAS, getgases, getozn      ! gas_init, gas_update,
+      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,   &  ! aer_init, aer_update,
      &                                     NSPC1
-      use module_radiation_surface,  only: NF_ALBD, sfc_init, setalb,  &
+      use module_radiation_surface,  only: NF_ALBD, setalb,            &  ! sfc_init
      &                                     setemis
-      use module_radiation_clouds,   only: NF_CLDS, cld_init,          &
+      use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
      &                                     progcld1, progcld2,progcld3,&
      &                                     progclduni, diagcld1
-
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
-     &                                     profsw_type,cmpfsw_type,NBDSW
-
+     &                                     profsw_type, NBDSW
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-
 
       implicit none
         type(GFS_control_type),              intent(in)    :: Model
@@ -210,8 +205,6 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP) :: plvl, tlvl
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,2:Model%ntrac) :: tracer1
-!CCPP: ntrac= 3; # meteorological tracers
-
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
@@ -230,10 +223,6 @@
            faersw1,  faersw2, faersw3
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW):: &
            faerlw1, faerlw2, faerlw3
-
-      !--- TYPED VARIABLES
-      type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
-
 
 !
 !===> ...  begin here
@@ -676,12 +665,13 @@
 
       endif  ! Model%lsswr
 
-       !zhang: should called before LW radiation 
+      
+      ! CCPP: GFS_radlw_pre_run
       ! Setup surface emissivity for LW radiation.
-       call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  --- inputs
-           Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
-           tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
-           Radtend%semis)                                   !  --- outputs
+      ! call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  --- inputs
+      !     Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
+      !     tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
+      !     Radtend%semis)                                   !  --- outputs
 
 ! CCPP
        do k = 1, LMK
