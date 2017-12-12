@@ -14,6 +14,8 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sasasdeep_init  Argument Table
+!! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !!
       subroutine sasasdeep_init
       end subroutine sasasdeep_init
@@ -22,6 +24,8 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sasasdeep_finalize  Argument Table
+!! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !!
       subroutine sasasdeep_finalize
       end subroutine sasasdeep_finalize
@@ -84,7 +88,7 @@
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
       real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),          &
+     &                     ql1(ix,km),ql2(ix,km), q1(ix,km), t1(ix,km), &
      &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
      &                     cldwrk(im), rn(im),      garea(im),          &
      &                     dot(ix,km), phil(ix,km),                     &
@@ -2307,7 +2311,7 @@ c
       enddo
 !!
       return
-      end
+      end subroutine sasasdeep_run
       !> @}
       !> @}
 

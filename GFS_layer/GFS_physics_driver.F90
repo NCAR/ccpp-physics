@@ -9,6 +9,7 @@ module module_physics_driver
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
   use gfs_fv3_needs,         only: get_prs_fv3, get_phi_fv3
+  use sasas_deep,            only: sasasdeep_run
   use sfc_nst,               only: sfc_nst_run
   use sfc_nst_pre,           only: sfc_nst_pre_run
   use sfc_nst_post,          only: sfc_nst_post_run
