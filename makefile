@@ -15,12 +15,9 @@ else
     $(info )
 endif
 
-LIBRARY   = libgfsphys.so
-VER_MAJOR = 1
-VER_MINOR = 0
-VER_PATCH = 0
+LIBRARY  = libgfsphys.a
 
-FFLAGS   += -I../fms -I../fms/include -fPIC
+FFLAGS   += -I../fms -I../fms/include
 
 CPPDEFS = -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 
@@ -67,6 +64,7 @@ SRCS_f   =  \
 	   ./physics/moninshoc.f                                                     \
 	   ./physics/mstadb.f                                                        \
 	   ./physics/mstadbtn.f                                                      \
+	   ./physics/mstadbtn2.f                                                     \
 	   ./physics/mstcnv.f                                                        \
 	   ./physics/namelist_soilveg.f                                              \
 	   ./physics/ozne_def.f                                                      \
@@ -76,6 +74,7 @@ SRCS_f   =  \
 	   ./physics/precpd.f                                                        \
 	   ./physics/precpd_shoc.f                                                   \
 	   ./physics/precpdp.f                                                       \
+	   ./physics/precpd_shoc.f                                                   \
 	   ./physics/progt2.f                                                        \
 	   ./physics/progtm_module.f                                                 \
 	   ./physics/rad_initialize.f                                                \
@@ -108,6 +107,8 @@ SRCS_f   =  \
 	   ./physics/sflx.f                                                          \
 	   ./physics/shalcnv.f                                                       \
 	   ./physics/shalcv.f                                                        \
+	   ./physics/shalcv_1lyr.f                                                   \
+	   ./physics/shalcv_fixdp.f                                                  \
 	   ./physics/shalcv_opr.f                                                    \
 	   ./physics/tracer_const_h.f                                                \
 	   ./physics/tridi2t3.f
@@ -126,8 +127,7 @@ SRCS_f90 = \
 	   ./physics/module_nst_water_prop.f90                                       \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90						     \
-	   ./physics/wam_f107_kp_mod.f90                                             \
-	   ./IPD_layer/IPD_driver_cap.f90
+	   ./physics/wam_f107_kp_mod.f90
 
 SRCS_F   = ./physics/aer_cloud.F						     \
 	   ./physics/cldmacro.F   						     \
@@ -163,9 +163,7 @@ OBJS = $(OBJS_f) $(OBJS_f90) $(OBJS_F) $(OBJS_F90) $(OBJS_c)
 all default: depend $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
-	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS)  $(LDFLAGS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
-	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
-	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
+	$(AR) $(ARFLAGS) $@ $?
 
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
@@ -181,8 +179,6 @@ clean:
 	@echo "Cleaning gfsphysics  ... "
 	@echo
 	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.lst *.i depend
-	$(RM) -f $(LIBRARY).$(VER_MAJOR)
-	$(RM) -f $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
 MKDEPENDS = ../mkDepends.pl
 include ../conf/make.rules
