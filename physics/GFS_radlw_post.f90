@@ -1,38 +1,52 @@
-      subroutine Post_radiation (Radtend, tsfa, lm, kd, htlwc, htlw0, &
-          Model, Coupling, Grid, htswc, htsw0, scmpsw, sfcalb, Diag,  &
-          nday, Statein, im, kt, kb, raddt, cldsa, mtopa, mbota,      &
-          clouds, aerodp)
+!>\file GFS_radlw_post
+!!This file contains
+      module GFS_radlw_post 
+      contains
 
-        implicit none
+!>\defgroup GFS_radlw_post GFS RRTMG/RADLW Scheme Post
+!! @{
+!>\section arg_table_GFS_radlw_post_init Argument Table
+!!
+      subroutine GFS_radlw_post_init()
+      end subroutine GFS_radlw_post_init      
 
-        integer, intent(in) :: lm, kd, im, kt, kb
-        type(GFS_grid_type),    intent(in)     :: Grid
-        type(GFS_control_type), intent(in)     :: Model
-        type(GFS_statein_type), intent(in)     :: Statein
-        type(GFS_radtend_type), intent(inout)  :: Radtend
-        type(GFS_coupling_type), intent(inout) :: Coupling
-        type(GFS_diag_type), intent(inout)     :: Diag
+!>\section arg_table_GFS_radlw_post_run Argument Table
+!!| local var name    | longname                                                                | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
+!!|-------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
+!!|   Model           | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
+!!|   Grid            | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
+!!|   Radtend         | FV3-GFS_Radtend_type                                                    | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
+!!|   Coupling        | FV3-GFS_Coupling_type                                                   | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
+!!|   ltp             | extra_top_layer                                                         | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
+!!|   lm              | vertical_layer_dimension_for_radiation                                  | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |
+!!|   kd              | vertical_index_difference_between_in-out_and_local                      | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
+!!|   tsfa            | surface_air_temperature_for_radiation                                   | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | in        | F        |
+!!|   htlwc           | tendency_of_air_temperature_due_to_longwave_heating                     | total sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!!|   htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky  | clear sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!!
+      subroutine GFS_radlw_post_run (Model, Grid, Radtend, Coupling,   &
+                 ltp, lm, kd, tsfa, htlwc, htlw0)
+    
+      use machine,                   only: kind_phys
+      use GFS_typedefs,              only: GFS_coupling_type,          &
+                                           GFS_control_type,           &
+                                           GFS_grid_type,              &
+                                           GFS_radtend_type
+      implicit none
+      type(GFS_control_type),         intent(in)    :: Model
+      type(GFS_coupling_type),        intent(inout) :: Coupling
+      type(GFS_grid_type),            intent(in)    :: Grid
+      type(GFS_radtend_type),         intent(inout) :: Radtend
 
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP), intent(in) :: htlw0, htlwc, htswc, htsw0
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1)), intent(in) :: tsfa
-        type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NF_ALBD), intent(in) :: sfcalb
-        integer, intent(in) :: nday
-        real(kind = kind_phys), intent(in) :: raddt
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), 5), intent(in) :: cldsa
-        integer, dimension(size(Grid%xlon, 1), 3), intent(in) :: mbota, mtopa
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-            LTP, NF_CLDS), intent(in) :: clouds
-        real(kind = kind_phys), dimension(Size (Grid%xlon, 1), NSPC1), intent(in) :: aerodp
-
-
-        !pedro Save LW results
-        !pedro call Post_lw (Radtend, tsfa, lm, kd, htlwc, htlw0, Model, Coupling, Grid)
-
-!>  - Save surface air temp for diurnal adjustment at model t-steps
+      integer :: k1,k, LM, kd, ltp
+      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
+          LTP) ::  htlwc, htlw0
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::  tsfa
 
       if (Model%lslwr) then
+!> -# Save calculation results
+!>  - Save surface air temp for diurnal adjustment at model t-steps
+
         Radtend%tsflw (:) = tsfa(:)
 
         do k = 1, LM
@@ -56,37 +70,20 @@
             do k = LM,Model%levs
               Radtend%lwhc(:,k) = Radtend%lwhc(:,LM)
             enddo
-          endif
-        endif
+           endif
+         endif
 
 ! --- radiation fluxes for other physics processes
         Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
 
       endif                                ! end_if_lslwr
+       
+      end subroutine GFS_radlw_post_run
 
+!>\section arg_table_GFS_radlw_post_finalize Argument Table
+!!
+      subroutine GFS_radlw_post_finalize ()
+      end subroutine GFS_radlw_post_finalize
 
-            ! post SW
-        call Save_sw_heating_rate (Radtend, Model, Grid, htswc, lm, kd, &
-            Model%lsswr)
-
-        call Save_sw_heating_rate_csk (Radtend, Model, Grid, htsw0, lm, &
-            kd, Model%lsswr)
-
-            ! Surface down and up spectral component fluxes
-            ! Save two spectral bands' surface downward and upward fluxes for output.
-        call Save_sw_fluxes (Coupling, scmpsw, Grid, sfcalb, Model%lsswr)
-
-            ! Night time: set SW heating rates and fluxes to zero
-        call Zero_out_heatrate_flux (Radtend, Diag, scmpsw, Coupling, &
-            Grid, Model, nday, Model%lsswr)
-
-        call Save_more_sw_fluxes (Radtend, Coupling, Model%lsswr)
-
-
-          ! Collect the fluxr data for wrtsfc
-        call Organize_output (Diag, Model, Grid, Radtend, Statein, &
-            Coupling, im, kd, kt, kb, lm, scmpsw, raddt, cldsa,    &
-            mtopa, mbota, clouds, aerodp)
-
-      end subroutine Post_radiation
-
+!! @}
+      end module GFS_radlw_post
