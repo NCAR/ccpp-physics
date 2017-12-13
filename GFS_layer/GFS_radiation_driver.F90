@@ -311,6 +311,7 @@
      &                                     fvirt => con_fvirt           &
      &,                                    rocp  => con_rocp
       use funcphys,                  only: fpvs
+      use radcons
 
       use module_radiation_astronomy,only: sol_init, sol_update, coszmn
       use module_radiation_gases,    only: NF_VGAS, getgases, getozn,   &
@@ -1199,7 +1200,7 @@
 
 ! CCPP: L1211-1577
       call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input 
-          Tbd, Cldprop, Radtend,itsfc, ltp, lextop,                    &
+          Tbd, Cldprop, Radtend,                                       &  
           lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,            & ! output
           tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,            &
           gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &

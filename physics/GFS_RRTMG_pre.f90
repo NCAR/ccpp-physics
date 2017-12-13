@@ -23,9 +23,6 @@
 !!|   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |           | in     | F        |
 !!|   Cldprop         | FV3-GFS_Cldprop_type                                          | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |  0   | GFS_typedefs%GFS_cldprop_type |           | in     | F        |
 !!|   Radtend         | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in     | F        |
-!!|   itsfc           | flag_for_surface_temperature                                  | control flag for surface temperature                                          | none     |  0   | integer                       |           | in     | F        |
-!!|   ltp             | extra_top_layer                                               | extra top layers                                                              | none     |  0   | integer                       |           | in     | F        |
-!!|   lextop          | flag_for_extra_top_layer                                      | control flag for extra top layer                                              | none     |  0   | logical                       |           | in     | F        |
 !!|   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | out    | F        |   
 !!|   im              | horizontal_loop_extent                                        | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | out    | F        |    
 !!|   lmk             | vertical_layer_dimension_with_extra_top_layer                 | number of vertical layers with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
@@ -75,7 +72,7 @@
 !!|   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
-          Tbd, Cldprop, Radtend, itsfc, ltp, lextop,                 &
+          Tbd, Cldprop, Radtend,                                     & 
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, nday, idxday,  olyr,         &
           gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
@@ -103,6 +100,8 @@
      &                                     epsm1 => con_epsm1,       &
      &                                     fvirt => con_fvirt        &
      &,                                    rocp  => con_rocp
+      use radcons,                   only: itsfc,ltp, lextop, qmin,  &
+                                           qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
       use module_radiation_astronomy,only: coszmn                         ! sol_init, sol_update
@@ -126,55 +125,7 @@
         type(GFS_tbd_type),                  intent(in)    :: Tbd
         type(GFS_cldprop_type),              intent(in)    :: Cldprop
 
-!  ---  version tag and last revision date
-      character(40), parameter ::                                    &
-     &   VTAGRAD='NCEP-Radiation_driver    v5.2  Jan 2013 '
-!    &   VTAGRAD='NCEP-Radiation_driver    v5.1  Nov 2012 '
-!    &   VTAGRAD='NCEP-Radiation_driver    v5.0  Aug 2012 '
-
-!>\name Constant values
-
-!> lower limit of saturation vapor pressure (=1.0e-10)
-      real (kind=kind_phys) :: QMIN
-!> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME5
-!> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME6
-!> EPSQ=1.0e-12
-      real (kind=kind_phys) :: EPSQ
-!     parameter (QMIN=1.0e-10, QME5=1.0e-5,  QME6=1.0e-6,  EPSQ=1.0e-12)
-      parameter (QMIN=1.0e-10, QME5=1.0e-7,  QME6=1.0e-7,  EPSQ=1.0e-12)
-!     parameter (QMIN=1.0e-10, QME5=1.0e-20, QME6=1.0e-20, EPSQ=1.0e-12)
-
-!> lower limit of toa pressure value in mb
-      real, parameter :: prsmin = 1.0e-6
-
-!> control flag for LW surface temperature at air/ground interface
-!! (default=0, the value will be set in subroutine radinit)
-      !integer :: itsfc  =0
-
-!> new data input control variables (set/reset in subroutines
-!radinit/radupdate):
-      integer :: month0=0,   iyear0=0,   monthd=0
-
-!> control flag for the first time of reading climatological ozone data
-!! (set/reset in subroutines radinit/radupdate, it is used only if the
-!! control parameter ioznflg=0)
-      logical :: loz1st =.true.
-
-!> optional extra top layer on top of low ceiling models
-!!\n LTP=0: no extra top layer
-      !integer, parameter :: LTP = 0   ! no extra top layer
-!     integer, parameter :: LTP = 1   ! add an extra top layer
-
-!> control flag for extra top layer
-      !logical, parameter :: lextop = (LTP > 0)
-
-!
-!  ---  local variables: (horizontal dimensioned by IM)
-      !--- INTEGER VARIABLES
-      logical :: lextop
-      integer :: me, im, lm, nfxr, ntrac,ltp, itsfc
+      integer :: me, im, lm, nfxr, ntrac            
       integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, LMK, LMP, kd, &
                  lla, llb, lya, lyb, kt, kb
       integer, dimension(size(Grid%xlon,1)) :: idxday
