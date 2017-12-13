@@ -27,7 +27,7 @@
 !!|   ltp             | extra_top_layer                                               | extra top layers                                                              | none     |  0   | integer                       |           | in     | F        |
 !!|   lextop          | flag_for_extra_top_layer                                      | control flag for extra top layer                                              | none     |  0   | logical                       |           | in     | F        |
 !!|   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | out    | F        |   
-!!|   im              | horizontal_loop_extent                                        | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | out    | F        |     
+!!|   im              | horizontal_loop_extent                                        | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | out    | F        |    
 !!|   lmk             | vertical_layer_dimension_with_extra_top_layer                 | number of vertical layers with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
 !!|   lmp             | vertical_level_dimension_with_extra_top_layer                 | number of vertical levels with extra top layer                                | index    |  0   | integer                       |           | out    | F        |
 !!|   kd              | vertical_index_difference_between_in-out_and_local            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | out    | F        |
@@ -39,7 +39,7 @@
 !!|   tlvl            | air_temperature_at_interface_for_radiation                    | air temperature at vertical interface for radiation calculation               | K        |  2   | real                          | kind_phys | out    | F        |
 !!|   tlyr            | air_temperature_at_layer_for_radiation                        | air temperature at vertical layer for radiation calculation                   | K        |  2   | real                          | kind_phys | out    | F        |
 !!|   tsfg            | surface_ground_temperature_for_radiation                      | surface ground temperature                                                    | K        |  1   | real                          | kind_phys | out    | F        |
-!!|   tsfa            | surface_air_temperature_for_radiation                         | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | out    | F        |           
+!!|   tsfa            | surface_air_temperature_for_radiation                         | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | out    | F        |    
 !!|   qlyr            | water_vapor_specific_humidity_at_layer_for_radiation          | water vapor specific humidity at vertical layer for radiation calculation     | kg kg-1  |  2   | real                          | kind_phys | out    | F        | 
 !!|   nday            | daytime_points_dimension                                      | daytime points dimension                                                      | index    |  0   | integer                       |           | out    | F        |
 !!|   idxday          | daytime_points                                                | daytime points                                                                | none     |  1   | integer                       |           | out    | F        |
@@ -71,12 +71,8 @@
 !!|   clouds8         | snow_water_path                                               | layer snow flake water path                                                   | g m-2    |  2   | real                          | kind_phys | out    | F        | 
 !!|   clouds9         | mean_effective_radius_for_snow_flake                          | mean effective radius for snow flake                                          | micron   |  2   | real                          | kind_phys | out    | F        |
 !!|   cldsa           | cloud_area_fraction                                           | fraction of clouds for low, middle,high, total and bl (IX,5)                  | frac     |  2   | real                          | kind_phys | out    | F        |
-!!|   mtopa           | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |  2   | integer                       |           | out    | F        |        
+!!|   mtopa           | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |  2   | integer                       |           | out    | F        |    
 !!|   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | out    | F        |
-!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct                          | surface albedo due to near IR direct beam                                     | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused                        | surface albedo due to near IR diffused beam                                   | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb3         | surface_albedo_due_to_uv+vis_direct                           | surface albedo due to UV+VIS direct beam                                      | none     |  1   | real                          | kind_phys | out    | F        |
-!!|   sfcalb4         | surface_albedo_due_to_uv+vis_diffused                         | surface albedo due to UV+VIS diffused beam                                    | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend, itsfc, ltp, lextop,                 &
@@ -88,8 +84,7 @@
           faersw1,  faersw2,  faersw3,                               &
           faerlw1, faerlw2, faerlw3, aerodp,                         &
           clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
-          clouds7, clouds8, clouds9, cldsa, mtopa, mbota,            &
-          sfcalb1, sfcalb2, sfcalb3, sfcalb4)
+          clouds7, clouds8, clouds9, cldsa, mtopa, mbota )
 
 
       use machine,                   only: kind_phys
@@ -114,8 +109,6 @@
       use module_radiation_gases,    only: NF_VGAS, getgases, getozn      ! gas_init, gas_update,
       use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,   &  ! aer_init, aer_update,
      &                                     NSPC1
-      use module_radiation_surface,  only: NF_ALBD, setalb,            &  ! sfc_init
-     &                                     setemis
       use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
      &                                     progcld1, progcld2,progcld3,&
      &                                     progclduni, diagcld1
@@ -195,8 +188,6 @@
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5)       :: cldsa
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
-!CCPP: NSPC1=NSPC+1; NSPC: num of species for optional aod output fields
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
            htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
            qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
@@ -210,9 +201,6 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
 
-! CCPP-compliant
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::                &
-           sfcalb1, sfcalb2, sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP)::  &
             clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,          &
             clouds7, clouds8, clouds9
@@ -644,35 +632,6 @@
 
       endif                                ! end_if_ntcw
 
-!  --- ...  start radiation calculations
-!           remember to set heating rate unit to k/sec!
-!> -# Start SW radiation calculations
-      if (Model%lsswr) then
-
-!>  - Call module_radiation_surface::setalb() to setup surface albedo.
-!!  for SW radiation.
-
-        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                     Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                     tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                     Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                     Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                     Sfcprop%tisfc, IM,                           &
-                     sfcalb)                                           !  ---  outputs
-
-!> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
-        Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-
-      endif  ! Model%lsswr
-
-      
-      ! CCPP: GFS_radlw_pre_run
-      ! Setup surface emissivity for LW radiation.
-      ! call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, & !  --- inputs
-      !     Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl,   &
-      !     tsfg, tsfa, Sfcprop%hprim, im, Model%lslwr,    &
-      !     Radtend%semis)                                   !  --- outputs
-
 ! CCPP
        do k = 1, LMK
          do i = 1, IM
@@ -687,14 +646,6 @@
             clouds9(i,k) = clouds(i,k,9)
          enddo
        enddo
-
-       do i = 1, im
-        sfcalb1(i) = sfcalb(i,1)
-        sfcalb2(i) = sfcalb(i,2)
-        sfcalb3(i) = sfcalb(i,3)
-        sfcalb4(i) = sfcalb(i,4)
-       enddo
-
 
       end subroutine GFS_RRTMG_pre_run
    

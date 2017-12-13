@@ -330,6 +330,7 @@
 
       use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
       use GFS_RRTMG_post,            only: GFS_RRTMG_post_run
+      use GFS_radsw_pre,             only: GFS_radsw_pre_run
       use GFS_radsw_post,            only: GFS_radsw_post_run
       use GFS_radlw_pre,             only: GFS_radlw_pre_run
       use GFS_radlw_post,            only: GFS_radlw_post_run
@@ -1196,28 +1197,29 @@
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
-! CCPP: L349-390
-!      call GFS_RRTMG_pre_init (vtagrad, qmin, qme5,qme6, epsq, prsmin, &
-!         itsfc, month0, iyear0, monthd,loz1st, ltp,lextop)
+! CCPP: L1211-1577
+      call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input 
+          Tbd, Cldprop, Radtend,itsfc, ltp, lextop,                    &
+          lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,            & ! output
+          tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,            &
+          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
+          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 &
+          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10), &
+          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),           &
+          faerlw(:,:,:,1), faerlw(:,:,:,2), faerlw(:,:,:,3), aerodp,   &
+          clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                 &
+          clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
+          clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
+          cldsa, mtopa, mbota )
 
-! CCPP: L1211-1596
-      call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,         &  ! input 
-          Tbd, Cldprop, Radtend,itsfc, ltp, lextop,                   &
-          lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,           &  ! output
-          tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,           &
-          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                &
-          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                & 
-          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10),&
-          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),          &
-          faerlw(:,:,:,1), faerlw(:,:,:,2), faerlw(:,:,:,3), aerodp,  &
-          clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                &
-          clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                &
-          clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                &
-          cldsa, mtopa, mbota, sfcalb(:,1), sfcalb(:,2),              &
-          sfcalb(:,3), sfcalb(:,4) )
+! CCPP: L1582-1596
+      call GFS_radsw_pre_run (Model, Grid, Sfcprop, Radtend, im,       &
+          tsfg, tsfa, sfcalb(:,1), sfcalb(:,2), sfcalb(:,3),           &
+          sfcalb(:,4) )
 
 ! CCPP: L1598-1618
-      call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr, gasvmr(:, :, 1), & ! Inputs:
+      call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
+          gasvmr(:, :, 1),                                             &
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
           faersw(:, :, :, 3), sfcalb(:,1), sfcalb(:,2),sfcalb(:,3),    &
@@ -1231,36 +1233,36 @@
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
 !CCPP: L1620-1686
-      call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
-          ltp, nday, lm, kd, htswc, htsw0,                            & 
+      call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,   &
+          ltp, nday, lm, kd, htswc, htsw0,                             &
           sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
 
 !CCPP: L1689-1698
-      call GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend,          &
+      call GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend,           &
           im, tsfg, tsfa)
 
 !CCPP: L1703-1714
-      call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,          &        !  ---  inputs
-          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),    &
-          gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),    &
-          gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),    &
-          Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis,   &
-          tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),     &
-          Model%lslwr,                                          &
-          htlwc, Diag%topflw, Radtend%sfcflw,                   & !  ---  outputs
-          hlw0=htlw0,                                           & !  ---  optional output
-          cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3), & !  ---  optional input
-          cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5), &
-          cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),&
+      call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! inputs
+          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),           &
+          gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),           &
+          gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),           &
+          Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis, &
+          tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),            &
+          Model%lslwr,                                                 &
+          htlwc, Diag%topflw, Radtend%sfcflw,                          & ! outputs
+          hlw0=htlw0,                                                  & ! optional output
+          cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! optional input
+          cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
+          cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
 !CCPP: L1718-1747
-       call GFS_radlw_post_run (Model, Grid, Radtend, Coupling,  &
+      call GFS_radlw_post_run (Model, Grid, Radtend, Coupling,         &
           ltp, lm, kd, tsfa, htlwc, htlw0)
 
 !CCPP: L1757-1841
-       call GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,  &
-          Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &
+      call GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,    &
+          Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,    &
           cldsa, mtopa, mbota, clouds(:,:,1))
 
 
