@@ -78,7 +78,6 @@
         sfcalb4(i) = sfcalb(i,4)
        enddo
 
-
       end subroutine GFS_radsw_pre_run
 
 !>\section arg_table_GFS_radsw_pre_finalize Argument Table

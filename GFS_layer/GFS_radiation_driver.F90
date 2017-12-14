@@ -354,47 +354,47 @@
       private
 
 !  ---  version tag and last revision date
-      character(40), parameter ::                                       &
-     &   VTAGRAD='NCEP-Radiation_driver    v5.2  Jan 2013 '
+!      character(40), parameter ::                                       &
+!     &   VTAGRAD='NCEP-Radiation_driver    v5.2  Jan 2013 '
 !    &   VTAGRAD='NCEP-Radiation_driver    v5.1  Nov 2012 '
 !    &   VTAGRAD='NCEP-Radiation_driver    v5.0  Aug 2012 '
 
 !>\name Constant values
 
 !> lower limit of saturation vapor pressure (=1.0e-10)
-      real (kind=kind_phys) :: QMIN
+!      real (kind=kind_phys) :: QMIN
 !> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME5
+!      real (kind=kind_phys) :: QME5
 !> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME6
+!      real (kind=kind_phys) :: QME6
 !> EPSQ=1.0e-12
-      real (kind=kind_phys) :: EPSQ
+!      real (kind=kind_phys) :: EPSQ
 !     parameter (QMIN=1.0e-10, QME5=1.0e-5,  QME6=1.0e-6,  EPSQ=1.0e-12)
-      parameter (QMIN=1.0e-10, QME5=1.0e-7,  QME6=1.0e-7,  EPSQ=1.0e-12)
+!      parameter (QMIN=1.0e-10, QME5=1.0e-7,  QME6=1.0e-7,  EPSQ=1.0e-12)
 !     parameter (QMIN=1.0e-10, QME5=1.0e-20, QME6=1.0e-20, EPSQ=1.0e-12)
 
 !> lower limit of toa pressure value in mb
-      real, parameter :: prsmin = 1.0e-6
+!      real, parameter :: prsmin = 1.0e-6
 
 !> control flag for LW surface temperature at air/ground interface
 !! (default=0, the value will be set in subroutine radinit)
-      integer :: itsfc  =0
+!      integer :: itsfc  =0
 
 !> new data input control variables (set/reset in subroutines radinit/radupdate):
-      integer :: month0=0,   iyear0=0,   monthd=0
+!      integer :: month0=0,   iyear0=0,   monthd=0
 
 !> control flag for the first time of reading climatological ozone data
 !! (set/reset in subroutines radinit/radupdate, it is used only if the
 !! control parameter ioznflg=0)
-      logical :: loz1st =.true.
+!      logical :: loz1st =.true.
 
 !> optional extra top layer on top of low ceiling models
 !!\n LTP=0: no extra top layer
-      integer, parameter :: LTP = 0   ! no extra top layer
+!      integer, parameter :: LTP = 0   ! no extra top layer
 !     integer, parameter :: LTP = 1   ! add an extra top layer
 
 !> control flag for extra top layer
-      logical, parameter :: lextop = (LTP > 0)
+!      logical, parameter :: lextop = (LTP > 0)
 
 !  ---  publicly accessible module programs:
 
@@ -525,6 +525,7 @@
 !                                                                       !
 !  ===================================================================  !
 !
+      use radcons
       implicit none
 
 !  ---  inputs:
@@ -662,8 +663,8 @@
 !> \section gen_radupdate General Algorithm
 !> @{
 !-----------------------------------
-      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
-     &       slag,sdec,cdec,solcon)
+!      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
+!     &       slag,sdec,cdec,solcon)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -724,24 +725,25 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+!      use radcons
+!      implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: idate(:), jdate(:), me
-      logical, intent(in) :: lsswr
+!      integer, intent(in) :: idate(:), jdate(:), me
+!      logical, intent(in) :: lsswr
 
-      real (kind=kind_phys), intent(in) :: deltsw, deltim
+!      real (kind=kind_phys), intent(in) :: deltsw, deltim
 
 !  ---  outputs:
-      real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
+!      real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
 
 !  ---  locals:
-      integer :: iyear, imon, iday, ihour
-      integer :: kyear, kmon, kday, khour
+!      integer :: iyear, imon, iday, ihour
+!      integer :: kyear, kmon, kday, khour
 
-      logical :: lmon_chg       ! month change flag
-      logical :: lco2_chg       ! cntrl flag for updating co2 data
-      logical :: lsol_chg       ! cntrl flag for updating solar constant
+!      logical :: lmon_chg       ! month change flag
+!      logical :: lco2_chg       ! cntrl flag for updating co2 data
+!      logical :: lsol_chg       ! cntrl flag for updating solar constant
 !
 !===> ...  begin here
 !
@@ -749,72 +751,72 @@
 !! (currently co2 only)
 !  --- ...  time stamp at fcst time
 
-      iyear = jdate(1)
-      imon  = jdate(2)
-      iday  = jdate(3)
-      ihour = jdate(5)
+!      iyear = jdate(1)
+!      imon  = jdate(2)
+!      iday  = jdate(3)
+!      ihour = jdate(5)
 
 !  --- ...  set up time stamp used for green house gases (** currently co2 only)
 
-      if ( ictmflg==0 .or. ictmflg==-2 ) then  ! get external data at initial condition time
-        kyear = idate(1)
-        kmon  = idate(2)
-        kday  = idate(3)
-        khour = idate(5)
-      else                           ! get external data at fcst or specified time
-        kyear = iyear
-        kmon  = imon
-        kday  = iday
-        khour = ihour
-      endif   ! end if_ictmflg_block
+!      if ( ictmflg==0 .or. ictmflg==-2 ) then  ! get external data at initial condition time
+!        kyear = idate(1)
+!        kmon  = idate(2)
+!        kday  = idate(3)
+!        khour = idate(5)
+!      else                           ! get external data at fcst or specified time
+!        kyear = iyear
+!        kmon  = imon
+!        kday  = iday
+!        khour = ihour
+!      endif   ! end if_ictmflg_block
 
-      if ( month0 /= imon ) then
-        lmon_chg = .true.
-        month0   = imon
-      else
-        lmon_chg = .false.
-      endif
+!      if ( month0 /= imon ) then
+!        lmon_chg = .true.
+!        month0   = imon
+!      else
+!        lmon_chg = .false.
+!      endif
 
 !> -# Call module_radiation_astronomy::sol_update(), yearly update, no
 !! time interpolation.
-      if (lsswr) then
+!      if (lsswr) then
 
-        if ( isolar == 0 .or. isolar == 10 ) then
-          lsol_chg = .false.
-        elseif ( iyear0 /= iyear ) then
-          lsol_chg = .true.
-        else
-          lsol_chg = ( isolar==4 .and. lmon_chg )
-        endif
-        iyear0 = iyear
+!        if ( isolar == 0 .or. isolar == 10 ) then
+!          lsol_chg = .false.
+!        elseif ( iyear0 /= iyear ) then
+!          lsol_chg = .true.
+!        else
+!          lsol_chg = ( isolar==4 .and. lmon_chg )
+!        endif
+!        iyear0 = iyear
 
-        call sol_update                                                 &
+!        call sol_update                                                 &
 !  ---  inputs:
-     &     ( jdate,kyear,deltsw,deltim,lsol_chg, me,                    &
+!     &     ( jdate,kyear,deltsw,deltim,lsol_chg, me,                    &
 !  ---  outputs:
-     &       slag,sdec,cdec,solcon                                      &
-     &     )
+!     &       slag,sdec,cdec,solcon                                      &
+!     &     )
 
-      endif  ! end_if_lsswr_block
+!      endif  ! end_if_lsswr_block
 
 !> -# Call module_radiation_aerosols::aer_update(), monthly update, no
 !! time interpolation
-      if ( lmon_chg ) then
-        call aer_update ( iyear, imon, me )
-      endif
+!      if ( lmon_chg ) then
+!        call aer_update ( iyear, imon, me )
+!      endif
 
 !> -# Call co2 and other gases update routine:
 !! module_radiation_gases::gas_update()
-      if ( monthd /= kmon ) then
-        monthd = kmon
-        lco2_chg = .true.
-      else
-        lco2_chg = .false.
-      endif
+!      if ( monthd /= kmon ) then
+!        monthd = kmon
+!        lco2_chg = .true.
+!      else
+!        lco2_chg = .false.
+!      endif
 
-      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me )
+!      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me )
 
-      if ( loz1st ) loz1st = .false.
+!      if ( loz1st ) loz1st = .false.
 
 !> -# Call surface update routine (currently not needed)
 !     call sfc_update ( iyear, imon, me )
@@ -822,9 +824,9 @@
 !> -# Call clouds update routine (currently not needed)
 !     call cld_update ( iyear, imon, me )
 !
-      return
+!      return
 !...................................
-      end subroutine radupdate
+!      end subroutine radupdate
 !-----------------------------------
 !> @}
 

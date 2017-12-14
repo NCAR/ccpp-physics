@@ -60,6 +60,17 @@
 !> control flag for extra top layer
       logical, parameter :: lextop = (LTP > 0)
 
+!----------------------------
+! Module variable definitions
+!----------------------------
+!CCPP: copy from GFS_driver.F90
+  real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
+  real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
+  real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
+  real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
+ ! real(kind=kind_phys), parameter :: qmin    =    1.0e-10
+
+
 
 
 !........................................!

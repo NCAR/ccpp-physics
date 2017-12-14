@@ -236,6 +236,7 @@ module GFS_driver
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, & 
                                  Grid, Tbd, Cldprop, Radtend, Diag)
 
+    use GFS_rad_time_vary,     only: GFS_rad_time_vary_run 
     implicit none
 
     !--- interface variables
@@ -250,7 +251,7 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
     !--- local variables
-    integer :: nblks
+    integer :: nblks, ictmflg, isolar
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
@@ -275,7 +276,9 @@ module GFS_driver
     call Print_debug_info (Model, sec)
 
     !--- radiation time varying routine
-    call Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
+! CCPP
+     call GFS_rad_time_vary_run(Model,Statein, Tbd, blksz, sec,    &
+         ictmflg, isolar)
 
     !--- physics time varying routine
     call GFS_phys_time_vary (Model, Grid, Tbd)
@@ -367,64 +370,64 @@ module GFS_driver
 !  Routine containing all of the setup logic originally in phys/gloopr.f
 !
 !-----------------------------------------------------------------------
-  subroutine GFS_rad_time_vary (Model, Statein, Tbd, sec)
+!  subroutine GFS_rad_time_vary (Model, Statein, Tbd, sec)
 
-    use physparam,        only: ipsd0, ipsdlim, iaerflg
-    use mersenne_twister, only: random_setseed, random_index, random_stat
+!    use physparam,        only: ipsd0, ipsdlim, iaerflg
+!    use mersenne_twister, only: random_setseed, random_index, random_stat
 
-    implicit none
+!    implicit none
 
-    type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(in)    :: Statein(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    real(kind=kind_phys),     intent(in)    :: sec
+!    type(GFS_control_type),   intent(inout) :: Model
+!    type(GFS_statein_type),   intent(in)    :: Statein(:)
+!    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
+!    real(kind=kind_phys),     intent(in)    :: sec
     !--- local variables
-    type (random_stat) :: stat
-    integer :: ix, nb, j, i, nblks, ipseed
-    integer :: numrdm(Model%cnx*Model%cny*2)
+!    type (random_stat) :: stat
+!    integer :: ix, nb, j, i, nblks, ipseed
+!    integer :: numrdm(Model%cnx*Model%cny*2)
 
-    nblks = size(blksz,1)
+!    nblks = size(blksz,1)
 
-    call radupdate (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
-                    Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon )
+!    call radupdate (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
+!                    Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon )
 
     !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
-    if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
-      ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
-      call random_setseed (ipseed, stat)
-      call random_index (ipsdlim, numrdm, stat)
+!    if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
+!      ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
+!      call random_setseed (ipseed, stat)
+!      call random_index (ipsdlim, numrdm, stat)
 
       !--- set the random seeds for each column in a reproducible way
-      ix = 0
-      nb = 1
-      do j = 1,Model%ny
-        do i = 1,Model%nx
-          ix = ix + 1
-          if (ix .gt. blksz(nb)) then
-            ix = 1
-            nb = nb + 1
-          endif
-          !--- for testing purposes, replace numrdm with '100'
-          Tbd(nb)%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-          Tbd(nb)%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
-        enddo
-      enddo
-    endif  ! isubc_lw and isubc_sw
+!      ix = 0
+!      nb = 1
+!      do j = 1,Model%ny
+!        do i = 1,Model%nx
+!          ix = ix + 1
+!          if (ix .gt. blksz(nb)) then
+!            ix = 1
+!            nb = nb + 1
+!          endif
+!          !--- for testing purposes, replace numrdm with '100'
+!          Tbd(nb)%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
+!          Tbd(nb)%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
+!        enddo
+!      enddo
+!    endif  ! isubc_lw and isubc_sw
 
-    if (Model%num_p3d == 4) then
-      if (Model%kdt == 1) then
-        do nb = 1,nblks
-          Tbd(nb)%phy_f3d(:,:,1) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,2) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f3d(:,:,3) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,4) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f2d(:,1)   = Statein(nb)%prsi(:,1)
-          Tbd(nb)%phy_f2d(:,2)   = Statein(nb)%prsi(:,1)
-        enddo
-      endif
-    endif
+!    if (Model%num_p3d == 4) then
+!      if (Model%kdt == 1) then
+!        do nb = 1,nblks
+!          Tbd(nb)%phy_f3d(:,:,1) = Statein(nb)%tgrs
+!          Tbd(nb)%phy_f3d(:,:,2) = max(qmin,Statein(nb)%qgrs(:,:,1))
+!          Tbd(nb)%phy_f3d(:,:,3) = Statein(nb)%tgrs
+!          Tbd(nb)%phy_f3d(:,:,4) = max(qmin,Statein(nb)%qgrs(:,:,1))
+!          Tbd(nb)%phy_f2d(:,1)   = Statein(nb)%prsi(:,1)
+!          Tbd(nb)%phy_f2d(:,2)   = Statein(nb)%prsi(:,1)
+!        enddo
+!      endif
+!    endif
 
-  end subroutine GFS_rad_time_vary
+!  end subroutine GFS_rad_time_vary
 
 
 !-----------------------------------------------------------------------
@@ -652,20 +655,20 @@ module GFS_driver
   end subroutine Print_debug_info
 
 
-  subroutine Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
+!  subroutine Gfs_rad_time_vary_driver (Model, Statein, Tbd, sec)
 
-    implicit none
+!    implicit none
 
-    type(GFS_control_type), intent(inout) :: Model
-    type(GFS_statein_type), intent(in)    :: Statein(:)
-    type(GFS_tbd_type),     intent(inout) :: Tbd(:)
-    real(kind=kind_phys),   intent(in)    :: sec
+!    type(GFS_control_type), intent(inout) :: Model
+!    type(GFS_statein_type), intent(in)    :: Statein(:)
+!    type(GFS_tbd_type),     intent(inout) :: Tbd(:)
+!    real(kind=kind_phys),   intent(in)    :: sec
 
-    if (Model%lsswr .or. Model%lslwr) then
-      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
-    endif
+!    if (Model%lsswr .or. Model%lslwr) then
+!      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
+!    endif
 
-  end subroutine Gfs_rad_time_vary_driver
+!  end subroutine Gfs_rad_time_vary_driver
 
 
   subroutine Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
