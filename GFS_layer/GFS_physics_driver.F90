@@ -9,6 +9,7 @@ module module_physics_driver
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
   use gfs_fv3_needs,         only: get_prs_fv3, get_phi_fv3
+  use sasas_deep,            only: sasasdeep_run
   use sfc_nst,               only: sfc_nst_run
   use sfc_nst_pre,           only: sfc_nst_pre_run
   use sfc_nst_post,          only: sfc_nst_post_run
@@ -1664,8 +1665,9 @@ module module_physics_driver
                         islmsk, Statein%vvl, Model%ncld, ud_mf, dd_mf,  &
                         dt_mf, cnvw, cnvc)
         elseif (Model%imfdeepcnv == 2) then
-          call mfdeepcnv (im, ix, levs, dtp, del, Statein%prsl,         &
-                          Statein%pgr, Statein%phil, clw(:,:,1:2), Stateout%gq0, &
+          call sasasdeep_run (im, ix, levs, dtp, del, Statein%prsl,     &
+                          Statein%pgr, Statein%phil, clw(:,:,1),        &
+                          clw(:,:,2), Stateout%gq0(:,:,1),              &
                           Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
                           cld1d, rain1, kbot, ktop, kcnv, islmsk,       &
                           garea, Statein%vvl, Model%ncld, ud_mf, dd_mf, &
