@@ -16,6 +16,35 @@
 !! - Routine OZPHYS is called from GBPHYS after call to RAYLEIGH_DAMP
 !! @{
 
+
+
+      module ozphys_pre
+
+      contains
+
+!! \section arg_table_ozphys_pre_init Argument Table
+!!
+      subroutine ozphys_pre_init()
+      end subroutine ozphys_pre_init
+
+
+!! \section arg_table_ozphys_pre_run Argument Table
+!!
+      subroutine ozphys_pre_run()
+      end subroutine ozphys_pre_run
+
+
+!! \section arg_table_ozphys_pre_finalize Argument Table
+!!
+      subroutine ozphys_pre_finalize()
+      end subroutine ozphys_pre_finalize
+
+
+      end module ozphys_pre
+
+
+
+
       module ozphys
 
       contains
@@ -199,3 +228,55 @@
 
 
       end module ozphys
+
+
+
+
+      module ozphys_post
+
+      contains
+
+!! \section arg_table_ozphys_post_init Argument Table
+!!
+      subroutine ozphys_post_init()
+      end subroutine ozphys_post_init
+
+
+!! \section arg_table_ozphys_post_run Argument Table
+!! | local var name | longname                                     | description                                  | units   | rank | type          | kind      | intent | optional |
+!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                         | horizontal dimension                         | index   | 0    | integer       | default   | in     | F        |
+!! | levs           | vertical_dimension                           | number of vertical layers                    | index   | 0    | integer       | default   | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer       | default   | in     | F        |
+!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real          | kind_phys | in     | F        |
+!! | Diag           | Diag                                         | GFS diagnostics derived data type variable   | various | 0    | GFS_diag_type |           | inout  | F        |
+!!
+      subroutine ozphys_post_run(ix, levs, pl_coeff, ozp, Diag)
+
+      use GFS_typedefs, only: GFS_diag_type
+      use machine,      only: kind_phys
+
+      implicit none
+
+      integer, intent(in) :: ix, levs, pl_coeff
+      real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
+      type(GFS_diag_type), intent(inout) :: Diag
+
+      Diag%dq3dt(:,:,6) = ozp(:,:,1)
+      Diag%dq3dt(:,:,7) = ozp(:,:,2)
+      Diag%dq3dt(:,:,8) = ozp(:,:,3)
+      Diag%dq3dt(:,:,9) = ozp(:,:,4)
+
+      return
+
+      end subroutine ozphys_post_run
+
+
+!! \section arg_table_ozphys_post_finalize Argument Table
+!!
+      subroutine ozphys_post_finalize()
+      end subroutine ozphys_post_finalize
+
+
+      end module ozphys_post
+
