@@ -1,6 +1,6 @@
 !> \file GFS_calpreciptype.F90
 !! This file contains the subroutine that calculates dominant precipitation type (calpreciptype)
-!! and its post. It is  adopted from post but was made into a column to used by GFS model.
+!! and its post. It is adopted from post but was made into a column to used by GFS model.
 
       module GFS_calpreciptype
       contains
@@ -41,7 +41,7 @@
 !!|    srflag      | flag_for_precipitation_type                       | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
 !!|    tprcp       | precipitation_amount_in_one_dynamics_time_step    | precipitation amount in one dynamics time step           | m       | 1    | real    | kind_phys | out    |  F       |
 !!
-      subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
+      subroutine GFS_calpreciptype_run (kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1, &
                                phii,n3dfercld,tskin,sr,phy_f3d,     & !input
@@ -307,7 +307,7 @@
       endif
 
       return
-      end subroutine GFS_calpreciptype_run
+      end subroutine GFS_CALPRECIPTYPE_RUN
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -1511,7 +1511,7 @@
       endif
 !
       return
-      end
+      end 
 
 !> \section arg_table_GFS_calpreciptype_finalize Argument table
 !!

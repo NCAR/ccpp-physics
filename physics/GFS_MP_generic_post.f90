@@ -18,32 +18,32 @@
 
 
 !!\section arg_table_GFS_MP_generic_post_run Argument Table
-!!| local var name | longname                                               |description                                               | units       | rank |  type   |   kind    | intent | optional |
-!!|----------------|--------------------------------------------------------|----------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
-!!|   im           | horizontal_loop_extent                                 | horizontal loop extent, start at 1                       | index       | 0    | integer |           | in     |  F       |
-!!|   ix           | horizontal_dimension                                   | horizontal dimension                                     | index       | 0    | integer |           | in     |  F       |
-!!|   levs         | vertical_dimension                                     | vertical layer dimension                                 | index       | 0    | integer |           | in     |  F       |           
-!!|   dtf          | time_step_for_dynamics                                 | dynamics time step                                       | s           | 0    | real    | kind_phys | in     |  F       |
-!!|   del          | air_pressure_difference_between_midlayers              | air pressure difference between midlayers                | Pa          | 2    | real    | kind_phys | in     |  F       |
-!!|   lssav        | flag_diagnostics                                       | logical flag for model physics diagnostics               | flag        | 0    | logical |           | in     |  F       |
-!!|   ldiag3d      | flag_diagnostics_3D                                    | logical flag for 3D diagnostics                          | flag        | 0    | logical |           | in     |  F       |
-!!|   rain         | total_rainfall_amount                                  | instantaneous total precipitation at surface (APCP)      | m           | 1    | real    | kind_phys | in     |  F       |
-!!|   frain        | factor_for_centered_difference_scheme                  | dtf/dtp; factor for centered difference scheme correction| none        | 0    | real    | kind_phys | in     |  F       |
-!!|   ntcw         | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array(3)                | index       | 0    | integer |           | in     |  F       |
-!!|   ncld         | number_of_hydrometeors                                 | number_of_hydrometeors(1 for Z-C)                        | none        | 0    | integer |           | in     |  F       |
-!!|   cwm          | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!!|   t            | air_temperature_updated_by_physics                     | layer mean air temperature                               | K           | 2    | real    | kind_phys | in     |  F       |
-!!|   q            | water_vapor_specific_humidity                          | water vapor specific humidity                            | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!!|   dtdt         | air_temperature_before_microphysics_scheme             | air temperature saved before micophysics scheme          | K           | 2    | real    | kind_phys | in     |  F       |
-!!|   dqdt1        | specific_humidity_before_microphysics_scheme           | specific humidity saved before microphysics schme        | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!!|   totprcp      | precipitation_rate_at_surface                          | precipitation rate at surface                            | kg m-2 s-1  | 1    | real    | kind_phys | inout  |  F       |
-!!|   dt3dt6       | large_scale_condensate_heating_rate_at_model_layers    | large scale condensate heating rate at model layers      | K s-1       | 2    | real    | kind_phys | inout  |  F       |
-!!|   dq3dt4       | large_scale_condensate_moistening_rate_at_model_layers | large scale condensate moistening rate at model layers   | kg kg-1 s-1 | 2    | real    | kind_phys | inout  |  F       |
-!!|   pwat         | column_precipitable_water                              | column integrated precipitable water                     | kg m-2      | 1    | real    | kind_phys | out    |  F       |
+!!| local var name | longname                                               |description                                                     | units       | rank |  type   |   kind    | intent | optional |
+!!|----------------|--------------------------------------------------------|----------------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
+!!|   im           | horizontal_loop_extent                                 | horizontal loop extent, start at 1                             | index       | 0    | integer |           | in     |  F       |
+!!|   ix           | horizontal_dimension                                   | horizontal dimension                                           | index       | 0    | integer |           | in     |  F       |
+!!|   levs         | vertical_dimension                                     | vertical layer dimension                                       | index       | 0    | integer |           | in     |  F       |           
+!!|   dtf          | time_step_for_dynamics                                 | dynamics time step                                             | s           | 0    | real    | kind_phys | in     |  F       |
+!!|   del          | air_pressure_difference_between_midlayers              | air pressure difference between midlayers                      | Pa          | 2    | real    | kind_phys | in     |  F       |
+!!|   lssav        | flag_diagnostics                                       | logical flag for model physics diagnostics                     | flag        | 0    | logical |           | in     |  F       |
+!!|   ldiag3d      | flag_diagnostics_3D                                    | logical flag for 3D diagnostics                                | flag        | 0    | logical |           | in     |  F       |
+!!|   rain         | total_rainfall_amount                                  | instantaneous total precipitation at surface (APCP)            | m           | 1    | real    | kind_phys | in     |  F       |
+!!|   frain        | factor_for_centered_difference_scheme                  | dtf/dtp; factor for centered difference scheme correction      | none        | 0    | real    | kind_phys | in     |  F       |
+!!|   ntcw         | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array(3)                      | index       | 0    | integer |           | in     |  F       |
+!!|   ncld         | number_of_hydrometeors                                 | number_of_hydrometeors(1 for Z-C)                              | none        | 0    | integer |           | in     |  F       |
+!!|   cwm          | cloud_condensed_water_specific_humidity                | cloud condensed water specific humidity                        | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
+!!|   t            | air_temperature_updated_by_physics                     | layer mean air temperature                                     | K           | 2    | real    | kind_phys | in     |  F       |
+!!|   q            | water_vapor_specific_humidity                          | water vapor specific humidity                                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
+!!|   initial_t    | air_temperature_initial                                | air temperature before entering a physics scheme               | K           | 2    | real    | kind_phys | in     | F        |
+!!|   initial_qv   | water_vapor_specific_humidity_initial                  | water vapor specific humidity before entering a physics scheme | kg kg-1     | 2    | real    | kind_phys | in     | F        |
+!!|   totprcp      | precipitation_rate_at_surface                          | precipitation rate at surface                                  | kg m-2 s-1  | 1    | real    | kind_phys | inout  |  F       |
+!!|   dt3dt6       | large_scale_condensate_heating_rate_at_model_layers    | large scale condensate heating rate at model layers            | K s-1       | 2    | real    | kind_phys | inout  |  F       |
+!!|   dq3dt4       | large_scale_condensate_moistening_rate_at_model_layers | large scale condensate moistening rate at model layers         | kg kg-1 s-1 | 2    | real    | kind_phys | inout  |  F       |
+!!|   pwat         | column_precipitable_water                              | column integrated precipitable water                           | kg m-2      | 1    | real    | kind_phys | out    |  F       |
 !!
-      subroutine GFS_MP_generic_post_run(im, ix, levs,dtf,del,          &
-                 lssav,ldiag3d,rain,frain,ntcw,ncld,cwm,                & !input
-                 t,q,dtdt,dqdt1,                                        &
+      subroutine GFS_MP_generic_post_run(im, ix, levs,dtf,del,        &
+                 lssav,ldiag3d,rain,frain,ntcw,ncld,cwm,              & !input
+                 t,q,initial_t, initial_qv,                           &
                  totprcp, dt3dt6,dq3dt4,pwat  )     ! output
      
 !
@@ -61,7 +61,8 @@
       real(kind=kind_phys),dimension(im)           :: work1
       real(kind=kind_phys),dimension(im), intent(in)      :: rain
       real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,       &
-                                             cwm, del, dtdt, dqdt1
+                                             cwm, del, initial_t,       &
+                                             initial_qv 
       real(kind=kind_phys),dimension(im), intent(inout)   :: totprcp
       real(kind=kind_phys),dimension(im), intent(out)     :: pwat
       real(kind=kind_phys),dimension(ix,levs), intent(inout)  ::        &
@@ -77,8 +78,11 @@
         if (ldiag3d) then
           do i = 1, im
             do k = 1,levs
-               dt3dt6(i,k) = dt3dt6(i,k) + (t(i,k)-dtdt(i,k)) * frain
-               dq3dt4(i,k) = dq3dt4(i,k) + (q(i,k)-dqdt1(i,k)) * frain
+               !CCPP dt3dt6(i,k) = dt3dt6(i,k) + (t(i,k)-dtdt(i,k)) * frain
+               !CCPP dq3dt4(i,k) = dq3dt4(i,k) + (q(i,k)-dqdt1(i,k)) * frain
+              dt3dt6(i,k) = dt3dt6(i,k) + (t(i,k)-initial_t(i,k)) * frain
+              dq3dt4(i,k) = dq3dt4(i,k) + (q(i,k)-initial_qv(i,k)) * frain
+
             enddo
           enddo
         endif
