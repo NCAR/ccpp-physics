@@ -1,6 +1,9 @@
 !>  \file mfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
+      module sasas_shal
+      contains
+
 !> \defgroup SASHAL Scale-Aware Mass Flux Shallow Convection
 !! @{
 !!  \brief Brief description of the parameterization
@@ -8,20 +11,53 @@
 !!  \section intraphysics Intraphysics Communication
 
 !> \brief Brief description of the subroutine
-!!!!
-!! \section arg_table_mfshalcnv_run Arguments
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!! \section arg_table_sasasshal_init Argument Table
+!!
+      subroutine sasasshal_init
+      end subroutine sasasshal_init
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasshal_run Argument Table
+!! | local var name | longname                                                  | description                              | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                    | horizontal loop extent, start at 1       | index   |    0 | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                      | horizontal dimension                     | index   |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                 | index   |    0 | integer |           | in     | F        |
+!! | delt           | time_step_for_physics                                     | physics time step                        | s       |    0 | real    | kind_phys | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                      | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                              | mean layer pressure                      | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                      | surface pressure                         | Pa      | 1    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                              | layer geopotential                       | m2 s-2  | 2    | real    | kind_phys | in     | F        |
+!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity              | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity            | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity                             | updated vapor specific humidity          | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                        | updated temperature                      | K       | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                 | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                 | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | rn             | instantaneous_rainfall_amount                             | convective rain                          | m       | 1    | real    | kind_phys | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                      | index   | 1    | integer |           | out    | F        |
+!! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                       | index   | 1    | integer |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes             | flag    | 1    | integer |           | out    | F        |
+!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2             | flag    | 1    | integer |           | in     | F        |
+!! | garea          | cell_area                                                 | grid cell area                           | m2      | 1    | real    | kind_phys | in     | F        |
+!! | dot            | omega                                                     | layer mean vertical velocity             | Pa s-1  | 2    | real    | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors                   | count   |    0 | integer |           | in     | F        |
+!! | hpbl           | atmosphere_boundary_layer_thickness                       | PBL top height                           | m       | 1    | real    | kind_phys | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt               | kg m-2  | 2    | real    | kind_phys | out    | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt           | kg m-2  | 2    | real    | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity | kg kg-1 | 2    | real    | kind_phys | out    | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                   | frac    | 2    | real    | kind_phys | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine mfshalcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,        &
-     &     q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,                 &
+      subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
+     &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
 !    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
-!
+
       use machine , only : kind_phys
       use funcphys , only : fpvs
       use physcons, grav => con_g, cp => con_cp, hvap => con_hvap
@@ -30,18 +66,22 @@
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
+! In the current NCEP spectral model im <= ix for reduced grid numbers
+! near the pole and a parallel computing. For FV3, im=ix.
       integer            im, ix,  km, ncloud,                           &
      &                   kbot(im), ktop(im), kcnv(im)
 !    &,                  me
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
       real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),          &
+     &                     ql1(ix,km), ql2(ix,km),  q1(ix,km),          &
+     &                     t1(ix,km),                                   &
      &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
      &                     rn(im),     garea(im),                       &
      &                     dot(ix,km), phil(ix,km), hpbl(im),           &
      &                     cnvw(ix,km),cnvc(ix,km)                      &
      &,                    ud_mf(im,km),dt_mf(im,km)                    & ! hchuang code change mass flux output
+
 !
       integer              i,j,indx, k, kk, km1, n
       integer              kpbl(im)
@@ -329,9 +369,9 @@ c
 c  column variables
 c  p is pressure of the layer (mb)
 c  t is temperature at t-dt (k)..tn
-c  q is mixing ratio at t-dt (kg/kg)..qn
-c  to is temperature at t+dt (k)... this is after advection and turbulan
-c  qo is mixing ratio at t+dt (kg/kg)..q1
+c  q is specific humidity at t-dt (kg/kg)..qn
+c  to is temperature at t+dt (k)... this is after advection and turbulence
+c  qo is specific humidity at t+dt (kg/kg)..q1
 c
       do k = 1, km
         do i=1,im
@@ -1421,11 +1461,11 @@ c
             if (k >= kbcon(i) .and. k <= ktcon(i)) then
               tem  = dellal(i,k) * xmb(i) * dt2
               tem1 = max(0.0, min(1.0, (tcr-t1(i,k))*tcrf))
-              if (ql(i,k,2) > -999.0) then
-                ql(i,k,1) = ql(i,k,1) + tem * tem1            ! ice
-                ql(i,k,2) = ql(i,k,2) + tem *(1.0-tem1)       ! water
+              if (ql2(i,k) > -999.0) then
+                ql1(i,k) = ql1(i,k) + tem * tem1            ! ice
+                ql2(i,k) = ql2(i,k) + tem *(1.0-tem1)       ! water
               else
-                ql(i,k,1) = ql(i,k,1) + tem
+                ql1(i,k) = ql1(i,k) + tem
               endif
             endif
           endif
@@ -1453,6 +1493,87 @@ c
       enddo
 !!
       return
-      end
+      end subroutine sasasshal_run
 !> @}
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasshal_init Argument Table
+!!
+      subroutine sasasshal_finalize
+      end subroutine sasasshal_finalize
 !> @}
+
+      end module sasas_shal
+
+      module sasas_shal_post
+      contains
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasshal_post_run Argument Table
+!! | local var name | longname                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
+!! |----------------|------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
+!! | frain          | dynamics_to_physics_timestep_ratio       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
+!! | rain1          | instantaneous_rainfall_amount            | convective rain                                                      | m       |    1 | real                          | kind_phys | in     | F        |
+!! | cnvc           | convective_cloud_cover                   | convective cloud cover                                               | frac    |    2 | real                          | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | kind_phys | in     | F        |
+!! | Model          | FV3-GFS_Control_type                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_typedefs%GFS_tbd_type     |           | inout  | F        |
+!!
+      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+     &                               Grid, Diag, Tbd)
+
+        use machine,               only: kind_phys
+        use GFS_typedefs,          only: GFS_control_type,              &
+     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
+
+        type(GFS_grid_type),            intent(in) :: Grid
+        type(GFS_control_type),         intent(in) :: Model
+        type(GFS_diag_type),         intent(inout) :: Diag
+        type(GFS_tbd_type),          intent(inout) :: Tbd
+
+        real(kind=kind_phys), intent(in) :: frain
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
+     &     intent(in) :: rain1
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
+     &     intent(in) :: cnvw, cnvc
+
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
+        integer :: num2, num3
+
+        raincs(:)     = frain * rain1(:)
+        Diag%rainc(:) = DIag%rainc(:) + raincs(:)
+        if (Model%lssav) then
+          Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
+        endif
+        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
+     &                             (Model%npdf3d == 3)) then
+          num2 = Model%num_p3d + 2
+          num3 = num2 + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+          Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+          num2 = Model%num_p3d + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+        endif
+
+      end subroutine sasasshal_post_run
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasshal_post_init Argument Table
+!!
+      subroutine sasasshal_post_init ()
+      end subroutine sasasshal_post_init
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasshal_post_finalize Argument Table
+!!
+      subroutine sasasshal_post_finalize ()
+      end subroutine sasasshal_post_finalize
+
+      end module sasas_shal_post
