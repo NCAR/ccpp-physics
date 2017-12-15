@@ -307,7 +307,7 @@
       endif
 
       return
-      end
+      end subroutine GFS_calpreciptype_run
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -1511,7 +1511,7 @@
       endif
 !
       return
-      end subroutine GFS_calpreciptype_run
+      end
 
 !> \section arg_table_GFS_calpreciptype_finalize Argument table
 !!
