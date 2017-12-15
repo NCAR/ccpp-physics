@@ -114,10 +114,7 @@ SRCS_f   =  \
 	   ./physics/tridi2t3.f
 
 SRCS_f90 = \
-	   ./physics/GFS_calpreciptype.f90                                           \
-           ./physics/GFS_MP_generic_post.f90                                         \
-           ./physics/GFS_MP_generic_pre.f90                                          \
-           ./physics/GFS_zhao_carr_pre.f90                                           \
+	   ./physics/calpreciptype.f90                                               \
 	   ./physics/cs_conv.f90                                                     \
 	   ./physics/funcphys.f90                                                    \
 	   ./physics/gcm_shoc.f90                                                    \
@@ -173,9 +170,6 @@ $(LIBRARY): $(OBJS)
 
 ./radiation_aerosols.o : ./gfsphys/radiation_aerosols.f
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
-
-./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
 
 .PHONY: clean
 clean:

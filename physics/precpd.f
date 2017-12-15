@@ -2,12 +2,52 @@
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice
 
+      module GFS_zhaocarr_precpd
+      contains
+
 !> \ingroup Zhao-Carr
 !> \defgroup precip Precipitation (snow or rain) Production
-!! This subroutine computes the conversion from condensation to
+!! @{
+
+!> \ingroup precip
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_precpd_init  Argument Table
+!!
+      subroutine precpd_init ()
+      end subroutine precpd_init
+
+
+!> \ingroup precip
+!! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
-!> The parameterization of precipitation is required in order to remove
+!!\section arg_table_precpd_run Argument Table
+!!| local var name | longname                                                 |description                                                        | units   | rank |  type   |   kind   | intent  | optional |
+!!|----------------|----------------------------------------------------------|-------------------------------------------------------------------|---------|------|---------|----------|---------|----------|
+!!|  im            | horizontal_loop_extent                                   | horizontal loop extent, start at 1                                | index   |  0   | integer |          |  in     |   F      |
+!!|  ix            | horizontal_dimension                                     | horizontal dimension                                              | index   |  0   | integer |          |  in     |   F      |
+!!|  km            | vertical_dimension                                       | vertical layer dimension                                          | index   |  0   | integer |          |  in     |   F      |
+!!|  dt            | time_step_for_physics                                    | physics time step                                                 | s       |  0   | real    | kind_phys|  in     |   F      |
+!!|  del           | air_pressure_difference_between_midlayers                | pressure level thickness                                          | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  prsl          | air_pressure                                             | layer mean pressure                                               | Pa      |  2   | real    | kind_phys|  in     |   F      |
+!!|  q             | water_vapor_specific_humidity                            | water vapor specific humidity                                     | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
+!!|  cwm           | cloud_condensed_water_specific_humidity                  | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
+!!|  t             | air_temperature_updated_by_physics                       | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
+!!|  rn            | instantaneous_rainfall_amount                            | large scale rainfall amount                                       | m       |  1   | real    | kind_phys|  out    |   F      |
+!!|  sr            | ratio_of_snowfall_to_rainfall                            | ratio of snowfall to large-scale rainfall                         | frac    |  1   | real    | kind_phys|  out    |   F      |
+!!|  rainp         | rain_water_path                                          | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
+!!|  u00k          | critical_relative_humidity                               | critical relative humidity                                        | 1       |  2   | real    | kind_phys|  in     |   F      |
+!!|  psautco       | coefficient_from_cloud_ice_to_snow                       | conversion coefficient from cloud ice to snow                     | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  prautco       | coefficient_from_cloud_water_to_rain                     | conversion coefficient from cloud water to rain                   | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  evpco         | coefficient_for_evaporation_of_rainfall                  | coefficient for evaporation of rainfall                           | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  wminco        | cloud_condensed_water_conversion_threshold               | conversion coefficient from cloud liquid and ice to precipitation | 1       |  0   | real    | kind_phys|  in     |   F      |
+!!|  wk1           | coefficient_for_grid                                     | grid coefficient                                                  | frac    |  1   | real    | kind_phys|  in     |   F      |
+!!|  lprnt         | flag_print                                               | flag for printing diagnostics to output                           | flag    |  0   | logical |          |  in     |   F      |
+!!|  jpr           | horizontal_index_of_printed_column                       | horizontal index of printed column                                | index   |  0   | integer |          |  in     |   F      |
+!!
+!! \section general General Algorithm
+!! The parameterization of precipitation is required in order to remove
 !! water from the atmosphere and transport it to the ground. In the
 !! scheme discussed here, simplifications in the precipitation
 !! parameterization are used due to computational limitations required
@@ -45,45 +85,12 @@
 !! gravity. The implementation of the precipitation scheme also
 !! includes a simplified procedure of computing \f$P_{r}\f$
 !! and \f$P_{s}\f$ (Zhao and Carr(1997) \cite zhao_and_carr_1997).
+!! \section Zhao-Carr_precip_detailed Detailed Algorithm
 !! @{
-
-!>
-!! \section arg_table_Zhao_Carr_run Arguments
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
-!!
-!! \param[in] im        horizontal number of used pts
-!! \param[in] ix        horizontal dimension
-!! \param[in] km        vertical layer dimension
-!! \param[in] dt        time step in seconds
-!! \param[in] del       pressure layer thickness (bottom to top)
-!! \param[in] prsl      pressure values for model layers (bottom to top)
-!! \param[in,out] q         specific humidity (updated in the code)
-!! \param[in,out] cwm       condensate mixing ratio (updated in the code)
-!! \param[in,out] t         temperature (updated in the code)
-!! \param[out] rn        precipitation over one time-step dt (m/dt)
-!! \param[out] sr        "snow ratio", ratio of snow to total precipitation
-!! \param[out] rainp    rainwater path
-!! \param[in] u00k      the critical value of relative humidity for
-!!                      large-scale condensation
-!! \param[in] psautco   auto conversion coeff from ice to snow
-!! \n                   = 4.0E-4; defined in module_MP_GFS.F90
-!! \param[in] prautco   auto conversion coeff from cloud to rain
-!! \n                   = 1.0E-4; defined in module_MP_GFS.F90
-!! \param[in] evpco     coeff for evaporation of largescale rain
-!! \n                   = 2.0E-5; defined in module_MP_GFS.F90
-!! \param[in] wminco    coeff for water and ice minimum threshold to
-!!                      conversion from condensate to precipitation
-!! \n                   = \1.0E-5, 1.0E-5\; defined in module_MP_GFS.F90
-!! \param[in] lprnt     logical print flag
-!! \param[in] jpr       check print point for debugging
-!> \section general General Algorithm
-!> @{
-       subroutine precpd (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr            &
+       subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
      &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
-     &,                   lprnt,jpr)
-!
+     &,                   wk1,lprnt,jpr)
+
 !
 !     ******************************************************************
 !     *                                                                *
@@ -155,8 +162,10 @@
      &,                                 del(ix,km),  prsl(ix,km)        &
      &,                     rn(im),      sr(im)                         &
      &,                     dt                                          &
-     &,                     rainp(im,km), rnp(im),                      &
-     &                      psautco(im), prautco(im), evpco, wminco(2)
+     &,                     rainp(im,km), rnp(im)                       &
+     &,                     psautco(2), prautco(2), evpco, wminco(2)    &
+     &,                     psautco_l(im), prautco_l(im), wk1(im)       &
+     &,                     wk2(im)
 !
 !
       real (kind=kind_phys) err(im),      ers(im),     precrl(im)       &
@@ -187,6 +196,13 @@
      &,                     praut, fi, qc, amaxrq, rqkll
       integer i, k, ihpr, n
 !
+
+!--------------  GFS psautco/prautco interstitial ----------------
+      do i=1, im
+        wk2(i) = 1.0-wk1(i)
+        psautco_l(i) = psautco(1)*wk1(i) + psautco(2)*wk2(i)
+        prautco_l(i) = prautco(1)*wk1(i) + prautco(2)*wk2(i)
+      enddo 
 !-----------------------preliminaries ---------------------------------
 !
 !     do k=1,km
@@ -456,7 +472,7 @@
             if (iwl(n) == 1) then                 !  ice phase
                amaxcm = max(cons_0, cwmk - wmini(i,k))
                expf      = dt * exp(0.025*tmt0(n))
-               psaut     = min(cwmk, psautco(i)*expf*amaxcm)
+               psaut     = min(cwmk, psautco_l(i)*expf*amaxcm)
                ww(n)     = ww(n) - psaut
                cwmk      = max(cons_0, ww(n))
 !              cwmk      = max(cons_0, ww(n)-wmini(i,k))
@@ -485,7 +501,7 @@
                tem2      = amaxcm * cmr * tem / max(ccr(n),cons_p01)
                tem2      = min(cons_50, tem2*tem2)
 !              praut     = c00  * tem * amaxcm * (1.0-exp(-tem2))
-               praut     = (prautco(i)*dt) * tem * amaxcm
+               praut     = (prautco_l(i)*dt) * tem * amaxcm
      &                                     * (1.0-exp(-tem2))
                praut     = min(praut, cwmk)
                ww(n)     = ww(n) - praut
@@ -720,6 +736,17 @@
       enddo
 !
       return
-      end
-!! @}
+      end subroutine precpd_run
 !> @}
+
+!> \ingroup precip
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_precpd_finalize  Argument Table
+!!
+      subroutine precpd_finalize
+      end subroutine precpd_finalize
+
+!> @}
+
+      end module GFS_zhaocarr_precpd
