@@ -495,6 +495,9 @@ module module_physics_driver
       real(kind=kind_phys), allocatable, dimension(:,:) ::              &
              qlcn, qicn, w_upi, cf_upi, CNV_MFD, CNV_PRC3, CNV_DQLDT,   &
              CLCN, CNV_FICE, CNV_NDROP, CNV_NICE
+!CCPP
+!      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
+!          initial_t, initial_qv
 
 !
 !
