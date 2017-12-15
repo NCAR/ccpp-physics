@@ -7,7 +7,7 @@ module GFS_driver
                                       GFS_control_type, GFS_grid_type,     &
                                       GFS_tbd_type,     GFS_cldprop_type,  &
                                       GFS_radtend_type, GFS_diag_type
-  use module_radiation_driver,  only: GFS_radiation_driver, radupdate
+  use module_radiation_driver,  only: GFS_radiation_driver !, radupdate
   use module_physics_driver,    only: GFS_physics_driver
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
   use module_radlw_parameters,  only: topflw_type, sfcflw_type

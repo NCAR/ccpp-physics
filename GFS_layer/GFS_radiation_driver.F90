@@ -398,7 +398,7 @@
 
 !  ---  publicly accessible module programs:
 
-      public radinit, radupdate, GFS_radiation_driver
+      public radinit, GFS_radiation_driver
 
 
 ! =================
