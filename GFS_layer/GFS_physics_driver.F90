@@ -20,6 +20,20 @@ module module_physics_driver
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
                                    GFS_radtend_type, GFS_diag_type
+  use edmf,                  only: edmf_run
+  use GFS_PBL_generic_pre,   only: GFS_PBL_generic_pre_run
+  use GFS_PBL_generic_post,  only: GFS_PBL_generic_post_run
+!  use sasas_deep,             only: sasasdeep_run
+  use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
+  use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
+  use GFS_SCNV_generic_pre,   only: GFS_SCNV_generic_pre_run
+  use GFS_SCNV_generic_post,  only: GFS_SCNV_generic_post_run
+  use GFS_suite_interstitial_1, only: GFS_suite_interstitial_1_run
+  use GFS_suite_interstitial_2, only: GFS_suite_interstitial_2_run
+  use GFS_suite_interstitial_3, only: GFS_suite_interstitial_3_run
+  use GFS_suite_update_stateout, only: GFS_suite_update_stateout_run
+  use GFS_suite_interstitial_4, only: GFS_suite_interstitial_4_run
+  use GFS_suite_interstitial_5, only: GFS_suite_interstitial_5_run
 
   use GFS_zhaocarr_gscond,       only: gscond_run
   use GFS_zhaocarr_precpd,       only: precpd_run
@@ -471,6 +485,9 @@ module module_physics_driver
           del, rhc, dtdt, dudt, dvdt, gwdcu, gwdcv, dtdtc, rainp,       &
           ud_mf, dd_mf, dt_mf, prnum, dkt, sigmatot, sigmafrac
 
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
+          initial_u, initial_v, initial_t, initial_qv
+
       !--- GFDL modification for FV3
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs+1) ::&
            del_gz
@@ -530,25 +547,26 @@ module module_physics_driver
 !
 !  --- ...                       figure out number of extra tracers
 !
-      tottracer = 0            ! no convective transport of tracers
-      if (Model%trans_trac .or. Model%cscnv) then
-        if (Model%ntcw > 0) then
-          if (Model%ntoz < Model%ntcw) then
-            trc_shft = Model%ntcw + Model%ncld - 1
-          else
-            trc_shft = Model%ntoz
-          endif
-        elseif (Model%ntoz > 0) then
-          trc_shft = Model%ntoz
-        else
-          trc_shft = 1
-        endif
+      ! tottracer = 0            ! no convective transport of tracers
+      ! if (Model%trans_trac .or. Model%cscnv) then
+      !   if (Model%ntcw > 0) then
+      !     if (Model%ntoz < Model%ntcw) then
+      !       trc_shft = Model%ntcw + Model%ncld - 1
+      !     else
+      !       trc_shft = Model%ntoz
+      !     endif
+      !   elseif (Model%ntoz > 0) then
+      !     trc_shft = Model%ntoz
+      !   else
+      !     trc_shft = 1
+      !   endif
+      !
+      !   tracers   = Model%ntrac - trc_shft
+      !   tottracer = tracers
+      !   if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
+      ! endif
+      ! if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
 
-        tracers   = Model%ntrac - trc_shft
-        tottracer = tracers
-        if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
-      endif
-      if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
 
 !     if (lprnt) write(0,*)' trans_trac=',trans_trac,' tottracer=',     &
 !                write(0,*)' trans_trac=',trans_trac,' tottracer=',     &
@@ -556,12 +574,14 @@ module module_physics_driver
 !    &,                  ntrac-ncld+2,' clstp=',clstp,' kdt=',kdt
 !    &,' ntk=',ntk,' lat=',lat
 
-      skip_macro = .false.
+      ! skip_macro = .false.
+      !
+      ! allocate ( clw(ix,levs,tottracer+2) )
+      ! if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
+      !   allocate (cnvc(ix,levs), cnvw(ix,levs))
+      ! endif
 
-      allocate ( clw(ix,levs,tottracer+2) )
-      if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
-        allocate (cnvc(ix,levs), cnvw(ix,levs))
-      endif
+      call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 !
 !  ---  set initial quantities for stochastic physics deltas
       if (Model%do_sppt) then
@@ -606,19 +626,19 @@ module module_physics_driver
       call get_prs_fv3 (ix, levs, ntrac, Statein%phii, Statein%prsi, &
                         Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
+
+      call GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, &
+        Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, &
+        dudt, dvdt, dtdt, dtdtc, dqdt )
 !
-!zhang: calrhc_run
-      rhbbot = Model%crtrh(1)
-      rhpbl  = Model%crtrh(2)
-      rhbtop = Model%crtrh(3)
 !
 !  --- ...  frain=factor for centered difference scheme correction of rain amount.
 
-      frain = dtf / dtp
+      ! frain = dtf / dtp
 
       do i = 1, im
         sigmaf(i)   = max( Sfcprop%vfrac(i),0.01 )
-        islmsk(i)   = nint(Sfcprop%slmsk(i))
+    !    islmsk(i)   = nint(Sfcprop%slmsk(i))
 
         if (islmsk(i) == 2) then
           if (Model%isot == 1) then
@@ -644,10 +664,10 @@ module module_physics_driver
 !
 !GFDL        work1(i)   = (log(coslat(i) / (nlons(i)*latr)) - dxmin) * dxinv
 !       work1(i)   = (log(Grid%dx(i)) - dxmin) * dxinv
-        work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
-        work1(i)   = max(0.0, min(1.0,work1(i)))
-        work2(i)   = 1.0 - work1(i)
-        Diag%psurf(i)   = Statein%pgr(i)
+        ! work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
+        ! work1(i)   = max(0.0, min(1.0,work1(i)))
+        ! work2(i)   = 1.0 - work1(i)
+        ! Diag%psurf(i)   = Statein%pgr(i)
         work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
 !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
@@ -681,11 +701,11 @@ module module_physics_driver
       smsoil(:,:) = Sfcprop%smc(:,:)
       stsoil(:,:) = Sfcprop%stc(:,:)
       slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
-      dudt(:,:)  = 0.
-      dvdt(:,:)  = 0.
-      dtdt(:,:)  = 0.
-      dtdtc(:,:) = 0.
-      dqdt(:,:,:) = 0.
+      ! dudt(:,:)  = 0.
+      ! dvdt(:,:)  = 0.
+      ! dtdt(:,:)  = 0.
+      ! dtdtc(:,:) = 0.
+      ! dqdt(:,:,:) = 0.
 
 !  --- ...  initialize dtdt with heating rate from dcyc2
 
@@ -761,51 +781,54 @@ module module_physics_driver
 
       gabsbdlw(:) = Radtend%semis(:) * adjsfcdlw(:)
 
-      if (Model%lssav) then      !  --- ...  accumulate/save output variables
+!       if (Model%lssav) then      !  --- ...  accumulate/save output variables
+!
+! !  --- ...  sunshine duration time is defined as the length of time (in mdl output
+! !           interval) that solar radiation falling on a plane perpendicular to the
+! !           direction of the sun >= 120 w/m2
+!
+!         do i = 1, im
+!           if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
+!             tem1 = adjsfcdsw(i) / xcosz(i)
+!             if ( tem1 >= 120.0 ) then
+!               Diag%suntim(i) = Diag%suntim(i) + dtf
+!             endif
+!           endif
+!         enddo
+!
+! !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
+!
+!         if (Model%cplflx) then
+!           do i = 1, im
+!             if (flag_cice(i)) adjsfculw(i) = ulwsfc_cice(i)
+!           enddo
+!         endif
+!         Diag%dlwsfc(:) = Diag%dlwsfc(:) +   adjsfcdlw(:)*dtf
+!         Diag%ulwsfc(:) = Diag%ulwsfc(:) +   adjsfculw(:)*dtf
+!         Diag%psmean(:) = Diag%psmean(:) + Statein%pgr(:)*dtf        ! mean surface pressure
+!
+!         if (Model%ldiag3d) then
+!           if (Model%lsidea) then
+!             Diag%dt3dt(:,:,1) = Diag%dt3dt(:,:,1) + Radtend%lwhd(:,:,1)*dtf
+!             Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + Radtend%lwhd(:,:,2)*dtf
+!             Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + Radtend%lwhd(:,:,3)*dtf
+!             Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + Radtend%lwhd(:,:,4)*dtf
+!             Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + Radtend%lwhd(:,:,5)*dtf
+!             Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + Radtend%lwhd(:,:,6)*dtf
+!           else
+!             do k = 1, levs
+!               Diag%dt3dt(:,k,1) = Diag%dt3dt(:,k,1) + Radtend%htrlw(:,k)*dtf
+!               Diag%dt3dt(:,k,2) = Diag%dt3dt(:,k,2) + Radtend%htrsw(:,k)*dtf*xmu(:)
+!             enddo
+!           endif
+!         endif
+!       endif    ! end if_lssav_block
+      call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
+        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
+      call GFS_PBL_generic_pre_run (im, levs, kinver)
 
-!  --- ...  sunshine duration time is defined as the length of time (in mdl output
-!           interval) that solar radiation falling on a plane perpendicular to the
-!           direction of the sun >= 120 w/m2
-
-        do i = 1, im
-          if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
-            tem1 = adjsfcdsw(i) / xcosz(i)
-            if ( tem1 >= 120.0 ) then
-              Diag%suntim(i) = Diag%suntim(i) + dtf
-            endif
-          endif
-        enddo
-
-!  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-
-        if (Model%cplflx) then
-          do i = 1, im
-            if (flag_cice(i)) adjsfculw(i) = ulwsfc_cice(i)
-          enddo
-        endif
-        Diag%dlwsfc(:) = Diag%dlwsfc(:) +   adjsfcdlw(:)*dtf
-        Diag%ulwsfc(:) = Diag%ulwsfc(:) +   adjsfculw(:)*dtf
-        Diag%psmean(:) = Diag%psmean(:) + Statein%pgr(:)*dtf        ! mean surface pressure
-
-        if (Model%ldiag3d) then
-          if (Model%lsidea) then
-            Diag%dt3dt(:,:,1) = Diag%dt3dt(:,:,1) + Radtend%lwhd(:,:,1)*dtf
-            Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + Radtend%lwhd(:,:,2)*dtf
-            Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + Radtend%lwhd(:,:,3)*dtf
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + Radtend%lwhd(:,:,4)*dtf
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + Radtend%lwhd(:,:,5)*dtf
-            Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + Radtend%lwhd(:,:,6)*dtf
-          else
-            do k = 1, levs
-              Diag%dt3dt(:,k,1) = Diag%dt3dt(:,k,1) + Radtend%htrlw(:,k)*dtf
-              Diag%dt3dt(:,k,2) = Diag%dt3dt(:,k,2) + Radtend%htrsw(:,k)*dtf*xmu(:)
-            enddo
-          endif
-        endif
-      endif    ! end if_lssav_block
-
-      kcnv(:)   = 0
-      kinver(:) = levs
+      !kcnv(:)   = 0
+      !kinver(:) = levs
       invrsn(:) = .false.
       tx1(:)    = 0.0
       tx2(:)    = 10.0
@@ -861,8 +884,8 @@ module module_physics_driver
       drain(:)      = 0.0
       ep1d(:)       = 0.0
       runof(:)      = 0.0
-      hflx(:)       = 0.0
-      evap(:)       = 0.0
+      !hflx(:)       = 0.0
+      !evap(:)       = 0.0
       evbs(:)       = 0.0
       evcw(:)       = 0.0
       trans(:)      = 0.0
@@ -1060,10 +1083,10 @@ module module_physics_driver
       Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
       Diag%dswsfci(:) = adjsfcdsw(:)
       Diag%gfluxi(:)  = gflx(:)
-      Diag%t1(:)      = Statein%tgrs(:,1)
-      Diag%q1(:)      = Statein%qgrs(:,1,1)
-      Diag%u1(:)      = Statein%ugrs(:,1)
-      Diag%v1(:)      = Statein%vgrs(:,1)
+      ! Diag%t1(:)      = Statein%tgrs(:,1)
+      ! Diag%q1(:)      = Statein%qgrs(:,1,1)
+      ! Diag%u1(:)      = Statein%ugrs(:,1)
+      ! Diag%v1(:)      = Statein%vgrs(:,1)
 
 !  --- ...  update near surface fields
 
@@ -1186,11 +1209,11 @@ module module_physics_driver
                        Model%xkzm_m, Model%xkzm_h, Model%xkzm_s, lprnt, ipr, me)
       else
         if (Model%hybedmf) then
-          call moninedmf(ix, im, levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
+          call edmf_run (ix, im, levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
                          Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,  &
-                         Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(1,1),   &
+                         Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(:,1),   &
                          rb, Sfcprop%zorl, Diag%u10m, Diag%v10m, Sfcprop%ffmm,    &
-                         Sfcprop%ffhh, Sfcprop%tsfc, qss, hflx, evap, stress,     &
+                         Sfcprop%ffhh, Sfcprop%tsfc, hflx, evap, stress,     &
                          wind, kpbl, Statein%prsi, del, Statein%prsl,             &
                          Statein%prslk, Statein%phii, Statein%phil, dtp,          &
                          Model%dspheat, dusfc1, dvsfc1, dtsfc1, dqsfc1, Diag%hpbl,&
@@ -1265,56 +1288,59 @@ module module_physics_driver
         Coupling%dtsfci_cpl(:) = dtsfc1(:)
         Coupling%dqsfci_cpl(:) = dqsfc1(:)
       endif
-!-------------------------------------------------------lssav if loop ----------
-      if (Model%lssav) then
-        Diag%dusfc (:) = Diag%dusfc(:) + dusfc1(:)*dtf
-        Diag%dvsfc (:) = Diag%dvsfc(:) + dvsfc1(:)*dtf
-        Diag%dtsfc (:) = Diag%dtsfc(:) + dtsfc1(:)*dtf
-        Diag%dqsfc (:) = Diag%dqsfc(:) + dqsfc1(:)*dtf
-        Diag%dusfci(:) = dusfc1(:)
-        Diag%dvsfci(:) = dvsfc1(:)
-        Diag%dtsfci(:) = dtsfc1(:)
-        Diag%dqsfci(:) = dqsfc1(:)
-!       if (lprnt) then
-!         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
-!    &     dtf,' kdt=',kdt,' lat=',lat
-!       endif
 
-        if (Model%ldiag3d) then
-          if (Model%lsidea) then
-            Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + dtdt(:,:)*dtf
-          else
-            do k = 1, levs
-              do i = 1, im
-                tem          = dtdt(i,k) - (Radtend%htrlw(i,k)+Radtend%htrsw(i,k)*xmu(i))
-                Diag%dt3dt(i,k,3) = Diag%dt3dt(i,k,3) + tem*dtf
-              enddo
-            enddo
-          endif
-          Diag%du3dt(:,:,1) = Diag%du3dt(:,:,1) + dudt(:,:) * dtf
-          Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) - dudt(:,:) * dtf
-          Diag%dv3dt(:,:,1) = Diag%dv3dt(:,:,1) + dvdt(:,:) * dtf
-          Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) - dvdt(:,:) * dtf
-! update dqdt_v to include moisture tendency due to vertical diffusion
-!         if (lgocart) then
+      call GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1,   &
+        dtsfc1, dqsfc1, dudt, dvdt, dtdt, dqdt, xmu, Diag)
+! !-------------------------------------------------------lssav if loop ----------
+!       if (Model%lssav) then
+!         Diag%dusfc (:) = Diag%dusfc(:) + dusfc1(:)*dtf
+!         Diag%dvsfc (:) = Diag%dvsfc(:) + dvsfc1(:)*dtf
+!         Diag%dtsfc (:) = Diag%dtsfc(:) + dtsfc1(:)*dtf
+!         Diag%dqsfc (:) = Diag%dqsfc(:) + dqsfc1(:)*dtf
+!         Diag%dusfci(:) = dusfc1(:)
+!         Diag%dvsfci(:) = dvsfc1(:)
+!         Diag%dtsfci(:) = dtsfc1(:)
+!         Diag%dqsfci(:) = dqsfc1(:)
+! !       if (lprnt) then
+! !         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
+! !    &     dtf,' kdt=',kdt,' lat=',lat
+! !       endif
+!
+!         if (Model%ldiag3d) then
+!           if (Model%lsidea) then
+!             Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + dtdt(:,:)*dtf
+!           else
+!             do k = 1, levs
+!               do i = 1, im
+!                 tem          = dtdt(i,k) - (Radtend%htrlw(i,k)+Radtend%htrsw(i,k)*xmu(i))
+!                 Diag%dt3dt(i,k,3) = Diag%dt3dt(i,k,3) + tem*dtf
+!               enddo
+!             enddo
+!           endif
+!           Diag%du3dt(:,:,1) = Diag%du3dt(:,:,1) + dudt(:,:) * dtf
+!           Diag%du3dt(:,:,2) = Diag%du3dt(:,:,2) - dudt(:,:) * dtf
+!           Diag%dv3dt(:,:,1) = Diag%dv3dt(:,:,1) + dvdt(:,:) * dtf
+!           Diag%dv3dt(:,:,2) = Diag%dv3dt(:,:,2) - dvdt(:,:) * dtf
+! ! update dqdt_v to include moisture tendency due to vertical diffusion
+! !         if (lgocart) then
+! !           do k = 1, levs
+! !             do i = 1, im
+! !               dqdt_v(i,k)  = dqdt(i,k,1) * dtf
+! !             enddo
+! !           enddo
+! !         endif
 !           do k = 1, levs
 !             do i = 1, im
-!               dqdt_v(i,k)  = dqdt(i,k,1) * dtf
+!               tem  = dqdt(i,k,1) * dtf
+!               Diag%dq3dt(i,k,1) = Diag%dq3dt(i,k,1) + tem
 !             enddo
 !           enddo
+!           if (Model%ntoz > 0) then
+!             Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * dtf
+!           endif
 !         endif
-          do k = 1, levs
-            do i = 1, im
-              tem  = dqdt(i,k,1) * dtf
-              Diag%dq3dt(i,k,1) = Diag%dq3dt(i,k,1) + tem
-            enddo
-          enddo
-          if (Model%ntoz > 0) then
-            Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * dtf
-          endif
-        endif
-
-      endif   ! end if_lssav
+!
+!       endif   ! end if_lssav
 !-------------------------------------------------------lssav if loop ----------
 !
 !            Orographic gravity wave drag parameterization
@@ -1400,10 +1426,12 @@ module module_physics_driver
 !       write(0,*)' dtdt=',(dtdt(ipr,ik),k=1,10)
 !     endif
 
-      Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * dtp
-      Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * dtp
-      Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * dtp
-      Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * dtp
+      ! Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * dtp
+      ! Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * dtp
+      ! Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * dtp
+      ! Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * dtp
+
+      call GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
 
 !     if (lprnt) then
 !                write(7000,*)' ugrs=',ugrs(ipr,:)
@@ -1490,17 +1518,19 @@ module module_physics_driver
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !     if (lprnt) write(7000,*)' bef convection gv0=',gv0(ipr,:)
 
-      if (Model%ldiag3d) then
-        dtdt(:,:) = Stateout%gt0(:,:)
-        dudt(:,:) = Stateout%gu0(:,:)
-        dvdt(:,:) = Stateout%gv0(:,:)
-      elseif (Model%cnvgwd) then
-        dtdt(:,:) = Stateout%gt0(:,:)
-      endif   ! end if_ldiag3d/cnvgwd
+      ! if (Model%ldiag3d) then
+      !   dtdt(:,:) = Stateout%gt0(:,:)
+      !   dudt(:,:) = Stateout%gu0(:,:)
+      !   dvdt(:,:) = Stateout%gv0(:,:)
+      ! elseif (Model%cnvgwd) then
+      !   dtdt(:,:) = Stateout%gt0(:,:)
+      ! endif   ! end if_ldiag3d/cnvgwd
+      !
+      ! if (Model%ldiag3d .or. Model%lgocart) then
+      !   dqdt(:,:,1) = Stateout%gq0(:,:,1)
+      ! endif   ! end if_ldiag3d/lgocart
 
-      if (Model%ldiag3d .or. Model%lgocart) then
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
-      endif   ! end if_ldiag3d/lgocart
+      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, initial_qv)
 
 #ifdef GFS_HYDRO
       call get_phi(im, ix, levs, ntrac, Stateout%gt0, Stateout%gq0,    &
@@ -1517,13 +1547,14 @@ module module_physics_driver
 !       print *,' phii2=',phii(ipr,k=1,levs)
 !       print *,' phil2=',phil(ipr,:)
 !     endif
-
-      clw(:,:,1) = 0.0
-      clw(:,:,2) = -999.9
-      if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
-        cnvc(:,:)  = 0.0
-        cnvw(:,:)  = 0.0
-      endif
+      call GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, &
+        rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+      ! clw(:,:,1) = 0.0
+      ! clw(:,:,2) = -999.9
+      ! if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
+      !   cnvc(:,:)  = 0.0
+      !   cnvw(:,:)  = 0.0
+      ! endif
 
 !     write(0,*)' before cnv clstp=',clstp,' kdt=',kdt,' lat=',lat
 
@@ -1553,14 +1584,6 @@ module module_physics_driver
 !           --------------------------------------------
 
       if (Model%ntcw > 0) then
-        do k=1,levs
-          do i=1,im
-!zhang: gscond, precpd interstitial calrhc_run
-            tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
-            tem      = rhc_max * work1(i) + tem * work2(i)
-            rhc(i,k) = max(0.0, min(1.0,tem))
-          enddo
-        enddo
         if (Model%ncld == 2) then
           clw(:,:,1) = Stateout%gq0(:,:,Model%ntiw)                    ! ice
           clw(:,:,2) = Stateout%gq0(:,:,Model%ntcw)                    ! water
@@ -1858,45 +1881,48 @@ module module_physics_driver
 !       write(0,*)' aftcnvgq1=',(gq0(ipr,k,ntcw),k=1,levs)
 !     endif
 !
-      do i = 1, im
-        Diag%rainc(:) = frain * rain1(:)
-      enddo
+!       do i = 1, im
+!         Diag%rainc(:) = frain * rain1(:)
+!       enddo
+! !
+!       if (Model%lssav) then
+!         Diag%cldwrk (:) = Diag%cldwrk (:) + cld1d(:) * dtf
+!         Diag%cnvprcp(:) = Diag%cnvprcp(:) + Diag%rainc(:)
 !
-      if (Model%lssav) then
-        Diag%cldwrk (:) = Diag%cldwrk (:) + cld1d(:) * dtf
-        Diag%cnvprcp(:) = Diag%cnvprcp(:) + Diag%rainc(:)
+!         if (Model%ldiag3d) then
+!           Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
+!           Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+!           Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-dudt(:,:)) * frain
+!           Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-dvdt(:,:)) * frain
+!
+!           Diag%upd_mf(:,:)  = Diag%upd_mf(:,:)  + ud_mf(:,:) * (con_g*frain)
+!           Diag%dwn_mf(:,:)  = Diag%dwn_mf(:,:)  + dd_mf(:,:) * (con_g*frain)
+!           Diag%det_mf(:,:)  = Diag%det_mf(:,:)  + dt_mf(:,:) * (con_g*frain)
+!         endif ! if (ldiag3d)
+!
+!       endif   ! end if_lssav
 
-        if (Model%ldiag3d) then
-          Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-          Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-          Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-dudt(:,:)) * frain
-          Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-dvdt(:,:)) * frain
-
-          Diag%upd_mf(:,:)  = Diag%upd_mf(:,:)  + ud_mf(:,:) * (con_g*frain)
-          Diag%dwn_mf(:,:)  = Diag%dwn_mf(:,:)  + dd_mf(:,:) * (con_g*frain)
-          Diag%det_mf(:,:)  = Diag%det_mf(:,:)  + dt_mf(:,:) * (con_g*frain)
-        endif ! if (ldiag3d)
-
-      endif   ! end if_lssav
+      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, &
+        initial_u, initial_v, initial_t, initial_qv, ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
-        Coupling%dqdti  (:,:)  = (Stateout%gq0(:,:,1) - dqdt(:,:,1))  * frain
+        Coupling%dqdti  (:,:)  = (Stateout%gq0(:,:,1) - initial_qv(:,:))  * frain
         Coupling%upd_mfi(:,:)  = Coupling%upd_mfi(:,:) + ud_mf(:,:) * frain
         Coupling%dwn_mfi(:,:)  = Coupling%dwn_mfi(:,:) + dd_mf(:,:) * frain
         Coupling%det_mfi(:,:)  = Coupling%det_mfi(:,:) + dt_mf(:,:) * frain
         Coupling%cnvqci (:,:)  = Coupling%cnvqci (:,:) + (clw(:,:,1)+clw(:,:,2))*frain
       endif ! if (lgocart)
 !
-      if ((Model%npdf3d == 3) .and. (Model%num_p3d == 4)) then
-        num2 = Model%num_p3d + 2
-        num3 = num2 + 1
-        Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-        Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
-      elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
-        num2 = Model%num_p3d + 1
-        Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-      endif
+      ! if ((Model%npdf3d == 3) .and. (Model%num_p3d == 4)) then
+      !   num2 = Model%num_p3d + 2
+      !   num3 = num2 + 1
+      !   Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+      !   Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+      ! elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+      !   num2 = Model%num_p3d + 1
+      !   Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+      ! endif
 
 !     if (lprnt) write(7000,*)' bef cnvgwd gu0=',gu0(ipr,:)
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
@@ -1914,7 +1940,7 @@ module module_physics_driver
         do k = 1, levs
           do i = 1, im
             if (k >= kbot(i) .and. k <= ktop(i)) then
-              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-dtdt(i,k)) * del(i,k)
+              cumabs(i) = cumabs(i) + (Stateout%gt0(i,k)-initial_t(i,k)) * del(i,k)
               work3(i)  = work3(i)  + del(i,k)
             endif
           enddo
@@ -2071,12 +2097,14 @@ module module_physics_driver
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !----------------Convective gravity wave drag parameterization over --------
 
-      if (Model%ldiag3d) then
-        dtdt(:,:)   = Stateout%gt0(:,:)
-      endif
-      if (Model%ldiag3d .or. Model%lgocart) then
-        dqdt(:,:,1) = Stateout%gq0(:,:,1)
-      endif
+      ! if (Model%ldiag3d) then
+      !   initial_t(:,:)   = Stateout%gt0(:,:)
+      ! endif
+      ! if (Model%ldiag3d .or. Model%lgocart) then
+      !   initial_qv(:,:) = Stateout%gq0(:,:,1)
+      ! endif
+
+      call GFS_SCNV_generic_pre_run (Model, Stateout, Grid, initial_t, initial_qv)
 
 !     write(0,*)' before do_shoc shal clstp=',clstp,' kdt=',kdt,
 !    &         ' lat=',lat
@@ -2157,27 +2185,29 @@ module module_physics_driver
           endif   ! end if_imfshalcnv
         endif     ! end if_shal_cnv
 
-        if (Model%lssav) then
-!          update dqdt_v to include moisture tendency due to shallow convection
-          if (Model%lgocart) then
-            do k = 1, levs
-              do i = 1, im
-                tem  = (Stateout%gq0(i,k,1)-dqdt(i,k,1)) * frain
-                Coupling%dqdti(i,k) = Coupling%dqdti(i,k)  + tem
-              enddo
-            enddo
-          endif
-          if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-            Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-          endif
-        endif   ! end if_lssav
-!
-        do k = 1, levs
-          do i = 1, im
-            if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
-          enddo
-        enddo
+!         if (Model%lssav) then
+! !          update dqdt_v to include moisture tendency due to shallow convection
+!           if (Model%lgocart) then
+!             do k = 1, levs
+!               do i = 1, im
+!                 tem  = (Stateout%gq0(i,k,1)-initial_qv(i,k)) * frain
+!                 Coupling%dqdti(i,k) = Coupling%dqdti(i,k)  + tem
+!               enddo
+!             enddo
+!           endif
+!           if (Model%ldiag3d) then
+!             Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
+!             Diag%dq3dt(:,:,3) = Diag%dq3dt(:,:,3) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
+!           endif
+!         endif   ! end if_lssav
+! !
+!         do k = 1, levs
+!           do i = 1, im
+!             if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
+!           enddo
+!         enddo
+
+        call GFS_SCNV_generic_post_run (Model, Stateout, Grid, initial_t, initial_qv, frain, Diag, clw)
 
 !       if (lprnt) then
 !         write(0,*)' prsl=',prsl(ipr,:)
@@ -2317,25 +2347,16 @@ module module_physics_driver
 !            enddo
 !          endif
           if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)  -dtdt(:,:)  ) * frain
-            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)  -initial_t(:,:)  ) * frain
+            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
           endif
          endif
       endif               !       moist convective adjustment over
 !
-!zhang
-!      if (Model%ldiag3d .or. Model%do_aw) then
-!        dtdt(:,:)   = Stateout%gt0(:,:)
-!        dqdt(:,:,1) = Stateout%gq0(:,:,1)
-!        do n=Model%ntcw,Model%ntcw+Model%ncld-1
-!          dqdt(:,:,n) = Stateout%gq0(:,:,n)
-!        enddo
-!      endif
        call GFS_MP_generic_pre_run (im, ix,levs,clw(:,:,1),clw(:,:,2),            &
                              Model%ldiag3d, Model%ntcw, Model%ncld,               & 
                              Model%num_p3d, Stateout%gt0,Stateout%gq0(:,:,1),     &
                              dtdt,dqdt(:,:,1),dqdt(:,:,3) )
-
 
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)
       if (Model%lgocart) then
@@ -2541,8 +2562,8 @@ module module_physics_driver
         do k = 1,levs
           do i = 1,im
             tem1        = sigmafrac(i,k)
-            Stateout%gt0(i,k)    = Stateout%gt0(i,k) - tem1 * (Stateout%gt0(i,k)-dtdt(i,k))
-            tem2        = tem1 * (Stateout%gq0(i,k,1)-dqdt(i,k,1))
+            Stateout%gt0(i,k)    = Stateout%gt0(i,k) - tem1 * (Stateout%gt0(i,k)-initial_t(i,k))
+            tem2        = tem1 * (Stateout%gq0(i,k,1)-initial_qv(i,k))
             Stateout%gq0(i,k,1)  = Stateout%gq0(i,k,1) - tem2
             temrain1(i) = temrain1(i) - (Statein%prsi(i,k)-Statein%prsi(i,k+1)) &
                                       * tem2 * onebg
@@ -2610,12 +2631,6 @@ module module_physics_driver
 
 !      if (Model%lssav) then
 !        Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
-
-!        if (Model%ldiag3d) then
-!          Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + (Stateout%gt0(:,:)-dtdt(:,:)) * frain
-!          Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-!        endif
-!      endif
 
 !  --- ...  estimate t850 for rain-snow decision
 
@@ -2755,12 +2770,13 @@ module module_physics_driver
         enddo
       endif
 
-      deallocate (clw)
+      call GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
+      !deallocate (clw)
       if (Model%do_shoc) then
         deallocate (qpl, qpi, ncpl, ncpi)
       endif
-      if (allocated(cnvc)) deallocate(cnvc)
-      if (allocated(cnvw)) deallocate(cnvw)
+      ! if (allocated(cnvc)) deallocate(cnvc)
+      ! if (allocated(cnvw)) deallocate(cnvw)
 
 !     deallocate (fscav, fswtr)
 !
