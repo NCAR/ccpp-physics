@@ -125,6 +125,7 @@ SRCS_f90 = \
 		 ./physics/GFS_SCNV_generic.f90                                            \
 		 ./physics/GFS_PBL_generic.f90                                             \
 		 ./physics/GFS_suite_interstitial.f90                                      \
+		 ./physics/GFS_suite_setup.f90                                             \
 	   ./physics/h2ointerp.f90                                                   \
 	   ./physics/m_micro_driver.f90                                              \
 	   ./physics/module_nst_model.f90                                            \
