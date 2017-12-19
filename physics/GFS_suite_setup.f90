@@ -16,7 +16,7 @@
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | inout  | F        |
 !!
-      subroutine GFS_suite_setup_1_run (Model)
+      subroutine GFS_suite_setup_1_run (Model, rinc)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type
@@ -25,19 +25,19 @@
 
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
-        real(kind=kind_phys) :: rinc(5)
+        real(kind=kind_phys), intent(in) :: rinc(5)
         real(kind=kind_phys) :: sec
 
         !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
         ! rinc(1:5)   = 0
         ! call w3difdat(Model%jdat,Model%idat,4,rinc)
-        ! sec = rinc(4)
-        ! Model%phour = sec/con_hr
-        ! !--- set current bucket hour
-        ! Model%zhour = Model%phour
-        ! Model%fhour = (sec + Model%dtp)/con_hr
-        ! Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+        sec = rinc(4)
+        Model%phour = sec/con_hr
+        !--- set current bucket hour
+        Model%zhour = Model%phour
+        Model%fhour = (sec + Model%dtp)/con_hr
+        Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
         Model%ipt    = 1
         Model%lprnt  = .false.
