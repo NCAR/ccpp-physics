@@ -256,7 +256,42 @@ module GFS_driver
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-    call GFS_suite_setup_1_run (Model)
+!    call GFS_suite_setup_1_run (Model)
+    nblks = size(blksz)
+    !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
+    !--- update calendars and triggers
+    rinc(1:5)   = 0
+    call w3difdat(Model%jdat,Model%idat,4,rinc)
+    sec = rinc(4)
+    Model%phour = sec/con_hr
+    !--- set current bucket hour
+    Model%zhour = Model%phour
+    Model%fhour = (sec + Model%dtp)/con_hr
+    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+
+    Model%ipt    = 1
+    Model%lprnt  = .false.
+    Model%lssav  = .true.
+
+    !--- radiation triggers
+    Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+    Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+
+    !--- set the solar hour based on a combination of phour and time initial hour
+    Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+
+    if ((Model%debug) .and. (Model%me == Model%master)) then
+      print *,'   sec ', sec
+      print *,'   kdt ', Model%kdt
+      print *,' nsswr ', Model%nsswr
+      print *,' nslwr ', Model%nslwr
+      print *,' nscyc ', Model%nscyc
+      print *,' lsswr ', Model%lsswr
+      print *,' lslwr ', Model%lslwr
+      print *,' fhour ', Model%fhour
+      print *,' phour ', Model%phour
+      print *,' solhr ', Model%solhr
+    endif
 
     !--- radiation time varying routine
     if (Model%lsswr .or. Model%lslwr) then
@@ -280,7 +315,7 @@ module GFS_driver
         call Diag(nb)%phys_zero (Model)
     !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
       enddo
-    endif    
+    endif
 
 
 !    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
