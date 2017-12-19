@@ -30,14 +30,14 @@
 
         !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
-        rinc(1:5)   = 0
-        call w3difdat(Model%jdat,Model%idat,4,rinc)
-        sec = rinc(4)
-        Model%phour = sec/con_hr
-        !--- set current bucket hour
-        Model%zhour = Model%phour
-        Model%fhour = (sec + Model%dtp)/con_hr
-        Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+        ! rinc(1:5)   = 0
+        ! call w3difdat(Model%jdat,Model%idat,4,rinc)
+        ! sec = rinc(4)
+        ! Model%phour = sec/con_hr
+        ! !--- set current bucket hour
+        ! Model%zhour = Model%phour
+        ! Model%fhour = (sec + Model%dtp)/con_hr
+        ! Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
         Model%ipt    = 1
         Model%lprnt  = .false.
