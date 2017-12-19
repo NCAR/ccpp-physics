@@ -15,6 +15,7 @@
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | inout  | F        |
+!! | sec            | seconds_elapsed                                        | seconds elapsed since the initialization                              | s             |    0 | real                          | kind_phys | inout  | F        |
 !!
       subroutine GFS_suite_setup_1_run (Model, sec)
 

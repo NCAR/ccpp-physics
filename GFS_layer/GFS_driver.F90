@@ -252,8 +252,8 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
     !--- local variables
-    integer :: nb, nblks
-    real(kind=kind_phys) :: rinc(5)
+    !integer :: nb, nblks
+    !real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
 
