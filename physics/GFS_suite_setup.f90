@@ -39,29 +39,29 @@
         Model%fhour = (sec + Model%dtp)/con_hr
         Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-        Model%ipt    = 1
-        Model%lprnt  = .false.
-        Model%lssav  = .true.
-
-        !--- radiation triggers
-        Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-        Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
-
-        !--- set the solar hour based on a combination of phour and time initial hour
-        Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
-
-        if ((Model%debug) .and. (Model%me == Model%master)) then
-          print *,'   sec ', sec
-          print *,'   kdt ', Model%kdt
-          print *,' nsswr ', Model%nsswr
-          print *,' nslwr ', Model%nslwr
-          print *,' nscyc ', Model%nscyc
-          print *,' lsswr ', Model%lsswr
-          print *,' lslwr ', Model%lslwr
-          print *,' fhour ', Model%fhour
-          print *,' phour ', Model%phour
-          print *,' solhr ', Model%solhr
-        endif
+        ! Model%ipt    = 1
+        ! Model%lprnt  = .false.
+        ! Model%lssav  = .true.
+        !
+        ! !--- radiation triggers
+        ! Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+        ! Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+        !
+        ! !--- set the solar hour based on a combination of phour and time initial hour
+        ! Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+        !
+        ! if ((Model%debug) .and. (Model%me == Model%master)) then
+        !   print *,'   sec ', sec
+        !   print *,'   kdt ', Model%kdt
+        !   print *,' nsswr ', Model%nsswr
+        !   print *,' nslwr ', Model%nslwr
+        !   print *,' nscyc ', Model%nscyc
+        !   print *,' lsswr ', Model%lsswr
+        !   print *,' lslwr ', Model%lslwr
+        !   print *,' fhour ', Model%fhour
+        !   print *,' phour ', Model%phour
+        !   print *,' solhr ', Model%solhr
+        ! endif
 
       end subroutine GFS_suite_setup_1_run
 
