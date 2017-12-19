@@ -26,14 +26,14 @@
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys) :: rinc(5)
-        real(kind=kind_phys), intent(in) :: sec
+        real(kind=kind_phys), intent(inout) :: sec
 
         !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
-        ! rinc(1:5)   = 0
-        ! call w3difdat(Model%jdat,Model%idat,4,rinc)
-        ! sec = rinc(4)
-        ! Model%phour = sec/con_hr
+        rinc(1:5)   = 0
+        call w3difdat(Model%jdat,Model%idat,4,rinc)
+        sec = rinc(4)
+        Model%phour = sec/con_hr
         !--- set current bucket hour
         Model%zhour = Model%phour
         Model%fhour = (sec + Model%dtp)/con_hr
