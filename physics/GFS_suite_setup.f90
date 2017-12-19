@@ -11,7 +11,7 @@
       subroutine GFS_suite_setup_1_finalize()
       end subroutine GFS_suite_setup_1_finalize
 
-!> \section arg_table_GFS_suite_interstitial_1_run Argument Table
+!> \section arg_table_GFS_suite_setup_1_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | inout  | F        |
@@ -78,7 +78,7 @@
     subroutine GFS_suite_setup_2_finalize()
     end subroutine GFS_suite_setup_2_finalize
 
-!> \section arg_table_GFS_suite_interstitial_2_run Argument Table
+!> \section arg_table_GFS_suite_setup_2_run Argument Table
 !! | local var name | longname                                                                | description                                                             | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | blksz          | horizontal_block_size                                                   | number of grid columns used for explicit data blocking for physics      | count         |    1 | integer                       |           | in     | F        |
