@@ -265,14 +265,14 @@ module GFS_driver
     !--- update calendars and triggers
     rinc(1:5)   = 0
     call w3difdat(Model%jdat,Model%idat,4,rinc)
-    ! sec = rinc(4)
-    ! Model%phour = sec/con_hr
+    sec = rinc(4)
+    Model%phour = sec/con_hr
     ! !--- set current bucket hour
     ! Model%zhour = Model%phour
     ! Model%fhour = (sec + Model%dtp)/con_hr
     ! Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-    call GFS_suite_setup_1_run (Model, rinc)
+    call GFS_suite_setup_1_run (Model, sec)
 
     ! Model%ipt    = 1
     ! Model%lprnt  = .false.
