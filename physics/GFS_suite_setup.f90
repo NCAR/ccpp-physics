@@ -89,7 +89,7 @@
 !! | Diag           | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    1 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !!
     subroutine GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
-
+      use mersenne_twister, only: random_setseed, random_number
       use machine,               only: kind_phys
       use physcons,              only: dxmin, dxinv
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
