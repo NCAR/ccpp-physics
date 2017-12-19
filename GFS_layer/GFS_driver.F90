@@ -263,16 +263,16 @@ module GFS_driver
 
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
-    ! rinc(1:5)   = 0
-    ! call w3difdat(Model%jdat,Model%idat,4,rinc)
-    ! sec = rinc(4)
-    ! Model%phour = sec/con_hr
-    ! !--- set current bucket hour
-    ! Model%zhour = Model%phour
-    ! Model%fhour = (sec + Model%dtp)/con_hr
-    ! Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+    rinc(1:5)   = 0
+    call w3difdat(Model%jdat,Model%idat,4,rinc)
+    sec = rinc(4)
+    Model%phour = sec/con_hr
+    !--- set current bucket hour
+    Model%zhour = Model%phour
+    Model%fhour = (sec + Model%dtp)/con_hr
+    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-    call GFS_suite_setup_1_run (Model)
+    ! call GFS_suite_setup_1_run (Model)
 
     Model%ipt    = 1
     Model%lprnt  = .false.
@@ -303,27 +303,27 @@ module GFS_driver
       call GFS_rad_time_vary (Model, Statein, Tbd, sec)
     endif
 
-    !--- physics time varying routine
-    call GFS_phys_time_vary (Model, Grid, Tbd)
+    ! !--- physics time varying routine
+    ! call GFS_phys_time_vary (Model, Grid, Tbd)
+    !
+    ! !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
+    ! if (Model%nscyc >  0) then
+    !   if (mod(Model%kdt,Model%nscyc) == 1) THEN
+    !     call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+    !   endif
+    ! endif
+    !
+    ! !--- determine if diagnostics buckets need to be cleared
+    ! if (mod(Model%kdt,Model%nszero) == 1) then
+    !   do nb = 1,nblks
+    !     call Diag(nb)%rad_zero  (Model)
+    !     call Diag(nb)%phys_zero (Model)
+    ! !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+    !   enddo
+    ! endif
 
-    !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    if (Model%nscyc >  0) then
-      if (mod(Model%kdt,Model%nscyc) == 1) THEN
-        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
-      endif
-    endif
 
-    !--- determine if diagnostics buckets need to be cleared
-    if (mod(Model%kdt,Model%nszero) == 1) then
-      do nb = 1,nblks
-        call Diag(nb)%rad_zero  (Model)
-        call Diag(nb)%phys_zero (Model)
-    !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-      enddo
-    endif
-
-
-!    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
+    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
 
   end subroutine GFS_time_vary_step
 
