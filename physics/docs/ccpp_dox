@@ -30,6 +30,7 @@ OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
 EXTENSION_MAPPING      = .f=FortranFixed \
+                         .f90=FortranFree  \
                          .f=FortranFree
 MARKDOWN_SUPPORT       = YES
 AUTOLINK_SUPPORT       = YES
@@ -122,6 +123,9 @@ INPUT                  =  txt/mainpage.txt \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \
+### MP_generic
+                        ../GFS_MP_generic_post.f90 \
+                        ../GFS_calpreciptype.f90   \
 ### Land Surface
                         ../sfc_drv.f \
                         ../sfc_diff.f \
