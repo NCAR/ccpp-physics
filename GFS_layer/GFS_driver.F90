@@ -263,7 +263,27 @@ module GFS_driver
       call GFS_rad_time_vary (Model, Statein, Tbd, sec)
     endif
 
-    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
+    !--- physics time varying routine
+    call GFS_phys_time_vary (Model, Grid, Tbd)
+
+    !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
+    if (Model%nscyc >  0) then
+      if (mod(Model%kdt,Model%nscyc) == 1) THEN
+        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+      endif
+    endif
+
+    !--- determine if diagnostics buckets need to be cleared
+    if (mod(Model%kdt,Model%nszero) == 1) then
+      do nb = 1,nblks
+        call Diag(nb)%rad_zero  (Model)
+        call Diag(nb)%phys_zero (Model)
+    !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+      enddo
+    endif    
+
+
+!    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
 
   end subroutine GFS_time_vary_step
 
