@@ -707,6 +707,7 @@ module module_physics_driver
 
 !  --- ...  transfer soil moisture and temperature from global to local variables
 !      smsoil(:,:) = Sfcprop%smc(:,:)
+      stsoil(:,:) = Sfcprop%stc(:,:)
 !      slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
       ! dudt(:,:)  = 0.
       ! dvdt(:,:)  = 0.
