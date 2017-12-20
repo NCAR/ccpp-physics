@@ -24,10 +24,7 @@ FFLAGS   += -I../fms -I../fms/include -fPIC
 
 CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 
-ifneq (,$(findstring CCPP_DIRECT,$(CPPDEFS)))
-    # CCPP without IPD
-    IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
-else ifneq (,$(findstring CCPP_IPD,$(CPPDEFS)))
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
     # IPD with CCPP
     IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
 else

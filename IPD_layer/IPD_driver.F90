@@ -12,7 +12,7 @@ module IPD_driver
 
   use physics_restart_layer,      only: restart_populate
 
-#ifdef CCPP_IPD
+#ifdef CCPP
   use fms_mod,            only: error_mesg, FATAL
   use ccpp_types,         only: ccpp_t
   use ccpp,               only: ccpp_init
@@ -26,7 +26,7 @@ module IPD_driver
 
        implicit none
 
-#ifdef CCPP_IPD
+#ifdef CCPP
 !------------------------------------------------------!
 !  CCPP container                                      !
 !------------------------------------------------------!
@@ -52,7 +52,7 @@ type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
   public IPD_radiation_step
   public IPD_physics_step1
   public IPD_physics_step2
-#ifdef CCPP_IPD
+#ifdef CCPP
   public IPD_step
 #endif
 
@@ -162,7 +162,7 @@ type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
   end subroutine IPD_physics_step2
 
 
-#ifdef CCPP_IPD
+#ifdef CCPP
   !-------------------------------
   !  IPD step generalized for CCPP
   !-------------------------------
