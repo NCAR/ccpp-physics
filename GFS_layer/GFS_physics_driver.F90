@@ -787,8 +787,8 @@ module module_physics_driver
       call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
         adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
       call GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein,&
-        adjsfcdlw, sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3, stsoil,  &
-        gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
+        adjsfcdlw, Diag sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3,     &
+        stsoil, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
       call GFS_PBL_generic_pre_run (im, levs, kinver)
 
       !kcnv(:)   = 0

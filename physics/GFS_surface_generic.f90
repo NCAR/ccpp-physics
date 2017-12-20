@@ -20,6 +20,7 @@
 !! | Radtend        | FV3-GFS_Radtend_type                                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT        |    0 | GFS_typedefs%GFS_radtend_type |           | in     | F        |
 !! | Statein        | FV3-GFS_Statein_type                                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT        |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
 !! | adjsfcdlw      | surface_downwelling_longwave_flux                                            | surface downwelling longwave flux at current time                     | W m-2      |    1 | real                          | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT        |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !! | sigmaf         | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                            | frac       |    1 | real                          | kind_phys | inout  | F        |
 !! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                          | flag       |    1 | integer                       |           | inout  | F        |
 !! | soiltyp        | cell_soil_type                                                               | soil type at each grid cell                                           | index      |    1 | integer                       |           | inout  | F        |
@@ -33,8 +34,8 @@
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                                    | flag       |    1 | logical                       |           | inout  | F        |
 !! | ep1d           | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                             | W m-2      |    1 | real                          | kind_phys | inout  | F        |
 !!
-      subroutine GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein, adjsfcdlw, sigmaf, islmsk, soiltyp, vegtype, &
-        slopetyp, work3, stsoil, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
+      subroutine GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein, adjsfcdlw, Diag, sigmaf, islmsk, &
+        soiltyp, vegtype, slopetyp, work3, stsoil, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_diag_type, GFS_radtend_type, &
@@ -44,13 +45,13 @@
         type(GFS_grid_type),              intent(in) :: Grid
         type(GFS_control_type),           intent(in) :: Model
         type(GFS_sfcprop_type),           intent(in) :: Sfcprop
-        type(GFS_radtent_type),           intent(in) :: Radtend
+        type(GFS_radtend_type),           intent(in) :: Radtend
         type(GFS_statein_type),           intent(in) :: Statein
         type(GFS_diag_type),              intent(inout) :: Diag
 
         integer, dimension(size(Grid%xlon,1)), intent(inout) :: islmsk, soiltyp, vegtype, slopetyp
 
-        logical, dimension(size(Grid%xlon,1)), intent(inout) :: flat_guess, flag_iter
+        logical, dimension(size(Grid%xlon,1)), intent(inout) :: flag_guess, flag_iter
 
         real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: adjsfcdlw
         real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(inout)  :: sigmaf, work3, gabsbdlw, tsurf, ep1d
