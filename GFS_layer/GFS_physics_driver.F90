@@ -2720,7 +2720,8 @@ module module_physics_driver
 !        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
 !        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
 !      endif
-      call lsm_noah_post_run(im,Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
+      call lsm_noah_post_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
+                               Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       do i = 1, im
@@ -2736,9 +2737,9 @@ module module_physics_driver
       enddo
 
 !  --- ...  return updated smsoil and stsoil to global arrays
-      Sfcprop%smc(:,:) = smsoil(:,:)
+!      Sfcprop%smc(:,:) = smsoil(:,:)
       Sfcprop%stc(:,:) = stsoil(:,:)
-      Sfcprop%slc(:,:) = slsoil(:,:)
+!      Sfcprop%slc(:,:) = slsoil(:,:)
 
 !  --- ...  calculate column precipitable water "pwat"
 !      Diag%pwat(:) = 0.0

@@ -102,6 +102,11 @@
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | index      |    0 | integer |           | in     | F        |
+!!| smsoil         | volume_fraction_of_soil_moisture                            | volumetric fraction of soil moisture       | frac       | 2    | real    | kind_phys | inout  | F        |
+!!| slsoil         | volume_fraction_of_unfrozen_soil_moisture                   | volume fraction of unfrozen soil moisture  | frac       | 2    | real    | kind_phys | inout  | F        |
+!!| smsoilout      | volume_fraction_of_soil_moisture_output                     | volumetric fraction of soil moisture output| frac       | 2    | real    | kind_phys | in     | F        |
+!!| slsoilout      | volume_fraction_of_unfrozen_soil_moisture_output            | volume fraction of unfrozen soil moisture output| frac       | 2    | real    | kind_phys | in     | F        |
 !!| flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical |           | in     | F        |
 !!| dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real    | kind_phys | in     | F        |
 !!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
@@ -113,13 +118,20 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine lsm_noah_post_run                                       &
-     &  (im,flag_lssav,dtf,drain,runof,runoff,srunoff                   &
+      subroutine lsm_noah_post_run                                      &
+     &  (im,km,smsoil,slsoil,smsoilout,slsoilout,                       &
+     &      flag_lssav,dtf,drain,runof,runoff,srunoff                   &
      &  )
       use machine,           only: kind_phys
 
 !  ---  interface variables
-      integer, intent(in) :: im
+      integer, intent(in) :: im,km
+      real(kind=kind_phys), dimension(im,km), intent(in) ::             &
+     &    smsoil,slsoil
+
+      real(kind=kind_phys), dimension(im,km), intent(out) ::            &
+     &    smsoilout,slsoilout
+
       logical, intent(in) :: flag_lssav
       real, intent (in)   :: dtf
 
@@ -133,6 +145,8 @@
         runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 0.001
         srunoff(:) = srunoff(:) + runof(:) * dtf * 0.001
       end if
+      smsoilout(:,:) = smsoil(:,:) 
+      slsoilout(:,:) = slsoil(:,:)
 
       end subroutine lsm_noah_post_run
 
