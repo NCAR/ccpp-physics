@@ -193,14 +193,14 @@ $(LIBRARY): $(OBJS) $(CAPS)
 
 ifneq (,$(findstring PGIFIX,$(CPPDEFS)))
 $(CAPS):
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
+	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
 	# Apply a fix specific to the PGI compiler (rename objects in cap object files)
 	./pgifix.py $@
 else
 $(CAPS):
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
+	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
 	#$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
-	#$(FC) $(FFLAGS) -c $*.f90 -o $@
+	#$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $*.f90 -o $@
 endif
 
 .PHONY: clean
