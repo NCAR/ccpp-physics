@@ -41,6 +41,9 @@ module module_physics_driver
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
   use GFS_zhao_carr_pre,         only: GFS_zhao_carr_pre_run
+
+  use GFS_surface_generic_pre,   only: GFS_surface_generic_pre_run
+  use GFS_surface_generic_post,  only: GFS_surface_generic_post_run
   implicit none
 
 
@@ -637,27 +640,7 @@ module module_physics_driver
       ! frain = dtf / dtp
 
       do i = 1, im
-        sigmaf(i)   = max( Sfcprop%vfrac(i),0.01 )
-    !    islmsk(i)   = nint(Sfcprop%slmsk(i))
-
-        if (islmsk(i) == 2) then
-          if (Model%isot == 1) then
-            soiltyp(i)  = 16
-          else
-            soiltyp(i)  = 9
-          endif
-          if (Model%ivegsrc == 1) then
-            vegtype(i)  = 15
-          elseif(Model%ivegsrc == 2) then
-            vegtype(i)  = 13
-          endif
-          slopetyp(i) = 9
-        else
-          soiltyp(i)  = int( Sfcprop%stype(i)+0.5 )
-          vegtype(i)  = int( Sfcprop%vtype(i)+0.5 )
-          slopetyp(i) = int( Sfcprop%slope(i)+0.5 )    !! clu: slope -> slopetyp
-        endif
-!  --- ...  xw: transfer ice thickness & concentration from global to local variables
+        !  --- ...  xw: transfer ice thickness & concentration from global to local variables
         zice(i) = Sfcprop%hice(i)
         cice(i) = Sfcprop%fice(i)
         tice(i) = Sfcprop%tisfc(i)
@@ -668,8 +651,7 @@ module module_physics_driver
         ! work1(i)   = max(0.0, min(1.0,work1(i)))
         ! work2(i)   = 1.0 - work1(i)
         ! Diag%psurf(i)   = Statein%pgr(i)
-        work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
-!GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
+        !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
 !GFDL        garea(i)   = tem1 * tem2
         tem1       = Grid%dx(i)
@@ -699,7 +681,6 @@ module module_physics_driver
 
 !  --- ...  transfer soil moisture and temperature from global to local variables
       smsoil(:,:) = Sfcprop%smc(:,:)
-      stsoil(:,:) = Sfcprop%stc(:,:)
       slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
       ! dudt(:,:)  = 0.
       ! dvdt(:,:)  = 0.
@@ -761,26 +742,6 @@ module module_physics_driver
         dtdt(:,:) = 0.
       endif
 
-!  ---  convert lw fluxes for land/ocean/sea-ice models
-!  note: for sw: adjsfcdsw and adjsfcnsw are zenith angle adjusted downward/net fluxes.
-!        for lw: adjsfcdlw is (sfc temp adjusted) downward fluxe with no emiss effect.
-!                adjsfculw is (sfc temp adjusted) upward fluxe including emiss effect.
-!        one needs to be aware that that the absorbed downward lw flux (used by land/ocean
-!        models as downward flux) is not the same as adjsfcdlw but a value reduced by
-!        the factor of emissivity.  however, the net effects are the same when seeing
-!        it either above the surface interface or below.
-!
-!   - flux above the interface used by atmosphere model:
-!        down: adjsfcdlw;    up: adjsfculw = sfcemis*sigma*T**4 + (1-sfcemis)*adjsfcdlw
-!        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-!   - flux below the interface used by lnd/oc/ice models:
-!        down: sfcemis*adjsfcdlw;  up: sfcemis*sigma*T**4
-!        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-
-!  --- ...  define the downward lw flux absorbed by ground
-
-      gabsbdlw(:) = Radtend%semis(:) * adjsfcdlw(:)
-
 !       if (Model%lssav) then      !  --- ...  accumulate/save output variables
 !
 ! !  --- ...  sunshine duration time is defined as the length of time (in mdl output
@@ -825,6 +786,9 @@ module module_physics_driver
 !       endif    ! end if_lssav_block
       call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
         adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
+      call GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein,&
+        adjsfcdlw, sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3, stsoil,  &
+        gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
       call GFS_PBL_generic_pre_run (im, levs, kinver)
 
       !kcnv(:)   = 0
@@ -878,11 +842,8 @@ module module_physics_driver
 
 !  --- ...  lu: initialize flag_guess, flag_iter, tsurf
 
-      tsurf(:)      = Sfcprop%tsfc(:)
-      flag_guess(:) = .false.
-      flag_iter(:)  = .true.
+
       drain(:)      = 0.0
-      ep1d(:)       = 0.0
       runof(:)      = 0.0
       !hflx(:)       = 0.0
       !evap(:)       = 0.0
@@ -892,7 +853,6 @@ module module_physics_driver
       sbsno(:)      = 0.0
       snowc(:)      = 0.0
       snohf(:)      = 0.0
-      Diag%zlvl(:)    = Statein%phil(:,1) * onebg
       Diag%smcwlt2(:) = 0.0
       Diag%smcref2(:) = 0.0
 
@@ -1077,12 +1037,12 @@ module module_physics_driver
 
       enddo   ! end iter_loop
 
-      Diag%epi(:)     = ep1d(:)
+
       Diag%dlwsfci(:) = adjsfcdlw(:)
       Diag%ulwsfci(:) = adjsfculw(:)
       Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
       Diag%dswsfci(:) = adjsfcdsw(:)
-      Diag%gfluxi(:)  = gflx(:)
+
       ! Diag%t1(:)      = Statein%tgrs(:,1)
       ! Diag%q1(:)      = Statein%qgrs(:,1,1)
       ! Diag%u1(:)      = Statein%ugrs(:,1)
@@ -1154,22 +1114,8 @@ module module_physics_driver
         enddo
       endif
 
-      if (Model%lssav) then
-        Diag%gflux(:)   = Diag%gflux(:)  + gflx(:)  * dtf
-        Diag%evbsa(:)   = Diag%evbsa(:)  + evbs(:)  * dtf
-        Diag%evcwa(:)   = Diag%evcwa(:)  + evcw(:)  * dtf
-        Diag%transa(:)  = Diag%transa(:) + trans(:) * dtf
-        Diag%sbsnoa(:)  = Diag%sbsnoa(:) + sbsno(:) * dtf
-        Diag%snowca(:)  = Diag%snowca(:) + snowc(:) * dtf
-        Diag%snohfa(:)  = Diag%snohfa(:) + snohf(:) * dtf
-        Diag%ep(:)      = Diag%ep(:)     + ep1d(:)  * dtf
-
-        Diag%tmpmax(:)  = max(Diag%tmpmax(:),Sfcprop%t2m(:))
-        Diag%tmpmin(:)  = min(Diag%tmpmin(:),Sfcprop%t2m(:))
-
-        Diag%spfhmax(:) = max(Diag%spfhmax(:),Sfcprop%q2m(:))
-        Diag%spfhmin(:) = min(Diag%spfhmin(:),Sfcprop%q2m(:))
-      endif
+      call GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, &
+        trans, sbsno, snowc, snohf, stsoil, Diag, Sfcprop)
 
 !!!!!!!!!!!!!!!!!Commented by Moorthi on July 18, 2012 !!!!!!!!!!!!!!!!!!!
 !     do i = 1, im
@@ -2354,7 +2300,7 @@ module module_physics_driver
       endif               !       moist convective adjustment over
 !
        call GFS_MP_generic_pre_run (im, ix,levs,clw(:,:,1),clw(:,:,2),            &
-                             Model%ldiag3d, Model%ntcw, Model%ncld,               & 
+                             Model%ldiag3d, Model%ntcw, Model%ncld,               &
                              Model%num_p3d, Stateout%gt0,Stateout%gq0(:,:,1),     &
                              dtdt,dqdt(:,:,1),dqdt(:,:,3) )
 
@@ -2584,14 +2530,14 @@ module module_physics_driver
       endif
 
 !      Diag%rain(:)  = Diag%rainc(:) + frain * rain1(:)
- 
+
       call GFS_calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,  &
                             Tbd%rann, Model%cal_pre, Stateout%gt0,        &
                             Stateout%gq0, Statein%prsl, Statein%prsi,     &
                             Diag%rainc,frain,rain1, Statein%phii, Model%num_p3d,       &
                             Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,3),    &   ! input !zhang:Tbd%phy_f3d(:,:,3) comes from gscond_run
                             Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag,     &   ! output
-                            Sfcprop%tprcp)        
+                            Sfcprop%tprcp)
 
       call GFS_MP_generic_post_run (im, ix, levs, dtf, del,               &
                          Model%lssav, Model%ldiag3d, Diag%rain,frain,     &
@@ -2715,7 +2661,6 @@ module module_physics_driver
 
 !  --- ...  return updated smsoil and stsoil to global arrays
       Sfcprop%smc(:,:) = smsoil(:,:)
-      Sfcprop%stc(:,:) = stsoil(:,:)
       Sfcprop%slc(:,:) = slsoil(:,:)
 
 !  --- ...  calculate column precipitable water "pwat"
