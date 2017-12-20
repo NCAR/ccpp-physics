@@ -24,7 +24,6 @@ FFLAGS   += -I../fms -I../fms/include -fPIC
 
 CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 
-
 ifneq (,$(findstring CCPP_DIRECT,$(CPPDEFS)))
     # CCPP without IPD
     IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
@@ -35,7 +34,6 @@ else
     # IPD without CCPP
     IPD_DRIVER_CAP =
 endif
-
 
 SRCS_f   =  \
 	   ./physics/cnvc90.f                                                        \
@@ -179,17 +177,8 @@ CAPS = $(CAPS_F90:.F90=.o)
 
 all default: depend $(LIBRARY)
 
-./IPD_layer/IPD_driver_cap.o: ./IPD_layer/IPD_driver_cap.F90
-	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
-	$(FC) $(FFLAGS) -c $*.f90 -o $@
-
-./IPD_layer/IPD_driver.o: ./IPD_layer/IPD_driver.F90
-	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
-	$(FC) $(FFLAGS) -c $*.f90 -o $@
-
 $(LIBRARY): $(OBJS) $(CAPS)
 	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) $(CAPS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
-	# DH* placeholder for PGI fix of cap object names in shared library
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
 
@@ -201,6 +190,18 @@ $(LIBRARY): $(OBJS) $(CAPS)
 
 ./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
+
+ifneq (,$(findstring PGIFIX,$(CPPDEFS)))
+$(CAPS):
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
+	# Apply a fix specific to the PGI compiler (rename objects in cap object files)
+	./pgifix.py $@
+else
+$(CAPS):
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
+	#$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
+	#$(FC) $(FFLAGS) -c $*.f90 -o $@
+endif
 
 .PHONY: clean
 clean:
