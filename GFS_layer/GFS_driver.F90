@@ -6,7 +6,8 @@ module GFS_driver
                                       GFS_sfcprop_type, GFS_coupling_type, &
                                       GFS_control_type, GFS_grid_type,     &
                                       GFS_tbd_type,     GFS_cldprop_type,  &
-                                      GFS_radtend_type, GFS_diag_type
+                                      GFS_radtend_type, GFS_diag_type,     &
+                                      GFS_sfccycle_type
   use module_radiation_driver,  only: GFS_radiation_driver, radupdate
   use module_physics_driver,    only: GFS_physics_driver
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
@@ -97,7 +98,7 @@ module GFS_driver
 !--------------
   subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,    &
                              Coupling, Grid, Tbd, Cldprop, Radtend, & 
-                             Diag, Init_parm)
+                             Diag, Sfccycle, Init_parm)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -116,6 +117,7 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
+    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle(:)
     type(GFS_init_type),      intent(in)    :: Init_parm
 
     !--- local variables
@@ -156,11 +158,15 @@ module GFS_driver
       call Radtend  (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
       call Diag     (nb)%create (Init_parm%blksz(nb), Model)
+      !--- internal representation of sfccycle
+      call Sfccycle (nb)%create (Init_parm%blksz(nb), Model)
+      !--- store own block number in Tbd(nb)%blkno
+      Tbd(nb)%blkno = nb
     enddo
 
     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
-     
+
     !--- read in and initialize ozone and water
     if (Model%ntoz > 0) then
       do nb = 1, nblks
@@ -234,61 +240,66 @@ module GFS_driver
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, & 
-                                 Grid, Tbd, Cldprop, Radtend, Diag)
+                                 Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
 
     implicit none
 
     !--- interface variables
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein(:)
-    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
-    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
-    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
-    type(GFS_diag_type),      intent(inout) :: Diag(:)
+    type(GFS_statein_type),   intent(inout) :: Statein
+    type(GFS_stateout_type),  intent(inout) :: Stateout
+    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
+    type(GFS_coupling_type),  intent(inout) :: Coupling
+    type(GFS_grid_type),      intent(inout) :: Grid
+    type(GFS_tbd_type),       intent(inout) :: Tbd
+    type(GFS_cldprop_type),   intent(inout) :: Cldprop
+    type(GFS_radtend_type),   intent(inout) :: Radtend
+    type(GFS_diag_type),      intent(inout) :: Diag
+    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
+
     !--- local variables
-    integer :: nb, nblks
     real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-    nblks = size(blksz)
     !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
     !--- update calendars and triggers
     rinc(1:5)   = 0
     call w3difdat(Model%jdat,Model%idat,4,rinc)
     sec = rinc(4)
-    Model%phour = sec/con_hr
-    !--- set current bucket hour
-    Model%zhour = Model%phour
-    Model%fhour = (sec + Model%dtp)/con_hr
-    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-    Model%ipt    = 1
-    Model%lprnt  = .false.
-    Model%lssav  = .true.
+    if (size(blksz)==1 .or. Tbd%blkno==1) then
+      Model%phour = sec/con_hr
+      !--- set current bucket hour
+      Model%zhour = Model%phour
+      Model%fhour = (sec + Model%dtp)/con_hr
+      Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
 
-    !--- radiation triggers
-    Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-    Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+      Model%ipt    = 1
+      Model%lprnt  = .false.
+      Model%lssav  = .true.
 
-    !--- set the solar hour based on a combination of phour and time initial hour
-    Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+      !--- radiation triggers
+      Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+      Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
 
-    if ((Model%debug) .and. (Model%me == Model%master)) then
-      print *,'   sec ', sec
-      print *,'   kdt ', Model%kdt
-      print *,' nsswr ', Model%nsswr
-      print *,' nslwr ', Model%nslwr
-      print *,' nscyc ', Model%nscyc
-      print *,' lsswr ', Model%lsswr
-      print *,' lslwr ', Model%lslwr
-      print *,' fhour ', Model%fhour
-      print *,' phour ', Model%phour
-      print *,' solhr ', Model%solhr
+      !--- set the solar hour based on a combination of phour and time initial hour
+      Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+
+      if ((Model%debug) .and. (Model%me == Model%master)) then
+        print *,'   sec ', sec
+        print *,'   kdt ', Model%kdt
+        print *,' nsswr ', Model%nsswr
+        print *,' nslwr ', Model%nslwr
+        print *,' nscyc ', Model%nscyc
+        print *,' lsswr ', Model%lsswr
+        print *,' lslwr ', Model%lslwr
+        print *,' fhour ', Model%fhour
+        print *,' phour ', Model%phour
+        print *,' solhr ', Model%solhr
+      endif
     endif
+
+!$OMP barrier
 
     !--- radiation time varying routine
     if (Model%lsswr .or. Model%lslwr) then
@@ -301,17 +312,15 @@ module GFS_driver
     !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
     if (Model%nscyc >  0) then
       if (mod(Model%kdt,Model%nscyc) == 1) THEN
-        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+        call gcycle (blksz(Tbd%blkno), Model, Grid, Sfcprop, Cldprop, Sfccycle)
       endif
     endif
 
     !--- determine if diagnostics buckets need to be cleared
     if (mod(Model%kdt,Model%nszero) == 1) then
-      do nb = 1,nblks
-        call Diag(nb)%rad_zero  (Model)
-        call Diag(nb)%phys_zero (Model)
+        call Diag%rad_zero  (Model)
+        call Diag%phys_zero (Model)
     !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-      enddo
     endif
 
   end subroutine GFS_time_vary_step
@@ -403,18 +412,21 @@ module GFS_driver
     implicit none
 
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(in)    :: Statein(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
+    type(GFS_statein_type),   intent(in)    :: Statein
+    type(GFS_tbd_type),       intent(inout) :: Tbd
     real(kind=kind_phys),     intent(in)    :: sec
+
     !--- local variables
     type (random_stat) :: stat
-    integer :: ix, nb, j, i, nblks, ipseed
+    integer :: nb, ix, j, i, ipseed
     integer :: numrdm(Model%cnx*Model%cny*2)
 
-    nblks = size(blksz,1)
+    if (size(blksz)==1 .or. Tbd%blkno==1) then
+      call radupdate (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
+                      Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon )
+    endif
 
-    call radupdate (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
-                    Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon )
+!$OMP barrier
 
     !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
     if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
@@ -425,6 +437,9 @@ module GFS_driver
       !--- set the random seeds for each column in a reproducible way
       ix = 0
       nb = 1
+      ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
+      ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
+      ! use OpenMP to speed up this loop *DH
       do j = 1,Model%ny
         do i = 1,Model%nx
           ix = ix + 1
@@ -432,23 +447,23 @@ module GFS_driver
             ix = 1
             nb = nb + 1
           endif
-          !--- for testing purposes, replace numrdm with '100'
-          Tbd(nb)%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-          Tbd(nb)%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
+          if (nb == Tbd%blkno) then
+            !--- for testing purposes, replace numrdm with '100'
+            Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
+            Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
+          endif
         enddo
       enddo
     endif  ! isubc_lw and isubc_sw
 
     if (Model%num_p3d == 4) then
       if (Model%kdt == 1) then
-        do nb = 1,nblks
-          Tbd(nb)%phy_f3d(:,:,1) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,2) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f3d(:,:,3) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,4) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f2d(:,1)   = Statein(nb)%prsi(:,1)
-          Tbd(nb)%phy_f2d(:,2)   = Statein(nb)%prsi(:,1)
-        enddo
+          Tbd%phy_f3d(:,:,1) = Statein%tgrs
+          Tbd%phy_f3d(:,:,2) = max(qmin,Statein%qgrs(:,:,1))
+          Tbd%phy_f3d(:,:,3) = Statein%tgrs
+          Tbd%phy_f3d(:,:,4) = max(qmin,Statein%qgrs(:,:,1))
+          Tbd%phy_f2d(:,1)   = Statein%prsi(:,1)
+          Tbd%phy_f2d(:,2)   = Statein%prsi(:,1)
       endif
     endif
 
@@ -467,30 +482,31 @@ module GFS_driver
 
     implicit none
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
+    type(GFS_grid_type),      intent(inout) :: Grid
+    type(GFS_tbd_type),       intent(inout) :: Tbd
+
     !--- local variables
-    integer :: nb, ix, k, j, i, nblks, iseed, iskip
+    integer :: nb, ix, k, j, i, iseed, iskip
     real(kind=kind_phys) :: wrk(1)
     real(kind=kind_phys) :: rannie(Model%cny)
     real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
 
-    nblks = size(blksz,1)
-
-    !--- switch for saving convective clouds - cnvc90.f 
-    !--- aka Ken Campana/Yu-Tai Hou legacy
-    if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
-      !--- initialize,accumulate,convert
-      Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-    elseif (mod(Model%kdt,Model%nsswr) == 0) then
-      !--- accumulate,convert
-      Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-    elseif (Model%lsswr) then
-      !--- initialize,accumulate
-      Model%clstp = 1100
-    else
-      !--- accumulate
-      Model%clstp = 0100
+    if (size(blksz)==1 .or. Tbd%blkno==1) then
+      !--- switch for saving convective clouds - cnvc90.f
+      !--- aka Ken Campana/Yu-Tai Hou legacy
+      if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
+        !--- initialize,accumulate,convert
+        Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+      elseif (mod(Model%kdt,Model%nsswr) == 0) then
+        !--- accumulate,convert
+        Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+      elseif (Model%lsswr) then
+        !--- initialize,accumulate
+        Model%clstp = 1100
+      else
+        !--- accumulate
+        Model%clstp = 0100
+      endif
     endif
 
     !--- random number needed for RAS and old SAS and when cal_pre=.true.
@@ -505,6 +521,9 @@ module GFS_driver
         rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
       enddo
 
+      ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
+      ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
+      ! use OpenMP to speed up this loop or the inside loops *DH
       do k = 1,Model%nrcm
         iskip = (k-1)*Model%cnx*Model%cny
         ix = 0
@@ -516,7 +535,9 @@ module GFS_driver
               ix = 1
               nb = nb + 1
             endif
-            Tbd(nb)%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
+            if (nb == Tbd%blkno) then
+              Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
+            endif
           enddo
         enddo
       enddo
@@ -524,21 +545,17 @@ module GFS_driver
 
     !--- o3 interpolation
     if (Model%ntoz > 0) then
-      do nb = 1, nblks
-        call ozinterpol (Model%me, blksz(nb), Model%idate, Model%fhour, &
-                         Grid(nb)%jindx1_o3, Grid(nb)%jindx2_o3,            &
-                         Tbd(nb)%ozpl, Grid(nb)%ddy_o3)
-      enddo
+      call ozinterpol (Model%me, blksz(Tbd%blkno), Model%idate, Model%fhour, &
+                       Grid%jindx1_o3, Grid%jindx2_o3,                &
+                       Tbd%ozpl, Grid%ddy_o3)
     endif
 
     !--- h2o interpolation
-     if (Model%h2o_phys) then
-       do nb = 1, nblks
-         call h2ointerpol (Model%me, blksz(nb), Model%idate, Model%fhour, &
-                           Grid(nb)%jindx1_h, Grid(nb)%jindx2_h,          &
-                           Tbd(nb)%h2opl, Grid(nb)%ddy_h)
-       enddo
-     endif
+    if (Model%h2o_phys) then
+      call h2ointerpol (Model%me, blksz(Tbd%blkno), Model%idate, Model%fhour, &
+                        Grid%jindx1_h, Grid%jindx2_h,                  &
+                        Tbd%h2opl, Grid%ddy_h)
+    endif
 
   end subroutine GFS_phys_time_vary
 
