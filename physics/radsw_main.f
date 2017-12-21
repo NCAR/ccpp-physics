@@ -504,7 +504,7 @@
 
 !  ---  public accessable subprograms
 
-      public swrad, rswinit
+      public swrad_init, swrad_run, swrad_finalize, rswinit 
 
 
 ! =================
@@ -579,16 +579,80 @@
 !!\n                    nirdf - downward surface nir diffused flux
 !!\n                    visbm - downward surface uv+vis direct beam flux
 !!\n                    visdf - downward surface uv+vis diffused flux
+
+      subroutine swrad_init ()
+      end subroutine swrad_init
+
+
+!! \section arg_table_swrad_run Argument Table
+!! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
+!! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
+!! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration                     | ozone concentration layer                              | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volumetric_mixing_ratio_co2             | volumetric mixing ratio co2                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_n2o      | volumetric_mixing_ratio_n2o             | volumetric mixing ratio no2                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ch4      | volumetric_mixing_ratio_ch4             | volumetric mixing ratio ch4                            | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_o2       | volumetric_mixing_ratio_o2              | volumetric mixing ratio o2                             | gm gm-1 |    2 | real        | kind_phys | in     | F        |
+!! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
+!! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
+!! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
+!! | aerasy          | aerosol_asymetry_parameter              | aerosol asymetry paramter                              |         |    3 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dir  | albedo_sfc_nir_dir                      | near infrared sw albedo for surface direct irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_nir_dif  | albedo_sfc_nir_dif                      | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                     | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
+!! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                     | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
+!! | cosz            | cosine_of_zenith_angle                  | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
+!! | solcon          | solar_constant                          | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
+!! | nday            | daytime_points_dimension                | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | idxday          | daytime_points                          | daytime points                                         |         |    1 | integer     |           | in     | F        |
+!! | npts            | horizontal_loop_extent                  | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
+!! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | nlp1            | vertical_level_dimension                | vertical level dimension                               | index   |    0 | integer     |           | in     | F        |
+!! | lprnt           | flag_to_print                           | logical flag to print                                  | logical |    0 | logical     |           | in     | F        |
+!! | cld_cf          | horizontal_cloud_fraction               | horizontal cloud fraction                              |         |    2 | real        | kind_phys | in     | F        |
+!! | lsswr           | flag_to_calc_sw                         | logical flag to calculate SW irradiances               | logical |    0 | logical     |           | in     | F        |
+!! | hswc            | sw_heating_rate_total_sky               | shortwave total sky heating rate                       | k s-1   |    2 | real        | kind_phys | out    | F        |
+!! | topflx          | sw_fluxes_top_atmosphere                | shortwave total sky fluxes at the top of the atm       | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
+!! | sfcflx          | sw_fluxes_sfc                           | shortwave total sky fluxes at the Earth surface        | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | hsw0            | sw_heating_rate_csk                     | shortwave clear sky heating rate                       | K s-1   |    2 | real        | kind_phys | out    | T        |
+!! | hswb            | sw_heating_rate_spectral                | shortwave total sky heating rate (spectral)            | K s-1   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | sw_fluxes                               | sw fluxes total sky / csk and up / down at levels      | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
+!! | fdncmp          | sw_fluxes_down_components_sfc           | componenets of the downward sw fluxes at the surface   | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+!! | cld_lwp         | cloud_liquid_water_path                 | cloud liquid water path                                | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_liq     | effective_radious_liquid_cloud_droplets | effective radious liquid cloud droplets                | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_iwp         | cloud_ice_water_path                    | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_ice     | effective_radious_ice_hydrometeor       | effective radious ice hydrometeor                      | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_rwp         | cloud_rain_water_path                   | cloud ice water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_rain    | effective_radious_rain_hydrometeor      | effective radious rain hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_swp         | cloud_snow_water_path                   | cloud snow water path                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_snow    | effective_radious_snow_hydrometeor      | effective radious snow hydrometeor                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_od          | cloud_optical_depth                     | cloud optical depth                                    |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_ssa         | cloud_single_scattering_albedo          | cloud single scattering albedo                         |         |    2 | real        | kind_phys | in     | T        |
+!! | cld_asy         | cloud_asymetry_parameter                | cloud asymetry parameter                               |         |    2 | real        | kind_phys | in     | T        |
+!!
 !> \section General_swrad General Algorithm
 !> @{
 !-----------------------------------
-      subroutine swrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                      &    !  ---  inputs
-     &       clouds,icseed,aerosols,sfcalb,                             &
+      subroutine swrad_run                                                  &
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
+     &       gasvmr_co2,                                                &
+     &       gasvmr_n2o, gasvmr_ch4,                                    &
+     &       gasvmr_o2,                                                 &    !  ---  inputs
+     &       icseed, aeraod, aerssa, aerasy,                            &
+     &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
+     &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
+     &       cld_cf, lsswr,                                             &
      &       hswc,topflx,sfcflx,                                        &   !  ---  outputs
-     &       HSW0,HSWB,FLXPRF,FDNCMP                                    &   ! ---  optional
+     &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od, cld_ssa, cld_asy
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -771,18 +835,32 @@
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
-      logical, intent(in) :: lprnt
+      logical, intent(in) :: lprnt, lsswr
 
       real (kind=kind_phys), dimension(npts,nlp1), intent(in) ::        &
      &       plvl, tlvl
       real (kind=kind_phys), dimension(npts,nlay), intent(in) ::        &
      &       plyr, tlyr, qlyr, olyr
-      real (kind=kind_phys), dimension(npts,4),    intent(in) :: sfcalb
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
-      real (kind=kind_phys), dimension(npts,nlay,nbdsw,3),intent(in)::  &
-     &       aerosols
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir &
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif &
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir&
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif&
+
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
+
+      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od, cld_ssa, cld_asy
+
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
+      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerasy
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon
 
@@ -838,9 +916,12 @@
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb
+
 !
 !===> ... begin here
 !
+      if (.not. lsswr) return
+      if (nday <= 0) return
 
       lhswb  = present ( hswb )
       lhsw0  = present ( hsw0 )
@@ -905,10 +986,10 @@
         ssolar = s0fac * cosz(j1)
 
 !> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
-        albbm(1) = sfcalb(j1,1)
-        albdf(1) = sfcalb(j1,2)
-        albbm(2) = sfcalb(j1,3)
-        albdf(2) = sfcalb(j1,4)
+        albbm(1) = sfcalb_nir_dir(j1)
+        albdf(1) = sfcalb_nir_dif(j1)
+        albbm(2) = sfcalb_uvis_dir(j1)
+        albdf(2) = sfcalb_uvis_dif(j1)
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -942,7 +1023,8 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,kk,1))   ! co2
+            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,kk,1))   ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,kk))   ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
           enddo
@@ -953,9 +1035,12 @@
           if (iswrgas > 0) then
             do k = 1, nlay
               kk = nlp1 - k
-              colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,kk,2))  ! n2o
-              colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,kk,3))  ! ch4
-              colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,kk,4))  ! o2
+              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,kk,2))  ! n2o
+             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,kk))  ! n2o
+             ! colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,kk,3))  ! ch4
+             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,kk))  ! ch4
+             ! colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,kk,4))  ! o2
+             colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,kk))  ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,kk,5))  ! co - notused
             enddo
           else
@@ -972,9 +1057,12 @@
           do k = 1, nlay
             kk = nlp1 - k
             do ib = 1, nbdsw
-              tauae(k,ib) = aerosols(j1,kk,ib,1)
-              ssaae(k,ib) = aerosols(j1,kk,ib,2)
-              asyae(k,ib) = aerosols(j1,kk,ib,3)
+              !tauae(k,ib) = aerosols(j1,kk,ib,1)
+              !ssaae(k,ib) = aerosols(j1,kk,ib,2)
+              !asyae(k,ib) = aerosols(j1,kk,ib,3)
+              tauae(k,ib) = aeraod(j1,kk,ib)
+              ssaae(k,ib) = aerssa(j1,kk,ib)
+              asyae(k,ib) = aerasy(j1,kk,ib)
             enddo
           enddo
 
@@ -982,23 +1070,23 @@
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
-              cfrac(k) = clouds(j1,kk,1)      ! cloud fraction
-              cliqp(k) = clouds(j1,kk,2)      ! cloud liq path
-              reliq(k) = clouds(j1,kk,3)      ! liq partical effctive radius
-              cicep(k) = clouds(j1,kk,4)      ! cloud ice path
-              reice(k) = clouds(j1,kk,5)      ! ice partical effctive radius
-              cdat1(k) = clouds(j1,kk,6)      ! cloud rain drop path
-              cdat2(k) = clouds(j1,kk,7)      ! rain partical effctive radius
-              cdat3(k) = clouds(j1,kk,8)      ! cloud snow path
-              cdat4(k) = clouds(j1,kk,9)      ! snow partical effctive radius
+              cfrac(k) = cld_cf(j1,kk)        ! cloud fraction
+              cliqp(k) = cld_lwp(j1,kk)       ! cloud liq path
+              reliq(k) = cld_ref_liq(j1,kk)   ! liq partical effctive radius
+              cicep(k) = cld_iwp(j1,kk)       ! cloud ice path
+              reice(k) = cld_ref_ice(j1,kk)   ! ice partical effctive radius
+              cdat1(k) = cld_rwp(j1,kk)       ! cloud rain drop path
+              cdat2(k) = cld_ref_rain(j1,kk)  ! rain partical effctive radius
+              cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
+              cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
-              cfrac(k) = clouds(j1,kk,1)      ! cloud fraction
-              cdat1(k) = clouds(j1,kk,2)      ! cloud optical depth
-              cdat2(k) = clouds(j1,kk,3)      ! cloud single scattering albedo
-              cdat3(k) = clouds(j1,kk,4)      ! cloud asymmetry factor
+              cfrac(k) = cld_cf(j1,kk)      ! cloud fraction
+              cdat1(k) = cld_od(j1,kk)      ! cloud optical depth
+              cdat2(k) = cld_ssa(j1,kk)      ! cloud single scattering albedo
+              cdat3(k) = cld_asy(j1,kk)      ! cloud asymmetry factor
             enddo
           endif                    ! end if_iswcliq
 
@@ -1026,7 +1114,8 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,k,1))    ! co2
+            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,k,1))    ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,k))  ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
           enddo
@@ -1047,9 +1136,12 @@
 
           if (iswrgas > 0) then
             do k = 1, nlay
-              colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,k,2))  ! n2o
-              colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,k,3))  ! ch4
-              colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,k,4))  ! o2
+              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,k,2))  ! n2o
+            colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,k))  ! n2o
+              !colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,k,3))  ! ch4
+            colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,k))  ! ch4
+              !colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,k,4))  ! o2
+            colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,k))  ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,k,5))  ! co - notused
             enddo
           else
@@ -1065,30 +1157,33 @@
 
           do ib = 1, nbdsw
             do k = 1, nlay
-              tauae(k,ib) = aerosols(j1,k,ib,1)
-              ssaae(k,ib) = aerosols(j1,k,ib,2)
-              asyae(k,ib) = aerosols(j1,k,ib,3)
+              !tauae(k,ib) = aerosols(j1,k,ib,1)
+              !ssaae(k,ib) = aerosols(j1,k,ib,2)
+              !asyae(k,ib) = aerosols(j1,k,ib,3)
+              tauae(k,ib) = aeraod(j1,k,ib)
+              ssaae(k,ib) = aerssa(j1,k,ib)
+              asyae(k,ib) = aerasy(j1,k,ib)
             enddo
           enddo
 
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
-              cfrac(k) = clouds(j1,k,1)       ! cloud fraction
-              cliqp(k) = clouds(j1,k,2)       ! cloud liq path
-              reliq(k) = clouds(j1,k,3)       ! liq partical effctive radius
-              cicep(k) = clouds(j1,k,4)       ! cloud ice path
-              reice(k) = clouds(j1,k,5)       ! ice partical effctive radius
-              cdat1(k) = clouds(j1,k,6)       ! cloud rain drop path
-              cdat2(k) = clouds(j1,k,7)       ! rain partical effctive radius
-              cdat3(k) = clouds(j1,k,8)       ! cloud snow path
-              cdat4(k) = clouds(j1,k,9)       ! snow partical effctive radius
+              cfrac(k) = cld_cf(j1,k)       ! cloud fraction
+              cliqp(k) = cld_lwp(j1,k)       ! cloud liq path
+              reliq(k) = cld_ref_liq(j1,k)   ! liq partical effctive radius
+              cicep(k) = cld_iwp(j1,k)       ! cloud ice path
+              reice(k) = cld_ref_ice(j1,k)   ! ice partical effctive radius
+              cdat1(k) = cld_rwp(j1,k)       ! cloud rain drop path
+              cdat2(k) = cld_ref_rain(j1,k)  ! rain partical effctive radius
+              cdat3(k) = cld_swp(j1,k)       ! cloud snow path
+              cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
           else                     ! use diagnostic cloud method
             do k = 1, nlay
-              cfrac(k) = clouds(j1,k,1)       ! cloud fraction
-              cdat1(k) = clouds(j1,k,2)       ! cloud optical depth
-              cdat2(k) = clouds(j1,k,3)       ! cloud single scattering albedo
-              cdat3(k) = clouds(j1,k,4)       ! cloud asymmetry factor
+              cfrac(k) = cld_cf(j1,k)     ! cloud fraction
+              cdat1(k) = cld_od(j1,k)     ! cloud optical depth
+              cdat2(k) = cld_ssa(j1,k)    ! cloud single scattering albedo
+              cdat3(k) = cld_asy(j1,k)    ! cloud asymmetry factor
             enddo
           endif                    ! end if_iswcliq
 
@@ -1362,9 +1457,12 @@
 
       return
 !...................................
-      end subroutine swrad
+      end subroutine swrad_run
 !-----------------------------------
 !> @}
+
+      subroutine swrad_finalize ()
+      end subroutine swrad_finalize
 
 
 !> This subroutine initializes non-varying module variables, conversion

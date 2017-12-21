@@ -120,6 +120,14 @@ SRCS_f90 = \
            ./physics/GFS_MP_generic_post.f90                                         \
            ./physics/GFS_MP_generic_pre.f90                                          \
            ./physics/GFS_zhao_carr_pre.f90                                           \
+           ./physics/GFS_RRTMG_pre.f90                                               \
+           ./physics/GFS_RRTMG_post.f90                                              \
+           ./physics/GFS_radsw_pre.f90                                               \
+           ./physics/GFS_radsw_post.f90                                              \
+           ./physics/GFS_radlw_pre.f90                                               \
+           ./physics/GFS_radlw_post.f90                                              \
+           ./physics/GFS_rad_time_vary.f90                                           \
+           ./physics/GFS_radupdate.f90                                               \
 	   ./physics/cs_conv.f90                                                     \
 	   ./physics/funcphys.f90                                                    \
 	   ./physics/gcm_shoc.f90                                                    \
@@ -136,6 +144,7 @@ SRCS_f90 = \
 	   ./physics/module_nst_water_prop.f90                                       \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90						     \
+           ./physics/radcons.f90                                                     \
 	   ./physics/wam_f107_kp_mod.f90
 
 SRCS_F   = ./physics/aer_cloud.F						     \
