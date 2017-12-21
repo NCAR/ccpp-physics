@@ -95,6 +95,7 @@ SRCS_f   =  \
 	   ./physics/sascnv.f                                                        \
 	   ./physics/sascnvn.f                                                       \
 	   ./physics/set_soilveg.f                                                   \
+	   ./physics/GFS_surface_loop_control.f                                      \
 	   ./physics/sfc_cice.f                                                      \
 	   ./physics/sfc_diag.f                                                      \
 	   ./physics/sfc_diff.f                                                      \

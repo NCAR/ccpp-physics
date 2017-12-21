@@ -23,7 +23,6 @@ module module_physics_driver
   use edmf,                  only: edmf_run
   use GFS_PBL_generic_pre,   only: GFS_PBL_generic_pre_run
   use GFS_PBL_generic_post,  only: GFS_PBL_generic_post_run
-!  use sasas_deep,             only: sasasdeep_run
   use GFS_DCNV_generic_pre,   only: GFS_DCNV_generic_pre_run
   use GFS_DCNV_generic_post,  only: GFS_DCNV_generic_post_run
   use GFS_SCNV_generic_pre,   only: GFS_SCNV_generic_pre_run
@@ -41,6 +40,15 @@ module module_physics_driver
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
   use GFS_zhao_carr_pre,         only: GFS_zhao_carr_pre_run
+
+  use lsm_noah
+  use lsm_noah_pre
+  use lsm_noah_post
+  use surface_exchange_coefficients
+  use surface_diagnose
+  use GFS_surface_loop_control_part1
+  use GFS_surface_loop_control_part2
+
   implicit none
 
 
@@ -698,9 +706,9 @@ module module_physics_driver
       endif
 
 !  --- ...  transfer soil moisture and temperature from global to local variables
-      smsoil(:,:) = Sfcprop%smc(:,:)
+!      smsoil(:,:) = Sfcprop%smc(:,:)
       stsoil(:,:) = Sfcprop%stc(:,:)
-      slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
+!      slsoil(:,:) = Sfcprop%slc(:,:)          !! clu: slc -> slsoil
       ! dudt(:,:)  = 0.
       ! dvdt(:,:)  = 0.
       ! dtdt(:,:)  = 0.
@@ -881,20 +889,22 @@ module module_physics_driver
       tsurf(:)      = Sfcprop%tsfc(:)
       flag_guess(:) = .false.
       flag_iter(:)  = .true.
-      drain(:)      = 0.0
+!      drain(:)      = 0.0
       ep1d(:)       = 0.0
-      runof(:)      = 0.0
+!      runof(:)      = 0.0
       !hflx(:)       = 0.0
       !evap(:)       = 0.0
-      evbs(:)       = 0.0
-      evcw(:)       = 0.0
-      trans(:)      = 0.0
-      sbsno(:)      = 0.0
-      snowc(:)      = 0.0
-      snohf(:)      = 0.0
+!      evbs(:)       = 0.0
+!      evcw(:)       = 0.0
+!      trans(:)      = 0.0
+!      sbsno(:)      = 0.0
+!      snowc(:)      = 0.0
+!      snohf(:)      = 0.0
       Diag%zlvl(:)    = Statein%phil(:,1) * onebg
-      Diag%smcwlt2(:) = 0.0
-      Diag%smcref2(:) = 0.0
+!      Diag%smcwlt2(:) = 0.0
+!      Diag%smcref2(:) = 0.0
+      call lsm_noah_pre_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
+            drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
@@ -904,22 +914,24 @@ module module_physics_driver
 !
 !     if (lprnt) write(0,*)' tsea=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 
-        call sfc_diff (im,Statein%pgr, Statein%ugrs, Statein%vgrs,        &
-                       Statein%tgrs, Statein%qgrs, Diag%zlvl,             &
+!        call sfc_diff (im,Statein%pgr, Statein%ugrs, Statein%vgrs,        &
+        call sfc_ex_coef_run(im,Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                       Statein%tgrs(:,1), Statein%qgrs(:,1,1), Diag%zlvl,           &
                        Sfcprop%snowd, Sfcprop%tsfc,  Sfcprop%zorl, cd,    &
-                       cdq, rb, Statein%prsl(1,1), work3, islmsk, stress, &
+                       cdq, rb, Statein%prsl(:,1), work3, islmsk, stress, &
                        Sfcprop%ffmm,  Sfcprop%ffhh, Sfcprop%uustar,       &
-                       wind,  Tbd%phy_f2d(1,Model%num_p2d), fm10, fh2,    &
+                       wind,  Tbd%phy_f2d(:,Model%num_p2d), fm10, fh2,    &
                        sigmaf, vegtype, Sfcprop%shdmax, Model%ivegsrc,    &
                        tsurf, flag_iter, Model%redrag)
 
 !  --- ...  lu: update flag_guess
 
-        do i = 1, im
-          if (iter == 1 .and. wind(i) < 2.0) then
-            flag_guess(i) = .true.
-          endif
-        enddo
+!        do i = 1, im
+!          if (iter == 1 .and. wind(i) < 2.0) then
+!            flag_guess(i) = .true.
+!          endif
+!        enddo
+        call GFS_surface_loop_control_part1_run(im,iter,wind,flag_guess)
 
         if (Model%nstf_name(1) > 0) then
 
@@ -985,13 +997,14 @@ module module_physics_driver
 !     if (lprnt) write(0,*)' tsead=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 !    &,' pgr=',pgr(ipr),' sfcemis=',sfcemis(ipr)
 
-          call sfc_drv                                                 &
+!          call sfc_drv                                                 &
+          call lsm_noah_run                                             &
 !  ---  inputs:
-           (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,  &
-            Statein%tgrs, Statein%qgrs, soiltyp, vegtype, sigmaf,      &
+           (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+            Statein%tgrs(:,1), Statein%qgrs(:,1,1), soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
-            Sfcprop%tg3, cd, cdq, Statein%prsl(1,1), work3, DIag%zlvl, &
-            islmsk, Tbd%phy_f2d(1,Model%num_p2d), slopetyp,            &
+            Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, DIag%zlvl, &
+            islmsk, Tbd%phy_f2d(:,Model%num_p2d), slopetyp,            &
             Sfcprop%shdmin, Sfcprop%shdmax, Sfcprop%snoalb,            &
             Radtend%sfalb, flag_iter, flag_guess, Model%isot,          &
             Model%ivegsrc,                                             &
@@ -1056,16 +1069,16 @@ module module_physics_driver
 
 !  --- ...  lu: update flag_iter and flag_guess
 
-        do i = 1, im
-          flag_iter(i)  = .false.
-          flag_guess(i) = .false.
-
-          if (iter == 1 .and. wind(i) < 2.0) then
-            if ((islmsk(i) == 1) .or. ((islmsk(i) == 0) .and.           &
-                                       (Model%nstf_name(1) > 0))) then
-              flag_iter(i) = .true.
-            endif
-          endif
+!        do i = 1, im
+!          flag_iter(i)  = .false.
+!          flag_guess(i) = .false.
+!
+!          if (iter == 1 .and. wind(i) < 2.0) then
+!            if ((islmsk(i) == 1) .or. ((islmsk(i) == 0) .and.           &
+!                                       (Model%nstf_name(1) > 0))) then
+!              flag_iter(i) = .true.
+!            endif
+!          endif
 
 !         if(islmsk(i) == 1 .and. iter == 1) then
 !           if (wind(i) < 2.0) flag_iter(i) = .true.
@@ -1073,7 +1086,9 @@ module module_physics_driver
 !    &                           .and. nstf_name(1) > 0) then
 !           if (wind(i) < 2.0) flag_iter(i) = .true.
 !         endif
-        enddo
+!        enddo
+        call GFS_surface_loop_control_part2_run(im,iter,wind,flag_guess,&
+             flag_iter,islmsk,Model%nstf_name(1))
 
       enddo   ! end iter_loop
 
@@ -1090,9 +1105,10 @@ module module_physics_driver
 
 !  --- ...  update near surface fields
 
-      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
-                     Statein%tgrs, Statein%qgrs, Sfcprop%tsfc, qss,   &
-                     Sfcprop%f10m, Diag%u10m, Diag%v10m,        &
+!      call sfc_diag (im, Statein%pgr, Statein%ugrs, Statein%vgrs,     &
+      call sfc_diag_run(im, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                     Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
+                     Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
                      Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
 
@@ -2678,11 +2694,16 @@ module module_physics_driver
 !!! this change allows gocart to use filtered wind fields
 !!!
       if (Model%lgocart) then
-        call sfc_diag (im, Statein%pgr, Stateout%gu0, Stateout%gv0,     &
-                       Stateout%gt0, Stateout%gq0, Sfcprop%tsfc, qss,   &
-                       Sfcprop%f10m, Diag%u10m, Diag%v10m, Sfcprop%t2m, &
-                       Sfcprop%q2m, work3, evap, Sfcprop%ffmm,          &
-                       Sfcprop%ffhh, fm10, fh2)
+!        call sfc_diag (im, Statein%pgr, Stateout%gu0, Stateout%gv0,     &
+!                       Stateout%gt0, Stateout%gq0, Sfcprop%tsfc, qss,   &
+!                       Sfcprop%f10m, Diag%u10m, Diag%v10m, Sfcprop%t2m, &
+!                       Sfcprop%q2m, work3, evap, Sfcprop%ffmm,          &
+!                       Sfcprop%ffhh, fm10, fh2)
+      call sfc_diag_run(im, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
+                     Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
+                     Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
+                     Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
+                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
 
         if (Model%lssav) then
           Diag%tmpmax (:) = max(Diag%tmpmax (:),Sfcprop%t2m(:))
@@ -2694,11 +2715,13 @@ module module_physics_driver
 
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
-      if (Model%lssav) then
-        tem = dtf * 0.001
-        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
-        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
-      endif
+!      if (Model%lssav) then
+!        tem = dtf * 0.001
+!        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
+!        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
+!      endif
+      call lsm_noah_post_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
+                               Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       do i = 1, im
@@ -2714,9 +2737,9 @@ module module_physics_driver
       enddo
 
 !  --- ...  return updated smsoil and stsoil to global arrays
-      Sfcprop%smc(:,:) = smsoil(:,:)
+!      Sfcprop%smc(:,:) = smsoil(:,:)
       Sfcprop%stc(:,:) = stsoil(:,:)
-      Sfcprop%slc(:,:) = slsoil(:,:)
+!      Sfcprop%slc(:,:) = slsoil(:,:)
 
 !  --- ...  calculate column precipitable water "pwat"
 !      Diag%pwat(:) = 0.0
