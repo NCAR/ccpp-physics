@@ -95,7 +95,9 @@ SRCS_f   =  \
 		./physics/sascnv.f                                                        \
 		./physics/sascnvn.f                                                       \
 		./physics/set_soilveg.f                                                   \
+# DH*?
 		./physics/GFS_surface_loop_control.f                                      \
+# *DH?
 		./physics/sfc_cice.f                                                      \
 		./physics/sfc_diag.f                                                      \
 		./physics/sfc_diff.f                                                      \
@@ -137,7 +139,7 @@ SRCS_f90 = \
 		./physics/GFS_SCNV_generic.f90                                            \
 		./physics/GFS_PBL_generic.f90                                             \
 		./physics/GFS_suite_interstitial.f90                                      \
-		./physics/GFS_surface_generic.f90                                         \
+		./physics/GFS_suite_setup.f90                                             \
 		./physics/h2ointerp.f90                                                   \
 		./physics/m_micro_driver.f90                                              \
 		./physics/module_nst_model.f90                                            \
@@ -145,7 +147,9 @@ SRCS_f90 = \
 		./physics/module_nst_water_prop.f90                                       \
 		./physics/ozinterp.f90                                                    \
 		./physics/physcons.f90                                                    \
+# DH*?
 		./physics/radcons.f90                                                     \
+# *DH?
 		./physics/wam_f107_kp_mod.f90
 
 SRCS_F   = \
@@ -157,15 +161,15 @@ SRCS_F   = \
 		./physics/wv_saturation.F
 
 SRCS_F90 = \
-	   ./physics/GFDL_parse_tracers.F90					     \
-	   ./GFS_layer/GFS_abstraction_layer.F90 				     \
-	   ./GFS_layer/GFS_diagnostics.F90       				     \
-	   ./GFS_layer/GFS_driver.F90            				     \
-	   ./GFS_layer/GFS_physics_driver.F90    				     \
-	   ./GFS_layer/GFS_radiation_driver.F90  				     \
-	   ./GFS_layer/GFS_restart.F90           				     \
-	   ./GFS_layer/GFS_typedefs.F90          				     \
-	   ./IPD_layer/IPD_driver.F90						     \
+	   ./physics/GFDL_parse_tracers.F90                                           \
+	   ./GFS_layer/GFS_abstraction_layer.F90                                      \
+	   ./GFS_layer/GFS_diagnostics.F90                                            \
+	   ./GFS_layer/GFS_driver.F90                                                 \
+	   ./GFS_layer/GFS_physics_driver.F90                                         \
+	   ./GFS_layer/GFS_radiation_driver.F90                                       \
+	   ./GFS_layer/GFS_restart.F90                                                \
+	   ./GFS_layer/GFS_typedefs.F90                                               \
+	   ./IPD_layer/IPD_driver.F90                                                 \
 	   ./IPD_layer/IPD_typedefs.F90
 
 SRCS_c   =
