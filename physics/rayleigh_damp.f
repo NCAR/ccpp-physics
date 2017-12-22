@@ -1,5 +1,36 @@
-      SUBROUTINE Rayleigh_damp(IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
-     &                         LEVR,pgr,PRSL,PRSLRD0,ral_ts)
+      module rayleigh_damp
+      contains
+
+!! \section arg_table_rayleigh_damp_init Argument Table
+!!
+      subroutine rayleigh_damp_init ()
+      end subroutine rayleigh_damp_init
+
+
+!! \section arg_table_rayleigh_damp_run Argument Table
+!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
+!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       | 0    | logical | default   | in     | F        |
+!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
+!! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
+!! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      | 2    | real    | kind_phys | inout  | F        |
+!! | C              | tendency_of_air_temperature_due_to_model_physics     | air temperature tendency due to model physics        | K s-1      | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
+!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
+!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | index      | 0    | integer | default   | in     | F        |
+!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
+!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
+!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!!
+      subroutine rayleigh_damp_run (
+     &           lsidea,IM,IX,IY,KM,A,B,C,U1,V1,DT,CP,
+     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -40,6 +71,7 @@
       USE MACHINE , ONLY : kind_phys
       implicit none
 !
+      logical,intent(in)                 :: lsidea
       integer,intent(in)                 :: im, ix, iy, km,levr
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
       real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
@@ -53,7 +85,7 @@
       real(kind=kind_phys) tx1(im)
       integer              i, k
 !
-      if (ral_ts <= 0.0 .or. prslrd0 == 0.0) return
+      if (lsidea .or. ral_ts <= 0.0 .or. prslrd0 == 0.0) return
 !
       RTRD1 = 1.0/(ral_ts*86400) ! RECIPROCAL OF TIME SCALE PER SCALE HEIGHT
                                  ! ABOVE BEGINNING SIGMA LEVEL FOR RAYLEIGH DAMPING
@@ -87,4 +119,13 @@
 
 
       RETURN
-      END
+      end subroutine rayleigh_damp_run
+
+
+!! \section arg_table_rayleigh_damp_finalize Argument Table
+!!
+      subroutine rayleigh_damp_finalize ()
+      end subroutine rayleigh_damp_finalize
+
+
+      end module rayleigh_damp

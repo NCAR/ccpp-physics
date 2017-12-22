@@ -1,0 +1,9 @@
+*.exe
+*.o
+*.mod
+*.a
+*.backup
+*.swo
+*.swp
+*.asv
+
