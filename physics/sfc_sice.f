@@ -1,9 +1,9 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
-module sfc_sice
+      module sfc_sice
 
-contains
+      contains
 
 !> \defgroup GFS_Ice GFS Thermodynamics Sea Ice
 !! @{
@@ -72,7 +72,7 @@ contains
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine sfc_sice_run                                               &
+      subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
@@ -744,7 +744,6 @@ contains
       end sfc_sice_pre_finalize
 
 
-
 !!
 !! \section arg_table_sice_pre  Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
@@ -761,7 +760,8 @@ contains
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function at 1st layer | ratio  |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
-      subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prslk, prslki, cice, zice, tice, work3)
+      subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &
+     &                            cice, zice, tice, work3)
   
       use machine, only : kind_phys
 
@@ -814,6 +814,7 @@ contains
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1          | index         |    0 | integer |           | in     | F        |
+!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag          |    1 | integer |           | in     | F        |
 !! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
 !! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        | 
 !! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
@@ -823,17 +824,19 @@ contains
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
-      subroutine sfc_sice_post_run(im, islmsk, fice, hice, tisfc, cice, zice, tice, tsfc)
+      subroutine sfc_sice_post_run(im, islmsk, cice, zice, tice, tsfc,        & 
+     &                             fice, hice, tisfc)
 
       use machine, only : kind_phys
 
       implicit none
 
-! --- input/output 
+! --- input
+      integer :: im
+      integer, dimension(im) :: islmsk
       real(kind=kind_phys), dimension(im), intent(in) :: cice, zice, tice, tsfc
 
 ! --- outputs
-      integer :: im
       real(kind=kind_phys), dimension(im), intent(out) :: fice, hice, tisfc
       
 ! --- locals
