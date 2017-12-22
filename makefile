@@ -112,7 +112,7 @@ SRCS_f   =  \
 	   ./physics/shalcv_fixdp.f                                                  \
 	   ./physics/shalcv_opr.f                                                    \
 	   ./physics/tracer_const_h.f                                                \
-		 ./physics/tridi.f                                                         \
+	   ./physics/tridi.f                                                         \
 	   ./physics/tridi2t3.f
 
 SRCS_f90 = \
@@ -133,10 +133,11 @@ SRCS_f90 = \
 	   ./physics/gcm_shoc.f90                                                    \
 	   ./physics/gcycle.f90                                                      \
 	   ./physics/get_prs_fv3.f90                                                 \
-		 ./physics/GFS_DCNV_generic.f90                                            \
-		 ./physics/GFS_SCNV_generic.f90                                            \
-		 ./physics/GFS_PBL_generic.f90                                             \
-		 ./physics/GFS_suite_interstitial.f90                                      \
+	   ./physics/GFS_DCNV_generic.f90                                            \
+	   ./physics/GFS_SCNV_generic.f90                                            \
+	   ./physics/GFS_PBL_generic.f90                                             \
+	   ./physics/GFS_suite_interstitial.f90                                      \
+	   ./physics/GFS_surface_generic.f90                                         \
 	   ./physics/h2ointerp.f90                                                   \
 	   ./physics/m_micro_driver.f90                                              \
 	   ./physics/module_nst_model.f90                                            \
