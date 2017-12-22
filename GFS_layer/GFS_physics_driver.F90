@@ -49,6 +49,9 @@ module module_physics_driver
   use surface_diagnose
   use GFS_surface_loop_control_part1
   use GFS_surface_loop_control_part2
+  use sfc_sice_pre,          only: sfc_sice_pre_run
+  use sfc_sice,              only: sfc_sice_run
+  use sfc_sice_post,         only: sfc_sice_post_run
   use gwdps_pre,             only: gwdps_pre_run
   use gwdps,                 only: gwdps_run
   use gwdps_post,            only: gwdps_post_run
@@ -1013,13 +1016,13 @@ module module_physics_driver
           enddo
         endif
 
-        call sfc_sice                                                   &
+        call sfc_sice_run                                               &
 !  ---  inputs:
            (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,   &
             Statein%tgrs, Statein%qgrs, dtf, Radtend%semis, gabsbdlw,   &
             adjsfcnsw, adjsfcdsw, Sfcprop%srflag, cd, cdq,              &
-            Statein%prsl(1,1), work3, islmsk,                           &
-            Tbd%phy_f2d(1,Model%num_p2d), flag_iter, Model%mom4ice,     &
+            Statein%prsl(:,1), work3, islmsk,                           &
+            Tbd%phy_f2d(:,Model%num_p2d), flag_iter, Model%mom4ice,     &
             Model%lsm, lprnt, ipr,                                      &
 !  ---  input/outputs:
             zice, cice, tice, Sfcprop%weasd, Sfcprop%tsfc,              &

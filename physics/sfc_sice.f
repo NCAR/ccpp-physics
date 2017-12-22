@@ -734,14 +734,14 @@
 !! \section arg_table_sfc_sice_pre_init  Argument Table
 !!
       subroutine sfc_sice_pre_init
-      end sfc_sice_pre_init
+      end subroutine sfc_sice_pre_init
 
 !!
 !> \brief This subroutine is empty since there are no procedures needed 
 !! \section arg_table_sfc_sice_pre_finalize  Argument Table
 !!
       subroutine sfc_sice_pre_finalize
-      end sfc_sice_pre_finalize
+      end subroutine sfc_sice_pre_finalize
 
 
 !!
@@ -769,10 +769,12 @@
 
 ! --- inputs 
       integer :: im
-      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice, tisfc, prsik, prslk
+      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice,    &
+     &     tisfc, prsik, prslk
       
 ! --- input/output 
-      real(kind=kind_phys), dimension(im), intent(out) :: cice, zice, tice, work3
+      real(kind=kind_phys), dimension(im), intent(out) :: cice, zice,   &
+     &     tice, work3
 
 ! --- locals
       integer :: i
@@ -799,14 +801,14 @@
 !! \section arg_table_sfc_sice_post_init  Argument Table
 !!
       subroutine sfc_sice_post_init
-      end sfc_sice_post_init
+      end subroutine sfc_sice_post_init
 
 !!
 !> \brief This subroutine is empty since there are no procedures needed 
 !! \section arg_table_sfc_sice_post_finalize  Argument Table
 !!
       subroutine sfc_sice_post_finalize
-      end sfc_sice_post_finalize
+      end subroutine sfc_sice_post_finalize
 
 
 !!
@@ -834,10 +836,12 @@
 ! --- input
       integer :: im
       integer, dimension(im) :: islmsk
-      real(kind=kind_phys), dimension(im), intent(in) :: cice, zice, tice, tsfc
+      real(kind=kind_phys), dimension(im), intent(in) :: cice, zice,    &
+     &     tice, tsfc
 
 ! --- outputs
-      real(kind=kind_phys), dimension(im), intent(out) :: fice, hice, tisfc
+      real(kind=kind_phys), dimension(im), intent(out) :: fice, hice,   &
+     &     tisfc
       
 ! --- locals
       integer :: i
@@ -857,7 +861,7 @@
         endif
       enddo
 
-      end sfc_sice_post_run
+      end subroutine sfc_sice_post_run
 
       end module  sfc_sice_post
 !> @}
