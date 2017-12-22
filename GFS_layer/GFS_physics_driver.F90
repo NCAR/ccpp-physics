@@ -602,8 +602,10 @@ module module_physics_driver
       frain = dtf / dtp
 
 !  --- ...  xw: transfer ice thickness & concentration from global to local variables
-      call sfc_sice_pre_run(im, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc, Statein%prsik(:,1), Statein%prslk(:,1),     &
-                              cice, zice, tice, work3)
+      call sfc_sice_pre_run                                             &
+     &              (im, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc,     &
+     &               Statein%prsik(:,1), Statein%prslk(:,1),            &
+     &               cice, zice, tice, work3)
       do i = 1, im
         sigmaf(i)   = max( Sfcprop%vfrac(i),0.01 )
         islmsk(i)   = nint(Sfcprop%slmsk(i))
@@ -2672,7 +2674,9 @@ module module_physics_driver
       endif
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
-      call sfc_sice_post_run(im, islmsk, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc, cice, zice, tice, Sfcprop%tsfc)
+      call sfc_sice_post_run                                            &
+     &                (im, islmsk, cice, zice, tice, Sfcprop%tsfc,      &
+     &                Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc)
 !DRS  do i = 1, im
 !DRS
 !DRS      Sfcprop%hice(i)  = zice(i)
