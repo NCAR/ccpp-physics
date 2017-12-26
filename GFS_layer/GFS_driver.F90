@@ -12,8 +12,6 @@ module GFS_driver
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
   use module_radlw_parameters,  only: topflw_type, sfcflw_type
   use funcphys,                 only: gfuncphys
-  use GFS_suite_setup_1,        only: GFS_suite_setup_1_run
-  use GFS_suite_setup_2,        only: GFS_suite_setup_2_run
 
   implicit none
 
@@ -238,6 +236,9 @@ module GFS_driver
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
                                  Grid, Tbd, Cldprop, Radtend, Diag)
 
+    use physparam,             only: ictmflg, isolar
+    use GFS_suite_setup_1,     only: GFS_suite_setup_1_run
+    use GFS_suite_setup_2,     only: GFS_suite_setup_2_run
     use GFS_rad_time_vary,     only: GFS_rad_time_vary_run 
     implicit none
 
@@ -253,21 +254,11 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
     !--- local variables
-    ! DH* - where are those coming from?
-    !integer :: nblks, ictmflg, isolar
-    integer :: ictmflg, isolar
-    !real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
     call GFS_suite_setup_1_run (Model, sec)
 
-    !--- radiation time varying routine
-! CCPP
-     call GFS_rad_time_vary_run(Model,Statein, Tbd, blksz, sec,    &
-         ictmflg, isolar)
-
-    !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    call Gcycle_driver (nblks, Model, Grid, Sfcprop, Cldprop)
+    call GFS_rad_time_vary_run(Model, Statein, Tbd, blksz, sec, ictmflg, isolar)
 
     call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
 
