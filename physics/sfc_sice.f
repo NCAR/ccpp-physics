@@ -15,15 +15,13 @@
 !! \section arg_table_sice_init  Argument Table
 !!
       subroutine sfc_sice_init
-
-      end
+      end subroutine sfc_sice_init
 !!
 !> \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS SICE code.
 !! \section arg_table_sice_finalize  Argument Table
 !!
       subroutine sfc_sice_finalize
-
-      end
+      end subroutine sfc_sice_finalize
 !!
 !! \section arg_table_sice_run Arguments
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
