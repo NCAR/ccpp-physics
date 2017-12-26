@@ -49,6 +49,9 @@ module module_physics_driver
   use surface_diagnose
   use GFS_surface_loop_control_part1
   use GFS_surface_loop_control_part2
+  use sfc_sice_pre,          only: sfc_sice_pre_run
+  use sfc_sice,              only: sfc_sice_run
+  use sfc_sice_post,         only: sfc_sice_post_run
   use gwdps_pre,             only: gwdps_pre_run
   use gwdps,                 only: gwdps_run
   use gwdps_post,            only: gwdps_post_run
@@ -666,19 +669,13 @@ module module_physics_driver
 
       ! frain = dtf / dtp
 
+!  --- ...  xw: transfer ice thickness & concentration from global to local variables
+      call sfc_sice_pre_run                                             &
+     &              (im, Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc,     &
+     &               Statein%prsik(:,1), Statein%prslk(:,1),            &
+     &               cice, zice, tice, work3)
       do i = 1, im
-        !  --- ...  xw: transfer ice thickness & concentration from global to local variables
-        zice(i) = Sfcprop%hice(i)
-        cice(i) = Sfcprop%fice(i)
-        tice(i) = Sfcprop%tisfc(i)
-!
-!GFDL        work1(i)   = (log(coslat(i) / (nlons(i)*latr)) - dxmin) * dxinv
-!       work1(i)   = (log(Grid%dx(i)) - dxmin) * dxinv
-        ! work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
-        ! work1(i)   = max(0.0, min(1.0,work1(i)))
-        ! work2(i)   = 1.0 - work1(i)
-        ! Diag%psurf(i)   = Statein%pgr(i)
-        !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
+!GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
 !GFDL        garea(i)   = tem1 * tem2
 !        tem1       = Grid%dx(i)
@@ -1019,13 +1016,13 @@ module module_physics_driver
           enddo
         endif
 
-        call sfc_sice                                                   &
+        call sfc_sice_run                                               &
 !  ---  inputs:
            (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,   &
             Statein%tgrs, Statein%qgrs, dtf, Radtend%semis, gabsbdlw,   &
             adjsfcnsw, adjsfcdsw, Sfcprop%srflag, cd, cdq,              &
-            Statein%prsl(1,1), work3, islmsk,                           &
-            Tbd%phy_f2d(1,Model%num_p2d), flag_iter, Model%mom4ice,     &
+            Statein%prsl(:,1), work3, islmsk,                           &
+            Tbd%phy_f2d(:,Model%num_p2d), flag_iter, Model%mom4ice,     &
             Model%lsm, lprnt, ipr,                                      &
 !  ---  input/outputs:
             zice, cice, tice, Sfcprop%weasd, Sfcprop%tsfc,              &
@@ -2742,17 +2739,20 @@ module module_physics_driver
                                Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
-      do i = 1, im
-        if (islmsk(i) == 2) then
-          Sfcprop%hice(i)  = zice(i)
-          Sfcprop%fice(i)  = cice(i)
-          Sfcprop%tisfc(i) = tice(i)
-        else
-          Sfcprop%hice(i)  = 0.0
-          Sfcprop%fice(i)  = 0.0
-          Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
-        endif
-      enddo
+      call sfc_sice_post_run                                            &
+     &                (im, islmsk, cice, zice, tice, Sfcprop%tsfc,      &
+     &                Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc)
+!DRS  do i = 1, im
+!DRS
+!DRS      Sfcprop%hice(i)  = zice(i)
+!DRS      Sfcprop%fice(i)  = cice(i)
+!DRS      Sfcprop%tisfc(i) = tice(i)
+!DRS    else
+!DRS      Sfcprop%hice(i)  = 0.0
+!DRS      Sfcprop%fice(i)  = 0.0
+!DRS      Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
+!DRS    endif
+!DRS  enddo
 
 !  --- ...  return updated smsoil and stsoil to global arrays
 !      Sfcprop%smc(:,:) = smsoil(:,:)
