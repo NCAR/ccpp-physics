@@ -454,8 +454,8 @@
 !! \section arg_table_lwrad_run Argument Table
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
-!! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plyr            | air_pressure_in_hPa                     | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level_in_hPa               | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
@@ -472,7 +472,7 @@
 !! | icseed          | seed_random_numbers                     | seed for random number generation                      |         |    2 | integer     |           | in     | F        |
 !! | aeraod          | aerosol_optical_depth                   | aerosol optical depth                                  |         |    3 | real        | kind_phys | in     | F        |
 !! | aerssa          | aerosol_single_scattering_albedo        | aerosol sngle scattering albedo                        |         |    3 | real        | kind_phys | in     | F        |
-!! | sfemis          | surface_longwave_emissivity             | surface emissivity                                     |         |    1 | real        | kind_phys | in     | F        |
+!! | sfemis          | surface_longwave_emissivity             | surface emissivity                                     | frac    |    1 | real        | kind_phys | in     | F        |
 !! | sfgtmp          | surface_groud_temperature               | surface ground temperature                             | K       |    1 | real        | kind_phys | in     | F        |
 !! | npts            | horizontal_loop_extent                  | horizontal dimension                                   | index   |    0 | integer     |           | in     | F        |
 !! | nlay            | vertical_layer_dimension                | vertical layer dimension                               | index   |    0 | integer     |           | in     | F        |
