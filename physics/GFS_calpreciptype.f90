@@ -41,7 +41,7 @@
 !!|    srflag      | flag_for_precipitation_type                       | snow(1)/rain(0) flag for precipitation                   | 1       | 1    | real    | kind_phys | out    |  F       |
 !!|    tprcp       | precipitation_amount_in_one_dynamics_time_step    | precipitation amount in one dynamics time step           | m       | 1    | real    | kind_phys | out    |  F       |
 !!
-      subroutine GFS_calpreciptype_run (kdt,nrcm,im,ix,lm,lp1,randomno,  &
+      subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1, &
                                phii,n3dfercld,tskin,sr,phy_f3d,     & !input
@@ -307,7 +307,7 @@
       endif
 
       return
-      end subroutine GFS_CALPRECIPTYPE_RUN
+      end subroutine GFS_calpreciptype_run
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -548,7 +548,7 @@
 !      deallocate (twet)
 
       return
-      end
+      end subroutine calwxt
 !
 !
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -836,7 +836,7 @@
 
       return
 !
-      end
+      end subroutine calwxt_ramer
 !
 !
 !--------------------------------------------------------------------------
@@ -894,7 +894,7 @@
       end if
 !
       return
-      end
+      end function xmytw
 !
 !
 !$$$  subprogram documentation block
@@ -1124,7 +1124,7 @@
       end if
 !
       return
-      end
+      end subroutine calwxt_bourg
 !
 !
        subroutine calwxt_revised(lm,lp1,t,q,pmid,pint,         &
@@ -1380,7 +1380,7 @@
       endif
 
       return
-      end
+      end subroutine calwxt_revised
 !
 !
       subroutine calwxt_explicit(lm,tskin,sr,f_rimef,iwx)
@@ -1440,7 +1440,7 @@
            iwx  = iwx + 1
         endif
       endif
-      end
+      end subroutine calwxt_explicit
 !
 !
        subroutine calwxt_dominant(nalg,rain,freezr,sleet,snow, &
@@ -1511,7 +1511,7 @@
       endif
 !
       return
-      end 
+      end subroutine calwxt_dominant
 
 !> \section arg_table_GFS_calpreciptype_finalize Argument table
 !!

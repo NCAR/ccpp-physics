@@ -587,8 +587,8 @@
 !! \section arg_table_swrad_run Argument Table
 !! | local var name  | longname                                | description                                            | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------|--------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
-!! | plyr            | air_pressure                            | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | plvl            | air_pressure_level                      | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plyr            | air_pressure_in_hPa                     | air pressure layer                                     | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_level_in_hPa               | air pressure level                                     | hPa     |    2 | real        | kind_phys | in     | F        |
 !! | tlyr            | air_temperature                         | air temperature layer                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | tlvl            | air_temperature_level                   | air temperature level                                  | K       |    2 | real        | kind_phys | in     | F        |
 !! | qlyr            | specific_humidity                       | specific humidity layer                                | gm gm-1 |    2 | real        | kind_phys | in     | F        |
@@ -605,7 +605,7 @@
 !! | sfcalb_nir_dif  | albedo_sfc_nir_dif                      | near infrared sw albedo for surface diffuse irradiance |         |    1 | real        | kind_phys | in     | F        |
 !! | sfcalb_uvis_dir | albedo_sfc_uvis_dir                     | uv - visible sw albedo for surface direct irradiance   |         |    1 | real        | kind_phys | in     | F        |
 !! | sfcalb_uvis_dif | albedo_sfc_uvis_dif                     | uv - visible sw albedo for surface diffuse irradiance  |         |    1 | real        | kind_phys | in     | F        |
-!! | cosz            | cosine_of_zenith_angle                  | cosine of the solar zenit angle                        |         |    1 | real        | kind_phys | in     | F        |
+!! | cosz            | cosine_of_zenith_angle                  | cosine of the solar zenit angle                        | none    |    1 | real        | kind_phys | in     | F        |
 !! | solcon          | solar_constant                          | solar constant                                         | W m-2   |    0 | real        | kind_phys | in     | F        |
 !! | nday            | daytime_points_dimension                | daytime points dimension                               | index   |    0 | integer     |           | in     | F        |
 !! | idxday          | daytime_points                          | daytime points                                         |         |    1 | integer     |           | in     | F        |

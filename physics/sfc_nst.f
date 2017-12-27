@@ -39,8 +39,7 @@
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
       subroutine sfc_nst_init
-
-      end
+      end subroutine sfc_nst_init
 
 !> \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !!
@@ -49,8 +48,7 @@
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_finalize
-
-      end
+      end subroutine sfc_nst_finalize
 
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !!
@@ -689,10 +687,10 @@ cc
 !     if (lprnt) print *,' tskin=',tskin(ipr)
 
       return
-      end
+      end subroutine sfc_nst_run
 !> @}
 !! @}
-      end module
+      end module sfc_nst
 
 
 
@@ -723,8 +721,7 @@ cc
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
       subroutine sfc_nst_pre_init
-
-      end
+      end subroutine sfc_nst_pre_init
 
 !> \brief Brief description of the subroutine
 !!
@@ -733,8 +730,7 @@ cc
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_pre_finalize
-
-      end
+      end subroutine sfc_nst_pre_finalize
 
 !> \brief Brief description of the subroutine
 !!
@@ -790,11 +786,11 @@ cc
       enddo
 
       return
-      end
+      end subroutine sfc_nst_pre_run
 
 !> @}
 !! @}
-      end module
+      end module sfc_nst_pre
 
 
 
@@ -824,8 +820,7 @@ cc
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
       subroutine sfc_nst_post_init
-
-      end
+      end subroutine sfc_nst_post_init
 
 !> \brief Brief description of the subroutine
 !!
@@ -834,8 +829,7 @@ cc
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_post_finalize
-
-      end
+      end subroutine sfc_nst_post_finalize
 
 !> \brief Brief description of the subroutine
 !!
@@ -930,8 +924,8 @@ cc
 !    &    ' dt_cool=',dt_cool(ipr),' dt_warm=',dt_warm(ipr),' kdt=',kdt
 
       return
-      end
+      end subroutine sfc_nst_post_run
 
 !> @}
 !! @}
-      end module
+      end module sfc_nst_post
