@@ -41,7 +41,6 @@ module module_physics_driver
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
   use GFS_zhao_carr_pre,         only: GFS_zhao_carr_pre_run
-
   use lsm_noah
   use lsm_noah_pre
   use lsm_noah_post
@@ -663,8 +662,8 @@ module module_physics_driver
       call GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, &
         Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, &
         dudt, dvdt, dtdt, dtdtc, dqdt )
-!
-!
+
+
 !  --- ...  frain=factor for centered difference scheme correction of rain amount.
 
       ! frain = dtf / dtp
@@ -2659,9 +2658,6 @@ module module_physics_driver
 !          end if
 !        enddo
 !      endif
-
-!      if (Model%lssav) then
-!        Diag%totprcp(:) = Diag%totprcp(:) + Diag%rain(:)
 
 !  --- ...  estimate t850 for rain-snow decision
 
