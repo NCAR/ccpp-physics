@@ -356,7 +356,7 @@
 !! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   | 1    | real          | kind_phys | in     | F        |
 !! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   | 1    | real          | kind_phys | in     | F        |
 !! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   | 1    | real          | kind_phys | in     | F        |
-!! | Diag           | Diag                                   | GFS diagnostics derived data type variable             | various | 0    | GFS_diag_type |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | various | 0    | GFS_diag_type |           | inout  | F        |
 !!
       subroutine dcyc2t3_post_run(                                      &
      &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)

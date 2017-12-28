@@ -885,7 +885,7 @@ module module_physics_driver
 !      Diag%zlvl(:)    = Statein%phil(:,1) * onebg
 !      Diag%smcwlt2(:) = 0.0
 !      Diag%smcref2(:) = 0.0
-      call lsm_noah_pre_run(im,Model%lsoil,drain,runof,evbs,evcw,trans,sbsno,
+      call lsm_noah_pre_run(im,Model%lsoil,drain,runof,evbs,evcw,trans,sbsno, &
                             snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)

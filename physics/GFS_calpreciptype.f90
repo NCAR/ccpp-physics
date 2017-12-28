@@ -25,15 +25,15 @@
 !!|    gq0         | water_vapor_specific_humidity                     | water vapor specific humidity                            | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
 !!|    prsl        | air_pressure                                      | layer mean pressure                                      | Pa      | 2    | real    | kind_phys | in     |  F       |
 !!|    prsi        | air_pressure_at_interface                         | pressure at layer interface                              | Pa      | 2    | real    | kind_phys | in     |  F       |
-!!|    rainc       | instantaneous_rainfall_amount_due_to_convetive    | instantaneous rainfall amount due to convective scheme   | m       | 1    | real    | kind_phys | in     |  F       |
+!!|    rainc       | timestep_convective_rainfall_amount               | convective rain                                          | m       | 1    | real    | kind_phys | in     |  F       |
 !!|    frain       | factor_for_centered_difference_scheme             | dtf/dtp                                                  | none    | 0    | real    | kind_phys | in     |  F       |
-!!|    rain1       | instantaneous_rainfall_amount_due_to_microphysics | instantaneous rainfall amount due to microphysics scheme | m       | 1    | real    | kind_phys | in     |  F       |
+!!|    rain1       | timestep_gridscale_rainfall_amount                | gridscale rain                                           | m       | 1    | real    | kind_phys | in     |  F       |
 !!|    phii        | geopotential_at_interface                         | geopotential at model layer interfaces                   | m2 s-2  | 2    | real    | kind_phys | in     |  F       |
 !!|    n3dfercld   | array_dimension_of_microphysics                   | number of 3D arrays needed for microphysics              | count   | 0    | integer |           | in     |  F       |
 !!|    tskin       | surface_skin_temperature                          | surface skin temperature                                 | K       | 1    | real    | kind_phys | in     |  F       |
 !!|    sr          | ratio_of_snowfall_to_rainfall                     | ratio of snowfall to rainfall                            | frac    | 1    | real    | kind_phys | in     |  F       |
 !!|    phy_f3d     | air_temperature_at_previous_time_step             | air temperature at previous time step                    | K       | 2    | real    | kind_phys | in     |  F       |
-!!|    prec        | total_rainfall_amount                             | instantaneous total rainfall amount                      | m       | 1    | real    | kind_phys | out    |  F       |
+!!|    prec        | timestep_total_rainfall_amount                    | total rain                                               | m       | 1    | real    | kind_phys | out    |  F       |
 !!|    domr        | dominant_rain_type                                | dominant rain type                                       | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    domzr       | dominant_freezing_rain_type                       | dominant freezing rain type                              | none    | 1    | real    | kind_phys | out    |  F       |
 !!|    domip       | dominant_sleet_type                               | dominant sleet type                                      | none    | 1    | real    | kind_phys | out    |  F       |
