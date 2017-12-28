@@ -32,7 +32,7 @@
 !! | phil           | geopotential                                              | layer geopotential                       | m2 s-2  | 2    | real    | kind_phys | in     | F        |
 !! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity              | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity            | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity                             | updated vapor specific humidity          | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity          | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | t1             | air_temperature_updated_by_physics                        | updated temperature                      | K       | 2    | real    | kind_phys | inout  | F        |
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                 | m s-1   | 2    | real    | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                 | m s-1   | 2    | real    | kind_phys | inout  | F        |

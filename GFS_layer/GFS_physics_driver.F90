@@ -2618,12 +2618,12 @@ module module_physics_driver
 
 !      Diag%rain(:)  = Diag%rainc(:) + frain * rain1(:)
 
-      call GFS_calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,  &
-                            Tbd%rann, Model%cal_pre, Stateout%gt0,        &
-                            Stateout%gq0, Statein%prsl, Statein%prsi,     &
-                            Diag%rainc,frain,rain1, Statein%phii, Model%num_p3d,       &
-                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,3),    &   ! input !zhang:Tbd%phy_f3d(:,:,3) comes from gscond_run
-                            Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag,     &   ! output
+      call GFS_calpreciptype_run (kdt, Model%nrcm, im, ix, levs, levs+1,         &
+                            Tbd%rann, Model%cal_pre, Stateout%gt0,               &
+                            Stateout%gq0(:,:,1), Statein%prsl, Statein%prsi,     &
+                            Diag%rainc,frain,rain1, Statein%phii, Model%num_p3d, &
+                            Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,3),           &   ! input !zhang:Tbd%phy_f3d(:,:,3) comes from gscond_run
+                            Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag, &   ! output
                             Sfcprop%tprcp)
 
       call GFS_MP_generic_post_run (im, ix, levs, dtf, del,               &

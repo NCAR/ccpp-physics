@@ -22,7 +22,7 @@
 !!|    randomno    | random_number_array                               | random number array                                      | none    | 2    | real    |           | in     |  F       |
 !!|    cal_pre     | flag_for_precipitation_type_algorithm             | flag controls precip type algorithm                      | flag    | 0    | logical |           | in     |  F       |
 !!|    gt0         | air_temperature_updated_by_physics                | layer mean air temperature                               | K       | 2    | real    | kind_phys | in     |  F       |
-!!|    gq0         | water_vapor_specific_humidity                     | water vapor specific humidity                            | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
+!!|    gq0         | water_vapor_specific_humidity_updated_by_physics  | water vapor specific humidity                            | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
 !!|    prsl        | air_pressure                                      | layer mean pressure                                      | Pa      | 2    | real    | kind_phys | in     |  F       |
 !!|    prsi        | air_pressure_at_interface                         | pressure at layer interface                              | Pa      | 2    | real    | kind_phys | in     |  F       |
 !!|    rainc       | timestep_convective_rainfall_amount               | convective rain                                          | m       | 1    | real    | kind_phys | in     |  F       |
