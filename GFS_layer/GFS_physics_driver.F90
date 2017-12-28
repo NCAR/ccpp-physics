@@ -1019,8 +1019,9 @@ module module_physics_driver
 
         call sfc_sice_run                                               &
 !  ---  inputs:
-           (im, Model%lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,   &
-            Statein%tgrs, Statein%qgrs, dtf, Radtend%semis, gabsbdlw,   &
+           (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1),            &
+            Statein%vgrs(:,1), Statein%tgrs(:,1), Statein%qgrs(:,1,1),  &
+            dtf, Radtend%semis, gabsbdlw,                               &
             adjsfcnsw, adjsfcdsw, Sfcprop%srflag, cd, cdq,              &
             Statein%prsl(:,1), work3, islmsk,                           &
             Tbd%phy_f2d(:,Model%num_p2d), flag_iter, Model%mom4ice,     &
