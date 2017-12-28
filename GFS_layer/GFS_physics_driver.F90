@@ -509,8 +509,10 @@ module module_physics_driver
       real(kind=kind_phys), dimension(size(Grid%xlon,1),4) ::           &
            oa4, clx
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%lsoil) :: &
-          smsoil, stsoil, slsoil
+      ! DH 20171227 - local variables no longer used, use Sfcprop%smc(:,:),
+      ! Sfcprop%stc(:,:) and Sfcprop%slc(:,:) instead
+      !real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%lsoil) :: &
+      !    smsoil, stsoil, slsoil
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
           del, rhc, dtdt, dudt, dvdt, gwdcu, gwdcv, dtdtc, rainp,       &
@@ -811,8 +813,8 @@ module module_physics_driver
       call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
         adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
       call GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein,&
-        adjsfcdlw, Diag, sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3,     &
-        stsoil, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
+        adjsfcdlw, Diag, sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3,    &
+        gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
       call GFS_PBL_generic_pre_run (im, levs, kinver)
 
       !kcnv(:)   = 0
@@ -883,8 +885,8 @@ module module_physics_driver
 !      Diag%zlvl(:)    = Statein%phil(:,1) * onebg
 !      Diag%smcwlt2(:) = 0.0
 !      Diag%smcref2(:) = 0.0
-      call lsm_noah_pre_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
-            drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
+      call lsm_noah_pre_run(im,Model%lsoil,drain,runof,evbs,evcw,trans,sbsno,
+                            snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
@@ -990,8 +992,8 @@ module module_physics_driver
             Model%ivegsrc,                                             &
 !  ---  in/outs:
             Sfcprop%weasd, Sfcprop%snowd, Sfcprop%tsfc, Sfcprop%tprcp, &
-            Sfcprop%srflag, smsoil, stsoil, slsoil, Sfcprop%canopy,    &
-            trans, tsurf, Sfcprop%zorl,                                &
+            Sfcprop%srflag, Sfcprop%smc, Sfcprop%stc, Sfcprop%slc,     &
+            Sfcprop%canopy, trans, tsurf, Sfcprop%zorl,                &
 !  ---  outputs:
             Sfcprop%sncovr, qss, gflx, drain, evap, hflx, ep1d, runof, &
             Diag%cmm, Diag%chh, evbs, evcw, sbsno, snowc, Diag%soilm,  &
@@ -1025,7 +1027,7 @@ module module_physics_driver
             Model%lsm, lprnt, ipr,                                      &
 !  ---  input/outputs:
             zice, cice, tice, Sfcprop%weasd, Sfcprop%tsfc,              &
-            Sfcprop%tprcp, stsoil, ep1d,                                &
+            Sfcprop%tprcp, Sfcprop%stc, ep1d,                           &
 !  ---  outputs:
             Sfcprop%snowd, qss, snowmt, gflx, Diag%cmm, Diag%chh, evap, &
             hflx)
@@ -1155,7 +1157,7 @@ module module_physics_driver
       endif
 
       call GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, &
-        trans, sbsno, snowc, snohf, stsoil, Diag, Sfcprop)
+        trans, sbsno, snowc, snohf, Diag, Sfcprop)
 
 !!!!!!!!!!!!!!!!!Commented by Moorthi on July 18, 2012 !!!!!!!!!!!!!!!!!!!
 !     do i = 1, im
@@ -2731,8 +2733,8 @@ module module_physics_driver
 !        Diag%runoff(:)  = Diag%runoff(:)  + (drain(:)+runof(:)) * tem
 !        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
 !      endif
-      call lsm_noah_post_run(im,Model%lsoil,smsoil,slsoil,Sfcprop%smc(:,:),Sfcprop%slc(:,:), &
-                               Model%lssav,dtf,drain,runof,Diag%runoff(:),Diag%srunoff(:))
+      call lsm_noah_post_run(im,Model%lsoil,Model%lssav,dtf,drain,runof,&
+                             Diag%runoff(:),Diag%srunoff(:))
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       call sfc_sice_post_run                                            &
