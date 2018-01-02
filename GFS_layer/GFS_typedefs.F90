@@ -716,6 +716,13 @@ module GFS_typedefs
     type (topflw_type),    pointer :: topflw(:)     => null()   !< lw radiation fluxes at top, component:
                                                !       %upfxc    - total sky upward lw flux at toa (w/m**2)
                                                !       %upfx0    - clear sky upward lw flux at toa (w/m**2)
+#ifdef __GFORTRAN__
+    real (kind=kind_phys), pointer :: topfsw_upfxc_gnufix(:) => null()
+    real (kind=kind_phys), pointer :: topfsw_dnfxc_gnufix(:) => null()
+    real (kind=kind_phys), pointer :: topfsw_upfx0_gnufix(:) => null()
+    real (kind=kind_phys), pointer :: topflw_upfxc_gnufix(:) => null()
+    real (kind=kind_phys), pointer :: topflw_upfx0_gnufix(:) => null()
+#endif
 
     ! Input/output - used by physics
     real (kind=kind_phys), pointer :: srunoff(:)    => null()   !< surface water runoff (from lsm)
@@ -796,9 +803,9 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: cldcov (:,:)   => null()  !< instantaneous 3D cloud fraction
 
     contains
-      procedure create    => diag_create
-      procedure rad_zero  => diag_rad_zero
-      procedure phys_zero => diag_phys_zero
+      procedure :: create    => diag_create
+      procedure :: rad_zero  => diag_rad_zero
+      procedure :: phys_zero => diag_phys_zero
   end type GFS_diag_type
 
 !----------------
@@ -1233,6 +1240,12 @@ module GFS_typedefs
       Coupling%dwn_mfi  = clear_val
       Coupling%det_mfi  = clear_val
       Coupling%cldcovi  = clear_val
+
+    elseif (.not.Model%uni_cld) then
+
+      allocate (Coupling%cldcovi (IM,Model%levs))
+      Coupling%cldcovi  = clear_val
+
     endif
 
   end subroutine coupling_create
@@ -1503,7 +1516,7 @@ module GFS_typedefs
       write(6,*) 'GFS_namelist_read:: namelist file: ',trim(fn_nml),' does not exist'
       stop
     else
-      open (unit=nlunit, file=fn_nml, READONLY, status='OLD', iostat=ios)
+      open (unit=nlunit, file=fn_nml, action='READ', status='OLD', iostat=ios)
     endif
     rewind(nlunit)
     read (nlunit, nml=gfs_physics_nml)
@@ -2340,6 +2353,14 @@ module GFS_typedefs
     allocate (Diag%fluxr   (IM,Model%nfxr))
     allocate (Diag%topfsw  (IM))
     allocate (Diag%topflw  (IM))
+#ifdef __GFORTRAN__
+    allocate (Diag%topfsw_upfxc_gnufix (IM))
+    allocate (Diag%topfsw_dnfxc_gnufix (IM))
+    allocate (Diag%topfsw_upfx0_gnufix (IM))
+    allocate (Diag%topflw_upfxc_gnufix (IM))
+    allocate (Diag%topflw_upfx0_gnufix (IM))
+#endif
+
     !--- Physics
     !--- In/Out
     allocate (Diag%srunoff (IM))
@@ -2438,7 +2459,13 @@ module GFS_typedefs
     if (Model%ldiag3d) then
       Diag%cldcov     = zero
     endif
-
+#ifdef __GFORTRAN__
+    Diag%topfsw_upfxc_gnufix = zero
+    Diag%topfsw_dnfxc_gnufix = zero
+    Diag%topfsw_upfx0_gnufix = zero
+    Diag%topflw_upfxc_gnufix = zero
+    Diag%topflw_upfx0_gnufix = zero
+#endif
 
   end subroutine diag_rad_zero
 
