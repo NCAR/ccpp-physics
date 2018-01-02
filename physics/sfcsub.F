@@ -1405,7 +1405,8 @@
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
      &           irtvet,irtsot,irtalf
      &,          irtvmn,irtvmx,irtslp,irtabs, 
-     &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me)
+     &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,
+     &           me)
 !     if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
 !
 !  scale zor and alb to match forecast model units
@@ -2671,13 +2672,20 @@
       real (kind=kind_io8) gdata(idim*jdim)
       logical gaus
       real (kind=kind_io8) blno,blto
-      real (kind=kind_io8) data8(idim*jdim)
+      real (kind=kind_io8), allocatable :: data8(:)
       real (kind=kind_io4), allocatable :: data4(:)
 !
       logical*1 lbms(mdata)
 !
       integer kpds(200),kgds(200)
       integer jpds(200),jgds(200), kpds0(200)
+!
+      allocate(data8(1:idim*jdim))
+      kpds = 0
+      kgds = 0
+      jpds = 0
+      jgds = 0
+      kpds0 = 0
 !
 !     if(me .eq. 0) then
 !     write(6,*) ' '
@@ -2728,10 +2736,10 @@
         call getgb(lugb,lugi,kdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data8,jret)
       else if (w3kindreal == 4) then
-        allocate(data4(idim*jdim))
+        allocate(data4(1:idim*jdim))
         call getgb(lugb,lugi,kdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = data4
+        data8 = real(data4, kind=kind_io8)
         deallocate(data4)
       else
         write(0,*)' Invalid w3kindreal --- aborting'
@@ -2761,6 +2769,7 @@
         call abort
       endif
 !
+      deallocate(data8)
       return
       end
       subroutine getarea(kgds,dlat,dlon,rslat,rnlat,wlon,elon,ijordr
@@ -5299,29 +5308,26 @@
       endif
 !
       len_thread_m  = (len+num_threads-1) / num_threads
-!
+      kmaxl = 0
+      kminl = 0
+      kmaxo = 0
+      kmino = 0
+      kmaxi = 0
+      kmini = 0
+      kmaxj = 0
+      kminj = 0
+      kmaxs = 0
+      kmins = 0
 !$omp parallel do private(i1_t,i2_t,it,i)
-!$omp+private(nprt,ij,iwk,kmaxs,kmins)
-!$omp+private(kmaxl,kminl,kmaxo,kmino,kmaxi,kmini,kmaxj,kminj)
+!$omp+private(nprt,ij,iwk)
+!$omp+reduction(+:kmaxs,kmins,kmaxl,kminl,kmaxo)
+!$omp+reduction(+:kmino,kmaxi,kmini,kmaxj,kminj)
 !$omp+shared(mode,epsfld)
 !$omp+shared(fldlmx,fldlmn,fldomx,fldjmn,fldsmx,fldsmn)
 !$omp+shared(fld,slimsk,sno,rla,rlo)
-!
-      do it=1,num_threads   ! start of threaded loop ...................
-        i1_t       = (it-1)*len_thread_m+1
-        i2_t       = min(i1_t+len_thread_m-1,len)
-!
-        kmaxl = 0
-        kminl = 0
-        kmaxo = 0
-        kmino = 0
-        kmaxi = 0
-        kmini = 0
-        kmaxj = 0
-        kminj = 0
-        kmaxs = 0
-        kmins = 0
-!
+      do it=1,num_threads   ! start of threaded loop
+        i1_t = (it-1)*len_thread_m+1
+        i2_t = min(i1_t+len_thread_m-1,len)
 !
 !  lower bound check over bare land
 !
@@ -5569,7 +5575,7 @@
                iwk(kmaxj) = i
             endif
           enddo
-          if(me == 0 . and. it == 1 .and. num_threads == 1) then
+          if(me == 0 .and. it == 1 .and. num_threads == 1) then
             nprt = min(mmprt,kmaxj)
             do i=1,nprt
               ij = iwk(i)
@@ -5584,7 +5590,7 @@
             enddo
           endif
         endif
-      enddo            ! end of threaded loop ...................
+      enddo            ! end of threaded loop
 !$omp end parallel do
 !
 !  print results
@@ -7891,8 +7897,8 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:), rslmsk(:,:)
-      real (kind=kind_io8) data8(mdata)
-      real (kind=kind_io4), allocatable ::  data4(:)
+      real (kind=kind_io8), allocatable :: data8(:)
+      real (kind=kind_io4), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -7902,6 +7908,8 @@ cjfe
       integer kpds(1000),kgds(1000)
       integer jpds(1000),jgds(1000), kpds0(1000)
       real (kind=kind_io8) outlat(len), outlon(len)
+!
+      allocate(data8(1:mdata))
 !
 !     integer imax_sv, jmax_sv, wlon_sv, rnlat_sv, kpds1_sv
 !     date imax_sv/0/, jmax_sv/0/, wlon_sv/999.0/, rnlat_sv/999.0/
@@ -7958,14 +7966,14 @@ cjfe
       jpds(9) = mon
       if(jpds(9).eq.13) jpds(9) = 1
       call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==8) then
+      if (w3kindreal==8) then
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data8,jret)
       else if (w3kindreal==4) then
-        allocate(data4(mdata))
+        allocate(data4(1:mdata))
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = data4
+        data8 = real(data4, kind=kind_io8)
         deallocate(data4)
       endif
       if (me .eq. 0) write(6,*) ' input grib file dates=',
@@ -8036,8 +8044,9 @@ cjfe
         deallocate (rslmsk, stat=iret)
       call baclose(lugb,iret)
 !
+      deallocate(data8)
       return
-      end
+      end subroutine fixrdc
       subroutine fixrda(lugb,fngrib,kpds5,slmask,
      &                  iy,im,id,ih,fh,gdata,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
@@ -8069,7 +8078,7 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:),rslmsk(:,:)
-      real (kind=kind_io8) data8(mdata)
+      real (kind=kind_io8), allocatable :: data8(:)
       real (kind=kind_io4), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
@@ -8095,6 +8104,7 @@ cjfe
       real(4) fha4(5)
       integer ida(8),jda(8)
 !
+      allocate(data8(1:mdata))
       iret   = 0
       monend = 9999
 !
@@ -8204,10 +8214,10 @@ cjfe
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data8,jret)
       elseif (w3kindreal == 4) then
-        allocate (data4(mdata))
+        allocate (data4(1:mdata))
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = data4
+        data8 = real(data4, kind=kind_io8)
         deallocate(data4)
       endif
       if (me .eq. 0) write(6,*) ' input grib file dates=',
@@ -8342,6 +8352,7 @@ cjfe
       deallocate (rslmsk, stat=iret)
       call baclose(lugb,iret2)
 !     write(6,*) ' '
+      deallocate(data8)
       return
 !
   100 continue
@@ -8352,6 +8363,7 @@ cjfe
 !
       call baclose(lugb,iret2)
 !
+      deallocate(data8)
       return
       end subroutine fixrda
       subroutine snodpth2(glacir,snwmax,snoanl, len, me)
