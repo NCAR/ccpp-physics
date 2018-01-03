@@ -165,7 +165,7 @@
 !! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          | 1    | real                          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
-!! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | index         | 1    | integer                       |           |   out  | F        |
+!! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | flag          | 1    | integer                       |           |   out  | F        |
 !! | heat           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
 !!

@@ -5,24 +5,24 @@
 
 !>\defgroup GFS_radlw_post GFS RRTMG/RADLW Scheme Post
 !! @{
-!>\section arg_table_GFS_radlw_post_init Argument Table
+!> \section arg_table_GFS_radlw_post_init Argument Table
 !!
       subroutine GFS_radlw_post_init()
       end subroutine GFS_radlw_post_init      
 
-!>\section arg_table_GFS_radlw_post_run Argument Table
-!!| local var name    | longname                                                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
-!!|-------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
-!!|   Model           | FV3-GFS_Control_type                                                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
-!!|   Grid            | FV3-GFS_Grid_type                                                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
-!!|   Radtend         | FV3-GFS_Radtend_type                                                                          | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
-!!|   Coupling        | FV3-GFS_Coupling_type                                                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
-!!|   ltp             | extra_top_layer                                                                               | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
-!!|   lm              | vertical_layer_dimension_for_radiation                                                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |
-!!|   kd              | vertical_index_difference_between_in-out_and_local                                            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
-!!|   tsfa            | surface_air_temperature_for_radiation                                                         | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | in        | F        |
-!!|   htlwc           | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | total sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
-!!|   htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!> \section arg_table_GFS_radlw_post_run Argument Table
+!! | local var name    | longname                                                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
+!! |-------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
+!! |   Model           | FV3-GFS_Control_type                                                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
+!! |   Grid            | FV3-GFS_Grid_type                                                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
+!! |   Radtend         | FV3-GFS_Radtend_type                                                                          | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
+!! |   Coupling        | FV3-GFS_Coupling_type                                                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
+!! |   ltp             | extra_top_layer                                                                               | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
+!! |   lm              | vertical_layer_dimension_for_radiation                                                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |
+!! |   kd              | vertical_index_difference_between_in-out_and_local                                            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
+!! |   tsfa            | surface_air_temperature_for_radiation                                                         | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | in        | F        |
+!! |   htlwc           | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | total sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!! |   htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
 !!
       subroutine GFS_radlw_post_run (Model, Grid, Radtend, Coupling,   &
                  ltp, lm, kd, tsfa, htlwc, htlw0)
@@ -80,7 +80,7 @@
        
       end subroutine GFS_radlw_post_run
 
-!>\section arg_table_GFS_radlw_post_finalize Argument Table
+!> \section arg_table_GFS_radlw_post_finalize Argument Table
 !!
       subroutine GFS_radlw_post_finalize ()
       end subroutine GFS_radlw_post_finalize

@@ -36,7 +36,7 @@
 !! | t1             | air_temperature_updated_by_physics                        | updated temperature                             | K       | 2    | real    | kind_phys | inout  | F        |
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | rn             | rainfall_amount_on_dynamics_timestep                      | convective rainfall amount on dynamics timestep | m       | 1    | real    | kind_phys | out    | F        |
+!! | rn             | rainfall_amount_on_physics_timestep                      | convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys | out    | F        |
 !! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                             | index   | 1    | integer |           | out    | F        |
 !! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                              | index   | 1    | integer |           | out    | F        |
 !! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                    | flag    | 1    | integer |           | out    | F        |
@@ -1515,7 +1515,7 @@ c
 !! | local var name | longname                                        | description                                                          | units   | rank | type                          |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
 !! | frain          | dynamics_to_physics_timestep_ratio              | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
-!! | rain1          | rainfall_amount_on_dynamics_timestep            | convective rainfall amount on dynamics timestep                      | m       |    1 | real                          | kind_phys | in     | F        |
+!! | rain1          | rainfall_amount_on_physics_timestep            | convective rainfall amount on physics timestep                      | m       |    1 | real                          | kind_phys | in     | F        |
 !! | cnvc           | convective_cloud_cover                          | convective cloud cover                                               | frac    |    2 | real                          | kind_phys | in     | F        |
 !! | cnvw           | convective_cloud_water_specific_humidity        | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | kind_phys | in     | F        |
 !! | Model          | FV3-GFS_Control_type                            | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |

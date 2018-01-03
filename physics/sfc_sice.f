@@ -55,7 +55,7 @@
 !! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                              | K             |    1 | real    | kind_phys | inout  | F        |
 !! | weasd          | water_equivalent_accumulated_snow_depth               | water equivalent accumulated snow depth                  | mm            |    1 | real    | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature                              | ground surface skin temperature                          | K             |    1 | real    | kind_phys | inout  | F        |
-!! | tprcp          | precipitation_amount_in_one_dynamics_time_step        | total precipitation                                      | kg m-2        |    1 | real    | kind_phys | inout  | F        |
+!! | tprcp          | precipitation_amount_in_one_dynamics_time_step        | total precipitation                                      | m             |    1 | real    | kind_phys | inout  | F        |
 !! | stc            | soil_temperature                                      | soil temp                                                | K             |    2 | real    | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux             | potential evaporation                                    | W m-2         |    1 | real    | kind_phys | inout  | F        |
 !! | snwdph         | surface_snow_thickness_water_equivalent               | water equivalent snow depth                              | mm            |    1 | real    | kind_phys |   out  | F        |

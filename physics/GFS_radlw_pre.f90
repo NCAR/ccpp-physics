@@ -6,21 +6,21 @@
 
 !>\defgroup GFS_radlw_pre GFS RADLW Scheme Pre
 !! @{
-!>\section arg_table_GFS_radlw_pre_init Argument Table
+!> \section arg_table_GFS_radlw_pre_init Argument Table
 !!
       subroutine GFS_radlw_pre_init ()
       end subroutine GFS_radlw_pre_init 
 
-!>\section arg_table_GFS_radlw_pre_run Argument Table
-!!| local var name    | longname                                  | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
-!!|-------------------|-------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!!| Model             | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_typedefs%GFS_control_type |           | in     | F        |
-!!| Grid              | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!!| Sfcprop           | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
-!!| Radtend           | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_typedefs%GFS_radtend_type |           | inout  | F        |
-!!| im                | horizontal_loop_extent                    | horizontal loop extent, start at 1                                   | index    | 0    | integer                       |           | in     | F        |
-!!| tsfg              | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
-!!| tsfa              | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
+!> \section arg_table_GFS_radlw_pre_run Argument Table
+!! | local var name    | longname                                  | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
+!! |-------------------|-------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
+!! | Model             | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Grid              | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Sfcprop           | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
+!! | Radtend           | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_typedefs%GFS_radtend_type |           | inout  | F        |
+!! | im                | horizontal_loop_extent                    | horizontal loop extent, start at 1                                   | index    | 0    | integer                       |           | in     | F        |
+!! | tsfg              | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
+!! | tsfa              | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
 !!
       subroutine GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend, im, tsfg, tsfa)
     
@@ -52,7 +52,7 @@
 
        end subroutine GFS_radlw_pre_run
 
-!>\section arg_table_GFS_radlw_pre_finalize Argument Table
+!> \section arg_table_GFS_radlw_pre_finalize Argument Table
 !!
        subroutine GFS_radlw_pre_finalize ()
        end subroutine GFS_radlw_pre_finalize

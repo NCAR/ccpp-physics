@@ -63,30 +63,30 @@
 !! steps, and on the temperature. Evaporation of cloud is allowed at
 !! points where the relative humidity is lower than the critical value
 !! required for condensation.
-!!\section arg_table_gscond_run Argument Table
-!!| local var name | longname                                                   | description                                              | units   | rank |  type   |   kind    | intent | optional |
-!!|----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                     | horizontal loop extent, start at 1                       | index   |    0 | integer |           | in     |   F      |
-!!| ix             | horizontal_dimension                                       | horizontal dimension                                     | index   |    0 | integer |           | in     |   F      |
-!!| km             | vertical_dimension                                         | vertical layer dimension                                 | index   |    0 | integer |           | in     |   F      |
-!!| dt             | time_step_for_physics                                      | physics time step                                        | s       |    0 | real    | kind_phys | in     |   F      |
-!!| dtf            | time_step_for_dynamics                                     | dynamics time step                                       | s       |    0 | real    | kind_phys | in     |   F      |
-!!| prsl           | air_pressure                                               | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys | in     |   F      |
-!!| ps             | surface_air_pressure                                       | surface pressure                                         | Pa      |    1 | real    | kind_phys | in     |   F      |
-!!| q              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| clw1           | cloud_ice_specific_humidity                                | cloud ice specific humidity                              | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
-!!| clw2           | cloud_liquid_water_specific_humidity                       | cloud water specific humidity                            | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
-!!| cwm            | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | out    |   F      |
-!!| t              | air_temperature_updated_by_physics                         | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
-!!| tp             | air_temperature_at_two_time_step_back                      | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
-!!| qp             | water_vapor_specific_humidity_at_two_time_step_back        | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| psp            | surface_air_pressure_at_two_time_step_back                 | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |
-!!| tp1            | air_temperature_at_previous_time_step                      | air temperature at previous time step                    | K       |    2 | real    | kind_phys | inout  |   F      |
-!!| qp1            | water_vapor_specific_humidity_at_previous_time_step        | water vapor specific humidity at previous time step      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!!| psp1           | surface_air_pressure_at_previous_time_step                 | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |
-!!| u              | critical_relative_humidity                                 | critical relative humidity                               | 1       |    2 | real    | kind_phys | in     |   F      |
-!!| lprnt          | flag_print                                                 | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
-!!| ipr            | horizontal_index_of_printed_column                         | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      |
+!! \section arg_table_gscond_run Argument Table
+!! | local var name | longname                                                   | description                                              | units   | rank |  type   |   kind    | intent | optional |
+!! |----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                     | horizontal loop extent, start at 1                       | index   |    0 | integer |           | in     |   F      |
+!! | ix             | horizontal_dimension                                       | horizontal dimension                                     | index   |    0 | integer |           | in     |   F      |
+!! | km             | vertical_dimension                                         | vertical layer dimension                                 | index   |    0 | integer |           | in     |   F      |
+!! | dt             | time_step_for_physics                                      | physics time step                                        | s       |    0 | real    | kind_phys | in     |   F      |
+!! | dtf            | time_step_for_dynamics                                     | dynamics time step                                       | s       |    0 | real    | kind_phys | in     |   F      |
+!! | prsl           | air_pressure                                               | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys | in     |   F      |
+!! | ps             | surface_air_pressure                                       | surface pressure                                         | Pa      |    1 | real    | kind_phys | in     |   F      |
+!! | q              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                            | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!! | clw1           | cloud_ice_specific_humidity                                | cloud ice specific humidity                              | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
+!! | clw2           | cloud_liquid_water_specific_humidity                       | cloud water specific humidity                            | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
+!! | cwm            | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | out    |   F      |
+!! | t              | air_temperature_updated_by_physics                         | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
+!! | tp             | air_temperature_at_two_time_step_back                      | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
+!! | qp             | water_vapor_specific_humidity_at_two_time_step_back        | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!! | psp            | surface_air_pressure_at_two_time_step_back                 | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!! | tp1            | air_temperature_at_previous_time_step                      | air temperature at previous time step                    | K       |    2 | real    | kind_phys | inout  |   F      |
+!! | qp1            | water_vapor_specific_humidity_at_previous_time_step        | water vapor specific humidity at previous time step      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!! | psp1           | surface_air_pressure_at_previous_time_step                 | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!! | u              | critical_relative_humidity                                 | critical relative humidity                               | frac    |    2 | real    | kind_phys | in     |   F      |
+!! | lprnt          | flag_print                                                 | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
+!! | ipr            | horizontal_index_of_printed_column                         | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      |
 !!
 !! \section def Definition of symbols
 !! - \f$C_{g}\f$: grid-scale condensation rate (\f$s^{-1}\f$)
