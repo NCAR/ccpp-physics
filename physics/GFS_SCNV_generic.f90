@@ -14,9 +14,9 @@
 !> \section arg_table_GFS_SCNV_generic_pre_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type             |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                      | K             |    2 | real                          | kind_phys | inout  | F        |
 !! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !!
@@ -54,13 +54,13 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! | local var name | longname                                                  | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                      | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                     | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                         | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                      | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                     | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type             |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                         | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
 !! | save_t         | air_temperature_save                                      | air temperature before entering a physics scheme                      | K             |    2 | real                          | kind_phys | in     | F        |
 !! | save_qv        | water_vapor_specific_humidity_save                        | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                          | kind_phys | in     | F        |
 !! | frain          | dynamics_to_physics_timestep_ratio                        | ratio of dynamics timestep to physics timestep                        | none          |    0 | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | clw            | convective_transportable_tracers                          | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
 !!
       subroutine GFS_SCNV_generic_post_run (Model, Stateout, Grid, save_t, save_qv, frain, Diag, clw)

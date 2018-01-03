@@ -1518,10 +1518,10 @@ c
 !! | rain1          | rainfall_amount_on_physics_timestep            | convective rainfall amount on physics timestep                      | m       |    1 | real                          | kind_phys | in     | F        |
 !! | cnvc           | convective_cloud_cover                          | convective cloud cover                                               | frac    |    2 | real                          | kind_phys | in     | F        |
 !! | cnvw           | convective_cloud_water_specific_humidity        | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | kind_phys | in     | F        |
-!! | Model          | FV3-GFS_Control_type                            | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                               | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                               | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_typedefs%GFS_tbd_type     |           | inout  | F        |
+!! | Model          | FV3-GFS_Control_type                            | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                               | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                               | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type                 |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type                  |           | inout  | F        |
 !!
       subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
      &                               Grid, Diag, Tbd)
