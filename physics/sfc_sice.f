@@ -35,8 +35,8 @@
 !! | q1             | specific_humidity_at_lowest_model_layer               | surface layer mean specific humidity                     | kg kg-1       |    1 | real    | kind_phys | in     | F        |
 !! | delt           | time_step_for_dynamics                                | time step                                                | s             |    0 | real    | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                           | sfc lw emissivity                                        | frac          |    1 | real    | kind_phys | in     | F        |
-!! | dlwflx         | surface_downwelling_longwave_flux                     | total sky sfc downward lw flux                           | W m-2         |    1 | real    | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downward_shortwave_flux                   | total sky sfc netsw flx into ground                      | W m-2         |    1 | real    | kind_phys | in     | F        |
+!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground  | total sky surface downward longwave flux absorbed by the ground | W m-2  |    1 | real    | kind_phys | in     | F        |
+!! | sfcnsw         | surface_net_downwelling_shortwave_flux                | total sky sfc netsw flx into ground                      | W m-2         |    1 | real    | kind_phys | in     | F        |
 !! | sfcdsw         | surface_downwelling_shortwave_flux                    | total sky sfc downward sw flux                           | W m-2         |    1 | real    | kind_phys | in     | F        |
 !! | srflag         | flag_for_precipitation_type                           | snow/rain flag for precipitation                         | flag          |    1 | real    | kind_phys | in     | F        |
 !! | cm             | surface_drag_coefficient_for_momentum_in_air          | surface exchange coeff for momentum                      | none          |    1 | real    | kind_phys | in     | F        |

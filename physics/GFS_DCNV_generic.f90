@@ -12,35 +12,37 @@
       end subroutine GFS_DCNV_generic_pre_finalize
 
 !> \section arg_table_GFS_DCNV_generic_pre_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | initial_u      | x_wind_initial                                         | x-wind before entering a physics scheme                               | m s-1         |    2 | real                          | kind_phys | inout  | F        |
-!! | initial_v      | y_wind_initial                                         | y-wind before entering a physics scheme                               | m s-1         |    2 | real                          | kind_phys | inout  | F        |
-!! | initial_t      | air_temperature_initial                                | air temperature before entering a physics scheme                      | K             |    2 | real                          | kind_phys | inout  | F        |
-!! | initial_qv     | water_vapor_specific_humidity_initial                  | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
+!! | local var name | longname                                               | description                                                              | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|--------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                  | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore      | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data       | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | save_u         | x_wind_save                                            | x-wind before entering a physics scheme                                  | m s-1         |    2 | real                          | kind_phys | inout  | F        |
+!! | save_v         | y_wind_save                                            | y-wind before entering a physics scheme                                  | m s-1         |    2 | real                          | kind_phys | inout  | F        |
+!! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                         | K             |    2 | real                          | kind_phys | inout  | F        |
+!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme           | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
+!! | save_qcw       | cloud_condensed_water_specific_humidity_save           | cloud condensed water specific humidity before entering a physics scheme | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
 !!
-      subroutine GFS_DCNV_generic_pre_run (Model, Stateout, Grid, initial_u, initial_v, initial_t, initial_qv)
+      subroutine GFS_DCNV_generic_pre_run (Model, Stateout, Grid, save_u, save_v, save_t, save_qv, save_qcw)
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_stateout_type, GFS_grid_type
 
         type(GFS_control_type),           intent(in) :: Model
         type(GFS_stateout_type),          intent(in) :: Stateout
         type(GFS_grid_type),              intent(in) :: Grid
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(inout) :: initial_u, initial_v, initial_t, initial_qv
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(inout) :: save_u, save_v, save_t, save_qv, save_qcw
 
         if (Model%ldiag3d) then
-          initial_t(:,:) = Stateout%gt0(:,:)
-          initial_u(:,:) = Stateout%gu0(:,:)
-          initial_v(:,:) = Stateout%gv0(:,:)
+          save_t(:,:) = Stateout%gt0(:,:)
+          save_u(:,:) = Stateout%gu0(:,:)
+          save_v(:,:) = Stateout%gv0(:,:)
         elseif (Model%cnvgwd) then
-          initial_t(:,:) = Stateout%gt0(:,:)
+          save_t(:,:) = Stateout%gt0(:,:)
         endif   ! end if_ldiag3d/cnvgwd
 
         if (Model%ldiag3d .or. Model%lgocart) then
-          initial_qv(:,:) = Stateout%gq0(:,:,1)
+          save_qv(:,:) = Stateout%gq0(:,:,1)
+          save_qcw(:,:) = Stateout%gq0(:,:,3)
         endif   ! end if_ldiag3d/lgocart
 
     end subroutine GFS_DCNV_generic_pre_run
@@ -58,27 +60,27 @@
     end subroutine GFS_DCNV_generic_post_finalize
 
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
-!! | local var name | longname                                                  | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Grid           | FV3-GFS_Grid_type                                         | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                      | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                     | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!! | frain          | dynamics_to_physics_timestep_ratio                        | ratio of dynamics timestep to physics timestep                        | none          |    0 | real                          | kind_phys | in     | F        |
-!! | rain1          | timestep_gridscale_rainfall_amount                        | gridscale rain                                                        | m             |    1 | real                          | kind_phys | in     | F        |
-!! | cld1d          | cloud_work_function                                       | cloud work function                                                   | m2 s-2        |    1 | real                          | kind_phys | in     | F        |
-!! | initial_u      | x_wind_initial                                            | x-wind before entering a physics scheme                               | m s-1         |    2 | real                          | kind_phys | in     | F        |
-!! | initial_v      | y_wind_initial                                            | y-wind before entering a physics scheme                               | m s-1         |    2 | real                          | kind_phys | in     | F        |
-!! | initial_t      | air_temperature_initial                                   | air temperature before entering a physics scheme                      | K             |    2 | real                          | kind_phys | in     | F        |
-!! | initial_qv     | water_vapor_specific_humidity_initial                     | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                          | kind_phys | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                                            | kg m-2        |    2 | real                          | kind_phys | in     | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                                          | kg m-2        |    2 | real                          | kind_phys | in     | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                        | kg m-2        |    2 | real                          | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
-!! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                          | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_typedefs%GFS_tbd_type     |           | inout  | F        |
+!! | local var name | longname                                                  | description                                                              | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|--------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Grid           | FV3-GFS_Grid_type                                         | Fortran DDT containing FV3-GFS grid and interpolation related data       | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                      | Fortran DDT containing FV3-GFS model control parameters                  | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                     | Fortran DDT containing FV3-GFS prognostic state to return to dycore      | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | in     | F        |
+!! | frain          | dynamics_to_physics_timestep_ratio                        | ratio of dynamics timestep to physics timestep                           | none          |    0 | real                          | kind_phys | in     | F        |
+!! | rain1          | rainfall_amount_on_dynamics_timestep                      | convective rainfall amount on dynamics timestep                          | m             |    1 | real                          | kind_phys | in     | F        |
+!! | cld1d          | cloud_work_function                                       | cloud work function                                                      | m2 s-2        |    1 | real                          | kind_phys | in     | F        |
+!! | save_u         | x_wind_save                                               | x-wind before entering a physics scheme                                  | m s-1         |    2 | real                          | kind_phys | in     | F        |
+!! | save_v         | y_wind_save                                               | y-wind before entering a physics scheme                                  | m s-1         |    2 | real                          | kind_phys | in     | F        |
+!! | save_t         | air_temperature_save                                      | air temperature before entering a physics scheme                         | K             |    2 | real                          | kind_phys | in     | F        |
+!! | save_qv        | water_vapor_specific_humidity_save                        | water vapor specific humidity before entering a physics scheme           | kg kg-1       |    2 | real                          | kind_phys | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                                               | kg m-2        |    2 | real                          | kind_phys | in     | F        |
+!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                                             | kg m-2        |    2 | real                          | kind_phys | in     | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                           | kg m-2        |    2 | real                          | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity                                 | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                                   | frac          |    2 | real                          | kind_phys |   out  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output     | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                          | Fortran DDT containing FV3-GFS miscellaneous data                        | DDT           |    0 | GFS_typedefs%GFS_tbd_type     |           | inout  | F        |
 !!
-      subroutine GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, initial_u, initial_v, initial_t, initial_qv, &
+      subroutine GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, save_u, save_v, save_t, save_qv, &
         ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd)
 
       use machine,               only: kind_phys
@@ -93,7 +95,7 @@
 
       real(kind=kind_phys), intent(in) :: frain
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: rain1, cld1d
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: initial_u, initial_v, initial_t, initial_qv
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: save_u, save_v, save_t, save_qv
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: ud_mf, dd_mf, dt_mf
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: cnvw, cnvc
 
@@ -108,10 +110,10 @@
           Diag%cnvprcp(:) = Diag%cnvprcp(:) + Diag%rainc(:)
 
           if (Model%ldiag3d) then
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-initial_t(:,:)) * frain
-            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-initial_qv(:,:)) * frain
-            Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-initial_u(:,:)) * frain
-            Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-initial_v(:,:)) * frain
+            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + (Stateout%gt0(:,:)-save_t(:,:)) * frain
+            Diag%dq3dt(:,:,2) = Diag%dq3dt(:,:,2) + (Stateout%gq0(:,:,1)-save_qv(:,:)) * frain
+            Diag%du3dt(:,:,3) = Diag%du3dt(:,:,3) + (Stateout%gu0(:,:)-save_u(:,:)) * frain
+            Diag%dv3dt(:,:,3) = Diag%dv3dt(:,:,3) + (Stateout%gv0(:,:)-save_v(:,:)) * frain
 
             Diag%upd_mf(:,:)  = Diag%upd_mf(:,:)  + ud_mf(:,:) * (con_g*frain)
             Diag%dwn_mf(:,:)  = Diag%dwn_mf(:,:)  + dd_mf(:,:) * (con_g*frain)

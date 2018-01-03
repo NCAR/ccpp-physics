@@ -12,19 +12,19 @@
       end subroutine GFS_radsw_pre_init
 
 !>\section arg_table_GFS_radsw_pre_run Argument Table
-!!| local var name | longname                                 | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
-!!|----------------|------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!!| Model          | FV3-GFS_Control_type                     | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_typedefs%GFS_control_type |           | in     | F        |
-!!| Grid           | FV3-GFS_Grid_type                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!!| Sfcprop        | FV3-GFS_Sfcprop_type                     | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
-!!| Radtend        | FV3-GFS_Radtend_type                     | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_typedefs%GFS_radtend_type |           | inout  | F        |
-!!| im             | horizontal_loop_extent                   | horizontal loop extent, start at 1                                   | index    | 0    | integer                       |           | in     | F        |
-!!| tsfg           | surface_ground_temperature_for_radiation | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
-!!| tsfa           | surface_air_temperature_for_radiation    | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
-!!| sfcalb1        | surface_albedo_due_to_near_IR_direct     | surface albedo due to near IR direct beam                            | none     |  1   | real                          | kind_phys | out    | F        |
-!!| sfcalb2        | surface_albedo_due_to_near_IR_diffused   | surface albedo due to near IR diffused beam                          | none     |  1   | real                          | kind_phys | out    | F        |
-!!| sfcalb3        | surface_albedo_due_to_uv+vis_direct      | surface albedo due to UV+VIS direct beam                             | none     |  1   | real                          | kind_phys | out    | F        |
-!!| sfcalb4        | surface_albedo_due_to_uv+vis_diffused    | surface albedo due to UV+VIS diffused beam                           | none     |  1   | real                          | kind_phys | out    | F        |
+!!| local var name | longname                                  | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
+!!|----------------|-------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
+!!| Model          | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_typedefs%GFS_control_type |           | in     | F        |
+!!| Grid           | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!!| Sfcprop        | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
+!!| Radtend        | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_typedefs%GFS_radtend_type |           | inout  | F        |
+!!| im             | horizontal_loop_extent                    | horizontal loop extent, start at 1                                   | index    | 0    | integer                       |           | in     | F        |
+!!| tsfg           | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
+!!| tsfa           | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
+!!| sfcalb1        | surface_albedo_due_to_near_IR_direct      | surface albedo due to near IR direct beam                            | none     |  1   | real                          | kind_phys | out    | F        |
+!!| sfcalb2        | surface_albedo_due_to_near_IR_diffused    | surface albedo due to near IR diffused beam                          | none     |  1   | real                          | kind_phys | out    | F        |
+!!| sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct   | surface albedo due to UV+VIS direct beam                             | none     |  1   | real                          | kind_phys | out    | F        |
+!!| sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused | surface albedo due to UV+VIS diffused beam                           | none     |  1   | real                          | kind_phys | out    | F        |
 !!
       subroutine GFS_radsw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
                  tsfg, tsfa, sfcalb1,sfcalb2, sfcalb3, sfcalb4 )

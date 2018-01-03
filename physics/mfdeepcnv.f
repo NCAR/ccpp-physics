@@ -33,36 +33,36 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sasasdeep_run Argument Table
-!! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                    | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
-!! | ix             | horizontal_dimension                                      | horizontal dimension               | index   |    0 | integer |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension           | index   |    0 | integer |           | in     | F        |
-!! | delt           | time_step_for_physics                                     | physics time step                  | s       |    0 | real    | kind_phys | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | prslp          | air_pressure                                              | mean layer pressure                | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | psp            | surface_air_pressure                                      | surface pressure                   | Pa      | 1    | real    | kind_phys | in     | F        |
-!! | phil           | geopotential                                              | layer geopotential                 | m2 s-2  | 2    | real    | kind_phys | in     | F        |
-!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity        | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity      | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity    | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | t1             | air_temperature_updated_by_physics                        | updated temperature                | K       | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind           | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | cldwrk         | cloud_work_function                                       | cloud work function                | m2 s-2  | 1    | real    | kind_phys |   out  | F        |
-!! | rn             | timestep_convective_rainfall_amount                       | convective rain                    | m       | 1    | real    | kind_phys |   out  | F        |
-!! | kbot           | vertical_index_at_cloud_base                              | index for cloud base               | index   | 1    | integer |           |   out  | F        |
-!! | ktop           | vertical_index_at_cloud_top                               | index for cloud top                | index   | 1    | integer |           |   out  | F        |
-!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes       | flag    | 1    | integer |           |   out  | F        |
-!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2       | flag    | 1    | integer |           | in     | F        |
-!! | garea          | cell_area                                                 | grid cell area                     | m2      | 1    | real    | kind_phys | in     | F        |
-!! | dot            | omega                                                     | layer mean vertical velocity       | Pa s-1  | 2    | real    | kind_phys | in     | F        |
-!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors             | count   |    0 | integer |           | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt         | kg m-2  | 2    | real    | kind_phys |   out  | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt       | kg m-2  | 2    | real    | kind_phys |   out  | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt     | kg m-2  | 2    | real    | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water             | kg kg-1 | 2    | real    | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover             | frac    | 2    | real    | kind_phys |   out  | F        |
+!! | local var name | longname                                                  | description                                     | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|-------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                    | horizontal loop extent, start at 1              | index   |    0 | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                      | horizontal dimension                            | index   |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                        | index   |    0 | integer |           | in     | F        |
+!! | delt           | time_step_for_physics                                     | physics time step                               | s       |    0 | real    | kind_phys | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                             | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                              | mean layer pressure                             | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                      | surface pressure                                | Pa      | 1    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                              | layer geopotential                              | m2 s-2  | 2    | real    | kind_phys | in     | F        |
+!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity                     | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity                   | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                 | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                        | updated temperature                             | K       | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | cldwrk         | cloud_work_function                                       | cloud work function                             | m2 s-2  | 1    | real    | kind_phys |   out  | F        |
+!! | rn             | rainfall_amount_on_dynamics_timestep                      | convective rainfall amount on dynamics timestep | m       | 1    | real    | kind_phys |   out  | F        |
+!! | kbot           | vertical_index_at_cloud_base                              | index for cloud base                            | index   | 1    | integer |           |   out  | F        |
+!! | ktop           | vertical_index_at_cloud_top                               | index for cloud top                             | index   | 1    | integer |           |   out  | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                    | flag    | 1    | integer |           |   out  | F        |
+!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                    | flag    | 1    | integer |           | in     | F        |
+!! | garea          | cell_area                                                 | grid cell area                                  | m2      | 1    | real    | kind_phys | in     | F        |
+!! | dot            | omega                                                     | layer mean vertical velocity                    | Pa s-1  | 2    | real    | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors                          | count   |    0 | integer |           | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                      | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                    | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                  | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water                          | kg kg-1 | 2    | real    | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                          | frac    | 2    | real    | kind_phys |   out  | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm

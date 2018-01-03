@@ -82,23 +82,23 @@
 !! \brief Brief description of the subroutine
 !!
 !! \section arg_table_gwdc_pre_run Argument Table
-!! | local var name | longname                                                | description                                             | units | rank | type    | kind      | intent | optional |
-!! |----------------|---------------------------------------------------------|---------------------------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                  | horizontal loop extent                                  | index | 0    | integer | default   | in     | F        |
-!! | cgwf           | multiplication_factors_for_convective_gravity_wave_drag | multiplication factors for convective gravity wave drag | none  | 1    | real    | kind_phys | in     | F        |
-!! | dx             | grid_size_in_x                                          | grid size in zonal direction                            | m     | 1    | real    | kind_phys | in     | F        |
-!! | work1          | work_array_1                                            | work array #1                                           | none  | 1    | real    | kind_phys | in     | F        |
-!! | work2          | work_array_2                                            | work array #2                                           | none  | 1    | real    | kind_phys | in     | F        |
-!! | dlength        | characteristic_grid_length_scale                        | representative horizontal length scale of grid box      | m     | 1    | real    | kind_phys | out    | F        |
-!! | cldf           | cloud_area_fraction                                     | fraction of grid box area in which updrafts occur       | frac  | 1    | real    | kind_phys | out    | F        |
-!! | levs           | vertical_dimension                                      | number of vertical layers                               | index | 0    | integer | default   | in     | F        |
-!! | kbot           | vertical_index_at_cloud_base                            | vertical index at cloud base                            | index | 1    | integer | default   | in     | F        |
-!! | ktop           | vertical_index_at_cloud_top                             | vertical index at cloud top                             | index | 1    | integer | default   | in     | F        |
-!! | dtp            | time_step_for_physics                                   | physics time step                                       | s     | 0    | real    | kind_phys | in     | F        |
-!! | gt0            | air_temperature_updated_by_physics                      | updated air temperature                                 | K     | 2    | real    | kind_phys | in     | F        |
-!! | gt0_init       | air_temperature_initial                                 | air temperature before entering convection scheme       | K     | 2    | real    | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers               | difference between mid-layer pressures                  | Pa    | 2    | real    | kind_phys | in     | F        |
-!! | cumabs         | maximum_column_heating_rate                             | maximum heating rate in column                          | K s-1 | 1    | real    | kind_phys | out    | F        |
+!! | local var name | longname                                                                 | description                                                   | units | rank | type    | kind      | intent | optional |
+!! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | index | 0    | integer | default   | in     | F        |
+!! | cgwf           | multiplication_factors_for_convective_gravity_wave_drag                  | multiplication factors for convective gravity wave drag       | none  | 1    | real    | kind_phys | in     | F        |
+!! | dx             | grid_size_in_x                                                           | grid size in zonal direction                                  | m     | 1    | real    | kind_phys | in     | F        |
+!! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes | none  |    1 | real    | kind_phys | in     | F        |
+!! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                           | none  |    1 | real    | kind_phys | in     | F        |
+!! | dlength        | characteristic_grid_length_scale                                         | representative horizontal length scale of grid box            | m     | 1    | real    | kind_phys | out    | F        |
+!! | cldf           | cloud_area_fraction                                                      | fraction of grid box area in which updrafts occur             | frac  | 1    | real    | kind_phys | out    | F        |
+!! | levs           | vertical_dimension                                                       | number of vertical layers                                     | index | 0    | integer | default   | in     | F        |
+!! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                  | index | 1    | integer | default   | in     | F        |
+!! | ktop           | vertical_index_at_cloud_top                                              | vertical index at cloud top                                   | index | 1    | integer | default   | in     | F        |
+!! | dtp            | time_step_for_physics                                                    | physics time step                                             | s     | 0    | real    | kind_phys | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                                       | updated air temperature                                       | K     | 2    | real    | kind_phys | in     | F        |
+!! | gt0_init       | air_temperature_save                                                     | air temperature before entering convection scheme             | K     | 2    | real    | kind_phys | in     | F        |
+!! | del            | air_pressure_difference_between_midlayers                                | difference between mid-layer pressures                        | Pa    | 2    | real    | kind_phys | in     | F        |
+!! | cumabs         | maximum_column_heating_rate                                              | maximum heating rate in column                                | K s-1 | 1    | real    | kind_phys | out    | F        |
 !!
       subroutine gwdc_pre_run (                                         &
      &  im, cgwf, dx, work1, work2, dlength, cldf,                      &
