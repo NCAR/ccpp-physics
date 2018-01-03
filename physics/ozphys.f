@@ -243,13 +243,13 @@
 
 
 !! \section arg_table_ozphys_post_run Argument Table
-!! | local var name | longname                                     | description                                  | units   | rank | type          | kind      | intent | optional |
-!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                         | horizontal dimension                         | index   | 0    | integer       | default   | in     | F        |
-!! | levs           | vertical_dimension                           | number of vertical layers                    | index   | 0    | integer       | default   | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer       | default   | in     | F        |
-!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | various | 0    | GFS_diag_type |           | inout  | F        |
+!! | local var name | longname                                     | description                                  | units   | rank | type                       | kind      | intent | optional |
+!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                         | horizontal dimension                         | index   | 0    | integer                    | default   | in     | F        |
+!! | levs           | vertical_dimension                           | number of vertical layers                    | index   | 0    | integer                    | default   | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer                    | default   | in     | F        |
+!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real                       | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     | 0    | GFS_typedefs%GFS_diag_type |           | inout  | F        |
 !!
       subroutine ozphys_post_run(ix, levs, pl_coeff, ozp, Diag)
 
