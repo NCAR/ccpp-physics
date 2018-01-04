@@ -487,7 +487,7 @@ module module_physics_driver
            dtshoc
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1))  ::            &
-           ccwfac, garea, dlength, cumabs, cice, zice, tice, gflx,      &
+           ccwfac, dlength, cumabs, cice, zice, tice, gflx,             &
            rain1, raincs, snowmt, cd, cdq, qss, dusfcg, dvsfcg, dusfc1, &
            dvsfc1,  dtsfc1, dqsfc1, rb, drain,  cld1d, evap, hflx,      &
            stress, t850, ep1d, gamt, gamq, sigmaf, oc, theta, gamma,    &
@@ -681,7 +681,7 @@ module module_physics_driver
 !GFDL        garea(i)   = tem1 * tem2
 !        tem1       = Grid%dx(i)
 !        tem2       = Grid%dx(i)
-        garea(i)   = Grid%area(i)
+!        garea(i)   = Grid%area(i)
 !        dlength(i) = sqrt( tem1*tem1+tem2*tem2 )
 !        cldf(i)    = Model%cgwf(1)*work1(i) + Model%cgwf(2)*work2(i)
         wcbmax(i)  = Model%cs_parm(1)*work1(i) + Model%cs_parm(2)*work2(i)
@@ -1726,8 +1726,8 @@ module module_physics_driver
                           clw(:,:,2), Stateout%gq0(:,:,1),              &
                           Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
                           cld1d, rain1, kbot, ktop, kcnv, islmsk,       &
-                          garea, Statein%vvl, Model%ncld, ud_mf, dd_mf, &
-                          dt_mf, cnvw, cnvc)
+                          Grid%area, Statein%vvl, Model%ncld, ud_mf,    &
+                          dd_mf, dt_mf, cnvw, cnvc)
 !         if (lprnt) print *,' rain1=',rain1(ipr)
         elseif (Model%imfdeepcnv == 0) then         ! random cloud top
           call sascnv (im, ix, levs, Model%jcap, dtp, del,              &
@@ -1836,7 +1836,7 @@ module module_physics_driver
                        Statein%prsik, Statein%prslk, Statein%phil,         &
                        Statein%phii, kpbl, cd, rain1, kbot, ktop, kcnv,    &
                        Tbd%phy_f2d(1,Model%num_p2d), Model%flipv, pa2mb,   &
-                       me, garea, lmh, ccwfac, Model%nrcm, rhc, ud_mf,     &
+                       me, Grid%area, lmh, ccwfac, Model%nrcm, rhc, ud_mf, &
                        dd_mf, dt_mf, dlqfac, lprnt, ipr, kdt, revap, QLCN, &
                        QICN, w_upi, cf_upi, CNV_MFD, CNV_PRC3, CNV_DQLDT,  &
                        CLCN, CNV_FICE, CNV_NDROP, CNV_NICE, Model%ncld )
@@ -2180,8 +2180,8 @@ module module_physics_driver
                             Statein%pgr, Statein%phil, clw(:,:,1),        &
                             clw(:,:,2), Stateout%gq0(:,:,1),              &
                             Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
-                            rain1, kbot, ktop, kcnv, islmsk, garea,       &
-                            Statein%vvl, Model%ncld, DIag%hpbl, ud_mf,    &
+                            rain1, kbot, ktop, kcnv, islmsk, Grid%area,   &
+                            Statein%vvl, Model%ncld, Diag%hpbl, ud_mf,    &
                             dt_mf, cnvw, cnvc)
 
             call sasasshal_post_run (frain, rain1, cnvc, cnvw, Model, Grid, Diag, Tbd)
