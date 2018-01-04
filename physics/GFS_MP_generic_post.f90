@@ -36,15 +36,15 @@
 !! |   q            | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !! |   save_t       | air_temperature_save                                       | air temperature before entering a physics scheme               | K           | 2    | real    | kind_phys | in     |  F       |
 !! |   save_qv      | water_vapor_specific_humidity_save                         | water vapor specific humidity before entering a physics scheme | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!! |   totprcp      | precipitation_rate_at_surface                              | precipitation rate at surface                                  | kg m-2 s-1  | 1    | real    | kind_phys | inout  |  F       |
+!! |   totprcp      | accumulated_total_rainfall_amount                          | accumulated total_rainfall_amount                              | m           | 1    | real    | kind_phys | inout  |  F       |
 !! |   dt3dt6       | large_scale_condensate_heating_rate_at_model_layers        | large scale condensate heating rate at model layers            | K s-1       | 2    | real    | kind_phys | inout  |  F       |
 !! |   dq3dt4       | large_scale_condensate_moistening_rate_at_model_layers     | large scale condensate moistening rate at model layers         | kg kg-1 s-1 | 2    | real    | kind_phys | inout  |  F       |
 !! |   pwat         | column_precipitable_water                                  | column integrated precipitable water                           | kg m-2      | 1    | real    | kind_phys | out    |  F       |
 !!
-      subroutine GFS_MP_generic_post_run(im, ix, levs,dtf,del,        &
+      subroutine GFS_MP_generic_post_run(im,ix,levs,dtf,del,          &
                  lssav,ldiag3d,rain,frain,ntcw,ncld,cwm,              & !input
-                 t,q,save_t, save_qv,                           &
-                 totprcp, dt3dt6,dq3dt4,pwat  )     ! output
+                 t,q,save_t,save_qv,                                  &
+                 totprcp,dt3dt6,dq3dt4,pwat)     ! output
      
 !
       use machine,               only: kind_phys

@@ -1424,8 +1424,8 @@
 !! | dudt           | tendency_of_x_wind_due_to_model_physics                   | zonal wind tendency due to model physics                         | m s-2 | 2    | real    | kind_phys | in     | F        |
 !! | dvdt           | tendency_of_y_wind_due_to_model_physics                   | meridional wind tendency due to model physics                    | m s-2 | 2    | real    | kind_phys | in     | F        |
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics          | air temperature tendency due to model physics                    | K s-1 | 2    | real    | kind_phys | in     | F        |
-!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag        | integral over time of zonal stress due to gravity wave drag      | Pa s  | 2    | real    | kind_phys | inout  | F        |
-!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag        | integral over time of meridional stress due to gravity wave drag | Pa s  | 2    | real    | kind_phys | inout  | F        |
+!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag        | integral over time of zonal stress due to gravity wave drag      | Pa s  | 1    | real    | kind_phys | inout  | F        |
+!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag        | integral over time of meridional stress due to gravity wave drag | Pa s  | 1    | real    | kind_phys | inout  | F        |
 !! | du3dt          | cumulative_change_in_x_wind_due_to_surface_processes      | cumulative change in zonal wind due to surface processes         | m s-1 | 2    | real    | kind_phys | inout  | F        |
 !! | dv3dt          | cumulative_change_in_y_wind_due_to_surface_processes      | cumulative change in meridional wind due to surface processes    | m s-1 | 2    | real    | kind_phys | inout  | F        |
 !! | dt3dt          | cumulative_change_in_temperature_due_to_surface_processes | cumulative change in temperature due to surface processes        | K     | 2    | real    | kind_phys | inout  | F        |

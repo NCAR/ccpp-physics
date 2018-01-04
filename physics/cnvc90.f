@@ -23,7 +23,7 @@
 !! | acv            | convective_rainfall_accumulated_thus_far                | convective rainfall accumulated thus far                | m     | 1    | real    | kind_phys | inout  | F        |
 !! | acvb           | smallest_cloud_base_vertical_index_encountered_thus_far | smallest cloud base vertical index encountered thus far | index | 1    | real    | kind_phys | inout  | F        |
 !! | acvt           | largest_cloud_top_vertical_index_encountered_thus_far   | largest cloud top vertical index encountered thus far   | index | 1    | real    | kind_phys | inout  | F        |
-!! | cv             | fraction_of_convective_cloud                            | fraction of convective cloud                            | none  | 1    | real    | kind_phys | inout  | F        |
+!! | cv             | fraction_of_convective_cloud                            | fraction of convective cloud                            | frac  | 1    | real    | kind_phys | inout  | F        |
 !! | cvb            | pressure_at_bottom_of_convective_cloud                  | pressure at bottom of convective cloud                  | Pa    | 1    | real    | kind_phys | inout  | F        |
 !! | cvt            | pressure_at_top_of_convective_cloud                     | pressure at top of convective cloud                     | Pa    | 1    | real    | kind_phys | inout  | F        |
 !!
