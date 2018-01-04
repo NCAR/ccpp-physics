@@ -2626,6 +2626,10 @@ module module_physics_driver
                             Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag, &   ! output
                             Sfcprop%tprcp)
 
+      ! DH* inside GFS_MP_generic_post_run Diag%dq3dt(:,:,6) is called dq3dt4
+      ! also, the original GFS_physics_driver had interstitial code around line 2599
+      ! Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
+      ! --> I think Diag%dq3dt(:,:,6) should be Diag%dq3dt(:,:,4) here *DH
       call GFS_MP_generic_post_run (im, ix, levs, dtf, del,               &
                          Model%lssav, Model%ldiag3d, Diag%rain,frain,     &
                          Model%ntcw, Model%ncld,                          &
