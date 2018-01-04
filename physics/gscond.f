@@ -78,9 +78,9 @@
 !! | clw2           | cloud_liquid_water_specific_humidity                       | cloud water specific humidity                            | kg kg-1 |    2 | real    | kind_phys | in     |   F      |
 !! | cwm            | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity                  | kg kg-1 |    2 | real    | kind_phys | out    |   F      |
 !! | t              | air_temperature_updated_by_physics                         | layer mean air temperature                               | K       |    2 | real    | kind_phys | inout  |   F      |
-!! | tp             | air_temperature_at_two_time_step_back                      | air temperature at two time step back                    | K       |    2 | real    | kind_phys | inout  |   F      |
-!! | qp             | water_vapor_specific_humidity_at_two_time_step_back        | water vapor specific humidity at two time step back      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
-!! | psp            | surface_air_pressure_at_two_time_step_back                 | surface air pressure at two time step back               | Pa      |    1 | real    | kind_phys | inout  |   F      |
+!! | tp             | air_temperature_two_time_steps_back                        | air temperature two time steps back                      | K       |    2 | real    | kind_phys | inout  |   F      |
+!! | qp             | water_vapor_specific_humidity_two_time_steps_back          | water vapor specific humidity two time steps back        | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
+!! | psp            | surface_air_pressure_two_time_steps_back                   | surface air pressure two time steps back                 | Pa      |    1 | real    | kind_phys | inout  |   F      |
 !! | tp1            | air_temperature_at_previous_time_step                      | air temperature at previous time step                    | K       |    2 | real    | kind_phys | inout  |   F      |
 !! | qp1            | water_vapor_specific_humidity_at_previous_time_step        | water vapor specific humidity at previous time step      | kg kg-1 |    2 | real    | kind_phys | inout  |   F      |
 !! | psp1           | surface_air_pressure_at_previous_time_step                 | surface air surface pressure at previous time step       | Pa      |    1 | real    | kind_phys | inout  |   F      |

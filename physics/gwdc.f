@@ -86,7 +86,7 @@
 !! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | index | 0    | integer | default   | in     | F        |
 !! | cgwf           | multiplication_factors_for_convective_gravity_wave_drag                  | multiplication factors for convective gravity wave drag       | none  | 1    | real    | kind_phys | in     | F        |
-!! | dx             | grid_size_in_x                                                           | grid size in zonal direction                                  | m     | 1    | real    | kind_phys | in     | F        |
+!! | dx             | cell_size                                                                | grid size in zonal direction                                  | m     | 1    | real    | kind_phys | in     | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes | none  |    1 | real    | kind_phys | in     | F        |
 !! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                           | none  |    1 | real    | kind_phys | in     | F        |
 !! | dlength        | characteristic_grid_length_scale                                         | representative horizontal length scale of grid box            | m     | 1    | real    | kind_phys | out    | F        |

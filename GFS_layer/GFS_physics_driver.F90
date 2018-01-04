@@ -886,7 +886,7 @@ module module_physics_driver
 !      Diag%smcwlt2(:) = 0.0
 !      Diag%smcref2(:) = 0.0
       call lsm_noah_pre_run(im,Model%lsoil,drain,runof,evbs,evcw,trans,sbsno, &
-                            snowc,snohf,Diag%smcwlt2(:),Diag%smcref2(:))
+                            snowc,snohf,Diag%smcwlt2,Diag%smcref2)
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
@@ -985,7 +985,7 @@ module module_physics_driver
            (im, Model%lsoil, Statein%pgr, Statein%ugrs(:,1), Statein%vgrs(:,1),  &
             Statein%tgrs(:,1), Statein%qgrs(:,1,1), soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
-            Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, DIag%zlvl, &
+            Sfcprop%tg3, cd, cdq, Statein%prsl(:,1), work3, Diag%zlvl, &
             islmsk, Tbd%phy_f2d(:,Model%num_p2d), slopetyp,            &
             Sfcprop%shdmin, Sfcprop%shdmax, Sfcprop%snoalb,            &
             Radtend%sfalb, flag_iter, flag_guess, Model%isot,          &
@@ -2739,7 +2739,7 @@ module module_physics_driver
 !        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
 !      endif
       call lsm_noah_post_run(im,Model%lsoil,Model%lssav,dtf,drain,runof,&
-                             Diag%runoff(:),Diag%srunoff(:))
+                             Diag%runoff,Diag%srunoff)
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       call sfc_sice_post_run                                            &
