@@ -15,7 +15,11 @@ else
     $(info )
 endif
 
-LIBRARY   = libgfsphys.so
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+LIBRARY = libgfsphys.dylib
+else
+LIBRARY = libgfsphys.so
+endif
 VER_MAJOR = 1
 VER_MINOR = 0
 VER_PATCH = 0
@@ -112,7 +116,6 @@ SRCS_f   =  \
 	   ./physics/sfc_nst.f                                                       \
 	   ./physics/sfc_ocean.f                                                     \
 	   ./physics/sfc_sice.f                                                      \
-	   ./physics/sfcsub.f                                                        \
 	   ./physics/sflx.f                                                          \
 	   ./physics/shalcnv.f                                                       \
 	   ./physics/shalcv.f                                                        \
@@ -140,6 +143,7 @@ SRCS_F   = ./physics/aer_cloud.F                                                
 	   ./physics/cldmacro.F                                                      \
 	   ./physics/cldwat2m_micro.F                                                \
 	   ./physics/machine.F                                                       \
+	   ./physics/sfcsub.F                                                        \
 	   ./physics/num_parthds.F                                                   \
 	   ./physics/wv_saturation.F
 
@@ -174,19 +178,27 @@ CAPS = $(CAPS_F90:.F90=.o)
 
 all default: depend $(LIBRARY)
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+LIBRARY_FULL_NAME = $(subst .dylib,.$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH).dylib,$(LIBRARY))
+$(LIBRARY): $(OBJS) $(CAPS)
+	$(FC) -shared $(OBJS) $(CAPS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY_FULL_NAME)
+	ln -sf $(LIBRARY_FULL_NAME) $(LIBRARY)
+	ln -sf $(LIBRARY_FULL_NAME) $(subst .dylib,.$(VER_MAJOR).dylib,$(LIBRARY))
+else
 $(LIBRARY): $(OBJS) $(CAPS)
 	$(FC) -shared -Wl,-soname,$(LIBRARY).$(VER_MAJOR) $(OBJS) $(CAPS) $(LDFLAGS) $(NCEPLIBS) -o $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY)
 	ln -sf $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH) $(LIBRARY).$(VER_MAJOR)
+endif
 
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
 
 ./radiation_aerosols.o : ./gfsphys/radiation_aerosols.f
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
+	$(FC) $(CPPDEFS) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
 
 ./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
+	$(FC) $(CPPDEFS) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
 
 ifneq (,$(findstring PGIFIX,$(CPPDEFS)))
 $(CAPS):
