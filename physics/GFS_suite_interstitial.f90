@@ -18,7 +18,7 @@
 !! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
 !! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
 !! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
-!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | index         |    0 | integer                       |           |   out  | F        |
+!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | count         |    0 | integer                       |           |   out  | F        |
 !! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
 !! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
 !! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
@@ -35,6 +35,13 @@
         integer,                          intent(out) :: tottracer, trc_shft, tracers, ntk
         logical, dimension(size(Grid%xlon,1)), intent(out) :: skip_macro
         real(kind=kind_phys), allocatable, intent(out) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+
+        ! DH*
+        ! ATTENTION - tottracer, trc_shft, tracers and ntk will be calculated as part of Interstitial_type -> create
+        ! and arrays clw (and potentially cnvc will be allocated there as well NEED TO REMOVE FROM HERE!!!
+        write(0,*) 'ATTENTION - THE ENTIRE CODE CONTAINED IN GFS_suite_interstitial_1_run'
+        write(0,*) 'must be skipped once the full CCPP-version is used (tracers are calculated'
+        write(0,*) 'and fields are allocated in GFS_typedefs.F90 ->interstitial_create)'
 
         tottracer = 0            ! no convective transport of tracers
         if (Model%trans_trac .or. Model%cscnv) then
@@ -62,6 +69,8 @@
         if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
           allocate (cnvc(size(Grid%xlon,1),Model%levs), cnvw(size(Grid%xlon,1),Model%levs))
         endif
+
+        ! *DH
 
       end subroutine GFS_suite_interstitial_1_run
 

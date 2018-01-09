@@ -614,6 +614,7 @@ module module_physics_driver
       !   allocate (cnvc(ix,levs), cnvw(ix,levs))
       ! endif
 
+      ! DH* this entire routine can/must be removed once the full CCPP version is used - part of interstitial_create in GFS_typedefs.F90 *DH
       call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 !
 !  ---  set initial quantities for stochastic physics deltas
