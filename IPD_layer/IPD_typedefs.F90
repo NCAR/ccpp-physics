@@ -7,22 +7,24 @@ module IPD_typedefs
                                        sfcprop_type,  coupling_type,     &
                                        grid_type,     tbd_type,          &
                                        cldprop_type,  radtend_type,      &
-                                       intdiag_type,  sfccycle_type
+                                       intdiag_type,  sfccycle_type,     &
+                                       interstitial_type
 
 !--------------------
 !  IPD sub-containers
 !--------------------
   type IPD_data_type
-    type(statein_type)  :: Statein
-    type(stateout_type) :: Stateout
-    type(sfcprop_type)  :: Sfcprop
-    type(coupling_type) :: Coupling
-    type(grid_type)     :: Grid
-    type(tbd_type)      :: Tbd
-    type(cldprop_type)  :: Cldprop
-    type(radtend_type)  :: Radtend
-    type(intdiag_type)  :: Intdiag
-    type(sfccycle_type) :: Sfccycle
+    type(statein_type)      :: Statein
+    type(stateout_type)     :: Stateout
+    type(sfcprop_type)      :: Sfcprop
+    type(coupling_type)     :: Coupling
+    type(grid_type)         :: Grid
+    type(tbd_type)          :: Tbd
+    type(cldprop_type)      :: Cldprop
+    type(radtend_type)      :: Radtend
+    type(intdiag_type)      :: Intdiag
+    type(sfccycle_type)     :: Sfccycle
+    type(interstitial_type) :: Interstitial
   end type IPD_data_type
 
 

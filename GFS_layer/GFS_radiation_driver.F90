@@ -302,7 +302,7 @@
 
 
 !========================================!
-      module module_radiation_driver        !
+      module module_radiation_driver     !
 !........................................!
 !
       use physparam
@@ -340,7 +340,8 @@
                                            GFS_tbd_type,                 &
                                            GFS_cldprop_type,             &
                                            GFS_radtend_type,             &
-                                           GFS_diag_type
+                                           GFS_diag_type,                &
+                                           LTP
 !
       implicit   none
 !
@@ -381,10 +382,11 @@
 !! control parameter ioznflg=0)
       logical :: loz1st =.true.
 
-!> optional extra top layer on top of low ceiling models
-!!\n LTP=0: no extra top layer
-      integer, parameter :: LTP = 0   ! no extra top layer
-!     integer, parameter :: LTP = 1   ! add an extra top layer
+!!> optional extra top layer on top of low ceiling models
+!!!\n LTP=0: no extra top layer
+!!!\n this has been moved to GFS_typedefs.F90, see comment there
+!      integer, parameter :: LTP = 0   ! no extra top layer
+!!     integer, parameter :: LTP = 1   ! add an extra top layer
 
 !> control flag for extra top layer
       logical, parameter :: lextop = (LTP > 0)

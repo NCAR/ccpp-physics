@@ -1,17 +1,18 @@
 module physics_abstraction_layer
 
-  use GFS_typedefs,    only: init_type        =>  GFS_init_type,     &
-                             control_type     =>  GFS_control_type,  &
-                             statein_type     =>  GFS_statein_type,  &
-                             stateout_type    =>  GFS_stateout_type, &
-                             sfcprop_type     =>  GFS_sfcprop_type,  &
-                             sfccycle_type    =>  GFS_sfccycle_type, &
-                             coupling_type    =>  GFS_coupling_type, &
-                             grid_type        =>  GFS_grid_type,     &
-                             tbd_type         =>  GFS_tbd_type,      &
-                             cldprop_type     =>  GFS_cldprop_type,  &
-                             radtend_type     =>  GFS_radtend_type,  &
-                             intdiag_type     =>  GFS_diag_type
+  use GFS_typedefs,    only: init_type         =>  GFS_init_type,       &
+                             control_type      =>  GFS_control_type,    &
+                             statein_type      =>  GFS_statein_type,    &
+                             stateout_type     =>  GFS_stateout_type,   &
+                             sfcprop_type      =>  GFS_sfcprop_type,    &
+                             sfccycle_type     =>  GFS_sfccycle_type,   &
+                             coupling_type     =>  GFS_coupling_type,   &
+                             grid_type         =>  GFS_grid_type,       &
+                             tbd_type          =>  GFS_tbd_type,        &
+                             cldprop_type      =>  GFS_cldprop_type,    &
+                             radtend_type      =>  GFS_radtend_type,    &
+                             intdiag_type      =>  GFS_diag_type,       &
+                             interstitial_type =>  GFS_interstitial_type
 
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
                              time_vary_step   =>  GFS_time_vary_step,   &
@@ -34,6 +35,7 @@ module physics_abstraction_layer
   public  cldprop_type
   public  radtend_type
   public  intdiag_type
+  public  interstitial_type
 
 !--------------------------
 !  public physics functions

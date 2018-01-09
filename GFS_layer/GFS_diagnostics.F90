@@ -15,7 +15,8 @@ module physics_diag_layer
                                        coupling_type, grid_type,     &
                                        tbd_type,      cldprop_type,  &
                                        radtend_type,  intdiag_type,  &
-                                       sfccycle_type, init_type
+                                       sfccycle_type, interstitial_type, &
+                                       init_type
 
   public diag_populate
 
@@ -25,8 +26,9 @@ module physics_diag_layer
 !----------------------
 ! GFS_populate_IPD_Diag
 !----------------------
-  subroutine diag_populate (IPD_Diag, Model, Statein, Stateout, Sfcprop, Coupling,  &
-                            Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle, Init_parm)
+  subroutine diag_populate (IPD_Diag, Model, Statein, Stateout, Sfcprop, Coupling,     &
+                            Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle, Interstitial, &
+                            Init_parm)
 !------------------------------------------------------------------------------------------!
 !   IPD_METADATA                                                                           !
 !     IPD_Diag%name           [char*32 ]   variable name in source  [char*32]              !
@@ -61,6 +63,7 @@ module physics_diag_layer
     type(radtend_type),         intent(in)    :: Radtend(:)
     type(intdiag_type),         intent(in)    :: Diag(:)
     type(sfccycle_type),        intent(in)    :: Sfccycle(:)
+    type(interstitial_type),    intent(in)    :: Interstitial(:)
     type(init_type),            intent(in)    :: Init_parm
 
     !--- local variabls

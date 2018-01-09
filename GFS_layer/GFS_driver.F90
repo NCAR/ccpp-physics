@@ -7,7 +7,8 @@ module GFS_driver
                                       GFS_control_type, GFS_grid_type,     &
                                       GFS_tbd_type,     GFS_cldprop_type,  &
                                       GFS_radtend_type, GFS_diag_type,     &
-                                      GFS_sfccycle_type
+                                      GFS_sfccycle_type,                   &
+                                      GFS_interstitial_type
   use module_radiation_driver,  only: GFS_radiation_driver, radupdate
   use module_physics_driver,    only: GFS_physics_driver
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
@@ -98,7 +99,7 @@ module GFS_driver
 !--------------
   subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,    &
                              Coupling, Grid, Tbd, Cldprop, Radtend, & 
-                             Diag, Sfccycle, Init_parm)
+                             Diag, Sfccycle, Interstitial, Init_parm)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -107,18 +108,19 @@ module GFS_driver
 
 
     !--- interface variables
-    type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein(:)
-    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
-    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
-    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
-    type(GFS_diag_type),      intent(inout) :: Diag(:)
-    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle(:)
-    type(GFS_init_type),      intent(in)    :: Init_parm
+    type(GFS_control_type),      intent(inout) :: Model
+    type(GFS_statein_type),      intent(inout) :: Statein(:)
+    type(GFS_stateout_type),     intent(inout) :: Stateout(:)
+    type(GFS_sfcprop_type),      intent(inout) :: Sfcprop(:)
+    type(GFS_coupling_type),     intent(inout) :: Coupling(:)
+    type(GFS_grid_type),         intent(inout) :: Grid(:)
+    type(GFS_tbd_type),          intent(inout) :: Tbd(:)
+    type(GFS_cldprop_type),      intent(inout) :: Cldprop(:)
+    type(GFS_radtend_type),      intent(inout) :: Radtend(:)
+    type(GFS_diag_type),         intent(inout) :: Diag(:)
+    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle(:)
+    type(GFS_interstitial_type), intent(inout) :: Interstitial(:)
+    type(GFS_init_type),         intent(in)    :: Init_parm
 
     !--- local variables
     integer :: nb
@@ -148,18 +150,20 @@ module GFS_driver
     call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
     do nb = 1,nblks
-      call Statein  (nb)%create (Init_parm%blksz(nb), Model)
-      call Stateout (nb)%create (Init_parm%blksz(nb), Model)
-      call Sfcprop  (nb)%create (Init_parm%blksz(nb), Model)
-      call Coupling (nb)%create (Init_parm%blksz(nb), Model)
-      call Grid     (nb)%create (Init_parm%blksz(nb), Model)
-      call Tbd      (nb)%create (Init_parm%blksz(nb), Model)
-      call Cldprop  (nb)%create (Init_parm%blksz(nb), Model)
-      call Radtend  (nb)%create (Init_parm%blksz(nb), Model)
+      call Statein      (nb)%create (Init_parm%blksz(nb), Model)
+      call Stateout     (nb)%create (Init_parm%blksz(nb), Model)
+      call Sfcprop      (nb)%create (Init_parm%blksz(nb), Model)
+      call Coupling     (nb)%create (Init_parm%blksz(nb), Model)
+      call Grid         (nb)%create (Init_parm%blksz(nb), Model)
+      call Tbd          (nb)%create (Init_parm%blksz(nb), Model)
+      call Cldprop      (nb)%create (Init_parm%blksz(nb), Model)
+      call Radtend      (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
-      call Diag     (nb)%create (Init_parm%blksz(nb), Model)
+      call Diag         (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of sfccycle
-      call Sfccycle (nb)%create (Init_parm%blksz(nb), Model)
+      call Sfccycle     (nb)%create (Init_parm%blksz(nb), Model)
+      !--- interstitial variables for GFS physics
+      call Interstitial (nb)%create (Init_parm%blksz(nb), Model)
       !--- store own block number in Tbd(nb)%blkno
       Tbd(nb)%blkno = nb
     enddo

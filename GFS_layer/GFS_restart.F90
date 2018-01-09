@@ -7,7 +7,8 @@ module physics_restart_layer
                                        coupling_type, grid_type,     &
                                        tbd_type,      cldprop_type,  &
                                        radtend_type,  intdiag_type,  &
-                                       sfccycle_type, init_type
+                                       sfccycle_type, interstitial_type, &
+                                       init_type
 
   public restart_populate
 
@@ -17,8 +18,9 @@ module physics_restart_layer
 !---------------------
 ! GFS_restart_populate
 !---------------------
-  subroutine restart_populate (IPD_Restart, Model, Statein, Stateout, Sfcprop, &
-                               Coupling, Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle, Init_parm)
+  subroutine restart_populate (IPD_Restart, Model, Statein, Stateout, Sfcprop,        &
+                               Coupling, Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle, &
+                               Interstitial, Init_parm)
 !----------------------------------------------------------------------------------------!
 !   IPD_METADATA                                                                         !
 !     IPD_Restart%num2d          [int*4  ]  number of 2D variables to output             !
@@ -40,6 +42,7 @@ module physics_restart_layer
     type(radtend_type),         intent(in)    :: Radtend(:)
     type(intdiag_type),         intent(in)    :: Diag(:)
     type(sfccycle_type),        intent(in)    :: Sfccycle(:)
+    type(interstitial_type),    intent(in)    :: Interstitial(:)
     type(init_type),            intent(in)    :: Init_parm
 
     !--- local variables

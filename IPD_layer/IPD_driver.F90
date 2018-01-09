@@ -12,7 +12,8 @@ module IPD_driver
 
   use physics_restart_layer,      only: restart_populate
 
-#ifdef CCPP
+#if 0
+def CCPP
   use fms_mod,            only: error_mesg, FATAL
   use ccpp_types,         only: ccpp_t
   use ccpp,               only: ccpp_init
@@ -24,9 +25,10 @@ module IPD_driver
   use iso_c_binding,      only: c_loc
 #endif
 
-       implicit none
+  implicit none
 
-#ifdef CCPP
+#if 0
+def CCPP
 !------------------------------------------------------!
 !  CCPP container                                      !
 !------------------------------------------------------!
@@ -52,7 +54,8 @@ type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
   public IPD_radiation_step
   public IPD_physics_step1
   public IPD_physics_step2
-#ifdef CCPP
+#if 0
+!ifdef CCPP
   public IPD_step
 #endif
 
@@ -74,21 +77,24 @@ type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
     call initialize (IPD_Control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout,      &
                      IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid, &
                      IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,   &
-                     IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
+                     IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle,                   &
+                     IPD_Data(:)%Interstitial, IPD_init_parm)
 
 
     !--- populate/associate the Diag container elements
     call diag_populate (IPD_Diag, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
                                   IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
                                   IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                  IPD_Data%Intdiag, IPD_Data%Sfccycle, IPD_init_parm)
+                                  IPD_Data%Intdiag, IPD_Data%Sfccycle,                &
+                                  IPD_Data(:)%Interstitial, IPD_init_parm)
 
 
     !--- allocate and populate/associate the Restart container elements
     call restart_populate (IPD_Restart, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
                                         IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
                                         IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                        IPD_Data%Intdiag, IPD_Data%Sfccycle, IPD_init_parm)
+                                        IPD_Data%Intdiag, IPD_Data%Sfccycle,                &
+                                        IPD_Data(:)%Interstitial, IPD_init_parm)
 
   end subroutine IPD_initialize
 
@@ -162,7 +168,8 @@ type(ccpp_t), dimension(:), allocatable, save, target :: cdata_block
   end subroutine IPD_physics_step2
 
 
-#ifdef CCPP
+#if 0
+def CCPP
   !-------------------------------
   !  IPD step generalized for CCPP
   !-------------------------------

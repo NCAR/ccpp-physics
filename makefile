@@ -31,9 +31,11 @@ CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 ifneq (,$(findstring CCPP,$(CPPDEFS)))
     # IPD with CCPP
     IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
+    IPD_CCPP_DRIVER = ./IPD_layer/IPD_CCPP_driver.F90
 else
     # IPD without CCPP
     IPD_DRIVER_CAP =
+    IPD_CCPP_DRIVER =
 endif
 
 SRCS_f   =  \
@@ -157,7 +159,8 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_restart.F90                                               \
 	   ./GFS_layer/GFS_typedefs.F90                                              \
 	   ./IPD_layer/IPD_driver.F90                                                \
-	   ./IPD_layer/IPD_typedefs.F90
+	   ./IPD_layer/IPD_typedefs.F90                                              \
+	   $(IPD_CCPP_DRIVER)
 
 SRCS_c   =
 
