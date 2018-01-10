@@ -49,10 +49,10 @@
 !!| sigmaf         | vegetation_area_fraction                                    | areal fractional cover of green vegetation      | frac       | 1    | real    | kind_phys | in     | F        |
 !!| vegtype        | cell_vegetation_type                                        | vegetation type at each grid cell               | index      | 1    | integer |           | in     | F        |
 !!| shdmax         | maximum_vegetation_area_fraction                            | max fractnl cover of green veg                  | frac       | 1    | real    | kind_phys | in     | F        |
-!!| ivegsrc        | vegetation_type                                             | vegetation type data source umd or igbp         | index      |    0 | integer |           | in     | F        |
+!!| ivegsrc        | vegetation_type                                             | vegetation type data source umd or igbp         | index      | 0    | integer |           | in     | F        |
 !!| tsurf          | surface_skin_temperature_after_iteration                    | surface skin temperature after iteration        | K          | 1    | real    | kind_phys | in     | F        |
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
-!!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 1    | logical |           | in     | F        |
+!!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
