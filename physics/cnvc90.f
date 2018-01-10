@@ -13,8 +13,8 @@
 !! | local var name | longname                                                | description                                             | units | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------------|---------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | clstp          | convective_cloud_switch                                 | switch for saving convective clouds                     | none  | 0    | real    | kind_phys | in     | F        |
-!! | im             | horizontal_loop_extent                                  | horizontal loop extent                                  | index | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                    | horizontal dimension                                    | index | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                  | horizontal loop extent                                  | count | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                    | horizontal dimension                                    | count | 0    | integer | default   | in     | F        |
 !! | rn             | timestep_convective_rainfall_amount                     | convective rainfall amount                              | m     | 1    | real    | kind_phys | in     | F        |
 !! | kbot           | vertical_index_at_cloud_base                            | vertical index at cloud base                            | index | 1    | integer | default   | in     | F        |
 !! | ktop           | vertical_index_at_cloud_top                             | vertical index at cloud top                             | index | 1    | integer | default   | in     | F        |

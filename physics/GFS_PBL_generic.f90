@@ -14,7 +14,7 @@
 !> \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! | local var name | longname                                               | description                                        | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|----------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent, start at 1                 | index         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                             | count         |    0 | integer |           | in     | F        |
 !! | levs           | vertical_dimension                                     | vertical layer dimension                           | index         |    0 | integer |           | in     | F        |
 !! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer |           | in     | F        |
 !!

@@ -21,7 +21,7 @@
 !! \section arg_table_GFS_surface_loop_control_part1_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
 !!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | real    | kind_phys | in     | F        |
 !!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level           | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                          | flag for guess run                         | flag       | 1    | logical |           | inout  | F        |
@@ -74,7 +74,7 @@
 !! \section arg_table_GFS_surface_loop_control_part2_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
 !!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | real    | kind_phys | in     | F        |
 !!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level           | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                          | flag for guess run                         | flag       | 1    | logical |           | inout  | F        |

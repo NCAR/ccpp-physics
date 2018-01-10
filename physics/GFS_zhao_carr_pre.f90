@@ -16,8 +16,8 @@
 !> \section arg_table_GFS_zhao_carr_pre_run Argument Table
 !! | local var name | longname                                                   | description                                               | units       | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
-!! |   im           | horizontal_loop_extent                                     | horizontal loop extent, start at 1                       | index       | 0    | integer |           | in     |  F       |
-!! |   ix           | horizontal_dimension                                       | horizontal dimension                                     | index       | 0    | integer |           | in     |  F       |
+!! |   im           | horizontal_loop_extent                                     | horizontal loop extent                                   | count       | 0    | integer |           | in     |  F       |
+!! |   ix           | horizontal_dimension                                       | horizontal dimension                                     | count       | 0    | integer |           | in     |  F       |
 !! |   levs         | vertical_dimension                                         | vertical layer dimension                                 | index       | 0    | integer |           | in     |  F       |
 !! |   cwm          | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !! |   clw1         | cloud_ice_specific_humidity                                | cloud ice specific humidity                              | kg kg-1     | 2    | real    | kind_phys | out    |  F       |

@@ -21,7 +21,7 @@
 !! \section arg_table_sfc_diag_run Arguments
 !!| local var name | longname                                                    | description                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1              | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent                          | count      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                        | surface pressure                                | Pa         | 1    | real    | kind_phys | in     | F        |
 !!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
