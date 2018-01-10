@@ -26,7 +26,7 @@
 !! \section arg_table_sfc_sice_run Arguments
 !! | local var name | longname                                              | description                                              | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|----------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1                       | index         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                                   | count         |    0 | integer |           | in     | F        |
 !! | km             | soil_vertical_dimension                               | vertical loop extent for soil levels, start at 1         | index         |    0 | integer |           | in     | F        |
 !! | ps             | surface_air_pressure                                  | surface pressure                                         | Pa            |    1 | real    | kind_phys | in     | F        | 
 !! | u1             | x_wind_at_lowest_model_layer                          | u component of surface layer wind                        | m s-1         |    1 | real    | kind_phys | in     | F        |
@@ -746,7 +746,7 @@
 !! \section arg_table_sfc_sice_pre_run Argument Table
 !! | local var name | longname                                              | description                                              | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|----------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1                       | index         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                                   | count         |    0 | integer |           | in     | F        |
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                              | frac          |    1 | real    | kind_phys | in     | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                                        | m             |    1 | real    | kind_phys | in     | F        | 
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                              | K             |    1 | real    | kind_phys | in     | F        |
@@ -813,7 +813,7 @@
 !! \section arg_table_sfc_sice_post_run Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1          | index         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag          |    1 | integer |           | in     | F        |
 !! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
 !! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        | 

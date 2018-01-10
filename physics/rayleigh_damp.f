@@ -11,9 +11,9 @@
 !! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
 !! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       | 0    | logical | default   | in     | F        |
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | index      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | index      | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | count      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | count      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                               | horizontal dimension                                 | count      | 0    | integer | default   | in     | F        |
 !! | km             | vertical_dimension                                   | number of vertical layers                            | index      | 0    | integer | default   | in     | F        |
 !! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      | 2    | real    | kind_phys | inout  | F        |
 !! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      | 2    | real    | kind_phys | inout  | F        |

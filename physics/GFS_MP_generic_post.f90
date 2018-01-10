@@ -20,8 +20,8 @@
 !! \section arg_table_GFS_MP_generic_post_run Argument Table
 !! | local var name | longname                                                   | description                                                    | units       | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
-!! |   im           | horizontal_loop_extent                                     | horizontal loop extent, start at 1                             | index       | 0    | integer |           | in     |  F       |
-!! |   ix           | horizontal_dimension                                       | horizontal dimension                                           | index       | 0    | integer |           | in     |  F       |
+!! |   im           | horizontal_loop_extent                                     | horizontal loop extent                                         | count       | 0    | integer |           | in     |  F       |
+!! |   ix           | horizontal_dimension                                       | horizontal dimension                                           | count       | 0    | integer |           | in     |  F       |
 !! |   levs         | vertical_dimension                                         | vertical layer dimension                                       | index       | 0    | integer |           | in     |  F       |
 !! |   dtf          | time_step_for_dynamics                                     | dynamics time step                                             | s           | 0    | real    | kind_phys | in     |  F       |
 !! |   del          | air_pressure_difference_between_midlayers                  | air pressure difference between midlayers                      | Pa          | 2    | real    | kind_phys | in     |  F       |

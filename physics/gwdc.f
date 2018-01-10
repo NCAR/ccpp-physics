@@ -84,7 +84,7 @@
 !! \section arg_table_gwdc_pre_run Argument Table
 !! | local var name | longname                                                                 | description                                                   | units | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | index | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | count | 0    | integer | default   | in     | F        |
 !! | cgwf           | multiplication_factors_for_convective_gravity_wave_drag                  | multiplication factors for convective gravity wave drag       | none  | 1    | real    | kind_phys | in     | F        |
 !! | dx             | cell_size                                                                | grid size in zonal direction                                  | m     | 1    | real    | kind_phys | in     | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes | none  |    1 | real    | kind_phys | in     | F        |
@@ -240,9 +240,9 @@
 !! \section arg_table_gwdc_run Argument Table
 !! | local var name | longname                                               | description                                                        | units      | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------|--------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                             | index      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                   | horizontal dimension                                               | index      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                                 | horizontal dimension                                               | index      | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                             | count      | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                   | horizontal dimension                                               | count      | 0    | integer | default   | in     | F        |
+!! | iy             | horizontal_loop_extent                                 | horizontal dimension                                               | count      | 0    | integer | default   | in     | F        |
 !! | km             | vertical_dimension                                     | number of vertical layers                                          | index      | 0    | integer | default   | in     | F        |
 !! | lat            | latitude_index_in_debug_printouts                      | latitude index in debug printouts                                  | index      | 0    | integer | default   | in     | F        |
 !! | u1             | x_wind                                                 | zonal wind                                                         | m s-1      | 2    | real    | kind_phys | in     | F        |
@@ -266,7 +266,7 @@
 !! | dlength        | characteristic_grid_length_scale                       | representative horizontal length scale of grid box                 | m          | 1    | real    | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                             | flag for debugging printouts                                       | flag       | 0    | logical | default   | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                     | horizontal index of column used in debugging printouts             | index      | 0    | integer | default   | in     | F        |
-!! | fhour          | forecast_time                                          | forecast hour                                                      | hr         | 0    | real    | kind_phys | in     | F        |
+!! | fhour          | forecast_time                                          | forecast hour                                                      | h          | 0    | real    | kind_phys | in     | F        |
 !! | utgwc          | tendency_of_x_wind_due_to_convective_gravity_wave_drag | zonal wind tendency due to convective gravity wave drag            | m s-2      | 2    | real    | kind_phys | out    | F        |
 !! | vtgwc          | tendency_of_y_wind_due_to_convective_gravity_wave_drag | meridional wind tendency due to convective gravity wave drag       | m s-2      | 2    | real    | kind_phys | out    | F        |
 !! | tauctx         | instantaneous_x_stress_due_to_gravity_wave_drag        | zonal stress at cloud top due to convective gravity wave drag      | Pa         | 1    | real    | kind_phys | out    | F        |
@@ -1587,7 +1587,7 @@
 !! \section arg_table_gwdc_post_run Argument Table
 !! | local var name | longname                                                        | description                                                              | units      | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | index      | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      | 0    | integer | default   | in     | F        |
 !! | levs           | vertical_dimension                                              | number of vertical layers                                                | index      | 0    | integer | default   | in     | F        |
 !! | lssav          | flag_diagnostics                                                | flag for calculating diagnostic fields                                   | flag       | 0    | logical | default   | in     | F        |
 !! | ldiag3d        | flag_diagnostics_3D                                             | flag for calculating 3-D diagnostic fields                               | flag       | 0    | logical | default   | in     | F        |

@@ -21,7 +21,7 @@
 !! \section arg_table_lsm_noah_pre_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
 !!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | index      |    0 | integer |           | in     | F        |
 !!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
 !!| runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
@@ -88,7 +88,7 @@
 !! \section arg_table_lsm_noah_post_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent, start at 1         | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
 !!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | index      |    0 | integer |           | in     | F        |
 !!| flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical |           | in     | F        |
 !!| dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real    | kind_phys | in     | F        |
@@ -256,7 +256,7 @@
 !! \section arg_table_lsm_noah_run Arguments
 !!| local var name | longname                                                                     | description                                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1                              | index      |    0 | integer |           | in     | F        |
+!!| im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count      |    0 | integer |           | in     | F        |
 !!| km             | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | index      |    0 | integer |           | in     | F        |
 !!| ps             | surface_air_pressure                                                         | surface pressure                                                | Pa         |    1 | real    | kind_phys | in     | F        |
 !!| u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1      |    1 | real    | kind_phys | in     | F        |

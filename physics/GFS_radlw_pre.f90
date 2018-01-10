@@ -18,7 +18,7 @@
 !! | Grid              | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_grid_type                 |           | in     | F        |
 !! | Sfcprop           | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_sfcprop_type              |           | in     | F        |
 !! | Radtend           | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_radtend_type              |           | inout  | F        |
-!! | im                | horizontal_loop_extent                    | horizontal loop extent, start at 1                                   | index    | 0    | integer                       |           | in     | F        |
+!! | im                | horizontal_loop_extent                    | horizontal loop extent                                               | count    | 0    | integer                       |           | in     | F        |
 !! | tsfg              | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
 !! | tsfa              | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
 !!

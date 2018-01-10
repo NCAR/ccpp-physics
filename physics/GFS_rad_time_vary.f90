@@ -16,10 +16,10 @@
 !! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | in     | F        |
 !! |   Statein         | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_statein_type              |           | in     | F        |
 !! |   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_tbd_type                  |           | in     | F        |
-!! |   blksz           | horizontal_block_size                                         | horizontal block size for explicit data blocking                              | none     |  1   | integer                       |           | in     | F        |
+!! |   blksz           | horizontal_block_size                                         | horizontal block size for explicit data blocking                              | count    |  0   | integer                       |           | in     | F        |
 !! |   sec             | seconds_elapsed_since_model_initialization                    | seconds elapsed since model initialization                                    | s        |  0   | real                          | kind_phys | in     | F        |
-!! |   ictmflg         | flag_for_initial_time-date_control                            | flag for initial time/date control                                            | none     |  0   | integer                       |           | in     | F        |
-!! |   isolar          | flag_for_solar_constant                                       | solar constant control flag                                                   | none     |  0   | integer                       |           | in     | F        |
+!! |   ictmflg         | flag_for_initial_time-date_control                            | flag for initial time/date control                                            | flag     |  0   | integer                       |           | in     | F        |
+!! |   isolar          | flag_for_solar_constant                                       | solar constant control flag                                                   | flag     |  0   | integer                       |           | in     | F        |
 !!
       subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, blksz, sec, ictmflg, isolar)
 

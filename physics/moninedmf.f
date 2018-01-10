@@ -30,8 +30,8 @@
 !! \section arg_table_edmf_run
 !! | local var name | longname                                                                    | description                                           | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | index         |    0 | integer |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent, start at 1                    | index         |    0 | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer |           | in     | F        |
 !! | km             | vertical_dimension                                                          | vertical layer dimension                              | index         |    0 | integer |           | in     | F        |
 !! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                                           | cloud condensate index in tracer array                | index         |    0 | integer |           | in     | F        |

@@ -61,8 +61,8 @@
 !! \section arg_table_ozphys_run Argument Table
 !! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                              | horizontal dimension                              | index   | 0    | integer | default   | in     | F        |
-!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | index   | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   | 0    | integer | default   | in     | F        |
 !! | levs           | vertical_dimension                                | number of vertical layers                         | index   | 0    | integer | default   | in     | F        |
 !! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | index   | 0    | integer | default   | in     | F        |
 !! | dt             | time_step_for_physics                             | physics time step                                 | s       | 0    | real    | kind_phys | in     | F        |
@@ -245,7 +245,7 @@
 !! \section arg_table_ozphys_post_run Argument Table
 !! | local var name | longname                                     | description                                  | units   | rank | type                       | kind      | intent | optional |
 !! |----------------|----------------------------------------------|----------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                         | horizontal dimension                         | index   | 0    | integer                    | default   | in     | F        |
+!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   | 0    | integer                    | default   | in     | F        |
 !! | levs           | vertical_dimension                           | number of vertical layers                    | index   | 0    | integer                    | default   | in     | F        |
 !! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer                    | default   | in     | F        |
 !! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real                       | kind_phys | in     | F        |

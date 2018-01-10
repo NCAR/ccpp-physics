@@ -57,7 +57,7 @@
 !! \section arg_table_sfc_nst_run Argument Table
 !! | local var name | longname                                                                     | description                                          | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|----------------------------------------------------- |---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1                   | index         | 0    | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                               | count         | 0    | integer |           | in     | F        |
 !! | km             | soil_vertical_dimension                                                      | vertical layer dimension                             | index         | 0    | integer |           | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                     | Pa            | 1    | real    | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                    | m s-1         | 1    | real    | kind_phys | in     | F        |
@@ -744,7 +744,7 @@ cc
 !! \section arg_table_sfc_nst_pre_run Argument Table
 !! | local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                         | count         | 0    | integer |           | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
 !! | oro            | orography                                                                    | orography                                      | m             | 1    | real    | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          | m             | 1    | real    | kind_phys | in     | F        |
@@ -843,7 +843,7 @@ cc
 !! \section arg_table_sfc_nst_post_run Argument Table
 !! | local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent, start at 1             | index         | 0    | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                         | count         | 0    | integer |           | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
 !! | oro            | orography                                                                    | orography                                      | m             | 1    | real    | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                                         | unfiltered orography                           | m             | 1    | real    | kind_phys | in     | F        |
