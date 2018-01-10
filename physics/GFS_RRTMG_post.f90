@@ -5,33 +5,33 @@
 
 !>\defgroup GFS_RRTMG_post GFS RRTMG Scheme Post
 !! @{
-!>\section arg_table_GFS_RRTMG_post_init Argument Table
+!> \section arg_table_GFS_RRTMG_post_init Argument Table
 !!
        subroutine GFS_RRTMG_post_init ()
        end subroutine GFS_RRTMG_post_init
 
-!>\section arg_table_GFS_RRTMG_post_run Argument Table
-!!| local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
-!!|-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!!|   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
-!!|   Grid            | FV3-GFS_Grid_type                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!!|   Diag            | FV3-GFS_Diag_type                                             | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |  0   | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
-!!|   Radtend         | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in     | F        |
-!!|   Statein         | FV3-GFS_Stateout_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!!|   Coupling        | FV3-GFS_Coupling_type                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout  | F        |
-!!|   scmpsw          | surface_downward_shortwave_flux_type                          | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | in     | F        |
-!!|   im              | horizontal_loop_extent                                        | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | in     | F        |
-!!|   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in     | F        |   
-!!|   ltp             | extra_top_layer                                               | extra top layers                                                              | none     |  0   | integer                       |           | in     | F        |
-!!|   kt              | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |  0   | integer                       |           | in     | F        |
-!!|   kb              | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |  0   | integer                       |           | in     | F        |
-!!|   kd              | vertical_index_difference_between_in-out_and_local            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in     | F        |
-!!|   raddt           | time_step_for_radiation                                       | radiation time step                                                           | s        |  0   | real                          | kind_phys | in     | F        |
-!!|   aerodp          | atmosphere_optical_thickness_due_to_ambient_aerosol_particals | vertical integrated optical depth for various aerosol species                 | none     |  2   | real                          | kind_phys | in     | F        |               
-!!|   cldsa           | cloud_area_fraction                                           | fraction of clouds for low, middle, high, total and BL                        | frac     |  2   | real                          | kind_phys | in     | F        |
-!!|   mtopa           | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |  2   | integer                       |           | in     | F        |
-!!|   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | in     | F        |
-!!|   clouds1         | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |  2   | real                          | kind_phys | in     | F        |
+!> \section arg_table_GFS_RRTMG_post_run Argument Table
+!! | local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
+!! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
+!! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! |   Grid            | FV3-GFS_Grid_type                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! |   Diag            | FV3-GFS_Diag_type                                             | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |  0   | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! |   Radtend         | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | in     | F        |
+!! |   Statein         | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! |   Coupling        | FV3-GFS_Coupling_type                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout  | F        |
+!! |   scmpsw          | components_of_surface_downward_shortwave_fluxes               | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | in     | F        |
+!! |   im              | horizontal_loop_extent                                        | horizontal loop extent, start at 1                                            | index    |  0   | integer                       |           | in     | F        |
+!! |   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in     | F        |   
+!! |   ltp             | extra_top_layer                                               | extra top layers                                                              | none     |  0   | integer                       |           | in     | F        |
+!! |   kt              | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |  0   | integer                       |           | in     | F        |
+!! |   kb              | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |  0   | integer                       |           | in     | F        |
+!! |   kd              | vertical_index_difference_between_in-out_and_local            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in     | F        |
+!! |   raddt           | time_step_for_radiation                                       | radiation time step                                                           | s        |  0   | real                          | kind_phys | in     | F        |
+!! |   aerodp          | atmosphere_optical_thickness_due_to_ambient_aerosol_particals | vertical integrated optical depth for various aerosol species                 | none     |  2   | real                          | kind_phys | in     | F        |               
+!! |   cldsa           | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle, high, total and BL                        | frac     |  2   | real                          | kind_phys | in     | F        |
+!! |   mtopa           | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |  2   | integer                       |           | in     | F        |
+!! |   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | in     | F        |
+!! |   clouds1         | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |  2   | real                          | kind_phys | in     | F        |
 !!
        subroutine GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,  &
                Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,    &
@@ -164,7 +164,7 @@
 !
       end subroutine GFS_RRTMG_post_run
 
-!>\section arg_table_GFS_RRTMG_post_finalize Argument Table
+!> \section arg_table_GFS_RRTMG_post_finalize Argument Table
 !!
       subroutine GFS_RRTMG_post_finalize ()
       end subroutine GFS_RRTMG_post_finalize

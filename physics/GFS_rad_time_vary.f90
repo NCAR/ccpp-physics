@@ -5,21 +5,21 @@
 
 !>\defgroup GFS_rad_time_vary GFS RRTMG Update 
 !! @{
-!!\section arg_table_GFS_rad_time_vary_init Argument Table
+!! \section arg_table_GFS_rad_time_vary_init Argument Table
 !!
       subroutine GFS_rad_time_vary_init
       end subroutine GFS_rad_time_vary_init
 
-!!\section arg_table_GFS_rad_time_vary_run Argument Table
-!!| local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
-!!|-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!!|   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
-!!|   Statein         | FV3-GFS_Stateout_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_stateout_type|           | in     | F        |
-!!|   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |           | in     | F        |
-!!|   blksz           | horizontal_block_grid_number                                  | horizontal grid number for explicit data blocking                             | none     |  1   | integer                       |           | in     | F        |
-!!|   sec             | forecast_time_at_previous_step                                | forecast time in second at previous_step                                      | s        |  0   | real                          | kind_phys | in     | F        |
-!!|   ictmflg         | flag_for_initial_time-date_control                            | flag for initial time/date control                                            | none     |  0   | integer                       |           | in     | F        |
-!!|   isolar          | flag_for_solar_constant                                       | solar constant control flag                                                   | none     |  0   | integer                       |           | in     | F        |
+!> \section arg_table_GFS_rad_time_vary_run Argument Table
+!! | local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
+!! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
+!! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in     | F        |
+!! |   Statein         | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! |   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_typedefs%GFS_tbd_type     |           | in     | F        |
+!! |   blksz           | horizontal_block_size                                         | horizontal block size for explicit data blocking                              | none     |  1   | integer                       |           | in     | F        |
+!! |   sec             | seconds_elapsed_since_model_initialization                    | seconds elapsed since model initialization                                    | s        |  0   | real                          | kind_phys | in     | F        |
+!! |   ictmflg         | flag_for_initial_time-date_control                            | flag for initial time/date control                                            | none     |  0   | integer                       |           | in     | F        |
+!! |   isolar          | flag_for_solar_constant                                       | solar constant control flag                                                   | none     |  0   | integer                       |           | in     | F        |
 !!
       subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, blksz, sec, ictmflg, isolar)
 
@@ -99,7 +99,7 @@
 
   end subroutine GFS_rad_time_vary_run
  
-!!\section arg_table_GFS_rad_time_vary_finalize Argument Table
+!> \section arg_table_GFS_rad_time_vary_finalize Argument Table
 !!
   subroutine GFS_rad_time_vary_finalize()
   end subroutine GFS_rad_time_vary_finalize

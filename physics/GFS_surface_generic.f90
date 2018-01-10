@@ -27,7 +27,6 @@
 !! | vegtype        | cell_vegetation_type                                                         | vegetation type at each grid cell                                     | index      |    1 | integer                       |           | inout  | F        |
 !! | slopetyp       | surface_slope_classification                                                 | class of sfc slope                                                    | index      |    1 | integer                       |           | inout  | F        |
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer           | ratio      |    1 | real                          | kind_phys | inout  | F        |
-!! | stsoil         | soil_temperature                                                             | soil temperature                                                      | K          |    2 | real                          | kind_phys | inout  | F        |
 !! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground       | W m-2      |    1 | real                          | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                              | K          |    1 | real                          | kind_phys | inout  | F        |
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                                    | flag       |    1 | logical                       |           | inout  | F        |
@@ -35,7 +34,7 @@
 !! | ep1d           | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                             | W m-2      |    1 | real                          | kind_phys | inout  | F        |
 !!
       subroutine GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein, adjsfcdlw, Diag, sigmaf, islmsk, &
-        soiltyp, vegtype, slopetyp, work3, stsoil, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
+        soiltyp, vegtype, slopetyp, work3, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_diag_type, GFS_radtend_type, &
@@ -55,7 +54,6 @@
 
         real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: adjsfcdlw
         real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(inout)  :: sigmaf, work3, gabsbdlw, tsurf, ep1d
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%lsoil), intent(inout) :: stsoil
 
         integer :: i
         real(kind=kind_phys), parameter :: onebg   = 1.0/con_g
@@ -83,8 +81,6 @@
 
             work3(i)   = Statein%prsik(i,1) / Statein%prslk(i,1)
         end do
-
-        stsoil(:,:) = Sfcprop%stc(:,:)
 
         !  ---  convert lw fluxes for land/ocean/sea-ice models
         !  note: for sw: adjsfcdsw and adjsfcnsw are zenith angle adjusted downward/net fluxes.
@@ -141,11 +137,10 @@
 !! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux | latent heat flux from snow depo/subl                                 | W m-2      | 1    | real                          | kind_phys | in     | F        |
 !! | snowc          | surface_snow_area_fraction                          | surface snow area fraction                                           | frac       | 1    | real                          | kind_phys | in     | F        |
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux          | latent heat flux due to snow and frz rain                            | W m-2      | 1    | real                          | kind_phys | in     | F        |
-!! | stsoil         | soil_temperature                                    | soil temperature                                                     | K          | 2    | real                          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                   | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT        |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                | Fortran DDT containing FV3-GFS surface fields                        | DDT        |    0 | GFS_typedefs%GFS_sfcprop_type |           | inout  | F        |
 !!
-      subroutine GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, trans, sbsno, snowc, snohf, stsoil, Diag, &
+      subroutine GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, trans, sbsno, snowc, snohf, Diag, &
         Sfcprop)
 
         use machine,               only: kind_phys
@@ -157,7 +152,6 @@
         type(GFS_diag_type),              intent(inout) :: Diag
 
         real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: ep1d, gflx, evbs, evcw, trans, sbsno, snowc, snohf
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%lsoil), intent(in) :: stsoil
 
         Diag%epi(:)     = ep1d(:)
         Diag%gfluxi(:)  = gflx(:)
@@ -178,8 +172,6 @@
           Diag%spfhmax(:) = max(Diag%spfhmax(:),Sfcprop%q2m(:))
           Diag%spfhmin(:) = min(Diag%spfhmin(:),Sfcprop%q2m(:))
         endif
-
-        Sfcprop%stc(:,:) = stsoil(:,:)
 
       end subroutine GFS_surface_generic_post_run
 

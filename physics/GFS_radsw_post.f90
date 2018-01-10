@@ -5,30 +5,30 @@
 
 !>\defgroup GFS_radsw_post GFS RRTMG/RADSW Scheme Post
 !! @{
-!>\section arg_table_GFS_radsw_post_init Argument Table
+!> \section arg_table_GFS_radsw_post_init Argument Table
 !!
       subroutine GFS_radsw_post_init ()
       end subroutine GFS_radsw_post_init
 
-!>\section arg_table_GFS_radsw_post_run Argument Table
-!!| local var name    | longname                                                                | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
-!!|-------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
-!!|   Model           | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
-!!|   Grid            | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
-!!|   Diag            | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |  0   | GFS_typedefs%GFS_diag_type    |           | inout     | F        |
-!!|   Radtend         | FV3-GFS_Radtend_type                                                    | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
-!!|   Coupling        | FV3-GFS_Coupling_type                                                   | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
-!!|   ltp             | extra_top_layer                                                         | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
-!!|   nday            | daytime_points_dimension                                                | daytime points dimension                                                      | index    |  0   | integer                       |           | in        | F        |
-!!|   lm              | vertical_layer_dimension_for_radiation                                  | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |   
-!!|   kd              | vertical_index_difference_between_in-out_and_local                      | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
-!!|   htswc           | tendency_of_air_temperature_due_to_shortwave_heating                    | total sky heating rate due to shortwave radiation                             | K s-1    |  2   | real                          | kind_phys | in        | F        |
-!!|   htsw0           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky | clear sky heating rates due to shortwave radiation                            | K s-1    |  2   | real                          | kind_phys | in        | F        |
-!!|   sfcalb1         | surface_albedo_due_to_near_IR_direct                                    | surface albedo due to near IR direct beam                                     | none     |  1   | real                          | kind_phys | in        | F        |
-!!|   sfcalb2         | surface_albedo_due_to_near_IR_diffused                                  | surface albedo due to near IR diffused beam                                   | none     |  1   | real                          | kind_phys | in        | F        |
-!!|   sfcalb3         | surface_albedo_due_to_uv+vis_direct                                     | surface albedo due to UV+VIS direct beam                                      | none     |  1   | real                          | kind_phys | in        | F        |
-!!|   sfcalb4         | surface_albedo_due_to_uv+vis_diffused                                   | surface albedo due to UV+VIS diffused beam                                    | none     |  1   | real                          | kind_phys | in        | F        |
-!!|   scmpsw          | surface_downward_shortwave_flux_type                                    | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | out       | F        |
+!> \section arg_table_GFS_radsw_post_run Argument Table
+!! | local var name    | longname                                                                | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
+!! |-------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
+!! |   Model           | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_typedefs%GFS_control_type |           | in        | F        |
+!! |   Grid            | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |  0   | GFS_typedefs%GFS_grid_type    |           | in        | F        |
+!! |   Diag            | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |  0   | GFS_typedefs%GFS_diag_type    |           | inout     | F        |
+!! |   Radtend         | FV3-GFS_Radtend_type                                                    | Fortran DDT containing FV3-GFS fields targetted for diagnostic output         | DDT      |  0   | GFS_typedefs%GFS_radtend_type |           | inout     | F        |
+!! |   Coupling        | FV3-GFS_Coupling_type                                                   | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |  0   | GFS_typedefs%GFS_coupling_type|           | inout     | F        |
+!! |   ltp             | extra_top_layer                                                         | extra top layers                                                              | none     |  0   | integer                       |           | in        | F        |
+!! |   nday            | daytime_points_dimension                                                | daytime points dimension                                                      | index    |  0   | integer                       |           | in        | F        |
+!! |   lm              | vertical_layer_dimension_for_radiation                                  | number of vertical layers for radiation calculation                           | index    |  0   | integer                       |           | in        | F        |   
+!! |   kd              | vertical_index_difference_between_in-out_and_local                      | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | in        | F        |
+!! |   htswc           | tendency_of_air_temperature_due_to_shortwave_heating                    | total sky heating rate due to shortwave radiation                             | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!! |   htsw0           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky | clear sky heating rates due to shortwave radiation                            | K s-1    |  2   | real                          | kind_phys | in        | F        |
+!! |   sfcalb1         | surface_albedo_due_to_near_IR_direct                                    | surface albedo due to near IR direct beam                                     | frac     |  1   | real                          | kind_phys | in        | F        |
+!! |   sfcalb2         | surface_albedo_due_to_near_IR_diffused                                  | surface albedo due to near IR diffused beam                                   | frac     |  1   | real                          | kind_phys | in        | F        |
+!! |   sfcalb3         | surface_albedo_due_to_UV_and_VIS_direct                                 | surface albedo due to UV+VIS direct beam                                      | frac     |  1   | real                          | kind_phys | in        | F        |
+!! |   sfcalb4         | surface_albedo_due_to_UV_and_VIS_diffused                               | surface albedo due to UV+VIS diffused beam                                    | frac     |  1   | real                          | kind_phys | in        | F        |
+!! |   scmpsw          | components_of_surface_downward_shortwave_fluxes                         | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | out       | F        |
 !!
       subroutine GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling, &
                  ltp, nday, lm, kd, htswc, htsw0,                          &  ! --input
@@ -131,7 +131,7 @@
 
        end subroutine GFS_radsw_post_run
  
-!>\section arg_table_GFS_radsw_post_finalize Argument Table
+!> \section arg_table_GFS_radsw_post_finalize Argument Table
 !!
        subroutine GFS_radsw_post_finalize ()
        end subroutine GFS_radsw_post_finalize

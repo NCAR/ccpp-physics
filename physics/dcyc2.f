@@ -155,7 +155,7 @@
 !! \section arg_table_dcyc2t3_run Argument Table
 !! | local var name | longname                                                                                       | description                                                                                          | units   | rank | type    | kind      | intent | optional |
 !! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | solhr          | forecast_hour                                                                                  | forecast time in 24-hour form                                                                        | hr      | 0    | real    | kind_phys | in     | F        |
+!! | solhr          | forecast_hour                                                                                  | forecast time in 24-hour form                                                                        | h       | 0    | real    | kind_phys | in     | F        |
 !! | slag           | equation_of_time                                                                               | equation of time                                                                                     | radians | 0    | real    | kind_phys | in     | F        |
 !! | sdec           | sine_of_solar_declination_angle                                                                | sine of solar declination angle                                                                      | none    | 0    | real    | kind_phys | in     | F        |
 !! | cdec           | cosine_of_solar_declination_angle                                                              | cosine of solar declination angle                                                                    | none    | 0    | real    | kind_phys | in     | F        |
@@ -349,14 +349,14 @@
 
 
 !! \section arg_table_dcyc2t3_post_run Argument Table
-!! | local var name | longname                               | description                                            | units   | rank | type          | kind      | intent | optional |
-!! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|---------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                 | horizontal loop extent                                 | index   | 0    | integer       | default   | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux      | surface downwelling longwave flux at current time      | W m-2   | 1    | real          | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   | 1    | real          | kind_phys | in     | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   | 1    | real          | kind_phys | in     | F        |
-!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   | 1    | real          | kind_phys | in     | F        |
-!! | Diag           | Diag                                   | GFS diagnostics derived data type variable             | various | 0    | GFS_diag_type |           | inout  | F        |
+!! | local var name | longname                               | description                                            | units   | rank | type                       | kind      | intent | optional |
+!! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                 | horizontal loop extent                                 | index   | 0    | integer                    | default   | in     | F        |
+!! | adjsfcdlw      | surface_downwelling_longwave_flux      | surface downwelling longwave flux at current time      | W m-2   | 1    | real                       | kind_phys | in     | F        |
+!! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   | 1    | real                       | kind_phys | in     | F        |
+!! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   | 1    | real                       | kind_phys | in     | F        |
+!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   | 1    | real                       | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | DDT     | 0    | GFS_typedefs%GFS_diag_type |           | inout  | F        |
 !!
       subroutine dcyc2t3_post_run(                                      &
      &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)
