@@ -2622,17 +2622,13 @@ module module_physics_driver
                             Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag, &   ! output
                             Sfcprop%tprcp)
 
-      ! DH* inside GFS_MP_generic_post_run Diag%dq3dt(:,:,6) is called dq3dt4
-      ! also, the original GFS_physics_driver had interstitial code around line 2599
-      ! Diag%dq3dt(:,:,4) = Diag%dq3dt(:,:,4) + (Stateout%gq0(:,:,1)-dqdt(:,:,1)) * frain
-      ! --> I think Diag%dq3dt(:,:,6) should be Diag%dq3dt(:,:,4) here *DH
       call GFS_MP_generic_post_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtf, del,               &
                          Model%lssav, Model%ldiag3d, Diag%rain,frain,     &
                          Model%ntcw, Model%ncld,                          &
                          Stateout%gq0(:,:,Model%ntcw),                    &
                          Stateout%gt0, Stateout%gq0(:,:,1),               &
                          save_t, save_qv, Diag%totprcp, Diag%dt3dt(:,:,6),&
-                         Diag%dq3dt(:,:,6), Diag%pwat)
+                         Diag%dq3dt(:,:,4), Diag%pwat)
 
 !      if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !        i = min(3,Model%num_p3d)
