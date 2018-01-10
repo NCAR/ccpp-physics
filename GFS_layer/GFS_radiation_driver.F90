@@ -1237,7 +1237,7 @@
 
 !CCPP: L1620-1686
       call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,   &
-          ltp, nday, lm, kd, htswc, htsw0,                             &
+          LTP, nday, lm, kd, htswc, htsw0,                             &
           sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
 
 !CCPP: L1689-1698
@@ -1261,11 +1261,11 @@
 
 !CCPP: L1718-1747
       call GFS_radlw_post_run (Model, Grid, Radtend, Coupling,         &
-          ltp, lm, kd, tsfa, htlwc, htlw0)
+          LTP, lm, kd, tsfa, htlwc, htlw0)
 
 !CCPP: L1757-1841
       call GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,    &
-          Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,    &
+          Coupling, scmpsw, im, lm, LTP, kt, kb, kd, raddt, aerodp,    &
           cldsa, mtopa, mbota, clouds(:,:,1))
 
 

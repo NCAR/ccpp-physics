@@ -46,7 +46,7 @@
 !! | islimsk        | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                               | flag          |    1 | integer |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection            | wind enhancement due to convection                       | m s-1         |    1 | real    | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                    | flag for iteration                                       | flag          |    1 | logical |           | in     | F        |
-!! | mom4ice        | flag_for_mom4_coupling                                | flag for Mom4 coupling                                   | flag          |    1 | logical |           | in     | F        |
+!! | mom4ice        | flag_for_mom4_coupling                                | flag for Mom4 coupling                                   | flag          |    0 | logical |           | in     | F        |
 !! | lsm            | flag_for_land_surface_scheme                          | flag for land sfc scheme =0: osu; =1: noah               | flag          |    0 | integer |           | in     | F        |
 !! | lprnt          | flag_print                                            | switch for printing sample column to stdout              | flag          |    0 | logical |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                    | horizontal index of printed column                       | index         |    0 | integer |           | in     | F        |

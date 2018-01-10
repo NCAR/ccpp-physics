@@ -14,11 +14,11 @@
 !> \section arg_table_GFS_suite_interstitial_1_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
 !! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
 !! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
-!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | index         |    0 | integer                       |           |   out  | F        |
+!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | count         |    0 | integer                       |           |   out  | F        |
 !! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
 !! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
 !! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
@@ -35,6 +35,13 @@
         integer,                          intent(out) :: tottracer, trc_shft, tracers, ntk
         logical, dimension(size(Grid%xlon,1)), intent(out) :: skip_macro
         real(kind=kind_phys), allocatable, intent(out) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+
+        ! DH*
+        ! ATTENTION - tottracer, trc_shft, tracers and ntk will be calculated as part of Interstitial_type -> create
+        ! and arrays clw (and potentially cnvc will be allocated there as well NEED TO REMOVE FROM HERE!!!
+        write(0,*) 'ATTENTION - THE ENTIRE CODE CONTAINED IN GFS_suite_interstitial_1_run'
+        write(0,*) 'must be skipped once the full CCPP-version is used (tracers are calculated'
+        write(0,*) 'and fields are allocated in GFS_typedefs.F90 ->interstitial_create)'
 
         tottracer = 0            ! no convective transport of tracers
         if (Model%trans_trac .or. Model%cscnv) then
@@ -63,6 +70,8 @@
           allocate (cnvc(size(Grid%xlon,1),Model%levs), cnvw(size(Grid%xlon,1),Model%levs))
         endif
 
+        ! *DH
+
       end subroutine GFS_suite_interstitial_1_run
 
     end module
@@ -80,11 +89,11 @@
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
 !! | local var name | longname                                                                 | description                                                             | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                     | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_typedefs%GFS_sfcprop_type |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                     | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type              |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | rhbbot         | critical_relative_humidity_at_surface                                    | critical relative humidity at the surface                               | frac          |    0 | real                          | kind_phys |   out  | F        |
 !! | rhpbl          | critical_relative_humidity_at_PBL_top                                    | critical relative humidity at the PBL top                               | frac          |    0 | real                          | kind_phys |   out  | F        |
 !! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                     | frac          |    0 | real                          | kind_phys |   out  | F        |
@@ -155,16 +164,16 @@
 !> \section arg_table_GFS_suite_interstitial_3_run Argument Table
 !! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT           |    0 | GFS_typedefs%GFS_radtend_type |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
+!! | Radtend        | FV3-GFS_Radtend_type                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT           |    0 | GFS_radtend_type              |           | in     | F        |
 !! | xcosz          | instantaneous_cosine_of_zenith_angle                         | cosine of zenith angle at current time                                | none          | 1    | real                          | kind_phys | in     | F        |
 !! | adjsfcdsw      | surface_downwelling_shortwave_flux                           | surface downwelling shortwave flux at current time                    | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | adjsfcdlw      | surface_downwelling_longwave_flux                            | surface downwelling longwave flux at current time                     | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         | 1    | real                          | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          | 1    | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_typedefs%GFS_diag_type    |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | flag          | 1    | integer                       |           |   out  | F        |
 !! | heat           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
@@ -255,14 +264,14 @@
 !> \section arg_table_GFS_suite_update_stateout_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Statein        | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
 !! | dudt           | tendency_of_x_wind_due_to_model_physics                | updated tendency of the x wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
 !! | dvdt           | tendency_of_y_wind_due_to_model_physics                | updated tendency of the y wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_typedefs%GFS_stateout_type|           | inout  | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type             |           | inout  | F        |
 !!
   subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
 
@@ -299,9 +308,9 @@ end subroutine GFS_suite_interstitial_4_finalize
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
 !! | local var name | longname                                                                 | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_typedefs%GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_typedefs%GFS_grid_type    |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_typedefs%GFS_statein_type |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
 !! | rhbbot         | critical_relative_humidity_at_surface                                    | critical relative humidity at the surface                             | frac          |    0 | real                          | kind_phys | in     | F        |
 !! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                   | frac          |    0 | real                          | kind_phys | in     | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes         | none          |    1 | real                          | kind_phys | in     | F        |
