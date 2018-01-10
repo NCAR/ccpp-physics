@@ -458,7 +458,7 @@ module module_physics_driver
 !  ---  local variables
 
       !--- INTEGER VARIABLES
-      integer :: lprint, ipr, nvdiff
+      integer :: ipr, nvdiff
       integer :: i, kk, ic, k, n, k1, iter, levshcm, tracers,           &
                  trc_shft, tottracer, num2, num3, nshocm, nshoc, ntk
 
@@ -558,12 +558,15 @@ module module_physics_driver
 !
 !===> ...  begin here
 
-      ! DH* these two need to go into some interstitial scheme
+      ! DH* UPDATE - in the final CCPP version, these are part of the
+      ! create_interstitital routine in GFS_typedefs.F90. Hence, the 
+      ! following two lines of code have to go
       nvdiff = Model%ntrac           ! vertical diffusion of all tracers!
       ipr    = min(size(Grid%xlon,1),10)
       ! *DH
 
-      ! DH* this as well
+      ! DH* these lines get executed operationally, but are only used
+      ! in the Morrison microphysics scheme - we can ignore them
       do i = 1, size(Grid%xlon,1)
         if(nint(Sfcprop%slmsk(i)) == 1) then
           frland(i) = 1.0
@@ -1450,7 +1453,7 @@ module module_physics_driver
 !                write(7000,*)' vgrs=',vgrs(ipr,:)
 !                write(7000,*)' dvdt*dtp ',dvdt(ipr,:)*Model%dtp
 !     endif
-!     if(Model%lprnt) write(1000+Model%me,*)' gq0w=',gq0(ipr,:,ntcw)
+!     if(Model%lprnt) write(1000+Model%me,*)' gq0w=',gq0(ipr,:,Model%ntcw)
 !     if(Model%lprnt) write(0,*)' gq0i=',gq0(ipr,:,ntiw)
 
       if (Model%lsidea) then            ! idea convective adjustment
@@ -1524,7 +1527,7 @@ module module_physics_driver
 !       write(0,*) ' gt0=',(gt0(ipr,k),k=1,Model%levs),' kdt=',Model%kdt
 !       write(0,*)' gq0=',(gq0(ipr,k,1),k=1,Model%levs),' lat=',lat
 !       write(0,*)' gq0i2=',(gq0(ipr,k,ntiw),k=1,Model%levs),' lat=',lat
-!       write(0,*)' gq1=',(gq0(ipr,k,ntcw),k=1,Model%levs)
+!       write(0,*)' gq1=',(gq0(ipr,k,Model%ntcw),k=1,Model%levs)
 !       print *,' vvel=',vvel
 !     endif
 !     if (Model%lprnt) write(7000,*)' bef convection gu0=',gu0(ipr,:)
@@ -1656,7 +1659,7 @@ module module_physics_driver
 !
 !     dqdt(1:size(Grid%xlon,1),:,1) = gq0(1:size(Grid%xlon,1),:,1)
 !     dqdt(1:size(Grid%xlon,1),:,2) = gq0(1:size(Grid%xlon,1),:,ntiw)
-!     dqdt(1:size(Grid%xlon,1),:,3) = gq0(1:size(Grid%xlon,1),:,ntcw)
+!     dqdt(1:size(Grid%xlon,1),:,3) = gq0(1:size(Grid%xlon,1),:,Model%ntcw)
 !GFDL lat has no meaning inside of shoc - changed to "1"
 !GFDL          call shoc(size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, Model%dtp, Model%me, lat,
           call shoc (size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, Model%dtp, Model%me, 1, Statein%prsl(1,1),  &
@@ -1891,7 +1894,7 @@ module module_physics_driver
 !       write(0,*)' aftcnvgt0=',gt0(ipr,:),' kdt=',Model%kdt,' lat=',lat
 !       write(0,*)' aftcnvgq0=',(gq0(ipr,k,1),k=1,Model%levs),' lat=',lat
 !       write(0,*)' gq0i2=',(gq0(ipr,k,ntiw),k=1,Model%levs),' lat=',lat
-!       write(0,*)' aftcnvgq1=',(gq0(ipr,k,ntcw),k=1,Model%levs)
+!       write(0,*)' aftcnvgq1=',(gq0(ipr,k,Model%ntcw),k=1,Model%levs)
 !     endif
 !
 !       do i = 1, size(Grid%xlon,1)
@@ -2255,10 +2258,10 @@ module module_physics_driver
 !         if (clw(1,1,2) < -999.0) then ! if clw is not partitioned to ice and water
 !           do k=1,Model%levs
 !             do i=1,size(Grid%xlon,1)
-!               tem = gq0(i,k,ntcw)                                     &
+!               tem = gq0(i,k,Model%ntcw)                                     &
 !    &              * max(0.0, MIN(1.0, (TCR-gt0(i,k))*TCRF))
 !               clw(i,k,1) = tem                              ! ice
-!               clw(i,k,2) = gq0(i,k,ntcw) - tem              ! water
+!               clw(i,k,2) = gq0(i,k,Model%ntcw) - tem              ! water
 !             enddo
 !           enddo
 !         endif     ! Anning ncld ==2
@@ -2565,7 +2568,7 @@ module module_physics_driver
 !     if (Model%lprnt) write(0,*) ' aftlsgq0=',gq0(ipr,:,1),' kdt=',Model%kdt
 !     if (Model%lprnt) write(0,*)' clw1aft=',gq0(ipr,:,ntiw),' kdt=',Model%kdt
 !     if (Model%lprnt) write(0,*)' cloudsm=',phy_f3d(ipr,:,1)*100,' kdt=',Model%kdt
-!     if (Model%lprnt) write(0,*)' clw2aft=',gq0(ipr,:,ntcw),' kdt=',Model%kdt
+!     if (Model%lprnt) write(0,*)' clw2aft=',gq0(ipr,:,Model%ntcw),' kdt=',Model%kdt
 
         if (Model%fprcp == 1) then
           Stateout%gq0(:,:,Model%ntrw)  = qrn(:,:)

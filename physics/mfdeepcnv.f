@@ -50,7 +50,7 @@
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
 !! | cldwrk         | cloud_work_function                                       | cloud work function                             | m2 s-2  | 1    | real    | kind_phys |   out  | F        |
-!! | rn             | rainfall_amount_on_physics_timestep                      | convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys |   out  | F        |
+!! | rn             | rainfall_amount_on_physics_timestep                       | convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys |   out  | F        |
 !! | kbot           | vertical_index_at_cloud_base                              | index for cloud base                            | index   | 1    | integer |           |   out  | F        |
 !! | ktop           | vertical_index_at_cloud_top                               | index for cloud top                             | index   | 1    | integer |           |   out  | F        |
 !! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                    | flag    | 1    | integer |           |   out  | F        |

@@ -22,7 +22,7 @@
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
-!!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | real    | kind_phys | in     | F        |
+!!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | integer |           | in     | F        |
 !!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level           | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                          | flag for guess run                         | flag       | 1    | logical |           | inout  | F        |
 !!
@@ -75,7 +75,7 @@
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
-!!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | real    | kind_phys | in     | F        |
+!!| iter           | iteration_number                                            | number of iteration                        | index      |    0 | integer |           | in     | F        |
 !!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level           | m s-1      | 1    | real    | kind_phys | in     | F        |
 !!| flag_guess     | flag_for_guess_run                                          | flag for guess run                         | flag       | 1    | logical |           | inout  | F        |
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                         | flag       | 1    | logical |           | in     | F        |
