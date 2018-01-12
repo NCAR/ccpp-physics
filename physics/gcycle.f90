@@ -133,7 +133,7 @@
         write(6,*) 'gcycle:: namelist file: ',trim(Model%fn_nml),' does not exist'
         stop
       else
-        open (unit=Model%nlunit, file=trim(Model%fn_nml), READONLY, status='OLD', iostat=ios)
+        open (unit=Model%nlunit, file=trim(Model%fn_nml), action='READ', status='OLD', iostat=ios)
       endif
       CALL SFCCYCLE (9998, npts, Model%lsoil, SIG1T, Model%fhcyc, &
                      Model%idate(4), Model%idate(2),              &
