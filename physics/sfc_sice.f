@@ -24,48 +24,48 @@
       end subroutine sfc_sice_finalize
 !!
 !! \section arg_table_sfc_sice_run Arguments
-!! | local var name | longname                                              | description                                              | units         | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|----------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent                                   | count         |    0 | integer |           | in     | F        |
-!! | km             | soil_vertical_dimension                               | vertical loop extent for soil levels, start at 1         | index         |    0 | integer |           | in     | F        |
-!! | ps             | surface_air_pressure                                  | surface pressure                                         | Pa            |    1 | real    | kind_phys | in     | F        | 
-!! | u1             | x_wind_at_lowest_model_layer                          | u component of surface layer wind                        | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                          | v component of surface layer wind                        | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                 | surface layer mean temperature                           | K             |    1 | real    | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer               | surface layer mean specific humidity                     | kg kg-1       |    1 | real    | kind_phys | in     | F        |
-!! | delt           | time_step_for_dynamics                                | time step                                                | s             |    0 | real    | kind_phys | in     | F        |
-!! | sfcemis        | surface_longwave_emissivity                           | sfc lw emissivity                                        | frac          |    1 | real    | kind_phys | in     | F        |
-!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground  | total sky surface downward longwave flux absorbed by the ground | W m-2  |    1 | real    | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downwelling_shortwave_flux                | total sky sfc netsw flx into ground                      | W m-2         |    1 | real    | kind_phys | in     | F        |
-!! | sfcdsw         | surface_downwelling_shortwave_flux                    | total sky sfc downward sw flux                           | W m-2         |    1 | real    | kind_phys | in     | F        |
-!! | srflag         | flag_for_precipitation_type                           | snow/rain flag for precipitation                         | flag          |    1 | real    | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air          | surface exchange coeff for momentum                      | none          |    1 | real    | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air | surface exchange coeff heat & moisture                   | none          |    1 | real    | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                    | surface layer mean pressure                              | Pa            |    1 | real    | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio at 1st layer | ratio         |    1 | real    | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                               | flag          |    1 | integer |           | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection            | wind enhancement due to convection                       | m s-1         |    1 | real    | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                    | flag for iteration                                       | flag          |    1 | logical |           | in     | F        |
-!! | mom4ice        | flag_for_mom4_coupling                                | flag for Mom4 coupling                                   | flag          |    0 | logical |           | in     | F        |
-!! | lsm            | flag_for_land_surface_scheme                          | flag for land sfc scheme =0: osu; =1: noah               | flag          |    0 | integer |           | in     | F        |
-!! | lprnt          | flag_print                                            | switch for printing sample column to stdout              | flag          |    0 | logical |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                    | horizontal index of printed column                       | index         |    0 | integer |           | in     | F        |
-!! | hice           | sea_ice_thickness                                     | sea-ice thickness                                        | m             |    1 | real    | kind_phys | inout  | F        | 
-!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                              | frac          |    1 | real    | kind_phys | inout  | F        |
-!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                              | K             |    1 | real    | kind_phys | inout  | F        |
-!! | weasd          | water_equivalent_accumulated_snow_depth               | water equivalent accumulated snow depth                  | mm            |    1 | real    | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature                              | ground surface skin temperature                          | K             |    1 | real    | kind_phys | inout  | F        |
-!! | tprcp          | precipitation_amount_in_one_dynamics_time_step        | total precipitation                                      | m             |    1 | real    | kind_phys | inout  | F        |
-!! | stc            | soil_temperature                                      | soil temp                                                | K             |    2 | real    | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux             | potential evaporation                                    | W m-2         |    1 | real    | kind_phys | inout  | F        |
-!! | snwdph         | surface_snow_thickness_water_equivalent               | water equivalent snow depth                              | mm            |    1 | real    | kind_phys |   out  | F        |
-!! | qsurf          | surface_specific_humidity                             | sfc air saturation specific humidity                     | kg kg-1       |    1 | real    | kind_phys |   out  | F        |
-!! | snowmt         | surface_snow_melt                                     | snow melt during timestep                                | m             |    1 | real    | kind_phys |   out  | F        |
-!! | gflux          | upward_heat_flux_in_soil                              | soil heat flux                                           | W m-2         |    1 | real    | kind_phys |   out  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air           | surf mom exch coef time mean surf wind                   | m s-1         |    1 | real    | kind_phys |   out  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air   | surf h&m exch coef time surf wind & density              | kg m-2 s-1    |    1 | real    | kind_phys |   out  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux             | evaperative latent heat flux                             | kg kg-1 m s-1 |    1 | real    | kind_phys |   out  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux           | kinematic sensible heat flux                             | K m s-1       |    1 | real    | kind_phys |   out  | F        |
+!! | local var name | longname                                                                     | description                                                     | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer |           | in     | F        |
+!! | km             | soil_vertical_dimension                                                      | vertical loop extent for soil levels, start at 1                | count         |    0 | integer |           | in     | F        |
+!! | ps             | surface_air_pressure                                                         | surface pressure                                                | Pa            |    1 | real    | kind_phys | in     | F        | 
+!! | u1             | x_wind_at_lowest_model_layer                                                 | u component of surface layer wind                               | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | v1             | y_wind_at_lowest_model_layer                                                 | v component of surface layer wind                               | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                                  | K             |    1 | real    | kind_phys | in     | F        |
+!! | q1             | specific_humidity_at_lowest_model_layer                                      | surface layer mean specific humidity                            | kg kg-1       |    1 | real    | kind_phys | in     | F        |
+!! | delt           | time_step_for_dynamics                                                       | time step                                                       | s             |    0 | real    | kind_phys | in     | F        |
+!! | sfcemis        | surface_longwave_emissivity                                                  | sfc lw emissivity                                               | frac          |    1 | real    | kind_phys | in     | F        |
+!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground | W m-2         |    1 | real    | kind_phys | in     | F        |
+!! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc netsw flx into ground                             | W m-2         |    1 | real    | kind_phys | in     | F        |
+!! | sfcdsw         | surface_downwelling_shortwave_flux                                           | total sky sfc downward sw flux                                  | W m-2         |    1 | real    | kind_phys | in     | F        |
+!! | srflag         | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | real    | kind_phys | in     | F        |
+!! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                             | none          |    1 | real    | kind_phys | in     | F        |
+!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | none          |    1 | real    | kind_phys | in     | F        |
+!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real    | kind_phys | in     | F        |
+!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real    | kind_phys | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer |           | in     | F        |
+!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real    | kind_phys | in     | F        |
+!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical |           | in     | F        |
+!! | mom4ice        | flag_for_mom4_coupling                                                       | flag for Mom4 coupling                                          | flag          |    0 | logical |           | in     | F        |
+!! | lsm            | flag_for_land_surface_scheme                                                 | flag for land sfc scheme =0: osu; =1: noah                      | flag          |    0 | integer |           | in     | F        |
+!! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical |           | in     | F        |
+!! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                              | index         |    0 | integer |           | in     | F        |
+!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                               | m             |    1 | real    | kind_phys | inout  | F        | 
+!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                     | frac          |    1 | real    | kind_phys | inout  | F        |
+!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                     | K             |    1 | real    | kind_phys | inout  | F        |
+!! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | mm            |    1 | real    | kind_phys | inout  | F        |
+!! | tskin          | surface_skin_temperature                                                     | ground surface skin temperature                                 | K             |    1 | real    | kind_phys | inout  | F        |
+!! | tprcp          | precipitation_amount_in_one_dynamics_time_step                               | total precipitation                                             | m             |    1 | real    | kind_phys | inout  | F        |
+!! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real    | kind_phys | inout  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                           | W m-2         |    1 | real    | kind_phys | inout  | F        |
+!! | snwdph         | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                     | mm            |    1 | real    | kind_phys |   out  | F        |
+!! | qsurf          | surface_specific_humidity                                                    | sfc air saturation specific humidity                            | kg kg-1       |    1 | real    | kind_phys |   out  | F        |
+!! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real    | kind_phys |   out  | F        |
+!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                                  | W m-2         |    1 | real    | kind_phys |   out  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real    | kind_phys |   out  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real    | kind_phys |   out  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaperative latent heat flux                                    | kg kg-1 m s-1 |    1 | real    | kind_phys |   out  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real    | kind_phys |   out  | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
@@ -744,18 +744,18 @@
 
 !!
 !! \section arg_table_sfc_sice_pre_run Argument Table
-!! | local var name | longname                                              | description                                              | units         | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|----------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent                                   | count         |    0 | integer |           | in     | F        |
-!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                              | frac          |    1 | real    | kind_phys | in     | F        |
-!! | hice           | sea_ice_thickness                                     | sea-ice thickness                                        | m             |    1 | real    | kind_phys | in     | F        | 
-!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                              | K             |    1 | real    | kind_phys | in     | F        |
-!! | prsik          | exner_function_at_lowest_model_interface              | Exner function at lowest model interface                 | none          |    1 | real    | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_lowest_model_layer    | dimensionless Exner function at lowest model layer       |  none         |    1 | real    | kind_phys | in     | F        |
-!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                              | frac          |    1 | real    | kind_phys |   out  | F        |
-!! | zice           | sea_ice_thickness                                     | sea-ice thickness                                        | m             |    1 | real    | kind_phys |   out  | F        | 
-!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                              | K             |    1 | real    | kind_phys |   out  | F        |
-!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio at 1st layer | ratio         |    1 | real    | kind_phys |   out  | F        |
+!! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer |           | in     | F        |
+!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys | in     | F        |
+!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kind_phys | in     | F        | 
+!! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys | in     | F        |
+!! | prsik          | exner_function_at_lowest_model_interface                                     | Exner function at lowest model interface                    | none          |    1 | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer          |  none         |    1 | real    | kind_phys | in     | F        |
+!! | cice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys |   out  | F        |
+!! | zice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kind_phys |   out  | F        | 
+!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys |   out  | F        |
+!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
       subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &

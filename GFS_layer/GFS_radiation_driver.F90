@@ -1182,6 +1182,8 @@
 !  ======================  end of definitions  =======================  !
 !
         ! Local Vars
+        ! DH* at least the local variables me, im, lm, lmk, lmp should be removed
+        ! and substituted by the variables in GFS_typedefs *DH
       integer :: me, im, lm, nday, lmk, lmp, kd, kt, kb
       integer, dimension(size(Grid%xlon, 1)) :: idxday
       integer, dimension(size(Grid%xlon, 1), 3) :: mbota, mtopa

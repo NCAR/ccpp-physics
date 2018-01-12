@@ -68,7 +68,7 @@
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                     | horizontal loop extent                                   | count   |    0 | integer |           | in     |   F      |
 !! | ix             | horizontal_dimension                                       | horizontal dimension                                     | count   |    0 | integer |           | in     |   F      |
-!! | km             | vertical_dimension                                         | vertical layer dimension                                 | index   |    0 | integer |           | in     |   F      |
+!! | km             | vertical_dimension                                         | vertical layer dimension                                 | count   |    0 | integer |           | in     |   F      |
 !! | dt             | time_step_for_physics                                      | physics time step                                        | s       |    0 | real    | kind_phys | in     |   F      |
 !! | dtf            | time_step_for_dynamics                                     | dynamics time step                                       | s       |    0 | real    | kind_phys | in     |   F      |
 !! | prsl           | air_pressure                                               | layer mean air pressure                                  | Pa      |    2 | real    | kind_phys | in     |   F      |

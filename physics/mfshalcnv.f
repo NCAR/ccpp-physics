@@ -24,7 +24,7 @@
 !! |----------------|-----------------------------------------------------------|-------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                          | count   |    0 | integer |           | in     | F        |
 !! | ix             | horizontal_dimension                                      | horizontal dimension                            | count   |    0 | integer |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension                        | index   |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                        | count   |    0 | integer |           | in     | F        |
 !! | delt           | time_step_for_physics                                     | physics time step                               | s       |    0 | real    | kind_phys | in     | F        |
 !! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                             | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prslp          | air_pressure                                              | mean layer pressure                             | Pa      | 2    | real    | kind_phys | in     | F        |
@@ -36,7 +36,7 @@
 !! | t1             | air_temperature_updated_by_physics                        | updated temperature                             | K       | 2    | real    | kind_phys | inout  | F        |
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                        | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | rn             | rainfall_amount_on_physics_timestep                      | convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys | out    | F        |
+!! | rn             | rainfall_amount_on_physics_timestep                       | convective rainfall amount on physics timestep  | m       | 1    | real    | kind_phys | out    | F        |
 !! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                             | index   | 1    | integer |           | out    | F        |
 !! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                              | index   | 1    | integer |           | out    | F        |
 !! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                    | flag    | 1    | integer |           | out    | F        |

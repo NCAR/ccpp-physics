@@ -17,8 +17,8 @@
 !! |    nrcm        | array_dimension_of_random_number                  | second dimension of random number array               | count   | 0    | integer |           | in     |  F       |
 !! |    im          | horizontal_loop_extent                            | horizontal loop extent                                | count   | 0    | integer |           | in     |  F       |
 !! |    ix          | horizontal_dimension                              | horizontal dimension                                  | count   | 0    | integer |           | in     |  F       |
-!! |    lm          | vertical_dimension                                | vertical layer dimension                              | index   | 0    | integer |           | in     |  F       |
-!! |    lp1         | vertical_interface_dimension                      | vertical interface dimension                          | index   | 0    | integer |           | in     |  F       |
+!! |    lm          | vertical_dimension                                | vertical layer dimension                              | count   | 0    | integer |           | in     |  F       |
+!! |    lp1         | vertical_interface_dimension                      | vertical interface dimension                          | count   | 0    | integer |           | in     |  F       |
 !! |    randomno    | random_number_array                               | random number array                                   | none    | 2    | real    |           | in     |  F       |
 !! |    cal_pre     | flag_for_precipitation_type_algorithm             | flag controls precip type algorithm                   | flag    | 0    | logical |           | in     |  F       |
 !! |    gt0         | air_temperature_updated_by_physics                | layer mean air temperature                            | K       | 2    | real    | kind_phys | in     |  F       |

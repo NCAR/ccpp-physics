@@ -32,7 +32,7 @@
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer |           | in     | F        |
 !! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer |           | in     | F        |
-!! | km             | vertical_dimension                                                          | vertical layer dimension                              | index         |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer |           | in     | F        |
 !! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                                           | cloud condensate index in tracer array                | index         |    0 | integer |           | in     | F        |
 !! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real    | kind_phys | inout  | F        |

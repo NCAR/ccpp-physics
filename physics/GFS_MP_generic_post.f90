@@ -22,7 +22,7 @@
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------------|-------------|------|---------|-----------|--------|----------|
 !! |   im           | horizontal_loop_extent                                     | horizontal loop extent                                         | count       | 0    | integer |           | in     |  F       |
 !! |   ix           | horizontal_dimension                                       | horizontal dimension                                           | count       | 0    | integer |           | in     |  F       |
-!! |   levs         | vertical_dimension                                         | vertical layer dimension                                       | index       | 0    | integer |           | in     |  F       |
+!! |   levs         | vertical_dimension                                         | vertical layer dimension                                       | count       | 0    | integer |           | in     |  F       |
 !! |   dtf          | time_step_for_dynamics                                     | dynamics time step                                             | s           | 0    | real    | kind_phys | in     |  F       |
 !! |   del          | air_pressure_difference_between_midlayers                  | air pressure difference between midlayers                      | Pa          | 2    | real    | kind_phys | in     |  F       |
 !! |   lssav        | flag_diagnostics                                           | logical flag for model physics diagnostics                     | flag        | 0    | logical |           | in     |  F       |
