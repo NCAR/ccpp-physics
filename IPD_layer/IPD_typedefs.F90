@@ -7,7 +7,7 @@ module IPD_typedefs
                                        sfcprop_type,  coupling_type,     &
                                        grid_type,     tbd_type,          &
                                        cldprop_type,  radtend_type,      &
-                                       intdiag_type
+                                       intdiag_type,  sfccycle_type
 
 !--------------------
 !  IPD sub-containers
@@ -22,6 +22,7 @@ module IPD_typedefs
     type(cldprop_type)  :: Cldprop
     type(radtend_type)  :: Radtend
     type(intdiag_type)  :: Intdiag
+    type(sfccycle_type)     :: Sfccycle
   end type IPD_data_type
 
 
@@ -29,7 +30,7 @@ module IPD_typedefs
     real(kind=kind_phys), pointer :: var2p(:)   => null()  !< 2D data saved in packed format [dim(ix)]
     real(kind=kind_phys), pointer :: var3p(:,:) => null()  !< 3D data saved in packed format [dim(ix,levs)]
   end type var_subtype
-    
+
 !-------------------------------------------
 ! IPD_restart_type
 !   data necessary for reproducible restarts

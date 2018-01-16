@@ -5,6 +5,9 @@ module GFS_typedefs
        use module_radlw_parameters,  only: topflw_type, sfcflw_type
        use ozne_def,                 only: levozp, oz_coeff
        use h2o_def,                  only: levh2o, h2o_coeff
+       ! Required for surface-cycling
+       use sfccyc_module,             only: sfccycle_clima_type
+
 
        implicit none
 
@@ -29,6 +32,7 @@ module GFS_typedefs
 !    GFS_statein_type        !< prognostic state data in from dycore
 !    GFS_stateout_type       !< prognostic state or tendencies return to dycore
 !    GFS_sfcprop_type        !< surface fields
+!    GFS_sfccycle_type       !< surface cycling/update fields
 !    GFS_coupling_type       !< fields to/from coupling with other components (e.g. land/ice/ocean/etc.)
 !    !---GFS specific containers
 !    GFS_control_type        !< model control parameters 
@@ -207,6 +211,23 @@ module GFS_typedefs
     contains
       procedure :: create  => sfcprop_create  !<   allocate array data
   end type GFS_sfcprop_type
+
+
+  !---------------------------------------------------------------------
+  ! GFS_sfccycle_type
+  !   fields required for sfccyle routine called through gcycle
+  !---------------------------------------------------------------------
+  type GFS_sfccycle_type
+
+    integer                             :: ifp                     !<
+    real (kind=kind_phys), pointer      :: glacir (:)   => null()  !<
+    real (kind=kind_phys), pointer      :: amxice (:)   => null()  !<
+    real (kind=kind_phys), pointer      :: tsfcl0 (:)   => null()  !<
+    type (sfccycle_clima_type)          :: clima                   !<
+
+    contains
+      procedure :: create  => sfccycle_create  !<   allocate array data
+  end type GFS_sfccycle_type
 
 
 !---------------------------------------------------------------------
@@ -635,6 +656,9 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: phy_f2d  (:,:)   => null()  !< 2d arrays saved for restart
     real (kind=kind_phys), pointer :: phy_f3d  (:,:,:) => null()  !< 3d arrays saved for restart
 
+    integer                        :: blkno                       !< for explicit data blocking: block number of this block
+    integer,               pointer :: blksz(:)         => null()  !< for explicit data blocking: horizontal block sizes of all blocks
+
     contains
       procedure :: create  => tbd_create  !<   allocate array data
   end type GFS_tbd_type
@@ -806,7 +830,7 @@ module GFS_typedefs
 !----------------
   public GFS_init_type
   public GFS_statein_type,  GFS_stateout_type, GFS_sfcprop_type, &
-         GFS_coupling_type
+         GFS_coupling_type, GFS_sfccycle_type
   public GFS_control_type,  GFS_grid_type,     GFS_tbd_type, &
          GFS_cldprop_type,  GFS_radtend_type,  GFS_diag_type
 
@@ -1038,6 +1062,32 @@ module GFS_typedefs
   end subroutine sfcprop_create
 
 
+  !-------------------------
+  ! GFS_sfccycle_type%create
+  !-------------------------
+  subroutine sfccycle_create (Sfccycle, IM, Model)
+
+    implicit none
+
+    class(GFS_sfccycle_type)           :: Sfccycle
+    integer,                intent(in) :: IM
+    type(GFS_control_type), intent(in) :: Model
+
+    Sfccycle%ifp = 0
+
+    allocate (Sfccycle%glacir  (IM))
+    allocate (Sfccycle%amxice  (IM))
+    allocate (Sfccycle%tsfcl0  (IM))
+
+    Sfccycle%glacir  = clear_val
+    Sfccycle%amxice  = clear_val
+    Sfccycle%tsfcl0  = clear_val
+
+    call Sfccycle%clima%create (IM, Model%lsoil)
+
+  end subroutine sfccycle_create
+
+
 !-------------------------
 ! GFS_coupling_type%create
 !-------------------------
@@ -1233,6 +1283,12 @@ module GFS_typedefs
       Coupling%dwn_mfi  = clear_val
       Coupling%det_mfi  = clear_val
       Coupling%cldcovi  = clear_val
+
+    elseif (.not.Model%uni_cld) then
+
+      allocate (Coupling%cldcovi (IM,Model%levs))
+      Coupling%cldcovi  = clear_val
+
     endif
 
   end subroutine coupling_create
@@ -2193,12 +2249,14 @@ module GFS_typedefs
 !--------------------
 ! GFS_tbd_type%create
 !--------------------
-  subroutine tbd_create (Tbd, IM, Model)
+  subroutine tbd_create (Tbd, IM, BLKSZ, BLKNO, Model)
 
     implicit none
 
     class(GFS_tbd_type)                :: Tbd
     integer,                intent(in) :: IM
+    integer, dimension(:),  intent(in) :: BLKSZ
+    integer,                intent(in) :: BLKNO
     type(GFS_control_type), intent(in) :: Model
 
     !--- In
@@ -2244,9 +2302,14 @@ module GFS_typedefs
     allocate (Tbd%phy_f2d  (IM,Model%ntot2d))
     allocate (Tbd%phy_f3d  (IM,Model%levs,Model%ntot3d))
 
+    allocate (Tbd%blksz (size(BLKSZ)))
+
     Tbd%phy_fctd = clear_val
     Tbd%phy_f2d  = clear_val
     Tbd%phy_f3d  = clear_val
+
+    Tbd%blkno = BLKNO
+    Tbd%blksz = BLKSZ
 
   end subroutine tbd_create
 
