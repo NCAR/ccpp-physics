@@ -25,7 +25,7 @@
 !!Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
 !!
 !! \htmlonly <style>div.image img[src="NNST.png"]{width:10px;}</style>
-!! \endhtmlonly 
+!! \endhtmlonly
 !! @image html NSST.png "Figure 1: NSST profile."
 !!
 !! \section intraphysics Intraphysics Communication
@@ -76,7 +76,7 @@
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                          | frac          | 1    | real    | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean | W m-2         | 1    | real    | kind_phys | in     | F        |
 !! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc net sw flx into ocean                  | W m-2         | 1    | real    | kind_phys | in     | F        |
-!! | rain           | precipitation_amount_in_one_dynamics_time_step                               | precipitation amount in one dynamics time step       | m             | 1    | real    | kind_phys | in     | F        |
+!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount on dyn time step    | m             | 1    | real    | kind_phys | in     | F        |
 !! | timestep       | time_step_for_dynamics                                                       | timestep interval                                    | s             | 0    | real    | kind_phys | in     | F        |
 !! | kdt            | index_of_time_step                                                           | current time step index                              | index         | 0    | integer |           | in     | F        |
 !! | solhr          | forecast_hour                                                                | fcst hour at the end of prev time step               | h             | 0    | real    | kind_phys | in     | F        |
@@ -120,7 +120,7 @@
 !!
 !! This is the main subroutine for the NSST scheme, and it calls the DTM and TSM.
 !!
-!! \section NSST_detailed_algorithm 
+!! \section NSST_detailed_algorithm
 !!
 !! Under construction
 !!
