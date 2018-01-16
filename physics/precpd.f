@@ -34,7 +34,7 @@
 !! |  q             | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity                                     | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !! |  cwm           | cloud_condensed_water_specific_humidity_updated_by_physics    | cloud condensed water specific humidity                           | kg kg-1 |  2   | real    | kind_phys|  inout  |   F      |
 !! |  t             | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K       |  2   | real    | kind_phys|  inout  |   F      |
-!! |  rn            | rainfall_amount_on_physics_timestep                           | convective rainfall amount on physics timestep                    | m       |  1   | real    | kind_phys|  out    |   F      |
+!! |  rn            | lwe_thickness_of_stratiform_precipitation_amount              | stratiform rainfall amount on physics timestep                    | m       |  1   | real    | kind_phys|  out    |   F      |
 !! |  sr            | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac    |  1   | real    | kind_phys|  out    |   F      |
 !! |  rainp         | rain_water_path                                               | rainwater path                                                    | kg m-3  |  2   | real    | kind_phys|  out    |   F      |
 !! |  u00k          | critical_relative_humidity                                    | critical relative humidity                                        | frac    |  2   | real    | kind_phys|  in     |   F      |
@@ -202,7 +202,7 @@
         wk2(i) = 1.0-wk1(i)
         psautco_l(i) = psautco(1)*wk1(i) + psautco(2)*wk2(i)
         prautco_l(i) = prautco(1)*wk1(i) + prautco(2)*wk2(i)
-      enddo 
+      enddo
 !-----------------------preliminaries ---------------------------------
 !
 !     do k=1,km

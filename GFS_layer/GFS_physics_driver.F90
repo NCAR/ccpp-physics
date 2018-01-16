@@ -109,11 +109,11 @@ module module_physics_driver
 !                                                                       !
 !     get_prs,  dcyc2t2_pre_rad (testing),    dcyc2t3,  sfc_diff,       !
 !     sfc_ocean,sfc_drv,  sfc_land, sfc_sice, sfc_diag, moninp1,        !
-!     moninp,   moninq1,  moninq,   
-!     gwdps_pre_run, gwdps_run, gwdps_post_run, 
+!     moninp,   moninq1,  moninq,
+!     gwdps_pre_run, gwdps_run, gwdps_post_run,
 !     ozphys,   get_phi,        !
-!     sascnv,   sascnvn,  rascnv,   cs_convr, 
-!     gwdc_pre_run, gwdc_run, gwdc_post_run, 
+!     sascnv,   sascnvn,  rascnv,   cs_convr,
+!     gwdc_pre_run, gwdc_run, gwdc_post_run,
 !     shalcvt3,shalcv,!
 !     shalcnv,  cnvc90_run,   lrgscl,   gsmdrive, gscond,   precpd,     !
 !     progt2.                                                           !
@@ -488,7 +488,7 @@ module module_physics_driver
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1))  ::            &
            ccwfac, dlength, cumabs, cice, zice, tice, gflx,             &
-           rain1, raincs, snowmt, cd, cdq, qss, dusfcg, dvsfcg, dusfc1, &
+           raincs, snowmt, cd, cdq, qss, dusfcg, dvsfcg, dusfc1, &
            dvsfc1,  dtsfc1, dqsfc1, rb, drain,  cld1d, evap, hflx,      &
            stress, t850, ep1d, gamt, gamq, sigmaf, oc, theta, gamma,    &
            hprime,                                                      &
@@ -505,6 +505,12 @@ module module_physics_driver
            tisfc_cice, tsea_cice, hice_cice, fice_cice,                 &
            !--- for CS-convection
            wcbmax
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1))  ::            &
+          lwe_thickness_of_deep_convective_precipitation_amount,        &
+          lwe_thickness_of_shallow_convective_precipitation_amount,     &
+          lwe_thickness_of_moist_convective_adj_precipitation_amount,   &
+          lwe_thickness_of_stratiform_precipitation_amount
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),4) ::           &
            oa4, clx
@@ -559,7 +565,7 @@ module module_physics_driver
 !===> ...  begin here
 
       ! DH* UPDATE - in the final CCPP version, these are part of the
-      ! create_interstitital routine in GFS_typedefs.F90. Hence, the 
+      ! create_interstitital routine in GFS_typedefs.F90. Hence, the
       ! following two lines of code have to go
       nvdiff = Model%ntrac           ! vertical diffusion of all tracers!
       ipr    = min(size(Grid%xlon,1),10)
@@ -968,7 +974,7 @@ module module_physics_driver
 
 !       if (Model%lprnt) write(0,*)' sfalb=',sfalb(ipr),' ipr=',ipr          &
 !    &,   ' weasd=',weasd(ipr),' snwdph=',snwdph(ipr)                  &
-!    &,   ' tprcp=',tprcp(ipr),' kdt=',Model%kdt,' iter=',iter               &
+!    &,   ' tprcp=',Diag%tprcp(ipr),' kdt=',Model%kdt,' iter=',iter               &
 !    &,' tseabefland=',tsea(ipr)
 
 !  --- ...  surface energy balance over land
@@ -1422,7 +1428,7 @@ module module_physics_driver
            Model%lssav, Model%ldiag3d, Model%dtf,  &
            dusfcg, dvsfcg, dudt, dvdt, dtdt, &
            Diag%dugwd, Diag%dvgwd,           &
-           Diag%du3dt(:,:,2), Diag%dv3dt(:,:,2), Diag%dt3dt(:,:,2)) 
+           Diag%du3dt(:,:,2), Diag%dv3dt(:,:,2), Diag%dt3dt(:,:,2))
 
 
 !    Rayleigh damping  near the model top
@@ -1675,8 +1681,8 @@ module module_physics_driver
 !     if (Model%lprnt) write(0,*)' aftshocice=',clw(ipr,:,1)
 !     if (Model%lprnt) write(0,*)' aftshocwat=',clw(ipr,:,1)
 !     write(1000+Model%me,*)' at latitude = ',lat
-!     rain1 = 0.0
-!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,Model%dtp,del,rain1
+!     lwe_thickness_of_deep_convective_precipitation_amount = 0.0
+!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,Model%dtp,del,lwe_thickness_of_deep_convective_precipitation_amount
 !    &,                    save_qv(1,1), dqdt(1,1,2), dqdt(1,1,3)
 !    &,                    gq0(1,1,1),clw(1,1,2),clw(1,1,1),'shoc      ')
 
@@ -1716,7 +1722,7 @@ module module_physics_driver
           call sascnvn (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del,             &
                         Statein%prsl, Statein%pgr, Statein%phil, clw(:,:,1:2),   &
                         Stateout%gq0, Stateout%gt0, Stateout%gu0,       &
-                        Stateout%gv0, cld1d, rain1, kbot, ktop, kcnv,   &
+                        Stateout%gv0, cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv,   &
                         islmsk, Statein%vvl, Model%ncld, ud_mf, dd_mf,  &
                         dt_mf, cnvw, cnvc)
         elseif (Model%imfdeepcnv == 2) then
@@ -1724,18 +1730,18 @@ module module_physics_driver
                           Statein%pgr, Statein%phil, clw(:,:,1),        &
                           clw(:,:,2), Stateout%gq0(:,:,1),              &
                           Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
-                          cld1d, rain1, kbot, ktop, kcnv, islmsk,       &
+                          cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv, islmsk,       &
                           Grid%area, Statein%vvl, Model%ncld, ud_mf,    &
                           dd_mf, dt_mf, cnvw, cnvc)
-!         if (Model%lprnt) print *,' rain1=',rain1(ipr)
+!         if (Model%lprnt) print *,' lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)
         elseif (Model%imfdeepcnv == 0) then         ! random cloud top
           call sascnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del,              &
                        Statein%prsl, Statein%pgr, Statein%phil, clw(:,:,1:2),    &
                        Stateout%gq0, Stateout%gt0, Stateout%gu0,        &
-                       Stateout%gv0, cld1d, rain1, kbot, ktop, kcnv,    &
+                       Stateout%gv0, cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv,    &
                        islmsk, Statein%vvl, Tbd%rann, Model%ncld,       &
                        ud_mf, dd_mf, dt_mf, cnvw, cnvc)
-!         if (Model%lprnt) print *,' rain1=',rain1(ipr),' rann=',rann(ipr,1)
+!         if (Model%lprnt) print *,' lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr),' rann=',rann(ipr,1)
         endif
       else        ! ras or cscnv
         if (Model%cscnv) then    ! Chikira-Sugiyama  convection scheme (via CSU)
@@ -1766,7 +1772,7 @@ module module_physics_driver
 !GFDL  again lat replaced with "1"
 !GFDL     &                  otspt, lat, Model%kdt     ,                     &
           call cs_convr (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, tottracer+3, Model%nctp, otspt, 1, &
-                         Model%kdt, Stateout%gt0, Stateout%gq0(1,1,1:1), rain1, &
+                         Model%kdt, Stateout%gt0, Stateout%gq0(1,1,1:1), lwe_thickness_of_deep_convective_precipitation_amount, &
                          clw, Statein%phil, Statein%phii, Statein%prsl,   &
                          Statein%prsi, Model%dtp, Model%dtf, ud_mf, dd_mf, dt_mf,     &
                          Stateout%gu0, Stateout%gv0, fscav, fswtr,        &
@@ -1780,11 +1786,11 @@ module module_physics_driver
 !     if (Model%lprnt) write(0,*)' gq0afcs3=',gq0(ipr,1:35,3)
 !     if (Model%lprnt) write(0,*)' gq0afcs4=',gq0(ipr,1:35,4)
 !     write(1000+Model%me,*)' at latitude = ',lat
-!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,Model%dtp,del,rain1
+!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,Model%dtp,del,lwe_thickness_of_deep_convective_precipitation_amount
 !    &,                    save_qv(1,1), dqdt(1,1,2), dqdt(1,1,3)
 !    &,                    gq0(1,1,1),clw(1,1,2),clw(1,1,1),' cs_conv')
 
-          rain1(:) = rain1(:) * (Model%dtp*0.001)
+          lwe_thickness_of_deep_convective_precipitation_amount(:) = lwe_thickness_of_deep_convective_precipitation_amount(:) * (Model%dtp*0.001)
           if (Model%do_aw) then
             do k=1,Model%levs
               kk = min(k+1,Model%levs)  ! assuming no cloud top reaches the model top
@@ -1799,8 +1805,8 @@ module module_physics_driver
 !       write(0,*)' gq01=',gq0(ipr,:,1),' kdt=',Model%kdt
 !       write(0,*)' clw1=',clw(ipr,:,1),' kdt=',Model%kdt
 !       write(0,*)' clw2=',clw(ipr,:,1),' kdt=',Model%kdt
-!       write(0,*)' aft cs rain1=',rain1(ipr)*86400
-!       write(0,*)' aft cs rain1=',rain1(ipr)
+!       write(0,*)' aft cs lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)*86400
+!       write(0,*)' aft cs lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)
 !     endif
 
         else      ! ras version 2
@@ -1833,7 +1839,7 @@ module module_physics_driver
                        Stateout%gq0, Stateout%gu0, Stateout%gv0, clw,      &
                        tottracer, fscav, Statein%prsi, Statein%prsl,       &
                        Statein%prsik, Statein%prslk, Statein%phil,         &
-                       Statein%phii, kpbl, cd, rain1, kbot, ktop, kcnv,    &
+                       Statein%phii, kpbl, cd, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv,    &
                        Tbd%phy_f2d(1,Model%num_p2d), Model%flipv, pa2mb,   &
                        Model%me, Grid%area, lmh, ccwfac, Model%nrcm, rhc, ud_mf, &
                        dd_mf, dt_mf, dlqfac, Model%lprnt, ipr, Model%kdt, revap, QLCN, &
@@ -1843,10 +1849,10 @@ module module_physics_driver
 
 !     write(1000+Model%me,*)' at latitude = ',lat
 !     tx1 = 1000.0
-!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,tx1,del,rain1
+!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,tx1,del,lwe_thickness_of_deep_convective_precipitation_amount
 !    &,                    save_qv(1,1), dqdt(1,1,2), dqdt(1,1,3)
 !    &,                    gq0(1,1,1),clw(1,1,2),clw(1,1,1),' ras_conv')
-!     if(Model%lprnt) write(0,*)' after ras rain1=',rain1(ipr)
+!     if(Model%lprnt) write(0,*)' after ras lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)
 !    &,' cnv_prc3sum=',sum(cnv_prc3(ipr,1:Model%levs))
 !     if (Model%lprnt) write(0,*)' gt04=',gt0(ipr,1:10)
 !     if (Model%lprnt) write(0,*)' gq04=',gq0(ipr,:,1)
@@ -1898,7 +1904,7 @@ module module_physics_driver
 !     endif
 !
 !       do i = 1, size(Grid%xlon,1)
-!         Diag%rainc(:) = frain * rain1(:)
+!         Diag%rainc(:) = frain * lwe_thickness_of_deep_convective_precipitation_amount(:)
 !       enddo
 ! !
 !       if (Model%lssav) then
@@ -1918,7 +1924,7 @@ module module_physics_driver
 !
 !       endif   ! end if_lssav
 
-      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, rain1, cld1d, &
+      call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, lwe_thickness_of_deep_convective_precipitation_amount, cld1d, &
         save_u, save_v, save_t, save_qv, ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
@@ -1950,7 +1956,7 @@ module module_physics_driver
 
 ! GSK 9/26/2017:
 ! Move this portion into gwdc_pre_run(...)
-!!  --- ...  calculate maximum convective heating rate 
+!!  --- ...  calculate maximum convective heating rate
 !!           cuhr = temperature change due to deep convection
 !        cumabs(:) = 0.0
 !        work3 (:)  = 0.0
@@ -2038,7 +2044,7 @@ module module_physics_driver
 
 !GFDL replacing lat with "1"
 !       call gwdc (size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, lat, gu0, gv0, gt0, gq0, Model%dtp,       &
-        call gwdc_run (                                                 & 
+        call gwdc_run (                                                 &
              size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, intgr_one, Statein%ugrs, Statein%vgrs,   &
              Statein%tgrs, Statein%qgrs(:,:,1), Model%dtp, Statein%prsl,      &
              Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,         &
@@ -2097,7 +2103,7 @@ module module_physics_driver
 !        enddo
 
         call gwdc_post_run (                                               &
-             size(Grid%xlon,1), Model%levs, Model%lssav, Model%ldiag3d, Model%dtf, Model%dtp, con_cp,       & 
+             size(Grid%xlon,1), Model%levs, Model%lssav, Model%ldiag3d, Model%dtf, Model%dtp, con_cp,       &
              dusfcg, dvsfcg, gwdcu, gwdcv,                                 &
              Diag%dugwd, Diag%dvgwd, Diag%du3dt(:,:,4), Diag%dv3dt(:,:,4), &
              Stateout%gu0, Stateout%gv0, Stateout%gt0)
@@ -2157,11 +2163,11 @@ module module_physics_driver
                                                !-----------------------
            call shalcnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del, Statein%prsl, &
                          Statein%pgr, Statein%phil, clw, Stateout%gq0,     &
-                         Stateout%gt0, Stateout%gu0, Stateout%gv0, rain1,  &
+                         Stateout%gt0, Stateout%gu0, Stateout%gv0, lwe_thickness_of_shallow_convective_precipitation_amount,  &
                          kbot, ktop, kcnv, islmsk, Statein%vvl, Model%ncld,&
                          Diag%hpbl, hflx, evap, ud_mf, dt_mf, cnvw, cnvc)
 
-            raincs(:)     = frain * rain1(:)
+            raincs(:)     = frain * lwe_thickness_of_shallow_convective_precipitation_amount(:)
             Diag%rainc(:) = Diag%rainc(:) + raincs(:)
             if (Model%lssav) then
               Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
@@ -2179,11 +2185,11 @@ module module_physics_driver
                             Statein%pgr, Statein%phil, clw(:,:,1),        &
                             clw(:,:,2), Stateout%gq0(:,:,1),              &
                             Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
-                            rain1, kbot, ktop, kcnv, islmsk, Grid%area,   &
+                            lwe_thickness_of_shallow_convective_precipitation_amount, kbot, ktop, kcnv, islmsk, Grid%area,   &
                             Statein%vvl, Model%ncld, Diag%hpbl, ud_mf,    &
                             dt_mf, cnvw, cnvc)
 
-            call sasasshal_post_run (frain, rain1, cnvc, cnvw, Model, Grid, Diag, Tbd)
+            call sasasshal_post_run (frain, lwe_thickness_of_shallow_convective_precipitation_amount, cnvc, cnvw, Model, Grid, Diag, Tbd)
 
           elseif (Model%imfshalcnv == 0) then    ! modified Tiedtke Shallow convecton
                                                  !-----------------------------------
@@ -2355,17 +2361,17 @@ module module_physics_driver
 !       endif
 
         call mstcnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Stateout%gt0, Stateout%gq0, &
-                     Statein%prsl,del, Statein%prslk, rain1,        &
+                     Statein%prsl,del, Statein%prslk, lwe_thickness_of_moist_convective_adj_precipitation_amount,        &
                      Stateout%gq0(1,1,Model%ntcw), rhc, Model%lprnt, ipr)
 
 !       if (Model%lprnt) then
-!         print *,' rain1=',rain1(ipr),' rainc=',rainc(ipr)
+!         print *,' lwe_thickness_of_moist_convective_adj_precipitation_amount=',lwe_thickness_of_moist_convective_adj_precipitation_amount(ipr),' rainc=',Diag%rainc(ipr)
 !         print *,' gt0a=',gt0(ipr,:)
 !         print *,' gq0a=',gq0(ipr,:,1)
 !       endif
-        Diag%rainc(:) = Diag%rainc(:) + frain * rain1(:)
+        Diag%rainc(:) = Diag%rainc(:) + frain * lwe_thickness_of_moist_convective_adj_precipitation_amount(:)
         if(Model%lssav) then
-          Diag%cnvprcp(:) = Diag%cnvprcp(:) + rain1(:) * frain
+          Diag%cnvprcp(:) = Diag%cnvprcp(:) + lwe_thickness_of_moist_convective_adj_precipitation_amount(:) * frain
 
 ! update dqdt_v to include moisture tendency due to surface processes
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)
@@ -2401,7 +2407,7 @@ module module_physics_driver
       if (Model%ncld == 0) then           ! no cloud microphysics
 
         call lrgscl (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Stateout%gt0, Stateout%gq0, &
-                     Statein%prsl, del, Statein%prslk, rain1, clw)
+                     Statein%prsl, del, Statein%prslk, lwe_thickness_of_stratiform_precipitation_amount, clw)
 
       elseif (Model%ncld == 1) then       ! microphysics with single cloud condensate
 
@@ -2420,7 +2426,7 @@ module module_physics_driver
             if (Model%do_shoc) then
               call precpd_shoc (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,              &
                                 Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw), &
-                                Stateout%gt0, rain1, Diag%sr, rainp, rhc,          &
+                                Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,          &
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), Model%lprnt, ipr)
             else
@@ -2433,7 +2439,7 @@ module module_physics_driver
 
               call precpd_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,           &
                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),   &
-                          Stateout%gt0, rain1, Diag%sr, rainp, rhc,            &
+                          Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,            &
                           Model%psautco, Model%prautco, Model%evpco,           &
                           Model%wminco, work1, Model%lprnt, ipr)
             endif
@@ -2443,7 +2449,7 @@ module module_physics_driver
 !             write(0,*) ' aftlsgt0=',gt0(ipr,:),' kdt=',Model%kdt
 !             write(0,*) ' aftlsgq0=',gq0(ipr,:,1),' kdt=',Model%kdt
 !             write(0,*) ' aftlsgw0=',gq0(ipr,:,3),' kdt=',Model%kdt
-!             write(0,*)' aft precpd rain1=',rain1(1:3),' lat=',lat
+!             write(0,*)' aft precpd lwe_thickness_of_stratiform_precipitation_amount=',lwe_thickness_of_stratiform_precipitation_amount(1:3),' lat=',lat
 !           endif
           else                                ! with pdf clouds
                                               ! ---------------
@@ -2459,13 +2465,13 @@ module module_physics_driver
             call precpdp (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs,  Model%dtp, del, Statein%prsl,       &
                           Statein%pgr, Stateout%gq0(1,1,1),            &
                           Stateout%gq0(1,1,Model%ntcw), Stateout%gt0,  &
-                          rain1, Diag%sr, rainp, rhc,                  &
+                          lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,                  &
                           Tbd%phy_f3d(1,1,Model%num_p3d+1), psautco_l, &
                           prautco_l, Model%evpco, Model%wminco, Model%lprnt, ipr)
           endif   ! end of grid-scale precip/microphysics options
         endif     ! end if_num_p3d
 
-!     if (Model%lprnt) write(0,*) ' rain1=',rain1(ipr),' rainc=',rainc(ipr),' lat=',lat
+!     if (Model%lprnt) write(0,*) ' lwe_thickness_of_stratiform_precipitation_amount=',lwe_thickness_of_stratiform_precipitation_amount(ipr),' rainc=',Diag%rainc(ipr),' lat=',lat
 
       elseif (Model%ncld == 2) then       ! MGB double-moment microphysics
 !       Acheng used clw here for other code to run smoothly and minimum change
@@ -2549,7 +2555,7 @@ module module_physics_driver
                              Diag%dvsfc, dusfc1, dvsfc1, dusfc1, dvsfc1,         &
                              CNV_FICE, CNV_NDROP, CNV_NICE, Stateout%gq0(1,1,1), &
                              Stateout%gq0(1,1,Model%ntcw),                       &
-                             Stateout%gq0(1,1,Model%ntiw), Stateout%gt0, rain1,  &
+                             Stateout%gq0(1,1,Model%ntiw), Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount,  &
                              Diag%sr, Stateout%gq0(1,1,Model%ntlnc),             &
                              Stateout%gq0(1,1,Model%ntinc), Model%fprcp, qrn,    &
                              qsnw, ncpr, ncps, Tbd%phy_f3d(1,1,1), kbot,         &
@@ -2558,12 +2564,12 @@ module module_physics_driver
 
 !     write(1000+Model%me,*)' at latitude = ',lat
 !     tx1 = 1000.0
-!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,tx1,del,rain1
+!     call moist_bud(size(Grid%xlon,1),size(Grid%xlon,1),size(Grid%xlon,1),Model%levs,Model%me,Model%kdt,con_g,tx1,del,lwe_thickness_of_stratiform_precipitation_amount
 !    &,                    txa, clw(1,1,2), clw(1,1,1)
 !    &,           gq0(1,1,1),gq0(1,1,ntcw),gq0(1,1,ntcw+1),' m_micro  ')
 
-!     if (Model%lprnt) write(0,*) ' rain1=',rain1(ipr)*86400.0,
-!    &' rainc=',rainc(ipr)*86400.0
+!     if (Model%lprnt) write(0,*) ' lwe_thickness_of_stratiform_precipitation_amount=',lwe_thickness_of_stratiform_precipitation_amount(ipr)*86400.0,
+!    &' rainc=',Diag%rainc(ipr)*86400.0
 !    &,' cn_prc=',cn_prc(ipr),' cn_snr=',cn_snr(ipr)
 !     if (Model%lprnt) write(0,*) ' aftlsgq0=',gq0(ipr,:,1),' kdt=',Model%kdt
 !     if (Model%lprnt) write(0,*)' clw1aft=',gq0(ipr,:,ntiw),' kdt=',Model%kdt
@@ -2577,7 +2583,7 @@ module module_physics_driver
           Stateout%gq0(:,:,Model%ntsnc) = ncps(:,:)
         endif
       endif       ! end if_ncld
-!     if (Model%lprnt) write(0,*)' rain1 after ls=',rain1(ipr)
+!     if (Model%lprnt) write(0,*)' lwe_thickness_of_stratiform_precipitation_amount after ls=',lwe_thickness_of_stratiform_precipitation_amount(ipr)
 !
       if (Model%do_aw) then
 !  Arakawa-Wu adjustment of large-scale microphysics tendencies:
@@ -2611,8 +2617,8 @@ module module_physics_driver
             enddo
           enddo
         enddo
-!     write(1000+Model%me,*)' rain1=',rain1(4),' temrain1=',temrain1(i)*0.001
-        rain1(:) = max(rain1(:) - temrain1(:)*0.001, 0.0_kind_phys)
+!     write(1000+Model%me,*)' lwe_thickness_of_stratiform_precipitation_amount=',lwe_thickness_of_stratiform_precipitation_amount(4),' temrain1=',temrain1(i)*0.001
+        lwe_thickness_of_stratiform_precipitation_amount(:) = max(lwe_thickness_of_stratiform_precipitation_amount(:) - temrain1(:)*0.001, 0.0_kind_phys)
       endif
 
 !      Diag%rain(:)  = Diag%rainc(:) + frain * rain1(:)
@@ -2620,7 +2626,7 @@ module module_physics_driver
       call GFS_calpreciptype_run (Model%kdt, Model%nrcm, size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%levs+1,         &
                             Tbd%rann, Model%cal_pre, Stateout%gt0,               &
                             Stateout%gq0(:,:,1), Statein%prsl, Statein%prsi,     &
-                            Diag%rainc,frain,rain1, Statein%phii, Model%num_p3d, &
+                            Diag%rainc,frain,lwe_thickness_of_stratiform_precipitation_amount, Statein%phii, Model%num_p3d, &
                             Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,3),           &   ! input !zhang:Tbd%phy_f3d(:,:,3) comes from gscond_run
                             Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag, &   ! output
                             Sfcprop%tprcp)

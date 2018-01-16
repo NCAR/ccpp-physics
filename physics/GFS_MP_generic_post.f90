@@ -1,5 +1,5 @@
 !> \file GFS_MP_generic_post.f90
-!! This file contains the subroutines that calculates physics/diagnotics variables 
+!! This file contains the subroutines that calculates physics/diagnotics variables
 !! after calling microphysics scheme:
 !! - totprcp: precipitation rate at surface
 !! - dt3dt(:,:,6): large scale condensate heating rate at model layers
@@ -7,13 +7,13 @@
 !! - pwat: column integrated precipitable water
 
       module GFS_MP_generic_post
-      contains 
+      contains
 
-!> \defgroup GFS_MP_generic_post GFS MP generic post 
+!> \defgroup GFS_MP_generic_post GFS MP generic post
 !! @{
 !! \section arg_table_GFS_MP_generic_post_init Argument Table
 !!
-      subroutine GFS_MP_generic_post_init     
+      subroutine GFS_MP_generic_post_init
       end subroutine GFS_MP_generic_post_init
 
 
@@ -27,7 +27,7 @@
 !! |   del          | air_pressure_difference_between_midlayers                  | air pressure difference between midlayers                      | Pa          | 2    | real    | kind_phys | in     |  F       |
 !! |   lssav        | flag_diagnostics                                           | logical flag for model physics diagnostics                     | flag        | 0    | logical |           | in     |  F       |
 !! |   ldiag3d      | flag_diagnostics_3D                                        | logical flag for 3D diagnostics                                | flag        | 0    | logical |           | in     |  F       |
-!! |   rain         | timestep_total_rainfall_amount                             | total precipitation at surface (APCP)                          | m           | 1    | real    | kind_phys | in     |  F       |
+!! |   rain         | lwe_thickness_of_precipitation_amount_on_dynamics_timestep | total rainfall amount on dynamics timestep                     | m           | 1    | real    | kind_phys | in     |  F       |
 !! |   frain        | dynamics_to_physics_timestep_ratio                         | dtf/dtp, dynamics to physics timestep ratio                    | none        | 0    | real    | kind_phys | in     |  F       |
 !! |   ntcw         | index_for_liquid_cloud_condensate                          | cloud condensate index in tracer array(3)                      | index       | 0    | integer |           | in     |  F       |
 !! |   ncld         | number_of_hydrometeors                                     | number_of_hydrometeors(1 for Z-C)                              | count       | 0    | integer |           | in     |  F       |
@@ -36,7 +36,7 @@
 !! |   q            | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                                  | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
 !! |   save_t       | air_temperature_save                                       | air temperature before entering a physics scheme               | K           | 2    | real    | kind_phys | in     |  F       |
 !! |   save_qv      | water_vapor_specific_humidity_save                         | water vapor specific humidity before entering a physics scheme | kg kg-1     | 2    | real    | kind_phys | in     |  F       |
-!! |   totprcp      | accumulated_total_rainfall_amount                          | accumulated total_rainfall_amount                              | m           | 1    | real    | kind_phys | inout  |  F       |
+!! |   totprcp      | accumulated_lwe_thickness_of_precipitation_amount          | accumulated total precipitation amount                         | m           | 1    | real    | kind_phys | inout  |  F       |
 !! |   dt3dt6       | large_scale_condensate_heating_rate_at_model_layers        | large scale condensate heating rate at model layers            | K s-1       | 2    | real    | kind_phys | inout  |  F       |
 !! |   dq3dt4       | large_scale_condensate_moistening_rate_at_model_layers     | large scale condensate moistening rate at model layers         | kg kg-1 s-1 | 2    | real    | kind_phys | inout  |  F       |
 !! |   pwat         | column_precipitable_water                                  | column integrated precipitable water                           | kg m-2      | 1    | real    | kind_phys | out    |  F       |
@@ -45,13 +45,13 @@
                  lssav,ldiag3d,rain,frain,ntcw,ncld,cwm,              & !input
                  t,q,save_t,save_qv,                                  &
                  totprcp,dt3dt6,dq3dt4,pwat)     ! output
-     
+
 !
       use machine,               only: kind_phys
       use physcons,              only:  con_g
 
       implicit none
-!    
+!
 !     declare variables.
 !
       integer,intent(in)   :: im, ix, levs, ntcw, ncld
@@ -62,7 +62,7 @@
       real(kind=kind_phys),dimension(im), intent(in)      :: rain
       real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,       &
                                              cwm, del, save_t,          &
-                                             save_qv 
+                                             save_qv
       real(kind=kind_phys),dimension(im), intent(inout)   :: totprcp
       real(kind=kind_phys),dimension(im), intent(out)     :: pwat
       real(kind=kind_phys),dimension(ix,levs), intent(inout)  ::        &
@@ -74,7 +74,7 @@
         do i = 1, im
            totprcp(i) = totprcp(i) + rain(i)
         enddo
- 
+
         if (ldiag3d) then
           do i = 1, im
             do k = 1,levs
@@ -99,13 +99,13 @@
              !if (ncld > 0) then
              !do ic = ntcw, ntcw+ncld-1
              !  work1(i) = work1(i) +  Stateout%gq0(i,k,ic)
-           work1(i) = work1(i) + cwm(i,k) 
+           work1(i) = work1(i) + cwm(i,k)
              !enddo
              !endif
            pwat(i) = pwat(i) + del(i,k)*(q(i,k)+work1(i))
          enddo
          pwat(i) = pwat(i) * onebg
-     
+
       enddo
 
       !deallocate (clw)
@@ -118,4 +118,3 @@
       end subroutine GFS_MP_generic_post_finalize
 !! @}
       end module GFS_MP_generic_post
-
