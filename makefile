@@ -104,7 +104,6 @@ SRCS_f   =  \
 	./physics/sfc_nst.f                                                       \
 	./physics/sfc_ocean.f                                                     \
 	./physics/sfc_sice.f                                                      \
-	./physics/sfcsub.f                                                        \
 	./physics/sflx.f                                                          \
 	./physics/shalcnv.f                                                       \
 	./physics/shalcv.f                                                        \
@@ -154,6 +153,7 @@ SRCS_F   = \
 	./physics/cldmacro.F                                                      \
 	./physics/cldwat2m_micro.F                                                \
 	./physics/machine.F                                                       \
+	./physics/sfcsub.F                                                        \
 	./physics/num_parthds.F                                                   \
 	./physics/wv_saturation.F
 
