@@ -10,22 +10,22 @@
 
 
 !! \section arg_table_cnvc90_run Argument Table
-!! | local var name | longname                                                | description                                             | units | rank | type    | kind      | intent | optional |
-!! |----------------|---------------------------------------------------------|---------------------------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | clstp          | convective_cloud_switch                                 | switch for saving convective clouds                     | none  | 0    | real    | kind_phys | in     | F        |
-!! | im             | horizontal_loop_extent                                  | horizontal loop extent                                  | count | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                    | horizontal dimension                                    | count | 0    | integer | default   | in     | F        |
-!! | rn             | timestep_convective_rainfall_amount                     | convective rainfall amount                              | m     | 1    | real    | kind_phys | in     | F        |
-!! | kbot           | vertical_index_at_cloud_base                            | vertical index at cloud base                            | index | 1    | integer | default   | in     | F        |
-!! | ktop           | vertical_index_at_cloud_top                             | vertical index at cloud top                             | index | 1    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                      | number of vertical layers                               | count | 0    | integer | default   | in     | F        |
-!! | prsi           | air_pressure_at_interface                               | interface pressure                                      | Pa    | 2    | real    | kind_phys | in     | F        |
-!! | acv            | convective_rainfall_accumulated_thus_far                | convective rainfall accumulated thus far                | m     | 1    | real    | kind_phys | inout  | F        |
-!! | acvb           | smallest_cloud_base_vertical_index_encountered_thus_far | smallest cloud base vertical index encountered thus far | index | 1    | real    | kind_phys | inout  | F        |
-!! | acvt           | largest_cloud_top_vertical_index_encountered_thus_far   | largest cloud top vertical index encountered thus far   | index | 1    | real    | kind_phys | inout  | F        |
-!! | cv             | fraction_of_convective_cloud                            | fraction of convective cloud                            | frac  | 1    | real    | kind_phys | inout  | F        |
-!! | cvb            | pressure_at_bottom_of_convective_cloud                  | pressure at bottom of convective cloud                  | Pa    | 1    | real    | kind_phys | inout  | F        |
-!! | cvt            | pressure_at_top_of_convective_cloud                     | pressure at top of convective cloud                     | Pa    | 1    | real    | kind_phys | inout  | F        |
+!! | local var name | longname                                                              | description                                             | units | rank | type    | kind      | intent | optional |
+!! |----------------|-----------------------------------------------------------------------|---------------------------------------------------------|-------|------|---------|-----------|--------|----------|
+!! | clstp          | convective_cloud_switch                                               | switch for saving convective clouds                     | none  | 0    | real    | kind_phys | in     | F        |
+!! | im             | horizontal_loop_extent                                                | horizontal loop extent                                  | count | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                                                  | horizontal dimension                                    | count | 0    | integer | default   | in     | F        |
+!! | rn             | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep | convective rainfall amount on dynamics timestep         | m     | 1    | real    | kind_phys | in     | F        |
+!! | kbot           | vertical_index_at_cloud_base                                          | vertical index at cloud base                            | index | 1    | integer | default   | in     | F        |
+!! | ktop           | vertical_index_at_cloud_top                                           | vertical index at cloud top                             | index | 1    | integer | default   | in     | F        |
+!! | km             | vertical_dimension                                                    | number of vertical layers                               | count | 0    | integer | default   | in     | F        |
+!! | prsi           | air_pressure_at_interface                                             | interface pressure                                      | Pa    | 2    | real    | kind_phys | in     | F        |
+!! | acv            | accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90   | accumulated convective rainfall amount for cnvc90 only  | m     | 1    | real    | kind_phys | inout  | F        |
+!! | acvb           | smallest_cloud_base_vertical_index_encountered_thus_far               | smallest cloud base vertical index encountered thus far | index | 1    | real    | kind_phys | inout  | F        |
+!! | acvt           | largest_cloud_top_vertical_index_encountered_thus_far                 | largest cloud top vertical index encountered thus far   | index | 1    | real    | kind_phys | inout  | F        |
+!! | cv             | fraction_of_convective_cloud                                          | fraction of convective cloud                            | frac  | 1    | real    | kind_phys | inout  | F        |
+!! | cvb            | pressure_at_bottom_of_convective_cloud                                | pressure at bottom of convective cloud                  | Pa    | 1    | real    | kind_phys | inout  | F        |
+!! | cvt            | pressure_at_top_of_convective_cloud                                   | pressure at top of convective cloud                     | Pa    | 1    | real    | kind_phys | inout  | F        |
 !!
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,
      1                      ACV,ACVB,ACVT,CV,CVB,CVT)
@@ -125,4 +125,3 @@ c....   convert cvt and cvb to pressures
 
 
       end module cnvc90
-
