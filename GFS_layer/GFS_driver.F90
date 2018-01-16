@@ -6,7 +6,8 @@ module GFS_driver
                                       GFS_sfcprop_type, GFS_coupling_type, &
                                       GFS_control_type, GFS_grid_type,     &
                                       GFS_tbd_type,     GFS_cldprop_type,  &
-                                      GFS_radtend_type, GFS_diag_type
+                                      GFS_radtend_type, GFS_diag_type,     &
+                                      GFS_sfccycle_type
   use module_radiation_driver,  only: GFS_radiation_driver !, radupdate
   use module_physics_driver,    only: GFS_physics_driver
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
@@ -97,7 +98,7 @@ module GFS_driver
 !--------------
   subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,    &
                              Coupling, Grid, Tbd, Cldprop, Radtend, &
-                             Diag, Init_parm)
+                             Diag, Sfccycle, Init_parm)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -116,6 +117,7 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
+    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle(:)
     type(GFS_init_type),      intent(in)    :: Init_parm
 
     !--- local variables
@@ -151,11 +153,13 @@ module GFS_driver
       call Sfcprop  (nb)%create (Init_parm%blksz(nb), Model)
       call Coupling (nb)%create (Init_parm%blksz(nb), Model)
       call Grid     (nb)%create (Init_parm%blksz(nb), Model)
-      call Tbd      (nb)%create (Init_parm%blksz(nb), Model)
+      call Tbd      (nb)%create (Init_parm%blksz(nb), Init_parm%blksz, nb, Model)
       call Cldprop  (nb)%create (Init_parm%blksz(nb), Model)
       call Radtend  (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
       call Diag     (nb)%create (Init_parm%blksz(nb), Model)
+      !--- internal representation of sfccycle
+      call Sfccycle (nb)%create (Init_parm%blksz(nb), Model)
     enddo
 
     !--- populate the grid components
@@ -234,7 +238,7 @@ module GFS_driver
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                 Grid, Tbd, Cldprop, Radtend, Diag)
+                                 Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
 
     use physparam,             only: ictmflg, isolar
     use GFS_suite_setup_1,     only: GFS_suite_setup_1_run
@@ -244,23 +248,25 @@ module GFS_driver
 
     !--- interface variables
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein(:)
-    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
-    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
-    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
-    type(GFS_diag_type),      intent(inout) :: Diag(:)
+    type(GFS_statein_type),   intent(inout) :: Statein
+    type(GFS_stateout_type),  intent(inout) :: Stateout
+    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
+    type(GFS_coupling_type),  intent(inout) :: Coupling
+    type(GFS_grid_type),      intent(inout) :: Grid
+    type(GFS_tbd_type),       intent(inout) :: Tbd
+    type(GFS_cldprop_type),   intent(inout) :: Cldprop
+    type(GFS_radtend_type),   intent(inout) :: Radtend
+    type(GFS_diag_type),      intent(inout) :: Diag
+    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
+
     !--- local variables
     real(kind=kind_phys) :: sec
 
-    call GFS_suite_setup_1_run (Model, sec)
+    call GFS_suite_setup_1_run (Model, sec, Tbd%blkno)
 
-    call GFS_rad_time_vary_run(Model, Statein, Tbd, blksz, sec, ictmflg, isolar)
+    call GFS_rad_time_vary_run (Model, Statein, Tbd, sec, ictmflg, isolar)
 
-    call GFS_suite_setup_2_run (blksz, Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
+    call GFS_suite_setup_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
 
   end subroutine GFS_time_vary_step
 
