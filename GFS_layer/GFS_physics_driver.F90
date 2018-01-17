@@ -80,6 +80,8 @@ module module_physics_driver
   real(kind=kind_phys), parameter :: albdf   = 0.06
   real(kind=kind_phys) tf, tcr, tcrf
   parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf))
+  ! DH* this variable will be replaced by Interstitial%latidxprnt, i.e.
+  ! the following line can go in the final CCPP-version of the code
   integer, parameter :: intgr_one = 1
 
 

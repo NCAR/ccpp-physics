@@ -27,7 +27,7 @@
 !! |   im              | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |  0   | integer                       |           | out    | F        |
 !! |   lmk             | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |  0   | integer                       |           | out    | F        |
 !! |   lmp             | adjusted_vertical_level_dimension_for_radiation               | number of vertical levels for radiation                                       | count    |  0   | integer                       |           | out    | F        |
-!! |   kd              | vertical_index_difference_between_in-out_and_local            | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | out    | F        |
+!! |   kd              | vertical_index_difference_between_inout_and_local             | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | out    | F        |
 !! |   kt              | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |  0   | integer                       |           | out    | F        |
 !! |   kb              | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |  0   | integer                       |           | out    | F        |
 !! |   raddt           | time_step_for_radiation                                       | radiation time step                                                           | s        |  0   | real                          | kind_phys | out    | F        |
@@ -71,6 +71,8 @@
 !! |   mtopa           | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |  2   | integer                       |           | out    | F        |
 !! |   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | out    | F        |
 !!
+      ! DH* Attention - the output arguments lm, im, lmk, lmp should not be set
+      ! here in the CCPP version - they are defined in the interstitial_create routine *DH
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend,                                     & 
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
@@ -168,8 +170,10 @@
 !
       !--- set commonly used integers
       me = Model%me
+! DH* these need to go for ccpp
       LM = Model%levr
       IM = size(Grid%xlon,1)
+! *DH
       NFXR = Model%nfxr
       NTRAC = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
 
@@ -179,8 +183,10 @@
 !  --- ...  set local /level/layer indexes corresponding to in/out
 !  variables
 
+! DH* these need to go for ccpp
       LMK = LM + LTP             ! num of local layers
       LMP = LMK + 1              ! num of local levels
+! *DH
 
       if ( lextop ) then
         if ( ivflip == 1 ) then    ! vertical from sfc upward

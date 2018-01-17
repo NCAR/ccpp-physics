@@ -24,7 +24,7 @@
 !! |----------------|-----------------------------------------------------------|--------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                                 | count   |    0 | integer |           | in     | F        |
 !! | ix             | horizontal_dimension                                      | horizontal dimension                                   | count   |    0 | integer |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension                               | index   |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                               | count   |    0 | integer |           | in     | F        |
 !! | delt           | time_step_for_physics                                     | physics time step                                      | s       |    0 | real    | kind_phys | in     | F        |
 !! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                                    | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prslp          | air_pressure                                              | mean layer pressure                                    | Pa      | 2    | real    | kind_phys | in     | F        |
