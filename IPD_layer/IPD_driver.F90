@@ -55,17 +55,17 @@ module IPD_driver
 
 
     !--- populate/associate the Diag container elements
-    call diag_populate (IPD_Diag, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
-                                  IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
-                                  IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                  IPD_Data%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
+    call diag_populate (IPD_Diag(:), IPD_control, IPD_Data%Statein, IPD_Data(:)%Stateout, &
+                        IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,      &
+                        IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,        &
+                        IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
 
 
     !--- allocate and populate/associate the Restart container elements
-    call restart_populate (IPD_Restart, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
-                                        IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
-                                        IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                        IPD_Data%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
+    call restart_populate (IPD_Restart, IPD_control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout, &
+                           IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,         &
+                           IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,           &
+                           IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
 
   end subroutine IPD_initialize
 
