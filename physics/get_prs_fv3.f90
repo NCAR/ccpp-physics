@@ -29,7 +29,7 @@ contains
 !! | tgrs           | air_temperature                                                                   | mid-layer temperature                                                               | K          | 2    | real    | kind_phys | in     | F        |
 !! | qgrs1          | water_vapor_specific_humidity                                                     | mid-layer specific humidity of water vapor                                          | kg kg-1    | 2    | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                         | difference between mid-layer pressures                                              | Pa         | 2    | real    | kind_phys | inout  | F        |
-!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
+!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
 !!
    subroutine get_prs_fv3_run(ix, levs, phii, prsi, tgrs, qgrs1, del, del_gz)
      integer, intent(in) :: ix, levs
@@ -90,7 +90,7 @@ contains
 !! | levs           | vertical_dimension                                                                | number of vertical layers                                                           | count      | 0    | integer | default   | in     | F        |
 !! | gt0            | air_temperature_updated_by_physics                                                | updated air temperature                                                             | K          | 2    | real    | kind_phys | in     | F        |
 !! | gq01           | water_vapor_specific_humidity_updated_by_physics                                  | mid-layer specific humidity of water vapor                                          | kg kg-1    | 2    | real    | kind_phys | in     | F        |
-!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
+!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 | 2    | real    | kind_phys | inout  | F        |
 !! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     | 2    | real    | kind_phys | inout  | F        |
 !! | phil           | geopotential                                                                      | mid-layer geopotential                                                              | m2 s-2     | 2    | real    | kind_phys | inout  | F        |
 !!
