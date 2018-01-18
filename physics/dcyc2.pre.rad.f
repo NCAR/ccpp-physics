@@ -11,7 +11,7 @@
 !                                                                       !
 !  usage:                                                               !
 !                                                                       !
-!    call dcyc2t3_pre rad                                               !
+!    call dcyc2t3_pre_rad                                               !
 !      inputs:                                                          !
 !          ( solhr,slag,sdec,cdec,sinlat,coslat,                        !
 !            xlon,coszen,tsea,tf,tsflw,                                 !
