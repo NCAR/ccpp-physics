@@ -1,7 +1,7 @@
 !>  \file radlw_param.f
 !!  This file contains LW band parameters setup.
 
-!> \ingroup  module_radlw_main
+!> \ingroup  module_radlw_main 
 !! @{
 
 !!!!!  ==============================================================  !!!!!

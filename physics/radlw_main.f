@@ -235,7 +235,7 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \defgroup module_radlw_main module_radlw_main
+!> \defgroup module_radlw_main GFS RADLW Main
 !! \ingroup RRTMG
 !! This module includes NCEP's modifications of the rrtmg-lw radiation
 !! code from AER.

@@ -116,7 +116,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_aerosols module_radiation_aerosols
+!! \defgroup module_radiation_aerosols RRTMG Aerosols Module
 !> @{
 !!  This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.

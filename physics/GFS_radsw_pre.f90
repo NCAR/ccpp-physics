@@ -4,7 +4,8 @@
       module GFS_radsw_pre
       contains
 
-!>\defgroup GFS_radsw_pre GFS RADSW Scheme Pre
+!>\defgroup GFS_radsw_pre GFS RADSW Pre
+!!\ingroup RRTMG
 !! @{
 !> \section arg_table_GFS_radsw_pre_init Argument Table
 !!

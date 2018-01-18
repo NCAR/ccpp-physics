@@ -76,7 +76,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_astronomy module_radiation_astronomy
+!! \defgroup module_radiation_astronomy RRTMG Astronomy Module
 !! @{
 !> This module sets up astronomical quantities for solar radiation
 !!  calculations.

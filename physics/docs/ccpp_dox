@@ -101,7 +101,6 @@ WARN_FORMAT            =
 WARN_LOGFILE           =
 INPUT                  =  txt/mainpage.txt \
 ### Radiation
-                        ../../GFS_layer/GFS_radiation_driver.F90 \
                         ../radiation_aerosols.f \
                         ../radiation_astronomy.f \
                         ../radiation_clouds.f \
@@ -113,6 +112,16 @@ INPUT                  =  txt/mainpage.txt \
                         ../radsw_datatb.f \
                         ../radsw_main.f \
                         ../radsw_param.f \
+### Radiation interstitial
+                        ../GFS_RRTMG_pre.f90  \
+                        ../GFS_RRTMG_post.f90 \
+                        ../GFS_radupdate.f90  \
+                        ../GFS_rad_time_vary.f90 \
+                        ../GFS_radsw_pre.f90  \
+                        ../GFS_radsw_post.f90 \
+                        ../GFS_radlw_pre.f90  \
+                        ../GFS_radlw_post.f90 \
+                        ../radcons.f90       \
 ### Deep Convection
                         ../mfdeepcnv.f \
 ### Shallow Convection

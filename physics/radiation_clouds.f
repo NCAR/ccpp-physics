@@ -146,7 +146,7 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_clouds module_radiation_clouds
+!! \defgroup module_radiation_clouds RRTMG Clouds Module
 !! @{
 !> This module computes cloud related quantities for radiation
 !! computations.

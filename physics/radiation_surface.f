@@ -75,7 +75,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_surface module_radiation_surface
+!! \defgroup module_radiation_surface RRTMG Surface Module
 !! @{
 !> This module sets up surface albedo for sw radiation and surface
 !! emissivity for lw radiation.

@@ -261,7 +261,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radsw_main module_radsw_main
+!! \defgroup module_radsw_main GFS RADSW Main
 !! This module includes NCEP's modifications of the rrtmg-sw radiation
 !! code from AER.
 !!

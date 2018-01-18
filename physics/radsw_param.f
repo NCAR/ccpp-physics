@@ -1,7 +1,7 @@
 !>  \file radsw_param.f
 !!  This file contains SW band parameters setup.
 
-!>  \ingroup module_radsw_main
+!>  \ingroup module_radsw_main 
 !!  @{
 
 !!!!!  ==============================================================  !!!!!

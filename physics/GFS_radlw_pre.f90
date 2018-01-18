@@ -4,7 +4,8 @@
       module GFS_radlw_pre
       contains
 
-!>\defgroup GFS_radlw_pre GFS RADLW Scheme Pre
+!>\defgroup GFS_radlw_pre GFS RADLW Pre
+!!\ingroup RRTMG
 !! @{
 !> \section arg_table_GFS_radlw_pre_init Argument Table
 !!

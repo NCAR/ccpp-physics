@@ -63,7 +63,7 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \ingroup module_radlw_main
+!> \ingroup module_radsw_main 
 !> This module contains the reference pressures (in logarithm form) at
 !! 59 vertical levels (TOA is omitted), and the mid-latitude summer
 !! (MLS) standard temperature profile for the 59 pressure layers that
@@ -136,7 +136,7 @@
       end module module_radsw_ref        !
 !========================================!
 
-!> \ingroup module_radlw_main
+!> \ingroup module_radsw_main 
 !> This module contains cloud radiative property coefficients.
 !!
 !! For liquid water clouds, cloud radiative property coefficients are
@@ -1924,7 +1924,7 @@
       end module module_radsw_cldprtb    !
 !========================================!
 
-!> \ingroup module_radlw_main
+!> \ingroup module_radsw_main 
 !> This module contains various indexes and coefficients for SW spectral
 !! bands, as well as the spectral distribution of solar flux. The values
 !! of spectral solar flux are derived based on a prescribed solar
@@ -2265,7 +2265,7 @@
 !========================================!
 
 !>\defgroup module_radsw_kgbnn module_radsw_kgbnn
-!>\ingroup  module_radsw_main
+!>\ingroup  module_radsw_main 
 !! @{
 
 !> This module sets up absorption coefficients for band 16: 2600-3250

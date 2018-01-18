@@ -105,7 +105,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_gases module_radiation_gases
+!! \defgroup module_radiation_gases RRTMG Gases Module
 !! @{
 !> This module sets up ozone climatological profiles and other constant
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All

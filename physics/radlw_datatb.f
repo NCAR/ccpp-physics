@@ -61,7 +61,7 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!> \ingroup module_radlw_main
+!> \ingroup module_radlw_main 
 !> This module contains plank flux data.
 !========================================!
       module module_radlw_avplank        !
@@ -738,7 +738,7 @@
       end module module_radlw_avplank    !
 !========================================!
 
-!> \ingroup  module_radlw_main
+!> \ingroup  module_radlw_main 
 !> This module contains reference temperature and pressure.
 !!
 !!  - These pressures are chosen such that the ln of the first one

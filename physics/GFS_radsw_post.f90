@@ -3,7 +3,8 @@
       module GFS_radsw_post
       contains
 
-!>\defgroup GFS_radsw_post GFS RRTMG/RADSW Scheme Post
+!>\defgroup GFS_radsw_post GFS RADSW Post
+!!\ingroup RRTMG
 !! @{
 !> \section arg_table_GFS_radsw_post_init Argument Table
 !!
