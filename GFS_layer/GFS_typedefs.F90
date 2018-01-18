@@ -742,7 +742,6 @@ module GFS_typedefs
 !! | IPD_Control%kdt                      | index_of_time_step                                                            | current forecast iteration                              | index         |    0 | integer   | default   | none   | F        |
 !! | IPD_Control%jdat                     |                                                                               | current forecast date and time                          |               |    1 | integer   | default   | none   | F        |
 !!
-! DH* TODO - COMPLETE THIS TABLE - LOOK AT UNITS ETC
   type GFS_control_type
 
     integer              :: me              !< MPI rank designator
@@ -1111,6 +1110,7 @@ module GFS_typedefs
 
     integer                        :: blkno                       !< for explicit data blocking: block number of this block
     integer,               pointer :: blksz (:)        => null()  !< for explicit data blocking: horizontal block sizes of all blocks
+
     contains
       procedure :: create  => tbd_create  !<   allocate array data
   end type GFS_tbd_type
@@ -1288,7 +1288,6 @@ module GFS_typedefs
 !! | IPD_Data(nb)%Intdiag%det_mf               |                                                                         | instantaneous convective detrainment mass flux                  |               |    2 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%cldcov               |                                                                         | instantaneous 3D cloud fraction                                 |               |    2 | real        | kind_phys | none   | F        |
 !!
-! DH* TODO - COMPLETE THIS TABLE - LOOK AT UNITS ETC
   type GFS_diag_type
 
     !! Input/Output only in radiation
@@ -2488,43 +2487,6 @@ module GFS_typedefs
     logical :: do_shum   = .false.
     logical :: do_skeb   = .false.
     logical :: do_vc     = .false.
-
-#if 0
-    print *,'DH DEBUG PRINT START'
-    print *, "MODEL"
-    call Model%print ()
-    print *,'nlunit', nlunit
-    print *,'fn_nml', fn_nml
-    print *,'me', me
-    print *,'master', master
-    print *,'logunit', logunit
-    print *,'isc', isc
-    print *,'jsc', jsc
-    print *,'nx', nx
-    print *,'ny', ny
-    print *,'levs', levs
-    print *,'cnx', cnx
-    print *,'cny', cny
-    print *,'gnx', gnx
-    print *,'gny', gny
-    print *,'dt_dycore', dt_dycore
-    print *,'dt_phys', dt_phys
-    print *,'idat', idat
-    print *,'jdat', jdat
-    print *,'tracer_names', tracer_names
-    print *,'max_lon', max_lon
-    print *,'max_lat', max_lat
-    print *,'min_lon', min_lon
-    print *,'min_lat', min_lat
-    print *,'dxmax', dxmax
-    print *,'dxmin', dxmin
-    print *,'dxinv', dxinv
-    print *,'con_rerth', con_rerth
-    print *,'con_pi', con_pi
-    print *,'nrcmax', nrcmax
-    print *,'DH DEBUG PRINT END'
-    call sleep(5)
-#endif
 
     !--- read in the namelist
     inquire (file=trim(fn_nml), exist=exists)
