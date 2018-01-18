@@ -42,6 +42,17 @@
 !
   public
 
+!> \section arg_table_physcons
+!! | local var name        | longname                                               | description                                             | units         | rank | type              |    kind   | intent | optional |
+!! |-----------------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
+!! | con_cp                | specific_heat_of_dry_air_at_constant_pressure          | specific heat of dry air at constant pressure           | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
+!! | con_fvirt             | ratio_of_vapor_to_dry_air_gas_constants_minus_one      | rv/rd - 1 (rv = ideal gas constant for water vapor)     | none          |    0 | real              | kind_phys | none   | F        |
+!! | con_g                 | gravitational_acceleration                             | gravitational acceleration                              | m s-2         |    0 | real              | kind_phys | none   | F        |
+!! | con_pi                | pi                                                     | ratio of a circle's circumference to its diameter       | radians       |    0 | real              | kind_phys | none   | F        |
+!! | con_rd                | gas_constant_dry_air                                   | ideal gas constant for dry air                          | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
+!! | con_rv                | gas_constant_water_vapor                               | ideal gas constant for water vapor                      | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
+!!
+
 !> \name Math constants
 
 !> pi

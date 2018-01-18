@@ -155,7 +155,7 @@ module GFS_driver
       call Sfcprop      (nb)%create (Init_parm%blksz(nb), Model)
       call Coupling     (nb)%create (Init_parm%blksz(nb), Model)
       call Grid         (nb)%create (Init_parm%blksz(nb), Model)
-      call Tbd          (nb)%create (Init_parm%blksz(nb), Model)
+      call Tbd          (nb)%create (Init_parm%blksz(nb), Init_parm%blksz(:), nb, Model)
       call Cldprop      (nb)%create (Init_parm%blksz(nb), Model)
       call Radtend      (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
@@ -164,8 +164,6 @@ module GFS_driver
       call Sfccycle     (nb)%create (Init_parm%blksz(nb), Model)
       !--- interstitial variables for GFS physics
       call Interstitial (nb)%create (Init_parm%blksz(nb), Model)
-      !--- store own block number in Tbd(nb)%blkno
-      Tbd(nb)%blkno = nb
     enddo
 
     !--- populate the grid components

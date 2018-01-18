@@ -212,7 +212,7 @@
 !!\n =yyyy0:use yyyy year of data, no extrapolation
 !!\n =yyyy1:use yyyy year of data, extrapolate when necessary
 !!\n Opr GFS/CFS=1; see ICTM in run scripts
-      integer, save :: ictmflg = 0     
+      integer, save :: ictmflg = 0
 !> ozone data source control flag
 !!\n =0:use seasonal climatology ozone data
 !!\n >0:use prognostic ozone scheme (also depend on other model control 

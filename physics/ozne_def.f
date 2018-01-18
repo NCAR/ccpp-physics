@@ -1,7 +1,7 @@
       module ozne_def
       use machine , only : kind_phys
       implicit none
-      
+
       integer, parameter :: kozpl=28, kozc=48
 
       integer latsozp, levozp, timeoz, latsozc, levozc, timeozc
