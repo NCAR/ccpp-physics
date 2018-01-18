@@ -211,8 +211,14 @@ $(CAPS):
 else
 $(CAPS):
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
-	#$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.f90
-	#$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $*.f90 -o $@
+endif
+
+# Do preprocessing of the IPD-CCPP driver in two steps to be
+# able to look at the actual .f90 file that gets compiled
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
+./IPD_layer/IPD_CCPP_driver.o: ./IPD_layer/IPD_CCPP_driver.F90
+	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.tmp.f90
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $*.tmp.f90 -o $@
 endif
 
 .PHONY: clean
