@@ -50,9 +50,9 @@
 !! | lsm            | flag_for_land_surface_scheme                                                 | flag for land sfc scheme =0: osu; =1: noah                      | flag          |    0 | integer |           | in     | F        |
 !! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                              | index         |    0 | integer |           | in     | F        |
-!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                               | m             |    1 | real    | kind_phys | inout  | F        |
-!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                     | frac          |    1 | real    | kind_phys | inout  | F        |
-!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                     | K             |    1 | real    | kind_phys | inout  | F        |
+!! | hice           | sea_ice_thickness_for_physics                                                | sea-ice thickness                                               | m             |    1 | real    | kind_phys | inout  | F        |
+!! | fice           | sea_ice_concentration_for_physics                                            | sea-ice concentration [0,1]                                     | frac          |    1 | real    | kind_phys | inout  | F        |
+!! | tice           | sea_ice_temperature_for_physics                                              | sea-ice surface temperature                                     | K             |    1 | real    | kind_phys | inout  | F        |
 !! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | mm            |    1 | real    | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature                                                     | ground surface skin temperature                                 | K             |    1 | real    | kind_phys | inout  | F        |
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real    | kind_phys | inout  | F        |
@@ -752,13 +752,13 @@
 !! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys | in     | F        |
 !! | prsik          | exner_function_at_lowest_model_interface                                     | Exner function at lowest model interface                    | none          |    1 | real    | kind_phys | in     | F        |
 !! | prslk          | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer          |  none         |    1 | real    | kind_phys | in     | F        |
-!! | cice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys |   out  | F        |
-!! | zice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kind_phys |   out  | F        |
-!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys |   out  | F        |
+!! | cice           | sea_ice_concentration_for_physics                                            | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys |   out  | F        |
+!! | zice           | sea_ice_thickness_for_physics                                                | sea-ice thickness                                           | m             |    1 | real    | kind_phys |   out  | F        |
+!! | tice           | sea_ice_temperature_for_physics                                              | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys |   out  | F        |
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real    | kind_phys |   out  | F        |
 !!
 !! @{
-      subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &
+      subroutine sfc_sice_pre_run(im, fice, hice, tisfc, prsik, prslk,       &
      &                            cice, zice, tice, work3)
 
       use machine, only : kind_phys
@@ -815,9 +815,9 @@
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag          |    1 | integer |           | in     | F        |
-!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
-!! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        |
-!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
+!! | cice           | sea_ice_concentration_for_physics                     | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
+!! | zice           | sea_ice_thickness_for_physics                         | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        |
+!! | tice           | sea_ice_temperature_for_physics                       | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
 !! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K             |    1 | real    | kind_phys | in     | F        |
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        |

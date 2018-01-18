@@ -12,7 +12,7 @@ module IPD_driver
 
   use physics_restart_layer,      only: restart_populate
 
-       implicit none
+  implicit none
 
 !------------------------------------------------------!
 !  IPD containers                                      !
@@ -51,21 +51,21 @@ module IPD_driver
     call initialize (IPD_Control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout,      &
                      IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid, &
                      IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,   &
-                     IPD_Data(:)%Intdiag, IPD_init_parm)
+                     IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
 
 
     !--- populate/associate the Diag container elements
-    call diag_populate (IPD_Diag, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
-                                  IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
-                                  IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                  IPD_Data%Intdiag, IPD_init_parm)
+    call diag_populate (IPD_Diag(:), IPD_control, IPD_Data%Statein, IPD_Data(:)%Stateout, &
+                        IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,      &
+                        IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,        &
+                        IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
 
 
     !--- allocate and populate/associate the Restart container elements
-    call restart_populate (IPD_Restart, IPD_control, IPD_Data%Statein, IPD_Data%Stateout,   &
-                                        IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
-                                        IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                                        IPD_Data%Intdiag, IPD_init_parm)
+    call restart_populate (IPD_Restart, IPD_control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout, &
+                           IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,         &
+                           IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,           &
+                           IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
 
   end subroutine IPD_initialize
 
@@ -76,14 +76,14 @@ module IPD_driver
 !---------------------------------------------
   subroutine IPD_setup_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart)
     type(IPD_control_type), intent(inout) :: IPD_Control
-    type(IPD_data_type),    intent(inout) :: IPD_Data(:)
+    type(IPD_data_type),    intent(inout) :: IPD_Data
     type(IPD_diag_type),    intent(inout) :: IPD_Diag(:)
     type(IPD_restart_type), intent(inout) :: IPD_Restart
 
-    call time_vary_step (IPD_Control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout,      &
-                         IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid, &
-                         IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,   &
-                         IPD_Data(:)%Intdiag)
+    call time_vary_step (IPD_Control, IPD_Data%Statein, IPD_Data%Stateout,   &
+                         IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
+                         IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
+                         IPD_Data%Intdiag, IPD_Data%Sfccycle)
 
   end subroutine IPD_setup_step
 

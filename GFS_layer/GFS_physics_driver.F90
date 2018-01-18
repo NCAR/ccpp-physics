@@ -1401,7 +1401,7 @@ module module_physics_driver
            Statein%ugrs, Statein%vgrs, Statein%tgrs,      &
            Statein%qgrs(:,:,1), kpbl, Statein%prsi, del,  &
            Statein%prsl, Statein%prslk, Statein%phii,     &
-           Statein%phil, Model%dtp, Model%kdt,                        &
+           Statein%phil, Model%dtp, Model%kdt,            &
 !           Sfcprop%hprime(1,1), oc, oa4, clx, theta,      &
            hprime, oc, oa4, clx, theta,                   &
            sigma, gamma, elvmax, dusfcg, dvsfcg,          &

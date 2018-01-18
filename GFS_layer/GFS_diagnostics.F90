@@ -15,6 +15,7 @@ module physics_diag_layer
                                        coupling_type, grid_type,     &
                                        tbd_type,      cldprop_type,  &
                                        radtend_type,  intdiag_type,  &
+                                       sfccycle_type,                &
                                        init_type 
 
   public diag_populate
@@ -26,7 +27,7 @@ module physics_diag_layer
 ! GFS_populate_IPD_Diag
 !----------------------
   subroutine diag_populate (IPD_Diag, Model, Statein, Stateout, Sfcprop, Coupling,  &
-                            Grid, Tbd, Cldprop, Radtend, Diag, Init_parm)
+                            Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle, Init_parm)
 !------------------------------------------------------------------------------------------!
 !   IPD_METADATA                                                                           !
 !     IPD_Diag%name           [char*32 ]   variable name in source  [char*32]              !
@@ -60,6 +61,7 @@ module physics_diag_layer
     type(cldprop_type),         intent(in)    :: Cldprop(:)
     type(radtend_type),         intent(in)    :: Radtend(:)
     type(intdiag_type),         intent(in)    :: Diag(:)
+    type(sfccycle_type),        intent(in)    :: Sfccycle(:)
     type(init_type),            intent(in)    :: Init_parm
 
     !--- local variabls
@@ -416,7 +418,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,18)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,18)
     enddo
 
     !--- fluxr19 and fluxr20 are replaced with the surface temperature
@@ -436,7 +438,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,21)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,21)
     enddo
 
     idx = idx + 1
@@ -453,7 +455,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,22)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,22)
     enddo
 
     idx = idx + 1
@@ -470,8 +472,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,23)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,23)
     enddo
 
     idx = idx + 1
@@ -488,7 +489,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,24)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,24)
     enddo
 
     idx = idx + 1
@@ -505,7 +506,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,25)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,25)
     enddo
 
     idx = idx + 1
@@ -522,7 +523,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,26)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,26)
     enddo
 
     idx = idx + 1
@@ -539,7 +540,7 @@ module physics_diag_layer
     IPD_Diag(idx)%zhour          = Model%zhour
     IPD_Diag(idx)%fcst_hour      = Model%fhour
     do nb = 1,nblks
-     IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,27)
+      IPD_Diag(idx)%data(nb)%var2p => Diag(nb)%fluxr(:,27)
     enddo
 
     idx = idx + 1
@@ -2293,7 +2294,7 @@ module physics_diag_layer
       IPD_Diag(idx)%zhour          = Model%zhour
       IPD_Diag(idx)%fcst_hour      = Model%fhour
       do nb = 1,nblks
-        IPD_Diag(idx)%data(nb)%var3p => Diag(nb)%dq3dt(:,:,1)
+        IPD_Diag(idx)%data(nb)%var3p => Diag(nb)%dq3dt(:,:,9)
       enddo
 
       !---du3dt
