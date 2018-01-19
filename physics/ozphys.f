@@ -248,10 +248,11 @@
 !! | ix             | horizontal_dimension                         | horizontal dimension                         | count   | 0    | integer                    |           | in     | F        |
 !! | levs           | vertical_dimension                           | number of vertical layers                    | count   | 0    | integer                    |           | in     | F        |
 !! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer                    |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    | 0    | logical                    |           | in     | F        |
 !! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real                       | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     | 0    | GFS_diag_type              |           | inout  | F        |
 !!
-      subroutine ozphys_post_run(ix, levs, pl_coeff, ozp, Diag)
+      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp, Diag)
 
       use GFS_typedefs, only: GFS_diag_type
       use machine,      only: kind_phys
@@ -259,13 +260,16 @@
       implicit none
 
       integer, intent(in) :: ix, levs, pl_coeff
+      logical, intent(in) :: ldiag3d
       real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
       type(GFS_diag_type), intent(inout) :: Diag
 
-      Diag%dq3dt(:,:,6) = ozp(:,:,1)
-      Diag%dq3dt(:,:,7) = ozp(:,:,2)
-      Diag%dq3dt(:,:,8) = ozp(:,:,3)
-      Diag%dq3dt(:,:,9) = ozp(:,:,4)
+      if (ldiag3d) then
+          Diag%dq3dt(:,:,6) = ozp(:,:,1)
+          Diag%dq3dt(:,:,7) = ozp(:,:,2)
+          Diag%dq3dt(:,:,8) = ozp(:,:,3)
+          Diag%dq3dt(:,:,9) = ozp(:,:,4)
+      end if
 
       return
 

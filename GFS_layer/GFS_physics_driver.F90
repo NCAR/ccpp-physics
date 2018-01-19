@@ -1499,7 +1499,7 @@ module module_physics_driver
 !            Diag%dq3dt(:,:,9) = dq3dt_loc(:,:,9)
 !          endif
           call ozphys_post_run (                                        &
-               size(Grid%xlon,1), Model%levs, oz_coeff, dq3dt_loc(:,:,6:6+oz_coeff-1), Diag)
+               size(Grid%xlon,1), Model%levs, oz_coeff, Model%ldiag3d, dq3dt_loc(:,:,6:6+oz_coeff-1), Diag)
         endif
       endif
 
