@@ -3411,17 +3411,19 @@ module GFS_typedefs
     allocate (Diag%wet1    (IM))
     allocate (Diag%sr      (IM))
     !--- 3D diagnostics
-    if (Model%ldiag3d) then
-      allocate (Diag%du3dt  (IM,Model%levs,4))
-      allocate (Diag%dv3dt  (IM,Model%levs,4))
-      allocate (Diag%dt3dt  (IM,Model%levs,6))
-      allocate (Diag%dq3dt  (IM,Model%levs,oz_coeff+5))
-      !--- needed to allocate GoCart coupling fields
-      allocate (Diag%upd_mf (IM,Model%levs))
-      allocate (Diag%dwn_mf (IM,Model%levs))
-      allocate (Diag%det_mf (IM,Model%levs))
-      allocate (Diag%cldcov (IM,Model%levs))
-    endif
+    ! allocate these fields whether Model%ldiag3d is true or not to avoid invalid
+    ! memory reference issues when passing these pointers to interstitital routines
+    !if (Model%ldiag3d) then
+    allocate (Diag%du3dt  (IM,Model%levs,4))
+    allocate (Diag%dv3dt  (IM,Model%levs,4))
+    allocate (Diag%dt3dt  (IM,Model%levs,6))
+    allocate (Diag%dq3dt  (IM,Model%levs,oz_coeff+5))
+    !--- needed to allocate GoCart coupling fields
+    allocate (Diag%upd_mf (IM,Model%levs))
+    allocate (Diag%dwn_mf (IM,Model%levs))
+    allocate (Diag%det_mf (IM,Model%levs))
+    allocate (Diag%cldcov (IM,Model%levs))
+    !endif
 
     call Diag%rad_zero  (Model)
     call Diag%phys_zero (Model)
@@ -3441,9 +3443,9 @@ module GFS_typedefs
     Diag%topfsw%upfx0 = zero
     Diag%topflw%upfxc = zero
     Diag%topflw%upfx0 = zero
-    if (Model%ldiag3d) then
+    !if (Model%ldiag3d) then
       Diag%cldcov     = zero
-    endif
+    !endif
 #ifdef __GFORTRAN__
     Diag%topfsw_upfxc_gnufix = zero
     Diag%topfsw_dnfxc_gnufix = zero
@@ -3527,7 +3529,7 @@ module GFS_typedefs
     Diag%wet1    = zero
     Diag%sr      = zero
 
-    if (Model%ldiag3d) then
+    !if (Model%ldiag3d) then
       Diag%du3dt   = zero
       Diag%dv3dt   = zero
       Diag%dt3dt   = zero
@@ -3535,7 +3537,7 @@ module GFS_typedefs
       Diag%upd_mf  = zero
       Diag%dwn_mf  = zero
       Diag%det_mf  = zero
-    endif
+    !endif
 
   end subroutine diag_phys_zero
 
