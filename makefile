@@ -110,6 +110,7 @@ SRCS_f   =  \
 	   ./physics/sascnv.f                                                        \
 	   ./physics/sascnvn.f                                                       \
 	   ./physics/set_soilveg.f                                                   \
+	   ./physics/GFS_surface_loop_control.f                                      \
 	   ./physics/sfc_cice.f                                                      \
 	   ./physics/sfc_diag.f                                                      \
 	   ./physics/sfc_diff.f                                                      \
@@ -123,15 +124,33 @@ SRCS_f   =  \
 	   ./physics/shalcv.f                                                        \
 	   ./physics/shalcv_opr.f                                                    \
 	   ./physics/tracer_const_h.f                                                \
+	   ./physics/tridi.f                                                         \
 	   ./physics/tridi2t3.f
 
 SRCS_f90 = \
-	   ./physics/calpreciptype.f90                                               \
+	   ./physics/GFS_calpreciptype.f90                                           \
+	   ./physics/GFS_MP_generic_post.f90                                         \
+	   ./physics/GFS_MP_generic_pre.f90                                          \
+	   ./physics/GFS_zhao_carr_pre.f90                                           \
+	   ./physics/GFS_RRTMG_pre.f90                                               \
+	   ./physics/GFS_RRTMG_post.f90                                              \
+	   ./physics/GFS_radsw_pre.f90                                               \
+	   ./physics/GFS_radsw_post.f90                                              \
+	   ./physics/GFS_radlw_pre.f90                                               \
+	   ./physics/GFS_radlw_post.f90                                              \
+	   ./physics/GFS_rad_time_vary.f90                                           \
+	   ./physics/GFS_radupdate.f90                                               \
 	   ./physics/cs_conv.f90                                                     \
 	   ./physics/funcphys.f90                                                    \
 	   ./physics/gcm_shoc.f90                                                    \
 	   ./physics/gcycle.f90                                                      \
 	   ./physics/get_prs_fv3.f90                                                 \
+	   ./physics/GFS_DCNV_generic.f90                                            \
+	   ./physics/GFS_SCNV_generic.f90                                            \
+	   ./physics/GFS_PBL_generic.f90                                             \
+	   ./physics/GFS_suite_interstitial.f90                                      \
+	   ./physics/GFS_suite_setup.f90                                             \
+	   ./physics/GFS_surface_generic.f90                                         \
 	   ./physics/h2ointerp.f90                                                   \
 	   ./physics/m_micro_driver.f90                                              \
 	   ./physics/module_nst_model.f90                                            \
@@ -139,9 +158,11 @@ SRCS_f90 = \
 	   ./physics/module_nst_water_prop.f90                                       \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90                                                    \
+	   ./physics/radcons.f90                                                     \
 	   ./physics/wam_f107_kp_mod.f90
 
-SRCS_F   = ./physics/aer_cloud.F                                                 \
+SRCS_F   = \
+	   ./physics/aer_cloud.F                                                     \
 	   ./physics/cldmacro.F                                                      \
 	   ./physics/cldwat2m_micro.F                                                \
 	   ./physics/machine.F                                                       \
@@ -225,7 +246,7 @@ endif
 clean:
 	@echo "Cleaning gfsphysics  ... "
 	@echo
-	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.lst *.i depend
+	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.tmp.f90 */*.tmp.f90 *.mod *.lst *.i depend
 	$(RM) -f $(LIBRARY).$(VER_MAJOR)
 	$(RM) -f $(LIBRARY).$(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 
@@ -238,4 +259,3 @@ include ./depend
 ifneq (clean,$(findstring clean,$(MAKECMDGOALS)))
    -include depend
 endif
-
