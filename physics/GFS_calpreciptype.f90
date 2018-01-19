@@ -2,6 +2,9 @@
 !! This file contains the subroutine that calculates dominant precipitation type (calpreciptype)
 !! and its post. It is adopted from post but was made into a column to used by GFS model.
 
+!>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
+!! @{
+
       module GFS_calpreciptype
       contains
 
@@ -1519,3 +1522,5 @@
       end subroutine GFS_calpreciptype_finalize
 
       end module GFS_calpreciptype
+
+!! @}

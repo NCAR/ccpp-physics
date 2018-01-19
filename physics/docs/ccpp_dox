@@ -112,16 +112,7 @@ INPUT                  =  txt/mainpage.txt \
                         ../radsw_datatb.f \
                         ../radsw_main.f \
                         ../radsw_param.f \
-### Radiation interstitial
-                        ../GFS_RRTMG_pre.f90  \
-                        ../GFS_RRTMG_post.f90 \
                         ../GFS_radupdate.f90  \
-                        ../GFS_rad_time_vary.f90 \
-                        ../GFS_radsw_pre.f90  \
-                        ../GFS_radsw_post.f90 \
-                        ../GFS_radlw_pre.f90  \
-                        ../GFS_radlw_post.f90 \
-                        ../radcons.f90       \
 ### Deep Convection
                         ../mfdeepcnv.f \
 ### Shallow Convection
@@ -132,8 +123,6 @@ INPUT                  =  txt/mainpage.txt \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \
-### MP_generic
-                        ../GFS_MP_generic_post.f90 \
                         ../GFS_calpreciptype.f90   \
 ### Land Surface
                         ../sfc_drv.f \

@@ -1,11 +1,13 @@
 !>  \file sfc_drv.f
 !!  This file contains the NOAH land surface scheme.
 
-!> \defgroup NOAH NOAH Land Surface pre
+!> \defgroup NOAH NOAH Land Surface Scheme
+!! \brief  This is the NOAH land surface scheme.
+!! @{
+!> \defgroup NOAH_pre NOAH Land Surface Pre
+!! \ingroup NOAH
 !! @{
 !!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
 
       module lsm_noah_pre
       contains
@@ -63,12 +65,13 @@
 
       end subroutine lsm_noah_pre_run
 
-!> @}
+!! @}
       end module lsm_noah_pre
 
-!> @}
+!! @}
 
-!> \defgroup NOAH NOAH Land Surface post
+!> \defgroup NOAH_post NOAH Land Surface post
+!! \ingroup NOAH
 !! @{
 !!  \brief Brief description of the parameterization
 !!  \section diagram Calling Hierarchy Diagram
@@ -125,11 +128,12 @@
 
       end subroutine lsm_noah_post_run
 
-!> @}
+!! @}
       end module lsm_noah_post
-!> @}
+!! @}
 
-!> \defgroup NOAH NOAH Land Surface
+!> \defgroup NOAH_main NOAH Land Surface Main
+!! \ingroup NOAH
 !! @{
 !!  \brief Brief description of the parameterization
 !!  \section diagram Calling Hierarchy Diagram
@@ -764,7 +768,8 @@
 !      end subroutine sfc_drv
       end subroutine lsm_noah_run
 !-----------------------------------
-!> @}
+!! @}
 
       end module lsm_noah
-!> @}
+!! @}
+!! @}

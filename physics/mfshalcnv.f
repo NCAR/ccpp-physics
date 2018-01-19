@@ -1,14 +1,38 @@
 !>  \file mfshalcnv.f
-!!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
+!!  This file contains the entire SAMF deep convection scheme.
+!> \defgroup SAMF_shal Scale-Aware Mass-Flux Shallow Convection
+!! @{
+!!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection
+!! scheme is an updated version of the previous mass-flux shallow
+!! convection scheme with scale and aerosol awareness and
+!! parameterizes the effect of shallow convection on the environment.
+!! The SAMF_shal scheme is similar to the SAMF deep convection scheme
+!! but with a few key differences. First, no quasi-equilibrium assumption
+!! is used for any grid size and the shallow cloud base mass flux is
+!! parameterized using a mean updraft velocity. Further, there are no
+!! convective downdrafts, the entrainment rate is greater than for deep
+!! convection, and the shallow convection is limited to not extend over
+!! the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and
+!! aerosol awareness follows that of the SAMF deep convection scheme.
+!!
+!! The previous version of the shallow convection scheme (shalcnv.f)
+!! is described in Han and Pan (2011) \cite han_and_pan_2011 and differences
+!! between the shallow and deep convection schemes are presented in 
+!! Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2017)
+!! \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
+!! are described in Han et al. (2017) \cite han_et_al_2017 .
+!!
+!!  \section diagram Calling Hierarchy Diagram
+!!  \image html SAMF_shal_Flowchart.png "Diagram depicting how the SAMF
+!! shallow convection scheme is called from the FV3GFS physics time loop"
+!! height=2cm
+!!  \section intraphysics Intraphysics Communication
+!!  This space is reserved for a description of how this scheme uses
+!! information from other scheme types and/or how information calculated
+!! in this scheme is used in other scheme types.
 
       module sasas_shal
       contains
-
-!> \defgroup SASHAL Scale-Aware Mass Flux Shallow Convection
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
 
 !> \brief Brief description of the subroutine
 !!
@@ -17,7 +41,14 @@
       subroutine sasasshal_init
       end subroutine sasasshal_init
 
-!> \brief Brief description of the subroutine
+!> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
+!! This routine follows the \ref SAMF deep scheme quite closely, although
+!! it can be interpreted as only having the "static" and "feedback" control
+!! portions, since the "dynamic" control is not necessary to find the
+!! cloud base mass flux. The algorithm is simplified from SAMF deep
+!! convection by excluding convective downdrafts and being confined to
+!! operate below \f$p=0.7p_{sfc}\f$. Also, entrainment is both simpler
+!! and stronger in magnitude compared to the deep scheme.
 !!
 !! \section arg_table_sasasshal_run Argument Table
 !! | local var name | longname                                                  | description                                            | units   | rank | type    |    kind   | intent | optional |
@@ -51,6 +82,17 @@
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    | 2    | real    | kind_phys | out    | F        |
 !!
 !!  \section general General Algorithm
+!!  -# Compute preliminary quantities needed for the static and feedback
+!!  control portions of the algorithm.
+!!  -# Perform calculations related to the updraft of the entraining/detraining
+!!  cloud model ("static control").
+!!  -# The cloud base mass flux is obtained using the cumulus updraft
+!!  velocity averaged ove the whole cloud depth.
+!!  -# Calculate the tendencies of the state variables (per unit cloud
+!!  base mass flux) and the cloud base mass flux.
+!!  -# For the "feedback control", calculate updated values of the state
+!!  variables by multiplying the cloud base mass flux and the tendencies
+!! calculated per unit cloud base mass flux from the static control.
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
@@ -1494,7 +1536,7 @@ c
 !!
       return
       end subroutine sasasshal_run
-!> @}
+!! @}
 
 !> \brief Brief description of the subroutine
 !!
@@ -1502,7 +1544,7 @@ c
 !!
       subroutine sasasshal_finalize
       end subroutine sasasshal_finalize
-!> @}
+!! @}
 
       end module sasas_shal
 
