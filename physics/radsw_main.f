@@ -511,79 +511,11 @@
       contains
 ! =================
 
-!> This subroutine is the main SW radiation routine.
-!!\param plyr           model layer mean pressure in mb
-!!\param plvl           model level pressure in mb
-!!\param tlyr           model layer mean temperature in K
-!!\param tlvl           model level temperature in K (not in use)
-!!\param qlyr           layer specific humidity in gm/gm
-!!\param olyr           layer ozone concentration in gm/gm
-!!\param gasvmr         atmospheric constent gases
-!!\n                    (:,:,1)  - co2 volume mixing ratio
-!!\n                    (:,:,2)  - n2o volume mixing ratio
-!!\n                    (:,:,3)  - ch4 volume mixing ratio
-!!\n                    (:,:,4)  - o2  volume mixing ratio
-!!\n                    (:,:,5)  - co  volume mixing ratio (not used)
-!!\n                    (:,:,6)  - cfc11 volume mixing ratio (not used)
-!!\n                    (:,:,7)  - cfc12 volume mixing ratio (not used)
-!!\n                    (:,:,8)  - cfc22 volume mixing ratio (not used)
-!!\n                    (:,:,9)  - ccl4  volume mixing ratio (not used)
-!!\param clouds         cloud profile
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer in-cloud liq water path (\f$g/m^2\f$)
-!!\n                    (:,:,3)  - mean eff radius for liq cloud (micron)
-!!\n                    (:,:,4)  - layer in-cloud ice water path (\f$g/m^2\f$)
-!!\n                    (:,:,5)  - mean eff radius for ice cloud (micron)
-!!\n                    (:,:,6)  - layer rain drop water path (\f$g/m^2\f$)
-!!\n                    (:,:,7)  - mean eff radius for rain drop (micron)
-!!\n                    (:,:,8)  - layer snow flake water path (\f$g/m^2\f$)
-!!\n                    (:,:,9)  - mean eff radius for snow flake (micron)
-!!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties
-!!\n                    (:,:,:,1) - optical depth
-!!\n                    (:,:,:,2) - single scattering albedo
-!!\n                    (:,:,:,3) - asymmetry parameter
-!!\param sfcalb         surface albedo in fraction
-!!\n                    (:,1) - near ir direct beam albedo
-!!\n                    (:,2) - near ir diffused albedo
-!!\n                    (:,3) - uv+vis direct beam albedo
-!!\n                    (:,4) - uv+vis diffused albedo
-!!\param cosz           cosine of solar zenith angle
-!!\param solcon         solar constant (\f$W/m^2\f$)
-!!\param NDAY           num of daytime points
-!!\param idxday         index array for daytime points
-!!\param npts           number of horizontal points
-!!\param nlay,nlp1      vertical layer/lavel numbers
-!!\param lprnt          logical check print flag
-!!\param hswc           total sky heating rates (k/sec or k/day)
-!!\param topflx         radiation fluxes at toa (\f$W/m^2\f$), components:
-!!\n                    upfxc - total sky upward flux at toa
-!!\n                    dnflx - total sky downward flux at toa
-!!\n                    upfx0 - clear sky upward flux at toa
-!!\param sfcflx         radiation fluxes at sfc (\f$W/m^2\f$), components:
-!!\n                    upfxc - total sky upward flux at sfc
-!!\n                    dnfxc - total sky downward flux at sfc
-!!\n                    upfx0 - clear sky upward flux at sfc
-!!\n                    dnfx0 - clear sky downward flux at sfc
-!!\param hswb           spectral band total sky heating rates
-!!\param hsw0           clear sky heating rates (k/sec or k/day)
-!!\param flxprf         level radiation fluxes (\f$ W/m^2 \f$), components:
-!!\n                    dnfxc - total sky downward flux at interface
-!!\n                    upfxc - total sky upward flux at interface
-!!\n                    dnfx0 - clear sky downward flux at interface
-!!\n                    upfx0 - clear sky upward flux at interface
-!!\param fdncmp         surface downward fluxes (\f$W/m^2\f$), components:
-!!\n                    uvbfc - total sky downward uv-b flux at sfc
-!!\n                    uvbf0 - clear sky downward uv-b flux at sfc
-!!\n                    nirbm - downward surface nir direct beam flux
-!!\n                    nirdf - downward surface nir diffused flux
-!!\n                    visbm - downward surface uv+vis direct beam flux
-!!\n                    visdf - downward surface uv+vis diffused flux
 
       subroutine swrad_init ()
       end subroutine swrad_init
 
-
+!>/brief This subroutine is the main SW radiation routine.
 !! \section arg_table_swrad_run Argument Table
 !! | local var name  | longname                                                                                      | description                                                              | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|

@@ -70,18 +70,16 @@
 
       contains
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_pre_init Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_pre_init Argument Table
 !!
       subroutine gwdc_pre_init ()
       end subroutine gwdc_pre_init
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_pre_run Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_pre_run Argument Table
 !! | local var name | longname                                                                 | description                                                   | units | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | count | 0    | integer |           | in     | F        |
@@ -149,10 +147,9 @@
 
       end subroutine gwdc_pre_run
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_pre_finalize Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_pre_finalize Argument Table
 !!
       subroutine gwdc_pre_finalize ()
       end subroutine gwdc_pre_finalize
@@ -165,16 +162,15 @@
 
       contains
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_init Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_init Argument Table
 !!
       subroutine gwdc_init()
       end subroutine gwdc_init
 
-!> \ingroup GFS_cgwd
-!! This subroutine is the parameterization of convective gravity wave
+!> \defgroup GFS_gwdc_run GFS gwdc Main
+!! \brief This subroutine is the parameterization of convective gravity wave
 !! drag based on the theory given by Chun and Baik (1998)
 !! \cite chun_and_baik_1998 modified for implementation into the
 !! GFS/CFS by Ake Johansson(Aug 2005).
@@ -199,43 +195,6 @@
 !! hypothesis in order to find wave breaking levels in terms of the
 !! Richardon number criterion using the nonlinearity factor of
 !! thermally induced waves.
-!> \param[in] IM       horizontal number of used pts
-!> \param[in] IX       horizontal dimension
-!> \param[in] IY       horizontal number of used pts
-!> \param[in] KM       vertical layer dimension
-!> \param[in] LAT      latitude index - used for debug prints
-!> \param[in] U1       u component of layer wind
-!> \param[in] V1       v component of layer wind
-!> \param[in] T1       layer mean temperature (K)
-!> \param[in] Q1       layer mean tracer concentration
-!> \param[in] DELTIM   physics time step in sectons
-!> \param[in] PMID1    mean layer pressure
-!> \param[in] PINT1    pressure at layer interfaces
-!> \param[in] DPMID1   mean layer delta p
-!> \param[in] QMAX     maximum convective heating rate (k/s) in a
-!!                     horizontal grid point calculated
-!!                     from cumulus parameterization
-!> \param[in] KTOP     vertical level index for cloud top
-!> \param[in] KBOT     vertical level index for cloud bottom
-!> \param[in] KCNV     (0,1) dependent on whether convection occur or not
-!> \param[in] CLDF     deep convective cloud fraction at the cloud top
-!> \param[in] GRAV     gravity defined in physcon
-!> \param[in] CP       specific heat at constant pressure defined in
-!!                     physcon
-!> \param[in] RD       gas constant air defined in physcon
-!> \param[in] FV       con_fvirt = con_rv/con_rd-1
-!> \param[in] PI       ratio of a circle's circumference to its diameter
-!> \param[in] DLENGTH  grid spacing in the direction of basic wind at
-!!                     the cloud top
-!> \param[in] LPRNT    logical print flag
-!> \param[in] IPR      check print point for debugging
-!> \param[in] FHOUR    forecast hour
-!> \param[out] UTGWC   zonal wind tendency
-!> \param[out] VTGWC   meridional wind tendency
-!> \param[out] TAUCTX  wave stress at the cloud top projected in the
-!!                     east
-!> \param[out] TAUCTY  wave stress at the cloud top projected in the
-!!                     north
 !!
 !! \section arg_table_gwdc_run Argument Table
 !! | local var name | longname                                               | description                                                        | units      | rank | type    | kind      | intent | optional |
@@ -1557,10 +1516,9 @@
       end subroutine gwdc_run
 !> @}
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_finalize Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_finalize Argument Table
 !!
       subroutine gwdc_finalize()
       end subroutine gwdc_finalize
@@ -1573,18 +1531,16 @@
 
       contains
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_post_init Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_post_init Argument Table
 !!
       subroutine gwdc_post_init()
       end subroutine gwdc_post_init
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_post_run Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_post_run Argument Table
 !! | local var name | longname                                                        | description                                                              | units      | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      | 0    | integer | default   | in     | F        |
@@ -1656,10 +1612,9 @@
 
       end subroutine gwdc_post_run
 
-!> \ingroup GFS_cgwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_post_finalize Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdc_post_finalize Argument Table
 !!
       subroutine gwdc_post_finalize()
       end subroutine gwdc_post_finalize

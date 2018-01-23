@@ -1,11 +1,11 @@
 !>  \file sfc_drv.f
 !!  This file contains the NOAH land surface scheme.
 
-!> \defgroup NOAH NOAH Land Surface Scheme
+!> \defgroup NOAH GFS NOAH Land Surface Scheme
 !! \brief  This is the NOAH land surface scheme.
 !! @{
-!> \defgroup NOAH_pre NOAH Land Surface Pre
-!! \ingroup NOAH
+! \defgroup NOAH_pre NOAH Land Surface Pre
+! \ingroup NOAH
 !! @{
 !!  \brief Brief description of the parameterization
 
@@ -18,9 +18,9 @@
       subroutine lsm_noah_pre_finalize
       end subroutine lsm_noah_pre_finalize
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_pre_run Arguments
+! \brief Brief description of the subroutine
+!
+! \section arg_table_lsm_noah_pre_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -70,8 +70,8 @@
 
 !! @}
 
-!> \defgroup NOAH_post NOAH Land Surface post
-!! \ingroup NOAH
+! \defgroup NOAH_post NOAH Land Surface post
+! \ingroup NOAH
 !! @{
 !!  \brief Brief description of the parameterization
 !!  \section diagram Calling Hierarchy Diagram
@@ -86,9 +86,9 @@
       subroutine lsm_noah_post_finalize
       end subroutine lsm_noah_post_finalize
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_post_run Arguments
+! \brief Brief description of the subroutine
+!
+! \section arg_table_lsm_noah_post_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -131,13 +131,6 @@
 !! @}
       end module lsm_noah_post
 !! @}
-
-!> \defgroup NOAH_main NOAH Land Surface Main
-!! \ingroup NOAH
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
 
       module lsm_noah
       contains
@@ -255,6 +248,13 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
+!> \defgroup NOAH_main GFS sfc_drv Main
+!! \ingroup NOAH
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_lsm_noah_run Arguments

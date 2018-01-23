@@ -1,7 +1,7 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface exchange coefficient calculation scheme.
 
-!> \defgroup Sfc_ex_cal Surface Exchange Coefficient Calculation
+!> \defgroup Sfc_ex_cal GFS Surface Exchange Coefficient Calculation
 !! @{
 !!  \brief Brief description of the scheme
 !!  \section diagram Calling Hierarchy Diagram
@@ -17,8 +17,10 @@
       end subroutine sfc_ex_coef_finalize
 
 !      subroutine sfc_diff(im,ps,u1,v1,t1,q1,z1,
+
+!> \defgroup GFS_diff_main GFS sfc_diff Main
+!! \ingroup Sfc_ex_cal
 !> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_ex_coef_run Arguments
 !!| local var name | longname                                                    | description                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|

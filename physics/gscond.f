@@ -6,7 +6,7 @@
       module GFS_zhaocarr_gscond
       contains
 
-!> \defgroup Zhao-Carr Zhao-Carr Microphysics
+!> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
 !! @{
 !! \brief The GFS scheme for large-scale condensation and precipitation
 !! , based on Zhao and Carr (1997) \cite zhao_and_carr_1997
@@ -37,22 +37,19 @@
 !! - EVPCO: Coefficient for evaporation of precipitation
 !!
 !! \section intramps Intraphysics Communication
-!! - Routine GSCOND is called from GBPHYS after call to SHALCNV
-!! - Routine PRECPD is called from GBPHYS after call to GSCOND
 
 !> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
 !! @{
 
-!> \ingroup condense
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gscond_init  Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gscond_init  Argument Table
+!
        subroutine gscond_init
        end subroutine gscond_init
 
 
-!> \ingroup condense
+!> \defgroup gfs_gscond GFS gscond Main
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
@@ -540,11 +537,10 @@
       end subroutine gscond_run
 !> @}
 
-!> \ingroup condense
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gscond_finalize  Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gscond_finalize  Argument Table
+!
        subroutine gscond_finalize
        end subroutine gscond_finalize
 

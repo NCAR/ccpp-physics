@@ -1,12 +1,11 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
+!> \defgroup GFS_Ice GFS Thermodynamics Sea Ice
       module sfc_sice
 
       contains
 
-!> \defgroup GFS_Ice GFS Thermodynamics Sea Ice
-!! @{
 !!  \brief Three layer thermodynamic sea ice model based on M. Winton's "a reformulated three-layer sea ice model", journal of atmospheric and oceanic technology, 2000.
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
@@ -22,7 +21,12 @@
 !!
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
-!!
+
+
+!>\defgroup gfs_sice_main GFS sfc_sice Main
+!> \brief blah blah
+!! @{
+!! \ingroup GFS_Ice
 !! \section arg_table_sfc_sice_run Arguments
 !! | local var name | longname                                                                     | description                                                     | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
@@ -97,7 +101,7 @@
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
-!  program history log:                                                 !
+u  program history log:                                                 !
 !         2005  --  xingren wu created  from original progtm and added  !
 !                     two-layer ice model                               !
 !         200x  -- sarah lu    added flag_iter                          !
@@ -728,21 +732,20 @@
       contains
 
 !!
-!> \brief This subroutine is empty since there are no procedures needed
-!! \section arg_table_sfc_sice_pre_init  Argument Table
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_pre_init  Argument Table
 !!
       subroutine sfc_sice_pre_init
       end subroutine sfc_sice_pre_init
 
 !!
-!> \brief This subroutine is empty since there are no procedures needed
-!! \section arg_table_sfc_sice_pre_finalize  Argument Table
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_pre_finalize  Argument Table
 !!
       subroutine sfc_sice_pre_finalize
       end subroutine sfc_sice_pre_finalize
 
 
-!!
 !! \section arg_table_sfc_sice_pre_run Argument Table
 !! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
@@ -795,15 +798,15 @@
       contains
 
 !!
-!> \brief This subroutine is empty since there are no procedures needed
-!! \section arg_table_sfc_sice_post_init  Argument Table
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_post_init  Argument Table
 !!
       subroutine sfc_sice_post_init
       end subroutine sfc_sice_post_init
 
 !!
-!> \brief This subroutine is empty since there are no procedures needed
-!! \section arg_table_sfc_sice_post_finalize  Argument Table
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_post_finalize  Argument Table
 !!
       subroutine sfc_sice_post_finalize
       end subroutine sfc_sice_post_finalize
@@ -860,6 +863,7 @@
       enddo
 
       end subroutine sfc_sice_post_run
+!! @}
 
       end module  sfc_sice_post
 !> @}

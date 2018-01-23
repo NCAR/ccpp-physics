@@ -96,25 +96,23 @@
 !! gravity wave drag than the T383L64 version.
 !!
 !!\section intra_gwdps Intraphysics Communication
-!! - Routine GWDPS is called from GBPHYS after call
-!!   to MONINEDMF
 
       module gwdps_pre
 
       contains
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_pre_init Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_pre_init Argument Table
+!
       subroutine gwdps_pre_init()
       end subroutine gwdps_pre_init
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_pre_run Argument Table
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_pre_run Argument Table
 !! | local var name | longname                                                                | description                                                                              | units   | rank | type    | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   | 0    | integer | default   | in     | F        |
@@ -202,11 +200,11 @@
       end subroutine gwdps_pre_run
 !> @}
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_pre_finalize Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_pre_finalize Argument Table
+!
       subroutine gwdps_pre_finalize()
       end subroutine gwdps_pre_finalize
 
@@ -218,15 +216,16 @@
 
       contains
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_init Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_init Argument Table
+!
       subroutine gwdps_init()
       end subroutine gwdps_init
 
-!> \ingroup GFS_ogwd
+!> \defgroup gfs_gwdps GFS gwdps Main
+!!\ingroup GFS_ogwd
 !! \brief This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!
@@ -279,52 +278,6 @@
 !! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       | 0    | logical | default   | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      | 0    | integer | default   | in     | F        |
 !!
-!> \param[in] IM       horizontal number of used pts
-!> \param[in] IX       horizontal dimension
-!> \param[in] IY       horizontal number of used pts
-!> \param[in] KM       vertical layer dimension
-!> \param[in,out] A    non-linear tendency for v wind component
-!> \param[in,out] B    non-linear tendency for u wind component
-!> \param[in,out] C    non-linear tendency for temperature (not used)
-!> \param[in] U1       zonal wind component of model layer wind (m/s)
-!> \param[in] V1       meridional wind component of model layer wind
-!! (m/s)
-!> \param[in] T1       model layer mean temperature  (K)
-!> \param[in] Q1       model layer mean specific humidity
-!> \param[in] KPBL     index for the PBL top layer
-!> \param[in] PRSI     pressure at layer interfaces
-!> \param[in] DEL      positive increment of p/psfc across layer
-!> \param[in] PRSL     mean layer pressure
-!> \param[in] PRSLK    Exner function at layer
-!> \param[in] PHII     interface geopotential (\f$m^2/s^2\f$)
-!> \param[in] PHIL     layer geopotential (\f$m^2/s^2\f$)
-!> \param[in] DELTIM   physics time step in seconds
-!> \param[in] KDT      number of the current time step
-!> \param[in] HPRIME   orographic standard deviation (m) (mtnvar(:,1))
-!> \param[in] OC       orographic Convexity (mtnvar(:,2))
-!> \param[in] OA4      orographic Asymmetry (mtnvar(:,3:6))
-!> \param[in] CLX4     Lx, the fractional area covered by the
-!!  subgrid-scale orography higher than a critical height for a grid
-!!  box with the interval \f$ \triangle x \f$ (mtnvar(:,7:10))
-!> \param[in] THETA    the angle of the mtn with that to the east (x)
-!!                     axis (mtnvar(:,11))
-!> \param[in] SIGMA    orographic slope (mtnvar(:,13))
-!> \param[in] GAMMA    orographic anisotropy (mtnvar(:,12))
-!> \param[in] ELVMAX   orographic maximum (mtnvar(:,14))
-!> \param[out] DUSFC   u component of surface stress
-!> \param[out] DVSFC   v component of surface stress
-!> \param[in] G        see physcons::con_g
-!> \param[in] CP       see physcons::con_cp
-!> \param[in] RD       see physcons::con_tird
-!> \param[in] RV       see physcons::con_rv
-!> \param[in] IMX      number of longitude points
-!> \param[in] NMTVR    number of topographic variables such as
-!! variance etc used in the GWD parameterization,current operational,
-!! nmtvr=14
-!> \param[in] CDMBGWD  multiplication factors for cdmb and gwd
-!> \param[in] ME       pe number - used for debug prints
-!> \param[in] LPRNT    logical print flag
-!> \param[in] IPR      check print point for debugging
 !> \section gen_gwdps General Algorithm
 !> @{
       subroutine gwdps_run(                                             &
@@ -1387,11 +1340,11 @@
       end subroutine gwdps_run
 !> @}
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_finalize Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_finalize Argument Table
+!
       subroutine gwdps_finalize()
       end subroutine gwdps_finalize
 
@@ -1403,17 +1356,17 @@
 
       contains
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_post_init Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_post_init Argument Table
+!
       subroutine gwdps_post_init()
       end subroutine gwdps_post_init
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!! \section arg_table_gwdps_post_run Argument Table
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+! \section arg_table_gwdps_post_run Argument Table
 !! | local var name | longname                                                  | description                                                      | units | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------|------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  | 0    | logical | default   | in     | F        |
@@ -1458,11 +1411,11 @@
 
       end subroutine gwdps_post_run
 
-!> \ingroup GFS_ogwd
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdps_post_finalize Argument Table
-!!
+! \ingroup GFS_ogwd
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gwdps_post_finalize Argument Table
+!
       subroutine gwdps_post_finalize()
       end subroutine gwdps_post_finalize
 

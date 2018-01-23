@@ -1,6 +1,6 @@
 !>  \file mfdeepcnv.f
 !!  This file contains the entire SAMF deep convection scheme.
-!> \defgroup SAMF Scale-Aware Mass-Flux Deep Convection
+!> \defgroup SAMF GFS Scale-Aware Mass-Flux Deep Convection
 !! @{
 !> \brief The scale-aware mass-flux (SAMF) deep convection scheme is an 
 !! updated version of the previous Simplified Arakawa-Schubert (SAS) scheme 
@@ -69,8 +69,8 @@
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
-!> \brief Brief description of the subroutine
-!!
+! \brief Brief description of the subroutine
+!
 ! \section arg_table_sasasdeep_init  Argument Table
 ! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
 ! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -79,8 +79,8 @@
       end subroutine sasasdeep_init
 
 
-!> \brief Brief description of the subroutine
-!!
+! \brief Brief description of the subroutine
+!
 ! \section arg_table_sasasdeep_finalize  Argument Table
 ! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
 ! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -89,6 +89,7 @@
       end subroutine sasasdeep_finalize
 
 
+!>\defgroup GFS_mfdeep GFS mfdeepcnv Main
 !>\brief This subroutine contains the entirety of the SAMF deep convection scheme.
 !!  
 !! For grid sizes larger than threshold value, as in Grell (1993) 
@@ -153,21 +154,20 @@
 !! cloud model ("static control").
 !!  -# Perform calculations related to the downdraft of the entraining/detraining
 !! cloud model ("static control").
-!!
 !!  -# For grid sizes larger than the threshold value (currently 8 km):
-!!   - 1) Using the updated temperature and moisture profiles that were
+!!\n   1) Using the updated temperature and moisture profiles that were
 !! modified by the convection on a short time-scale, recalculate the
 !! total cloud work function to determine the change in the cloud work
 !! function due to convection, or the stabilizing effect of the cumulus.
-!!   - 2) For the "dynamic control", using a reference cloud work function,
+!!!\n  2) For the "dynamic control", using a reference cloud work function,
 !! estimate the change in cloud work function due to the large-scale dynamics.
 !! Following the quasi-equilibrium assumption, calculate the cloud base
 !! mass flux required to keep the large-scale convective destabilization
 !! in balance with the stabilization effect of the convection.
 !!
 !!  -# For grid sizes smaller than the threshold value (currently 8 km):
-!!   - 1) compute the cloud base mass flux using the cumulus updraft
-!! velocity averaged ove the whole cloud depth.
+!!\n   1) compute the cloud base mass flux using the cumulus updraft
+!! velocity averaged over the whole cloud depth.
 !!
 !!  -# For scale awareness, the updraft fraction (sigma) is obtained as
 !! a function of cloud base entrainment. Then, the final cloud base mass
@@ -275,7 +275,7 @@ cj
      &                     cinacr,  cinacrmx,  cinacrmn
 cj
 
-!>  parameters for updraft velocity calculation
+!  parameters for updraft velocity calculation
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
      &                     bb1,     bb2,     wucb
 
@@ -344,7 +344,7 @@ c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
 !>  - Convert input pressure terms to centibar units.
 !************************************************************************
-!>    convert input Pa terms to Cb terms  -- Moorthi
+!    convert input Pa terms to Cb terms  -- Moorthi
       ps   = psp   * 0.001
       prsl = prslp * 0.001
       del  = delp  * 0.001
@@ -499,13 +499,15 @@ c
 c hydrostatic height assume zero terr and initially assume
 c   updraft entrainment rate as an inverse function of height
 c
-!>  - Calculate hydrostatic height at layer centers assuming a flat surface (no terrain) from the geopotential.
+!>  - Calculate hydrostatic height at layer centers assuming a flat 
+!! surface (no terrain) from the geopotential.
       do k = 1, km
         do i=1,im
           zo(i,k) = phil(i,k) / g
         enddo
       enddo
-!>  - Calculate interface height and the initial entrainment rate as an inverse function of height.
+!>  - Calculate interface height and the initial entrainment rate as 
+!! an inverse function of height.
       do k = 1, km1
         do i=1,im
           zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
@@ -517,7 +519,7 @@ c
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c  convert surface pressure to mb from cb
 c
-!>  - Convert prsl from centibar to millibar, set normalized mass fluxes
+!>  - Convert \a prsl from centibar to millibar, set normalized mass fluxes
 !! to 1, cloud properties to 0, and save model state variables (after 
 !! advection/turbulence).
       do k = 1, km
@@ -1492,8 +1494,7 @@ c ----- downdraft calculations
 c
 c - compute precipitation efficiency in terms of windshear
 c
-!> ## Perform calculations related to the downdraft of the entraining/detraining
-!! cloud model ("static control").
+!> ## Perform calculations related to the downdraft of the entraining/detraining cloud model ("static control").
 !! - First, in order to calculate the downdraft mass flux (as a fraction
 !! of the updraft mass flux), calculate the wind shear and precipitation
 !! efficiency according to equation 58 in Fritsch and Chappell (1980)
@@ -1900,10 +1901,7 @@ c--- destabilization.
 c
 c--- environmental conditions again, first heights
 c
-!> ## Using the updated temperature and moisture profiles that were
-!! modified by the convection on a short time-scale, recalculate the
-!! total cloud work function to determine the change in the cloud work
-!! function due to convection, or the stabilizing effect of the cumulus.
+!> ## Using the updated temperature and moisture profiles that were modified by the convection on a short time-scale, recalculate the total cloud work function to determine the change in the cloud work function due to convection, or the stabilizing effect of the cumulus.
 !! - Using notation from Pan and Wu (1995) \cite pan_and_wu_1995, the
 !! previously calculated cloud work function is denoted by \f$A^+\f$.
 !! Now, it is necessary to use the entraining/detraining cloud model 
@@ -2414,9 +2412,7 @@ c--- feedback: simply the changes from the cloud with unit mass flux
 c---           multiplied by  the mass flux necessary to keep the
 c---           equilibrium with the larger-scale.
 c
-!> ## For the "feedback" control, calculate updated values of the state
-!! variables by multiplying the cloud base mass flux and the tendencies
-!! calculated per unit cloud base mass flux from the static control.
+!> ## For the "feedback" control, calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !> - Calculate the temperature tendency from the moist static energy and
 !! specific humidity tendencies.
 !> - Update the temperature, specific humidity, and horiztonal wind state

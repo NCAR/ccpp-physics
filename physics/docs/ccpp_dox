@@ -1,6 +1,6 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "CCPP Physics Documentation"
+PROJECT_NAME           = "GMTB CCPP Physics Documentation"
 PROJECT_NUMBER         = ""
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png

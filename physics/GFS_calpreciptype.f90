@@ -7,12 +7,12 @@
 
       module GFS_calpreciptype
       contains
-
-!> \section arg_table_GFS_calpreciptype_init Argument Table
-!!
+! \section arg_table_GFS_calpreciptype_init Argument Table
+!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
 
+!>\defgroup gfs_calpreciptype GFS calpreciptype Main
 !> \section arg_table_GFS_calpreciptype_run Argument Table
 !! | local var name | longname                                                               | description                                                | units   | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -1516,8 +1516,8 @@
       return
       end subroutine calwxt_dominant
 
-!> \section arg_table_GFS_calpreciptype_finalize Argument table
-!!
+! \section arg_table_GFS_calpreciptype_finalize Argument table
+!
       subroutine GFS_calpreciptype_finalize
       end subroutine GFS_calpreciptype_finalize
 

@@ -1,6 +1,6 @@
 !>  \file mfshalcnv.f
 !!  This file contains the entire SAMF deep convection scheme.
-!> \defgroup SAMF_shal Scale-Aware Mass-Flux Shallow Convection
+!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !! @{
 !!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection
 !! scheme is an updated version of the previous mass-flux shallow
@@ -34,13 +34,14 @@
       module sasas_shal
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_init Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_init Argument Table
+!
       subroutine sasasshal_init
       end subroutine sasasshal_init
 
+!>\defgroup SAMF_shal_main GFS mfshalcnv Main
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
 !! This routine follows the \ref SAMF deep scheme quite closely, although
 !! it can be interpreted as only having the "static" and "feedback" control
@@ -1538,10 +1539,10 @@ c
       end subroutine sasasshal_run
 !! @}
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_init Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_init Argument Table
+!
       subroutine sasasshal_finalize
       end subroutine sasasshal_finalize
 !! @}
@@ -1551,10 +1552,10 @@ c
       module sasas_shal_post
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_post_run Argument Table
-!! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_run Argument Table
+! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
 !! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
 !! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
 !! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real                          | kind_phys | in     | F        |
@@ -1611,10 +1612,10 @@ c
       subroutine sasasshal_post_init ()
       end subroutine sasasshal_post_init
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_post_finalize Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_finalize Argument Table
+!
       subroutine sasasshal_post_finalize ()
       end subroutine sasasshal_post_finalize
 

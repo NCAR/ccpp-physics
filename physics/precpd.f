@@ -9,16 +9,15 @@
 !> \defgroup precip Precipitation (snow or rain) Production
 !! @{
 
-!> \ingroup precip
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_precpd_init  Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_precpd_init  Argument Table
+!
       subroutine precpd_init ()
       end subroutine precpd_init
 
 
-!> \ingroup precip
+!> \defgroup gfs_precpd GFS precpd Main
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
@@ -739,11 +738,10 @@
       end subroutine precpd_run
 !> @}
 
-!> \ingroup precip
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_precpd_finalize  Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_precpd_finalize  Argument Table
+!
       subroutine precpd_finalize
       end subroutine precpd_finalize
 
