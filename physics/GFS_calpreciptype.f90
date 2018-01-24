@@ -19,7 +19,7 @@
 !! |    ix          | horizontal_dimension                                                   | horizontal dimension                                       | count   | 0    | integer |           | in     |  F       |
 !! |    lm          | vertical_dimension                                                     | vertical layer dimension                                   | count   | 0    | integer |           | in     |  F       |
 !! |    lp1         | vertical_interface_dimension                                           | vertical interface dimension                               | count   | 0    | integer |           | in     |  F       |
-!! |    randomno    | random_number_array                                                    | random number array                                        | none    | 2    | real    |           | in     |  F       |
+!! |    randomno    | random_number_array                                                    | random number array                                        | none    | 2    | real    | kind_phys | in     |  F       |
 !! |    cal_pre     | flag_for_precipitation_type_algorithm                                  | flag controls precip type algorithm                        | flag    | 0    | logical |           | in     |  F       |
 !! |    gt0         | air_temperature_updated_by_physics                                     | layer mean air temperature                                 | K       | 2    | real    | kind_phys | in     |  F       |
 !! |    gq0         | water_vapor_specific_humidity_updated_by_physics                       | water vapor specific humidity                              | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
@@ -70,7 +70,7 @@
 !
       integer,intent(in) :: kdt,nrcm,im,ix,lm,lp1,n3dfercld
       logical            :: cal_pre
-      real,intent(in)    :: randomno(ix,nrcm)
+      real(kind=kind_phys),                  intent(in)  :: randomno(ix,nrcm)
       real(kind=kind_phys),dimension(im),    intent(in)  :: sr,tskin, &
                                                      rainc,rain1
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl,phy_f3d

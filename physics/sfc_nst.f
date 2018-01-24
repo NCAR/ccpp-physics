@@ -85,11 +85,11 @@
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag          | 1    | logical |           | in     | F        |
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                          | flag          | 1    | logical |           | in     | F        |
 !! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2                     | flag          | 0    | integer |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                                       | mm            | 1    | integer |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                                       | mm            | 1    | integer |           | in     | F        |
+!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                                       | mm            | 0    | integer |           | in     | F        |
+!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                                       | mm            | 0    | integer |           | in     | F        |
 !! | lprnt          | flag_print                                                                   | flag for printing diagnostics to output                     | flag          | 0    | logical |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                          | index         | 0    | integer |           | in     | F        |
-!! | tskin          | surface_skin_temperature                                                     | ocean surface skin temperature                              | K             | 1    | real    | kind_phys | inout  | F        |
+!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                              | K             | 1    | real    | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run                | K             | 1    | real    | kind_phys | inout  | F        |
 !! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer                   | K m           | 1    | real    | kind_phys | inout  | F        |
 !! | xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer              | ppt m         | 1    | real    | kind_phys | inout  | F        |
@@ -750,7 +750,7 @@ cc
 !! | oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          | m             | 1    | real    | kind_phys | in     | F        |
 !! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
 !!
 !! \section NSST_general_algorithm General Algorithm
 !!
@@ -848,8 +848,8 @@ cc
 !! | oro            | orography                                                                    | orography                                      | m             | 1    | real    | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                                         | unfiltered orography                           | m             | 1    | real    | kind_phys | in     | F        |
 !! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2        | flag          | 0    | integer |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                          | mm            | 1    | integer |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                          | mm            | 1    | integer |           | in     | F        |
+!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                          | mm            | 0    | integer |           | in     | F        |
+!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                          | mm            | 0    | integer |           | in     | F        |
 !! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer      | K m           | 1    | real    | kind_phys | in     | F        |
 !! | xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness            | m             | 1    | real    | kind_phys | in     | F        |
 !! | dt_cool        | sub-layer_cooling_amount                                                     | sub-layer cooling amount                       | K             | 1    | real    | kind_phys | in     | F        |

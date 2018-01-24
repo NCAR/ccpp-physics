@@ -117,9 +117,8 @@
 !! \section arg_table_gwdps_pre_run Argument Table
 !! | local var name | longname                                                                | description                                                                              | units   | rank | type    | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   | 0    | integer | default   | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   | 0    | integer |           | in     | F        |
+!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   | 0    | integer |           | in     | F        |
 !! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various | 2    | real    | kind_phys | in     | F        |
 !! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       | 1    | real    | kind_phys | out    | F        |
 !! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none    | 1    | real    | kind_phys | out    | F        |
@@ -134,19 +133,19 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine gwdps_pre_run(                                         &
-     &           im, iy, nmtvr, mntvar,                                 &
+     &           im, nmtvr, mntvar,                                     &
      &           hprime, oc, oa4, clx, theta,                           &
      &           sigma, gamma, elvmax)
 
       use machine, only : kind_phys
       implicit none
 
-      integer, intent(in) :: im, iy, nmtvr
+      integer, intent(in) :: im, nmtvr
 !      integer, intent(in) :: nmtvar
       real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  hprime(im), oc(im), oa4(iy,4), clx(iy,4),                       &
+     &  hprime(im), oc(im), oa4(im,4), clx(im,4),                       &
      &  theta(im), sigma(im), gamma(im), elvmax(im)                     &
 !     &  hprime(:), oc(:), oa4(:,4), clx4(:,4),
 !     &  theta(:), sigma(:), gamma(:), elvmax(:)
@@ -238,10 +237,9 @@
 !! \section arg_table_gwdps_run Argument Table
 !! | local var name | longname                                                                      | description                                                                                              | units      | rank | type    | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                        | horizontal loop extent                                                                                   | count      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                                          | horizontal dimension                                                                                     | count      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                                                        | horizontal dimension                                                                                     | count      | 0    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                                            | number of vertical layers                                                                                | count      | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                                        | horizontal loop extent                                                                                   | count      | 0    | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                                          | horizontal dimension                                                                                     | count      | 0    | integer |           | in     | F        |
+!! | km             | vertical_dimension                                                            | number of vertical layers                                                                                | count      | 0    | integer |           | in     | F        |
 !! | A              | tendency_of_y_wind_due_to_model_physics                                       | meridional wind tendency due to model physics                                                            | m s-2      | 2    | real    | kind_phys | inout  | F        |
 !! | B              | tendency_of_x_wind_due_to_model_physics                                       | zonal wind tendency due to model physics                                                                 | m s-2      | 2    | real    | kind_phys | inout  | F        |
 !! | C              | tendency_of_air_temperature_due_to_model_physics                              | air temperature tendency due to model physics                                                            | K s-1      | 2    | real    | kind_phys | inout  | F        |
@@ -249,7 +247,7 @@
 !! | v1             | y_wind                                                                        | meridional wind                                                                                          | m s-1      | 2    | real    | kind_phys | in     | F        |
 !! | t1             | air_temperature                                                               | mid-layer temperature                                                                                    | K          | 2    | real    | kind_phys | in     | F        |
 !! | q1             | water_vapor_specific_humidity                                                 | mid-layer specific humidity of water vapor                                                               | kg kg-1    | 2    | real    | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                            | vertical index at top atmospheric boundary layer                                                         | index      | 1    | integer | default   | in     | F        |
+!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                            | vertical index at top atmospheric boundary layer                                                         | index      | 1    | integer |           | in     | F        |
 !! | prsi           | air_pressure_at_interface                                                     | interface pressure                                                                                       | Pa         | 2    | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                     | difference between mid-layer pressures                                                                   | Pa         | 2    | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                                                  | mid-layer pressure                                                                                       | Pa         | 2    | real    | kind_phys | in     | F        |
@@ -257,7 +255,7 @@
 !! | phii           | geopotential_at_interface                                                     | interface geopotential                                                                                   | m2 s-2     | 2    | real    | kind_phys | in     | F        |
 !! | phil           | geopotential                                                                  | mid-layer geopotential                                                                                   | m2 s-2     | 2    | real    | kind_phys | in     | F        |
 !! | deltim         | time_step_for_physics                                                         | physics time step                                                                                        | s          | 0    | real    | kind_phys | in     | F        |
-!! | kdt            | index_of_time_step                                                            | current time step index                                                                                  | index      | 0    | integer | default   | in     | F        |
+!! | kdt            | index_of_time_step                                                            | current time step index                                                                                  | index      | 0    | integer |           | in     | F        |
 !! | hprime         | standard_deviation_of_subgrid_orography                                       | standard deviation of subgrid orography                                                                  | m          | 1    | real    | kind_phys | in     | F        |
 !! | oc             | convexity_of_subgrid_orography                                                | convexity of subgrid orography                                                                           | none       | 1    | real    | kind_phys | in     | F        |
 !! | oa4            | asymmetry_of_subgrid_orography                                                | asymmetry of subgrid orography                                                                           | none       | 2    | real    | kind_phys | in     | F        |
@@ -272,16 +270,15 @@
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure                                 | specific heat of dry air at constant pressure                                                            | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
 !! | rd             | gas_constant_dry_air                                                          | ideal gas constant for dry air                                                                           | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
 !! | rv             | gas_constant_water_vapor                                                      | ideal gas constant for water vapor                                                                       | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
-!! | imx            | number_of_equatorial_longitude_points                                         | number of longitude points along the equator                                                             | count      | 0    | integer | default   | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                           | number of statistical measures of subgrid orography                                                      | count      | 0    | integer | default   | in     | F        |
+!! | imx            | number_of_equatorial_longitude_points                                         | number of longitude points along the equator                                                             | count      | 0    | integer |           | in     | F        |
+!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                           | number of statistical measures of subgrid orography                                                      | count      | 0    | integer |           | in     | F        |
 !! | cdmbgwd        | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag | none       | 1    | real    | kind_phys | in     | F        |
-!! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      | 0    | integer | default   | in     | F        |
-!! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       | 0    | logical | default   | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      | 0    | integer | default   | in     | F        |
+!! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      | 0    | integer |           | in     | F        |
+!! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       | 0    | logical |           | in     | F        |
+!! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      | 0    | integer |           | in     | F        |
 !!
 !> \param[in] IM       horizontal number of used pts
 !> \param[in] IX       horizontal dimension
-!> \param[in] IY       horizontal number of used pts
 !> \param[in] KM       vertical layer dimension
 !> \param[in,out] A    non-linear tendency for v wind component
 !> \param[in,out] B    non-linear tendency for u wind component
@@ -328,7 +325,7 @@
 !> \section gen_gwdps General Algorithm
 !> @{
       subroutine gwdps_run(                                             &
-     &           IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,                    &
+     &           IM,IX,KM,A,B,C,U1,V1,T1,Q1,KPBL,                       &
      &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
      &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
      &           DUSFC,DVSFC,G, CP, RD, RV, IMX,                        &
@@ -401,9 +398,9 @@
 !        CRITICAL LEVELS
 !
 !  INPUT
-!        A(IY,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
-!        B(IY,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
-!        C(IY,KM)  NON-LIN TENDENCY FOR TEMPERATURE
+!        A(IX,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
+!        B(IX,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
+!        C(IX,KM)  NON-LIN TENDENCY FOR TEMPERATURE
 !        U1(IX,KM) ZONAL WIND M/SEC  AT T0-DT
 !        V1(IX,KM) MERIDIONAL WIND M/SEC AT T0-DT
 !        T1(IX,KM) TEMPERATURE DEG K AT T0-DT
@@ -427,15 +424,15 @@
 !   ********************************************************************
       USE MACHINE , ONLY : kind_phys
       implicit none
-      integer im, iy, ix, km, imx, kdt, ipr, me
+      integer im, ix, km, imx, kdt, ipr, me
       integer KPBL(IM)                 ! Index for the PBL top layer!
       real(kind=kind_phys) deltim, G, CP, RD, RV,      cdmbgwd(2)
-      real(kind=kind_phys) A(IY,KM),    B(IY,KM),      C(IY,KM),        &
+      real(kind=kind_phys) A(IX,KM),    B(IX,KM),      C(IX,KM),        &
      &                     U1(IX,KM),   V1(IX,KM),     T1(IX,KM),       &
      &                     Q1(IX,KM),   PRSI(IX,KM+1), DEL(IX,KM),      &
      &                     PRSL(IX,KM), PRSLK(IX,KM),  PHIL(IX,KM),     &
      &                     PHII(IX,KM+1)
-      real(kind=kind_phys) OC(IM),     OA4(IY,4), CLX4(IY,4)            &
+      real(kind=kind_phys) OC(IM),     OA4(IX,4), CLX4(IX,4)            &
      &,                    HPRIME(IM)
 ! for lm mtn blocking
       real(kind=kind_phys) ELVMAX(IM),THETA(IM),SIGMA(IM),GAMMA(IM)
@@ -581,7 +578,7 @@
           kreflm(i) = 0
         enddo
 !       if (lprnt)
-!    &  print *,' in gwdps_lm.f npt,IM,IX,IY,km,me=',npt,IM,IX,IY,km,me
+!    &  print *,' in gwdps_lm.f npt,IM,IX,km,me=',npt,IM,IX,km,me
 !
 !
 !> --- Subgrid Mountain Blocking Section
@@ -1416,8 +1413,8 @@
 !! \section arg_table_gwdps_post_run Argument Table
 !! | local var name | longname                                                  | description                                                      | units | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------|------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  | 0    | logical | default   | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                       | flag for calculating 3-D diagnostic fields                       | flag  | 0    | logical | default   | in     | F        |
+!! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  | 0    | logical |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                       | flag for calculating 3-D diagnostic fields                       | flag  | 0    | logical |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                    | dynamics time step                                               | s     | 0    | real    | kind_phys | in     | F        |
 !! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag           | zonal surface stress due to orographic gravity wave drag         | Pa    | 1    | real    | kind_phys | in     | F        |
 !! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag           | meridional surface stress due to orographic gravity wave drag    | Pa    | 1    | real    | kind_phys | in     | F        |

@@ -201,7 +201,6 @@
 !! thermally induced waves.
 !> \param[in] IM       horizontal number of used pts
 !> \param[in] IX       horizontal dimension
-!> \param[in] IY       horizontal number of used pts
 !> \param[in] KM       vertical layer dimension
 !> \param[in] LAT      latitude index - used for debug prints
 !> \param[in] U1       u component of layer wind
@@ -240,11 +239,10 @@
 !! \section arg_table_gwdc_run Argument Table
 !! | local var name | longname                                               | description                                                        | units      | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------|--------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                             | count      | 0    | integer | default   | in     | F        |
-!! | ix             | horizontal_dimension                                   | horizontal dimension                                               | count      | 0    | integer | default   | in     | F        |
-!! | iy             | horizontal_loop_extent                                 | horizontal dimension                                               | count      | 0    | integer | default   | in     | F        |
-!! | km             | vertical_dimension                                     | number of vertical layers                                          | count      | 0    | integer | default   | in     | F        |
-!! | lat            | latitude_index_in_debug_printouts                      | latitude index in debug printouts                                  | index      | 0    | integer | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                             | count      | 0    | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                   | horizontal dimension                                               | count      | 0    | integer |           | in     | F        |
+!! | km             | vertical_dimension                                     | number of vertical layers                                          | count      | 0    | integer |           | in     | F        |
+!! | lat            | latitude_index_in_debug_printouts                      | latitude index in debug printouts                                  | index      | 0    | integer |           | in     | F        |
 !! | u1             | x_wind                                                 | zonal wind                                                         | m s-1      | 2    | real    | kind_phys | in     | F        |
 !! | v1             | y_wind                                                 | meridional wind                                                    | m s-1      | 2    | real    | kind_phys | in     | F        |
 !! | t1             | air_temperature                                        | mid-layer temperature                                              | K          | 2    | real    | kind_phys | in     | F        |
@@ -254,9 +252,9 @@
 !! | pint1          | air_pressure_at_interface                              | interface pressure                                                 | Pa         | 2    | real    | kind_phys | in     | F        |
 !! | dpmid1         | air_pressure_difference_between_midlayers              | difference between mid-layer pressures                             | Pa         | 2    | real    | kind_phys | in     | F        |
 !! | qmax           | maximum_column_heating_rate                            | maximum heating rate in column                                     | K s-1      | 1    | real    | kind_phys | in     | F        |
-!! | ktop           | vertical_index_at_cloud_top                            | vertical index at cloud top                                        | index      | 1    | integer | default   | in     | F        |
-!! | kbot           | vertical_index_at_cloud_base                           | vertical index at cloud base                                       | index      | 1    | integer | default   | in     | F        |
-!! | kcnv           | flag_deep_convection                                   | flag indicating whether convection occurs in column (0 or 1)       | flag       | 1    | integer | default   | in     | F        |
+!! | ktop           | vertical_index_at_cloud_top                            | vertical index at cloud top                                        | index      | 1    | integer |           | in     | F        |
+!! | kbot           | vertical_index_at_cloud_base                           | vertical index at cloud base                                       | index      | 1    | integer |           | in     | F        |
+!! | kcnv           | flag_deep_convection                                   | flag indicating whether convection occurs in column (0 or 1)       | flag       | 1    | integer |           | in     | F        |
 !! | cldf           | cloud_area_fraction                                    | fraction of grid box area in which updrafts occur                  | frac       | 1    | real    | kind_phys | in     | F        |
 !! | grav           | gravitational_acceleration                             | gravitational acceleration                                         | m s-2      | 0    | real    | kind_phys | in     | F        |
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure          | specific heat of dry air at constant pressure                      | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
@@ -264,8 +262,8 @@
 !! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one      | rv/rd - 1 (rv = ideal gas constant for water vapor)                | none       | 0    | real    | kind_phys | in     | F        |
 !! | pi             | pi                                                     | ratio of a circle's circumference to its diameter                  | radians    | 0    | real    | kind_phys | in     | F        |
 !! | dlength        | characteristic_grid_length_scale                       | representative horizontal length scale of grid box                 | m          | 1    | real    | kind_phys | in     | F        |
-!! | lprnt          | flag_print                                             | flag for debugging printouts                                       | flag       | 0    | logical | default   | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                     | horizontal index of column used in debugging printouts             | index      | 0    | integer | default   | in     | F        |
+!! | lprnt          | flag_print                                             | flag for debugging printouts                                       | flag       | 0    | logical |           | in     | F        |
+!! | ipr            | horizontal_index_of_printed_column                     | horizontal index of column used in debugging printouts             | index      | 0    | integer |           | in     | F        |
 !! | fhour          | forecast_time                                          | forecast hour                                                      | h          | 0    | real    | kind_phys | in     | F        |
 !! | utgwc          | tendency_of_x_wind_due_to_convective_gravity_wave_drag | zonal wind tendency due to convective gravity wave drag            | m s-2      | 2    | real    | kind_phys | out    | F        |
 !! | vtgwc          | tendency_of_y_wind_due_to_convective_gravity_wave_drag | meridional wind tendency due to convective gravity wave drag       | m s-2      | 2    | real    | kind_phys | out    | F        |
@@ -274,7 +272,7 @@
 !!
 !> \section al_gwdc General Algorithm
 !> @{
-      subroutine gwdc_run (im,ix,iy,km,lat,u1,v1,t1,q1,deltim,          &
+      subroutine gwdc_run (im,ix,km,lat,u1,v1,t1,q1,deltim,             &
      &           pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,           &
      &           grav,cp,rd,fv,pi,dlength,lprnt,ipr,fhour,              &
      &           utgwc,vtgwc,tauctx,taucty)
@@ -318,7 +316,7 @@
 !
 !-----------------------------------------------------------------------
 
-      integer im, ix, iy, km, lat, ipr
+      integer im, ix, km, lat, ipr
       integer ktop(im),kbot(im),kcnv(im)
 
 !     real(kind=kind_phys) grav,cp,rd,fv,fhour,fhourpr,deltim
@@ -329,7 +327,7 @@
       real(kind=kind_phys), dimension(ix,km)   :: u1,v1,t1,q1,          &
      &                                            pmid1,dpmid1
 !    &,                                           cumchr1
-      real(kind=kind_phys), dimension(iy,km)   :: utgwc,vtgwc
+      real(kind=kind_phys), dimension(ix,km)   :: utgwc,vtgwc
       real(kind=kind_phys), dimension(ix,km+1) :: pint1
 
       logical lprnt
@@ -1587,10 +1585,10 @@
 !! \section arg_table_gwdc_post_run Argument Table
 !! | local var name | longname                                                        | description                                                              | units      | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      | 0    | integer | default   | in     | F        |
-!! | levs           | vertical_dimension                                              | number of vertical layers                                                | count      | 0    | integer | default   | in     | F        |
-!! | lssav          | flag_diagnostics                                                | flag for calculating diagnostic fields                                   | flag       | 0    | logical | default   | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                             | flag for calculating 3-D diagnostic fields                               | flag       | 0    | logical | default   | in     | F        |
+!! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      | 0    | integer |           | in     | F        |
+!! | levs           | vertical_dimension                                              | number of vertical layers                                                | count      | 0    | integer |           | in     | F        |
+!! | lssav          | flag_diagnostics                                                | flag for calculating diagnostic fields                                   | flag       | 0    | logical |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                             | flag for calculating 3-D diagnostic fields                               | flag       | 0    | logical |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                          | dynamics time step                                                       | s          | 0    | real    | kind_phys | in     | F        |
 !! | dtp            | time_step_for_physics                                           | physics time step                                                        | s          | 0    | real    | kind_phys | in     | F        |
 !! | con_cp         | specific_heat_of_dry_air_at_constant_pressure                   | specific heat of dry air at constant pressure                            | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |

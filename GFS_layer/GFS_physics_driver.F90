@@ -524,7 +524,9 @@ module module_physics_driver
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
           del, rhc, dtdt, dudt, dvdt, gwdcu, gwdcv, dtdtc, rainp,       &
-          ud_mf, dd_mf, dt_mf, prnum, dkt, sigmatot, sigmafrac
+          ud_mf, dd_mf, dt_mf, prnum, sigmatot, sigmafrac
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs-1) :: dkt
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
           save_u, save_v, save_t, save_qv, save_qcw
@@ -1390,14 +1392,14 @@ module module_physics_driver
 !      endif   ! end if_nmtvr
 
       call gwdps_pre_run (                      &
-           size(Grid%xlon,1), size(Grid%xlon,1), Model%nmtvr, Sfcprop%hprime, &
+           size(Grid%xlon,1), Model%nmtvr, Sfcprop%hprime, &
            hprime, oc, oa4, clx, theta,         &
            sigma, gamma, elvmax)
 
 
 !     write(0,*)' before gwd clstp=',clstp,' kdt=',Model%kdt,' lat=',lat
       call gwdps_run (                                    &
-           size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, dvdt, dudt, dtdt,            &
+           size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, dvdt, dudt, dtdt,            &
            Statein%ugrs, Statein%vgrs, Statein%tgrs,      &
            Statein%qgrs(:,:,1), kpbl, Statein%prsi, del,  &
            Statein%prsl, Statein%prslk, Statein%phii,     &
@@ -1436,7 +1438,7 @@ module module_physics_driver
 !    Rayleigh damping  near the model top
 !      if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
       call rayleigh_damp_run (                               &
-           Model%lsidea, size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, dvdt, dudt, dtdt, &
+           Model%lsidea, size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, dvdt, dudt, dtdt, &
            Statein%ugrs, Statein%vgrs, Model%dtp, con_cp,          &
            Model%levr, Statein%pgr, Statein%prsl,            &
            Model%prslrd0, Model%ral_ts)
@@ -1487,7 +1489,6 @@ module module_physics_driver
         else
           call ozphys_run (                                             &
                size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, levozp, Model%dtp,                               &
-               Stateout%gq0(:,:,Model%ntoz),                            &
                Stateout%gq0(:,:,Model%ntoz),                            &
                Stateout%gt0, oz_pres, Statein%prsl,                     &
                Tbd%ozpl, oz_coeff, del, Model%ldiag3d,                  &
@@ -2047,7 +2048,7 @@ module module_physics_driver
 !GFDL replacing lat with "1"
 !       call gwdc (size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, lat, gu0, gv0, gt0, gq0, Model%dtp,       &
         call gwdc_run (                                                 &
-             size(Grid%xlon,1), size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, intgr_one, Statein%ugrs, Statein%vgrs,   &
+             size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, intgr_one, Statein%ugrs, Statein%vgrs,   &
              Statein%tgrs, Statein%qgrs(:,:,1), Model%dtp, Statein%prsl,      &
              Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,         &
              con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,         &

@@ -20,39 +20,39 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_ex_coef_run Arguments
-!!| local var name | longname                                                    | description                                     | units      | rank | type    |    kind   | intent | optional |
-!!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!!| im             | horizontal_loop_extent                                      | horizontal loop extent                          | count      |    0 | integer |           | in     | F        |
-!!| ps             | surface_air_pressure                                        | surface pressure                                | Pa         | 1    | real    | kind_phys | in     | F        |
-!!| u1             | x_wind_at_lowest_model_layer                                | x component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| v1             | y_wind_at_lowest_model_layer                                | y component of 1st model layer wind             | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| t1             | air_temperature_at_lowest_model_layer                       | 1st model layer air temperature                 | K          | 1    | real    | kind_phys | in     | F        |
-!!| q1             | specific_humidity_at_lowest_model_layer                     | 1st model layer specific humidity               | kg kg-1    | 1    | real    | kind_phys | in     | F        |
-!!| z1             | height_above_mean_sea_level_at_lowest_model_layer           | height above mean sea level at 1st model layer  | m          | 1    | real    | kind_phys | in     | F        |
-!!| snwdph         | surface_snow_thickness_water_equivalent                     | water equivalent surface snow thickness         | mm         | 1    | real    | kind_phys | in     | F        |
-!!| tskin          | surface_skin_temperature                                    | surface skin temperature                        | K          | 1    | real    | kind_phys | in     | F        |
-!!| z0rl           | surface_roughness_length                                    | surface roughness length                        | cm         | 1    | real    | kind_phys | inout  | F        |
-!!| cm             | surface_drag_coefficient_for_momentum_in_air                | surface exchange coeff for momentum             | none       | 1    | real    | kind_phys |   out? | F        |
-!!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air       | surface exchange coeff heat & moisture          | none       | 1    | real    | kind_phys |   out? | F        |
-!!| rb             | bulk_richardson_number_at_lowest_model_level                | bulk Richardson number at the surface           | none       | 1    | real    | kind_phys |   out? | F        |
-!!| prsl1          | air_pressure_at_lowest_model_layer                          | Model layer 1 mean pressure                     | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| local var name | longname                                                                     | description                                                 | units      | rank | type    |    kind   | intent | optional |
+!!|----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
+!!| im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count      |    0 | integer |           | in     | F        |
+!!| ps             | surface_air_pressure                                                         | surface pressure                                            | Pa         | 1    | real    | kind_phys | in     | F        |
+!!| u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                         | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                         | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                             | K          | 1    | real    | kind_phys | in     | F        |
+!!| q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                           | kg kg-1    | 1    | real    | kind_phys | in     | F        |
+!!| z1             | height_above_mean_sea_level_at_lowest_model_layer                            | height above mean sea level at 1st model layer              | m          | 1    | real    | kind_phys | in     | F        |
+!!| snwdph         | surface_snow_thickness_water_equivalent                                      | water equivalent surface snow thickness                     | mm         | 1    | real    | kind_phys | in     | F        |
+!!| tskin          | surface_skin_temperature                                                     | surface skin temperature                                    | K          | 1    | real    | kind_phys | in     | F        |
+!!| z0rl           | surface_roughness_length                                                     | surface roughness length                                    | cm         | 1    | real    | kind_phys | inout  | F        |
+!!| cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                         | none       | 1    | real    | kind_phys |   out  | F        |
+!!| ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                      | none       | 1    | real    | kind_phys |   out  | F        |
+!!| rb             | bulk_richardson_number_at_lowest_model_level                                 | bulk Richardson number at the surface                       | none       | 1    | real    | kind_phys |   out  | F        |
+!!| prsl1          | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                 | Pa         | 1    | real    | kind_phys | in     | F        |
 !!| prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio      | 1    | real    | kind_phys | in     | F        |
-!!| islimsk        | sea_land_ice_mask                                           | landmask: sea/land/ice=0/1/2                    | flag       | 1    | integer |           | in     | F        |
-!!| stress         | surface_wind_stress                                         | surface wind stress                             | m2 s-2     | 1    | real    | kind_phys |   out? | F        |
-!!| fm             | Monin-Obukhov_similarity_function_for_momentum              | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out? | F        |
-!!| fh             | Monin-Obukhov_similarity_function_for_heat                  | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out? | F        |
-!!| ustar          | surface_friction_velocity                                   | surface friction velocity                       | m s-1      | 1    | real    | kind_phys |   out? | F        |
-!!| wind           | wind_speed_at_lowest_model_layer                            | wind speed at lowest model level                | m s-1      | 1    | real    | kind_phys |   out  | F        |
-!!| ddvel          | surface_wind_enhancement_due_to_convection                  | surface wind enhancement due to convection      | m s-1      | 1    | real    | kind_phys | in     | F        |
-!!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m       | Monin-Obukhov similarity parameter for momentum | none       | 1    | real    | kind_phys |   out  | F        |
-!!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m            | Monin-Obukhov similarity parameter for heat     | none       | 1    | real    | kind_phys |   out  | F        |
-!!| sigmaf         | vegetation_area_fraction                                    | areal fractional cover of green vegetation      | frac       | 1    | real    | kind_phys | in     | F        |
-!!| vegtype        | cell_vegetation_type                                        | vegetation type at each grid cell               | index      | 1    | integer |           | in     | F        |
-!!| shdmax         | maximum_vegetation_area_fraction                            | max fractnl cover of green veg                  | frac       | 1    | real    | kind_phys | in     | F        |
-!!| ivegsrc        | vegetation_type                                             | vegetation type data source umd or igbp         | index      | 0    | integer |           | in     | F        |
-!!| tsurf          | surface_skin_temperature_after_iteration                    | surface skin temperature after iteration        | K          | 1    | real    | kind_phys | in     | F        |
-!!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
-!!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
+!!| islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag       | 1    | integer |           | in     | F        |
+!!| stress         | surface_wind_stress                                                          | surface wind stress                                         | m2 s-2     | 1    | real    | kind_phys |   out  | F        |
+!!| fm             | Monin-Obukhov_similarity_function_for_momentum                               | Monin-Obukhov similarity parameter for momentum             | none       | 1    | real    | kind_phys |   out  | F        |
+!!| fh             | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity parameter for heat                 | none       | 1    | real    | kind_phys |   out  | F        |
+!!| ustar          | surface_friction_velocity                                                    | surface friction velocity                                   | m s-1      | 1    | real    | kind_phys |   out  | F        |
+!!| wind           | wind_speed_at_lowest_model_layer                                             | wind speed at lowest model level                            | m s-1      | 1    | real    | kind_phys |   out  | F        |
+!!| ddvel          | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                  | m s-1      | 1    | real    | kind_phys | in     | F        |
+!!| fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                        | Monin-Obukhov similarity parameter for momentum             | none       | 1    | real    | kind_phys |   out  | F        |
+!!| fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                             | Monin-Obukhov similarity parameter for heat                 | none       | 1    | real    | kind_phys |   out  | F        |
+!!| sigmaf         | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                  | frac       | 1    | real    | kind_phys | in     | F        |
+!!| vegtype        | cell_vegetation_type                                                         | vegetation type at each grid cell                           | index      | 1    | integer |           | in     | F        |
+!!| shdmax         | maximum_vegetation_area_fraction                                             | max fractnl cover of green veg                              | frac       | 1    | real    | kind_phys | in     | F        |
+!!| ivegsrc        | vegetation_type                                                              | vegetation type data source umd or igbp                     | index      | 0    | integer |           | in     | F        |
+!!| tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                    | K          | 1    | real    | kind_phys | in     | F        |
+!!| flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag       | 1    | logical |           | in     | F        |
+!!| redrag         | flag_for_reduced_drag_coefficient_over_sea                                   | flag for reduced drag coefficient over sea                  | flag       | 0    | logical |           | in     | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm

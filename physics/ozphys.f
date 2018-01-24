@@ -61,29 +61,27 @@
 !! \section arg_table_ozphys_run Argument Table
 !! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   | 0    | integer | default   | in     | F        |
-!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   | 0    | integer | default   | in     | F        |
-!! | levs           | vertical_dimension                                | number of vertical layers                         | count   | 0    | integer | default   | in     | F        |
-!! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | count   | 0    | integer | default   | in     | F        |
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   | 0    | integer |           | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   | 0    | integer |           | in     | F        |
+!! | levs           | vertical_dimension                                | number of vertical layers                         | count   | 0    | integer |           | in     | F        |
+!! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | count   | 0    | integer |           | in     | F        |
 !! | dt             | time_step_for_physics                             | physics time step                                 | s       | 0    | real    | kind_phys | in     | F        |
-!! | ozi            | ozone_concentration_updated_by_physics            | ozone concentration                               | kg kg-1 | 2    | real    | kind_phys | in     | F        |
-!! | ozo            | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg-1 | 2    | real    | kind_phys | out    | F        |
+!! | oz             | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
 !! | tin            | air_temperature_updated_by_physics                | updated air temperature                           | K       | 2    | real    | kind_phys | in     | F        |
 !! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa) | 1    | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      | 2    | real    | kind_phys | in     | F        |
 !! | prdout         | ozone_forcing                                     | ozone forcing data                                | various | 3    | real    | kind_phys | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   | 0    | integer | default   | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   | 0    | integer |           | in     | F        |
 !! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    | 0    | logical | default   | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    | 0    | logical |           | in     | F        |
 !! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 | 3    | real    | kind_phys | inout  | F        |
-!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   | 0    | integer | default   | in     | F        |
+!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   | 0    | integer |           | in     | F        |
 !!
 !! \param[in] ix,im     integer, horizontal dimension and num of used pts
 !! \param[in] levs      integer, vertical layer dimension
 !! \param[in] ko3       integer, number of layers for ozone data
 !! \param[in] dt        real, physics time step in seconds
-!! \param[in] ozi       real, updated ozone
-!! \param[out] ozo      real, updated ozone
+!! \param[inout] oz     real, updated ozone
 !! \param[in] tin       real, updated temperature
 !! \param[in] po3       real, (ko3), ozone forcing data level pressure
 !!                      (ln(Pa))
@@ -92,12 +90,12 @@
 !! \param[in] pl_coeff  integer, number coefficients in ozone forcing
 !! \param[in] delp      real, (ix,levs)
 !! \param[in] ldiag3d   logical, flag for 3d diagnostic fields
-!! \param[out] ozp      real, ozone change due to physics
+!! \param[inout] ozp    real, ozone change due to physics
 !! \param[in] me        integer, pe number - used for debug prints
 !! \section gen_al General Algorithm
 !> @{
       subroutine ozphys_run (                                           &
-     &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,                      &
+     &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
      &  ozp, me)
 !
@@ -110,7 +108,7 @@
 !
       real, parameter :: gravi=1.0/grav
       integer im, ix, levs, ko3, pl_coeff, me
-      real(kind=kind_phys) ozi(ix,levs),   ozo(ix,levs), po3(ko3),      &
+      real(kind=kind_phys) oz(ix,levs), po3(ko3),                       &
      &                     prsl(ix,levs),  tin(ix,levs), delp(ix,levs), &
      &                     prdout(ix,ko3,pl_coeff),                     &
      &                     ozp(ix,levs,pl_coeff), dt
@@ -119,7 +117,10 @@
       logical              ldiag3d, flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
-     &                     ozib(im),  colo3(im,levs+1)
+     &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
+!
+!     safe input oz in ozi
+      ozi = oz
 !
       if (pl_coeff > 2) then
         colo3(:,levs+1) = 0.0
@@ -181,13 +182,13 @@
         if (pl_coeff == 2) then
           do i=1,im
             ozib(i)   = ozi(i,l)           ! no filling
-            ozo(i,l)  = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
+            oz(i,l)   = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
           enddo
 !
           if (ldiag3d) then     !     ozone change diagnostics
             do i=1,im
               ozp(i,l,1) = ozp(i,l,1) + prod(i,1)*dt
-              ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+              ozp(i,l,2) = ozp(i,l,2) + (oz(i,l) - ozib(i))
             enddo
           endif
         endif
@@ -199,12 +200,12 @@
      &                           + prod(i,4)*colo3(i,l+1)
 !     if (me .eq. 0) print *,'ozphys tem=',tem,' prod=',prod(i,:)
 !    &,' ozib=',ozib(i),' l=',l,' tin=',tin(i,l),'colo3=',colo3(i,l+1)
-            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
+            oz(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
           enddo
           if (ldiag3d) then     !     ozone change diagnostics
             do i=1,im
               ozp(i,l,1) = ozp(i,l,1) + prod(i,1)*dt
-              ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+              ozp(i,l,2) = ozp(i,l,2) + (oz(i,l) - ozib(i))
               ozp(i,l,3) = ozp(i,l,3) + prod(i,3)*tin(i,l)*dt
               ozp(i,l,4) = ozp(i,l,4) + prod(i,4)*colo3(i,l+1)*dt
             enddo

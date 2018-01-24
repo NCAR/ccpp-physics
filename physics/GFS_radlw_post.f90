@@ -8,7 +8,7 @@
 !> \section arg_table_GFS_radlw_post_init Argument Table
 !!
       subroutine GFS_radlw_post_init()
-      end subroutine GFS_radlw_post_init      
+      end subroutine GFS_radlw_post_init
 
 !> \section arg_table_GFS_radlw_post_run Argument Table
 !! | local var name    | longname                                                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
