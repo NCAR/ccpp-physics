@@ -99,22 +99,22 @@
 !    &   VTAGSFC='NCEP-Radiation_surface   v5.0  Aug 2012 '
 
 !  ---  constant parameters
-!> num of sfc albedo components
+! num of sfc albedo components
       integer, parameter, public :: NF_ALBD = 4
 
-!> num of longitude points in global emis-type map
+! num of longitude points in global emis-type map
       integer, parameter, public :: IMXEMS = 360
 
-!> num of latitude points in global emis-type map
+! num of latitude points in global emis-type map
       integer, parameter, public :: JMXEMS = 180
 
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: rad2dg= 180.0 / con_pi
 
-!> global surface emissivity index array
+! global surface emissivity index array
       integer, allocatable  ::  idxems(:,:)
-!> global surface emissivity contrl flag set up in 'sfc_init'
+! global surface emissivity contrl flag set up in 'sfc_init'
       integer :: iemslw = 0
 !
       public  sfc_init, setalb, setemis

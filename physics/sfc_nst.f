@@ -2,11 +2,6 @@
 !!  This file contains the GFS NSST model.
 
 !> \defgroup GFS_NSST GFS Near Sea Surface Temperature
-!! @{
-      module sfc_nst
-
-      contains
-
 !! \brief Near Sea Surface Temperature (NSST) is a temperature profile just below the sea surface. The GFS NSST scheme is used to forecast the NSST for two main purposes: supply SSTs to the atmospheric model for the calculation of air-sea heat and moisture fluxes and providing a sub-layer temperature profile forecast for use as a first guess in the Gridpoint Statistical Interpolator (GSI) data assimilation code.
 !!
 !! The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li 2015 \cite Li_2015, and Li and Derber 2009 \cite Li_Derber_2009). The GFS NSST scheme predicts the vertical profile of sea temperature between the surface and a reference level (zr), which is on the order of 5 m.  Only two physical process are considered in this scheme: diurnal thermocline layer warming and thermal skin layer (also known as sub-layer) cooling. All other process that could influence NSST are ignored in this simple scheme.
@@ -32,6 +27,10 @@
 !!
 !! This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
+      module sfc_nst
+
+      contains
+
 ! \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
@@ -48,6 +47,7 @@
       end subroutine sfc_nst_finalize
 
 !>\defgroup gfs_nst_main GFS sfc_nst Main
+!!\ingroup GFS_NSST
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
@@ -120,7 +120,7 @@
 !!
 !! Under construction
 !!
-!! @{
+!> @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
@@ -690,7 +690,6 @@ cc
       return
       end subroutine sfc_nst_run
 !> @}
-!! @}
       end module sfc_nst
 
 
@@ -927,6 +926,6 @@ cc
       return
       end subroutine sfc_nst_post_run
 
-!> @}
+!! @}
 !! @}
       end module sfc_nst_post

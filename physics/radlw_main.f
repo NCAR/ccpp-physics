@@ -326,7 +326,7 @@
 
 !> \defgroup module_radlw_main GFS RADLW Main
 !! \ingroup RRTMG
-!! This module includes NCEP's modifications of the rrtmg-lw radiation
+!! This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
 !! The RRTM-LW package includes three files:
@@ -338,14 +338,8 @@
 !!  - module_radlw_cldprlw: cloud property coefficients
 !!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
 !! - radlw_main.f, which contains:
-!!  - module_radlw_main, which is the main LW radiation transfer
-!!    program and contains two externally callable subroutines:
-!!   - lwrad_run(): the main LW radiation routine
-!!   - rlwinit(): the initialization routine
-!!
-!! All the LW radiation subprograms become contained subprograms in
-!! module 'module_radlw_main' and many of them are not directly
-!! accessable from places outside the module.
+!!  - lwrad_run(): the main LW radiation routine
+!!  - rlwinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -481,6 +475,7 @@
          subroutine lwrad_init ()
          end subroutine lwrad_init
 
+!>\ingroup module_radlw_main
 !> This subroutine is the main LW radiation routine.
 !! \section arg_table_lwrad_run Argument Table
 !! | local var name  | longname                                                                                     | description                                                | units   | rank | type        |    kind   | intent | optional |
@@ -1347,6 +1342,7 @@
       end subroutine lwrad_finalize 
 
 
+!>\ingroup module_radlw_main
 !> This subroutine performs calculations necessary for the initialization
 !! of the longwave model.  lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
@@ -3949,8 +3945,8 @@
       contains
 ! =================
 
-!> band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
-!!  (high key - h2o; high minor - n2)
+! band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
+!  (high key - h2o; high minor - n2)
 ! ----------------------------------
       subroutine taugb01
 ! ..................................

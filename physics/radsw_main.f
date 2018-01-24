@@ -262,7 +262,7 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radsw_main GFS RADSW Main
-!! This module includes NCEP's modifications of the rrtmg-sw radiation
+!! This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!
 !! The SW radiation model in the current NOAA Environmental Modeling
@@ -381,10 +381,8 @@
 !!  - mersenne_twister: program of random number generators using the
 !!    Mersenne-Twister algorithm
 !! - radsw_main.f, which contains:
-!!  - module_radsw_main: the main SW radiation computation programming
-!!    source codes, which contains two externally callable subroutines:
-!!   - swrad(): the main radiation routine
-!!   - rswinit(): the initialization routine
+!!  - swrad_run(): the main radiation routine
+!!  - rswinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -434,30 +432,30 @@
 !    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
 !    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
 
-!> \name constant values
+! \name constant values
 
       real (kind=kind_phys), parameter :: eps     = 1.0e-6
       real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
-!> pade approx constant
+! pade approx constant
       real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
       real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
       real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
       real (kind=kind_phys), parameter :: flimit  = 1.0e-20
-!> internal solar constant
+! internal solar constant
       real (kind=kind_phys), parameter :: s0      = 1368.22
 
       real (kind=kind_phys), parameter :: f_zero  = 0.0
       real (kind=kind_phys), parameter :: f_one   = 1.0
 
-!> \name atomic weights for conversion from mass to volume mixing ratios
+! \name atomic weights for conversion from mass to volume mixing ratios
       real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
       real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
-!> \name band indices
+! \name band indices
       integer, dimension(nblow:nbhgh) :: nspa, nspb
-!> band index for sfc flux
+! band index for sfc flux
       integer, dimension(nblow:nbhgh) :: idxsfc
-!> band index for cld prop
+! band index for cld prop
       integer, dimension(nblow:nbhgh) :: idxebc
 
       data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
@@ -480,26 +478,26 @@
 !    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
 !    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
 
-!> uv-b band index
+! uv-b band index
       integer, parameter :: nuvb = 27
 
-!>\name logical flags for optional output fields
+!\name logical flags for optional output fields
       logical :: lhswb  = .false.
       logical :: lhsw0  = .false.
       logical :: lflxprf= .false.
       logical :: lfdncmp= .false.
 
 
-!> those data will be set up only once by "rswinit"
+! those data will be set up only once by "rswinit"
       real (kind=kind_phys) :: exp_tbl(0:NTBMX)
 
 
-!> the factor for heating rates (in k/day, or k/sec set by subroutine
+! the factor for heating rates (in k/day, or k/sec set by subroutine
 !!  'rswinit')
       real (kind=kind_phys) :: heatfac
 
 
-!> initial permutation seed used for sub-column cloud scheme
+! initial permutation seed used for sub-column cloud scheme
       integer, parameter :: ipsdsw0 = 1
 
 !  ---  public accessable subprograms
@@ -515,6 +513,7 @@
       subroutine swrad_init ()
       end subroutine swrad_init
 
+!>\ingroup module_radsw_main
 !>/brief This subroutine is the main SW radiation routine.
 !! \section arg_table_swrad_run Argument Table
 !! | local var name  | longname                                                                                      | description                                                              | units   | rank | type        |    kind   | intent | optional |
@@ -1397,6 +1396,7 @@
       end subroutine swrad_finalize
 
 
+!>\ingroup module_radsw_main
 !> This subroutine initializes non-varying module variables, conversion
 !! factors, and look-up tables.
 !!\param me             print control for parallel process
@@ -4178,7 +4178,7 @@
       contains
 ! =================
 
-!> The subroutine computes the optical depth in band 16:  2600-3250
+! The subroutine computes the optical depth in band 16:  2600-3250
 !! cm-1 (low - h2o,ch4; high - ch4)
 !-----------------------------------
       subroutine taumol16

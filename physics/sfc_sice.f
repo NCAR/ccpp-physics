@@ -2,14 +2,14 @@
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
 !> \defgroup GFS_Ice GFS Thermodynamics Sea Ice
+!!  \brief Three layer thermodynamic sea ice model based on M. Winton's 
+!! "a reformulated three-layer sea ice model", journal of atmospheric and oceanic technology, 2000.
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
       module sfc_sice
 
       contains
-
-!!  \brief Three layer thermodynamic sea ice model based on M. Winton's "a reformulated three-layer sea ice model", journal of atmospheric and oceanic technology, 2000.
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-!!
 !> \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS SICE code.
 !! \section arg_table_sice_init  Argument Table
 !!
@@ -73,7 +73,7 @@
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
-!!  @{
+!>  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
@@ -455,7 +455,6 @@ u  program history log:                                                 !
 
 !-----------------------------------
 !> \brief Brief description of the subroutine
-!!
       subroutine ice3lay
 !...................................
 !  ---  inputs:

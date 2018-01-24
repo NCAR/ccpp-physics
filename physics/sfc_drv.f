@@ -6,8 +6,8 @@
 !! @{
 ! \defgroup NOAH_pre NOAH Land Surface Pre
 ! \ingroup NOAH
-!! @{
-!!  \brief Brief description of the parameterization
+! @{
+!  \brief Brief description of the parameterization
 
       module lsm_noah_pre
       contains
@@ -36,9 +36,9 @@
 !!| smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point | soil water fraction at wilting point       | frac       | 1    | real    | kind_phys | inout  | F        |
 !!| smcref2        | threshold_volume_fraction_of_condensed_water_in_soil        | soil moisture threshold                    | frac       | 1    | real    | kind_phys | inout  | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
+!  \section general General Algorithm
+!  \section detailed Detailed Algorithm
+!  @{
       subroutine lsm_noah_pre_run                                       &
      &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
      &   smcref2                                                        &
@@ -65,17 +65,17 @@
 
       end subroutine lsm_noah_pre_run
 
-!! @}
+! @}
       end module lsm_noah_pre
 
 !! @}
 
 ! \defgroup NOAH_post NOAH Land Surface post
 ! \ingroup NOAH
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+! @{
+!  \brief Brief description of the parameterization
+!  \section diagram Calling Hierarchy Diagram
+!  \section intraphysics Intraphysics Communication
 
       module lsm_noah_post
       contains
@@ -88,7 +88,7 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_lsm_noah_post_run Arguments
+!! \section arg_table_lsm_noah_post_run Arguments
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
