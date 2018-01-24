@@ -1438,7 +1438,7 @@ module GFS_typedefs
 !! | IPD_Data(nb)%Interstitial%dd_mf                         | instantaneous_atmosphere_downdraft_convective_mass_flux                                        | (downdraft mass flux) * delt                                                        | kg m-2        |    2 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Interstitial%del                           | air_pressure_difference_between_midlayers                                                      | air pressure difference between midlayers                                           | Pa            |    2 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Interstitial%del_gz                        | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature              | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1    |    2 | real        | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Interstitial%dkt                           | atmosphere_heat_diffusivity                                                                    | diffusivity for heat                                                                | m2 s-1        |    1 | real        | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Interstitial%dkt                           | atmosphere_heat_diffusivity                                                                    | diffusivity for heat                                                                | m2 s-1        |    2 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Interstitial%dlength                       | characteristic_grid_length_scale                                                               | representative horizontal length scale of grid box                                  | m             |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Interstitial%domip                         | dominant_sleet_type                                                                            | dominant sleet type                                                                 | none          |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Interstitial%domr                          | dominant_rain_type                                                                             | dominant rain type                                                                  | none          |    1 | real        | kind_phys | none   | F        |
@@ -3588,7 +3588,7 @@ module GFS_typedefs
     allocate (Interstitial%dd_mf      (IM,Model%levs))
     allocate (Interstitial%del        (IM,Model%levs))
     allocate (Interstitial%del_gz     (IM,Model%levs+1))
-    allocate (Interstitial%dkt        (IM,Model%levs))
+    allocate (Interstitial%dkt        (IM,Model%levs-1))
     allocate (Interstitial%dlength    (IM))
     allocate (Interstitial%domip      (IM))
     allocate (Interstitial%domr       (IM))
