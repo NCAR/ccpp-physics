@@ -504,7 +504,7 @@
 
 !  ---  public accessable subprograms
 
-      public swrad_init, swrad_run, swrad_finalize, rswinit 
+      public radsw_init, radsw_run, radsw_finalize, rswinit 
 
 
 ! =================
@@ -580,11 +580,11 @@
 !!\n                    visbm - downward surface uv+vis direct beam flux
 !!\n                    visdf - downward surface uv+vis diffused flux
 
-      subroutine swrad_init ()
-      end subroutine swrad_init
+      subroutine radsw_init ()
+      end subroutine radsw_init
 
 
-!! \section arg_table_swrad_run Argument Table
+!! \section arg_table_radsw_run Argument Table
 !! | local var name  | longname                                                                                      | description                                                              | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                                       | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -616,12 +616,12 @@
 !! | cld_cf          | total_cloud_fraction                                                                          | total cloud fraction                                                     | frac    |    2 | real        | kind_phys | in     | F        |
 !! | lsswr           | flag_to_calc_sw                                                                               | flag to calculate SW irradiances                                         | flag    |    0 | logical     |           | in     | F        |
 !! | hswc            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                   | shortwave total sky heating rate                                         | K s-1   |    2 | real        | kind_phys | out    | F        |
-!! | topflx          | sw_fluxes_top_atmosphere                                                                      | shortwave total sky fluxes at the top of the atm                         | W m-2   |    1 | topfsw_type | kind_phys | out    | F        |
-!! | sfcflx          | sw_fluxes_sfc                                                                                 | shortwave total sky fluxes at the Earth surface                          | W m-2   |    1 | sfcfsw_type | kind_phys | out    | F        |
+!! | topflx          | sw_fluxes_top_atmosphere                                                                      | shortwave total sky fluxes at the top of the atm                         | W m-2   |    1 | topfsw_type |           | out    | F        |
+!! | sfcflx          | sw_fluxes_sfc                                                                                 | shortwave total sky fluxes at the Earth surface                          | W m-2   |    1 | sfcfsw_type |           | out    | F        |
 !! | hsw0            | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step| shortwave clear sky heating rate                                         | K s-1   |    2 | real        | kind_phys | out    | T        |
 !! | hswb            | sw_heating_rate_spectral                                                                      | shortwave total sky heating rate (spectral)                              | K s-1   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | sw_fluxes                                                                                     | sw fluxes total sky / csk and up / down at levels                        | W m-2   |    2 | profsw_type | kind_phys | out    | T        |
-!! | fdncmp          | components_of_surface_downward_shortwave_fluxes                                               | derived type for special components of surface downward shortwave fluxes | W m-2   |    1 | cmpfsw_type | kind_phys | out    | T        |
+!! | flxprf          | sw_fluxes                                                                                     | sw fluxes total sky / csk and up / down at levels                        | W m-2   |    2 | profsw_type |           | out    | T        |
+!! | fdncmp          | components_of_surface_downward_shortwave_fluxes                                               | derived type for special components of surface downward shortwave fluxes | W m-2   |    1 | cmpfsw_type |           | out    | T        |
 !! | cld_lwp         | cloud_liquid_water_path                                                                       | cloud liquid water path                                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                        | mean effective radius for liquid cloud                                   | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                                                                          | cloud ice water path                                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -637,7 +637,7 @@
 !> \section General_swrad General Algorithm
 !> @{
 !-----------------------------------
-      subroutine swrad_run                                                  &
+      subroutine radsw_run                                                  &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
      &       gasvmr_co2,                                                &
      &       gasvmr_n2o, gasvmr_ch4,                                    &
@@ -829,6 +829,9 @@
 !                                                                       !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
+! DH*
+      use mpi
+! *DH
 
 !  ---  inputs:
       integer, intent(in) :: npts, nlay, nlp1, NDAY
@@ -916,6 +919,13 @@
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb
+      ! DH*
+      integer :: ierr
+
+      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+      write(0,*) 'DH DEBUG: top of radsw_run'
+      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+      ! *DH
 
 !
 !===> ... begin here
@@ -1454,15 +1464,20 @@
         endif                       ! if_ivflip
 
       enddo   lab_do_ipt
+      ! DH*
+      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+      write(0,*) 'DH DEBUG: end of radsw_run'
+      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+      ! *DH
 
       return
 !...................................
-      end subroutine swrad_run
+      end subroutine radsw_run
 !-----------------------------------
 !> @}
 
-      subroutine swrad_finalize ()
-      end subroutine swrad_finalize
+      subroutine radsw_finalize ()
+      end subroutine radsw_finalize
 
 
 !> This subroutine initializes non-varying module variables, conversion

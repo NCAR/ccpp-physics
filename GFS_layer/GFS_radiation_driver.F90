@@ -327,7 +327,7 @@
 
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
-      use module_radsw_main,         only: rswinit,  swrad_run
+      use module_radsw_main,         only: rswinit,  radsw_run
 
       use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
       use GFS_RRTMG_post,            only: GFS_RRTMG_post_run
@@ -337,7 +337,7 @@
       use GFS_radlw_post,            only: GFS_radlw_post_run
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-      use module_radlw_main,         only: rlwinit,  lwrad_run
+      use module_radlw_main,         only: rlwinit,  radlw_run
       use GFS_typedefs,              only: GFS_statein_type,             &
                                            GFS_stateout_type,            &
                                            GFS_sfcprop_type,             &
@@ -398,8 +398,11 @@
 
 !  ---  publicly accessible module programs:
 
+#ifdef CCXX
+      public radinit
+#else
       public radinit, GFS_radiation_driver
-
+#endif
 
 ! =================
       contains
@@ -642,6 +645,8 @@
 !-----------------------------------
 !> @}
 
+! Block commented out for CCXX
+#ifndef CCXX
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
 !! the time advancement loop but outside of the horizontal grid loop.
@@ -1223,7 +1228,7 @@
           sfcalb(:,4) )
 
 ! CCPP: L1598-1618
-      call swrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
+      call radsw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
           gasvmr(:, :, 1),                                             &
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
@@ -1247,7 +1252,7 @@
           im, tsfg, tsfa)
 
 !CCPP: L1703-1714
-      call lwrad_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! inputs
+      call radlw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! inputs
           gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),           &
           gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),           &
           gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),           &
@@ -1272,7 +1277,8 @@
 
 
       end subroutine GFS_radiation_driver
-
+#endif
+! End of block commented out for CCXX
 
 !
 !> @}

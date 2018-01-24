@@ -382,7 +382,7 @@
 
 !  ---  public accessable subprograms
 
-      public lwrad_init, lwrad_run, lwrad_finalize, rlwinit
+      public radlw_init, radlw_run, radlw_finalize, rlwinit
 
 
 ! ================
@@ -448,10 +448,10 @@
 !!\n                    upfxc - total sky upward flux
 !!\n                    dnfx0 - clear sky downward flux
 !!\n                    upfx0 - clear sky upward flux
-         subroutine lwrad_init ()
-         end subroutine lwrad_init
+         subroutine radlw_init ()
+         end subroutine radlw_init
 
-!! \section arg_table_lwrad_run Argument Table
+!! \section arg_table_radlw_run Argument Table
 !! | local var name  | longname                                                                                     | description                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|----------------------------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                   | air pressure layer                                         | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -481,11 +481,11 @@
 !! | cld_cf          | total_cloud_fraction                                                                         | total cloud fraction                                       | frac    |    2 | real        | kind_phys | in     | F        |
 !! | lslwr           | flag_to_calc_lw                                                                              | flag to calculate LW irradiances                           | flag    |    0 | logical     |           | in     | F        |
 !! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                   | longwave total sky heating rate                            | K s-1   |    2 | real        | kind_phys | out    | F        |
-!! | topflx          | lw_fluxes_top_atmosphere                                                                     | longwave total sky fluxes at the top of the atm            | W m-2   |    1 | topflw_type | kind_phys | out    | F        |
-!! | sfcflx          | lw_fluxes_sfc                                                                                | longwave total sky fluxes at the Earth surface             | W m-2   |    1 | sfcflw_type | kind_phys | out    | F        |
+!! | topflx          | lw_fluxes_top_atmosphere                                                                     | longwave total sky fluxes at the top of the atm            | W m-2   |    1 | topflw_type |           | out    | F        |
+!! | sfcflx          | lw_fluxes_sfc                                                                                | longwave total sky fluxes at the Earth surface             | W m-2   |    1 | sfcflw_type |           | out    | F        |
 !! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step| longwave clear sky heating rate                            | K s-1   |    2 | real        | kind_phys | out    | T        |
 !! | hlwb            | lw_heating_rate_spectral                                                                     | longwave total sky heating rate (spectral)                 | K s-1   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | lw_fluxes                                                                                    | lw fluxes total sky / csk and up / down at levels          | W m-2   |    2 | proflw_type | kind_phys | out    | T        |
+!! | flxprf          | lw_fluxes                                                                                    | lw fluxes total sky / csk and up / down at levels          | W m-2   |    2 | proflw_type |           | out    | T        |
 !! | cld_lwp         | cloud_liquid_water_path                                                                      | cloud liquid water path                                    | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                       | mean effective radius for liquid cloud                     | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                                                                         | cloud ice water path                                       | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -499,7 +499,7 @@
 !> \section gen_lwrad General Algorithm
 !> @{
 ! --------------------------------
-      subroutine lwrad_run                                              &
+      subroutine radlw_run                                              &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
@@ -1309,11 +1309,11 @@
       enddo  lab_do_iplon
 
 !...................................
-      end subroutine lwrad_run
+      end subroutine radlw_run
 !-----------------------------------
 !> @}
-      subroutine lwrad_finalize ()
-      end subroutine lwrad_finalize 
+      subroutine radlw_finalize ()
+      end subroutine radlw_finalize 
 
 
 
