@@ -53,8 +53,7 @@
 !! to more strongly suppress convection in a drier environment.
 !!
 !!  \section diagram Calling Hierarchy Diagram
-!!  \image html SAMF_Flowchart.png "Diagram depicting how the SAMF deep convection
-!! scheme is called from the FV3GFS physics time loop" height=2cm
+!!
 !!  \section intraphysics Intraphysics Communication
 !! This space is reserved for a description of how this scheme uses information
 !! from other scheme types and/or how information calculated in this scheme 

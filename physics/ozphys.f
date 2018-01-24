@@ -12,12 +12,10 @@
 !! Original version of these terms were provided by NASA/DAO based on
 !! NASA 2D Chemistry model - GSM is capable of running both versions
 !!
+!! \section diagram Calling Hierarchy Diagram
 !! \section intra_oz Intraphysics Communication
 !! 
-!! @{
-
       module ozphys_pre
-
       contains
 
 ! \section arg_table_ozphys_pre_init Argument Table
@@ -41,8 +39,6 @@
       end module ozphys_pre
 
 
-
-
       module ozphys
 
       contains
@@ -55,6 +51,7 @@
       end subroutine ozphys_init
 
 !>\defgroup GFS_ozphys GFS ozphys Main
+!>\ingroup GFS_ozn
 !! \brief This is the main subroutine 
 !! \section arg_table_ozphys_run Argument Table
 !! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
@@ -197,7 +194,6 @@
 !
       return
       end subroutine ozphys_run
-!! @}
 !> @}
 
 ! \brief Brief description of the subroutine
@@ -207,10 +203,7 @@
       subroutine ozphys_finalize()
       end subroutine ozphys_finalize
 
-
       end module ozphys
-
-
 
 
       module ozphys_post
@@ -223,7 +216,7 @@
       end subroutine ozphys_post_init
 
 
-!! \section arg_table_ozphys_post_run Argument Table
+! \section arg_table_ozphys_post_run Argument Table
 !! | local var name | longname                                     | description                                  | units   | rank | type                       | kind      | intent | optional |
 !! |----------------|----------------------------------------------|----------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                         | horizontal dimension                         | count   | 0    | integer                    |           | in     | F        |
