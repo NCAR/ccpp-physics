@@ -9,9 +9,11 @@ module IPD_CCPP_driver
   use ccpp_fcall,         only: ccpp_run
   use ccpp_fields,        only: ccpp_fields_add
 
+#ifdef CCXX
 ! Begin include auto-generated list of modules for ccpp
 #include "ccpp_modules.inc"
 ! End include auto-generated list of modules for ccpp
+#endif
 
   use iso_c_binding,      only: c_loc
 
@@ -110,10 +112,12 @@ module IPD_CCPP_driver
          !--- Initialize CCPP
          call ccpp_init(ccpp_suite, cdata_block(nb), ierr)
 
+#ifdef CCXX
 ! Begin include auto-generated list of calls to ccpp_fields_add
 #include "ccpp_fields.inc"
 ! End include auto-generated list of calls to ccpp_fields_add
-
+#endif
+#ifdef CCPP
          !--- Add the DDTs to the CCPP data structure for this block
          call ccpp_fields_add(cdata_block(nb), 'IPD_Control', '', c_loc(IPD_Control),  ierr=ierr)
          call ccpp_fields_add(cdata_block(nb), 'IPD_Data',    '', c_loc(IPD_Data(nb)), ierr=ierr)
@@ -123,7 +127,7 @@ module IPD_CCPP_driver
          call ccpp_fields_add(cdata_block(nb), 'Init_parm',   '', c_loc(Init_parm),    ierr=ierr)
          call ccpp_fields_add(cdata_block(nb), 'salp_data',       l_salp_data,         ierr=ierr)
          call ccpp_fields_add(cdata_block(nb), 'snupx',           l_snupx,             ierr=ierr)
-
+#endif
       end do
 
     else if (step==1) then
@@ -134,22 +138,29 @@ module IPD_CCPP_driver
       ! whether OpenMP is supposed to be used at this level or whether
       ! threading is already implemented outside (i.e. here) *DH
       do nb = 1,nBlocks
+#ifdef CCXX
+        call ccpp_run(cdata_block(nb)%suite%ipds(step), cdata_block(nb), ierr)
+#else
         call ccpp_run(cdata_block(nb)%suite%ipds(1)%subcycles(1)%schemes(step), cdata_block(nb), ierr)
+#endif
       end do
 
-    ! DH* TODO: is the number of steps available from CCPP? then do step>1 and step < N-1 here
     else if (step==2 .or. step==3 .or. step==4) then
+      ! Radiation, physics and stochastics
 
 !$OMP parallel do default (none) &
 !$OMP            schedule (dynamic,1), &
 !$OMP            shared   (nBlocks, cdata_block, step) &
 !$OMP            private  (nb, ierr)
       do nb = 1,nBlocks
+#ifdef CCXX
+        call ccpp_run(cdata_block(nb)%suite%ipds(step), cdata_block(nb), ierr)
+#else
         call ccpp_run(cdata_block(nb)%suite%ipds(1)%subcycles(1)%schemes(step), cdata_block(nb), ierr)
+#endif
       end do
 !$OMP end parallel do
 
-    ! DH* TODO: is the number of steps available from CCPP? then do step=N here
     else if (step==5) then
       ! DH* ccpp_run(cdata%suite%finalize, ...) not yet implemented
       deallocate(cdata_block)

@@ -3,10 +3,13 @@ module IPD_driver
   use IPD_typedefs,               only: IPD_init_type,                       &
                                         IPD_control_type,  IPD_data_type,    &
                                         IPD_diag_type,     IPD_restart_type
-
+#ifdef CCXX
+  use physics_abstraction_layer,  only: initialize
+#else
   use physics_abstraction_layer,  only: initialize,        time_vary_step,   &
                                         radiation_step1,   physics_step1,    &
                                         physics_step2
+#endif
 
   use physics_diag_layer,         only: diag_populate
 
@@ -28,10 +31,12 @@ module IPD_driver
 !----------------
 ! functions
   public IPD_initialize
+#ifndef CCXX
   public IPD_setup_step 
   public IPD_radiation_step
   public IPD_physics_step1
   public IPD_physics_step2
+#endif
 
   CONTAINS
 !*******************************************************************************************
@@ -73,6 +78,7 @@ module IPD_driver
   end subroutine IPD_initialize
 
 
+#ifndef CCXX
 !---------------------------------------------
 !  IPD setup step
 !    surface data cycling, random streams, etc
@@ -140,5 +146,6 @@ module IPD_driver
                         IPD_Data%Intdiag)
 
   end subroutine IPD_physics_step2
+#endif
 
 end module IPD_driver

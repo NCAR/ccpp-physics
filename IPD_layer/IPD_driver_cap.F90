@@ -31,12 +31,17 @@ module IPD_driver_cap
                             IPD_data_type,                             &
                             IPD_restart_type,                          &
                             IPD_diag_type
+#ifdef CCXX
+    use            :: IPD_driver,                                      &
+                      only: IPD_initialize
+#else
     use            :: IPD_driver,                                      &
                       only: IPD_initialize,                            &
                             IPD_setup_step,                            &
                             IPD_radiation_step,                        &
                             IPD_physics_step1,                         &
                             IPD_physics_step2
+#endif
     use            :: machine,                                         &
                       only: kind_phys
     use            :: namelist_soilveg,                                &
@@ -44,11 +49,15 @@ module IPD_driver_cap
     implicit none
 
     private
+#ifdef CCXX
+    public :: ipd_initialize_cap
+#else
     public :: ipd_initialize_cap,     &
               ipd_setup_step_cap,     &
               ipd_radiation_step_cap, &
               ipd_physics_step1_cap,  &
               ipd_physics_step2_cap
+#endif
 
     contains
 
@@ -117,6 +126,7 @@ module IPD_driver_cap
         l_salp_data = salp_data
     end subroutine ipd_initialize_cap
 
+#ifndef CCXX
     subroutine ipd_setup_step_cap(ptr) bind(c)
 
         type(c_ptr), intent(inout) :: ptr
@@ -313,5 +323,6 @@ module IPD_driver_cap
                                IPD_Restart=IPD_Restart)
 
     end subroutine ipd_physics_step2_cap
+#endif
 
 end module IPD_driver_cap
