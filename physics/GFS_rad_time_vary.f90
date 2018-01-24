@@ -1,5 +1,5 @@
 !>\file GFS_rad_time_vary.f90
-!! This file contains
+!!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
       module GFS_rad_time_vary
       contains
 

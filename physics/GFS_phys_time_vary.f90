@@ -1,24 +1,24 @@
-!> \file GFS_suite_setup.f90
-!!  Contains code related to GFS physics suite setup.
+!> \file GFS_phys_time_vary.f90
+!!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
-    module GFS_suite_setup_1
+    module GFS_phys_time_vary_1
 
       contains
 
-      subroutine GFS_suite_setup_1_init ()
-      end subroutine GFS_suite_setup_1_init
+      subroutine GFS_phys_time_vary_1_init ()
+      end subroutine GFS_phys_time_vary_1_init
 
-      subroutine GFS_suite_setup_1_finalize()
-      end subroutine GFS_suite_setup_1_finalize
+      subroutine GFS_phys_time_vary_1_finalize()
+      end subroutine GFS_phys_time_vary_1_finalize
 
-!> \section arg_table_GFS_suite_setup_1_run Argument Table
+!> \section arg_table_GFS_phys_time_vary_1_run Argument Table
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | inout  | F        |
 !! | sec            | seconds_elapsed_since_model_initialization             | seconds elapsed since model initialization                            | s             |    0 | real                          | kind_phys | inout  | F        |
 !! | blkno          | block_number                                           | for explicit data blocking: block number of this block                | index         |    0 | integer                       |           | in     | F        |
 !!
-      subroutine GFS_suite_setup_1_run (Model, sec, blkno)
+      subroutine GFS_phys_time_vary_1_run (Model, sec, blkno)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type
@@ -72,21 +72,21 @@
           endif
         endif
 
-      end subroutine GFS_suite_setup_1_run
+      end subroutine GFS_phys_time_vary_1_run
 
-    end module GFS_suite_setup_1
+    end module GFS_phys_time_vary_1
 
-    module GFS_suite_setup_2
+    module GFS_phys_time_vary_2
 
       contains
 
-      subroutine GFS_suite_setup_2_init ()
-      end subroutine GFS_suite_setup_2_init
+      subroutine GFS_phys_time_vary_2_init ()
+      end subroutine GFS_phys_time_vary_2_init
 
-      subroutine GFS_suite_setup_2_finalize()
-      end subroutine GFS_suite_setup_2_finalize
+      subroutine GFS_phys_time_vary_2_finalize()
+      end subroutine GFS_phys_time_vary_2_finalize
 
-!> \section arg_table_GFS_suite_setup_2_run Argument Table
+!> \section arg_table_GFS_phys_time_vary_2_run Argument Table
 !! | local var name | longname                                                                | description                                                             | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Grid           | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
@@ -95,8 +95,9 @@
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                                    | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
 !! | Cldprop        | FV3-GFS_Cldprop_type                                                    | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
 !! | Diag           | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
+!! | Sfccycle       | FV3-GFS_Sfccycle_type                                                   | Fortran DDT containing FV3-GFS fields for surface cycling               | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
 !!
-      subroutine GFS_suite_setup_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
 
         use mersenne_twister, only: random_setseed, random_number
         use machine,               only: kind_phys
@@ -203,6 +204,6 @@
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
         endif
 
-      end subroutine GFS_suite_setup_2_run
+      end subroutine GFS_phys_time_vary_2_run
 
-    end module GFS_suite_setup_2
+    end module GFS_phys_time_vary_2
