@@ -14,11 +14,15 @@ module physics_abstraction_layer
                              intdiag_type      =>  GFS_diag_type,       &
                              interstitial_type =>  GFS_interstitial_type
 
+#ifdef CCXX
+  use GFS_driver,      only: initialize       =>  GFS_initialize
+#else
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
                              time_vary_step   =>  GFS_time_vary_step,   &
                              radiation_step1  =>  GFS_radiation_driver, &
                              physics_step1    =>  GFS_physics_driver,   &
                              physics_step2    =>  GFS_stochastic_driver
+#endif
 
 !----------------------
 !  public physics types
@@ -41,10 +45,12 @@ module physics_abstraction_layer
 !  public physics functions
 !--------------------------
   public  initialize
+#ifndef CCXX
   public  time_vary_step
   public  radiation_step1
   public  physics_step1
   public  physics_step2
+#endif
 
 CONTAINS
 

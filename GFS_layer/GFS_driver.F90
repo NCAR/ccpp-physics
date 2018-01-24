@@ -8,8 +8,10 @@ module GFS_driver
                                       GFS_tbd_type,      GFS_cldprop_type,    &
                                       GFS_radtend_type,  GFS_diag_type,       &
                                       GFS_sfccycle_type, GFS_interstitial_type
+#ifndef CCXX
   use module_radiation_driver,  only: GFS_radiation_driver
   use module_physics_driver,    only: GFS_physics_driver
+#endif
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
   use module_radlw_parameters,  only: topflw_type, sfcflw_type
   use funcphys,                 only: gfuncphys
@@ -83,11 +85,12 @@ module GFS_driver
 ! Public entities
 !----------------
   public  GFS_initialize              !< GFS initialization routine
+#ifndef CCXX
   public  GFS_time_vary_step          !< perform operations needed prior radiation or physics
   public  GFS_radiation_driver        !< radiation_driver (was grrad)
   public  GFS_physics_driver          !< physics_driver (was gbphys)
   public  GFS_stochastic_driver       !< stochastic physics
-
+#endif
 
   CONTAINS
 !*******************************************************************************************
@@ -230,6 +233,8 @@ module GFS_driver
   end subroutine GFS_initialize
 
 
+! Block commented out for CCXX
+#ifndef CCXX
 !-------------------------------------------------------------------------
 ! time_vary_step
 !-------------------------------------------------------------------------
@@ -244,8 +249,8 @@ module GFS_driver
                                  Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
 
     use physparam,             only: ictmflg, isolar
-    use GFS_suite_setup_1,     only: GFS_suite_setup_1_run
-    use GFS_suite_setup_2,     only: GFS_suite_setup_2_run
+    use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
+    use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
     use GFS_rad_time_vary,     only: GFS_rad_time_vary_run 
     implicit none
 
@@ -265,11 +270,11 @@ module GFS_driver
     !--- local variables
     real(kind=kind_phys) :: sec
 
-    call GFS_suite_setup_1_run (Model, sec, Tbd%blkno)
+    call GFS_phys_time_vary_1_run (Model, sec, Tbd%blkno)
 
     call GFS_rad_time_vary_run (Model, Statein, Tbd, sec, ictmflg, isolar)
 
-    call GFS_suite_setup_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
 
   end subroutine GFS_time_vary_step
 
@@ -287,6 +292,8 @@ module GFS_driver
   subroutine GFS_stochastic_driver (Model, Statein, Stateout, Sfcprop, Coupling, &
                                     Grid, Tbd, Cldprop, Radtend, Diag)
 
+    use GFS_stochastics, only: GFS_stochastics_run
+
     implicit none
 
     !--- interface variables
@@ -300,6 +307,10 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
     type(GFS_radtend_type),   intent(in   ) :: Radtend
     type(GFS_diag_type),      intent(inout) :: Diag
+        
+    call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+                             Grid, Tbd, Cldprop, Radtend, Diag)
+#if 0
     !--- local variables
     integer :: k, i
     real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew
@@ -334,8 +345,10 @@ module GFS_driver
      if (Model%do_shum) then
        Stateout%gq0(:,:,1) = Stateout%gq0(:,:,1)*(1.0 + Coupling%shum_wts(:,:))
      endif
-
+#endif
   end subroutine GFS_stochastic_driver
+#endif
+! End of block commented out for CCXX
 
 
 !------------------
