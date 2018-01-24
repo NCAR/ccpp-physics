@@ -74,7 +74,7 @@
 !! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real    | kind_phys | out    | F        |
 !! | hgamt          | countergradient_mixing_term_for_temperature                                 | countergradient mixing term for temperature           | K             |    1 | real    | kind_phys | out    | F        |
 !! | hgamq          | countergradient_mixing_term_for_water_vapor                                 | countergradient mixing term for water vapor           | kg kg-1       |    1 | real    | kind_phys | out    | F        |
-!! | dkt            | atmosphere_heat_diffusivity                                                 | diffusivity for heat                                  | m2 s-1        |    1 | real    | kind_phys | out    | F        |
+!! | dkt            | atmosphere_heat_diffusivity                                                 | diffusivity for heat                                  | m2 s-1        |    2 | real    | kind_phys | out    | F        |
 !! | kinver         | index_of_highest_temperature_inversion                                      | index of highest temperature inversion                | index         |    1 | integer |           | in     | F        |
 !! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real    | kind_phys | in     | F        |
 !! | xkzm_h         | atmosphere_heat_diffusivity_background                                      | background value of heat diffusivity                  | m2 s-1        |    0 | real    | kind_phys | in     | F        |
