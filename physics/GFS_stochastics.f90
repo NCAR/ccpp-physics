@@ -1,4 +1,4 @@
-!> \file GFS_suite_setup.f90
+!> \file GFS_stochastics.f90
 !!  Contains code previously in GFS_stochastics_driver.
 
     module GFS_stochastics

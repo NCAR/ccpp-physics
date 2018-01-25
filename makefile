@@ -174,7 +174,8 @@ SRCS_f90 = \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90                                                    \
 	   ./physics/radcons.f90                                                     \
-	   ./physics/wam_f107_kp_mod.f90
+	   ./physics/wam_f107_kp_mod.f90                                             \
+	   ./physics/GFS_diagtoscreen.f90
 
 SRCS_F   = \
 	   ./physics/aer_cloud.F                                                     \
