@@ -829,9 +829,6 @@
 !                                                                       !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
-! DH*
-      use mpi
-! *DH
 
 !  ---  inputs:
       integer, intent(in) :: npts, nlay, nlp1, NDAY
@@ -919,13 +916,6 @@
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb
-      ! DH*
-      integer :: ierr
-
-      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-      write(0,*) 'DH DEBUG: top of radsw_run'
-      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-      ! *DH
 
 !
 !===> ... begin here
@@ -1464,11 +1454,6 @@
         endif                       ! if_ivflip
 
       enddo   lab_do_ipt
-      ! DH*
-      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-      write(0,*) 'DH DEBUG: end of radsw_run'
-      !call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-      ! *DH
 
       return
 !...................................
