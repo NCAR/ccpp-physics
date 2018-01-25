@@ -61,13 +61,14 @@
 !! positive effects from using the parameterization are seen in the
 !! tropical upper troposphere and lower stratosphere.
 !!
-!!\section intra_gwdps Intraphysics Communication
-!! - Routine GWDC is called from GBPHYS after call
-!!   to SASCNVN
-
+!> \section diagram Calling Hierarchy Diagram
+!!
+!! \todo gwdc calling hierarchy diagram
+!!
+!> \section intraphysics Intraphysics Communication
+!! \todo gwdc calling hierarchy diagram
 
       module gwdc_pre
-
       contains
 
 ! \brief Brief description of the subroutine

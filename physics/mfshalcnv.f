@@ -23,11 +23,9 @@
 !! are described in Han et al. (2017) \cite han_et_al_2017 .
 !!
 !!  \section diagram Calling Hierarchy Diagram
-!!
+!! \todo mfshalcnv calling hierarchy diagram
 !!  \section intraphysics Intraphysics Communication
-!!  This space is reserved for a description of how this scheme uses
-!! information from other scheme types and/or how information calculated
-!! in this scheme is used in other scheme types.
+!! \todo mfshalcnv intraphysics communitcation
 
       module sasas_shal
       contains

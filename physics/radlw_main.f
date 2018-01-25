@@ -90,6 +90,13 @@
 !! the lower atmosphere (<3km) a monthly mean CO2 distribution in 15
 !! degree horizontal resolution is used, while a global mean monthly
 !! value is used in the upper atmosphere.
+!!
+!> \section diagram Calling Hierarchy Diagram
+!! \todo RRTMG calling hierarchy diagram
+!!
+!> \section intraphysics Intraphysics Communication
+!! \todo RRTMG intraphysics communication
+
 !
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!

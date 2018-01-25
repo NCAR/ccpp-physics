@@ -1,30 +1,76 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
-!> \defgroup GFS_Ice GFS Thermodynamics Sea Ice
-!!  \brief Three layer thermodynamic sea ice model based on M. Winton's 
-!! "a reformulated three-layer sea ice model", journal of atmospheric and oceanic technology, 2000.
+!> \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
+!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
+!!
+!! Sea ice is a thin skin of frozen water covering the polar oceans.  The sea ice strongly interacts with both the atmosphere above and the ocean underneath in the high
+!! latitudes. In a coupled weather/climate system, changes in sea ice extent, thickness and concentration
+!! regionally or globally would influence oceanic and atmospheric conditions, which in turn affect the 
+!! sea ice distribution. The physical and dynamical processes affecting the weather and climate are 
+!! considered as follows.
+!!
+!! The high albedo of the sea ice reflects more solar radiation back to the space. The feedbacks are
+!! considered as positive. The broader the sea ice cover, the higher the surface albedo, which result
+!! in less amount of solar radiation absorbed at the Earth's surface. A cooler surface would favor more 
+!! sea ice to form. The process would be reversed in less sea ice situation.
+!!
+!! The sea ice restricts the heat/water exchange between the air and ocean. The presence of extensive
+!! areas of sea ice would suppress the heat loss in winter and the heat gain in summer by the ocean.
+!! Even a thin ice cover influences the turbulent heat transfer significantly between ocean and
+!! atmosphere. The surface fluxes of sensible and latent heat can be greater by up to two orders of magnitude
+!! at the open water surface of a lead or polynya than that through (snow covered) pack ice.
+!!
+!! The sea ice modifies air/sea momentum transfer, ocean fresh water balance and ocean circulation.
+!! The freezing and melting of the ocean surface and the associated fluxes of salt and heat produce major
+!! changes in the density structure of the polar water. Formation of sea ice injects salt into the ocean
+!! makes the water heavier and more convectively unstable, conversely when melting occurs, stable and fresh
+!! layers can prevent deep covective activity.
+!!
+!! A sea ice model, in general, may contain subcomponents treating 1)dynamics (ice motion),
+!! 2)ice transport, 3) multiple ice thickness categories (including leads), 4) surface albedo,
+!! and 5) vertical thermodynamics. GFS sea ice scheme is concerned with a scheme for the 
+!! last of these processes.
+!!
+!! A three-layer thermodynamic sea ice model has been coupled to NCEP GFS. It predicts sea ice/snow thickness,
+!! the surface temperature and ice temperature structure. In each model grid box, the heat and moisture
+!! fluxes and albedo are treated separately for the ice and the open water.
+!!
+!!\image html sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!! The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness 
+!! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
+!! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of 
+!! the bottom of the ice is fixed at \f$T_f\f$, the freezing temperature of seawater. The temperature of 
+!! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
+!!
+!! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
+!! The upper ice layer has a variable heat capacity to represent brine pockets. 
+!!
+!!
 !!  \section diagram Calling Hierarchy Diagram
+!!
 !!  \section intraphysics Intraphysics Communication
+!!\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
 
       module sfc_sice
 
       contains
-!> \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS SICE code.
-!! \section arg_table_sice_init  Argument Table
-!!
+
+! \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS SICE code.
+! \section arg_table_sice_init  Argument Table
+!
       subroutine sfc_sice_init
       end subroutine sfc_sice_init
 !!
-!> \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS SICE code.
-!! \section arg_table_sice_finalize  Argument Table
-!!
+! \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS SICE code.
+! \section arg_table_sice_finalize  Argument Table
+!
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
 
 !>\defgroup gfs_sice_main GFS sfc_sice Main
-!> \brief blah blah
+!> \todo gfs_sice_main brief blah blah
 !! @{
 !! \ingroup GFS_Ice
 !! \section arg_table_sfc_sice_run Arguments
@@ -454,7 +500,8 @@ u  program history log:                                                 !
 !> @}
 
 !-----------------------------------
-!> \brief Brief description of the subroutine
+!> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
+!! based on Winton(2000) \cite winton_2000 .
       subroutine ice3lay
 !...................................
 !  ---  inputs:

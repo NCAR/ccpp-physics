@@ -14,5 +14,4 @@ The documentation found here corresponds to the state of the operational GFS phy
   - \ref GFS_ogwd
   - \ref GFS_cgwd
   - \ref GFS_ozn
-  - \ref CALPRECIPTYPE
 */

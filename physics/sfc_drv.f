@@ -1,9 +1,44 @@
 !>  \file sfc_drv.f
-!!  This file contains the NOAH land surface scheme.
+!!  This file contains the NOAH land surface scheme driver.
 
 !> \defgroup NOAH GFS NOAH Land Surface Scheme
-!! \brief  This is the NOAH land surface scheme.
-!! @{
+!! \brief The Noah LSM(version 2.7) is the land model.
+!!
+!! In 2005, the NCEP Noah LSM (Version 2.7.1) replaced 
+!! the Oregon State University (OSU) LSM, which had been operational in the GFS since 
+!! the mid-1990s. The Noah LSM embodies about 10 years of upgrades (see Chen et.al. 1996 
+!! \cite chen_et_al_1996; Koren et. al. 1999 \cite koren_et_al_1999; Ek et. al. 2003
+!! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  
+!!
+!! The Noah LSM upgrade includes an increase from two (10, 190 cm thick) to four
+!! soil layers (10, 30, 60, 100 cm thick). addition of frozen soil physics, new
+!! formulations for infiltration and runoff (giving more runoff for unsaturated 
+!! soils), revised physics of the snowpack and its influence on surface heat fluxes
+!! and albedo, tuning and adding canopy resistance parameters, allowing spatially 
+!! varying root depth, revised treatment of ground heat flux and soil thermal 
+!! conductivity, reformulation of dependence of direct surface evaporation on first
+!! layer soil moisture, and improved seasonality of green vegetation cover. The
+!! frozen soil physics includes soil heat sinks/sources from freezing/thawing
+!! and influences vertical transport of soil moisture, soil thermal conductivity 
+!! and heat capacity, and present prognostic states of snowpack water-equivalent (SWE),
+!! total soil moisture (liquid plus frozen), soil temperature, canopy water, and skin
+!! temperature. SWE divided by the snowpack depth gives the snowpack density. Total
+!! soil moisture minus liquid soil moisture gives the frozen soil moisture.
+!!
+!! To provide initial values of soil moisture/temperature, the Noah LSM land states
+!! cycle continuous in the coupled atmosphere/land global model of the GDAS. These 
+!! land states respond to the global model's predicted land-surface forcing (precipitation,
+!! surface radiation, near-surface air temperature, humidity, and wind speed). Since
+!! the land component of the GDAS is forced by model prediction rather than observed
+!! precipitation, we avoid undue drift by nudging soil moisture towards a monthly
+!! global climatology(in GDAS only, not in forecast).
+!!
+!!
+!!\section diagram Calling Hierarchy Diagram
+!! \todo NOAH calling hierarchy diagram
+!!\section Intraphysics Intraphysics Communication
+!! \todo NOAH intraphysics communication
+!! 
 ! \defgroup NOAH_pre NOAH Land Surface Pre
 ! \ingroup NOAH
 ! @{
@@ -20,7 +55,7 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_lsm_noah_pre_run Arguments
+! \section arg_table_lsm_noah_pre_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -88,7 +123,7 @@
 
 ! \brief Brief description of the subroutine
 !
-!! \section arg_table_lsm_noah_post_run Arguments
+!! \section arg_table_lsm_noah_post_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -248,16 +283,12 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
-!> \defgroup NOAH_main GFS sfc_drv Main
+!> \defgroup NOAH_drv GFS sfc_drv Main
 !! \ingroup NOAH
 !! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-
-!> \brief Brief description of the subroutine
+!!  \brief This is NOAH LSM driver scheme.
 !!
-!! \section arg_table_lsm_noah_run Arguments
+!! \section arg_table_lsm_noah_run Argument Table
 !!| local var name | longname                                                                     | description                                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count      |    0 | integer |           | in     | F        |
@@ -325,7 +356,9 @@
 !!| wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!
 !!  \section general General Algorithm
+!!  \todo sfc_drv general algorithm
 !!  \section detailed Detailed Algorithm
+!!  \todo sfc_drv detailed algorithm
 !!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
@@ -771,5 +804,4 @@
 !! @}
 
       end module lsm_noah
-!! @}
 !! @}

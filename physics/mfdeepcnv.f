@@ -53,8 +53,9 @@
 !! to more strongly suppress convection in a drier environment.
 !!
 !!  \section diagram Calling Hierarchy Diagram
-!!
+!! \todo mfdeepcnv calling hierarchy diagram
 !!  \section intraphysics Intraphysics Communication
+!! \todo mfshalcnv intraphysics diagram
 !! This space is reserved for a description of how this scheme uses information
 !! from other scheme types and/or how information calculated in this scheme 
 !! is used in other scheme types.
@@ -62,11 +63,6 @@
 
       module sasas_deep
       contains
-
-
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
 
 ! \brief Brief description of the subroutine
 !

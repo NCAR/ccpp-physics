@@ -2,7 +2,7 @@
 !! This file is ozone sources and sinks.
 
 !> \defgroup GFS_ozn GFS Ozone Sources and Sinks
-!! \detail The operational GFS currently parameterizes ozone production and
+!! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
 !! (McCormack et al. 2006 \cite mccormack_et_al_2006).
@@ -13,7 +13,9 @@
 !! NASA 2D Chemistry model - GSM is capable of running both versions
 !!
 !! \section diagram Calling Hierarchy Diagram
+!! \todo ozphys calling hierarchy diagram
 !! \section intra_oz Intraphysics Communication
+!! \todo ozphys intraphysics communication
 !! 
       module ozphys_pre
       contains

@@ -123,9 +123,9 @@ INPUT                  =  txt/mainpage.txt \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \
-                        ../GFS_calpreciptype.f90   \
 ### Land Surface
                         ../sfc_drv.f \
+                        ../sflx.f    \
                         ../sfc_diff.f \
 ### Sea Ice Surface
                         ../sfc_sice.f \

@@ -1,3 +1,19 @@
+!\file sflx.f
+!! This file contains the NCEP Noah LSM (Version 2.7.1)
+
+!>\defgroup NOAH_LSM NCEP Noah LSM
+!!\ingroup NOAH_drv
+!!\brief This is sub-driver for "NOAH/OSU LSM" family of physics subroutines.
+!! It is a soil/veg/snowpack land-surface model to update soil moisture, soil
+!! ice, soil temperature, skin temperature, snowpack water content, snowdepth,
+!! and all terms of the surface energy balance and surface water balance
+!! (excluding input atmospheric forcings of downward radiation and precip).
+!!
+!!\section general General Algorithm
+!!\todo NOAH LSM general algorithm
+!!\section detailed Detailed Algorithm
+!!\todo NOAH LSM detailed algorithm
+!! @{
 !-----------------------------------
       subroutine sflx                                                   &
 !...................................
@@ -781,6 +797,7 @@
 !*************************************!
 
 !-----------------------------------
+!>This subroutine calculates albedo including snow effect (0 -> 1).
       subroutine alcalc
 !...................................
 !  ---  inputs:
@@ -863,6 +880,10 @@
 
 
 !-----------------------------------
+!> This subroutine calculates canopy resistance which depends on incoming
+!! solar radiation, air temperature, atmospheric water vapor pressure
+!! deficit at the lowest model level, and soil moisture (preferably unfrozen
+!! soil moisture rather than total).
       subroutine canres
 !...................................
 !  ---  inputs:
@@ -1017,6 +1038,7 @@
 
 
 !-----------------------------------
+!> This subroutine calculates snow termal conductivity
       subroutine csnow
 !...................................
 !  ---  inputs:
@@ -1078,6 +1100,9 @@
 
 
 !-----------------------------------
+!> This subroutine calculates soil moisture and heat flux values and 
+!! update soil moisture content and soil heat content values for the
+!! case when now snow pack is present.
       subroutine nopac
 !...................................
 !  ---  inputs:
@@ -1341,6 +1366,9 @@
 
 
 !-----------------------------------
+!> This subroutine calculates potential evaporation for the current point.
+!! various partial sums/products are also calculated and passed back
+!! to the calling routine for later use
       subroutine penman
 !...................................
 !  ---  inputs:
@@ -1447,6 +1475,9 @@
 
 
 !-----------------------------------
+!> This subroutine internally sets default values or optionally read-in 
+!! via namelist i/o, all soil and vegetation parateters requied for the execusion
+!! of the NOAH LSM.
       subroutine redprm
 !...................................
 !  ---  inputs:
@@ -1736,6 +1767,8 @@
 
 
 !-----------------------------------
+!> This subroutine calculates surface layer exchange coefficients
+!! via iterative process(see chen et al. 1997 \cite chen_et_al_1997).
       subroutine sfcdif
 !...................................
 !  ---  inputs:
@@ -2021,6 +2054,7 @@
 
 
 !-----------------------------------
+!> This subroutine calculates snow fraction (0->1).
       subroutine snfrac
 !...................................
 !  ---  inputs:
@@ -2090,6 +2124,9 @@
 
 
 !-----------------------------------
+!> This subroutine calculates soil moisture and heat flux values and 
+!! update soil moisture content and soil heat content values for the
+!! case when a snow pack is present.
       subroutine snopac
 !...................................
 !  ---  inputs:
@@ -2605,6 +2642,8 @@
 
 
 !-----------------------------------
+!> This subroutine calculates snow depth and densitity to account
+!! for the new snowfall. new values of snow depth & density returned.
       subroutine snow_new
 !...................................
 !  ---  inputs:
@@ -2677,6 +2716,7 @@
 
 
 !-----------------------------------
+!> This subroutine calculates total roughness length over snow.
       subroutine snowz0
 !...................................
 !  ---  inputs:
@@ -2727,6 +2767,8 @@
 
 
 !-----------------------------------
+!> This subroutine calculates thermal diffusivity and conductivity
+!! of the soil for a given point and time.
       subroutine tdfcnd                                                 &
 !...................................
 !  ---  inputs:
@@ -5471,3 +5513,4 @@ c ----------------------------------------------------------------------
 !...................................
       end subroutine sflx
 !-----------------------------------
+!! @}

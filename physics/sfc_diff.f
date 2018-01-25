@@ -3,9 +3,11 @@
 
 !> \defgroup Sfc_ex_cal GFS Surface Exchange Coefficient Calculation
 !! @{
-!!  \brief Brief description of the scheme
+!!  \brief This is the first subroutine called in surface layer loop to calculate surface exchange ciefficients and near-surface wind.
 !!  \section diagram Calling Hierarchy Diagram
+!!  \todo sfc_diff Calling hierarchy diagram
 !!  \section intraphysics Intraphysics Communication
+!!  \todo sfc_diff intraphysics communication
 
       module surface_exchange_coefficients
       contains
@@ -20,8 +22,8 @@
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
 !! \ingroup Sfc_ex_cal
-!> \brief Brief description of the subroutine
-!! \section arg_table_sfc_ex_coef_run Arguments
+!> \brief This is the first subroutine called in surface layer loop to calculate surface exchange coefficients and near-surface wind.
+!! \section arg_table_sfc_ex_coef_run Argument Table
 !!| local var name | longname                                                    | description                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                          | count      |    0 | integer |           | in     | F        |
@@ -57,7 +59,9 @@
 !!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
 !!
 !!  \section general General Algorithm
+!!  \todo sfc_ex_coef_run general algorithm
 !!  \section detailed Detailed Algorithm
+!!  \todo sfc_ex_coef_run Detailed Algorithm
 !!  @{
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &

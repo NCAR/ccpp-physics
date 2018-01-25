@@ -48,8 +48,8 @@
 
 !>\defgroup gfs_nst_main GFS sfc_nst Main
 !!\ingroup GFS_NSST
-!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
-!! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!> \brief This is the second subroutine called in surface land loop.
+!!This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
@@ -118,7 +118,7 @@
 !!
 !! \section NSST_detailed_algorithm
 !!
-!! Under construction
+!! \todo nsst detailed algorithm
 !!
 !> @{
       subroutine sfc_nst_run                                            &
