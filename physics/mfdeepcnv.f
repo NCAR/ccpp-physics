@@ -52,10 +52,7 @@
 !! cloud condensate in the updraft. The lateral entrainment is also enhanced
 !! to more strongly suppress convection in a drier environment.
 !!
-!!  \section diagram Calling Hierarchy Diagram
-!! \todo mfdeepcnv calling hierarchy diagram
 !!  \section intraphysics Intraphysics Communication
-!! \todo mfshalcnv intraphysics diagram
 !! This space is reserved for a description of how this scheme uses information
 !! from other scheme types and/or how information calculated in this scheme 
 !! is used in other scheme types.

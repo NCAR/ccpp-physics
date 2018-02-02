@@ -95,13 +95,7 @@
 !! four times stronger mountain blocking and one half the strength of
 !! gravity wave drag than the T383L64 version.
 !!
-!> \section diagram Calling Hierarchy Diagram
-!!
-!! \todo gwdps calling hierarchy diagram
-!!
 !> \section intraphysics Intraphysics Communication
-!! \todo gwdps interaphysics communication
-
 
       module gwdps_pre
 

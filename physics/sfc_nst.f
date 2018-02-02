@@ -118,7 +118,6 @@
 !!
 !! \section NSST_detailed_algorithm
 !!
-!! \todo nsst detailed algorithm
 !!
 !> @{
       subroutine sfc_nst_run                                            &
@@ -704,9 +703,6 @@ cc
 !!
 !! Blah blah blah description of parameterization
 !!
-!! \section diagram Calling Hierarchy Diagram
-!!
-!! Blah blah blah diagram
 !!
 !! \section intraphysics Intraphysics Communication
 !!

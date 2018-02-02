@@ -1,19 +1,14 @@
 !> \file GFS_calpreciptype.F90
-!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype)
-!! and its post. It is adopted from post but was made into a column to used by GFS model.
+!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype),
+!! which provides precipitation forcing for LSM.
 
 !>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
 !!\brief This scheme contains the subroutine that calculates dominant
-!! precipitation type and its post. It is adopted from post but was made
-!! into a column to used by GFS model.
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM
 !!
-!!\section diagram Calling Hierarchy Diagram
-!! placeholder
 !!\section intraphysics Intraphysics Communication
-!! This space is reserved for a description of how this scheme uses info
-!! from other scheme types and/or how information calculated in this
-!! scheme is used in other scheme types.
-
+!
       module GFS_calpreciptype
       contains
 ! \section arg_table_GFS_calpreciptype_init Argument Table
@@ -23,7 +18,7 @@
 
 !>\defgroup gfs_calpreciptype GFS calpreciptype Main
 !!\ingroup CALPRECIPTYPE 
-!!\brief blah blah
+!!\brief This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
 !> \section arg_table_GFS_calpreciptype_run Argument Table
 !! | local var name | longname                                                               | description                                                | units   | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|---------|-----------|--------|----------|

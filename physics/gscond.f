@@ -36,14 +36,8 @@
 !! conversion from condensate (water and ice)  to precipitation
 !! - EVPCO: Coefficient for evaporation of precipitation
 !!
-!! \section diagram Calling Hierarchy Diagram
-!!
-!! \todo zhao-carr calling hierarchy diagram
-!!
 !! \section intraphysics Intraphysics Communication
-!! \todo zhao-carr intraphysics communication
-
-
+!!
 !> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
 !! @{
 

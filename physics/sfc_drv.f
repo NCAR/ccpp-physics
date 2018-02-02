@@ -2,42 +2,71 @@
 !!  This file contains the NOAH land surface scheme driver.
 
 !> \defgroup NOAH GFS NOAH Land Surface Scheme
-!! \brief The Noah LSM(version 2.7) is the land model.
+!! \brief This it the NOAH Land Surface Model (NOAH LSM).
 !!
-!! In 2005, the NCEP Noah LSM (Version 2.7.1) replaced 
-!! the Oregon State University (OSU) LSM, which had been operational in the GFS since 
-!! the mid-1990s. The Noah LSM embodies about 10 years of upgrades (see Chen et.al. 1996 
-!! \cite chen_et_al_1996; Koren et. al. 1999 \cite koren_et_al_1999; Ek et. al. 2003
-!! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  
+!! Land-atmosphere interactions are a main driver of Earth's surface 
+!! water and energy budgets. The importance of the land surface is 
+!! rather intuitive, and has been demonstrated not only in terms of 
+!! predictability on daily to seasonal timescale (Betts et al. 2017
+!! \cite betts_et_al_2017), but also in terms 
+!! of influencing extremes such as drought and heatwaves (PaiMazumder and
+!! Done, 2016 \cite paimazumder_and_done_2016), PBL evolution and cloud 
+!! formation (Milovac  et al. 2016 \cite milovac_et_al_2016) and afternoon
+!! convection (Guillod et al. 2015 \cite guillod_et_al_2015), and 
+!! tropical cyclone re-intensification (Andersen and Shepherd, 2014 \cite 
+!! andersen_and_shepherd_2014). Other linkages, such as the role of soil 
+!! moisture (SM) or vegetation heterogeneity in mesoscale circulation
+!! (Hsu et al. 2017 \cite hsu_et_al_2017) and planetary waves (Koster 
+!! et al. 2014 \cite koster_et_al_2014), and those driven by land use
+!! and land cover change or management (Hirsch et al. 2015 
+!! \cite hirsch_et_al_2015, Findell et al. 2017
+!! \cite findell_et_al_2017) are topics of active research.
 !!
-!! The Noah LSM upgrade includes an increase from two (10, 190 cm thick) to four
-!! soil layers (10, 30, 60, 100 cm thick). addition of frozen soil physics, new
-!! formulations for infiltration and runoff (giving more runoff for unsaturated 
-!! soils), revised physics of the snowpack and its influence on surface heat fluxes
-!! and albedo, tuning and adding canopy resistance parameters, allowing spatially 
-!! varying root depth, revised treatment of ground heat flux and soil thermal 
-!! conductivity, reformulation of dependence of direct surface evaporation on first
-!! layer soil moisture, and improved seasonality of green vegetation cover. The
-!! frozen soil physics includes soil heat sinks/sources from freezing/thawing
-!! and influences vertical transport of soil moisture, soil thermal conductivity 
-!! and heat capacity, and present prognostic states of snowpack water-equivalent (SWE),
-!! total soil moisture (liquid plus frozen), soil temperature, canopy water, and skin
-!! temperature. SWE divided by the snowpack depth gives the snowpack density. Total
-!! soil moisture minus liquid soil moisture gives the frozen soil moisture.
+!! Figure 1 is a schematic of local land-atmosphere interactions in a 
+!! quiescent synoptic regime, including the soil moisture-precipitation
+!! (SM-P) feedback pathways.  Solid arrows indicate a positive feedback
+!! pathway, and large dashed arrows represent a negative feedback, while
+!! red indicates radiative, black indicates surface layer and PBL, and 
+!! brown indicates land surface processes. Thin red and grey dashed lines
+!! with arrows also represent positive feedbacks. The single horizontal
+!! gay-dotted line (no arrows) indicates the top of the PBL, and the seven
+!! small vertical dashed lines (no arrows) represent precipitation
+!! \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994),\cite ek_and_mahrt_1994, Ek and Holtslag (2004),\cite ek_and_holtslag_2004)" width=10cm
+!! The land-surface model component was substantially upgraded from the Oregon
+!! State University (OSU) land surface model to EMC's new NOAH Land Surface Model
+!! (NOAH LSM) during the major implementation in the NCEP Global Forecast System
+!! (GFS) on May 31, 2005. Forecast System (GFS). The NOAH LSM embodies about 10 
+!! years of upgrades (see Chen et al. 1996 
+!! \cite chen_et_al_1996; Koren et al. 1999 \cite koren_et_al_1999; Ek et al. 2003
+!! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The NOAH LSM upgrade includes: 
+!! - An increase from two (10, 190 cm thick) to four soil layers (10, 
+!! 30, 60, 100 cm thick) 
+!! - Addition of frozen soil physics 
+!! - Add glacial ice treatment
+!! - Two snowpack states (SWE, density)
+!! - New  formulations for infiltration and runoff account for sub-grid 
+!! variability in precipitation and soil moisture 
+!! - Revised physics of the snowpack and its influence on surface heat 
+!! fluxes and albedo
+!! - Higher canopy resistance  
+!! - Spatially  varying root depth 
+!! - Surface fluxes weighted by snow cover fraction
+!! - Improved thermal conduction in soil/snow
+!! - Improved seasonality of green vegetation cover. 
+!! - Improved evaporation treatment over bare soil and snowpack
 !!
-!! To provide initial values of soil moisture/temperature, the Noah LSM land states
-!! cycle continuous in the coupled atmosphere/land global model of the GDAS. These 
-!! land states respond to the global model's predicted land-surface forcing (precipitation,
-!! surface radiation, near-surface air temperature, humidity, and wind speed). Since
-!! the land component of the GDAS is forced by model prediction rather than observed
-!! precipitation, we avoid undue drift by nudging soil moisture towards a monthly
-!! global climatology(in GDAS only, not in forecast).
+!! \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=10cm
+!!
+!! \section upgrads Land Surface Updrades in Q3FY17 GFS 
+!! - IGBP 20-type land classifications and STASGO 19 type soil classifications
+!! - New MODIS-based snow free and max snow albedo
+!! - Diurnal albedo treatment
+!! - Unify snow cover and albedo between radiation driver and Noah LSM
+!! - Fix excessive cooling of T2m during sunset
+!! - Increase ground heat flux under the deep snow
 !!
 !!
-!!\section diagram Calling Hierarchy Diagram
-!! \todo NOAH calling hierarchy diagram
 !!\section Intraphysics Intraphysics Communication
-!! \todo NOAH intraphysics communication
 !! 
 ! \defgroup NOAH_pre NOAH Land Surface Pre
 ! \ingroup NOAH
@@ -109,7 +138,6 @@
 ! \ingroup NOAH
 ! @{
 !  \brief Brief description of the parameterization
-!  \section diagram Calling Hierarchy Diagram
 !  \section intraphysics Intraphysics Communication
 
       module lsm_noah_post
@@ -356,9 +384,7 @@
 !!| wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!
 !!  \section general General Algorithm
-!!  \todo sfc_drv general algorithm
 !!  \section detailed Detailed Algorithm
-!!  \todo sfc_drv detailed algorithm
 !!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &

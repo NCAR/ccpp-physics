@@ -12,10 +12,7 @@
 !! Original version of these terms were provided by NASA/DAO based on
 !! NASA 2D Chemistry model - GSM is capable of running both versions
 !!
-!! \section diagram Calling Hierarchy Diagram
-!! \todo ozphys calling hierarchy diagram
 !! \section intra_oz Intraphysics Communication
-!! \todo ozphys intraphysics communication
 !! 
       module ozphys_pre
       contains

@@ -36,7 +36,7 @@
 !! the surface temperature and ice temperature structure. In each model grid box, the heat and moisture
 !! fluxes and albedo are treated separately for the ice and the open water.
 !!
-!!\image html sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!!\image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
 !! The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness 
 !! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
 !! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of 
@@ -45,9 +45,6 @@
 !!
 !! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets. 
-!!
-!!
-!!  \section diagram Calling Hierarchy Diagram
 !!
 !!  \section intraphysics Intraphysics Communication
 !!\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
@@ -70,7 +67,6 @@
 
 
 !>\defgroup gfs_sice_main GFS sfc_sice Main
-!> \todo gfs_sice_main brief blah blah
 !! @{
 !! \ingroup GFS_Ice
 !! \section arg_table_sfc_sice_run Arguments

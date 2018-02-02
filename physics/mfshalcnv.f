@@ -22,10 +22,7 @@
 !! \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
 !! are described in Han et al. (2017) \cite han_et_al_2017 .
 !!
-!!  \section diagram Calling Hierarchy Diagram
-!! \todo mfshalcnv calling hierarchy diagram
 !!  \section intraphysics Intraphysics Communication
-!! \todo mfshalcnv intraphysics communitcation
 
       module sasas_shal
       contains

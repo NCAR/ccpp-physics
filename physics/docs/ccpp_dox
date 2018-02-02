@@ -126,7 +126,10 @@ INPUT                  =  txt/mainpage.txt \
 ### Land Surface
                         ../sfc_drv.f \
                         ../sflx.f    \
+                        ../sfcsub.f  \
                         ../sfc_diff.f \
+                        ../set_soilveg.f \
+                        ../GFS_calpreciptype.F90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface
@@ -135,6 +138,8 @@ INPUT                  =  txt/mainpage.txt \
                         ../gwdps.f \
 ### Convective Gravity Wave
                         ../gwdc.f \
+### Rayleigh damp
+                        ../rayleigh_damp.f \
 ### Prognostic Ozone
                         ../ozphys.f
 INPUT_ENCODING         = UTF-8

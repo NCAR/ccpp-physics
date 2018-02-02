@@ -1,7 +1,7 @@
 !\file sflx.f
-!! This file contains the NCEP Noah LSM (Version 2.7.1)
+!! This file contains the NCEP NOAH LSM (Version 2.7.1)
 
-!>\defgroup NOAH_LSM NCEP Noah LSM
+!>\defgroup NOAH_LSM NCEP NOAH LSM
 !!\ingroup NOAH_drv
 !!\brief This is sub-driver for "NOAH/OSU LSM" family of physics subroutines.
 !! It is a soil/veg/snowpack land-surface model to update soil moisture, soil
@@ -10,9 +10,7 @@
 !! (excluding input atmospheric forcings of downward radiation and precip).
 !!
 !!\section general General Algorithm
-!!\todo NOAH LSM general algorithm
 !!\section detailed Detailed Algorithm
-!!\todo NOAH LSM detailed algorithm
 !! @{
 !-----------------------------------
       subroutine sflx                                                   &
@@ -2911,6 +2909,11 @@
 
 
 !-----------------------------------
+!> This subroutine calculates soil moisture flux. The soil moisture
+!! content (smc - a per unit volume measurement) is a dependent variable
+!! that is updated with prognostic equations. The canopy moisture content
+!! (cmc) is also updated. Frozen ground version: new states added: sh2o,
+!! and frozen ground correction factor, frzfact and paramter slope.
       subroutine evapo                                                  &
 !...................................
 !  ---  inputs:
@@ -3057,6 +3060,9 @@
 
 
 !-----------------------------------
+!> This subroutine updates the temperature state of the soil column
+!! based on the thermal diffusion equation and update the frozen soil
+!! moisture content based on the temperature.
       subroutine shflx                                                  &
 !...................................
 !  ---  inputs:
@@ -3218,6 +3224,11 @@
 
 
 !-----------------------------------
+!> This subroutine calculates soil moisture flux. The soil moisture
+!! content (smc - a per unit vulume measurement) is a dependent variable
+!! that is updated with prognostic equations. The canopy moisture content
+!! (cmc) is also updated. Frozen ground version: new states added: sh2o and
+!! frozen ground correction factor, frzx and parameter slope.
       subroutine smflx                                                    &
 !...................................
 !  ---  inputs:
@@ -3424,6 +3435,11 @@
 
 
 !-----------------------------------
+!> This subroutine calculates compaction of a snowpack under conditions of 
+!! increasing snow density, as obtained from an approximate solution of 
+!! E. Anderson's differential equation (3.29),NOAA technical report NWS 19,
+!! by Victor Koren, 03/25/95. subroutine will return new values of \a snowh
+!! and \a sndens .
       subroutine snowpack                                               &
 !...................................
 !  ---  inputs:
@@ -3586,6 +3602,7 @@
 
 
 !-----------------------------------
+!> This subrtouine calculates direct soil evaporation.
       subroutine devap                                                  &
 !...................................
 !  ---  inputs:
@@ -3655,6 +3672,17 @@
 
 
 !-----------------------------------
+!> This subroutine calculates amount of supercooled liquid soil water
+!! content if temperature is below 273.15K (t0). It requires Newton-type
+!! iteration to solve the nonlinear implicit equation given in eqn 17
+!! of Koren et al.(1999) \cite koren_et_al_1999.
+!!
+!! New version (June 2001): much faster and more accurate Newton iteration
+!! achieved by first taking log of eqn cited above -- less than 4 (typically
+!! 1 or 2) iterations achieves convergence. Also, explicit 1-step solution
+!! option for special case of paramter ck=0, which reduces the orginal 
+!! implicit equation to a simpler explicit form, known as the "flerchinger eqn".
+!! Improved handling of solution in the limit of freezing point temperature t0.
       subroutine frh2o                                                  &
 !...................................
 !  ---  inputs:
@@ -3806,6 +3834,10 @@
 
 
 !-----------------------------------
+!> This subroutine calculates the right hand side of the time tendency 
+!! term of the soil thermal diffusion equation. Also to compute (prepare)
+!! the matrix coefficients for the tri-diagonal matrix of the implicit time
+!! scheme.
       subroutine hrt                                                    &
 !...................................
 !  ---  inputs:
@@ -4150,6 +4182,9 @@
 
 
 !-----------------------------------
+!> This subroutine calculates the right hand side of the time tendency
+!! term of the soil thermal diffusion equation for sea-ice (ice = 1) or
+!! glacial-ice (ice).
       subroutine hrtice                                                 &
 !...................................
 !  ---  inputs:
@@ -4322,6 +4357,7 @@
 
 
 !-----------------------------------
+!> This subroutine calculates/updates the soil temperature field.
       subroutine hstep                                                  &
 !...................................
 !  ---  inputs:
@@ -4421,6 +4457,7 @@
 
 
 !-----------------------------------
+!> This subroutine inverts (solve) the tri-diagonal matrix problem.
       subroutine rosr12                                                 &
 !...................................
 !  ---  inputs:
@@ -4523,6 +4560,7 @@
 
 
 !-----------------------------------
+!> This subroutine calculates sink/source term of the termal diffusion equation.
       subroutine snksrc                                                 &
 !...................................
 !  ---  inputs:
@@ -4664,6 +4702,10 @@
 
 
 !-----------------------------------
+!> This subroutine calculates the right hand side of the time tendency
+!! term of the soil water diffusion equation. Also to compute
+!! (prepare) the matrix coefficients for the tri-diagonal matrix of 
+!! the implicit time scheme.
       subroutine srt                                                    &
 !...................................
 !  ---  inputs:
@@ -4974,6 +5016,8 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!> This subroutine calculates/updates soil moisture content values and
+!! canopy moisture content values.
       subroutine sstep                                                  &
 !...................................
 !  ---  inputs:
@@ -5120,6 +5164,8 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!> This subroutine calculates temperature on the boundary of the 
+!! layer by interpolation of the middle layer temperatures.
       subroutine tbnd                                                   &
 !...................................
 !  ---  inputs:
@@ -5190,6 +5236,11 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!> This subroutine calculates soil layer average temperature (tavg)
+!! in freezing/thawing layer using up, down, and middle layer
+!! temperature (tup, tdn, tm), where tup is at top boundary of layer,
+!! tdn is at bottom boundary of layer. tm is layer prognostic state
+!! temperature.
       subroutine tmpavg                                                 &
 !...................................
 !  ---  inputs:
@@ -5294,6 +5345,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!> This subroutine calculates transpiration for the veg class.
       subroutine transp                                                    &
 !...................................
 !  ---  inputs:
@@ -5426,6 +5478,8 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!> This subroutine calculates soil water diffusivity and soil
+!! hydraulic conductivity.
       subroutine wdfcnd                                                 &
 !...................................
 !  ---  inputs:

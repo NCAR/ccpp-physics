@@ -1,3 +1,17 @@
+!>\file sfcsub.f
+!! This file sets, updates and quility controls numerous surface fields
+!! such as soil moisture and SST.
+!!
+!!\defgroup static Surface Static Fields
+!!\ingroup NOAH
+!!\brief The GFS physics module "sfcsub.f" sets, updates and quality 
+!! controls numerous surface fields such as soil moisture and SST.
+!!
+!! It is incorporated in the forcast model, CHGRES and CYCLE. One of its
+!! important functions is to set several static fields (which only change
+!! when the land/non-land mask changes) by interpolating global gaussian
+!! fields (grib 1) to the model point.
+ 
       module sfccyc_module
       implicit none
       save
