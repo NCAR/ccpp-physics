@@ -13,8 +13,8 @@
 !! Done, 2016 \cite paimazumder_and_done_2016), PBL evolution and cloud 
 !! formation (Milovac  et al. 2016 \cite milovac_et_al_2016) and afternoon
 !! convection (Guillod et al. 2015 \cite guillod_et_al_2015), and 
-!! tropical cyclone re-intensification (Andersen and Shepherd, 2014 \cite 
-!! andersen_and_shepherd_2014). Other linkages, such as the role of soil 
+!! tropical cyclone re-intensification (Andersen and Shepherd, 2014  
+!! \cite andersen_and_shepherd_2014). Other linkages, such as the role of soil 
 !! moisture (SM) or vegetation heterogeneity in mesoscale circulation
 !! (Hsu et al. 2017 \cite hsu_et_al_2017) and planetary waves (Koster 
 !! et al. 2014 \cite koster_et_al_2014), and those driven by land use
@@ -31,7 +31,7 @@
 !! with arrows also represent positive feedbacks. The single horizontal
 !! gay-dotted line (no arrows) indicates the top of the PBL, and the seven
 !! small vertical dashed lines (no arrows) represent precipitation
-!! \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994),\cite ek_and_mahrt_1994, Ek and Holtslag (2004),\cite ek_and_holtslag_2004)" width=10cm
+!! \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994), Ek and Holtslag (2004))" width=10cm
 !! The land-surface model component was substantially upgraded from the Oregon
 !! State University (OSU) land surface model to EMC's new NOAH Land Surface Model
 !! (NOAH LSM) during the major implementation in the NCEP Global Forecast System
@@ -383,8 +383,8 @@
 !!| smcref2        | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!| wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section general_noah General Algorithm
+!!  \section detailed_noah Detailed Algorithm
 !!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
@@ -830,4 +830,3 @@
 !! @}
 
       end module lsm_noah
-!! @}

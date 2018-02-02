@@ -46,7 +46,7 @@
 !! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets. 
 !!
-!!  \section intraphysics Intraphysics Communication
+!!  \section intraphysics_sice Intraphysics Communication
 !!\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
 
       module sfc_sice
@@ -113,8 +113,8 @@
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real    | kind_phys |   out  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real    | kind_phys |   out  | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section general_sice_run General Algorithm
+!!  \section detailed_sice_run Detailed Algorithm
 !>  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &

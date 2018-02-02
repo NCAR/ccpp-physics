@@ -1,7 +1,6 @@
 !>  \file mfshalcnv.f
 !!  This file contains the entire SAMF deep convection scheme.
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
-!! @{
 !!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection
 !! scheme is an updated version of the previous mass-flux shallow
 !! convection scheme with scale and aerosol awareness and
@@ -75,7 +74,7 @@
 !! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity               | kg kg-1 | 2    | real    | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    | 2    | real    | kind_phys | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section general_mfshal General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback
 !!  control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining
@@ -87,7 +86,7 @@
 !!  -# For the "feedback control", calculate updated values of the state
 !!  variables by multiplying the cloud base mass flux and the tendencies
 !! calculated per unit cloud base mass flux from the static control.
-!!  \section detailed Detailed Algorithm
+!!  \section detailed_mfshal Detailed Algorithm
 !!  @{
       subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
@@ -1708,7 +1707,6 @@ c
 !
       subroutine sasasshal_finalize
       end subroutine sasasshal_finalize
-!! @}
 
       end module sasas_shal
 

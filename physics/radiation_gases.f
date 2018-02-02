@@ -106,7 +106,6 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radiation_gases RRTMG Gases Module
-!! @{
 !> This module sets up ozone climatological profiles and other constant
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
 !! data are entered as mixing ratio by volume, except ozone which is
@@ -1166,4 +1165,3 @@
 !........................................!
       end module module_radiation_gases  !
 !========================================!
-!> @}

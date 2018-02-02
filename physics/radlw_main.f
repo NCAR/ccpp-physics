@@ -3,7 +3,6 @@
 !!  code from AER.
 
 !>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation Scheme
-!! @{
 !!  \brief The GFS radiation scheme
 !!  \details Radiative processes are among the most complex and
 !! computationally intensive parts of all model physics. As an
@@ -38,8 +37,8 @@
 !! \cite clough_et_al_1992) to compute absorption by water vapor at the
 !! continuum band. Longwave cloud radiative properties external to the
 !! RRTM depend on cloud liquid/ice water path and the effective radius
-!! of ice particles and water droplets (Hu and Stamnes 1993 \cite
-!! hu_and_stamnes_1993; Ebert and Curry 1992 \cite ebert_and_curry_1992).
+!! of ice particles and water droplets (Hu and Stamnes 1993
+!! \cite hu_and_stamnes_1993; Ebert and Curry 1992 \cite ebert_and_curry_1992).
 !!
 !! Changes to Radiation Parameterization since 2007:
 !! \n The longwave (LW) and the shortwave (SW) radiation
@@ -359,7 +358,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module module_radlw_main           !
 !........................................!
@@ -6754,5 +6752,3 @@
       end module module_radlw_main       !
 !========================================!
 
-!! @}
-!! @}

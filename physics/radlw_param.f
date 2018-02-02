@@ -3,7 +3,6 @@
 
 !> \defgroup radlw_param GFS RADLW param Module 
 !!\ingroup RRTMG
-!! @{
 
 !!!!!  ==============================================================  !!!!!
 !!!!!             lw-rrtm3 radiation package description               !!!!!
@@ -161,4 +160,3 @@
 !........................................!
       end module module_radlw_parameters !
 !========================================!
-!! @}

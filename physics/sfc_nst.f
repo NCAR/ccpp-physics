@@ -23,7 +23,7 @@
 !! \endhtmlonly
 !! @image html NSST.png "Figure 1: NSST profile."
 !!
-!! \section intraphysics Intraphysics Communication
+!! \section intraphysics_nst Intraphysics Communication
 !!
 !! This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
@@ -698,7 +698,6 @@ cc
       contains
 
 ! \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
-!! @{
 !! \brief Brief description of the parameterization
 !!
 !! Blah blah blah description of parameterization
@@ -743,11 +742,10 @@ cc
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature                                                          | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
 !!
-!! \section NSST_general_algorithm General Algorithm
+! \section NSST_general_algorithm General Algorithm
 !!
-!! Blah blah general algorithm
 !!
-!! \section NSST_detailed_algorithm Detailed Algorithm
+! \section NSST_detailed_algorithm Detailed Algorithm
 !! @{
       subroutine sfc_nst_pre_run                                        &
      &     ( im, islimsk, oro, oro_uf, tsfc, tsurf, tskin )
@@ -783,8 +781,6 @@ cc
 
       return
       end subroutine sfc_nst_pre_run
-
-!> @}
 !! @}
       end module sfc_nst_pre
 
@@ -796,7 +792,6 @@ cc
       contains
 
 ! \defgroup GFS_NSST_POST GFS Near Sea Surface Temperature Post
-!! @{
 !! \brief Brief description of the parameterization
 !!
 !! Blah blah blah description of parameterization
@@ -809,20 +804,19 @@ cc
 !!
 !! Blah blah blah intraphysics communication
 
-!> \brief Brief description of the subroutine
-!!
-!! Blah blah description of subroutine
-!!
-!! \section arg_table_sfc_nst_init  Argument Table
+! \brief Brief description of the subroutine
+!
+! Blah blah description of subroutine
+!
+! \section arg_table_sfc_nst_init  Argument Table
 !!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
 
-!> \brief Brief description of the subroutine
+! \brief Brief description of the subroutine
+!
 !!
-!! Blah blah description of subroutine
-!!
-!! \section arg_table_sfc_nst_finalize  Argument Table
+! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_post_finalize
       end subroutine sfc_nst_post_finalize
@@ -852,12 +846,12 @@ cc
 !! | dtzm           | mean_change_over_depth_in_sea_water_temperature                              | mean of dT(z)  (zsea1 to zsea2)                | K             | 1    | real    | kind_phys | out    | F        |
 !! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
 !!
-!! \section NSST_general_algorithm General Algorithm
-!!
-!! Blah blah general algorithm
-!!
-!! \section NSST_detailed_algorithm Detailed Algorithm
-!! @{
+! \section NSST_general_algorithm General Algorithm
+!
+! Blah blah general algorithm
+!
+! \section NSST_detailed_algorithm Detailed Algorithm
+! @{
       subroutine sfc_nst_post_run                                       &
      &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
      &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
@@ -922,6 +916,4 @@ cc
       return
       end subroutine sfc_nst_post_run
 
-!! @}
-!! @}
       end module sfc_nst_post

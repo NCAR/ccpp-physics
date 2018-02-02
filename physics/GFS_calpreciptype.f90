@@ -1,4 +1,4 @@
-!> \file GFS_calpreciptype.F90
+!> \file GFS_calpreciptype.f90
 !! This file contains the subroutine that calculates dominant precipitation type (calpreciptype),
 !! which provides precipitation forcing for LSM.
 
@@ -50,9 +50,9 @@
 !! |    srflag      | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                     | flag    | 1    | real    | kind_phys | out    |  F       |
 !! |    tprcp       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m       | 1    | real    | kind_phys | out    |  F       |
 !!
-!! \section general General Algorithm
+!! \section general_calpreciptype General Algorithm
 !!
-!! \section detailed Detailed Algorithm
+!! \section detailed_calpreciptype Detailed Algorithm
 !! @{
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &

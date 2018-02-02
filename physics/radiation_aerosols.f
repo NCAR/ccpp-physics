@@ -117,7 +117,6 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radiation_aerosols RRTMG Aerosols Module
-!> @{
 !!  This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
@@ -924,6 +923,7 @@
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
 !>\section gel_set_spec General Algorithm
+!! @{
 !--------------------------------
       subroutine set_spectrum
 !................................
@@ -1014,7 +1014,7 @@
 !................................
       end subroutine set_spectrum
 !--------------------------------
-
+!! @}
 
 !> The initialization program for stratospheric volcanic aerosols.
 !-----------------------------
@@ -5494,4 +5494,3 @@
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!
-!> @}

@@ -45,7 +45,7 @@
 !! |  lprnt         | flag_print                                                    | flag for printing diagnostics to output                           | flag        |  0   | logical |          |  in     |   F      |
 !! |  jpr           | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |  0   | integer |          |  in     |   F      |
 !!
-!! \section general General Algorithm
+!! \section general_precpd General Algorithm
 !! The parameterization of precipitation is required in order to remove
 !! water from the atmosphere and transport it to the ground. In the
 !! scheme discussed here, simplifications in the precipitation

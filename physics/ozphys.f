@@ -72,7 +72,7 @@
 !! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 | 3    | real    | kind_phys | inout  | F        |
 !! | me             | mpi_rank                                          | rank of the current MPI task                      | index   | 0    | integer | default   | in     | F        |
 !!
-!! \section gen_al General Algorithm
+!! \section genal_ozphys General Algorithm
 !> @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,                      &

@@ -129,7 +129,7 @@ INPUT                  =  txt/mainpage.txt \
                         ../sfcsub.f  \
                         ../sfc_diff.f \
                         ../set_soilveg.f \
-                        ../GFS_calpreciptype.F90 \
+                        ../GFS_calpreciptype.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface

@@ -399,7 +399,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module module_radsw_main           !
 !........................................!
@@ -3922,7 +3921,7 @@
 !!\param sfluxzen         spectral distribution of incoming solar flux
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
-!>\section gen_al General Algorithm
+!>\section gen_al_taumol General Algorithm
 !! @{
 !-----------------------------------
       subroutine taumol                                                 &
@@ -5410,4 +5409,3 @@
 !........................................!
       end module module_radsw_main       !
 !========================================!
-!! @}

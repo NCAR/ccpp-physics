@@ -147,8 +147,7 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radiation_clouds RRTMG Clouds Module
-!! @{
-!> This module computes cloud related quantities for radiation
+!! This module computes cloud related quantities for radiation
 !! computations.
 !!
 !! Knowledge of cloud properties and their vertical structure is
@@ -172,7 +171,7 @@
 !!  - gethml():get diagnostic hi, mid, low,total,BL clouds
 !!  - rhtable():rh lookup table for diag cloud scheme
 !!
-!> \section gen_al  General Algorithm
+!> \section gen_al_clouds  General Algorithm
 !! @{
 !! -# Cloud Liquid/Ice Water Path (LWP,IWP)
 !!\n We define the fraction of liquid and ice cloud as:
@@ -3399,4 +3398,3 @@
 !........................................!
       end module module_radiation_clouds !
 !========================================!
-!> @}

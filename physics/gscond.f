@@ -36,7 +36,7 @@
 !! conversion from condensate (water and ice)  to precipitation
 !! - EVPCO: Coefficient for evaporation of precipitation
 !!
-!! \section intraphysics Intraphysics Communication
+!! \section intraphysics_gscond Intraphysics Communication
 !!
 !> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
 !! @{

@@ -634,7 +634,7 @@
 !!\param hprif     (IMAX), topographic standard deviation in m
 !!\param IMAX       array horizontal dimension
 !!\param sfcemis  (IMAX), surface emissivity
-!!\section general General Algorithm
+!!\section general_setemis General Algorithm
 !> @{
 !-----------------------------------
       subroutine setemis                                                &

@@ -77,7 +77,6 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radiation_astronomy RRTMG Astronomy Module
-!! @{
 !> This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !! \version NCEP-Radiation_astronomy v5.2  Jan 2013
@@ -1008,4 +1007,3 @@
 !...........................................!
       end module module_radiation_astronomy !
 !===========================================!
-!> @}

@@ -3,7 +3,6 @@
 
 !>  \defgroup radsw_param GFS RADSW param Module 
 !! \ingroup RRTMG
-!!  @{
 
 !!!!!  ==============================================================  !!!!!
 !!!!!              sw-rrtm3 radiation package description              !!!!!
@@ -200,4 +199,3 @@
 !........................................!
       end module module_radsw_parameters !
 !========================================!
-!! @}

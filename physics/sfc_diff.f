@@ -1,14 +1,13 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface roughness length formulation based on 
-!! the surface sublayer scheme from Zeng and Dickinson (1998) \cite
-!! zeng_and_dickinson_1998. It is 
+!! the surface sublayer scheme from Zeng and Dickinson (1998) 
+!! \cite zeng_and_dickinson_1998. It is 
 !! the first subroutine called in surface layer loop.
 
 !> \defgroup Sfc_ex_cal GFS Surface Roughness Length Calculation
-!! @{
 !!  \brief It is the surface roughness length formulation based on
-!! the surface sublayer scheme from Zeng and Dickinson (1998) \cite
-!! zeng_and_dickinson_1998. 
+!! the surface sublayer scheme from Zeng and Dickinson (1998) 
+!! \cite zeng_and_dickinson_1998. 
 !!
 !! NOAH LSM are largely responsible for the quality 
 !! of model forecasts produced for near-surface weather parameters, such
@@ -42,7 +41,7 @@
 !! data in the NCEP Gridpoint Statistical Interpolation (GSI) system,
 !! especially for surface-sensitive satellite channels.
 !!
-!! Zheng et al.(2009) \cite zhang_et_al_2009 proposed a new formulation on 
+!! Zheng et al.(2009) \cite zheng_et_al_2009 proposed a new formulation on 
 !! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
 !!\f[
 !!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}      
@@ -133,9 +132,9 @@
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
 !!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
 !!
-!!  \section general General Algorithm
+!!  \section general_diff General Algorithm
 !!
-!!  \section detailed Detailed Algorithm
+!!  \section detailed_diff Detailed Algorithm
 !!
 !!  @{
       subroutine sfc_ex_coef_run                                        &
@@ -448,4 +447,3 @@
 !! @}
 
       end module surface_exchange_coefficients
-!! @}

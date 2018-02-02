@@ -9,9 +9,8 @@
 !! and all terms of the surface energy balance and surface water balance
 !! (excluding input atmospheric forcings of downward radiation and precip).
 !!
-!!\section general General Algorithm
-!!\section detailed Detailed Algorithm
-!! @{
+!!\section general_sflx General Algorithm
+!!\section detailed_sflx Detailed Algorithm
 !-----------------------------------
       subroutine sflx                                                   &
 !...................................
@@ -5567,4 +5566,4 @@ c ----------------------------------------------------------------------
 !...................................
       end subroutine sflx
 !-----------------------------------
-!! @}
+
