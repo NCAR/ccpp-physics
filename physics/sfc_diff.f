@@ -69,16 +69,16 @@
 !! the west half of CONUS (i.e., arid or semiarid regions). The new roughness
 !! length formulations significantly reduce the cold bias in the western 
 !! CONUS, while the LST in the eastern CONUS, where the bias is small in
-!! the control run, is not much affected
+!! the control run, is not much affected.
 !!
 !!\image html roughness_length_fig2.png "Fiure 2: Average diurnal cycle on 1-3 July 2007 for verification of LST with GOES (black) and SURFRAD (blue) at Desert Rock, Nevada; red and green lines are for the control and sensitivity runs, respectively" width=10cm
 !!
-!! The Desert Rock station (36.63^oN, 116.02^oW), located in the Nevada
+!! The Desert Rock station (\f$36.63^oN\f$, \f$116.02^oW\f$), located in the Nevada
 !! desert,is one of the observation stations within the SURFRAD network.
 !! The GOES-derived LST is very similar to the SURFRAD obervations (Figure 2).
 !! However, the old GFS run produces very low LST, compared to the observations,
 !! especially during daytime. During midday, the cold bias can reach up to 
-!! -15^oC. The new formulation run produces a reasonable LST diurnal cycle.
+!! \f$-15^oC\f$. The new formulation run produces a reasonable LST diurnal cycle.
 !! The daytime LST increases substantially and is very close to the observations.
 !!  \section intraphysics Intraphysics Communication
 

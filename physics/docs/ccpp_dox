@@ -120,6 +120,7 @@ INPUT                  =  txt/mainpage.txt \
 ### PBL
                         ../moninedmf.f \
                         ../mfpbl.f \
+                        ../tridi.f    \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \

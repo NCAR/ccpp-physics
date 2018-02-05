@@ -59,28 +59,9 @@
 
       module sasas_deep
       contains
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_init  Argument Table
-! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
-! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!
-      subroutine sasasdeep_init
-      end subroutine sasasdeep_init
-
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_finalize  Argument Table
-! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
-! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!
-      subroutine sasasdeep_finalize
-      end subroutine sasasdeep_finalize
-
-
 !>\defgroup GFS_mfdeep GFS mfdeepcnv Main
+!!\ingroup SAMF
+!> @{
 !>\brief This subroutine contains the entirety of the SAMF deep convection scheme.
 !!  
 !! For grid sizes larger than threshold value, as in Grell (1993) 
@@ -101,11 +82,29 @@
 !!
 !! For grid sizes smaller than threshold value, the cloud base mass flux
 !! in the SAMF scheme is determined by the cumulus updraft velocity averaged
-!! over the whole cloud depth (Han et al., 2017 \cite han_et_al_2017 ), which
+!! over the whole cloud depth (Han et al., 2017 \cite han_et_al_2017 ),which
 !! in turn, determines changes of the large-scale environment due to the
 !! cumulus convection.
 !!
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_init  Argument Table
+! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!
+      subroutine sasasdeep_init
+      end subroutine sasasdeep_init
+
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_finalize  Argument Table
+! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!
+      subroutine sasasdeep_finalize
+      end subroutine sasasdeep_finalize
+
 !! \section arg_table_sasasdeep_run Argument Table
 !! | local var name | longname                                                  | description                                         | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -2666,6 +2665,7 @@ c
       enddo
 !!
       return
-      end subroutine sasasdeep_run
 !! @}
+      end subroutine sasasdeep_run
+!> @}
       end module sasas_deep

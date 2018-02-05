@@ -57,21 +57,12 @@
 !!
 !! \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=10cm
 !!
-!! \section upgrads Land Surface Updrades in Q3FY17 GFS 
-!! - IGBP 20-type land classifications and STASGO 19 type soil classifications
-!! - New MODIS-based snow free and max snow albedo
-!! - Diurnal albedo treatment
-!! - Unify snow cover and albedo between radiation driver and Noah LSM
-!! - Fix excessive cooling of T2m during sunset
-!! - Increase ground heat flux under the deep snow
-!!
-!!
 !!\section Intraphysics Intraphysics Communication
 !! 
-! \defgroup NOAH_pre NOAH Land Surface Pre
-! \ingroup NOAH
-! @{
-!  \brief Brief description of the parameterization
+!! \defgroup NOAH_pre NOAH Land Surface Pre
+!! \ingroup NOAH
+!!  \brief Brief description of the parameterization
+!! @{
 
       module lsm_noah_pre
       contains
@@ -82,9 +73,9 @@
       subroutine lsm_noah_pre_finalize
       end subroutine lsm_noah_pre_finalize
 
-! \brief Brief description of the subroutine
-!
-! \section arg_table_lsm_noah_pre_run Argument Table
+!! \brief Brief description of the subroutine
+!!
+!! \section arg_table_lsm_noah_pre_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -129,17 +120,15 @@
 
       end subroutine lsm_noah_pre_run
 
-! @}
       end module lsm_noah_pre
 
 !! @}
 
-! \defgroup NOAH_post NOAH Land Surface post
-! \ingroup NOAH
-! @{
-!  \brief Brief description of the parameterization
-!  \section intraphysics Intraphysics Communication
-
+!! \defgroup NOAH_post NOAH Land Surface post
+!! \ingroup NOAH
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section intraphysics Intraphysics Communication
       module lsm_noah_post
       contains
 
@@ -149,8 +138,8 @@
       subroutine lsm_noah_post_finalize
       end subroutine lsm_noah_post_finalize
 
-! \brief Brief description of the subroutine
-!
+!! \brief Brief description of the subroutine
+!!
 !! \section arg_table_lsm_noah_post_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
@@ -827,6 +816,7 @@
 !      end subroutine sfc_drv
       end subroutine lsm_noah_run
 !-----------------------------------
+!! @}
 !! @}
 
       end module lsm_noah

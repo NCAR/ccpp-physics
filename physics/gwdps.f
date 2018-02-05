@@ -56,7 +56,7 @@
 !! seen as a source of gravity waves to the atmosphere above and
 !! nonlinear subgrid low-level mountain drag effect below.
 !!
-!> \section provenance Provenance
+!> \section provenance_gwdps Provenance
 !! - Gravity-wave drag is simulated as described by Alpert et al.
 !! (1988) \cite alpert_et_al_1988. The parameterization includes
 !! determination of the momentum flux due to gravity waves at the

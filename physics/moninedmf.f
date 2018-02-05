@@ -1044,7 +1044,7 @@ c
 !
 !     solve tridiagonal problem for heat and moisture
 !
-!>  The tridiagonal system is solved by calling the internal ::edmf_tridin subroutine.
+!>  The tridiagonal system is solved by calling tridin() subroutine.
       call tridin(im,km,ntrac,al,ad,au,a1,a2,au,a1,a2)
 
 !
@@ -1198,10 +1198,10 @@ c
 !>  @}
 
 c-----------------------------------------------------------------------
-!>  \ingroup HEDMF
-!!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
-!!
-!!  Origin of subroutine unknown.
+!  \ingroup HEDMF
+!  \brief Routine to solve the tridiagonal system to calculate temperature and moisture at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
+!
+!  Origin of subroutine unknown.
 C      subroutine edmf_tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 c
 C      use machine     , only : kind_phys
@@ -1242,10 +1242,10 @@ C      return
 C      end
 C
 C-----------------------------------------------------------------------
-!>  \ingroup HEDMF
-!!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
-!!
-!!  Origin of subroutine unknown.
+!  \ingroup HEDMF
+!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
+!
+!  Origin of subroutine unknown.
 C      subroutine edmf_tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
 c
 C      use machine     , only : kind_phys

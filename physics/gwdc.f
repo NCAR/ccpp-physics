@@ -52,7 +52,7 @@
 !! the stable stratosphere can generate gravity waves that influence
 !! the large-scale flow.
 !!
-!> \section provenance Provenance
+!> \section provenance_gwdc Provenance
 !! - The parameterization of stationary convectively-forced GWD follows
 !! the development of Chun and Baik (1998) \cite chun_and_baik_1998 ,
 !! which was tested in GCMs by Chun et al. (2001,2004)

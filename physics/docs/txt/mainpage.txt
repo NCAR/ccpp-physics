@@ -28,7 +28,8 @@ Details on the changes and evaluation of the changes of the entire Global Foreca
 \n  http://www.emc.ncep.noaa.gov/gmb/noor/GFS2017/GFS2017.htm
 
 \section schemes CCPP Physics Documentation
-The documentation found here corresponds to the state of the operational GFS physics suite as of 2017. Documentation for the operational physics suite can be access through these links:
+Please check DTC website https://dtcenter.org/community-code/ipd-ccpp for GMTB IPD/CCPP infrastructure and governance information.
+\n The documentation found here corresponds to the state of the operational GFS physics suite as of 2017. Documentation for the operational physics suite can be access through these links:
   - \ref RRTMG
   - \ref SAMF
   - \ref SAMF_shal
@@ -43,4 +44,5 @@ The documentation found here corresponds to the state of the operational GFS phy
   - \ref GFS_cgwd
   - \ref GFS_ozn
   - \ref CALPRECIPTYPE
+
 */
