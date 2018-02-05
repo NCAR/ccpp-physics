@@ -28,6 +28,7 @@
 !!
 !!  \section intraphysics_deep Intraphysics Communication
 !!
+
 ! \brief Brief description of the subroutine
 !
 ! \section arg_table_sasasshal_init Argument Table
@@ -1706,8 +1707,8 @@ c
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_sasasshal_init Argument Table
-!
+!> \section arg_table_sasasshal_init Argument Table
+!!
       subroutine sasasshal_finalize
       end subroutine sasasshal_finalize
 
@@ -1770,17 +1771,17 @@ c
 
       end subroutine sasasshal_post_run
 
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_post_init Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_init Argument Table
+!
       subroutine sasasshal_post_init ()
       end subroutine sasasshal_post_init
 
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_sasasshal_post_finalize Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_finalize Argument Table
+!
       subroutine sasasshal_post_finalize ()
       end subroutine sasasshal_post_finalize
 

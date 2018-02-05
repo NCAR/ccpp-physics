@@ -59,10 +59,10 @@
 !!
 !!\section Intraphysics Intraphysics Communication
 !! 
-!! \defgroup NOAH_pre NOAH Land Surface Pre
-!! \ingroup NOAH
-!!  \brief Brief description of the parameterization
-!! @{
+! \defgroup NOAH_pre NOAH Land Surface Pre
+! \ingroup NOAH
+!  \brief Brief description of the parameterization
+! @{
 
       module lsm_noah_pre
       contains
@@ -122,13 +122,13 @@
 
       end module lsm_noah_pre
 
-!! @}
+! @}
 
-!! \defgroup NOAH_post NOAH Land Surface post
-!! \ingroup NOAH
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section intraphysics Intraphysics Communication
+! \defgroup NOAH_post NOAH Land Surface post
+! \ingroup NOAH
+! @{
+!  \brief Brief description of the parameterization
+!  \section intraphysics Intraphysics Communication
       module lsm_noah_post
       contains
 
@@ -138,8 +138,8 @@
       subroutine lsm_noah_post_finalize
       end subroutine lsm_noah_post_finalize
 
-!! \brief Brief description of the subroutine
-!!
+! \brief Brief description of the subroutine
+!
 !! \section arg_table_lsm_noah_post_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
@@ -300,6 +300,7 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
+
 !> \defgroup NOAH_drv GFS sfc_drv Main
 !! \ingroup NOAH
 !! @{

@@ -776,19 +776,19 @@ u  program history log:                                                 !
 !!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_pre_init  Argument Table
-!!
+!
       subroutine sfc_sice_pre_init
       end subroutine sfc_sice_pre_init
 
 !!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_pre_finalize  Argument Table
-!!
+!
       subroutine sfc_sice_pre_finalize
       end subroutine sfc_sice_pre_finalize
 
 
-!! \section arg_table_sfc_sice_pre_run Argument Table
+!> \section arg_table_sfc_sice_pre_run Argument Table
 !! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer |           | in     | F        |
@@ -842,20 +842,20 @@ u  program history log:                                                 !
 !!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_post_init  Argument Table
-!!
+!
       subroutine sfc_sice_post_init
       end subroutine sfc_sice_post_init
 
 !!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_post_finalize  Argument Table
-!!
+!
       subroutine sfc_sice_post_finalize
       end subroutine sfc_sice_post_finalize
 
 
 !!
-!! \section arg_table_sfc_sice_post_run Argument Table
+!> \section arg_table_sfc_sice_post_run Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |

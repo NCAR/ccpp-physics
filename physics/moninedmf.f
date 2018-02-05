@@ -6,13 +6,6 @@
 
       contains
 
-!> \defgroup HEDMF GFS Hybrid Eddy-diffusivity Mass-flux PBL and Free Atmospheric Turbulence
-!! @{
-!!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
-!!
-!!  The PBL scheme's main task is to calculate tendencies of temperature, moisture, and momentum due to vertical diffusion throughout the column (not just the PBL). The scheme is an amalgamation of decades of work, starting from the initial first-order PBL scheme of Troen and Mahrt (1986) \cite troen_and_mahrt_1986, implemented according to Hong and Pan (1996) \cite hong_and_pan_1996 and modified by Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2015) \cite han_et_al_2015 to include top-down mixing due to stratocumulus layers from Lock et al. (2000) \cite lock_et_al_2000 and replacement of counter-gradient terms with a mass flux scheme according to Siebesma et al. (2007) \cite siebesma_et_al_2007 and Soares et al. (2004) \cite soares_et_al_2004. Recently, heating due to TKE dissipation was also added according to Han et al. (2015) \cite han_et_al_2015.
-!!
-!!  \section intraphysics Intraphysics Communication
 
       subroutine edmf_init ()
       end subroutine edmf_init
@@ -20,6 +13,14 @@
       subroutine edmf_finalize ()
       end subroutine edmf_finalize
 
+!> \defgroup HEDMF GFS Hybrid Eddy-diffusivity Mass-flux PBL and Free Atmospheric Turbulence
+!>  @{
+!!  \brief The Hybrid EDMF scheme is a first-order turbulent transport scheme used for subgrid-scale vertical turbulent mixing in the PBL and above. It blends the traditional first-order approach that has been used and improved over the last several years with a more recent scheme that uses a mass-flux approach to calculate the countergradient diffusion terms.
+!!
+!!  The PBL scheme's main task is to calculate tendencies of temperature, moisture, and momentum due to vertical diffusion throughout the column (not just the PBL). The scheme is an amalgamation of decades of work, starting from the initial first-order PBL scheme of Troen and Mahrt (1986) \cite troen_and_mahrt_1986, implemented according to Hong and Pan (1996) \cite hong_and_pan_1996 and modified by Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2015) \cite han_et_al_2015 to include top-down mixing due to stratocumulus layers from Lock et al. (2000) \cite lock_et_al_2000 and replacement of counter-gradient terms with a mass flux scheme according to Siebesma et al. (2007) \cite siebesma_et_al_2007 and Soares et al. (2004) \cite soares_et_al_2004. Recently, heating due to TKE dissipation was also added according to Han et al. (2015) \cite han_et_al_2015.
+!!
+!!  \section intraphysics Intraphysics Communication
+!!
 !>\defgroup GFS_edmf_main GFS moninedmf Main
 !>  \brief This subroutine contains all of logic for the Hybrid EDMF PBL scheme except for the calculation of the updraft properties and mass flux.
 !!
@@ -1195,7 +1196,8 @@ c
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine edmf_run
-!>  @}
+!!  @}
+!> @}
 
 c-----------------------------------------------------------------------
 !  \ingroup HEDMF
@@ -1310,5 +1312,4 @@ C      enddo
 C-----------------------------------------------------------------------
 C      return
 C      end
-!> @}
       end module edmf

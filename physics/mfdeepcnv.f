@@ -89,9 +89,6 @@
 ! \brief Brief description of the subroutine
 !
 ! \section arg_table_sasasdeep_init  Argument Table
-! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
-! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!
       subroutine sasasdeep_init
       end subroutine sasasdeep_init
 
@@ -99,9 +96,6 @@
 ! \brief Brief description of the subroutine
 !
 ! \section arg_table_sasasdeep_finalize  Argument Table
-! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
-! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!
       subroutine sasasdeep_finalize
       end subroutine sasasdeep_finalize
 
