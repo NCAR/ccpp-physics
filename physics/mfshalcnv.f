@@ -39,6 +39,7 @@
 !>\defgroup SAMF_shal_main GFS mfshalcnv Main
 !!\ingroup SAMF_shal
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
+!!
 !! This routine follows the \ref SAMF deep scheme quite closely, although
 !! it can be interpreted as only having the "static" and "feedback" control
 !! portions, since the "dynamic" control is not necessary to find the
@@ -1717,7 +1718,7 @@ c
       module sasas_shal_post
       contains
 
-!! \brief Brief description of the subroutine
+!> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sasasshal_post_run Argument Table
 !! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |

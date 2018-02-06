@@ -52,21 +52,33 @@
 !! to more strongly suppress convection in a drier environment.
 !!
 !!  \section intraphysics Intraphysics Communication
-!! This space is reserved for a description of how this scheme uses information
-!! from other scheme types and/or how information calculated in this scheme 
-!! is used in other scheme types.
+!!
 
 
       module sasas_deep
       contains
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_init  Argument Table
+      subroutine sasasdeep_init
+      end subroutine sasasdeep_init
+
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_finalize  Argument Table
+      subroutine sasasdeep_finalize
+      end subroutine sasasdeep_finalize
+
 !>\defgroup GFS_mfdeep GFS mfdeepcnv Main
 !!\ingroup SAMF
 !> @{
 !>\brief This subroutine contains the entirety of the SAMF deep convection scheme.
-!!  
-!! For grid sizes larger than threshold value, as in Grell (1993) 
-!! \cite grell_1993 , the SAMF deep convection scheme can be described 
-!! in terms of three types of "controls": static, dynamic, and feedback. 
+!!
+!! For grid sizes larger than threshold value, as in Grell (1993)
+!! \cite grell_1993 , the SAMF deep convection scheme can be described
+!! in terms of three types of "controls": static, dynamic, and feedback.
 !! The static control component consists of the simple entraining/detraining
 !! updraft/downdraft cloud model and is used to determine the cloud
 !! properties, convective precipitation, as well as the convective cloud
@@ -86,19 +98,6 @@
 !! in turn, determines changes of the large-scale environment due to the
 !! cumulus convection.
 !!
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_init  Argument Table
-      subroutine sasasdeep_init
-      end subroutine sasasdeep_init
-
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_finalize  Argument Table
-      subroutine sasasdeep_finalize
-      end subroutine sasasdeep_finalize
-
 !! \section arg_table_sasasdeep_run Argument Table
 !! | local var name | longname                                                  | description                                         | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------|------|---------|-----------|--------|----------|
