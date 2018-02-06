@@ -1234,7 +1234,6 @@ c
 !! respectively, \f$\gamma = \frac{L}{c_p}\left(\frac{\partial \overline{q_s}}{\partial T}\right)_p\f$ 
 !! and other quantities are previously defined.
       do i = 1, im
-      do i = 1, im
         if (cnvflg(i)) then
           aa1(i) = 0.
         endif

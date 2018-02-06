@@ -143,7 +143,7 @@
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
-u  program history log:                                                 !
+!  program history log:                                                 !
 !         2005  --  xingren wu created  from original progtm and added  !
 !                     two-layer ice model                               !
 !         200x  -- sarah lu    added flag_iter                          !
