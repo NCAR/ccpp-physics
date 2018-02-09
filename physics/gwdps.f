@@ -279,6 +279,7 @@
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      | 0    | integer | default   | in     | F        |
 !!
 !> \section gen_gwdps General Algorithm
+!> \section det_gwdps Detailed Algorithm
 !> @{
       subroutine gwdps_run(                                             &
      &           IM,IX,IY,KM,A,B,C,U1,V1,T1,Q1,KPBL,                    &

@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Documentation"
-PROJECT_NUMBER         = "Version 0"
+PROJECT_NAME           = "GMTB CCPP Documentation"
+PROJECT_NUMBER         = "V0"
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -89,7 +89,7 @@ SHOW_USED_FILES        = YES
 SHOW_FILES             = YES 
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
-LAYOUT_FILE            = 
+LAYOUT_FILE            = ccpp_dox_layout.xml
 CITE_BIB_FILES         = library.bib
 QUIET                  = NO
 WARNINGS               = YES
@@ -99,7 +99,7 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  txt/mainpage_bootstrapped.txt \
+INPUT                  =  txt/mainpage.txt \
                           txt/GFS_RRTMG.txt \
                           txt/GFS_SAMFdeep.txt \
                           txt/GFS_SAMFshal.txt \
@@ -190,11 +190,11 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = ./bootstrapped/header.html
-HTML_FOOTER            = ./bootstrapped/footer.html
+HTML_HEADER            =
+HTML_FOOTER            =
 HTML_STYLESHEET        =
-HTML_EXTRA_STYLESHEET  = ./bootstrapped/customdoxygen.css
-HTML_EXTRA_FILES       = ./bootstrapped/doxy-boot.js
+HTML_EXTRA_STYLESHEET  = ccpp_dox_extra_style.css
+HTML_EXTRA_FILES       =
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
@@ -224,7 +224,7 @@ QHG_LOCATION           =
 GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = YES
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO

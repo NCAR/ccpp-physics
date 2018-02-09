@@ -564,7 +564,7 @@
 !! | cld_ssa         | cloud_single_scattering_albedo                                                                | cloud single scattering albedo                                           | frac    |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymmetry_parameter                                                                     | cloud asymmetry parameter                                                | none    |    2 | real        | kind_phys | in     | T        |
 !!
-!> \section General_swrad General Algorithm
+!> \section gen_swrad General Algorithm
 !> @{
 !-----------------------------------
       subroutine swrad_run                                                  &

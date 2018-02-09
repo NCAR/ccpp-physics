@@ -1,0 +1,21 @@
+/**
+\page GFS_OZPHYS GFS Ozone Sources and Sinks Scheme
+\section des_ozone 1. Description
+ The operational GFS currently parameterizes ozone production and
+ destruction based on monthly mean coefficients provided by Naval
+ Research Laboratory through CHEM2D chemistry model
+ (McCormack et al. 2006 \cite mccormack_et_al_2006).
+ Monthly and zonal mean ozone production rate and ozone destruction
+ rate per unit ozone mixing ratio were provided by NRL based on
+ CHEM2D model.
+ Original version of these terms were provided by NASA/DAO based on
+ NASA 2D Chemistry model - GSM is capable of running both versions
+
+\section intra_ozone 2. Intraphysics Communication
+\ref arg_table_ozphys_run
+
+\section gen_ozone 3. General Algorithm
+
+
+
+*/

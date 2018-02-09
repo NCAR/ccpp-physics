@@ -848,7 +848,6 @@ cc
 !!
 ! \section NSST_general_algorithm General Algorithm
 !
-! Blah blah general algorithm
 !
 ! \section NSST_detailed_algorithm Detailed Algorithm
 ! @{

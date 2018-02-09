@@ -1,0 +1,14 @@
+/**
+\page GFS_CALPRECIPTYPE GFS Dominant Precipitation Scheme
+\section des_calprecip 1. Description
+This scheme calculates dominant precipitation type (calpreciptype),
+which provides precipitation forcing for LSM.
+
+\section intra_calprecip 2. Intraphysics Communication
+\ref arg_table_GFS_calpreciptype_run
+
+\section gen_calprecip  3. General Algorithm
+
+
+
+*/

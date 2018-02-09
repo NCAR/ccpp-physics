@@ -69,7 +69,7 @@
 !>\defgroup gfs_sice_main GFS sfc_sice Main
 !! @{
 !! \ingroup GFS_Ice
-!! \section arg_table_sfc_sice_run Arguments
+!! \section arg_table_sfc_sice_run Argument Table
 !! | local var name | longname                                                                     | description                                                     | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer |           | in     | F        |

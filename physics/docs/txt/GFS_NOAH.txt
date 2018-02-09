@@ -1,0 +1,62 @@
+/**
+\page GFS_NOAH GFS Noah Land Surface Scheme
+\section des_noah 1. Description
+ Land-atmosphere interactions are a main driver of Earth's surface
+ water and energy budgets. The importance of the land surface is
+ rather intuitive, and has been demonstrated not only in terms of
+ predictability on daily to seasonal timescale (Betts et al. 2017
+ \cite betts_et_al_2017), but also in terms
+ of influencing extremes such as drought and heatwaves (PaiMazumder and
+ Done, 2016 \cite paimazumder_and_done_2016), PBL evolution and cloud
+ formation (Milovac  et al. 2016 \cite milovac_et_al_2016) and afternoon
+ convection (Guillod et al. 2015 \cite guillod_et_al_2015), and
+ tropical cyclone re-intensification (Andersen and Shepherd, 2014
+ \cite andersen_and_shepherd_2014). Other linkages, such as the role of soil
+ moisture (SM) or vegetation heterogeneity in mesoscale circulation
+ (Hsu et al. 2017 \cite hsu_et_al_2017) and planetary waves (Koster
+ et al. 2014 \cite koster_et_al_2014), and those driven by land use
+ and land cover change or management (Hirsch et al. 2015
+ \cite hirsch_et_al_2015, Findell et al. 2017
+ \cite findell_et_al_2017) are topics of active research.
+
+ Figure 1 is a schematic of local land-atmosphere interactions in a
+ quiescent synoptic regime, including the soil moisture-precipitation
+ (SM-P) feedback pathways.  Solid arrows indicate a positive feedback
+ pathway, and large dashed arrows represent a negative feedback, while
+ red indicates radiative, black indicates surface layer and PBL, and
+ brown indicates land surface processes. Thin red and grey dashed lines
+ with arrows also represent positive feedbacks. The single horizontal
+ gay-dotted line (no arrows) indicates the top of the PBL, and the seven
+ small vertical dashed lines (no arrows) represent precipitation
+ \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994), Ek and Holtslag (2004))" width=10cm
+ The land-surface model component was substantially upgraded from the Oregon
+ State University (OSU) land surface model to EMC's new NOAH Land Surface Model
+ (NOAH LSM) during the major implementation in the NCEP Global Forecast System
+ (GFS) on May 31, 2005. Forecast System (GFS). The NOAH LSM embodies about 10
+ years of upgrades (see Chen et al. 1996
+ \cite chen_et_al_1996; Koren et al. 1999 \cite koren_et_al_1999; Ek et al. 2003
+ \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The NOAH LSM upgrade includes:
+ - An increase from two (10, 190 cm thick) to four soil layers (10, 30, 60, 100 cm thick)
+ - Addition of frozen soil physics
+ - Add glacial ice treatment
+ - Two snowpack states (SWE, density)
+ - New  formulations for infiltration and runoff account for sub-grid variability in precipitation and soil moisture
+ - Revised physics of the snowpack and its influence on surface heat fluxes and albedo
+ - Higher canopy resistance
+ - Spatially  varying root depth
+ - Surface fluxes weighted by snow cover fraction
+ - Improved thermal conduction in soil/snow
+ - Improved seasonality of green vegetation cover.
+ - Improved evaporation treatment over bare soil and snowpack
+
+ \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=10cm
+
+
+\section intra_noah 2. Intraphysics Communication
+\ref arg_table_lsm_noah_run
+
+\section gen_al_noah 3. General Algorithm
+
+
+
+*/
