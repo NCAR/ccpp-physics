@@ -788,7 +788,7 @@
       end subroutine sfc_sice_pre_finalize
 
 
-!> \section arg_table_sfc_sice_pre_run Argument Table
+! \section arg_table_sfc_sice_pre_run Argument Table
 !! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer |           | in     | F        |
@@ -855,7 +855,7 @@
 
 
 !!
-!> \section arg_table_sfc_sice_post_run Argument Table
+! \section arg_table_sfc_sice_post_run Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |

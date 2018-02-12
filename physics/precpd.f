@@ -5,10 +5,6 @@
       module GFS_zhaocarr_precpd
       contains
 
-!> \ingroup Zhao-Carr
-!> \defgroup precip Precipitation (snow or rain) Production
-!! @{
-
 ! \brief Brief description of the subroutine
 !
 ! \section arg_table_precpd_init  Argument Table
@@ -16,8 +12,9 @@
       subroutine precpd_init ()
       end subroutine precpd_init
 
-
-!> \defgroup gfs_precpd GFS precpd Main
+!> \defgroup precip Precipitation (snow or rain) Production
+!! \ingroup Zhao-Carr
+!! @{
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
@@ -45,45 +42,8 @@
 !! |  lprnt         | flag_print                                                    | flag for printing diagnostics to output                           | flag        |  0   | logical |          |  in     |   F      |
 !! |  jpr           | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |  0   | integer |          |  in     |   F      |
 !!
-!! \section general_precpd General Algorithm
-!! The parameterization of precipitation is required in order to remove
-!! water from the atmosphere and transport it to the ground. In the
-!! scheme discussed here, simplifications in the precipitation
-!! parameterization are used due to computational limitations required
-!! by operational NWP models. First, consideration of particle size and
-!! shape can be avoided by using the bulk parameterization method
-!! introduced by Kessler (1969) \cite kessler_1969. Second, only two
-!! types of precipitation, rain and snow, are considered in this
-!! scheme. Third, only the most important microphysical processes
-!! associated with the formation of rain and snow are included.
-!! Figure 2 presents the microphysical processes considered in the
-!! precipitation parameterization.
-!! \image html precpd-micop.png "Figure 2: Microphysical processes simulated in the precipitation scheme " width=5cm
-!! Basically, there are four types of microphysical processes
-!! considered here:
-!! - production of rain from cloud water
-!! (\f$P_{racw}\f$, \f$P_{raut}\f$, \f$P_{sacw}\f$)
-!! - production of snow from cloud ice
-!! (\f$P_{saut}\f$, \f$P_{saci}\f$)
-!! - melting of snow to form rain below the freezing level
-!! (\f$P_{sm1}\f$, \f$P_{sm2}\f$)
-!! - the evaporation of precipitation
-!! (\f$E_{rr}\f$, \f$E_{rs}\f$)
-!!
-!! The following two equations can be used to calculate the
-!! precipitation rates of rain and snow at each module level:
-!!\f[
-!! P_{r}(\eta)=\frac{p_{s}-p_{t}}{g\eta_{s}}\int_{\eta}^{\eta_{t}}(P_{raut}+P_{racw}+P_{sacw}+P_{sm1}+P_{sm2}-E_{rr})d\eta
-!!\f]
-!! and
-!!\f[
-!! P_{s}(\eta)=\frac{p_{s}-p_{t}}{g\eta_{s}}\int_{\eta}^{\eta_{t}}(P_{saut}+P_{saci}-P_{sm1}-P_{sm2}-E_{rs})d\eta
-!!\f]
-!! where \f$p_{s}\f$ and\f$p_{t}\f$ are the surface pressure and the
-!! pressure at the top of model domain, respectively, and \f$g\f$ is
-!! gravity. The implementation of the precipitation scheme also
-!! includes a simplified procedure of computing \f$P_{r}\f$
-!! and \f$P_{s}\f$ (Zhao and Carr(1997) \cite zhao_and_carr_1997).
+!> \section general_precpd General Algorithm
+!! \todo general precpd
 !! \section Zhao-Carr_precip_detailed Detailed Algorithm
 !! @{
        subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
@@ -737,6 +697,7 @@
       return
       end subroutine precpd_run
 !> @}
+!> @}
 
 ! \brief Brief description of the subroutine
 !
@@ -744,7 +705,5 @@
 !
       subroutine precpd_finalize
       end subroutine precpd_finalize
-
-!> @}
 
       end module GFS_zhaocarr_precpd

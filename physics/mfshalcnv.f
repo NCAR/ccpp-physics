@@ -1718,8 +1718,8 @@ c
       module sasas_shal_post
       contains
 
-!> \brief Brief description of the subroutine
-!!
+! \brief Brief description of the subroutine
+!
 !! \section arg_table_sasasshal_post_run Argument Table
 !! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
 !! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|

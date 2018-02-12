@@ -75,7 +75,7 @@
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gwdc_pre_run Argument Table
+! \section arg_table_gwdc_pre_run Argument Table
 !! | local var name | longname                                                                 | description                                                   | units | rank | type    | kind      | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                        | count | 0    | integer |           | in     | F        |
@@ -1536,7 +1536,7 @@
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gwdc_post_run Argument Table
+! \section arg_table_gwdc_post_run Argument Table
 !! | local var name | longname                                                        | description                                                              | units      | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      | 0    | integer | default   | in     | F        |

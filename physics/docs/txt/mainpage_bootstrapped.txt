@@ -24,6 +24,7 @@ Documentation for the individual physics scheme can of 2017 operational GFS phys
  + @ref GFS_GWDC
  + @ref GFS_OZPHYS
  + @ref GFS_CALPRECIPTYPE
+ + @ref GFS_RAYLEIGH
 
  You can find more information about 
 <a href="https://dtcenter.org/community-code/ipd-ccpp">GMTB Interoperable Physics Driver/Common Community Physics Package(IPD/CCPP)</a> on DTC website

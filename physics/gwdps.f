@@ -112,7 +112,7 @@
 ! \ingroup GFS_ogwd
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gwdps_pre_run Argument Table
+! \section arg_table_gwdps_pre_run Argument Table
 !! | local var name | longname                                                                | description                                                                              | units   | rank | type    | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   | 0    | integer | default   | in     | F        |
@@ -1367,7 +1367,7 @@
 
 ! \ingroup GFS_ogwd
 ! \brief Brief description of the subroutine
-!> \section arg_table_gwdps_post_run Argument Table
+! \section arg_table_gwdps_post_run Argument Table
 !! | local var name | longname                                                  | description                                                      | units | rank | type    | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------|------------------------------------------------------------------|-------|------|---------|-----------|--------|----------|
 !! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  | 0    | logical | default   | in     | F        |

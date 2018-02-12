@@ -74,9 +74,9 @@
 !!
 !! \section genal_ozphys General Algorithm
 !> @{
-      subroutine ozphys_run (                                           &
-     &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,                      &
-     &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
+      subroutine ozphys_run ( &
+     &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,&
+     &  prsl, prdout, pl_coeff, delp, ldiag3d,&
      &  ozp, me)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
