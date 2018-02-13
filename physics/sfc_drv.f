@@ -92,8 +92,8 @@
 !!| km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer |           | in     | F        |
 !!| flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical |           | in     | F        |
 !!| dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real    | kind_phys | in     | F        |
-!!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
-!!| runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  | 1    | real    | kind_phys | inout  | F        |
+!!| drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  | 1    | real    | kind_phys | in     | F        |
+!!| runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  | 1    | real    | kind_phys | in     | F        |
 !!| runoff         | total_runoff                                                | total runoff                               | kg m-2     | 1    | real    | kind_phys | inout  | F        |
 !!| srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     | 1    | real    | kind_phys | inout  | F        |
 !!
@@ -377,7 +377,7 @@
 
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf
+     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc
@@ -386,7 +386,7 @@
       real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
-     &       zorl, wet1
+     &       wet1
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
@@ -417,7 +417,7 @@
 !===> ...  begin here
 !
 
-!  --- ...  set flag for land points
+!  --- ... set flag for land points
 
       do i = 1, im
         flag(i) = (islimsk(i) == 1)

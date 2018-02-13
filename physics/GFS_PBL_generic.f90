@@ -16,7 +16,7 @@
 !! |----------------|--------------------------------------------------------|----------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                 | horizontal loop extent                             | count         |    0 | integer |           | in     | F        |
 !! | levs           | vertical_dimension                                     | vertical layer dimension                           | count         |    0 | integer |           | in     | F        |
-!! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer |           | in     | F        |
+!! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer |           | inout  | F        |
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, kinver)
 
@@ -27,7 +27,7 @@
 
     end subroutine GFS_PBL_generic_pre_run
 
-    end module
+    end module GFS_PBL_generic_pre
 
     module GFS_PBL_generic_post
 
@@ -56,7 +56,7 @@
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics             | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                     | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          |    1 | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type                 |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !!
       subroutine GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
         dudt, dvdt, dtdt, dqdt, xmu, Diag)
@@ -66,7 +66,7 @@
 
       type(GFS_grid_type),            intent(in) :: Grid
       type(GFS_radtend_type),         intent(in) :: Radtend
-      type(GFS_control_type),           intent(in) :: Model
+      type(GFS_control_type),         intent(in) :: Model
       type(GFS_diag_type),         intent(inout) :: Diag
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
@@ -123,4 +123,4 @@
         endif   ! end if_lssav
       end subroutine GFS_PBL_generic_post_run
 
-      end module
+      end module GFS_PBL_generic_post

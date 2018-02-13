@@ -57,6 +57,7 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
+! DH* TODO add intent() information for variables
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
      &                    snwdph,tskin,z0rl,cm,ch,rb,                   &

@@ -39,7 +39,7 @@
 
     end subroutine GFS_SCNV_generic_pre_run
 
-    end module
+    end module GFS_SCNV_generic_pre
 
     module GFS_SCNV_generic_post
 
@@ -96,4 +96,4 @@
 
       end subroutine GFS_SCNV_generic_post_run
 
-      end module
+      end module GFS_SCNV_generic_post

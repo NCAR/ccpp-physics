@@ -47,7 +47,7 @@
 
     end subroutine GFS_DCNV_generic_pre_run
 
-    end module
+    end module GFS_DCNV_generic_pre
 
     module GFS_DCNV_generic_post
 
@@ -75,8 +75,8 @@
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                                               | kg m-2        |    2 | real                          | kind_phys | in     | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                                             | kg m-2        |    2 | real                          | kind_phys | in     | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                           | kg m-2        |    2 | real                          | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity                                 | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                                   | frac          |    2 | real                          | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity                                 | kg kg-1       |    2 | real                          | kind_phys | in     | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                                   | frac          |    2 | real                          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output     | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                          | Fortran DDT containing FV3-GFS miscellaneous data                        | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
 !!
@@ -134,4 +134,4 @@
 
       end subroutine GFS_DCNV_generic_post_run
 
-      end module
+      end module GFS_DCNV_generic_post

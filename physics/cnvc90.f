@@ -30,6 +30,7 @@
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,
      1                      ACV,ACVB,ACVT,CV,CVB,CVT)
 cc
+c     DH* TODO add intent information for all variables
       USE MACHINE, ONLY :kind_phys
       implicit none
       integer              i,ibot,im,itop,km,lc,lz,n,ncc,ix

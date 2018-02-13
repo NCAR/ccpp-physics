@@ -1,17 +1,79 @@
 !> \file GFS_suite_interstitial.f90
 !!  Contains code related to more than one scheme in the GFS physics suite.
 
-    module GFS_suite_interstitial_2
+    module GFS_suite_interstitial_rad_reset
 
     contains
 
-    subroutine GFS_suite_interstitial_2_init ()
-    end subroutine GFS_suite_interstitial_2_init
+    subroutine GFS_suite_interstitial_rad_reset_init ()
+    end subroutine GFS_suite_interstitial_rad_reset_init
 
-    subroutine GFS_suite_interstitial_2_finalize()
-    end subroutine GFS_suite_interstitial_2_finalize
+    subroutine GFS_suite_interstitial_rad_reset_finalize()
+    end subroutine GFS_suite_interstitial_rad_reset_finalize
 
-!> \section arg_table_GFS_suite_interstitial_2_run Argument Table
+!> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
+!! | local var name | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!!
+    subroutine GFS_suite_interstitial_rad_reset_run (Interstitial)
+
+      use GFS_typedefs, only: GFS_interstitial_type
+
+      implicit none
+
+      !--- interface variables
+      type(GFS_interstitial_type), intent(inout) :: Interstitial
+
+      call Interstitial%rad_reset()
+
+    end subroutine GFS_suite_interstitial_rad_reset_run
+
+    end module GFS_suite_interstitial_rad_reset
+
+
+    module GFS_suite_interstitial_phys_reset
+
+    contains
+
+    subroutine GFS_suite_interstitial_phys_reset_init ()
+    end subroutine GFS_suite_interstitial_phys_reset_init
+
+    subroutine GFS_suite_interstitial_phys_reset_finalize()
+    end subroutine GFS_suite_interstitial_phys_reset_finalize
+
+!> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
+!! | local var name | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!!
+    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial)
+
+      use GFS_typedefs, only: GFS_interstitial_type
+
+      implicit none
+
+      !--- interface variables
+      type(GFS_interstitial_type), intent(inout) :: Interstitial
+
+      call Interstitial%phys_reset()
+
+    end subroutine GFS_suite_interstitial_phys_reset_run
+
+    end module GFS_suite_interstitial_phys_reset
+
+
+    module GFS_suite_interstitial_1
+
+    contains
+
+    subroutine GFS_suite_interstitial_1_init ()
+    end subroutine GFS_suite_interstitial_1_init
+
+    subroutine GFS_suite_interstitial_1_finalize()
+    end subroutine GFS_suite_interstitial_1_finalize
+
+!> \section arg_table_GFS_suite_interstitial_1_run Argument Table
 !! | local var name | longname                                                                 | description                                                             | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | in     | F        |
@@ -32,7 +94,8 @@
 !! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky  | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real                          | kind_phys |   out  | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                                 | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real                          | kind_phys |   out  | F        |
 !!
-    subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt)
+    subroutine GFS_suite_interstitial_1_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
+                                             work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt)
 
       use machine,               only: kind_phys
       use physcons,              only: dxmin, dxinv
@@ -72,21 +135,22 @@
       dtdtc(:,:) = 0.
       dqdt(:,:,:) = 0.
 
-    end subroutine GFS_suite_interstitial_2_run
+    end subroutine GFS_suite_interstitial_1_run
 
-  end module GFS_suite_interstitial_2
+  end module GFS_suite_interstitial_1
 
-  module GFS_suite_interstitial_3
+
+  module GFS_suite_interstitial_2
 
   contains
 
-  subroutine GFS_suite_interstitial_3_init ()
-  end subroutine GFS_suite_interstitial_3_init
+  subroutine GFS_suite_interstitial_2_init ()
+  end subroutine GFS_suite_interstitial_2_init
 
-  subroutine GFS_suite_interstitial_3_finalize()
-  end subroutine GFS_suite_interstitial_3_finalize
+  subroutine GFS_suite_interstitial_2_finalize()
+  end subroutine GFS_suite_interstitial_2_finalize
 
-!> \section arg_table_GFS_suite_interstitial_3_run Argument Table
+!> \section arg_table_GFS_suite_interstitial_2_run Argument Table
 !! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
@@ -103,7 +167,8 @@
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
 !!
-  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
+  subroutine GFS_suite_interstitial_2_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, &
+                                           Diag, kcnv, hflx, evap)
 
     use machine,               only: kind_phys
     use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type, GFS_radtend_type, GFS_diag_type
@@ -172,9 +237,10 @@
     Diag%u1(:)      = Statein%ugrs(:,1)
     Diag%v1(:)      = Statein%vgrs(:,1)
 
-  end subroutine GFS_suite_interstitial_3_run
+  end subroutine GFS_suite_interstitial_2_run
 
-  end module GFS_suite_interstitial_3
+  end module GFS_suite_interstitial_2
+
 
   module GFS_suite_update_stateout
 
@@ -220,17 +286,18 @@
 
   end module GFS_suite_update_stateout
 
-  module GFS_suite_interstitial_4
+
+  module GFS_suite_interstitial_3
 
   contains
 
-  subroutine GFS_suite_interstitial_4_init ()
-  end subroutine GFS_suite_interstitial_4_init
+  subroutine GFS_suite_interstitial_3_init ()
+  end subroutine GFS_suite_interstitial_3_init
 
-  subroutine GFS_suite_interstitial_4_finalize()
-  end subroutine GFS_suite_interstitial_4_finalize
+  subroutine GFS_suite_interstitial_3_finalize()
+  end subroutine GFS_suite_interstitial_3_finalize
 
-!> \section arg_table_GFS_suite_interstitial_4_run Argument Table
+!> \section arg_table_GFS_suite_interstitial_3_run Argument Table
 !! | local var name | longname                                                                 | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
@@ -247,7 +314,8 @@
 !! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                          | index         |    1 | integer                       |           | inout  | F        |
 !! | rhc            | critical_relative_humidity                                               | critical relative humidity                                            | frac          |    2 | real                          | kind_phys |   out  | F        |
 !!
-  subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, &
+                                           ktop, kbot, rhc)
 
     use machine,               only: kind_phys
     use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
@@ -286,6 +354,6 @@
       enddo
     endif
 
-  end subroutine GFS_suite_interstitial_4_run
+  end subroutine GFS_suite_interstitial_3_run
 
-  end module GFS_suite_interstitial_4
+  end module GFS_suite_interstitial_3

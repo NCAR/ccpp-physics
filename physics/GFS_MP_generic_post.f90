@@ -78,11 +78,8 @@
         if (ldiag3d) then
           do i = 1, im
             do k = 1,levs
-               !CCPP dt3dt6(i,k) = dt3dt6(i,k) + (t(i,k)-dtdt(i,k)) * frain
-               !CCPP dq3dt4(i,k) = dq3dt4(i,k) + (q(i,k)-dqdt1(i,k)) * frain
               dt3dt6(i,k) = dt3dt6(i,k) + (t(i,k)-save_t(i,k)) * frain
               dq3dt4(i,k) = dq3dt4(i,k) + (q(i,k)-save_qv(i,k)) * frain
-
             enddo
           enddo
         endif

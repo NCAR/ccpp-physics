@@ -67,6 +67,7 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
+! DH* TODO add intent information for all variables
       subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,   &
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,      &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)

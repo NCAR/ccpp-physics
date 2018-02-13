@@ -42,10 +42,10 @@
 !! |    tprcp       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m       | 1    | real    | kind_phys | out    |  F       |
 !!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
-                               cal_pre,                              &
-                               gt0,gq0,prsl,prsi, rainc,frain,rain1, &
-                               phii,n3dfercld,tskin,sr,phy_f3d,     & !input
-                               prec, domr,domzr,domip,doms,srflag,tprcp)    !output
+                               cal_pre,                                 &
+                               gt0,gq0,prsl,prsi, rainc,frain,rain1,    &
+                               phii,n3dfercld,tskin,sr,phy_f3d,         & !input
+                               prec, domr,domzr,domip,doms,srflag,tprcp)  !output
 
 !$$$  subprogram documentation block
 !                .      .    .
@@ -76,8 +76,7 @@
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl,phy_f3d
       real(kind=kind_phys),dimension(ix,lp1),intent(in)  :: prsi,phii
       real(kind=kind_phys),dimension(im),    intent(out) :: domr,domzr,domip,doms
-      real(kind=kind_phys),dimension(im),    intent(out) ::  srflag,tprcp, &
-                                                             prec
+      real(kind=kind_phys),dimension(im),    intent(out) :: srflag,tprcp, prec
       real(kind=kind_phys),dimension(im)                 :: t850
       real(kind=kind_phys), parameter :: p850    = 85000.0
 

@@ -782,6 +782,8 @@ cc
       integer :: i
       real(kind=kind_phys) :: tem
 
+      tskin = 0.0
+
       do i = 1, im
         if ( islimsk(i) == 0 ) then
           tem      = (oro(i)-oro_uf(i)) * rlapse
@@ -859,7 +861,7 @@ cc
 !! | xlon           | longitude                                                                    | longitude                                      | radians       | 1    | real    | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
 !! | dtzm           | mean_change_over_depth_in_sea_water_temperature                              | mean of dT(z)  (zsea1 to zsea2)                | K             | 1    | real    | kind_phys | out    | F        |
-!! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | inout  | F        |
 !!
 !! \section NSST_general_algorithm General Algorithm
 !!
@@ -893,7 +895,7 @@ cc
 !  ---  outputs:
       real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
      &      dtzm
-      real (kind=kind_phys), dimension(im), intent(out) :: tsfc
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsfc
 
 !  ---  locals
       integer :: i
@@ -911,6 +913,7 @@ cc
 
 !  --- ...  run nsst model  ... ---
 
+      dtzm = 0.0
       if (nstf_name1 > 1) then
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)

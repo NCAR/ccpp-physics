@@ -53,6 +53,7 @@
                         Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon,            &
                         ictmflg, isolar )
         endif
+!$OMP barrier
 
         !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
         if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then

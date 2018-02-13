@@ -293,6 +293,7 @@
       USE MACHINE , ONLY : kind_phys
       implicit none
 
+! DH* TODO - add intent information for all variables
 !---------------------------- Arguments --------------------------------
 !
 !  Input variables

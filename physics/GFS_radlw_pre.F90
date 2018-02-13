@@ -37,9 +37,8 @@
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
       type(GFS_grid_type),            intent(in)    :: Grid
-
-      integer :: im
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::  tsfa, tsfg
+      integer, intent(in)                           :: im
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
 
       if (Model%lslwr) then
 !>  - Call module_radiation_surface::setemis(),to setup surface

@@ -43,8 +43,6 @@
       end module ozphys_pre
 
 
-
-
       module ozphys
 
       contains
@@ -94,6 +92,7 @@
 !! \param[in] me        integer, pe number - used for debug prints
 !! \section gen_al General Algorithm
 !> @{
+! DH* TODO add intent() information for variables
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &

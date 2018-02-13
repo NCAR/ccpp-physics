@@ -46,7 +46,7 @@
 !! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real    | kind_phys | in     | F        |
 !! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real    | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real    | kind_phys | in     | F        |
-!! | psk            | exner_function_at_lowest_model_interface                                    | exner function at the surface interface               | none          |    1 | real    | kind_phys | in     | F        |
+!! | psk            | dimensionless_exner_function_at_lowest_model_interface                      | dimensionless Exner function at the surface interface | none          |    1 | real    | kind_phys | in     | F        |
 !! | rbsoil         | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real    | kind_phys | in     | F        |
 !! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real    | kind_phys | in     | F        |
 !! | u10m           | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real    | kind_phys | in     | F        |
@@ -62,7 +62,7 @@
 !! | prsi           | air_pressure_at_interface                                                   | air pressure at model layer interfaces                | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                   | pres(k) - pres(k+1)                                   | Pa            |    2 | real    | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real    | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function                                                | Exner function at layers                              | none          |    2 | real    | kind_phys | in     | F        |
+!! | prslk          | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real    | kind_phys | in     | F        |
 !! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | phil           | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real    | kind_phys | in     | F        |
 !! | delt           | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real    | kind_phys | in     | F        |
@@ -98,6 +98,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed Detailed Algorithm
 !!  @{
+! DH* TODO add intent() information for variables
       subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &

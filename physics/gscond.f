@@ -99,6 +99,7 @@
 
 
 !
+! DH* TODO - add intent information for all variables
 !     ******************************************************************
 !     *                                                                *
 !     *  subroutine for grid-scale condensation & evaporation          *

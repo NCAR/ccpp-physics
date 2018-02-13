@@ -50,27 +50,27 @@
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::   &
                                           save_t, save_qv, save_qcw
 
-       if (ldiag3d) then
-         do i = 1, im
-           do k = 1, levs
-             !CCPP dtdt(i,k)   = t(i,k)                  
-             !CCPP dqdt1(i,k) =  q(i,k)                 
-             save_t(i,k) = t(i,k)
-             save_qv(i,k) = q(i,k)
-           enddo
-         end do
-         !in FV3GFS v0 OP: ntcw=3, ncld=1, num_p3d=4, ntrac=3
-         do n=ntcw,ntcw+ncld-1     
-           if (n == ntcw .and. num_p3d == 4 ) then
-               do i = 1, im
-                 do k = 1, levs
-                    !CCPP dqdt3(i,k) = clw1(i,k)+clw2(i,k)   !
-                    save_qcw(i,k) = clw1(i,k)+clw2(i,k)
-                 enddo
+      if (ldiag3d) then
+        do i = 1, im
+          do k = 1, levs
+            !CCPP dtdt(i,k)   = t(i,k)
+            !CCPP dqdt1(i,k) =  q(i,k)
+            save_t(i,k) = t(i,k)
+            save_qv(i,k) = q(i,k)
+          enddo
+        end do
+        !in FV3GFS v0 OP: ntcw=3, ncld=1, num_p3d=4, ntrac=3
+        do n=ntcw,ntcw+ncld-1
+          if (n == ntcw .and. num_p3d == 4 ) then
+              do i = 1, im
+                do k = 1, levs
+                   !CCPP dqdt3(i,k) = clw1(i,k)+clw2(i,k)   !
+                   save_qcw(i,k) = clw1(i,k)+clw2(i,k)
                 enddo
-           endif
-         enddo
-       endif
+               enddo
+          endif
+        enddo
+      endif
 
 
       end subroutine GFS_MP_generic_pre_run

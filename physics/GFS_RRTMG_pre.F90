@@ -23,10 +23,10 @@
 !! |   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_tbd_type                  |           | in     | F        |
 !! |   Cldprop         | FV3-GFS_Cldprop_type                                          | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |  0   | GFS_cldprop_type              |           | in     | F        |
 !! |   Radtend         | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |  0   | GFS_radtend_type              |           | in     | F        |
-!! |   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | count    |  0   | integer                       |           | out    | F        |
-!! |   im              | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |  0   | integer                       |           | out    | F        |
-!! |   lmk             | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |  0   | integer                       |           | out    | F        |
-!! |   lmp             | adjusted_vertical_level_dimension_for_radiation               | number of vertical levels for radiation                                       | count    |  0   | integer                       |           | out    | F        |
+!! |   lm              | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | count    |  0   | integer                       |           | in     | F        |
+!! |   im              | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |  0   | integer                       |           | in     | F        |
+!! |   lmk             | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |  0   | integer                       |           | in     | F        |
+!! |   lmp             | adjusted_vertical_level_dimension_for_radiation               | number of vertical levels for radiation                                       | count    |  0   | integer                       |           | in     | F        |
 !! |   kd              | vertical_index_difference_between_inout_and_local             | vertical index difference between in/out and local                            | index    |  0   | integer                       |           | out    | F        |
 !! |   kt              | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |  0   | integer                       |           | out    | F        |
 !! |   kb              | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |  0   | integer                       |           | out    | F        |
@@ -73,6 +73,7 @@
 !!
       ! DH* Attention - the output arguments lm, im, lmk, lmp should not be set
       ! here in the CCPP version - they are defined in the interstitial_create routine *DH
+      ! DH* TODO add intent information for each variable (be careful with intent(out))!
       subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend,                                     & 
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
@@ -127,10 +128,19 @@
         type(GFS_tbd_type),                  intent(in)    :: Tbd
         type(GFS_cldprop_type),              intent(in)    :: Cldprop
 
-      integer :: me, im, lm, nfxr, ntrac            
+#ifdef CCPP
+      integer, intent(in) :: im, lm, lmk, lmp
+      integer :: me, nfxr, ntrac
+      ! nday is intent(out)
+      integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, kd, &
+                 lla, llb, lya, lyb, kt, kb
+#else
+      integer :: me, im, lm, nfxr, ntrac
+      ! nday is intent(out)
       integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, LMK, LMP, kd, &
                  lla, llb, lya, lyb, kt, kb
-      integer, dimension(size(Grid%xlon,1)) :: idxday
+#endif
+      integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
       integer, dimension(size(Grid%xlon,1),3) :: mbota, mtopa
 
       !--- REAL VARIABLES
@@ -170,10 +180,10 @@
 !
       !--- set commonly used integers
       me = Model%me
-! DH* these need to go for ccpp
+#ifndef CCPP
       LM = Model%levr
       IM = size(Grid%xlon,1)
-! *DH
+#endif
       NFXR = Model%nfxr
       NTRAC = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
 
@@ -183,10 +193,10 @@
 !  --- ...  set local /level/layer indexes corresponding to in/out
 !  variables
 
-! DH* these need to go for ccpp
+#ifndef CCPP
       LMK = LM + LTP             ! num of local layers
       LMP = LMK + 1              ! num of local levels
-! *DH
+#endif
 
       if ( lextop ) then
         if ( ivflip == 1 ) then    ! vertical from sfc upward
@@ -417,6 +427,7 @@
 !>  - Check for daytime points for SW radiation.
 
       nday = 0
+      idxday = 0
       do i = 1, IM
         if (Radtend%coszen(i) >= 0.0001) then
           nday = nday + 1

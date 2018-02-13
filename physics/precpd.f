@@ -87,6 +87,7 @@
 !! and \f$P_{s}\f$ (Zhao and Carr(1997) \cite zhao_and_carr_1997).
 !! \section Zhao-Carr_precip_detailed Detailed Algorithm
 !! @{
+! DH* TODO add intent() information for variables
        subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
      &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
      &,                   wk1,lprnt,jpr)

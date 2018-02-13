@@ -34,21 +34,22 @@
       use GFS_typedefs,              only: GFS_control_type,           &
                                            GFS_grid_type,              &
                                            GFS_radtend_type,           &
-                                           GFS_sfcprop_type      
-      use module_radiation_surface,  only: NF_ALBD, setalb            
+                                           GFS_sfcprop_type
+      use module_radiation_surface,  only: NF_ALBD, setalb
 
       implicit none
       type(GFS_control_type),         intent(in)    :: Model
       type(GFS_radtend_type),         intent(inout) :: Radtend
-      type(GFS_sfcprop_type),         intent(in)    :: Sfcprop         
-      type(GFS_grid_type),            intent(in)    :: Grid            
-                                           
-      integer :: i, im                        
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::  tsfa, tsfg
+      type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
+      type(GFS_grid_type),            intent(in)    :: Grid
+      integer,                        intent(in)    :: im
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      ! Local variables
+      integer :: i
+      ! DH* TODO - instead of passing in sfcalb{1-4} and using sfcalb internally,
+      ! we can just pass in the sfcalb array? *DH
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
-! CCPP-compliant
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::   &
-          sfcalb1, sfcalb2, sfcalb3, sfcalb4
 
 !  --- ...  start radiation calculations
 !           remember to set heating rate unit to k/sec!
@@ -68,22 +69,23 @@
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+      else
+        sfcalb = 0.0
+      endif
 
-       endif
-
-       do i = 1, im
+      do i = 1, im
         sfcalb1(i) = sfcalb(i,1)
         sfcalb2(i) = sfcalb(i,2)
         sfcalb3(i) = sfcalb(i,3)
         sfcalb4(i) = sfcalb(i,4)
-       enddo
+      enddo
 
       end subroutine GFS_radsw_pre_run
 
 !> \section arg_table_GFS_radsw_pre_finalize Argument Table
 !!
       subroutine GFS_radsw_pre_finalize ()
-      end subroutine GFS_radsw_pre_finalize      
+      end subroutine GFS_radsw_pre_finalize
 
 !! @}
       end module GFS_radsw_pre

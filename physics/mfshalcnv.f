@@ -53,6 +53,7 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
+! DH* TODO add intent information for all variables
       subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)

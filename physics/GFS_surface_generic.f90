@@ -112,7 +112,7 @@
 
       end subroutine GFS_surface_generic_pre_run
 
-      end module
+      end module GFS_surface_generic_pre
 
       module GFS_surface_generic_post
 

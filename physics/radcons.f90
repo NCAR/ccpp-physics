@@ -52,10 +52,12 @@
 !! control parameter ioznflg=0)
       logical :: loz1st =.true.
 
+! DH* THIS MUST GO BUT NEED IT RIGHT NOW TO DEFINE LEXTOP
 !> optional extra top layer on top of low ceiling models
 !!\n LTP=0: no extra top layer
       integer, parameter :: LTP = 0   ! no extra top layer
 !     integer, parameter :: LTP = 1   ! add an extra top layer
+! *DH
 
 !> control flag for extra top layer
       logical, parameter :: lextop = (LTP > 0)
@@ -63,6 +65,7 @@
 !----------------------------
 ! Module variable definitions
 !----------------------------
+! DH* CHECK IF THIS IS NEEDED/TRUE?
 !CCPP: copy from GFS_driver.F90
   real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
   real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys

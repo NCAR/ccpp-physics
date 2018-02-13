@@ -56,7 +56,7 @@
         type(GFS_coupling_type),             intent(inout) :: Coupling
         type(GFS_radtend_type),              intent(in)    :: Radtend
         type(GFS_diag_type),                 intent(inout) :: Diag
-        type(cmpfsw_type),                   dimension(size(Grid%xlon,1)) :: scmpsw
+        type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(in) :: scmpsw
 
         integer :: i, j, im, lm, k, k1, itop, ibtc, kd, kt, kb, ltp
         real(kind=kind_phys) :: tem0d, raddt 
@@ -155,9 +155,7 @@
         if (.not. Model%uni_cld) then
           do k = 1, LM
             k1 = k + kd
-            !CCPP Coupling%cldcovi(:,k) = clouds(:,k1,1)
             Coupling%cldcovi(:,k) = clouds1(:,k1)
-         
           enddo
         endif
       endif                                ! end_if_lssav

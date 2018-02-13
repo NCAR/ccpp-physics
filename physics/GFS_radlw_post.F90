@@ -10,6 +10,8 @@
       subroutine GFS_radlw_post_init()
       end subroutine GFS_radlw_post_init
 
+! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
+#ifndef __PGI
 !> \section arg_table_GFS_radlw_post_run Argument Table
 !! | local var name    | longname                                                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
 !! |-------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
@@ -24,6 +26,7 @@
 !! |   htlwc           | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | total sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
 !! |   htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
 !!
+#endif
       subroutine GFS_radlw_post_run (Model, Grid, Radtend, Coupling,   &
                  ltp, lm, kd, tsfa, htlwc, htlw0)
     
@@ -37,11 +40,12 @@
       type(GFS_coupling_type),        intent(inout) :: Coupling
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_radtend_type),         intent(inout) :: Radtend
-
-      integer :: k1,k, LM, kd, ltp
-      real(kind = kind_phys), dimension(Size (Grid%xlon, 1), Model%levr + &
-          LTP) ::  htlwc, htlw0
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) ::  tsfa
+      integer,                        intent(in)    :: ltp, LM, kd
+      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlwc
+      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlw0
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                 intent(in) ::  tsfa
+      ! local variables
+      integer :: k1, k
 
       if (Model%lslwr) then
 !> -# Save calculation results

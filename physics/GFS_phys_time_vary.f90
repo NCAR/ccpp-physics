@@ -33,7 +33,6 @@
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys) :: rinc(5)
 
-        ! DH* check if it is sufficient to do this only for blkno=1 - sec will be part of IPD_Data%Interstitial in the full CCPP code
         !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
         rinc(1:5)   = 0
@@ -41,6 +40,7 @@
         sec = rinc(4)
 
         if (blkno==1) then
+
           Model%phour = sec/con_hr
           !--- set current bucket hour
           Model%zhour = Model%phour
@@ -71,6 +71,7 @@
             print *,' solhr ', Model%solhr
           endif
         endif
+!$OMP barrier
 
       end subroutine GFS_phys_time_vary_1_run
 
@@ -143,6 +144,7 @@
             Model%clstp = 0100
           endif
         endif
+!$OMP barrier
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
         if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
