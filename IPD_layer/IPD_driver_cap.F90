@@ -30,8 +30,9 @@ module IPD_driver_cap
                             IPD_control_type,                          &
                             IPD_data_type,                             &
                             IPD_restart_type,                          &
-                            IPD_diag_type
-#ifdef CCXX
+                            IPD_diag_type,                             &
+                            IPD_interstitial_type
+#ifdef CCPP
     use            :: IPD_driver,                                      &
                       only: IPD_initialize
 #else
@@ -49,7 +50,7 @@ module IPD_driver_cap
     implicit none
 
     private
-#ifdef CCXX
+#ifdef CCPP
     public :: ipd_initialize_cap
 #else
     public :: ipd_initialize_cap,     &
@@ -65,19 +66,19 @@ module IPD_driver_cap
 
         type(c_ptr), intent(inout) :: ptr
 
-        integer                          :: ierr
-        integer, allocatable             :: dims(:)
-        type(ccpp_t),           pointer  :: cdata       => null()
-        type(IPD_control_type), pointer  :: IPD_Control => null()
-        type(IPD_data_type),    pointer  :: IPD_Data(:) => null()
-        type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
-        type(IPD_restart_type), pointer  :: IPD_Restart => null()
-        type(IPD_init_type),    pointer  :: Init_parm   => null()
-        type(c_ptr)                      :: tmp
-        real(kind=kind_phys),   pointer  :: l_snupx(:)  => null()
-        real(kind=kind_phys),   pointer  :: l_salp_data => null()
+        integer                               :: ierr
+        integer, allocatable                  :: dims(:)
+        type(ccpp_t),                pointer  :: cdata
+        type(IPD_control_type),      pointer  :: IPD_Control
+        type(IPD_data_type),         pointer  :: IPD_Data(:)
+        type(IPD_diag_type),         pointer  :: IPD_Diag(:)
+        type(IPD_restart_type),      pointer  :: IPD_Restart
+        type(IPD_interstitial_type), pointer  :: IPD_Interstitial(:)
+        type(IPD_init_type),         pointer  :: Init_parm
+        type(c_ptr)                           :: tmp
+        real(kind=kind_phys),        pointer  :: l_snupx(:)
+        real(kind=kind_phys),        pointer  :: l_salp_data
 
-!$OMP critical
         call c_f_pointer(ptr, cdata)
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
@@ -106,6 +107,13 @@ module IPD_driver_cap
         end if
         call c_f_pointer(tmp, IPD_Restart)
 
+        call ccpp_fields_get(cdata, 'IPD_Interstitial', tmp, ierr, dims=dims)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve IPD_Interstitial')
+        end if
+        call c_f_pointer(tmp, IPD_Interstitial, dims)
+        deallocate(dims)
+
         call ccpp_fields_get(cdata, 'Init_parm', tmp, ierr)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve Init_parm')
@@ -114,33 +122,32 @@ module IPD_driver_cap
 
         call ccpp_fields_get(cdata, 'salp_data', l_salp_data, ierr)
         call ccpp_fields_get(cdata, 'snupx', l_snupx, ierr)
-!$OMP end critical
 
-        call IPD_initialize(IPD_Control=IPD_Control, &
-                            IPD_Data=IPD_Data,       &
-                            IPD_Diag=IPD_Diag,       &
-                            IPD_Restart=IPD_Restart, &
+        call IPD_initialize(IPD_Control=IPD_Control,           &
+                            IPD_Data=IPD_Data,                 &
+                            IPD_Diag=IPD_Diag,                 &
+                            IPD_Restart=IPD_Restart,           &
+                            IPD_Interstitial=IPD_Interstitial, &
                             IPD_init_parm=Init_parm)
 
         l_snupx = snupx
         l_salp_data = salp_data
     end subroutine ipd_initialize_cap
 
-#ifndef CCXX
+#ifndef CCPP
     subroutine ipd_setup_step_cap(ptr) bind(c)
 
         type(c_ptr), intent(inout) :: ptr
 
         integer                          :: ierr
         integer, allocatable             :: dims(:)
-        type(ccpp_t),           pointer  :: cdata       => null()
-        type(IPD_control_type), pointer  :: IPD_Control => null()
-        type(IPD_data_type),    pointer  :: IPD_Data    => null()
-        type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
-        type(IPD_restart_type), pointer  :: IPD_Restart => null()
+        type(ccpp_t),           pointer  :: cdata
+        type(IPD_control_type), pointer  :: IPD_Control
+        type(IPD_data_type),    pointer  :: IPD_Data
+        type(IPD_diag_type),    pointer  :: IPD_Diag(:)
+        type(IPD_restart_type), pointer  :: IPD_Restart
         type(c_ptr)                      :: tmp
 
-!$OMP critical
         call c_f_pointer(ptr, cdata)
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
@@ -167,7 +174,6 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Restart')
         end if
         call c_f_pointer(tmp, IPD_Restart)
-!$OMP end critical
 
         call IPD_setup_step(IPD_Control=IPD_Control, &
                             IPD_Data=IPD_Data,       &
@@ -182,15 +188,13 @@ module IPD_driver_cap
 
         integer                          :: ierr
         integer, allocatable             :: dims(:)
-        type(ccpp_t),           pointer  :: cdata       => null()
-        type(IPD_control_type), pointer  :: IPD_Control => null()
-        type(IPD_data_type),    pointer  :: IPD_Data    => null()
-        type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
-        type(IPD_restart_type), pointer  :: IPD_Restart => null()
+        type(ccpp_t),           pointer  :: cdata
+        type(IPD_control_type), pointer  :: IPD_Control
+        type(IPD_data_type),    pointer  :: IPD_Data
+        type(IPD_diag_type),    pointer  :: IPD_Diag(:)
+        type(IPD_restart_type), pointer  :: IPD_Restart
         type(c_ptr)                      :: tmp
-        integer,                external :: omp_get_thread_num
 
-!$OMP critical
         call c_f_pointer(ptr, cdata)
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
@@ -217,7 +221,6 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Restart')
         end if
         call c_f_pointer(tmp, IPD_Restart)
-!$OMP end critical
 
         call IPD_radiation_step(IPD_Control=IPD_Control, &
                                 IPD_Data=IPD_Data,       &
@@ -232,14 +235,13 @@ module IPD_driver_cap
 
         integer                          :: ierr
         integer, allocatable             :: dims(:)
-        type(ccpp_t),           pointer  :: cdata       => null()
-        type(IPD_control_type), pointer  :: IPD_Control => null()
-        type(IPD_data_type),    pointer  :: IPD_Data    => null()
-        type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
-        type(IPD_restart_type), pointer  :: IPD_Restart => null()
+        type(ccpp_t),           pointer  :: cdata
+        type(IPD_control_type), pointer  :: IPD_Control
+        type(IPD_data_type),    pointer  :: IPD_Data
+        type(IPD_diag_type),    pointer  :: IPD_Diag(:)
+        type(IPD_restart_type), pointer  :: IPD_Restart
         type(c_ptr)                      :: tmp
 
-!$OMP critical
         call c_f_pointer(ptr, cdata)
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
@@ -266,7 +268,6 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Restart')
         end if
         call c_f_pointer(tmp, IPD_Restart)
-!$OMP end critical
 
         call IPD_physics_step1(IPD_Control=IPD_Control, &
                                IPD_Data=IPD_Data,       &
@@ -281,14 +282,13 @@ module IPD_driver_cap
 
         integer                          :: ierr
         integer, allocatable             :: dims(:)
-        type(ccpp_t),           pointer  :: cdata       => null()
-        type(IPD_control_type), pointer  :: IPD_Control => null()
-        type(IPD_data_type),    pointer  :: IPD_Data    => null()
-        type(IPD_diag_type),    pointer  :: IPD_Diag(:) => null()
-        type(IPD_restart_type), pointer  :: IPD_Restart => null()
+        type(ccpp_t),           pointer  :: cdata
+        type(IPD_control_type), pointer  :: IPD_Control
+        type(IPD_data_type),    pointer  :: IPD_Data
+        type(IPD_diag_type),    pointer  :: IPD_Diag(:)
+        type(IPD_restart_type), pointer  :: IPD_Restart
         type(c_ptr)                      :: tmp
 
-!$OMP critical
         call c_f_pointer(ptr, cdata)
 
         call ccpp_fields_get(cdata, 'IPD_Control', tmp, ierr)
@@ -315,7 +315,6 @@ module IPD_driver_cap
             call ccpp_error('Unable to retrieve IPD_Restart')
         end if
         call c_f_pointer(tmp, IPD_Restart)
-!$OMP end critical
 
         call IPD_physics_step2(IPD_Control=IPD_Control, &
                                IPD_Data=IPD_Data,       &

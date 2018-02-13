@@ -8,7 +8,7 @@ module IPD_typedefs
                                        grid_type,     tbd_type,          &
                                        cldprop_type,  radtend_type,      &
                                        intdiag_type,  sfccycle_type,     &
-                                       interstitial_type
+                                       IPD_interstitial_type => interstitial_type
 
 !--------------------
 !  IPD sub-containers
@@ -24,7 +24,6 @@ module IPD_typedefs
     type(radtend_type)      :: Radtend
     type(intdiag_type)      :: Intdiag
     type(sfccycle_type)     :: Sfccycle
-    type(interstitial_type) :: Interstitial
   end type IPD_data_type
 
 
@@ -72,6 +71,7 @@ module IPD_typedefs
   public IPD_restart_type
   public IPD_diag_type
   public IPD_init_type
+  public IPD_interstitial_type
 
   CONTAINS
 !*******************************************************************************************
