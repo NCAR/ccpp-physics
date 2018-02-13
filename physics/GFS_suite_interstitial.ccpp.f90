@@ -1,74 +1,6 @@
 !> \file GFS_suite_interstitial.f90
 !!  Contains code related to more than one scheme in the GFS physics suite.
 
-      module GFS_suite_interstitial_1
-
-      contains
-
-      subroutine GFS_suite_interstitial_1_init ()
-      end subroutine GFS_suite_interstitial_1_init
-
-      subroutine GFS_suite_interstitial_1_finalize()
-      end subroutine GFS_suite_interstitial_1_finalize
-
-!> \section arg_table_GFS_suite_interstitial_1_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
-!! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
-!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | count         |    0 | integer                       |           |   out  | F        |
-!! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
-!! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!!
-      subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
-
-        use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type, GFS_grid_type
-
-        type(GFS_control_type),           intent(in) :: Model
-        type(GFS_grid_type),              intent(in) :: Grid
-        integer,                          intent(out) :: tottracer, trc_shft, tracers, ntk
-        logical, dimension(size(Grid%xlon,1)), intent(out) :: skip_macro
-        real(kind=kind_phys), allocatable, intent(out) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
-
-        tottracer = 0            ! no convective transport of tracers
-        if (Model%trans_trac .or. Model%cscnv) then
-          if (Model%ntcw > 0) then
-            if (Model%ntoz < Model%ntcw) then
-              trc_shft = Model%ntcw + Model%ncld - 1
-            else
-              trc_shft = Model%ntoz
-            endif
-          elseif (Model%ntoz > 0) then
-            trc_shft = Model%ntoz
-          else
-            trc_shft = 1
-          endif
-
-          tracers   = Model%ntrac - trc_shft
-          tottracer = tracers
-          if (Model%ntoz > 0) tottracer = tottracer + 1  ! ozone is added separately
-        endif
-        if (Model%ntke > 0) ntk = Model%ntke - trc_shft + 3
-
-        skip_macro = .false.
-
-        allocate ( clw(size(Grid%xlon,1),Model%levs,tottracer+2) )
-        if (Model%imfdeepcnv >= 0 .or. Model%imfshalcnv > 0) then
-          allocate (cnvc(size(Grid%xlon,1),Model%levs), cnvw(size(Grid%xlon,1),Model%levs))
-        endif
-
-        ! *DH
-
-      end subroutine GFS_suite_interstitial_1_run
-
-    end module
-
     module GFS_suite_interstitial_2
 
     contains
@@ -142,7 +74,7 @@
 
     end subroutine GFS_suite_interstitial_2_run
 
-  end module
+  end module GFS_suite_interstitial_2
 
   module GFS_suite_interstitial_3
 
@@ -242,7 +174,7 @@
 
   end subroutine GFS_suite_interstitial_3_run
 
-  end module
+  end module GFS_suite_interstitial_3
 
   module GFS_suite_update_stateout
 
@@ -286,17 +218,17 @@
 
   end subroutine GFS_suite_update_stateout_run
 
-end module
+  end module GFS_suite_update_stateout
 
-module GFS_suite_interstitial_4
+  module GFS_suite_interstitial_4
 
-contains
+  contains
 
-subroutine GFS_suite_interstitial_4_init ()
-end subroutine GFS_suite_interstitial_4_init
+  subroutine GFS_suite_interstitial_4_init ()
+  end subroutine GFS_suite_interstitial_4_init
 
-subroutine GFS_suite_interstitial_4_finalize()
-end subroutine GFS_suite_interstitial_4_finalize
+  subroutine GFS_suite_interstitial_4_finalize()
+  end subroutine GFS_suite_interstitial_4_finalize
 
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
 !! | local var name | longname                                                                 | description                                                           | units         | rank | type                          |    kind   | intent | optional |
@@ -315,76 +247,45 @@ end subroutine GFS_suite_interstitial_4_finalize
 !! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                          | index         |    1 | integer                       |           | inout  | F        |
 !! | rhc            | critical_relative_humidity                                               | critical relative humidity                                            | frac          |    2 | real                          | kind_phys |   out  | F        |
 !!
-subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+  subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
 
-  use machine,               only: kind_phys
-  use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
-  use physcons,              only: rhc_max
+    use machine,               only: kind_phys
+    use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
+    use physcons,              only: rhc_max
 
-  type(GFS_control_type),           intent(in)    :: Model
-  type(GFS_grid_type),              intent(in)    :: Grid
-  type(GFS_statein_type),           intent(in)    :: Statein
+    type(GFS_control_type),           intent(in)    :: Model
+    type(GFS_grid_type),              intent(in)    :: Grid
+    type(GFS_statein_type),           intent(in)    :: Statein
 
-  real(kind=kind_phys), intent(in)                                           :: rhbbot, rhbtop
-  real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)             :: work1, work2
-  real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
-  integer, dimension(size(Grid%xlon,1)), intent(inout)                       :: ktop, kbot
-  real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: rhc
+    real(kind=kind_phys), intent(in)                                           :: rhbbot, rhbtop
+    real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)             :: work1, work2
+    real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+    integer, dimension(size(Grid%xlon,1)), intent(inout)                       :: ktop, kbot
+    real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: rhc
 
-  integer :: i,k
-  real(kind=kind_phys) :: tem
+    integer :: i,k
+    real(kind=kind_phys) :: tem
 
-  clw(:,:,1) = 0.0
-  clw(:,:,2) = -999.9
-  if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
-    cnvc(:,:)  = 0.0
-    cnvw(:,:)  = 0.0
-  endif
+    clw(:,:,1) = 0.0
+    clw(:,:,2) = -999.9
+    if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
+      cnvc(:,:)  = 0.0
+      cnvw(:,:)  = 0.0
+    endif
 
-  ktop(:)  = 1
-  kbot(:)  = Model%levs
+    ktop(:)  = 1
+    kbot(:)  = Model%levs
 
-  if (Model%ntcw > 0) then
-    do k=1,Model%levs
-      do i=1, size(Grid%xlon,1)
-        tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
-        tem      = rhc_max * work1(i) + tem * work2(i)
-        rhc(i,k) = max(0.0, min(1.0,tem))
+    if (Model%ntcw > 0) then
+      do k=1,Model%levs
+        do i=1, size(Grid%xlon,1)
+          tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
+          tem      = rhc_max * work1(i) + tem * work2(i)
+          rhc(i,k) = max(0.0, min(1.0,tem))
+        enddo
       enddo
-    enddo
-  endif
+    endif
 
-end subroutine GFS_suite_interstitial_4_run
+  end subroutine GFS_suite_interstitial_4_run
 
-end module GFS_suite_interstitial_4
-
-module GFS_suite_interstitial_5
-
-contains
-
-subroutine GFS_suite_interstitial_5_init ()
-end subroutine GFS_suite_interstitial_5_init
-
-subroutine GFS_suite_interstitial_5_finalize()
-end subroutine GFS_suite_interstitial_5_finalize
-
-!> \section arg_table_GFS_suite_interstitial_5_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
-!!
-subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
-
-  use machine,               only: kind_phys
-
-  real(kind=kind_phys), allocatable, intent(inout) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
-
-  deallocate (clw)
-  if (allocated(cnvc)) deallocate(cnvc)
-  if (allocated(cnvw)) deallocate(cnvw)
-
-end subroutine GFS_suite_interstitial_5_run
-
-end module
+  end module GFS_suite_interstitial_4

@@ -1,6 +1,12 @@
-# All CCPP caps are defined here.
+# All CCPP schemes are defined here.
 #
 # This file is auto-generated using ccpp_prebuild.py
 # at compile time, do not edit manually.
 #
-CAPS_F90 =
+SCHEMES_F =
+
+SCHEMES_F90 =
+
+SCHEMES_f =
+
+SCHEMES_f90 =
