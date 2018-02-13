@@ -14,7 +14,7 @@ module physics_abstraction_layer
                              intdiag_type      =>  GFS_diag_type,       &
                              interstitial_type =>  GFS_interstitial_type
 
-#ifdef CCXX
+#ifdef CCPP
   use GFS_driver,      only: initialize       =>  GFS_initialize
 #else
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
@@ -45,7 +45,7 @@ module physics_abstraction_layer
 !  public physics functions
 !--------------------------
   public  initialize
-#ifndef CCXX
+#ifndef CCPP
   public  time_vary_step
   public  radiation_step1
   public  physics_step1

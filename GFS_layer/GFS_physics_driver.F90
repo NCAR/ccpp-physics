@@ -66,6 +66,10 @@ module module_physics_driver
   use GFS_surface_generic_pre,   only: GFS_surface_generic_pre_run
   use GFS_surface_generic_post,  only: GFS_surface_generic_post_run
 
+! DH*
+!  use GFS_diagtoscreen, only: GFS_diagtoscreen_run
+! *DH
+
   implicit none
 
 
@@ -80,8 +84,6 @@ module module_physics_driver
   real(kind=kind_phys), parameter :: albdf   = 0.06
   real(kind=kind_phys) tf, tcr, tcrf
   parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf))
-  ! DH* this variable will be replaced by Interstitial%latidxprnt, i.e.
-  ! the following line can go in the final CCPP-version of the code
   integer, parameter :: intgr_one = 1
 
 
@@ -568,15 +570,9 @@ module module_physics_driver
 !
 !===> ...  begin here
 
-      ! DH* UPDATE - in the final CCPP version, these are part of the
-      ! create_interstitital routine in GFS_typedefs.F90. Hence, the
-      ! following two lines of code have to go
       nvdiff = Model%ntrac           ! vertical diffusion of all tracers!
       ipr    = min(size(Grid%xlon,1),10)
-      ! *DH
 
-      ! DH* these lines get executed operationally, but are only used
-      ! in the Morrison microphysics scheme - we can ignore them
       do i = 1, size(Grid%xlon,1)
         if(nint(Sfcprop%slmsk(i)) == 1) then
           frland(i) = 1.0
@@ -584,7 +580,7 @@ module module_physics_driver
           frland(i) = 0.
         endif
       enddo
-      ! *DH
+
 !
 !  --- ...                       figure out number of extra tracers
 !
@@ -622,7 +618,6 @@ module module_physics_driver
       !   allocate (cnvc(size(Grid%xlon,1),Model%levs), cnvw(size(Grid%xlon,1),Model%levs))
       ! endif
 
-      ! DH* this entire routine can/must be removed once the full CCPP version is used - part of interstitial_create in GFS_typedefs.F90 *DH
       call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
 !
 !  ---  set initial quantities for stochastic physics deltas
@@ -2844,6 +2839,10 @@ module module_physics_driver
         deallocate (qrn, qsnw, ncpr, ncps)
       endif
 
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
       return
 !...................................
       end subroutine GFS_physics_driver

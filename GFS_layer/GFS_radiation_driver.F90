@@ -349,6 +349,9 @@
                                            GFS_radtend_type,             &
                                            GFS_diag_type
 !
+! DH*
+!      use GFS_diagtoscreen, only: GFS_diagtoscreen_run
+! *DH
       implicit   none
 !
       private
@@ -398,7 +401,7 @@
 
 !  ---  publicly accessible module programs:
 
-#ifdef CCXX
+#ifdef CCPP
       public radinit
 #else
       public radinit, GFS_radiation_driver
@@ -1186,9 +1189,7 @@
 !                                                                       !
 !  ======================  end of definitions  =======================  !
 !
-        ! Local Vars
-        ! DH* at least the local variables me, im, lm, lmk, lmp should be removed
-        ! and substituted by the variables in GFS_typedefs *DH
+      ! Local Vars
       integer :: me, im, lm, nday, lmk, lmp, kd, kt, kb
       integer, dimension(size(Grid%xlon, 1)) :: idxday
       integer, dimension(size(Grid%xlon, 1), 3) :: mbota, mtopa
@@ -1222,11 +1223,19 @@
           clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
           cldsa, mtopa, mbota )
 
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
 ! CCPP: L1582-1596
       call GFS_radsw_pre_run (Model, Grid, Sfcprop, Radtend, im,       &
           tsfg, tsfa, sfcalb(:,1), sfcalb(:,2), sfcalb(:,3),           &
           sfcalb(:,4) )
 
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
 ! CCPP: L1598-1618
       call radsw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
           gasvmr(:, :, 1),                                             &
@@ -1242,11 +1251,19 @@
           cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
           cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
 
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
 !CCPP: L1620-1686
       call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,   &
           LTP, nday, lm, kd, htswc, htsw0,                             &
           sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
 
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
 !CCPP: L1689-1698
       call GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend,           &
           im, tsfg, tsfa)
@@ -1275,7 +1292,10 @@
           Coupling, scmpsw, im, lm, LTP, kt, kb, kd, raddt, aerodp,    &
           cldsa, mtopa, mbota, clouds(:,:,1))
 
-
+      ! DH*
+      !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      ! *DH
       end subroutine GFS_radiation_driver
 #endif
 ! End of block commented out for CCXX

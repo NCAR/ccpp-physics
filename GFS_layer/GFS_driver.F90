@@ -8,7 +8,7 @@ module GFS_driver
                                       GFS_tbd_type,      GFS_cldprop_type,    &
                                       GFS_radtend_type,  GFS_diag_type,       &
                                       GFS_sfccycle_type, GFS_interstitial_type
-#ifndef CCXX
+#ifndef CCPP
   use module_radiation_driver,  only: GFS_radiation_driver
   use module_physics_driver,    only: GFS_physics_driver
 #endif
@@ -85,7 +85,7 @@ module GFS_driver
 ! Public entities
 !----------------
   public  GFS_initialize              !< GFS initialization routine
-#ifndef CCXX
+#ifndef CCPP
   public  GFS_time_vary_step          !< perform operations needed prior radiation or physics
   public  GFS_radiation_driver        !< radiation_driver (was grrad)
   public  GFS_physics_driver          !< physics_driver (was gbphys)
@@ -107,7 +107,9 @@ module GFS_driver
     use cldwat2m_micro,      only: ini_micro
     use aer_cloud,           only: aer_cloud_init
     use module_ras,          only: ras_init
-
+#ifdef OPENMP
+    use omp_lib
+#endif
 
     !--- interface variables
     type(GFS_control_type),      intent(inout) :: Model
@@ -127,6 +129,9 @@ module GFS_driver
     !--- local variables
     integer :: nb
     integer :: nblks
+    integer :: blkszmax
+    integer :: nt
+    integer :: nthreads
     integer :: ntrac
     real(kind=kind_phys), allocatable :: si(:)
     real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
@@ -151,6 +156,7 @@ module GFS_driver
     call read_o3data  (Model%ntoz, Model%me, Model%master)
     call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
+    blkszmax = 0
     do nb = 1,nblks
       call Statein      (nb)%create (Init_parm%blksz(nb), Model)
       call Stateout     (nb)%create (Init_parm%blksz(nb), Model)
@@ -164,9 +170,20 @@ module GFS_driver
       call Diag         (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of sfccycle
       call Sfccycle     (nb)%create (Init_parm%blksz(nb), Model)
-      !--- interstitial variables for GFS physics
-      call Interstitial (nb)%create (Init_parm%blksz(nb), Model)
+      !--- maximum blocksize
+      blkszmax = max(blkszmax, Init_parm%blksz(nb))
     enddo
+
+#ifdef CCPP
+#ifdef OPENMP
+    nthreads = omp_get_max_threads()
+#else
+    nthreads = 1
+#endif
+    do nt=1,nthreads
+      call Interstitial (nt)%create (blkszmax, Model)
+    enddo
+#endif
 
     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
@@ -233,8 +250,7 @@ module GFS_driver
   end subroutine GFS_initialize
 
 
-! Block commented out for CCXX
-#ifndef CCXX
+#ifndef CCPP
 !-------------------------------------------------------------------------
 ! time_vary_step
 !-------------------------------------------------------------------------
@@ -310,45 +326,9 @@ module GFS_driver
         
     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
                              Grid, Tbd, Cldprop, Radtend, Diag)
-#if 0
-    !--- local variables
-    integer :: k, i
-    real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew
 
-     if (Model%do_sppt) then
-       do k = 1,size(Statein%tgrs,2)
-         do i = 1,size(Statein%tgrs,1)
-
-           upert = (Stateout%gu0(i,k)   - Statein%ugrs(i,k))   * Coupling%sppt_wts(i,k)
-           vpert = (Stateout%gv0(i,k)   - Statein%vgrs(i,k))   * Coupling%sppt_wts(i,k)
-           tpert = (Stateout%gt0(i,k)   - Statein%tgrs(i,k))   * Coupling%sppt_wts(i,k) - Tbd%dtdtr(i,k)
-           qpert = (Stateout%gq0(i,k,1) - Statein%qgrs(i,k,1)) * Coupling%sppt_wts(i,k)
-
-           Stateout%gu0(i,k)  = Statein%ugrs(i,k)+upert
-           Stateout%gv0(i,k)  = Statein%vgrs(i,k)+vpert
-
-           !negative humidity check
-           qnew = Statein%qgrs(i,k,1)+qpert
-           if (qnew .GE. 1.0e-10) then
-              Stateout%gq0(i,k,1) = qnew
-              Stateout%gt0(i,k)   = Statein%tgrs(i,k) + tpert + Tbd%dtdtr(i,k)
-           endif
-         enddo
-       enddo
-
-       Diag%totprcp(:)      = Diag%totprcp(:)      + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dtotprcp(:)
-       Diag%cnvprcp(:)      = Diag%cnvprcp(:)      + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dcnvprcp(:)
-       Coupling%rain_cpl(:) = Coupling%rain_cpl(:) + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%drain_cpl(:)
-       Coupling%snow_cpl(:) = Coupling%snow_cpl(:) + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dsnow_cpl(:)
-     endif
-
-     if (Model%do_shum) then
-       Stateout%gq0(:,:,1) = Stateout%gq0(:,:,1)*(1.0 + Coupling%shum_wts(:,:))
-     endif
-#endif
   end subroutine GFS_stochastic_driver
 #endif
-! End of block commented out for CCXX
 
 
 !------------------
