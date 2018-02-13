@@ -42,11 +42,42 @@ def execute(cmd, debug = True, abort = True):
 def correct_cap_object_names(fixcmd, cap):
     (cappath, capname) = os.path.split(cap)
     pgiprefix = capname.rstrip('.o').lower() + '_'
+    # DH*
+    # Nasty hack around non-CCPP-compliant module names and subroutine names
+    if pgiprefix == 'radsw_cap_':
+        print "WARNING! Manually change pgiprefix from 'radsw_cap_' to 'module_radsw_main_cap_'!"
+        pgiprefix = 'module_radsw_main_cap_'
+    elif pgiprefix == 'radlw_cap_':
+        print "WARNING! Manually change pgiprefix from 'radsw_cap_' to 'module_radlw_main_cap_'!"
+        pgiprefix = 'module_radlw_main_cap_'
+    elif pgiprefix == 'sfc_ex_coef_cap_':
+        print "WARNING! Manually change pgiprefix from 'sfc_ex_coef_cap_' to 'surface_exchange_coefficients_cap_'!"
+        pgiprefix = 'surface_exchange_coefficients_cap_'
+    elif pgiprefix == 'sfc_diag_cap_':
+        print "WARNING! Manually change pgiprefix from 'sfc_diag_cap_' to 'surface_diagnose_cap_'!"
+        pgiprefix = 'surface_diagnose_cap_'
+    elif pgiprefix == 'sasasshal_cap_':
+        print "WARNING! Manually change pgiprefix from 'sasasshal_cap_' to 'sasas_shal_cap_'!"
+        pgiprefix = 'sasas_shal_cap_'
+    elif pgiprefix == 'sasasshal_post_cap_':
+        print "WARNING! Manually change pgiprefix from 'sasasshal_post_cap_' to 'sasas_shal_post_cap_'!"
+        pgiprefix = 'sasas_shal_post_cap_'
+    elif pgiprefix == 'gscond_cap_':
+        print "WARNING! Manually change pgiprefix from 'gscond_cap_' to 'gfs_zhaocarr_gscond_cap_'!"
+        pgiprefix = 'gfs_zhaocarr_gscond_cap_'
+    elif pgiprefix == 'sasasdeep_cap_':
+        print "WARNING! Manually change pgiprefix from 'sasasdeep_cap_' to 'sasas_deep_cap_'!"
+        pgiprefix = 'sasas_deep_cap_'
+    elif pgiprefix == 'precpd_cap_':
+        print "WARNING! Manually change pgiprefix from 'precpd_cap_' to 'gfs_zhaocarr_precpd_cap_'!"
+        pgiprefix = 'gfs_zhaocarr_precpd_cap_'
+    # *DH
     # Get list of all symbols in cap object
     nmcmd = 'nm {0}'.format(cap)
     (status, stdout, stderr) = execute(nmcmd)
     del nmcmd
     # Parse all symbols and generate objcopy command
+    found = False
     for line in stdout.split('\n'):
         try:
             (address, symboltype, objectname) = line.split()
@@ -56,8 +87,13 @@ def correct_cap_object_names(fixcmd, cap):
             continue
         if objectname.startswith(pgiprefix):
             newname = objectname[len(pgiprefix):]
+        else:
+            continue
         if newname.endswith('_cap'):
             fixcmd += '--redefine-sym {0}={1} '.format(objectname, newname)
+            found = True
+    if not found:
+        raise Exception('Unable to rename CCPP scheme caps in cap "{0}"'.format(cap))
     return fixcmd
 
 def correct_object_names(fixcmd, cap):
