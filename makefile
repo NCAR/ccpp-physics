@@ -28,12 +28,8 @@ FFLAGS   += -I../fms -I../fms/include -fPIC
 
 CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
 
-ifneq (,$(findstring CCXX,$(CPPDEFS)))
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
     # IPD with full CCPP - not making use of IPD steps
-    IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
-    IPD_CCPP_DRIVER = ./IPD_layer/IPD_CCPP_driver.F90
-else ifneq (,$(findstring CCPP,$(CPPDEFS)))
-    # IPD with CCPP
     IPD_DRIVER_CAP = ./IPD_layer/IPD_driver_cap.F90
     IPD_CCPP_DRIVER = ./IPD_layer/IPD_CCPP_driver.F90
 else
@@ -42,12 +38,12 @@ else
     IPD_CCPP_DRIVER =
 endif
 
-ifneq (,$(findstring CCXX,$(CPPDEFS)))
-    GFS_SUITE_INTERSTITIAL = ./physics/GFS_suite_interstitial.ccxx.f90
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
+    GFS_SUITE_INTERSTITIAL = ./physics/GFS_suite_interstitial.ccpp.f90
     GFS_PHYSICS_DRIVER =
     GFS_RADIATION_DRIVER = ./GFS_layer/GFS_radiation_driver.F90
 else
-    GFS_SUITE_INTERSTITIAL = ./physics/GFS_suite_interstitial.ccpp.f90
+    GFS_SUITE_INTERSTITIAL = ./physics/GFS_suite_interstitial.ipd.f90
     GFS_PHYSICS_DRIVER = ./GFS_layer/GFS_physics_driver.F90
     GFS_RADIATION_DRIVER = ./GFS_layer/GFS_radiation_driver.F90
 endif
@@ -146,12 +142,6 @@ SRCS_f90 = \
 	   ./physics/GFS_MP_generic_post.f90                                         \
 	   ./physics/GFS_MP_generic_pre.f90                                          \
 	   ./physics/GFS_zhao_carr_pre.f90                                           \
-	   ./physics/GFS_RRTMG_pre.f90                                               \
-	   ./physics/GFS_RRTMG_post.f90                                              \
-	   ./physics/GFS_radsw_pre.f90                                               \
-	   ./physics/GFS_radsw_post.f90                                              \
-	   ./physics/GFS_radlw_pre.f90                                               \
-	   ./physics/GFS_radlw_post.f90                                              \
 	   ./physics/GFS_rad_time_vary.f90                                           \
 	   ./physics/GFS_radupdate.f90                                               \
 	   ./physics/cs_conv.f90                                                     \
@@ -175,7 +165,7 @@ SRCS_f90 = \
 	   ./physics/physcons.f90                                                    \
 	   ./physics/radcons.f90                                                     \
 	   ./physics/wam_f107_kp_mod.f90                                             \
-	   ./physics/GFS_diagtoscreen.f90
+	   ./physics/GFS_debug.f90
 
 SRCS_F   = \
 	   ./physics/aer_cloud.F                                                     \
@@ -191,6 +181,12 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
 	   ./GFS_layer/GFS_diagnostics.F90                                           \
 	   ./GFS_layer/GFS_driver.F90                                                \
+	   ./physics/GFS_RRTMG_pre.F90                                               \
+	   ./physics/GFS_RRTMG_post.F90                                              \
+	   ./physics/GFS_radsw_pre.F90                                               \
+	   ./physics/GFS_radsw_post.F90                                              \
+	   ./physics/GFS_radlw_pre.F90                                               \
+	   ./physics/GFS_radlw_post.F90                                              \
 	   $(GFS_PHYSICS_DRIVER)                                                     \
 	   $(GFS_RADIATION_DRIVER)                                                   \
 	   ./GFS_layer/GFS_restart.F90                                               \
@@ -201,10 +197,12 @@ SRCS_F90 = \
 
 SRCS_c   =
 
-ifneq (,$(findstring CCXX,$(CPPDEFS)))
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
 include ./CCPP_CAPS.mk
 CAPS_F90 += \
 	   $(IPD_DRIVER_CAP)
+#include ./CCPP_SCHEMES.mk
+# Schemes not yet used, all hardcoded above
 else
 CAPS_F90 = \
 	   $(IPD_DRIVER_CAP)
@@ -258,11 +256,7 @@ endif
 
 # Do preprocessing of the IPD-CCPP driver in two steps to be
 # able to look at the actual .f90 file that gets compiled
-ifneq (,$(findstring CCXX,$(CPPDEFS)))
-./IPD_layer/IPD_CCPP_driver.o: ./IPD_layer/IPD_CCPP_driver.F90
-	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.tmp.f90
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $*.tmp.f90 -o $@
-else ifneq (,$(findstring CCPP,$(CPPDEFS)))
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
 ./IPD_layer/IPD_CCPP_driver.o: ./IPD_layer/IPD_CCPP_driver.F90
 	$(CPP) $(CPPDEFS) $(CPPFLAGS) $< > $*.tmp.f90
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $*.tmp.f90 -o $@
