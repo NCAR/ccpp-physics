@@ -1,47 +1,16 @@
 /**
-\mainpage GFS Operational Physics
+\mainpage 2017 GFS Operational Physics
 
-The documentation found here corresponds to the state of the operational GFS physics suite as of 2016. The suite is considered to contain
-both driving routines and the individual physical parameterizations. Documentation for the driving routines can be accessed using the following links:
- - gbphys() (GFS physics driver)
- - grrad() (GFS radiation driver)
- - radupdate() (GFS time-sensitive preparation for radiation)
-
-Documentation for the operational physics suite can be access through these links::
-	-  \ref rad
-	-  \ref PBL
-	-  \ref SAS
-	-  \ref SASHAL
-	-  \ref MPscheme
-	-  \ref gwd
-
-Separate documentation of the initial version of the Interoperable Physics Driver is found <a href="http://www.dtcenter.org/GMTB/gmtb_ipd_doc/">here</a>
-
-\section structure Structure
-\image html GFS_Operational_Physics.png "This diagram represents the GFS physics calling structure. Colors represent layers of abstraction in the code, with cooler colors being deeper in the calling hierarchy. Labels represent subroutine names and those in parentheses reflect that they are one of many options (the subroutines that are written are the current operational schemes). The sfc_* subroutine represents sfc_diff and other subroutines that are called depending on the underlying surface (sea, ice, land)."
-The operational GFS physics suite is called from the GSM dycore according to the diagram above.
-The highest tiers (red and orange) can be considered part of the GSM model and are located within
-the "atmos/gsm/phys" directory of NEMS. The lower tiers (green and blue) consist of driving routines
-(green) and the parameterization code (blue) and are found in the "atmos/phys" directory of NEMS.
-In this way, the bottom two tiers are currently considered the GFS physics suite -- the parameterization
-code and the code necessary to connect it to a dycore. The Interoperable Physics Driver (IPD), currently
-found within the "nuopc_physics.F90" file, is an additional layer of abstraction (yellow) between the
-orange and green tiers. Although it functions as a "wrapper" to the green tier at present, it will
-likely evolve to replace much of its functionality. Functionality found in the green tier that is not
-generalizable, that is inextricably linked to the GFS physics suite, will be part of the pre/post GFS
-physics routine that interfaces with the IPD.
-
-\section plan Future Plans
-NCEP plans to improve the physics package based on the ongoing physics developments which include:
-- Modified deep and shallow convection parameterizations with scale and aerosol awareness.
-- TKE-based moist EDMF PBL parameterizations to further improve vertical turbulence mixing in the stratocumulus-topped PBL as well as in the dry PBL.
-- WSM6 & Thompson cloud microphysics parameterizations.
-- Simplified Higher Order Closure (SHOC) model with prognostic TKE that unifies the boundary layer and shallow convection.
-- Chikira-Sugiyama deep convection parameterization with prognostic closure and with Arakawa-Wu scale-aware extension.
-- Morrison-Gettelman double moment microphysics with interactive aerosols.
-- The next major Noah LSM upgrade is planned for the unification among different NCEP models. The Noah LSM in the current GFS will be upgraded from version 2.7.1 to version 3.3, which includes many physics upgrades and new land datasets.
-- Implementation of a unified GW physics for both orographic and non-orographic waves.
-- Changes to the convective gravity wave drag parameterization to include a gravity-wave spectrum with both stationary waves and waves of varying phase speeds.
-
-\n see also http://www.emc.ncep.noaa.gov/GFS/doc.php
+The documentation found here corresponds to the state of the operational GFS physics suite as of 2017. Documentation for the operational physics suite can be access through these links::
+  - \ref RRTMG
+  - \ref SASAS
+  - \ref SASHAL
+  - \ref HEDMF
+  - \ref Zhao-Carr
+  - \ref NOAH
+  - \ref GFS_Ice
+  - \ref GFS_NSST
+  - \ref GFS_ogwd
+  - \ref GFS_cgwd
+  - \ref GFS_ozn
 */

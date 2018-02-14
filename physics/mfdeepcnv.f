@@ -1,6 +1,77 @@
-      subroutine mfdeepcnv(im,ix,km,delt,delp,prslp,psp,phil,ql,
-     &     q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
+!>  \file mfdeepcnv.f
+!!  This file contains NCEP's Scale Aware Simplified Arakawa Schubert Scheme
+!!  for deep convection.
+
+      module sasas_deep
+      contains
+
+!> \defgroup SASAS Scale-Aware Simplified Arakawa-Schubert Deep Convection
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasdeep_init  Argument Table
+!! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!!
+      subroutine sasasdeep_init
+      end subroutine sasasdeep_init
+
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasdeep_finalize  Argument Table
+!! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!!
+      subroutine sasasdeep_finalize
+      end subroutine sasasdeep_finalize
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_sasasdeep_run Argument Table
+!! | local var name | longname                                                  | description                                         | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count   |    0 | integer |           | in     | F        |
+!! | ix             | horizontal_dimension                                      | horizontal dimension                                | count   |    0 | integer |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                            | count   |    0 | integer |           | in     | F        |
+!! | delt           | time_step_for_physics                                     | physics time step                                   | s       |    0 | real    | kind_phys | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                                 | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                              | mean layer pressure                                 | Pa      | 2    | real    | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                      | surface pressure                                    | Pa      | 1    | real    | kind_phys | in     | F        |
+!! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2  | 2    | real    | kind_phys | in     | F        |
+!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity                         | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity                       | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                     | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                        | updated temperature                                 | K       | 2    | real    | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1   | 2    | real    | kind_phys | inout  | F        |
+!! | cldwrk         | cloud_work_function                                       | cloud work function                                 | m2 s-2  | 1    | real    | kind_phys |   out  | F        |
+!! | rn             | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys |   out  | F        |
+!! | kbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index   | 1    | integer |           |   out  | F        |
+!! | ktop           | vertical_index_at_cloud_top                               | index for cloud top                                 | index   | 1    | integer |           |   out  | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                        | flag    | 1    | integer |           |   out  | F        |
+!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag    | 1    | integer |           | in     | F        |
+!! | garea          | cell_area                                                 | grid cell area                                      | m2      | 1    | real    | kind_phys | in     | F        |
+!! | dot            | omega                                                     | layer mean vertical velocity                        | Pa s-1  | 2    | real    | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors                              | count   |    0 | integer |           | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2  | 2    | real    | kind_phys |   out  | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water                              | kg kg-1 | 2    | real    | kind_phys |   out  | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac    | 2    | real    | kind_phys |   out  | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
+! DH* TODO add intent information for all variables
+      subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,   &
+     &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,      &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
+
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -10,20 +81,21 @@
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
-      integer            im, ix,  km, ncloud,
-     &                   kbot(im), ktop(im), kcnv(im) 
+! In the current NCEP spectral model im <= ix for reduced grid numbers
+! near the pole and a parallel computing. For FV3, im=ix.
+      integer            im, ix,  km, ncloud,                           &
+     &                   kbot(im), ktop(im), kcnv(im)
 !    &,                  me
       real(kind=kind_phys) delt
       real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
-      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),
-     &                     ql(ix,km,2),q1(ix,km),   t1(ix,km),
-     &                     u1(ix,km),  v1(ix,km),
-!    &                     u1(ix,km),  v1(ix,km),   rcs(im),
-     &                     cldwrk(im), rn(im),      garea(im),
-     &                     dot(ix,km), phil(ix,km),
-     &                     cnvw(ix,km),cnvc(ix,km),
-! hchuang code change mass flux output
-     &                     ud_mf(im,km),dd_mf(im,km),dt_mf(im,km)
+      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
+     &                     ql1(ix,km),ql2(ix,km), q1(ix,km), t1(ix,km), &
+     &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
+     &                     cldwrk(im), rn(im),      garea(im),          &
+     &                     dot(ix,km), phil(ix,km),                     &
+     &                     cnvw(ix,km),cnvc(ix,km),                     &
+     &                     ud_mf(im,km),dd_mf(im,km),dt_mf(im,km) ! hchuang code change mass flux output
+
 !
       integer              i, indx, jmn, k, kk, km1, n
       integer, dimension(im), intent(in) :: islimsk
@@ -32,7 +104,7 @@
       real(kind=kind_phys) clam,    cxlamu,  cxlamd,
      &                     xlamde,  xlamdd,
      &                     crtlamu, crtlamd
-! 
+!
 !     real(kind=kind_phys) detad
       real(kind=kind_phys) adw,     aup,     aafac,
      &                     beta,    betal,   betas,
@@ -41,7 +113,7 @@
      &                     dellat,  delta,   desdt,   dg,
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
-     &                     dt2,     dtmax,   dtmin,   
+     &                     dt2,     dtmax,   dtmin,
      &                     dxcrtas, dxcrtuf,
      &                     dv1h,    dv2h,    dv3h,
      &                     dv1q,    dv2q,    dv3q,
@@ -50,7 +122,7 @@
      &                     es,      etah,
      &                     cthk,    dthk,
      &                     evef,    evfact,  evfactl, fact1,
-     &                     fact2,   factor,  
+     &                     fact2,   factor,
      &                     g,       gamma,   pprime,  cm,
      &                     qlk,     qrch,    qs,
      &                     rain,    rfact,   shear,   tfac,
@@ -77,7 +149,7 @@
      &                     delqbar(im), delqev(im), deltbar(im),
      &                     deltv(im),   dtconv(im), edt(im),
      &                     edto(im),    edtx(im),   fld(im),
-     &                     hcdo(im,km), hmax(im),   hmin(im), 
+     &                     hcdo(im,km), hmax(im),   hmin(im),
      &                     ucdo(im,km), vcdo(im,km),aa2(im),
      &                     pdot(im),    po(im,km),
      &                     pwavo(im),   pwevo(im),  mbdt(im),
@@ -87,30 +159,30 @@
      &                     xmb(im),     xmbmax(im), xpwav(im),
      &                     xpwev(im),   xlamx(im),
      &                     delubar(im),delvbar(im)
-!
+
       real(kind=kind_phys) c0(im)
 cj
       real(kind=kind_phys) cinpcr,  cinpcrmx,  cinpcrmn,
      &                     cinacr,  cinacrmx,  cinacrmn
 cj
-!
-!  parameters for updraft velocity calculation
+
+!>  parameters for updraft velocity calculation
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
      &                     bb1,     bb2,     wucb
-!
+
 c  physical parameters
       parameter(g=grav,asolfac=0.89)
       parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(c0s=.002,c1=.002,d0=.01)
       parameter(c0l=c0s*asolfac)
-!
-! asolfac: aerosol-aware parameter based on Lim & Hong (2012)
-!      asolfac= cx / c0s(=.002)
-!      cx = min([-0.7 ln(Nccn) + 24]*1.e-4, c0s)
-!      Nccn: CCN number concentration in cm^(-3)
-!      Until a realistic Nccn is provided, typical Nccns are assumed
-!      as Nccn=100 for sea and Nccn=7000 for land 
-!
+
+!> asolfac: aerosol-aware parameter based on Lim & Hong (2012)
+!!     asolfac= cx / c0s(=.002)
+!!     cx = min([-0.7 ln(Nccn) + 24]*1.e-4, c0s)
+!!     Nccn: CCN number concentration in cm^(-3)
+!!     Until a realistic Nccn is provided, typical Nccns are assumed
+!!     as Nccn=100 for sea and Nccn=7000 for land
+
       parameter(cm=1.0,delta=fv)
       parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(cthk=200.,dthk=25.)
@@ -119,18 +191,18 @@ c  physical parameters
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
-!
-!  local variables and arrays
+
+!> local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km)
-!  for updraft velocity calculation
+!> for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
-!
-c  cloud water
+
+!> cloud water
 !     real(kind=kind_phys) tvo(im,km)
       real(kind=kind_phys) qlko_ktcon(im), dellal(im,km), tvo(im,km),
-     &                     dbyo(im,km),    zo(im,km),     
+     &                     dbyo(im,km),    zo(im,km),
      &                     xlamue(im,km),  xlamud(im,km),
      &                     fent1(im,km),   fent2(im,km),  frh(im,km),
      &                     heo(im,km),     heso(im,km),
@@ -142,11 +214,11 @@ c  cloud water
      &                     pwo(im,km),     pwdo(im,km),   c0t(im,km),
      &                     tx1(im),        sumx(im),      cnvwt(im,km)
 !    &,                    rhbar(im)
-!
+
       logical totflg, cnvflg(im), asqecflg(im), flg(im)
-!
-!    asqecflg: flag for the quasi-equilibrium assumption of Arakawa-Schubert
-!
+
+!>   asqecflg: flag for the quasi-equilibrium assumption of Arakawa-Schubert
+
 !     real(kind=kind_phys) pcrit(15), acritt(15), acrit(15)
 !!    save pcrit, acritt
 !     data pcrit/850.,800.,750.,700.,650.,600.,550.,500.,450.,400.,
@@ -162,7 +234,7 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
 c-----------------------------------------------------------------------
 !
 !************************************************************************
-!     convert input Pa terms to Cb terms  -- Moorthi
+!>    convert input Pa terms to Cb terms  -- Moorthi
       ps   = psp   * 0.001
       prsl = prslp * 0.001
       del  = delp  * 0.001
@@ -170,9 +242,9 @@ c-----------------------------------------------------------------------
 !
 !
       km1 = km - 1
-c
-c  initialize arrays
-c
+
+!> initialize arrays
+
       do i=1,im
         cnvflg(i) = .true.
         rn(i)=0.
@@ -250,7 +322,7 @@ c
 !     val   =         5400.
       val   =         10800.
       dtmax = max(dt2, val )
-c  model tunable parameters are all here
+!> model tunable parameters are all here
       edtmaxl = .3
       edtmaxs = .3
       clam    = .1
@@ -274,25 +346,25 @@ c     evef    = 0.07
 !     pgcon   = 0.7     ! Gregory et al. (1997, QJRMS)
       pgcon   = 0.55    ! Zhang & Wu (2003,JAS)
 !
-      w1l     = -8.e-3 
+      w1l     = -8.e-3
       w2l     = -4.e-2
-      w3l     = -5.e-3 
+      w3l     = -5.e-3
       w4l     = -5.e-4
       w1s     = -2.e-4
       w2s     = -2.e-3
       w3s     = -1.e-3
       w4s     = -2.e-5
-c
-c  define top layer for search of the downdraft originating layer
-c  and the maximum thetae for updraft
-c
+
+!> define top layer for search of the downdraft originating layer
+!! and the maximum thetae for updraft
+
       do i=1,im
         kbmax(i) = km
         kbm(i)   = km
         kmax(i)  = km
         tx1(i)   = 1.0 / ps(i)
       enddo
-!     
+!
       do k = 1, km
         do i=1,im
           if (prsl(i,k)*tx1(i) > 0.04) kmax(i)  = k + 1
@@ -305,10 +377,11 @@ c
         kbmax(i) = min(kbmax(i),kmax(i))
         kbm(i)   = min(kbm(i),kmax(i))
       enddo
-c
-c  hydrostatic height assume zero terr and initially assume
-c    updraft entrainment rate as an inverse function of height 
-c
+
+!> hydrostatic height assume zero terr and initially assume
+!!   updraft entrainment rate as an inverse function of height
+
+
       do k = 1, km
         do i=1,im
           zo(i,k) = phil(i,k) / g
@@ -321,10 +394,9 @@ c
 !         xlamue(i,k) = max(xlamue(i,k), crtlamu)
         enddo
       enddo
-c
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c   convert surface pressure to mb from cb
-c
+
+!>  convert surface pressure to mb from cb
+
       do k = 1, km
         do i = 1, im
           if (k <= kmax(i)) then
@@ -362,14 +434,14 @@ c
           endif
         enddo
       enddo
-c
-c  column variables
-c  p is pressure of the layer (mb)
-c  t is temperature at t-dt (k)..tn
-c  q is mixing ratio at t-dt (kg/kg)..qn
-c  to is temperature at t+dt (k)... this is after advection and turbulan
-c  qo is mixing ratio at t+dt (kg/kg)..q1
-c
+
+!> column variables
+!! p is pressure of the layer (mb)
+!! t is temperature at t-dt (k)..tn
+!! q is specific humidity at t-dt (kg/kg)..qn
+!! to is temperature at t+dt (k)... this is after advection and turbulence
+!! qo is specific humidity at t+dt (kg/kg)..q1
+
       do k = 1, km
         do i=1,im
           if (k <= kmax(i)) then
@@ -384,9 +456,9 @@ c
           endif
         enddo
       enddo
-c
-c  compute moist static energy
-c
+
+!> compute moist static energy
+
       do k = 1, km
         do i=1,im
           if (k <= kmax(i)) then
@@ -398,10 +470,10 @@ c           heo(i,k)  = min(heo(i,k),heso(i,k))
           endif
         enddo
       enddo
-c
-c  determine level with largest moist static energy
-c  this is the level where updraft starts
-c
+
+!> determine level with largest moist static energy
+!! this is the level where updraft starts
+
       do i=1,im
         hmax(i) = heo(i,1)
         kb(i)   = 1
@@ -458,9 +530,9 @@ c
           endif
         enddo
       enddo
-c
-c  look for the level of free convection as cloud base
-c
+
+!> look for the level of free convection as cloud base
+
       do i=1,im
         flg(i)   = .true.
         kbcon(i) = kmax(i)
@@ -492,10 +564,10 @@ c
           pdot(i)  = 0.01 * dot(i,kbcon(i)) ! Now dot is in Pa/s
         endif
       enddo
-c
-c   turn off convection if pressure depth between parcel source level
-c      and cloud base is larger than a critical value, cinpcr
-c
+
+!>  turn off convection if pressure depth between parcel source level
+!!     and cloud base is larger than a critical value, cinpcr
+
       do i=1,im
         if(cnvflg(i)) then
           if(islimsk(i) == 1) then
@@ -535,11 +607,10 @@ c
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
       if(totflg) return
-!!
-c
-c  assume that updraft entrainment rate above cloud base is
-c    same as that at cloud base
-c
+
+!> assume that updraft entrainment rate above cloud base is
+!!   same as that at cloud base
+
       do i=1,im
         if(cnvflg(i)) then
           xlamx(i) = xlamue(i,kbcon(i))
@@ -553,9 +624,9 @@ c
           endif
         enddo
       enddo
-c
-c  specify a background (turbulent) detrainment rate for the updrafts
-c
+
+!> specify a background (turbulent) detrainment rate for the updrafts
+
       do k = 1, km1
         do i=1,im
           if(cnvflg(i) .and. k < kmax(i)) then
@@ -564,10 +635,10 @@ c
           endif
         enddo
       enddo
-c
-c  functions rapidly decreasing with height, mimicking a cloud ensemble
-c    (Bechtold et al., 2008)
-c
+
+!> functions rapidly decreasing with height, mimicking a cloud ensemble
+!!   (Bechtold et al., 2008)
+
       do k = 2, km1
         do i=1,im
           if(cnvflg(i).and.
@@ -578,11 +649,11 @@ c
           endif
         enddo
       enddo
-c
-c  final entrainment and detrainment rates as the sum of turbulent part and
-c    organized entrainment depending on the environmental relative humidity
-c    (Bechtold et al., 2008)
-c
+
+!> final entrainment and detrainment rates as the sum of turbulent part and
+!!   organized entrainment depending on the environmental relative humidity
+!!   (Bechtold et al., 2008)
+
       do k = 2, km1
         do i=1,im
           if(cnvflg(i) .and.
@@ -594,11 +665,9 @@ c
           endif
         enddo
       enddo
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c
-c  determine updraft mass flux for the subcloud layers
-c
+
+!> determine updraft mass flux for the subcloud layers
+
       do k = km1, 1, -1
         do i = 1, im
           if (cnvflg(i)) then
@@ -611,9 +680,9 @@ c
           endif
         enddo
       enddo
-c
-c  compute mass flux above cloud base
-c
+
+!> compute mass flux above cloud base
+
       do i = 1, im
         flg(i) = cnvflg(i)
       enddo
@@ -634,9 +703,9 @@ c
          endif
         enddo
       enddo
-c
-c  compute updraft cloud properties
-c
+
+!> compute updraft cloud properties
+
       do i = 1, im
         if(cnvflg(i)) then
           indx         = kb(i)
@@ -646,11 +715,11 @@ c
           pwavo(i)     = 0.
         endif
       enddo
-c
-c  cloud property is modified by the entrainment process
-c
-!  cm is an enhancement factor in entrainment rates for momentum
-!
+
+!> cloud property is modified by the entrainment process
+
+!> cm is an enhancement factor in entrainment rates for momentum
+
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -675,10 +744,10 @@ c
           endif
         enddo
       enddo
-c
-c   taking account into convection inhibition due to existence of
-c    dry layers below cloud base
-c
+
+!>  taking account into convection inhibition due to existence of
+!!   dry layers below cloud base
+
       do i=1,im
         flg(i) = cnvflg(i)
         kbcon1(i) = kmax(i)
@@ -713,9 +782,9 @@ c
       enddo
       if(totflg) return
 !!
-c
-c  calculate convective inhibition
-c
+
+!> calculate convective inhibition
+
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -759,7 +828,7 @@ c
           else
             tem = 0.
           endif
- 
+
           val1    =            -1.
           tem = max(tem,val1)
           val2    =             1.
@@ -778,10 +847,9 @@ c
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
       if(totflg) return
-!!
-c
-c  determine first guess cloud top as the level of zero buoyancy
-c
+
+!> determine first guess cloud top as the level of zero buoyancy
+
       do i = 1, im
         flg(i) = cnvflg(i)
         ktcon(i) = 1
@@ -812,10 +880,9 @@ c
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
       if(totflg) return
-!!
-c
-c  search for downdraft originating level above theta-e minimum
-c
+
+!> search for downdraft originating level above theta-e minimum
+
       do i = 1, im
         if(cnvflg(i)) then
            hmin(i) = heo(i,kbcon1(i))
@@ -833,9 +900,9 @@ c
           endif
         enddo
       enddo
-c
-c  make sure that jmin(i) is within the cloud
-c
+
+!> make sure that jmin(i) is within the cloud
+
       do i = 1, im
         if(cnvflg(i)) then
           jmin(i) = min(lmin(i),ktcon(i)-1)
@@ -843,9 +910,9 @@ c
           if(jmin(i) >= ktcon(i)) cnvflg(i) = .false.
         endif
       enddo
-c
-c  specify upper limit of mass flux at cloud base
-c
+
+!> specify upper limit of mass flux at cloud base
+
       do i = 1, im
         if(cnvflg(i)) then
 !         xmbmax(i) = .1
@@ -860,9 +927,9 @@ c
 !         xmbmax(i) = min(tem, xmbmax(i))
         endif
       enddo
-c
-c  compute cloud moisture property and precipitation
-c
+
+!> compute cloud moisture property and precipitation
+
       do i = 1, im
         if (cnvflg(i)) then
 !         aa1(i) = 0.
@@ -890,9 +957,9 @@ cj
               dq = eta(i,k) * (qcko(i,k) - qrch)
 c
 !             rhbar(i) = rhbar(i) + qo(i,k) / qeso(i,k)
-c
-c  check if there is excess moisture to release latent heat
-c
+
+!> check if there is excess moisture to release latent heat
+
               if(k >= kbcon(i) .and. dq > 0.) then
                 etah = .5 * (eta(i,k) + eta(i,k-1))
                 if(ncloud > 0 .and. k > jmin(i)) then
@@ -912,9 +979,9 @@ c
 !               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * g / dp
                 cnvwt(i,k) = etah * qlk * g / dp
               endif
-!
-!  compute buoyancy and drag for updraft velocity
-!
+
+!> compute buoyancy and drag for updraft velocity
+
               if(k >= kbcon(i)) then
                 rfact =  1. + delta * cp * gamma
      &                   * to(i,k) / hvap
@@ -938,9 +1005,9 @@ c
 !         rhbar(i) = rhbar(i) / float(indx)
 !       endif
 !     enddo
-c
-c  calculate cloud work function
-c
+
+!> calculate cloud work function
+
 !     do k = 2, km1
 !       do i = 1, im
 !         if (cnvflg(i)) then
@@ -963,9 +1030,9 @@ c
 !         endif
 !       enddo
 !     enddo
-!
-!  calculate cloud work function
-!
+
+!> calculate cloud work function
+
       do i = 1, im
         if (cnvflg(i)) then
           aa1(i) = 0.
@@ -992,12 +1059,11 @@ c
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
       if(totflg) return
-!!
-c
-c  estimate the onvective overshooting as the level 
-c    where the [aafac * cloud work function] becomes zero,
-c    which is the final cloud top
-c
+
+!> estimate the onvective overshooting as the level
+!!   where the [aafac * cloud work function] becomes zero,
+!!   which is the final cloud top
+
       do i = 1, im
         if (cnvflg(i)) then
           aa2(i) = aafac * aa1(i)
@@ -1034,10 +1100,10 @@ c
           endif
         enddo
       enddo
-c
-c  compute cloud moisture property, detraining cloud water 
-c    and precipitation in overshooting layers 
-c
+
+!> compute cloud moisture property, detraining cloud water
+!!   and precipitation in overshooting layers
+
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -1055,9 +1121,9 @@ cj
               qrcko(i,k) = qcko(i,k)
 cj
               dq = eta(i,k) * (qcko(i,k) - qrch)
-c
-c  check if there is excess moisture to release latent heat
-c
+
+!> check if there is excess moisture to release latent heat
+
               if(dq > 0.) then
                 etah = .5 * (eta(i,k) + eta(i,k-1))
                 if(ncloud > 0) then
@@ -1078,9 +1144,9 @@ c
           endif
         enddo
       enddo
-!
-!  compute updraft velocity square(wu2)
-!
+
+!> compute updraft velocity square(wu2)
+
 !     bb1 = 2. * (1.+bet1*cd1)
 !     bb2 = 2. / (f1*(1.+gam1))
 !
@@ -1120,9 +1186,9 @@ c
           endif
         enddo
       enddo
-!
-!  compute updraft velocity average over the whole cumulus
-!
+
+!> compute updraft velocity average over the whole cumulus
+
       do i = 1, im
         wc(i) = 0.
         sumx(i) = 0.
@@ -1150,9 +1216,9 @@ c
           if (wc(i) < val) cnvflg(i)=.false.
         endif
       enddo
-c
-c exchange ktcon with ktcon1
-c
+
+!> exchange ktcon with ktcon1
+
       do i = 1, im
         if(cnvflg(i)) then
           kk = ktcon(i)
@@ -1160,13 +1226,13 @@ c
           ktcon1(i) = kk
         endif
       enddo
-c
-c  this section is ready for cloud water
-c
+
+!> this section is ready for cloud water
+
       if(ncloud > 0) then
-c
-c  compute liquid and vapor separation at cloud top
-c
+
+!> compute liquid and vapor separation at cloud top
+
       do i = 1, im
         if(cnvflg(i)) then
           k = ktcon(i) - 1
@@ -1174,9 +1240,9 @@ c
           qrch = qeso(i,k)
      &         + gamma * dbyo(i,k) / (hvap * (1. + gamma))
           dq = qcko(i,k) - qrch
-c
-c  check if there is excess moisture to release latent heat
-c
+
+!> check if there is excess moisture to release latent heat
+
           if(dq > 0.) then
             qlko_ktcon(i) = dq
             qcko(i,k) = qrch
@@ -1188,11 +1254,11 @@ c
 ccccc if(lat.==.latd.and.lon.==.lond.and.cnvflg(i)) then
 ccccc   print *, ' aa1(i) before dwndrft =', aa1(i)
 ccccc endif
-c
-c------- downdraft calculations
-c
-c--- compute precipitation efficiency in terms of windshear
-c
+
+!> ----- downdraft calculations
+
+!> - compute precipitation efficiency in terms of windshear
+
       do i = 1, im
         if(cnvflg(i)) then
           vshear(i) = 0.
@@ -1223,9 +1289,9 @@ c
           edtx(i)=edt(i)
         endif
       enddo
-c
-c  determine detrainment rate between 1 and kbcon
-c
+
+!> determine detrainment rate between 1 and kbcon
+
       do i = 1, im
         if(cnvflg(i)) then
           sumx(i) = 0.
@@ -1250,9 +1316,9 @@ c
           xlamd(i) = (1.-beta**tem)/dz
         endif
       enddo
-c
-c  determine downdraft mass flux
-c
+
+!> determine downdraft mass flux
+
       do k = km1, 1, -1
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)-1) then
@@ -1268,9 +1334,9 @@ c
           endif
         enddo
       enddo
-c
-c--- downdraft moisture properties
-c
+
+!> - downdraft moisture properties
+
       do i = 1, im
         if(cnvflg(i)) then
           jmn = jmin(i)
@@ -1341,11 +1407,11 @@ cj
           endif
         enddo
       enddo
-c
-c--- final downdraft strength dependent on precip
-c--- efficiency (edt), normalized condensate (pwav), and
-c--- evaporate (pwev)
-c
+
+!> - final downdraft strength dependent on precip
+!! - efficiency (edt), normalized condensate (pwav), and
+!! - evaporate (pwev)
+
       do i = 1, im
         edtmax = edtmaxl
         if(islimsk(i) == 0) edtmax = edtmaxs
@@ -1471,14 +1537,14 @@ cj
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
               ptem1=etad(i,k)*(uo(i,k)-ucdo(i,k))
               ptem2=etad(i,k-1)*(uo(i,k-1)-ucdo(i,k-1))
-              dellau(i,k) = dellau(i,k) + 
+              dellau(i,k) = dellau(i,k) +
      &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
               ptem1=etad(i,k)*(vo(i,k)-vcdo(i,k))
               ptem2=etad(i,k-1)*(vo(i,k-1)-vcdo(i,k-1))
-              dellav(i,k) = dellav(i,k) + 
+              dellav(i,k) = dellav(i,k) +
      &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
 cj
           endif
@@ -1511,9 +1577,9 @@ c
 c
 c------- final changed variable per unit mass flux
 c
-!  if grid size is less than a threshold value (dxcrtas), 
+!  if grid size is less than a threshold value (dxcrtas),
 !    the quasi-equilibrium assumption of Arakawa-Schubert is not
-!      used any longer. 
+!      used any longer.
 !
       do i = 1, im
          asqecflg(i) = cnvflg(i)
@@ -1910,7 +1976,7 @@ c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity for the grid sizes where
 c    the quasi-equilibrium assumption of Arakawa-Schubert is not
-c      valid any longer. 
+c      valid any longer.
 c
       do i= 1, im
         if(cnvflg(i) .and. .not.asqecflg(i)) then
@@ -1923,7 +1989,7 @@ c
       enddo
 c
 c  compute cloud base mass flux using
-c    the quasi-equilibrium assumption of Arakawa-Schubert 
+c    the quasi-equilibrium assumption of Arakawa-Schubert
 c
       do i= 1, im
         if(asqecflg(i)) then
@@ -2172,7 +2238,7 @@ c
         do i = 1, im
           if (cnvflg(i) .and. rn(i) > 0.) then
             if (k >= kbcon(i) .and. k < ktcon(i)) then
-              cnvc(i,k) = 0.04 * log(1. + 675. * eta(i,k) * xmb(i)) 
+              cnvc(i,k) = 0.04 * log(1. + 675. * eta(i,k) * xmb(i))
               cnvc(i,k) = min(cnvc(i,k), 0.6)
               cnvc(i,k) = max(cnvc(i,k), 0.0)
             endif
@@ -2192,11 +2258,11 @@ c
             if (k >= kbcon(i) .and. k <= ktcon(i)) then
               tem  = dellal(i,k) * xmb(i) * dt2
               tem1 = max(0.0, min(1.0, (tcr-t1(i,k))*tcrf))
-              if (ql(i,k,2) > -999.0) then
-                ql(i,k,1) = ql(i,k,1) + tem * tem1            ! ice
-                ql(i,k,2) = ql(i,k,2) + tem *(1.0-tem1)       ! water
+              if (ql2(i,k) > -999.0) then
+                ql1(i,k) = ql1(i,k) + tem * tem1            ! ice
+                ql2(i,k) = ql2(i,k) + tem *(1.0-tem1)       ! water
               else
-                ql(i,k,1) = ql(i,k,1) + tem
+                ql1(i,k) = ql1(i,k) + tem
               endif
             endif
           endif
@@ -2246,4 +2312,8 @@ c
       enddo
 !!
       return
-      end
+      end subroutine sasasdeep_run
+      !> @}
+      !> @}
+
+      end module sasas_deep

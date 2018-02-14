@@ -1,14 +1,17 @@
 module GFS_driver
 
   use machine,                  only: kind_phys
-  use GFS_typedefs,             only: GFS_init_type,                       &
-                                      GFS_statein_type, GFS_stateout_type, &
-                                      GFS_sfcprop_type, GFS_coupling_type, &
-                                      GFS_control_type, GFS_grid_type,     &
-                                      GFS_tbd_type,     GFS_cldprop_type,  &
-                                      GFS_radtend_type, GFS_diag_type
-  use module_radiation_driver,  only: GFS_radiation_driver, radupdate
+  use GFS_typedefs,             only: GFS_init_type,                          &
+                                      GFS_statein_type,  GFS_stateout_type,   &
+                                      GFS_sfcprop_type,  GFS_coupling_type,   &
+                                      GFS_control_type,  GFS_grid_type,       &
+                                      GFS_tbd_type,      GFS_cldprop_type,    &
+                                      GFS_radtend_type,  GFS_diag_type,       &
+                                      GFS_sfccycle_type, GFS_interstitial_type
+#ifndef CCPP
+  use module_radiation_driver,  only: GFS_radiation_driver
   use module_physics_driver,    only: GFS_physics_driver
+#endif
   use module_radsw_parameters,  only: topfsw_type, sfcfsw_type
   use module_radlw_parameters,  only: topflw_type, sfcflw_type
   use funcphys,                 only: gfuncphys
@@ -22,7 +25,7 @@ module GFS_driver
 !--------------------------------------------------------------------------------
 !   This container is the minimum set of data required from the dycore/atmosphere
 !   component to allow proper initialization of the GFS physics
-!  
+!
 !   Type is defined in GFS_typedefs.F90
 !--------------------------------------------------------------------------------
 ! type GFS_init_type
@@ -62,7 +65,7 @@ module GFS_driver
 !   character(len=65) :: fn_nml                  !< namelist filename
 ! end type GFS_init_type
 !--------------------------------------------------------------------------------
-    
+
 !------------------
 ! Module parameters
 !------------------
@@ -82,11 +85,12 @@ module GFS_driver
 ! Public entities
 !----------------
   public  GFS_initialize              !< GFS initialization routine
+#ifndef CCPP
   public  GFS_time_vary_step          !< perform operations needed prior radiation or physics
   public  GFS_radiation_driver        !< radiation_driver (was grrad)
   public  GFS_physics_driver          !< physics_driver (was gbphys)
   public  GFS_stochastic_driver       !< stochastic physics
-
+#endif
 
   CONTAINS
 !*******************************************************************************************
@@ -95,32 +99,39 @@ module GFS_driver
 !--------------
 ! GFS initialze
 !--------------
-  subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,    &
-                             Coupling, Grid, Tbd, Cldprop, Radtend, & 
-                             Diag, Init_parm)
+  subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,     &
+                             Coupling, Grid, Tbd, Cldprop, Radtend, &
+                             Diag, Sfccycle, Interstitial, Init_parm)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
     use aer_cloud,           only: aer_cloud_init
     use module_ras,          only: ras_init
-
+#ifdef OPENMP
+    use omp_lib
+#endif
 
     !--- interface variables
-    type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein(:)
-    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
-    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
-    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
-    type(GFS_diag_type),      intent(inout) :: Diag(:)
-    type(GFS_init_type),      intent(in)    :: Init_parm
+    type(GFS_control_type),      intent(inout) :: Model
+    type(GFS_statein_type),      intent(inout) :: Statein(:)
+    type(GFS_stateout_type),     intent(inout) :: Stateout(:)
+    type(GFS_sfcprop_type),      intent(inout) :: Sfcprop(:)
+    type(GFS_coupling_type),     intent(inout) :: Coupling(:)
+    type(GFS_grid_type),         intent(inout) :: Grid(:)
+    type(GFS_tbd_type),          intent(inout) :: Tbd(:)
+    type(GFS_cldprop_type),      intent(inout) :: Cldprop(:)
+    type(GFS_radtend_type),      intent(inout) :: Radtend(:)
+    type(GFS_diag_type),         intent(inout) :: Diag(:)
+    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle(:)
+    type(GFS_interstitial_type), intent(inout) :: Interstitial(:)
+    type(GFS_init_type),         intent(in)    :: Init_parm
 
     !--- local variables
     integer :: nb
     integer :: nblks
+    integer :: blkszmax
+    integer :: nt
+    integer :: nthreads
     integer :: ntrac
     real(kind=kind_phys), allocatable :: si(:)
     real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
@@ -145,22 +156,38 @@ module GFS_driver
     call read_o3data  (Model%ntoz, Model%me, Model%master)
     call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
+    blkszmax = 0
     do nb = 1,nblks
-      call Statein  (nb)%create (Init_parm%blksz(nb), Model)
-      call Stateout (nb)%create (Init_parm%blksz(nb), Model)
-      call Sfcprop  (nb)%create (Init_parm%blksz(nb), Model)
-      call Coupling (nb)%create (Init_parm%blksz(nb), Model)
-      call Grid     (nb)%create (Init_parm%blksz(nb), Model)
-      call Tbd      (nb)%create (Init_parm%blksz(nb), Model)
-      call Cldprop  (nb)%create (Init_parm%blksz(nb), Model)
-      call Radtend  (nb)%create (Init_parm%blksz(nb), Model)
+      call Statein      (nb)%create (Init_parm%blksz(nb), Model)
+      call Stateout     (nb)%create (Init_parm%blksz(nb), Model)
+      call Sfcprop      (nb)%create (Init_parm%blksz(nb), Model)
+      call Coupling     (nb)%create (Init_parm%blksz(nb), Model)
+      call Grid         (nb)%create (Init_parm%blksz(nb), Model)
+      call Tbd          (nb)%create (Init_parm%blksz(nb), Init_parm%blksz(:), nb, Model)
+      call Cldprop      (nb)%create (Init_parm%blksz(nb), Model)
+      call Radtend      (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
-      call Diag     (nb)%create (Init_parm%blksz(nb), Model)
+      call Diag         (nb)%create (Init_parm%blksz(nb), Model)
+      !--- internal representation of sfccycle
+      call Sfccycle     (nb)%create (Init_parm%blksz(nb), Model)
+      !--- maximum blocksize
+      blkszmax = max(blkszmax, Init_parm%blksz(nb))
     enddo
+
+#ifdef CCPP
+#ifdef OPENMP
+    nthreads = omp_get_max_threads()
+#else
+    nthreads = 1
+#endif
+    do nt=1,nthreads
+      call Interstitial (nt)%create (blkszmax, Model)
+    enddo
+#endif
 
     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
-     
+
     !--- read in and initialize ozone and water
     if (Model%ntoz > 0) then
       do nb = 1, nblks
@@ -181,7 +208,7 @@ module GFS_driver
 
     call gsmconst (Model%dtp, Model%me, .TRUE.)
 
-    !--- define sigma level for radiation initialization 
+    !--- define sigma level for radiation initialization
     !--- The formula converting hybrid sigma pressure coefficients to sigma coefficients follows Eckermann (2009, MWR)
     !--- ps is replaced with p0. The value of p0 uses that in http://www.emc.ncep.noaa.gov/officenotes/newernotes/on461.pdf
     !--- ak/bk have been flipped from their original FV3 orientation and are defined sfc -> toa
@@ -223,6 +250,7 @@ module GFS_driver
   end subroutine GFS_initialize
 
 
+#ifndef CCPP
 !-------------------------------------------------------------------------
 ! time_vary_step
 !-------------------------------------------------------------------------
@@ -233,86 +261,36 @@ module GFS_driver
 !      5) interpolates coefficients for prognostic ozone calculation
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
-  subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, & 
-                                 Grid, Tbd, Cldprop, Radtend, Diag)
+  subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
+                                 Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
 
+    use physparam,             only: ictmflg, isolar
+    use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
+    use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
+    use GFS_rad_time_vary,     only: GFS_rad_time_vary_run 
     implicit none
 
     !--- interface variables
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein(:)
-    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
-    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
-    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
-    type(GFS_diag_type),      intent(inout) :: Diag(:)
+    type(GFS_statein_type),   intent(inout) :: Statein
+    type(GFS_stateout_type),  intent(inout) :: Stateout
+    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
+    type(GFS_coupling_type),  intent(inout) :: Coupling
+    type(GFS_grid_type),      intent(inout) :: Grid
+    type(GFS_tbd_type),       intent(inout) :: Tbd
+    type(GFS_cldprop_type),   intent(inout) :: Cldprop
+    type(GFS_radtend_type),   intent(inout) :: Radtend
+    type(GFS_diag_type),      intent(inout) :: Diag
+    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
+
     !--- local variables
-    integer :: nb, nblks
-    real(kind=kind_phys) :: rinc(5)
     real(kind=kind_phys) :: sec
 
-    nblks = size(blksz)
-    !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
-    !--- update calendars and triggers
-    rinc(1:5)   = 0
-    call w3difdat(Model%jdat,Model%idat,4,rinc)
-    sec = rinc(4)
-    Model%phour = sec/con_hr
-    !--- set current bucket hour
-    Model%zhour = Model%phour
-    Model%fhour = (sec + Model%dtp)/con_hr
-    Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+    call GFS_phys_time_vary_1_run (Model, sec, Tbd%blkno)
 
-    Model%ipt    = 1
-    Model%lprnt  = .false.
-    Model%lssav  = .true.
+    call GFS_rad_time_vary_run (Model, Statein, Tbd, sec, ictmflg, isolar)
 
-    !--- radiation triggers
-    Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-    Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
-
-    !--- set the solar hour based on a combination of phour and time initial hour
-    Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
-
-    if ((Model%debug) .and. (Model%me == Model%master)) then
-      print *,'   sec ', sec
-      print *,'   kdt ', Model%kdt
-      print *,' nsswr ', Model%nsswr
-      print *,' nslwr ', Model%nslwr
-      print *,' nscyc ', Model%nscyc
-      print *,' lsswr ', Model%lsswr
-      print *,' lslwr ', Model%lslwr
-      print *,' fhour ', Model%fhour
-      print *,' phour ', Model%phour
-      print *,' solhr ', Model%solhr
-    endif
-
-    !--- radiation time varying routine
-    if (Model%lsswr .or. Model%lslwr) then
-      call GFS_rad_time_vary (Model, Statein, Tbd, sec)
-    endif
-
-    !--- physics time varying routine
-    call GFS_phys_time_vary (Model, Grid, Tbd)
-
-    !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-    if (Model%nscyc >  0) then
-      if (mod(Model%kdt,Model%nscyc) == 1) THEN
-        call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
-      endif
-    endif
-
-    !--- determine if diagnostics buckets need to be cleared
-    if (mod(Model%kdt,Model%nszero) == 1) then
-      do nb = 1,nblks
-        call Diag(nb)%rad_zero  (Model)
-        call Diag(nb)%phys_zero (Model)
-    !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-      enddo
-    endif
+    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
 
   end subroutine GFS_time_vary_step
 
@@ -330,6 +308,8 @@ module GFS_driver
   subroutine GFS_stochastic_driver (Model, Statein, Stateout, Sfcprop, Coupling, &
                                     Grid, Tbd, Cldprop, Radtend, Diag)
 
+    use GFS_stochastics, only: GFS_stochastics_run
+
     implicit none
 
     !--- interface variables
@@ -343,204 +323,12 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
     type(GFS_radtend_type),   intent(in   ) :: Radtend
     type(GFS_diag_type),      intent(inout) :: Diag
-    !--- local variables
-    integer :: k, i
-    real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew
-
-     if (Model%do_sppt) then
-       do k = 1,size(Statein%tgrs,2)
-         do i = 1,size(Statein%tgrs,1)
-      
-           upert = (Stateout%gu0(i,k)   - Statein%ugrs(i,k))   * Coupling%sppt_wts(i,k)
-           vpert = (Stateout%gv0(i,k)   - Statein%vgrs(i,k))   * Coupling%sppt_wts(i,k)
-           tpert = (Stateout%gt0(i,k)   - Statein%tgrs(i,k))   * Coupling%sppt_wts(i,k) - Tbd%dtdtr(i,k)
-           qpert = (Stateout%gq0(i,k,1) - Statein%qgrs(i,k,1)) * Coupling%sppt_wts(i,k)
- 
-           Stateout%gu0(i,k)  = Statein%ugrs(i,k)+upert
-           Stateout%gv0(i,k)  = Statein%vgrs(i,k)+vpert
- 
-           !negative humidity check
-           qnew = Statein%qgrs(i,k,1)+qpert
-           if (qnew .GE. 1.0e-10) then
-              Stateout%gq0(i,k,1) = qnew
-              Stateout%gt0(i,k)   = Statein%tgrs(i,k) + tpert + Tbd%dtdtr(i,k)
-           endif
-         enddo
-       enddo
- 
-       Diag%totprcp(:)      = Diag%totprcp(:)      + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dtotprcp(:)
-       Diag%cnvprcp(:)      = Diag%cnvprcp(:)      + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dcnvprcp(:)
-       Coupling%rain_cpl(:) = Coupling%rain_cpl(:) + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%drain_cpl(:)
-       Coupling%snow_cpl(:) = Coupling%snow_cpl(:) + (Coupling%sppt_wts(:,15) - 1.0)*Tbd%dsnow_cpl(:)
-     endif
-
-     if (Model%do_shum) then
-       Stateout%gq0(:,:,1) = Stateout%gq0(:,:,1)*(1.0 + Coupling%shum_wts(:,:))
-     endif
+        
+    call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+                             Grid, Tbd, Cldprop, Radtend, Diag)
 
   end subroutine GFS_stochastic_driver
-
-
-
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-!
-!                     PRIVATE SUBROUTINES
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-!-----------------------------------------------------------------------
-! GFS_rad_time_vary
-!-----------------------------------------------------------------------
-!
-!  Routine containing all of the setup logic originally in phys/gloopr.f
-!
-!-----------------------------------------------------------------------
-  subroutine GFS_rad_time_vary (Model, Statein, Tbd, sec)
-
-    use physparam,        only: ipsd0, ipsdlim, iaerflg
-    use mersenne_twister, only: random_setseed, random_index, random_stat
-
-    implicit none
-
-    type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(in)    :: Statein(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    real(kind=kind_phys),     intent(in)    :: sec
-    !--- local variables
-    type (random_stat) :: stat
-    integer :: ix, nb, j, i, nblks, ipseed
-    integer :: numrdm(Model%cnx*Model%cny*2)
-
-    nblks = size(blksz,1)
-
-    call radupdate (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
-                    Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon )
-
-    !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
-    if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
-      ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
-      call random_setseed (ipseed, stat)
-      call random_index (ipsdlim, numrdm, stat)
-
-      !--- set the random seeds for each column in a reproducible way
-      ix = 0
-      nb = 1
-      do j = 1,Model%ny
-        do i = 1,Model%nx
-          ix = ix + 1
-          if (ix .gt. blksz(nb)) then
-            ix = 1
-            nb = nb + 1
-          endif
-          !--- for testing purposes, replace numrdm with '100'
-          Tbd(nb)%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-          Tbd(nb)%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
-        enddo
-      enddo
-    endif  ! isubc_lw and isubc_sw
-
-    if (Model%num_p3d == 4) then
-      if (Model%kdt == 1) then
-        do nb = 1,nblks
-          Tbd(nb)%phy_f3d(:,:,1) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,2) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f3d(:,:,3) = Statein(nb)%tgrs
-          Tbd(nb)%phy_f3d(:,:,4) = max(qmin,Statein(nb)%qgrs(:,:,1))
-          Tbd(nb)%phy_f2d(:,1)   = Statein(nb)%prsi(:,1)
-          Tbd(nb)%phy_f2d(:,2)   = Statein(nb)%prsi(:,1)
-        enddo
-      endif
-    endif
-
-  end subroutine GFS_rad_time_vary
-
-
-!-----------------------------------------------------------------------
-! GFS_phys_time_vary
-!-----------------------------------------------------------------------
-!
-!  Routine containing all of the setup logic originally in phys/gloopb.f
-!
-!-----------------------------------------------------------------------
-  subroutine GFS_phys_time_vary (Model, Grid, Tbd)
-    use mersenne_twister, only: random_setseed, random_number
-
-    implicit none
-    type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_grid_type),      intent(inout) :: Grid(:)
-    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
-    !--- local variables
-    integer :: nb, ix, k, j, i, nblks, iseed, iskip
-    real(kind=kind_phys) :: wrk(1)
-    real(kind=kind_phys) :: rannie(Model%cny)
-    real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
-
-    nblks = size(blksz,1)
-
-    !--- switch for saving convective clouds - cnvc90.f 
-    !--- aka Ken Campana/Yu-Tai Hou legacy
-    if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
-      !--- initialize,accumulate,convert
-      Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-    elseif (mod(Model%kdt,Model%nsswr) == 0) then
-      !--- accumulate,convert
-      Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-    elseif (Model%lsswr) then
-      !--- initialize,accumulate
-      Model%clstp = 1100
-    else
-      !--- accumulate
-      Model%clstp = 0100
-    endif
-
-    !--- random number needed for RAS and old SAS and when cal_pre=.true.
-    if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
-      iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
-      call random_setseed(iseed)
-      call random_number(wrk)
-      do i = 1,Model%cnx*Model%nrcm
-        iseed = iseed + nint(wrk(1)) * i
-        call random_setseed(iseed)
-        call random_number(rannie)
-        rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
-      enddo
-
-      do k = 1,Model%nrcm
-        iskip = (k-1)*Model%cnx*Model%cny
-        ix = 0
-        nb = 1
-        do j = 1,Model%ny
-          do i = 1,Model%nx
-            ix = ix + 1
-            if (ix .gt. blksz(nb)) then
-              ix = 1
-              nb = nb + 1
-            endif
-            Tbd(nb)%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
-          enddo
-        enddo
-      enddo
-    endif  ! imfdeepcnv, cal_re, random_clds
-
-    !--- o3 interpolation
-    if (Model%ntoz > 0) then
-      do nb = 1, nblks
-        call ozinterpol (Model%me, blksz(nb), Model%idate, Model%fhour, &
-                         Grid(nb)%jindx1_o3, Grid(nb)%jindx2_o3,            &
-                         Tbd(nb)%ozpl, Grid(nb)%ddy_o3)
-      enddo
-    endif
-
-    !--- h2o interpolation
-     if (Model%h2o_phys) then
-       do nb = 1, nblks
-         call h2ointerpol (Model%me, blksz(nb), Model%idate, Model%fhour, &
-                           Grid(nb)%jindx1_h, Grid(nb)%jindx2_h,          &
-                           Tbd(nb)%h2opl, Grid(nb)%ddy_h)
-       enddo
-     endif
-
-  end subroutine GFS_phys_time_vary
+#endif
 
 
 !------------------
@@ -583,4 +371,3 @@ module GFS_driver
   end subroutine GFS_grid_populate
 
 end module GFS_driver
-

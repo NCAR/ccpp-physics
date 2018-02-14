@@ -110,7 +110,7 @@
 !                                                                          !
 !                                                                          !
 !                   a rapid radiative transfer model                       !
-!                       for the longwave region                            ! 
+!                       for the longwave region                            !
 !             for application to general circulation models                !
 !                                                                          !
 !                                                                          !
@@ -228,7 +228,7 @@
 !       apr 2012,  b. ferrier and y. hou -- added conversion factor to fu's!
 !                    cloud-snow optical property scheme.                   !
 !       nov 2012,  yu-tai hou        -- modified control parameters thru   !
-!                     module 'physparam'.                                  !  
+!                     module 'physparam'.                                  !
 !                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
@@ -236,7 +236,7 @@
 
 
 !> \defgroup module_radlw_main module_radlw_main
-!! \ingroup rad
+!! \ingroup RRTMG
 !! This module includes NCEP's modifications of the rrtmg-lw radiation
 !! code from AER.
 !!
@@ -258,13 +258,13 @@
 !! module 'module_radlw_main' and many of them are not directly
 !! accessable from places outside the module.
 !!
-!!\author   Eli J. Mlawer, emlawer@aer.com 
-!!\author   Jennifer S. Delamere, jdelamer@aer.com                    
-!!\author   Michael J. Iacono, miacono@aer.com  
+!!\author   Eli J. Mlawer, emlawer@aer.com
+!!\author   Jennifer S. Delamere, jdelamer@aer.com
+!!\author   Michael J. Iacono, miacono@aer.com
 !!\author   Shepard A. Clough
 !!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
-!!                                                               
-!! The authors wish to acknowledge the contributions of the       
+!!
+!! The authors wish to acknowledge the contributions of the
 !! following people:  Steven J. Taubman, Karen Cady-Pereira,
 !! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
 !!
@@ -382,7 +382,7 @@
 
 !  ---  public accessable subprograms
 
-      public lwrad, rlwinit
+      public radlw_init, radlw_run, radlw_finalize, rlwinit
 
 
 ! ================
@@ -394,8 +394,8 @@
 !!\param plvl           model interface pressure in mb
 !!\param tlyr           model layer mean temperature in K
 !!\param tlvl           model interface temperature in K
-!!\param qlyr           layer specific humidity in gm/gm  
-!!\param olyr           layer ozone concentration in gm/gm 
+!!\param qlyr           layer specific humidity in gm/gm
+!!\param olyr           layer ozone concentration in gm/gm
 !!\param gasvmr         atmospheric gases amount:
 !!\n                    (:,:,1)  - co2 volume mixing ratio
 !!\n                    (:,:,2)  - n2o volume mixing ratio
@@ -423,7 +423,7 @@
 !!\n                    (:,:,3)  - layer cloud single scattering albedo
 !!\n                    (:,:,4)  - layer cloud asymmetry factor
 !!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties 
+!!\param aerosols       aerosol optical properties
 !!\n                    (:,:,:,1) - optical depth
 !!\n                    (:,:,:,2) - single scattering albedo
 !!\n                    (:,:,:,3) - asymmetry parameter
@@ -448,16 +448,70 @@
 !!\n                    upfxc - total sky upward flux
 !!\n                    dnfx0 - clear sky downward flux
 !!\n                    upfx0 - clear sky upward flux
+         subroutine radlw_init ()
+         end subroutine radlw_init
+
+!! \section arg_table_radlw_run Argument Table
+!! | local var name  | longname                                                                                     | description                                                | units   | rank | type        |    kind   | intent | optional |
+!! |-----------------|----------------------------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
+!! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                   | air pressure layer                                         | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | plvl            | air_pressure_at_interface_for_radiation_in_hPa                                               | air pressure level                                         | hPa     |    2 | real        | kind_phys | in     | F        |
+!! | tlyr            | air_temperature_at_layer_for_radiation                                                       | air temperature layer                                      | K       |    2 | real        | kind_phys | in     | F        |
+!! | tlvl            | air_temperature_at_interface_for_radiation                                                   | air temperature level                                      | K       |    2 | real        | kind_phys | in     | F        |
+!! | qlyr            | water_vapor_specific_humidity_at_layer_for_radiation                                         | specific humidity layer                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | olyr            | ozone_concentration_at_layer_for_radiation                                                   | ozone concentration layer                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co2      | volume_mixing_ratio_co2                                                                      | volume mixing ratio co2                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_n2o      | volume_mixing_ratio_n2o                                                                      | volume mixing ratio no2                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ch4      | volume_mixing_ratio_ch4                                                                      | volume mixing ratio ch4                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_o2       | volume_mixing_ratio_o2                                                                       | volume mixing ratio o2                                     | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co       | volume_mixing_ratio_co                                                                       | volume mixing ratio co                                     | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc11    | volume_mixing_ratio_cfc11                                                                    | volume mixing ratio cfc11                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc12    | volume_mixing_ratio_cfc12                                                                    | volume mixing ratio cfc12                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc22    | volume_mixing_ratio_cfc22                                                                    | volume mixing ratio cfc22                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ccl4     | volume_mixing_ratio_ccl4                                                                     | volume mixing ratio ccl4                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | icseed          | seed_random_numbers_lw                                                                       | seed for random number generation for longwave radiation   | none    |    1 | integer     |           | in     | F        |
+!! | aeraod          | aerosol_optical_depth_for_longwave_bands_01-16                                               | aerosol optical depth for longwave bands 01-16             | none    |    3 | real        | kind_phys | in     | F        |
+!! | aerssa          | aerosol_single_scattering_albedo_for_longwave_bands_01-16                                    | aerosol single scattering albedo for longwave bands 01-16  | frac    |    3 | real        | kind_phys | in     | F        |
+!! | sfemis          | surface_longwave_emissivity                                                                  | surface emissivity                                         | frac    |    1 | real        | kind_phys | in     | F        |
+!! | sfgtmp          | surface_ground_temperature_for_radiation                                                     | surface ground temperature for radiation                   | K       |    1 | real        | kind_phys | in     | F        |
+!! | npts            | horizontal_loop_extent                                                                       | horizontal dimension                                       | count   |    0 | integer     |           | in     | F        |
+!! | nlay            | adjusted_vertical_layer_dimension_for_radiation                                              | number of vertical layers for radiation                    | count   |    0 | integer     |           | in     | F        |
+!! | nlp1            | adjusted_vertical_level_dimension_for_radiation                                              | number of vertical levels for radiation                    | count   |    0 | integer     |           | in     | F        |
+!! | lprnt           | flag_print                                                                                   | flag to print                                              | flag    |    0 | logical     |           | in     | F        |
+!! | cld_cf          | total_cloud_fraction                                                                         | total cloud fraction                                       | frac    |    2 | real        | kind_phys | in     | F        |
+!! | lslwr           | flag_to_calc_lw                                                                              | flag to calculate LW irradiances                           | flag    |    0 | logical     |           | in     | F        |
+!! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                   | longwave total sky heating rate                            | K s-1   |    2 | real        | kind_phys | out    | F        |
+!! | topflx          | lw_fluxes_top_atmosphere                                                                     | longwave total sky fluxes at the top of the atm            | W m-2   |    1 | topflw_type |           | out    | F        |
+!! | sfcflx          | lw_fluxes_sfc                                                                                | longwave total sky fluxes at the Earth surface             | W m-2   |    1 | sfcflw_type |           | out    | F        |
+!! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step| longwave clear sky heating rate                            | K s-1   |    2 | real        | kind_phys | out    | T        |
+!! | hlwb            | lw_heating_rate_spectral                                                                     | longwave total sky heating rate (spectral)                 | K s-1   |    3 | real        | kind_phys | out    | T        |
+!! | flxprf          | lw_fluxes                                                                                    | lw fluxes total sky / csk and up / down at levels          | W m-2   |    2 | proflw_type |           | out    | T        |
+!! | cld_lwp         | cloud_liquid_water_path                                                                      | cloud liquid water path                                    | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                       | mean effective radius for liquid cloud                     | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_iwp         | cloud_ice_water_path                                                                         | cloud ice water path                                       | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_ice     | mean_effective_radius_for_ice_cloud                                                          | mean effective radius for ice cloud                        | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_rwp         | cloud_rain_water_path                                                                        | cloud ice water path                                       | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                          | mean effective radius for rain drop                        | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_swp         | cloud_snow_water_path                                                                        | cloud snow water path                                      | g m-2   |    2 | real        | kind_phys | in     | T        |
+!! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                         | mean effective radius for snow flake                       | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_od          | cloud_optical_depth                                                                          | cloud optical depth                                        | none    |    2 | real        | kind_phys | in     | T        |
+!!
 !> \section gen_lwrad General Algorithm
 !> @{
 ! --------------------------------
-      subroutine lwrad                                                  &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                      &   !  ---  inputs
-     &       clouds,icseed,aerosols,sfemis,sfgtmp,                      &
-     &       npts, nlay, nlp1, lprnt,                                   &
+      subroutine radlw_run                                              &
+     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
+     &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
+     &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
+     &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
+     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,                                        &    !  ---  outputs
-     &       HLW0,HLWB,FLXPRF                                           &   !! ---  optional
+     &       HLW0,HLWB,FLXPRF,                                          &   !! ---  optional
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od                                                     &
      &     )
+
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -641,14 +695,21 @@
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: plyr,  &
      &       tlyr, qlyr, olyr
 
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: gasvmr
-      real (kind=kind_phys), dimension(npts,nlay,9),intent(in):: clouds
+      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2,&
+     &     gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,  &
+     &     gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4
+
+      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
+     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow, cld_od
+
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp
 
-      real (kind=kind_phys), dimension(npts,nlay,nbands,3),intent(in):: &
-     &       aerosols
+      real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
+     &       aeraod, aerssa
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(out) :: hlwc
@@ -663,6 +724,7 @@
      &       intent(out) :: hlw0
       type (proflw_type),    dimension(npts,nlp1),       optional,      &
      &       intent(out) :: flxprf
+      logical, intent(in) :: lslwr
 
 !  ---  locals:
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
@@ -709,13 +771,14 @@
 !
 !===> ... begin here
 !
+      if (.not. lslwr) return
 
 !  --- ...  initialization
 
       lhlwb  = present ( hlwb )
       lhlw0  = present ( hlw0 )
       lflxprf= present ( flxprf )
- 
+
 
       colamt(:,:) = f_zero
 
@@ -738,7 +801,7 @@
 !     endif
 
 !  --- ...  loop over horizontal npts profiles
- 
+
       lab_do_iplon : do iplon = 1, npts
 
 !> -# Read surface emissivity.
@@ -793,7 +856,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))          ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(iplon,k1,1)) ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k1)) ! co2
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
@@ -804,15 +867,15 @@
           if (ilwrgas > 0) then
             do k = 1, nlay
               k1 = nlp1 - k
-              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr(iplon,k1,2))  ! n2o
-              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr(iplon,k1,3))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr(iplon,k1,4))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr(iplon,k1,5))  ! co
+              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k1))  ! n2o
+              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k1))  ! ch4
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k1))  ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k1))  ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr(iplon,k1,9) )   ! ccl4
-              wx(k,2) = max( f_zero, coldry(k)*gasvmr(iplon,k1,6) )   ! cf11
-              wx(k,3) = max( f_zero, coldry(k)*gasvmr(iplon,k1,7) )   ! cf12
-              wx(k,4) = max( f_zero, coldry(k)*gasvmr(iplon,k1,8) )   ! cf22
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k1) )   ! ccl4
+              wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k1) )   ! cf11
+              wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k1) )   ! cf12
+              wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k1) )   ! cf22
             enddo
           else
             do k = 1, nlay
@@ -833,8 +896,8 @@
           do k = 1, nlay
             k1 = nlp1 - k
             do j = 1, nbands
-              tauaer(j,k) = aerosols(iplon,k1,j,1)                      &
-     &                    * (f_one - aerosols(iplon,k1,j,2))
+              tauaer(j,k) = aeraod(iplon,k1,j)                          &
+     &                    * (f_one - aerssa(iplon,k1,j))
             enddo
           enddo
 
@@ -842,21 +905,21 @@
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
-              cldfrc(k)= clouds(iplon,k1,1)
-              clwp(k)  = clouds(iplon,k1,2)
-              relw(k)  = clouds(iplon,k1,3)
-              ciwp(k)  = clouds(iplon,k1,4)
-              reiw(k)  = clouds(iplon,k1,5)
-              cda1(k)  = clouds(iplon,k1,6)
-              cda2(k)  = clouds(iplon,k1,7)
-              cda3(k)  = clouds(iplon,k1,8)
-              cda4(k)  = clouds(iplon,k1,9)
+              cldfrc(k)= cld_cf(iplon,k1)
+              clwp(k)  = cld_lwp(iplon,k1)
+              relw(k)  = cld_ref_liq(iplon,k1)
+              ciwp(k)  = cld_iwp(iplon,k1)
+              reiw(k)  = cld_ref_ice(iplon,k1)
+              cda1(k)  = cld_rwp(iplon,k1)
+              cda2(k)  = cld_ref_rain(iplon,k1)
+              cda3(k)  = cld_swp(iplon,k1)
+              cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
-              cldfrc(k)= clouds(iplon,k1,1)
-              cda1(k)  = clouds(iplon,k1,2)
+              cldfrc(k)= cld_cf(iplon,k1)
+              cda1(k)  = cld_od(iplon,k1)
             enddo
           endif                      ! end if_ilwcliq
 
@@ -903,7 +966,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))          ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(iplon,k,1))  ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k))  ! co2
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
@@ -912,15 +975,15 @@
 
           if (ilwrgas > 0) then
             do k = 1, nlay
-              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr(iplon,k,2))  ! n2o
-              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr(iplon,k,3))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr(iplon,k,4))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr(iplon,k,5))  ! co
+              colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k))  ! n2o
+              colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k))  ! ch4
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k))  ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k))  ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr(iplon,k,9) )   ! ccl4
-              wx(k,2) = max( f_zero, coldry(k)*gasvmr(iplon,k,6) )   ! cf11
-              wx(k,3) = max( f_zero, coldry(k)*gasvmr(iplon,k,7) )   ! cf12
-              wx(k,4) = max( f_zero, coldry(k)*gasvmr(iplon,k,8) )   ! cf22
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k) )   ! ccl4
+              wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k) )   ! cf11
+              wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k) )   ! cf12
+              wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k) )   ! cf22
             enddo
           else
             do k = 1, nlay
@@ -940,27 +1003,27 @@
 
           do j = 1, nbands
             do k = 1, nlay
-              tauaer(j,k) = aerosols(iplon,k,j,1)                       &
-     &                    * (f_one - aerosols(iplon,k,j,2))
+              tauaer(j,k) = aeraod(iplon,k,j)                           &
+     &                    * (f_one - aerssa(iplon,k,j))
             enddo
           enddo
 
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
-              cldfrc(k)= clouds(iplon,k,1)
-              clwp(k)  = clouds(iplon,k,2)
-              relw(k)  = clouds(iplon,k,3)
-              ciwp(k)  = clouds(iplon,k,4)
-              reiw(k)  = clouds(iplon,k,5)
-              cda1(k)  = clouds(iplon,k,6)
-              cda2(k)  = clouds(iplon,k,7)
-              cda3(k)  = clouds(iplon,k,8)
-              cda4(k)  = clouds(iplon,k,9)
+              cldfrc(k)= cld_cf(iplon,k)
+              clwp(k)  = cld_lwp(iplon,k)
+              relw(k)  = cld_ref_liq(iplon,k)
+              ciwp(k)  = cld_iwp(iplon,k)
+              reiw(k)  = cld_ref_ice(iplon,k)
+              cda1(k)  = cld_rwp(iplon,k)
+              cda2(k)  = cld_ref_rain(iplon,k)
+              cda3(k)  = cld_swp(iplon,k)
+              cda4(k)  = cld_ref_snow(iplon,k)
             enddo
           else                       ! use diagnostic cloud method
             do k = 1, nlay
-              cldfrc(k)= clouds(iplon,k,1)
-              cda1(k)  = clouds(iplon,k,2)
+              cldfrc(k)= cld_cf(iplon,k)
+              cda1(k)  = cld_od(iplon,k)
             enddo
           endif                      ! end if_ilwcliq
 
@@ -1090,7 +1153,7 @@
 !      print *,'indfor',indfor
 !     endif
 
-!> -# Call taumol() to calculte the gaseous optical depths and Plank 
+!> -# Call taumol() to calculte the gaseous optical depths and Plank
 !! fractions for each longwave spectral band.
 
         call taumol                                                     &
@@ -1246,9 +1309,11 @@
       enddo  lab_do_iplon
 
 !...................................
-      end subroutine lwrad
+      end subroutine radlw_run
 !-----------------------------------
 !> @}
+      subroutine radlw_finalize ()
+      end subroutine radlw_finalize 
 
 
 
@@ -1969,18 +2034,18 @@
 !!\param rfrate          ref ratios of binary species param
 !!\n                     (:,m,:)m=1-h2o/co2,2-h2o/o3,3-h2o/n2o,
 !!                                4-h2o/ch4,5-n2o/co2,6-o3/co2
-!!\n                     (:,:,n)n=1,2: the rates of ref press at 
+!!\n                     (:,:,n)n=1,2: the rates of ref press at
 !!                                the 2 sides of the layer
 !!\param facij           factors multiply the reference ks, i,j=0/1 for
 !!                       lower/higher of the 2 appropriate temperatures
 !!                       and altitudes.
 !!\param selffac         scale factor for w. v. self-continuum equals
 !!                       (w. v. density)/(atmospheric density at 296k and 1013 mb)
-!!\param selffrac        factor for temperature interpolation of 
+!!\param selffrac        factor for temperature interpolation of
 !!                       reference w. v. self-continuum data
 !!\param indself         index of lower ref temp for selffac
 !!\param forfac          scale factor for w. v. foreign-continuum
-!!\param forfrac         factor for temperature interpolation of 
+!!\param forfrac         factor for temperature interpolation of
 !!                       reference w.v. foreign-continuum data
 !!\param indfor          index of lower ref temp for forfac
 !!\param minorfrac       factor for minor gases
@@ -2251,7 +2316,7 @@
 !! randomly overlaping in a vertical column.
 !!\brief Original Code Description: this program calculates the upward
 !! fluxes, downward fluxes, and heating rates for an arbitrary clear or
-!! cloudy atmosphere. The input to this program is the atmospheric 
+!! cloudy atmosphere. The input to this program is the atmospheric
 !! profile, all Planck function information, and the cloud fraction by
 !! layer. A variable diffusivity angle (secdif) is used for the angle
 !! integration. Bands 2-3 and 5-9 use a value for secdif that varies
@@ -2585,7 +2650,7 @@
 
       enddo   ! end do_ig_loop
 
-!> -# Process longwave output from band for total and clear streams. 
+!> -# Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
 
       flxfac = wtdiff * fluxfac
@@ -2641,7 +2706,7 @@
 
 
 !> This subroutine computes the upward/downward radiative fluxes, and
-!! heating rates for both clear or cloudy atmosphere. Clouds are 
+!! heating rates for both clear or cloudy atmosphere. Clouds are
 !! assumed as in maximum-randomly overlaping in a vertical column.
 !!\param semiss        lw surface emissivity
 !!\param delp          layer pressure thickness (mb)
@@ -3629,13 +3694,13 @@
 !> This subroutine contains optical depths developed for the rapid
 !! radiative transfer model.
 !!\brief This file contains the subroutines taugbn (where n goes from
-!! 1 to 16). taugbn calculates the optical depths and planck fractions 
+!! 1 to 16). taugbn calculates the optical depths and planck fractions
 !! per g-value and layer for band n.
-!!\param laytrop          tropopause layer index (unitless) layer at 
+!!\param laytrop          tropopause layer index (unitless) layer at
 !!                        which switch is made for key species
 !!\param pavel            layer pressures (mb)
 !!\param coldry           column amount for dry air \f$(mol/cm^2)\f$
-!!\param colamt           column amounts of h2o, co2, o3, n2o, ch4,o2, 
+!!\param colamt           column amounts of h2o, co2, o3, n2o, ch4,o2,
 !!                        co \f$(mol/cm^2)\f$
 !!\param colbrd           column amount of broadening gases
 !!\param wx               cross-section amounts \f$(mol/cm^2)\f$
@@ -3646,7 +3711,7 @@
 !!\n                      (:,:,n)n=1,2: the rates of ref press at the 2
 !!                                 sides of the layer
 !!\param facij            factors multiply the reference ks, i,j of 0/1
-!!                        for lower/higher of the 2 appropriate 
+!!                        for lower/higher of the 2 appropriate
 !!                        temperatures and altitudes
 !!\param jp               index of lower reference pressure
 !!\param jt, jt1          indices of lower reference temperatures for
@@ -3855,7 +3920,7 @@
 ! =================
 
 !> band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
-!!  (high key - h2o; high minor - n2)         
+!!  (high key - h2o; high minor - n2)
 ! ----------------------------------
       subroutine taugb01
 ! ..................................
@@ -3914,7 +3979,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) -  forref(ig,indf))) 
+     &            * (forref(ig,indfp) -  forref(ig,indf)))
           taun2   = scalen2 * (ka_mn2(ig,indm) + minorfrac(k)           &
      &            * (ka_mn2(ig,indmp) - ka_mn2(ig,indm)))
 
@@ -3945,7 +4010,7 @@
 
         do ig = 1, ng01
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           taun2  = scalen2 * (kb_mn2(ig,indm) + minorfrac(k)            &
      &           * (kb_mn2(ig,indmp) - kb_mn2(ig,indm)))
 
@@ -4000,7 +4065,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns02+ig,k) = corradj * (colamt(k,1)                      &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -4024,7 +4089,7 @@
 
         do ig = 1, ng02
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns02+ig,k) = colamt(k,1)                                 &
      &           * (fac00(k)*absb(ig,ind0) + fac10(k)*absb(ig,ind0p)    &
@@ -4087,7 +4152,7 @@
         specparm = colamt(k,1) / speccomb
         specmult = 8.0 * min(specparm, oneminus)
         js = 1 + int(specmult)
-        fs = mod(specmult, f_one)        
+        fs = mod(specmult, f_one)
         ind0 = ((jp(k)-1)*5 + (jt(k)-1)) * nspa(3) + js
 
         speccomb1 = colamt(k,1) + rfrate(k,1,2)*colamt(k,2)
@@ -4320,7 +4385,7 @@
 
         do ig = 1, ng03
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           n2om1  = kb_mn2o(ig,jmn2o,indm) + fmn2o                       &
      &           * (kb_mn2o(ig,jmn2op,indm) - kb_mn2o(ig,jmn2o,indm))
           n2om2  = kb_mn2o(ig,jmn2o,indmp) + fmn2o                      &
@@ -4336,7 +4401,7 @@
      &              +  fac101*absb(ig,id101) + fac111*absb(ig,id111))
 
           taug(ns03+ig,k) = tau_major + tau_major1                      &
-     &                    + taufor + adjcoln2o*absn2o            
+     &                    + taufor + adjcoln2o*absn2o
 
           fracs(ns03+ig,k) = fracrefb(ig,jpl) + fpl                     &
      &                     * (fracrefb(ig,jplp) - fracrefb(ig,jpl))
@@ -4495,7 +4560,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           tau_major = speccomb                                          &
      &              * (fac000*absa(ig,id000) + fac010*absa(ig,id010)    &
@@ -4591,8 +4656,8 @@
       end subroutine taugb04
 ! ----------------------------------
 
-!> Band 5:  700-820 cm-1 (low key - h2o,co2; low minor - o3, ccl4) 
-!!                       (high key - o3,co2)                 
+!> Band 5:  700-820 cm-1 (low key - h2o,co2; low minor - o3, ccl4)
+!!                       (high key - o3,co2)
 ! ----------------------------------
       subroutine taugb05
 ! ..................................
@@ -4604,7 +4669,7 @@
 
       use module_radlw_kgb05
 
-!  ---  locals: 
+!  ---  locals:
       integer :: k, ind0, ind1, inds, indsp, indf, indfp, indm, indmp,  &
      &       id000, id010, id100, id110, id200, id210, jmo3, jmo3p,     &
      &       id001, id011, id101, id111, id201, id211, jpl, jplp,       &
@@ -4854,7 +4919,7 @@
       end subroutine taugb05
 ! ----------------------------------
 
-!> Band 6:  820-980 cm-1 (low key - h2o; low minor - co2) 
+!> Band 6:  820-980 cm-1 (low key - h2o; low minor - co2)
 !!                       (high key - none; high minor - cfc11, cfc12)
 ! ----------------------------------
       subroutine taugb06
@@ -4867,7 +4932,7 @@
 
       use module_radlw_kgb06
 
-!  ---  locals: 
+!  ---  locals:
       integer :: k, ind0, ind0p, ind1, ind1p, inds, indsp, indf, indfp, &
      &       indm, indmp, ig
 
@@ -5129,7 +5194,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           co2m1   = ka_mco2(ig,jmco2,indm) + fmco2                      &
      &            * (ka_mco2(ig,jmco2p,indm) - ka_mco2(ig,jmco2,indm))
           co2m2   = ka_mco2(ig,jmco2,indmp) + fmco2                     &
@@ -5202,8 +5267,8 @@
       end subroutine taugb07
 ! ----------------------------------
 
-!> Band 8:  1080-1180 cm-1 (low key - h2o; low minor - co2,o3,n2o) 
-!!                         (high key - o3; high minor - co2, n2o) 
+!> Band 8:  1080-1180 cm-1 (low key - h2o; low minor - co2,o3,n2o)
+!!                         (high key - o3; high minor - co2, n2o)
 ! ----------------------------------
       subroutine taugb08
 ! ..................................
@@ -5328,7 +5393,7 @@
 ! ----------------------------------
 
 !> Band 9:  1180-1390 cm-1 (low key - h2o,ch4; low minor - n2o)
-!!                         (high key - ch4; high minor - n2o)  
+!!                         (high key - ch4; high minor - n2o)
 ! ----------------------------------
       subroutine taugb09
 ! ..................................
@@ -5514,7 +5579,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           n2om1   = ka_mn2o(ig,jmn2o,indm) + fmn2o                      &
      &            * (ka_mn2o(ig,jmn2op,indm) - ka_mn2o(ig,jmn2o,indm))
           n2om2   = ka_mn2o(ig,jmn2o,indmp) + fmn2o                     &
@@ -5529,7 +5594,7 @@
      &                * (fac001*absa(ig,id001) + fac011*absa(ig,id011)  &
      &                +  fac101*absa(ig,id101) + fac111*absa(ig,id111)  &
      &                +  fac201*absa(ig,id201) + fac211*absa(ig,id211)) &
-     &                + tauself + taufor + adjcoln2o*absn2o            
+     &                + tauself + taufor + adjcoln2o*absn2o
 
           fracs(ns09+ig,k) = fracrefa(ig,jpl) + fpl                     &
      &                     * (fracrefa(ig,jplp) - fracrefa(ig,jpl))
@@ -5613,7 +5678,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns10+ig,k) = colamt(k,1)                                 &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -5652,8 +5717,8 @@
       end subroutine taugb10
 ! ----------------------------------
 
-!> Band 11:  1480-1800 cm-1 (low - h2o; low minor - o2) 
-!!                          (high key - h2o; high minor - o2)   
+!> Band 11:  1480-1800 cm-1 (low - h2o; low minor - o2)
+!!                          (high key - h2o; high minor - o2)
 ! ----------------------------------
       subroutine taugb11
 ! ..................................
@@ -5728,7 +5793,7 @@
 
         do ig = 1, ng11
           taufor = forfac(k) * (forref(ig,indf) + forfrac(k)            &
-     &           * (forref(ig,indfp) - forref(ig,indf))) 
+     &           * (forref(ig,indfp) - forref(ig,indf)))
           tauo2  = scaleo2 * (kb_mo2(ig,indm) + minorfrac(k)            &
      &           * (kb_mo2(ig,indmp) - kb_mo2(ig,indm)))
 
@@ -5900,7 +5965,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns12+ig,k) = speccomb                                    &
      &                * (fac000*absa(ig,id000) + fac010*absa(ig,id010)  &
@@ -6129,7 +6194,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           co2m1   = ka_mco2(ig,jmco2,indm) + fmco2                      &
      &            * (ka_mco2(ig,jmco2p,indm) - ka_mco2(ig,jmco2,indm))
           co2m2   = ka_mco2(ig,jmco2,indmp) + fmco2                     &
@@ -6177,7 +6242,7 @@
       end subroutine taugb13
 ! ----------------------------------
 
-!> Band 14:  2250-2380 cm-1 (low - co2; high - co2) 
+!> Band 14:  2250-2380 cm-1 (low - co2; high - co2)
 ! ----------------------------------
       subroutine taugb14
 ! ..................................
@@ -6213,7 +6278,7 @@
           tauself = selffac(k) * (selfref(ig,inds) + selffrac(k)        &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns14+ig,k) = colamt(k,2)                                 &
      &            * (fac00(k)*absa(ig,ind0) + fac10(k)*absa(ig,ind0p)   &
@@ -6246,8 +6311,8 @@
       end subroutine taugb14
 ! ----------------------------------
 
-!> Band 15:  2380-2600 cm-1 (low - n2o,co2; low minor - n2) 
-!!                          (high - nothing)     
+!> Band 15:  2380-2600 cm-1 (low - n2o,co2; low minor - n2)
+!!                          (high - nothing)
 ! ----------------------------------
       subroutine taugb15
 ! ..................................
@@ -6325,7 +6390,7 @@
         indmp = indm + 1
         jplp  = jpl  + 1
         jmn2p = jmn2 + 1
-         
+
 
         if (specparm < 0.125 .and. specparm1 < 0.125) then
           p0 = fs - f_one
@@ -6421,7 +6486,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
           n2m1    = ka_mn2(ig,jmn2,indm) + fmn2                         &
      &            * (ka_mn2(ig,jmn2p,indm) - ka_mn2(ig,jmn2,indm))
           n2m2    = ka_mn2(ig,jmn2,indmp) + fmn2                        &
@@ -6611,7 +6676,7 @@
           tauself = selffac(k)* (selfref(ig,inds) + selffrac(k)         &
      &            * (selfref(ig,indsp) - selfref(ig,inds)))
           taufor  = forfac(k) * (forref(ig,indf) + forfrac(k)           &
-     &            * (forref(ig,indfp) - forref(ig,indf))) 
+     &            * (forref(ig,indfp) - forref(ig,indf)))
 
           taug(ns16+ig,k) = speccomb                                    &
      &                * (fac000*absa(ig,id000) + fac010*absa(ig,id010)  &
