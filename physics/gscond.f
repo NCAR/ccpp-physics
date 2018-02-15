@@ -49,11 +49,11 @@
 !!
 !> \section general_gscond General Algorithm
 !! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction betwee
-!! cloud water and cloud ice (table2 in Zhao and Carr (1997)).
+!! cloud water and cloud ice (table2 of Zhao and Carr (1997) \cite zhao_and_carr_1997).
 !! -# Calculate the changes in \f$t\f$, \f$q\f$ and \f$p\f$ due to all the processes except microphysics.
-!! -# Calculate cloud evaporation process (\f$E_c\f$)
-!! \todo general_gscond
-!!\n Cloud evaporation is allowed to take place only where 
+!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of Zhao and Carr (1997) \cite zhao_and_carr_1997)
+!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of Zhao and Carr (1997) \cite zhao_and_carr_1997) 
+!! -# update t,q,cwm due to cloud evaporation and condensation process
 !> \section Zhao-Carr_cond_detailed Detailed Algorithm
 !> @{
         subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1,clw2      &
@@ -315,7 +315,7 @@
 !!  E_{c}=\frac{cwm}{dt}
 !! \f]
 !!  - If cloud fraction \f$b>1.0\times10^{-3}\f$, condense water vapor
-!! in to cloud condensate (\f$C_{g}\f$).
+!! into cloud condensate (\f$C_{g}\f$).
 !!\n Using \f$q=fq_{s}\f$, \f$q_{s}=\epsilon e_{s}/p\f$, and the
 !! Clausius-Clapeyron equation \f$de_{s}/dT=\epsilon Le_{s}/RT^{2}\f$,
 !! where \f$q_{s}\f$ is the saturation specific humidity,\f$e_{s}\f$

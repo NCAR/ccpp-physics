@@ -1,3 +1,8 @@
+!>\file module_nst_model.f90
+!>\defgroup nst_module Diurnal Thermocline Model
+!! @{
+!>\ingroup GFS_NSST
+!!\brief This is the module of diurnal thermocline layer model (DTM).
 module nst_module
 
 !
@@ -921,4 +926,4 @@ subroutine cool_skin(ustar_a,f_nsol,f_sol_0,evap,sss,alpha,beta,rho_w,rho_a,ts,q
 
 
 end module nst_module
-
+!! @ }

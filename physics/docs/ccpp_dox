@@ -149,6 +149,9 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                         ../sfc_sice.f \
 ### Ocean Surface
                         ../sfc_nst.f \
+                        ../module_nst_model.f90 \
+                        ../module_nst_water_prop.f90 \
+                        ../module_nst_parameters.f90 \
 ### Orographic Gravity Wave
                         ../gwdps.f \
 ### Convective Gravity Wave

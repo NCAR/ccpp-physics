@@ -1,54 +1,6 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
-!> \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
-!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
-!!
-!! Sea ice is a thin skin of frozen water covering the polar oceans.  The sea ice strongly interacts with both the atmosphere above and the ocean underneath in the high
-!! latitudes. In a coupled weather/climate system, changes in sea ice extent, thickness and concentration
-!! regionally or globally would influence oceanic and atmospheric conditions, which in turn affect the 
-!! sea ice distribution. The physical and dynamical processes affecting the weather and climate are 
-!! considered as follows.
-!!
-!! The high albedo of the sea ice reflects more solar radiation back to the space. The feedbacks are
-!! considered as positive. The broader the sea ice cover, the higher the surface albedo, which result
-!! in less amount of solar radiation absorbed at the Earth's surface. A cooler surface would favor more 
-!! sea ice to form. The process would be reversed in less sea ice situation.
-!!
-!! The sea ice restricts the heat/water exchange between the air and ocean. The presence of extensive
-!! areas of sea ice would suppress the heat loss in winter and the heat gain in summer by the ocean.
-!! Even a thin ice cover influences the turbulent heat transfer significantly between ocean and
-!! atmosphere. The surface fluxes of sensible and latent heat can be greater by up to two orders of magnitude
-!! at the open water surface of a lead or polynya than that through (snow covered) pack ice.
-!!
-!! The sea ice modifies air/sea momentum transfer, ocean fresh water balance and ocean circulation.
-!! The freezing and melting of the ocean surface and the associated fluxes of salt and heat produce major
-!! changes in the density structure of the polar water. Formation of sea ice injects salt into the ocean
-!! makes the water heavier and more convectively unstable, conversely when melting occurs, stable and fresh
-!! layers can prevent deep covective activity.
-!!
-!! A sea ice model, in general, may contain subcomponents treating 1)dynamics (ice motion),
-!! 2)ice transport, 3) multiple ice thickness categories (including leads), 4) surface albedo,
-!! and 5) vertical thermodynamics. GFS sea ice scheme is concerned with a scheme for the 
-!! last of these processes.
-!!
-!! A three-layer thermodynamic sea ice model has been coupled to NCEP GFS. It predicts sea ice/snow thickness,
-!! the surface temperature and ice temperature structure. In each model grid box, the heat and moisture
-!! fluxes and albedo are treated separately for the ice and the open water.
-!!
-!!\image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
-!! The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness 
-!! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
-!! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of 
-!! the bottom of the ice is fixed at \f$T_f\f$, the freezing temperature of seawater. The temperature of 
-!! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
-!!
-!! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
-!! The upper ice layer has a variable heat capacity to represent brine pockets. 
-!!
-!!  \section intraphysics_sice Intraphysics Communication
-!!\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
-
       module sfc_sice
 
       contains
@@ -66,8 +18,10 @@
       end subroutine sfc_sice_finalize
 
 
-!>\defgroup gfs_sice_main GFS sfc_sice Main
+!> \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
 !! @{
+!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
+!>\defgroup gfs_sice_main GFS sfc_sice Main
 !! \ingroup GFS_Ice
 !! \section arg_table_sfc_sice_run Argument Table
 !! | local var name | longname                                                                     | description                                                     | units         | rank | type    |    kind   | intent | optional |
@@ -114,8 +68,20 @@
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real    | kind_phys |   out  | F        |
 !!
 !!  \section general_sice_run General Algorithm
+!!  The ice model main program ice3lay() performs two functions:
+!!  - \b Calculation \b of \b ice \b temperature 
+!!\n The surface temperature is determined from the diagnostic balance between
+!! the upward conduction of heat through snow and/or ice and upward flux of heat 
+!! from the surface. 
+!!
+!!  - \b Calculation \b of \b ice \b and \b snow \b changes
+!!\n In addition to calculating ice temperature changes, the ice model must
+!! also readjust the sizes of the snow and ice layers 1) to accommodate
+!! mass fluxes at the upper and lower surfaces, 2) to convert snow below
+!! the water line to ice, and 3) to equalize the thickness of the two 
+!! ice layers.
 !!  \section detailed_sice_run Detailed Algorithm
-!>  @{
+!! @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
@@ -217,13 +183,13 @@
 !
       implicit none
 !
-!  ---  constant parameters:
-      integer,              parameter :: kmi   = 2        ! 2-layer of ice
+! - Define constant parameters
+      integer,              parameter :: kmi   = 2        !>  - 2-layer of ice
       real(kind=kind_phys), parameter :: cpinv = 1.0/cp
       real(kind=kind_phys), parameter :: hvapi = 1.0/hvap
       real(kind=kind_phys), parameter :: elocp = hvap/cp
-      real(kind=kind_phys), parameter :: himax = 8.0      ! maximum ice thickness allowed
-      real(kind=kind_phys), parameter :: himin = 0.1      ! minimum ice thickness required
+      real(kind=kind_phys), parameter :: himax = 8.0      !>  -  maximum ice thickness allowed
+      real(kind=kind_phys), parameter :: himin = 0.1      !>  - minimum ice thickness required
       real(kind=kind_phys), parameter :: hsmax = 2.0      ! maximum snow depth allowed
       real(kind=kind_phys), parameter :: timin = 173.0    ! minimum temperature allowed for snow/ice
       real(kind=kind_phys), parameter :: albfw = 0.06     ! albedo for lead
@@ -378,15 +344,17 @@
 
           snetw(i) = sfcdsw(i) * (1.0 - albfw)
           snetw(i) = min(3.0*sfcnsw(i)/(1.0+2.0*ffw(i)), snetw(i))
+! - Calculate sneti
           sneti(i) = (sfcnsw(i) - ffw(i)*snetw(i)) / fice(i)
 
           t12 = tice(i) * tice(i)
           t14 = t12 * t12
 
-!  --- ...  hfi = net non-solar and upir heat flux @ ice surface
+! - Calculate hfi = net non-solar and upir heat flux @ ice surface
 
           hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
      &           + rch(i)*(tice(i) - theta1(i))
+! - Calculate hfd 
           hfd(i) = 4.0*sfcemis(i)*sbc*tice(i)*t12                       &
      &           + (1.0 + elocp*eps*hvap*qs1/(rd*t12)) * rch(i)
 
@@ -493,11 +461,28 @@
       contains
 ! =================
 
-!> @}
 
 !-----------------------------------
 !> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
 !! based on Winton(2000) \cite winton_2000 .
+!! @{
+!!\ingroup gfs_sice_main
+!!\param[in] im    integer, horizontal dimension
+!!\param[in] kmi   integer, number of ice layers (2) 
+!!\param[in] fice  real, sea-ice concentration
+!!\param[in] flag  logical, ice mask flag
+!!\param[in] hfi   real, net non-solar and heat flux at surface (\f$W/m^2\f$)
+!!\param[in] hfd   real, heat flux derivative at surface 
+!!\param[in] sneti real, net solar incoming at top (\f$W/m^2\f$)
+!!\param[in] focn  real, heat flux from ocean (\f$W/m^2\f$)
+!!\param[in] delt  real, time step(\f$sec\f$)
+!!\param[in,out] snowd  real, surface pressure
+!!\param[in,out] hice real, sea-ice thickness
+!!\param[in,out] stsice real, temperature at mid-point of ice levels (\f$^oC\f$)
+!!\param[in,out] tice real, surface temperature (\f$^oC\f$)
+!!\param[in,out] snof real, snowfall rate (\f$ms^{-1}\f$)
+!!\param[out] snowmt real, snow melt during delt (\f$m\f$)
+!!\param[out] gflux real, conductive heat flux (\f$W/m^2\f$)
       subroutine ice3lay
 !...................................
 !  ---  inputs:
@@ -758,6 +743,7 @@
 !...................................
       end subroutine ice3lay
 !-----------------------------------
+!! @}
 
 ! =========================== !
 !     end contain programs    !
@@ -766,6 +752,8 @@
 !...................................
       end subroutine sfc_sice_run
 !-----------------------------------
+!! @}
+!! @}
       end module sfc_sice
 
 
@@ -773,14 +761,14 @@
 
       contains
 
-!!
+!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_pre_init  Argument Table
 !
       subroutine sfc_sice_pre_init
       end subroutine sfc_sice_pre_init
 
-!!
+!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_pre_finalize  Argument Table
 !
@@ -802,7 +790,6 @@
 !! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys |   out  | F        |
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real    | kind_phys |   out  | F        |
 !!
-!! @{
       subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &
      &                            cice, zice, tice, work3)
 
@@ -839,14 +826,14 @@
 
       contains
 
-!!
+!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_post_init  Argument Table
 !
       subroutine sfc_sice_post_init
       end subroutine sfc_sice_post_init
 
-!!
+!
 ! \brief This subroutine is empty since there are no procedures needed
 ! \section arg_table_sfc_sice_post_finalize  Argument Table
 !
@@ -854,7 +841,7 @@
       end subroutine sfc_sice_post_finalize
 
 
-!!
+!
 ! \section arg_table_sfc_sice_post_run Argument Table
 !! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
@@ -868,7 +855,6 @@
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        |
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
 !!
-!! @{
       subroutine sfc_sice_post_run(im, islmsk, cice, zice, tice, tsfc,        &
      &                             fice, hice, tisfc)
 
@@ -905,7 +891,5 @@
       enddo
 
       end subroutine sfc_sice_post_run
-!! @}
 
       end module  sfc_sice_post
-!> @}

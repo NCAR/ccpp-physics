@@ -10,22 +10,30 @@ This profile is a composed by subdividing the near-surface layer in three parts
 T(z) = Tr + T’w (z) + T’c (z),
 
 where
-Ts = T(z=0) is the SST
-T’c (z) is the temperature profile in the skin layer (0 < z <= zc)
-T’w (z) is the temperature profile in the warm layer (0 < z <= zr)
-Tr is the reference temperature
-zc is the depth of the skin layer
+\n Ts = T(z=0) is the SST
+\n T’c (z) is the temperature profile in the skin layer (0 < z <= zc)
+\n T’w (z) is the temperature profile in the warm layer (0 < z <= zr)
+\n Tr is the reference temperature
+\n zc is the depth of the skin layer
 
-Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
+Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM \ref nst_module), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
 
- \htmlonly <style>div.image img[src="NNST.png"]{width:10px;}</style>
- \endhtmlonly
  @image html NSST.png "Figure 1: NSST profile."
 
+This scheme includes the following components:
++ \ref gfs_nst_main
++ \ref nst_water_prop
++ \ref nst_module
++ \ref nst_parameters
+
 \section intra_nst 2. Intraphysics Communication
-\ref arg_table_sfc_nst_run
+\sa \ref arg_table_sfc_nst_run
 
 \section gen_nst 3. General Algorithm
+\sa \ref NSST_general_algorithm
+
+\section det_nst 4. Detailed Algorithm
+\sa \ref NSST_detailed_algorithm
 
 
 

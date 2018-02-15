@@ -1,5 +1,5 @@
 /**
-\page GFS_SFCSICE GFS Three-Layer Thermodynamics Sea Ice Scheme
+\page GFS_SFCSICE GFS Sea Ice Scheme
 \section des_sice 1. Description
  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 
@@ -46,12 +46,12 @@
  The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
  The upper ice layer has a variable heat capacity to represent brine pockets.
 
-\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
-
 \section intra_sice 2. Intraphysics Communication
-\ref arg_table_sfc_sice_run
+\image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
+\sa \ref arg_table_sfc_sice_run
 
 \section gen_sice 3. General Algorithm 
+\sa \ref general_sice_run
 
 
 

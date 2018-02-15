@@ -1,86 +1,7 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface roughness length formulation based on 
 !! the surface sublayer scheme from Zeng and Dickinson (1998) 
-!! \cite zeng_and_dickinson_1998. It is 
-!! the first subroutine called in surface layer loop.
-
-!> \defgroup Sfc_ex_cal GFS Surface Roughness Length Calculation
-!!  \brief It is the surface roughness length formulation based on
-!! the surface sublayer scheme from Zeng and Dickinson (1998) 
-!! \cite zeng_and_dickinson_1998. 
-!!
-!! NOAH LSM are largely responsible for the quality 
-!! of model forecasts produced for near-surface weather parameters, such
-!!  as 2-meter air temperature (\a T2m) and surface skin temperature 
-!! (\a LST). LST is derived from the surface energy budget, and is 
-!! particularly important to remote sensing and data  assimilation. How
-!! precise these two parameters can be simulated by the model strongly
-!! dependes on how accurate the surface heat fluxes are parameterized,
-!! particularly the surface sensible heat flux (\a SH). The surface
-!! thermal roughness length is a key parameter to determine \a SH.
-!! Previous GFS version do not distinguish between the roughness length
-!! for heat and momentum. The aerodynamic roughness \f$Z_{0m}\f$ is used
-!! for wind, while the thermal roughness \f$Z_{0t}\f$ is used for heat and
-!! water vapor. In general,\f$Z_{0m}\f$ is different from \f$Z_{0t}\f$, 
-!! because the transfer of momentum is affected by pressure fluctuations 
-!! in the turbulent waves behind the roughness elements, while for heat
-!! and water vapor transfer no such dynamical mechanism exists. Zeng and
-!! Dickinson (1998) \cite zeng_and_dickinson_1998 found that the surface
-!! skin temperature can be at least 10 K higher when considering the surface
-!! sublayer (or the variable ratio of the \f$Z_{0m}/Z_{0t}\f$ than without
-!! in the desert summer afternoon.
-!! 
-!! In May 2011, the new vegetation-dependent formulations of  
-!! momentum and thermal roughness formulation (Zheng et al. 2009
-!! \cite zheng_et_al_2009; Zheng et al. 2012 \cite zheng_et_al_2012 )
-!! was implemented to deal with the cold LST bias
-!!  over the arid western continental United States
-!! (CONUS) during daytime. This LST bias contributes to large errors in
-!! simulated satellite brightness temperatures over land by the Community
-!! Radiative Transfer Model (CRTM) and hence the rejection of satellite     
-!! data in the NCEP Gridpoint Statistical Interpolation (GSI) system,
-!! especially for surface-sensitive satellite channels.
-!!
-!! Zheng et al.(2009) \cite zheng_et_al_2009 proposed a new formulation on 
-!! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
-!!\f[
-!!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}      
-!!\f]
-!! where \f$Z_{0m}^,\f$ is the effective momentum roughness length 
-!! computed in the following equation for each grid, \f$Z_{0t}\f$
-!! is the roughness lenghth for heat, \f$C_{zil}\f$ is a coefficient
-!! (taken as 0.8), k is the Von Karman constant (0.4), 
-!! \f$\nu=1.5\times10^{-5}m^{2}s^{-1}\f$ is the molecular viscosity,
-!! \f$u*\f$ is the friction velocity, and \f$Z_{0g}\f$ is the bare
-!! soil roughness length for momentum (taken as 0.01).
-!! \n In order to consider the convergence of \f$Z_{0m}\f$ between
-!! fully vegetated and bare soil, the effective \f$Z_{0m}^,\f$ is
-!! computed:
-!!\f[
-!!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
-!!\f]
-!!
-!!\image html roughness_length_fig1.png "Figure 1: Comparison of LST simulated in GFS and verification with the observations. (a) Difference between GFS and GOES in the control run at 18:00 UTC; (b) Difference between GFS and GOES with the new formulation run at 18:00 UTC, averaged from 1 to 3 July 2007" width=10cm
-!!
-!! Figure 1 show the 3 day average land surface skin temperature predicted 
-!! by the GFS and comparison with the GOES-derived satellite measurements.
-!! At 18:00 UTC (midday in local time over the central United States) in
-!! the control run (Figure 1a), a substantial cold bias can be found over
-!! the west half of CONUS (i.e., arid or semiarid regions). The new roughness
-!! length formulations significantly reduce the cold bias in the western 
-!! CONUS, while the LST in the eastern CONUS, where the bias is small in
-!! the control run, is not much affected.
-!!
-!!\image html roughness_length_fig2.png "Fiure 2: Average diurnal cycle on 1-3 July 2007 for verification of LST with GOES (black) and SURFRAD (blue) at Desert Rock, Nevada; red and green lines are for the control and sensitivity runs, respectively" width=10cm
-!!
-!! The Desert Rock station (\f$36.63^oN\f$, \f$116.02^oW\f$), located in the Nevada
-!! desert,is one of the observation stations within the SURFRAD network.
-!! The GOES-derived LST is very similar to the SURFRAD obervations (Figure 2).
-!! However, the old GFS run produces very low LST, compared to the observations,
-!! especially during daytime. During midday, the cold bias can reach up to 
-!! \f$-15^oC\f$. The new formulation run produces a reasonable LST diurnal cycle.
-!! The daytime LST increases substantially and is very close to the observations.
-!!  \section intraphysics Intraphysics Communication
+!! \cite zeng_and_dickinson_1998. It is the first subroutine called in surface layer loop.
 
       module surface_exchange_coefficients
       contains
@@ -91,8 +12,8 @@
       subroutine sfc_ex_coef_finalize
       end subroutine sfc_ex_coef_finalize
 
-!      subroutine sfc_diff(im,ps,u1,v1,t1,q1,z1,
-
+!> \defgroup Sfc_ex_cal GFS Surface Sublayer Scheme
+!!
 !> \defgroup GFS_diff_main GFS sfc_diff Main
 !! \ingroup Sfc_ex_cal
 !> \brief This is the first subroutine called in surface layer loop to 
@@ -132,8 +53,31 @@
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
 !!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
 !!
-!!  \section general_diff General Algorithm
-!!
+!>  \section general_diff General Algorithm
+!! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
+!!  in Zeng et al.(1998) \cite zeng_et_al_1998). 
+!! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
+!! -# Calculate the new vegetation-dependent formulation of thermal roughness length (Zheng et al. (2009)
+!! \cite zheng_et_al_2009).
+!! Zheng et al.(2009) \cite zheng_et_al_2009 proposed a new formulation on
+!! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
+!! \f[
+!!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
+!! \f]
+!! where \f$Z_{0m}^,\f$ is the effective momentum roughness length
+!! computed in the following equation for each grid, \f$Z_{0t}\f$
+!! is the roughness lenghth for heat, \f$C_{zil}\f$ is a coefficient
+!! (taken as 0.8), k is the Von Karman constant (0.4),
+!! \f$\nu=1.5\times10^{-5}m^{2}s^{-1}\f$ is the molecular viscosity,
+!! \f$u*\f$ is the friction velocity, and \f$Z_{0g}\f$ is the bare
+!! soil roughness length for momentum (taken as 0.01).
+!! \n In order to consider the convergence of \f$Z_{0m}\f$ between
+!! fully vegetated and bare soil, the effective \f$Z_{0m}^,\f$ is
+!! computed:
+!! \f[
+!!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
+!!\f]
+!! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!  \section detailed_diff Detailed Algorithm
 !!
 !!  @{
@@ -230,12 +174,14 @@
 !
 
           if(islimsk(i) == 0) then            ! over ocean
+! - Over the ocean, calculate friction velocity in eq.(A10) in Zeng et al. (1998) \cite zeng_et_al_1998 .
             ustar(i) = sqrt(grav * z0 / charnock)
 
 !**  test xubin's new z0
 
 !           ztmax  = z0max
 
+! - Over the ocean, calculate the roughness Reynolds number:
             restar = max(ustar(i)*z0max*visi, 0.000001)
 
 !           restar = log(restar)
@@ -245,6 +191,8 @@
 !           rat    = rat    / (1. + (bb2 + cc2*restar) * restar))
 !  rat taken from zeng, zhao and dickinson 1997
 
+! - Over the ocean, calculate the roughness length of temperature
+!! (see eq.(25) and (26) in Zeng et al. (1998) \cite zeng_et_al_1998).
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax  = z0max * exp(-rat)
 
@@ -255,7 +203,7 @@
             tem1 = 1.0  - tem2
 
             if( ivegsrc == 1 ) then
-
+! - Calculate the roughness length of momentum over land and sea ice.
               if (vegtype(i) == 10) then
                 z0max = exp( tem2*log01 + tem1*log07 )
               elseif (vegtype(i) == 6) then
@@ -287,6 +235,8 @@
                 endif
 
             endif
+! - Calculate the roughness length for heat (see eq.(1) of Zheng et al. (2012)
+!! \cite zheng_et_al_2012 ) .
             z0max = max(z0max,1.0e-6)
 !
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
@@ -408,6 +358,8 @@
 !
 !  finish the exchange coefficient computation to provide fm and fh
 !
+! - Finish the exchange coefficient computation to provide cm, ch, stress as input of other 
+! \a sfc schemes.
           fm(i)     = fm(i) - pm
           fh(i)     = fh(i) - ph
           fm10(i)   = fm10(i) - pm10

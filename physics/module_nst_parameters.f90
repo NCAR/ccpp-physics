@@ -1,3 +1,7 @@
+!>\file module_nst_parameters.f90
+!>\defgroup nst_parameters NST Parameters Module
+!! \ingroup GFS_NSST
+!! @{
 module module_nst_parameters
   use machine, only :  kind_phys &
        ,kind_rad ! for astronomy (date) calculations
@@ -141,3 +145,4 @@ module module_nst_parameters
 !!$
 !!$
 end module module_nst_parameters
+!! @}

@@ -1,6 +1,6 @@
 !> \file precpd.f
 !! This file contains the subroutine that calculates precipitation
-!! processes from suspended cloud water/ice
+!! processes from suspended cloud water/ice.
 
       module GFS_zhaocarr_precpd
       contains
@@ -43,7 +43,12 @@
 !! |  jpr           | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |  0   | integer |          |  in     |   F      |
 !!
 !> \section general_precpd General Algorithm
-!! \todo general precpd
+!! -# Calculate precipitation production by auto conversion and accretion (\f$P_{saut}\f$, \f$P_{saci}\f$, \f$P_{raut}\f$).
+!!  - The accretion of cloud water by rain, \f$P_{racw}\f$, is not included in the current operational scheme.
+!! -# Calculate evaporation of precipitation (\f$E_{rr}\f$ and \f$E_{rs}\f$).
+!! -# Calculate melting of snow (\f$P_{sm1}\f$ and \f$P_{sm2}\f$, \f$P_{sacw}\f$).
+!! -# Update t and q due to precipitation (snow or rain) production.
+!! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
 !! \section Zhao-Carr_precip_detailed Detailed Algorithm
 !! @{
        subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
@@ -334,7 +339,7 @@
 !           if (tmt0(n).le.-40.) qint = qi
 !
 !-------------------ice-water id number iw------------------------------
-!> -# Compute ice-water identification number IW (see algorithm in
+!> -# Calculate ice-water identification number IW (see algorithm in
 !! \ref condense).
             if(tmt0(n) < -15.) then
                fi = qk - u00k(i,k)*qi
@@ -465,15 +470,15 @@
                praut     = min(praut, cwmk)
                ww(n)     = ww(n) - praut
 !
-!>  - Calculate the accretion of cloud water by rain \f$P_{racw}\f$,
-!! can be expressed using the cloud mixing ratio \f$cwm\f$ and rainfall
-!! rate \f$P_{r}\f$:
-!!\f[
-!!  P_{saci}=C_{s}cwmP_{r}
-!!\f]
-!! where \f$C_{r}=5.0\times10^{-4}m^{2}kg^{-1}s{-1}\f$ is the
-!! collection coeffiecient. Note that this process is not included in
-!! current operational physcics.
+!  - Calculate the accretion of cloud water by rain \f$P_{racw}\f$,
+! can be expressed using the cloud mixing ratio \f$cwm\f$ and rainfall
+! rate \f$P_{r}\f$:
+!\f[
+!  P_{racw}=C_{r}cwmP_{r}
+!\f]
+! where \f$C_{r}=5.0\times10^{-4}m^{2}kg^{-1}s^{-1}\f$ is the
+! collection coeffiecient. Note that this process is not included in
+! current operational physcics.
 !          below is for zhao's precip formulation (water)
 !
 !              amaxcm    = max(cons_0, cwmk - wmink(n))
@@ -663,7 +668,7 @@
 !-----------------------end of precipitation processes-----------------
 !**********************************************************************
 !
-!> -# Compute precipitation at surface (\f$rn\f$)and determine
+!> -# Calculate precipitation at surface (\f$rn\f$)and determine
 !! fraction of frozen precipitation (\f$sr\f$).
 !!\f[
 !!   rn= (P_{r}(\eta_{sfc})+P_{s}(\eta_{sfc}))/10^3

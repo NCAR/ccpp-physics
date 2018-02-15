@@ -1,8 +1,8 @@
 !>  \file sfc_drv.f
-!!  This file contains the NOAH land surface scheme driver.
+!!  This file contains the Noah land surface scheme driver.
 
-!> \defgroup NOAH GFS NOAH Land Surface Scheme
-!! \brief This it the NOAH Land Surface Model (NOAH LSM).
+!> \defgroup NOAH GFS Noah Land Surface Scheme
+!! \brief This it the Noah Land Surface Model (Noah LSM).
 !!
 !! Land-atmosphere interactions are a main driver of Earth's surface 
 !! water and energy budgets. The importance of the land surface is 
@@ -33,12 +33,12 @@
 !! small vertical dashed lines (no arrows) represent precipitation
 !! \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994), Ek and Holtslag (2004))" width=10cm
 !! The land-surface model component was substantially upgraded from the Oregon
-!! State University (OSU) land surface model to EMC's new NOAH Land Surface Model
-!! (NOAH LSM) during the major implementation in the NCEP Global Forecast System
-!! (GFS) on May 31, 2005. Forecast System (GFS). The NOAH LSM embodies about 10 
+!! State University (OSU) land surface model to EMC's new Noah Land Surface Model
+!! (Noah LSM) during the major implementation in the NCEP Global Forecast System
+!! (GFS) on May 31, 2005. Forecast System (GFS). The Noah LSM embodies about 10 
 !! years of upgrades (see Chen et al. 1996 
 !! \cite chen_et_al_1996; Koren et al. 1999 \cite koren_et_al_1999; Ek et al. 2003
-!! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The NOAH LSM upgrade includes: 
+!! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The Noah LSM upgrade includes: 
 !! - An increase from two (10, 190 cm thick) to four soil layers (10, 
 !! 30, 60, 100 cm thick) 
 !! - Addition of frozen soil physics 
@@ -59,7 +59,7 @@
 !!
 !!\section Intraphysics Intraphysics Communication
 !! 
-! \defgroup NOAH_pre NOAH Land Surface Pre
+! \defgroup NOAH_pre Noah Land Surface Pre
 ! \ingroup NOAH
 !  \brief Brief description of the parameterization
 ! @{
@@ -304,7 +304,7 @@
 !> \defgroup NOAH_drv GFS sfc_drv Main
 !! \ingroup NOAH
 !! @{
-!!  \brief This is NOAH LSM driver scheme.
+!!  \brief This is Noah LSM driver scheme.
 !!
 !! \section arg_table_lsm_noah_run Argument Table
 !!| local var name | longname                                                                     | description                                                     | units      | rank | type    |    kind   | intent | optional |
