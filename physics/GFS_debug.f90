@@ -109,9 +109,7 @@
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htlw0',            Tbd%htlw0)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htswc',            Tbd%htswc)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htsw0',            Tbd%htsw0)
-                     call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%sec',              Tbd%sec)
-                     call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%blksz(Tbd%blkno)', Tbd%blksz(Tbd%blkno))
-                     !call Interstitial%mprint(mpirank,omprank,Tbd%blkno)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Model%sec',            Model%sec)
                  end if
 !$OMP BARRIER
              end do

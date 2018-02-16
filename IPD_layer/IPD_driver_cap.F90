@@ -34,7 +34,8 @@ module IPD_driver_cap
                             IPD_interstitial_type
 #ifdef CCPP
     use            :: IPD_driver,                                      &
-                      only: IPD_initialize
+                      only: IPD_initialize,                            &
+                            IPD_setup_step
 #else
     use            :: IPD_driver,                                      &
                       only: IPD_initialize,                            &
@@ -51,7 +52,8 @@ module IPD_driver_cap
 
     private
 #ifdef CCPP
-    public :: ipd_initialize_cap
+    public :: ipd_initialize_cap,     &
+              ipd_setup_step_cap
 #else
     public :: ipd_initialize_cap,     &
               ipd_setup_step_cap,     &
@@ -134,7 +136,6 @@ module IPD_driver_cap
         l_salp_data = salp_data
     end subroutine ipd_initialize_cap
 
-#ifndef CCPP
     subroutine ipd_setup_step_cap(ptr) bind(c)
 
         type(c_ptr), intent(inout) :: ptr
@@ -143,7 +144,7 @@ module IPD_driver_cap
         integer, allocatable             :: dims(:)
         type(ccpp_t),           pointer  :: cdata
         type(IPD_control_type), pointer  :: IPD_Control
-        type(IPD_data_type),    pointer  :: IPD_Data
+        type(IPD_data_type),    pointer  :: IPD_Data(:)
         type(IPD_diag_type),    pointer  :: IPD_Diag(:)
         type(IPD_restart_type), pointer  :: IPD_Restart
         type(c_ptr)                      :: tmp
@@ -156,11 +157,12 @@ module IPD_driver_cap
         end if
         call c_f_pointer(tmp, IPD_Control)
 
-        call ccpp_fields_get(cdata, 'IPD_Data', tmp, ierr)
+        call ccpp_fields_get(cdata, 'IPD_Data', tmp, ierr, dims=dims)
         if (ierr /= 0) then
             call ccpp_error('Unable to retrieve IPD_Data')
         end if
-        call c_f_pointer(tmp, IPD_Data)
+        call c_f_pointer(tmp, IPD_Data, dims)
+        deallocate(dims)
 
         call ccpp_fields_get(cdata, 'IPD_Diag', tmp, ierr, dims=dims)
         if (ierr /= 0) then
@@ -182,6 +184,7 @@ module IPD_driver_cap
 
     end subroutine IPD_setup_step_cap
 
+#ifndef CCPP
     subroutine ipd_radiation_step_cap(ptr) bind(c)
 
         type(c_ptr), intent(inout) :: ptr

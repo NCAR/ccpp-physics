@@ -5,7 +5,6 @@ module physics_abstraction_layer
                              statein_type      =>  GFS_statein_type,    &
                              stateout_type     =>  GFS_stateout_type,   &
                              sfcprop_type      =>  GFS_sfcprop_type,    &
-                             sfccycle_type     =>  GFS_sfccycle_type,   &
                              coupling_type     =>  GFS_coupling_type,   &
                              grid_type         =>  GFS_grid_type,       &
                              tbd_type          =>  GFS_tbd_type,        &
@@ -15,7 +14,8 @@ module physics_abstraction_layer
                              interstitial_type =>  GFS_interstitial_type
 
 #ifdef CCPP
-  use GFS_driver,      only: initialize       =>  GFS_initialize
+  use GFS_driver,      only: initialize       =>  GFS_initialize,       &
+                             time_vary_step   =>  GFS_time_vary_step
 #else
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
                              time_vary_step   =>  GFS_time_vary_step,   &
@@ -32,7 +32,6 @@ module physics_abstraction_layer
   public  statein_type
   public  stateout_type
   public  sfcprop_type
-  public  sfccycle_type
   public  coupling_type
   public  grid_type
   public  tbd_type

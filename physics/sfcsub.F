@@ -1,40 +1,5 @@
       module sfccyc_module
-      use machine , only : kind_io8,kind_io4
       implicit none
-      type sfccycle_clima_type
-        logical                        :: first
-        integer                        :: mon1s
-        integer                        :: mon2s
-        integer                        :: sea1s
-        integer                        :: sea2s
-        integer                        :: k1
-        integer                        :: k2
-        integer                        :: m1
-        integer                        :: m2
-        real (kind=kind_io8), pointer  :: tsf(:,:)     => null()
-        real (kind=kind_io8), pointer  :: sno(:,:)     => null()
-        real (kind=kind_io8), pointer  :: zor(:,:)     => null()
-        real (kind=kind_io8), pointer  :: wet(:,:)     => null()
-        real (kind=kind_io8), pointer  :: ais(:,:)     => null()
-        real (kind=kind_io8), pointer  :: acn(:,:)     => null()
-        real (kind=kind_io8), pointer  :: scv(:,:)     => null()
-        real (kind=kind_io8), pointer  :: smc(:,:,:)   => null()
-        real (kind=kind_io8), pointer  :: tg3(:)       => null()
-        real (kind=kind_io8), pointer  :: alb(:,:,:)   => null()
-        real (kind=kind_io8), pointer  :: alf(:,:)     => null()
-        real (kind=kind_io8), pointer  :: vet(:)       => null()
-        real (kind=kind_io8), pointer  :: sot(:)       => null()
-        real (kind=kind_io8), pointer  :: tsf2(:)      => null()
-        real (kind=kind_io8), pointer  :: veg(:,:)     => null()
-        real (kind=kind_io8), pointer  :: stc(:,:,:)   => null()
-        real (kind=kind_io8), pointer  :: vmn(:)       => null()
-        real (kind=kind_io8), pointer  :: vmx(:)       => null()
-        real (kind=kind_io8), pointer  :: slp(:)       => null()
-        real (kind=kind_io8), pointer  :: abs(:)       => null()
-      contains
-        procedure :: create  => sfccycle_clima_create
-      end type sfccycle_clima_type
-!
       save
 !
 !  grib code for each parameter - used in subroutines sfccycle and setrmsk.
@@ -62,65 +27,6 @@
       integer            :: veg_type_landice
       integer            :: soil_type_landice
 !
-      contains
-!
-        subroutine sfccycle_clima_create (Clima, len, lsoil)
-          implicit none
-          class(sfccycle_clima_type) :: Clima
-          integer,        intent(in) :: len, lsoil
-!
-          Clima%first = .true.
-          Clima%mon1s = 0
-          Clima%mon2s = 0
-          Clima%sea1s = 0
-          Clima%sea2s = 0
-          Clima%k1    = 0
-          Clima%k2    = 0
-          Clima%m1    = 0
-          Clima%m2    = 0
-!
-          allocate (Clima%tsf  (len,2)      )
-          allocate (Clima%sno  (len,2)      )
-          allocate (Clima%zor  (len,2)      )
-          allocate (Clima%wet  (len,2)      )
-          allocate (Clima%ais  (len,2)      )
-          allocate (Clima%acn  (len,2)      )
-          allocate (Clima%scv  (len,2)      )
-          allocate (Clima%smc  (len,lsoil,2))
-          allocate (Clima%tg3  (len)        )
-          allocate (Clima%alb  (len,4,2)    )
-          allocate (Clima%alf  (len,2)      )
-          allocate (Clima%vet  (len)        )
-          allocate (Clima%sot  (len)        )
-          allocate (Clima%tsf2 (len)        )
-          allocate (Clima%veg  (len,2)      )
-          allocate (Clima%stc  (len,lsoil,2))
-          allocate (Clima%vmn  (len)        )
-          allocate (Clima%vmx  (len)        )
-          allocate (Clima%slp  (len)        )
-          allocate (Clima%abs  (len)        )
-!
-          Clima%tsf   = 0.0
-          Clima%sno   = 0.0
-          Clima%zor   = 0.0
-          Clima%wet   = 0.0
-          Clima%ais   = 0.0
-          Clima%acn   = 0.0
-          Clima%scv   = 0.0
-          Clima%smc   = 0.0
-          Clima%tg3   = 0.0
-          Clima%alb   = 0.0
-          Clima%alf   = 0.0
-          Clima%vet   = 0.0
-          Clima%sot   = 0.0
-          Clima%tsf2  = 0.0
-          Clima%veg   = 0.0
-          Clima%stc   = 0.0
-          Clima%vmn   = 0.0
-          Clima%vmx   = 0.0
-          Clima%slp   = 0.0
-          Clima%abs   = 0.0
-        end subroutine sfccycle_clima_create
       end module sfccyc_module
       subroutine sfccycle_sub(lugb,len,lsoil,sig1t,deltsfc
      &,                   iy,im,id,ih,fh
@@ -131,10 +37,7 @@
      &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs
      &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,f10m
      &,                   vegfcs,vetfcs,sotfcs,alffcs
-     &,                   cvfcs,cvbfcs,cvtfcs
-     &,                   glacir, amxice, tsfcl0
-     &,                   me,nlunit,ialb
-     &,                   ifp, clima_data
+     &,                   cvfcs,cvbfcs,cvtfcs,me,nlunit,ialb
      &,                   isot,ivegsrc)
 !
       use machine , only : kind_io8,kind_io4
@@ -210,7 +113,7 @@
      &                     abslmx,abslmn,absomx,absomn,abssmx,
      &                     abssmn,absimx,absimn,absjmx,absjmn
      &,                    sihnew
-!
+
       integer imsk,jmsk,ifp,irtscv,irtacn,irtais,irtsno,irtzor,
      &        irtalb,irtsot,irtalf,j,irtvet,irtsmc,irtstc,irtveg,
      &        irtwet,k,iprnt,kk,irttsf,iret,i,igrdbg,iy,im,id,
@@ -218,11 +121,10 @@
      &        ictsfl,iczors,icplrl,icplrs,iczorl,icalfs,icsnol,
      &        icsnos,irttg3,me,kqcm, nlunit,ialb
      &,       irtvmn, irtvmx, irtslp, irtabs, isot, ivegsrc
-     !
-      type (sfccycle_clima_type) :: clima_data
-!
       logical gausm, deads, qcmsk, znlst, monclm, monanl,
      &        monfcs, monmer, mondif, landice
+
+      integer num_parthds
 !
 !  this is a limited point version of surface program.
 !
@@ -516,7 +418,7 @@
 !  permanent/extremes
 !
       character*500 fnglac,fnmxic
-      real (kind=kind_io8) :: glacir(len),amxice(len),tsfcl0(len)
+      real (kind=kind_io8), allocatable :: glacir(:),amxice(:),tsfcl0(:)
 !
 !     tsfcl0 is the climatological tsf at fh=0
 !
@@ -640,6 +542,7 @@
 !       rec. 30    vmx
 !       rec. 31    slp
 !       rec. 32    abs
+
 !
 !  debug only
 !   ldebug=.true. creates bges files for climatology and analysis
@@ -785,8 +688,9 @@
       data ccnp/1.0/
       data ccv/1.0/,   ccvb/1.0/, ccvt/1.0/
 !
+      data ifp/0/
 !
-      save fnglac,fnmxic,
+      save ifp,fnglac,fnmxic,
      &     fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &     fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
      &     fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
@@ -827,6 +731,7 @@
      &,    cvmnl,  cvmns,  cvmxl, cvmxs, cslpl, cslps,
      &     cabsl,  cabss
      &,    imsk, jmsk, slmskh, blnmsk, bltmsk
+     &,    glacir, amxice, tsfcl0
      &,    caisl, caiss, cvegs
 !
       lprnt = .false.
@@ -1081,6 +986,9 @@
 !
 !  reading permanent/extreme features (glacier points and maximum ice extent)
 !
+        allocate (tsfcl0(len))
+        allocate (glacir(len))
+        allocate (amxice(len))
 !
 !  read glacier
 !
@@ -1130,34 +1038,23 @@
 !
       percrit=critp1
 !
-      call clima(
-     &           clima_data%first, clima_data%mon1s, clima_data%mon2s
-     &,          clima_data%sea1s, clima_data%sea2s, clima_data%k1
-     &,          clima_data%k2, clima_data%m1, clima_data%m2
-     &,          clima_data%tsf, clima_data%sno, clima_data%zor
-     &,          clima_data%wet, clima_data%ais, clima_data%acn
-     &,          clima_data%scv, clima_data%smc, clima_data%tg3
-     &,          clima_data%alb, clima_data%alf, clima_data%vet
-     &,          clima_data%sot, clima_data%tsf2, clima_data%veg
-     &,          clima_data%stc, clima_data%vmn, clima_data%vmx
-     &,          clima_data%slp, clima_data%abs
-     &,          lugb,iy,im,id,ih,fh,len,lsoil,slmask
-     &,          fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc
-     &,          fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc
-     &,          fnvetc,fnsotc
-     &,          fnvmnc,fnvmxc,fnslpc,fnabsc
-     &,          tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm
-     &,          tg3clm,cvclm ,cvbclm,cvtclm
-     &,          cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm
-     &,          vetclm,sotclm,alfclm
-     &,          vmnclm,vmxclm,slpclm,absclm
-     &,          kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais
-     &,          kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg
-     &,          kpdvet,kpdsot,kpdalf,tsfcl0
-     &,          kpdvmn,kpdvmx,kpdslp,kpdabs
-     &,          deltsfc, lanom
-     &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
-     &,          me, lprnt, iprnt, fnalbc2, ialb)
+      call clima(lugb,iy,im,id,ih,fh,len,lsoil,slmask,
+     &           fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
+     &           fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
+     &           fnvetc,fnsotc,
+     &           fnvmnc,fnvmxc,fnslpc,fnabsc,
+     &           tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
+     &           tg3clm,cvclm ,cvbclm,cvtclm,
+     &           cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,
+     &           vetclm,sotclm,alfclm,
+     &           vmnclm,vmxclm,slpclm,absclm,
+     &           kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,
+     &           kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
+     &           kpdvet,kpdsot,kpdalf,tsfcl0,
+     &           kpdvmn,kpdvmx,kpdslp,kpdabs,
+     &           deltsfc, lanom
+     &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
+     &,          lprnt, iprnt, fnalbc2, ialb)
 !     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
@@ -3097,8 +2994,8 @@
       integer jy,ifills,ix,len,inttyp,me,i,j,jmxin,imxin,jq,jx,j1,j2,
      &        ii,i1,i2,kmami,it
       integer nx,kxs,kxt
-      integer, allocatable :: imxnx(:)
-      integer, allocatable :: ifill(:)
+      integer, allocatable, save :: imxnx(:)
+      integer, allocatable       :: ifill(:)
 !
 !  interpolation from lat/lon or gaussian grid to other lat/lon grid
 !
@@ -3113,13 +3010,20 @@
 !
       logical lmask
 !
-      integer num_threads
+      logical first
+      integer   num_threads
+      data first /.true./
+      save num_threads, first
 !
       integer len_thread_m, len_thread, i1_t, i2_t
       integer num_parthds
 !
-      num_threads = num_parthds()
-      allocate (imxnx(num_threads))
+      if (first) then
+         num_threads = num_parthds()
+         first = .false.
+         if (.not. allocated(imxnx)) allocate (imxnx(num_threads))
+      endif
+!
       if (me == 0) print *,' num_threads =',num_threads,' me=',me
 !
 !     if(me .eq. 0) then
@@ -3612,7 +3516,6 @@
 !
       kmami=1
       if (me .eq. 0) call maxmin(gauout,len,kmami)
-      deallocate(imxnx)
 !
       return
       end subroutine la2ga
@@ -4716,12 +4619,19 @@
      &                     rstcl(lsoil), rstcs(lsoil)
       real (kind=kind_io8) qsmcl(lsoil), qsmcs(lsoil),
      &                     qstcl(lsoil), qstcs(lsoil)
-      integer num_threads
+      logical first
+      integer   num_threads
+      data first /.true./
+      save num_threads, first
 !
       integer len_thread_m, i1_t, i2_t, it
       integer num_parthds
 !
-      num_threads = num_parthds()
+      if (first) then
+         num_threads = num_parthds()
+         first = .false.
+      endif
+!
 !  coeeficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
 !  1.0 = use of forecast
@@ -5376,12 +5286,19 @@
       integer iwk(len)
       logical lgchek
 !
-      integer num_threads
+      logical first
+      integer   num_threads
+      data first /.true./
+      save num_threads, first
 !
       integer len_thread_m, i1_t, i2_t, it
       integer num_parthds
 !
-      num_threads = num_parthds()
+      if (first) then
+         num_threads = num_parthds()
+         first = .false.
+      endif
+!
 !  check against land-sea mask and ice cover mask
 !
       if(me .eq. 0) then
@@ -6570,43 +6487,58 @@
      &,                    rlnout(imxout), rltout(jmxout)
       logical gaus
 !
-      real :: gaul(jmxin)
+      real, allocatable :: gaul(:)
       real (kind=kind_io8) ddx(imxout),ddy(jmxout)
       integer iindx1(imxout), iindx2(imxout),
      &        jindx1(jmxout), jindx2(jmxout)
-      integer n,kspla
+      integer jmxsav,n,kspla
+      data    jmxsav/0/
+      save    jmxsav, gaul, dlati
       real (kind=kind_io8) radi
       real (kind=kind_io8) a(jmxin), w(jmxin)
 !
 !
-      integer num_threads
+      logical first
+      integer   num_threads
+      data first /.true./
+      save num_threads, first
 !
       integer len_thread_m, j1_t, j2_t, it
       integer num_parthds
 !
-      num_threads = num_parthds()
-      if (gaus) then
-cjfe    call gaulat(gaul,jmxin)
-cjfe
-!
-        kspla=4
-        call splat(kspla, jmxin, a, w)
-!
-        radi = 180.0 / (4.*atan(1.))
-        do  n=1,jmxin
-          gaul(n) = acos(a(n)) * radi
-        enddo
-cjfe
-        do j=1,jmxin
-          gaul(j) = 90. - gaul(j)
-        enddo
-      else
-        dlat = -2*blto / float(jmxin-1)
-        dlati = 1 / dlat
-        do j=1,jmxin
-         gaul(j) = blto + (j-1) * dlat
-        enddo
+      if (first) then
+         num_threads = num_parthds()
+         first = .false.
       endif
+!
+      if (jmxin .ne. jmxsav) then
+        if (jmxsav .gt. 0) deallocate (gaul, stat=iret)
+        allocate (gaul(jmxin))
+        jmxsav = jmxin
+        if (gaus) then
+cjfe      call gaulat(gaul,jmxin)
+cjfe
+!
+          kspla=4
+          call splat(kspla, jmxin, a, w)
+!
+          radi = 180.0 / (4.*atan(1.))
+          do  n=1,jmxin
+            gaul(n) = acos(a(n)) * radi
+          enddo
+cjfe
+          do j=1,jmxin
+            gaul(j) = 90. - gaul(j)
+          enddo
+        else
+          dlat = -2*blto / float(jmxin-1)
+          dlati = 1 / dlat
+          do j=1,jmxin
+           gaul(j) = blto + (j-1) * dlat
+          enddo
+        endif
+      endif
+!
 !
       dxin  = 360. / float(imxin )
 !
@@ -6844,32 +6776,21 @@ cjfe
       enddo
       return
       end
-      subroutine clima(
-     &                 first, mon1s, mon2s
-     &,                sea1s, sea2s, k1
-     &,                k2, m1, m2
-     &,                tsf, sno, zor
-     &,                wet, ais, acn
-     &,                scv, smc, tg3
-     &,                alb, alf, vet
-     &,                sot, tsf2, veg
-     &,                stc, vmn, vmx
-     &,                slp, abs
-     &,                lugb,iy,im,id,ih,fh,len,lsoil
-     &,                slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc
-     &,                fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc
-     &,                fnvetc,fnsotc
-     &,                fnvmnc,fnvmxc,fnslpc,fnabsc
-     &,                tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm
-     &,                tg3clm,cvclm ,cvbclm,cvtclm
-     &,                cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm
-     &,                vetclm,sotclm,alfclm
-     &,                vmnclm,vmxclm,slpclm,absclm
-     &,                kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais
-     &,                kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg
-     &,                kpdvet,kpdsot,kpdalf,tsfcl0
-     &,                kpdvmn,kpdvmx,kpdslp,kpdabs
-     &,                deltsfc, lanom
+      subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,
+     &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
+     &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
+     &                 fnvetc,fnsotc,
+     &                 fnvmnc,fnvmxc,fnslpc,fnabsc,
+     &                 tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
+     &                 tg3clm,cvclm ,cvbclm,cvtclm,
+     &                 cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,
+     &                 vetclm,sotclm,alfclm,
+     &                 vmnclm,vmxclm,slpclm,absclm,
+     &                 kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,
+     &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
+     &                 kpdvet,kpdsot,kpdalf,tsfcl0,
+     &                 kpdvmn,kpdvmx,kpdslp,kpdabs,
+     &                 deltsfc, lanom
      &,                imsk, jmsk, slmskh, outlat, outlon
      &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb)
 !
@@ -6881,7 +6802,7 @@ cjfe
       integer jdoy,jday,jh,jdow,mmm,mmp,mm,iret,monend,i,k,jm,jd,iy4,
      &        jy,mon1,is2,isx,kpd9,is1,l,nn,mon2,mon,is,kpdsno,
      &        kpdzor,kpdtsf,kpdwet,kpdscv,kpdacn,kpdais,kpdtg3,im,id,
-     &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,
+     &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,m1,m2,k1,k2,
      &        kpdvet,kpdsot,kpdstc,kpdveg,jmsk,imsk,j,ialb
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,landice_cat
       integer kpdalb(4), kpdalf(2)
@@ -6906,7 +6827,7 @@ cjfe
       real (kind=kind_io8) slmask(len), tsfcl0(len)
       real (kind=kind_io8), allocatable :: slmask_noice(:)
 !
-      logical lanom, gaus
+      logical lanom, gaus, first
 !
 ! set z0 based on sib vegetation type
       real (kind=kind_io8) z0_sib(13)
@@ -6936,38 +6857,22 @@ cjfe
       integer w3kindreal,w3kindint
       integer ida(8),jda(8),ivtyp, kpd7
 !
-      integer sea1, sea2, hyr1, hyr2
+      real (kind=kind_io8), allocatable :: tsf(:,:),sno(:,:),
+     &                     zor(:,:),wet(:,:),
+     &                     ais(:,:), acn(:,:),   scv(:,:), smc(:,:,:),
+     &                     tg3(:),   alb(:,:,:), alf(:,:),
+     &                     vet(:),   sot(:),     tsf2(:),
+     &                     veg(:,:), stc(:,:,:)
+     &,                    vmn(:), vmx(:),  slp(:), abs(:)
 !
-! input/output (parts of clima_data)
-      logical, intent(inout) :: first
-      integer, intent(inout) :: mon1s
-      integer, intent(inout) :: mon2s
-      integer, intent(inout) :: sea1s
-      integer, intent(inout) :: sea2s
-      integer, intent(inout) :: k1
-      integer, intent(inout) :: k2
-      integer, intent(inout) :: m1
-      integer, intent(inout) :: m2
-      real(kind=kind_io8), intent(inout) :: tsf(len,2)
-      real(kind=kind_io8), intent(inout) :: sno(len,2)
-      real(kind=kind_io8), intent(inout) :: zor(len,2)
-      real(kind=kind_io8), intent(inout) :: wet(len,2)
-      real(kind=kind_io8), intent(inout) :: ais(len,2)
-      real(kind=kind_io8), intent(inout) :: acn(len,2)
-      real(kind=kind_io8), intent(inout) :: scv(len,2)
-      real(kind=kind_io8), intent(inout) :: smc(len,lsoil,2)
-      real(kind=kind_io8), intent(inout) :: tg3(len)
-      real(kind=kind_io8), intent(inout) :: alb(len,4,2)
-      real(kind=kind_io8), intent(inout) :: alf(len,2)
-      real(kind=kind_io8), intent(inout) :: vet(len)
-      real(kind=kind_io8), intent(inout) :: sot(len)
-      real(kind=kind_io8), intent(inout) :: tsf2(len)
-      real(kind=kind_io8), intent(inout) :: veg(len,2)
-      real(kind=kind_io8), intent(inout) :: stc(len,lsoil,2)
-      real(kind=kind_io8), intent(inout) :: vmn(len)
-      real(kind=kind_io8), intent(inout) :: vmx(len)
-      real(kind=kind_io8), intent(inout) :: slp(len)
-      real(kind=kind_io8), intent(inout) :: abs(len)
+      integer mon1s, mon2s, sea1s, sea2s, sea1, sea2, hyr1, hyr2
+      data first/.true./
+      data mon1s/0/, mon2s/0/, sea1s/0/, sea2s/0/
+!
+      save first, tsf, sno, zor, wet,  ais, acn, scv, smc, tg3,
+     &     alb,   alf, vet, sot, tsf2, veg, stc
+     &,    vmn,   vmx, slp, abs,
+     &     mon1s, mon2s, sea1s, sea2s, k1, k2, m1, m2
 !
       logical lprnt
 !
@@ -7012,6 +6917,17 @@ cjfe
       monend = 9999
 !
       if (first) then
+!
+!    allocate variables to be saved
+!
+       allocate (tsf(len,2), sno(len,2),      zor(len,2),
+     &           wet(len,2), ais(len,2),      acn(len,2),
+     &           scv(len,2), smc(len,lsoil,2),
+     &           tg3(len),   alb(len,4,2),    alf(len,2),
+     &           vet(len),   sot(len), tsf2(len),
+!clu [+1l] add vmn, vmx, slp, abs
+     &           vmn(len),   vmx(len), slp(len), abs(len),
+     &           veg(len,2), stc(len,lsoil,2))
 !
 !     get tsf climatology for the begining of the forecast
 !

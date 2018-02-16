@@ -7,7 +7,7 @@ module IPD_typedefs
                                        sfcprop_type,  coupling_type,     &
                                        grid_type,     tbd_type,          &
                                        cldprop_type,  radtend_type,      &
-                                       intdiag_type,  sfccycle_type,     &
+                                       intdiag_type,                     &
                                        IPD_interstitial_type => interstitial_type
 
 !--------------------
@@ -23,7 +23,6 @@ module IPD_typedefs
     type(cldprop_type)      :: Cldprop
     type(radtend_type)      :: Radtend
     type(intdiag_type)      :: Intdiag
-    type(sfccycle_type)     :: Sfccycle
   end type IPD_data_type
 
 

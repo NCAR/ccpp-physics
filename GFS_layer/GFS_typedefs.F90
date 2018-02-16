@@ -10,21 +10,18 @@ module GFS_typedefs
        use module_radiation_surface,  only: NF_ALBD
        use ozne_def,                  only: levozp, oz_coeff, oz_pres
        use h2o_def,                   only: levh2o, h2o_coeff
-       ! Required for time vary steps, surface-cycling
-       use sfccyc_module,             only: sfccycle_clima_type
 
        implicit none
 
 !> \section arg_table_GFS_typedefs
 !! | local var name                  | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
 !! |---------------------------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | IPD_Data(nb)%Cldprop            | FV3-GFS_Cldprop_type                                   | derived type GFS_cldprop_type in FV3                    | DDT           |    0 | GFS_cldprop_type      |           | none   | F        |
 !! | IPD_Control                     | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | none   | F        |
+!! | IPD_Data(nb)%Cldprop            | FV3-GFS_Cldprop_type                                   | derived type GFS_cldprop_type in FV3                    | DDT           |    0 | GFS_cldprop_type      |           | none   | F        |
 !! | IPD_Data(nb)%Coupling           | FV3-GFS_Coupling_type                                  | derived type GFS_coupling_type in FV3                   | DDT           |    0 | GFS_coupling_type     |           | none   | F        |
 !! | IPD_Data(nb)%Intdiag            | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | none   | F        |
 !! | IPD_Data(nb)%Grid               | FV3-GFS_Grid_type                                      | derived type GFS_grid_type in FV3                       | DDT           |    0 | GFS_grid_type         |           | none   | F        |
 !! | IPD_Data(nb)%Radtend            | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type      |           | none   | F        |
-!! | IPD_Data(nb)%Sfccycle           | FV3-GFS_Sfccycle_type                                  | derived type GFS_sfccycle_type in FV3                   | DDT           |    0 | GFS_sfccycle_type     |           | none   | F        |
 !! | IPD_Data(nb)%Sfcprop            | FV3-GFS_Sfcprop_type                                   | derived type GFS_sfcprop_type in FV3                    | DDT           |    0 | GFS_sfcprop_type      |           | none   | F        |
 !! | IPD_Data(nb)%Statein            | FV3-GFS_Statein_type                                   | derived type GFS_statein_type in FV3                    | DDT           |    0 | GFS_statein_type      |           | none   | F        |
 !! | IPD_Data(nb)%Stateout           | FV3-GFS_Stateout_type                                  | derived type GFS_stateout_type in FV3                   | DDT           |    0 | GFS_stateout_type     |           | none   | F        |
@@ -59,7 +56,6 @@ module GFS_typedefs
 !    GFS_statein_type        !< prognostic state data in from dycore
 !    GFS_stateout_type       !< prognostic state or tendencies return to dycore
 !    GFS_sfcprop_type        !< surface fields
-!    GFS_sfccycle_type       !< surface cycling/update fields
 !    GFS_coupling_type       !< fields to/from coupling with other components (e.g. land/ice/ocean/etc.)
 !    !---GFS specific containers
 !    GFS_control_type        !< model control parameters 
@@ -365,23 +361,6 @@ module GFS_typedefs
     contains
       procedure :: create  => sfcprop_create  !<   allocate array data
   end type GFS_sfcprop_type
-
-
-  !---------------------------------------------------------------------
-  ! GFS_sfccycle_type
-  !   fields required for sfccyle routine called through gcycle
-  !---------------------------------------------------------------------
-  type GFS_sfccycle_type
-
-    integer                             :: ifp                     !<
-    real (kind=kind_phys), pointer      :: glacir (:)   => null()  !<
-    real (kind=kind_phys), pointer      :: amxice (:)   => null()  !<
-    real (kind=kind_phys), pointer      :: tsfcl0 (:)   => null()  !<
-    type (sfccycle_clima_type)          :: clima                   !<
-
-    contains
-      procedure :: create  => sfccycle_create  !<   allocate array data
-  end type GFS_sfccycle_type
 
 
 !---------------------------------------------------------------------
@@ -740,6 +719,8 @@ module GFS_typedefs
 !! | IPD_Control%zhour                    |                                                                               | previous hour diagnostic buckets emptied                | h             |    0 | real      | kind_phys | none   | F        |
 !! | IPD_Control%kdt                      | index_of_time_step                                                            | current forecast iteration                              | index         |    0 | integer   |           | none   | F        |
 !! | IPD_Control%jdat                     |                                                                               | current forecast date and time                          |               |    1 | integer   |           | none   | F        |
+!! | IPD_Control%sec                      | seconds_elapsed_since_model_initialization                                    | seconds elapsed since model initialization              | s             |    0 | real      | kind_phys | none   | F        |
+!! | IPD_Control%blksz                    | horizontal_block_size                                                         | for explicit data blocking: block sizes of all blocks   | count         |    1 | integer   |           | none   | F        |
 !!
   type GFS_control_type
 
@@ -767,6 +748,7 @@ module GFS_typedefs
     integer              :: cny             !< number of points in the j-dir for this cubed-sphere face
     integer              :: lonr            !< number of global points in x-dir (i) along the equator
     integer              :: latr            !< number of global points in y-dir (j) along any meridian
+    integer,     pointer :: blksz(:)        !< for explicit data blocking
 
     !--- coupling parameters
     logical              :: cplflx          !< default no cplflx collection
@@ -986,6 +968,7 @@ module GFS_typedefs
     integer              :: kdt             !< current forecast iteration
     integer              :: jdat(1:8)       !< current forecast date and time
                                             !< (yr, mon, day, t-zone, hr, min, sec, mil-sec)
+    real(kind=kind_phys) :: sec             !< seconds since model initialization
 
     contains
       procedure :: init  => control_initialize
@@ -1075,8 +1058,6 @@ module GFS_typedefs
 !! | IPD_Data(nb)%Tbd%phy_f3d(:,:,3)                 | air_temperature_at_previous_time_step                                                          | air temperature at previous time step                   | K             |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Tbd%phy_f3d(:,:,4)                 | water_vapor_specific_humidity_at_previous_time_step                                            | water vapor specific humidity at previous time step     | kg kg-1       |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Tbd%blkno                          | block_number                                                                                   | for explicit data blocking: block number of this block  | index         |    0 | integer |           | none   | F        |
-!! | IPD_Data(nb)%Tbd%blksz                          | horizontal_block_size                                                                          | for explicit data blocking: block sizes of all blocks   | count         |    1 | integer |           | none   | F        |
-!! | IPD_Data(nb)%Tbd%sec                            | seconds_elapsed_since_model_initialization                                                     | seconds elapsed since model initialization              | s             |    0 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Tbd%htlwc                          | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                     | total sky heating rate due to longwave radiation        | K s-1         |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Tbd%htlw0                          | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step  | clear sky heating rate due to longwave radiation        | K s-1         |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Tbd%htswc                          | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | total sky heating rate due to shortwave radiation       | K s-1         |    2 | real    | kind_phys | none   | F        |
@@ -1116,8 +1097,8 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: phy_f3d  (:,:,:) => null()  !< 3d arrays saved for restart
 
     integer                        :: blkno                       !< for explicit data blocking: block number of this block
-    integer,               pointer :: blksz (:)        => null()  !< for explicit data blocking: horizontal block sizes of all blocks
-    real (kind=kind_phys)          :: sec                         !<
+
+    !--- radiation variables that need to be carried over from radiation to physics
     real (kind=kind_phys), pointer :: htlwc(:,:)       => null()  !<
     real (kind=kind_phys), pointer :: htlw0(:,:)       => null()  !<
     real (kind=kind_phys), pointer :: htswc(:,:)       => null()  !<
@@ -1776,7 +1757,7 @@ module GFS_typedefs
 !----------------
   public GFS_init_type
   public GFS_statein_type,  GFS_stateout_type, GFS_sfcprop_type, &
-         GFS_coupling_type, GFS_sfccycle_type
+         GFS_coupling_type
   public GFS_control_type,  GFS_grid_type,     GFS_tbd_type, &
          GFS_cldprop_type,  GFS_radtend_type,  GFS_diag_type
 
@@ -2008,32 +1989,6 @@ module GFS_typedefs
   end subroutine sfcprop_create
 
 
-  !-------------------------
-  ! GFS_sfccycle_type%create
-  !-------------------------
-  subroutine sfccycle_create (Sfccycle, IM, Model)
-
-    implicit none
-
-    class(GFS_sfccycle_type)           :: Sfccycle
-    integer,                intent(in) :: IM
-    type(GFS_control_type), intent(in) :: Model
-
-    Sfccycle%ifp = 0
-
-    allocate (Sfccycle%glacir  (IM))
-    allocate (Sfccycle%amxice  (IM))
-    allocate (Sfccycle%tsfcl0  (IM))
-
-    Sfccycle%glacir  = clear_val
-    Sfccycle%amxice  = clear_val
-    Sfccycle%tsfcl0  = clear_val
-
-    call Sfccycle%clima%create (IM, Model%lsoil)
-
-  end subroutine sfccycle_create
-
-
 !-------------------------
 ! GFS_coupling_type%create
 !-------------------------
@@ -2246,7 +2201,8 @@ module GFS_typedefs
   subroutine control_initialize (Model, nlunit, fn_nml, me, master, &
                                  logunit, isc, jsc, nx, ny, levs,   &
                                  cnx, cny, gnx, gny, dt_dycore,     &
-                                 dt_phys, idat, jdat, tracer_names)
+                                 dt_phys, idat, jdat, tracer_names, &
+                                 blksz)
 
     !--- modules
     use physcons,         only: max_lon, max_lat, min_lon, min_lat, &
@@ -2279,6 +2235,7 @@ module GFS_typedefs
     integer,                intent(in) :: idat(8)
     integer,                intent(in) :: jdat(8)
     character(len=32),      intent(in) :: tracer_names(:)
+    integer,                intent(in) :: blksz(:)
     !--- local variables
     integer :: n
     integer :: ios
@@ -2538,6 +2495,8 @@ module GFS_typedefs
     Model%cny              = cny
     Model%lonr             = gnx
     Model%latr             = gny
+    allocate(Model%blksz(1:size(blksz)))
+    Model%blksz            = blksz
 
     !--- coupling parameters
     Model%cplflx           = cplflx
@@ -2713,6 +2672,7 @@ module GFS_typedefs
     Model%zhour            = mod(Model%phour,Model%fhzero)
     Model%kdt              = 0
     Model%jdat(1:8)        = jdat(1:8)
+    Model%sec              = 0
 
     !--- stored in wam_f107_kp module
     f107_kp_size      = 56
@@ -2968,6 +2928,8 @@ module GFS_typedefs
       print *, ' cny               : ', Model%cny
       print *, ' lonr              : ', Model%lonr
       print *, ' latr              : ', Model%latr
+      print *, ' blksz(1)          : ', Model%blksz(1)
+      print *, ' blksz(size(blksz)): ', Model%blksz(size(Model%blksz))
       print *, ' '
       print *, 'coupling parameters'
       print *, ' cplflx            : ', Model%cplflx
@@ -3144,6 +3106,7 @@ module GFS_typedefs
       print *, ' zhour             : ', Model%zhour
       print *, ' kdt               : ', Model%kdt
       print *, ' jdat              : ', Model%jdat
+      print *, ' sec               : ', Model%sec
     endif
 
   end subroutine control_print
@@ -3195,13 +3158,12 @@ module GFS_typedefs
 !--------------------
 ! GFS_tbd_type%create
 !--------------------
-  subroutine tbd_create (Tbd, IM, BLKSZ, BLKNO, Model)
+  subroutine tbd_create (Tbd, IM, BLKNO, Model)
 
     implicit none
 
     class(GFS_tbd_type)                :: Tbd
     integer,                intent(in) :: IM
-    integer, dimension(:),  intent(in) :: BLKSZ
     integer,                intent(in) :: BLKNO
     type(GFS_control_type), intent(in) :: Model
 
@@ -3252,11 +3214,7 @@ module GFS_typedefs
     Tbd%phy_f2d  = clear_val
     Tbd%phy_f3d  = clear_val
 
-    allocate (Tbd%blksz (size(BLKSZ)))
-
     Tbd%blkno = BLKNO
-    Tbd%blksz = BLKSZ
-    Tbd%sec   =  clear_val
 
     allocate (Tbd%htlwc (IM,Model%levr+LTP))
     allocate (Tbd%htlw0 (IM,Model%levr+LTP))

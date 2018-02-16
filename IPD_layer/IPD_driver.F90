@@ -5,7 +5,7 @@ module IPD_driver
                                         IPD_diag_type,     IPD_restart_type, &
                                         IPD_interstitial_type
 #ifdef CCPP
-  use physics_abstraction_layer,  only: initialize
+  use physics_abstraction_layer,  only: initialize,        time_vary_step
 #else
   use physics_abstraction_layer,  only: initialize,        time_vary_step,   &
                                         radiation_step1,   physics_step1,    &
@@ -32,8 +32,8 @@ module IPD_driver
 !----------------
 ! functions
   public IPD_initialize
+  public IPD_setup_step
 #ifndef CCPP
-  public IPD_setup_step 
   public IPD_radiation_step
   public IPD_physics_step1
   public IPD_physics_step2
@@ -58,45 +58,44 @@ module IPD_driver
     call initialize (IPD_Control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout,      &
                      IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid, &
                      IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,   &
-                     IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle,                   &
-                     IPD_Interstitial(:), IPD_init_parm)
+                     IPD_Data(:)%Intdiag, IPD_Interstitial(:), IPD_init_parm)
 
 
     !--- populate/associate the Diag container elements
     call diag_populate (IPD_Diag(:), IPD_control, IPD_Data%Statein, IPD_Data(:)%Stateout, &
                         IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,      &
                         IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,        &
-                        IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
+                        IPD_Data(:)%Intdiag, IPD_init_parm)
 
 
     !--- allocate and populate/associate the Restart container elements
     call restart_populate (IPD_Restart, IPD_control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout, &
                            IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid,         &
                            IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,           &
-                           IPD_Data(:)%Intdiag, IPD_Data(:)%Sfccycle, IPD_init_parm)
+                           IPD_Data(:)%Intdiag, IPD_init_parm)
 
   end subroutine IPD_initialize
 
 
-#ifndef CCPP
 !---------------------------------------------
 !  IPD setup step
 !    surface data cycling, random streams, etc
 !---------------------------------------------
   subroutine IPD_setup_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart)
     type(IPD_control_type), intent(inout) :: IPD_Control
-    type(IPD_data_type),    intent(inout) :: IPD_Data
+    type(IPD_data_type),    intent(inout) :: IPD_Data(:)
     type(IPD_diag_type),    intent(inout) :: IPD_Diag(:)
     type(IPD_restart_type), intent(inout) :: IPD_Restart
 
-    call time_vary_step (IPD_Control, IPD_Data%Statein, IPD_Data%Stateout,   &
-                         IPD_Data%Sfcprop, IPD_Data%Coupling, IPD_Data%Grid, &
-                         IPD_Data%Tbd, IPD_Data%Cldprop, IPD_Data%Radtend,   &
-                         IPD_Data%Intdiag, IPD_Data%Sfccycle)
+    call time_vary_step (IPD_Control, IPD_Data(:)%Statein, IPD_Data(:)%Stateout,      &
+                         IPD_Data(:)%Sfcprop, IPD_Data(:)%Coupling, IPD_Data(:)%Grid, &
+                         IPD_Data(:)%Tbd, IPD_Data(:)%Cldprop, IPD_Data(:)%Radtend,   &
+                         IPD_Data(:)%Intdiag)
 
   end subroutine IPD_setup_step
 
 
+#ifndef CCPP
 !--------------------
 !  IPD radiation step
 !--------------------

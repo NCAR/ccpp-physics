@@ -38,7 +38,7 @@ module IPD_CCPP_driver
   !-------------------------------
   ! DH* TODO - CHECK IF WE CAN REMOVE Atm_block completely?
   subroutine IPD_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, IPD_Interstitial, &
-                       nBlocks, Atm_block, Init_parm, l_salp_data, l_snupx, ccpp_suite, step, ierr)
+                       nBlocks, Init_parm, l_salp_data, l_snupx, ccpp_suite, step, ierr)
 
     use namelist_soilveg,  only: salp_data, snupx, max_vegtyp
     use block_control_mod, only: block_control_type
@@ -55,7 +55,6 @@ module IPD_CCPP_driver
     type(IPD_restart_type),      target, intent(inout)           :: IPD_Restart
     type(IPD_interstitial_type), target, intent(inout)           :: IPD_Interstitial(:)
     integer,                     target, intent(in)              :: nBlocks
-    type (block_control_type),   target, intent(in)   , optional :: Atm_block
     type(IPD_init_type),         target, intent(in)   , optional :: Init_parm
     real(kind=kind_phys),                intent(inout), optional :: l_salp_data
     real(kind=kind_phys),                intent(inout), optional :: l_snupx(max_vegtyp)
@@ -76,11 +75,7 @@ module IPD_CCPP_driver
 
     if (step==0) then
 
-      if (.not. present(Atm_block)) then
-        call ccpp_error('Error, IPD init step called without mandatory Atm_block argument')
-        ierr = 1
-        return
-      else if (.not. present(Init_parm)) then
+      if (.not. present(Init_parm)) then
         call ccpp_error('Error, IPD init step called without mandatory Init_parm argument')
         ierr = 1
         return
@@ -106,7 +101,6 @@ module IPD_CCPP_driver
       call ccpp_fields_add(cdata, 'IPD_Diag',         '', c_loc(IPD_Diag),         rank=size(shape(IPD_Diag)),         dims=shape(IPD_Diag),         ierr=ierr)
       call ccpp_fields_add(cdata, 'IPD_Restart',      '', c_loc(IPD_Restart),      ierr=ierr)
       call ccpp_fields_add(cdata, 'IPD_Interstitial', '', c_loc(IPD_Interstitial), rank=size(shape(IPD_Interstitial)), dims=shape(IPD_Interstitial), ierr=ierr)
-      call ccpp_fields_add(cdata, 'Atm_block',        '', c_loc(Atm_block),        ierr=ierr)
       call ccpp_fields_add(cdata, 'Init_parm',        '', c_loc(Init_parm),        ierr=ierr)
       call ccpp_fields_add(cdata, 'salp_data',            l_salp_data,             ierr=ierr)
       call ccpp_fields_add(cdata, 'snupx',                l_snupx,                 ierr=ierr)
@@ -132,15 +126,9 @@ module IPD_CCPP_driver
         end do
       end do
 
+    ! Time vary steps
     else if (step==1) then
-
-      ! DH* TODO - TEST RUNNING THIS OVER ALL BLOCKS USING THREADING?
-      ! Loop over blocks - in general, cannot use OpenMP for this step;
-      ! however, threading may be implemented inside the IPD_setup_step
-      do nb = 1,nBlocks
-        nt = 1
-        call ccpp_run(cdata_block(nb,nt)%suite%ipds(step), cdata_block(nb,nt), ierr)
-      end do
+      call ccpp_run(cdata%suite%ipds(step), cdata, ierr)
 
     ! Radiation, physics and stochastics
     else if (step==2 .or. step==3 .or. step==4) then

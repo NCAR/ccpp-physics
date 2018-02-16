@@ -15,10 +15,8 @@
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | sec            | seconds_elapsed_since_model_initialization             | seconds elapsed since model initialization                            | s             |    0 | real                          | kind_phys | inout  | F        |
-!! | blkno          | block_number                                           | for explicit data blocking: block number of this block                | index         |    0 | integer                       |           | in     | F        |
 !!
-      subroutine GFS_phys_time_vary_1_run (Model, sec, blkno)
+      subroutine GFS_phys_time_vary_1_run (Model)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type
@@ -26,8 +24,6 @@
         implicit none
 
         type(GFS_control_type),           intent(inout) :: Model
-        real(kind=kind_phys),             intent(inout) :: sec
-        integer,                          intent(in)    :: blkno
 
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
@@ -37,41 +33,37 @@
         !--- update calendars and triggers
         rinc(1:5)   = 0
         call w3difdat(Model%jdat,Model%idat,4,rinc)
-        sec = rinc(4)
+        Model%sec = rinc(4)
 
-        if (blkno==1) then
+        Model%phour = Model%sec/con_hr
+        !--- set current bucket hour
+        Model%zhour = Model%phour
+        Model%fhour = (Model%sec + Model%dtp)/con_hr
+        Model%kdt   = nint((Model%sec + Model%dtp)/Model%dtp)
 
-          Model%phour = sec/con_hr
-          !--- set current bucket hour
-          Model%zhour = Model%phour
-          Model%fhour = (sec + Model%dtp)/con_hr
-          Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+        Model%ipt    = 1
+        Model%lprnt  = .false.
+        Model%lssav  = .true.
 
-          Model%ipt    = 1
-          Model%lprnt  = .false.
-          Model%lssav  = .true.
+        !--- radiation triggers
+        Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+        Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
 
-          !--- radiation triggers
-          Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-          Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+        !--- set the solar hour based on a combination of phour and time initial hour
+        Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
 
-          !--- set the solar hour based on a combination of phour and time initial hour
-          Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
-
-          if ((Model%debug) .and. (Model%me == Model%master)) then
-            print *,'   sec ', sec
-            print *,'   kdt ', Model%kdt
-            print *,' nsswr ', Model%nsswr
-            print *,' nslwr ', Model%nslwr
-            print *,' nscyc ', Model%nscyc
-            print *,' lsswr ', Model%lsswr
-            print *,' lslwr ', Model%lslwr
-            print *,' fhour ', Model%fhour
-            print *,' phour ', Model%phour
-            print *,' solhr ', Model%solhr
-          endif
+        if ((Model%debug) .and. (Model%me == Model%master)) then
+          print *,'   sec ', Model%sec
+          print *,'   kdt ', Model%kdt
+          print *,' nsswr ', Model%nsswr
+          print *,' nslwr ', Model%nslwr
+          print *,' nscyc ', Model%nscyc
+          print *,' lsswr ', Model%lsswr
+          print *,' lslwr ', Model%lslwr
+          print *,' fhour ', Model%fhour
+          print *,' phour ', Model%phour
+          print *,' solhr ', Model%solhr
         endif
-!$OMP barrier
 
       end subroutine GFS_phys_time_vary_1_run
 
@@ -88,63 +80,59 @@
       end subroutine GFS_phys_time_vary_2_finalize
 
 !> \section arg_table_GFS_phys_time_vary_2_run Argument Table
-!! | local var name | longname                                                                | description                                                             | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Grid           | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                                        | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                    | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
-!! | Cldprop        | FV3-GFS_Cldprop_type                                                    | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Sfccycle       | FV3-GFS_Sfccycle_type                                                   | Fortran DDT containing FV3-GFS fields for surface cycling               | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
+!! | local var name | longname                                                            | description                                                             | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|---------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Grid           | FV3-GFS_Grid_type_all_blocks                                        | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    1 | GFS_grid_type                 |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                                | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type_all_blocks                                         | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    1 | GFS_tbd_type                  |           | inout  | F        |
+!! | Sfcprop        | FV3-GFS_Sfcprop_type_all_blocks                                     | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    1 | GFS_sfcprop_type              |           | inout  | F        |
+!! | Cldprop        | FV3-GFS_Cldprop_type_all_blocks                                     | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    1 | GFS_cldprop_type              |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type_all_blocks                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    1 | GFS_diag_type                 |           | inout  | F        |
 !!
-      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
 
         use mersenne_twister, only: random_setseed, random_number
         use machine,               only: kind_phys
         use physcons,              only: dxmin, dxinv
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
-                                         GFS_Tbd_type, GFS_sfcprop_type,  &
-                                         GFS_cldprop_type, GFS_diag_type, &
-                                         GFS_sfccycle_type
+                                         GFS_tbd_type, GFS_sfcprop_type,  &
+                                         GFS_cldprop_type, GFS_diag_type
 
         implicit none
 
-        type(GFS_grid_type),              intent(in)    :: Grid
+        type(GFS_grid_type),              intent(in)    :: Grid(:)
         type(GFS_control_type),           intent(inout) :: Model
-        type(GFS_tbd_type),               intent(inout) :: Tbd
-        type(GFS_sfcprop_type),           intent(inout) :: Sfcprop
-        type(GFS_cldprop_type),           intent(inout) :: Cldprop
-        type(GFS_diag_type),              intent(inout) :: Diag
-        type(GFS_sfccycle_type),          intent(inout) :: Sfccycle
+        type(GFS_tbd_type),               intent(inout) :: Tbd(:)
+        type(GFS_sfcprop_type),           intent(inout) :: Sfcprop(:)
+        type(GFS_cldprop_type),           intent(inout) :: Cldprop(:)
+        type(GFS_diag_type),              intent(inout) :: Diag(:)
 
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
         real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
 
-        integer :: i, j, k, iseed, iskip, ix, nb
+        integer :: i, j, k, iseed, iskip, ix, nb, nblks
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
 
-        if (Tbd%blkno==1) then
-          !--- switch for saving convective clouds - cnvc90.f
-          !--- aka Ken Campana/Yu-Tai Hou legacy
-          if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
-            !--- initialize,accumulate,convert
-            Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-          elseif (mod(Model%kdt,Model%nsswr) == 0) then
-            !--- accumulate,convert
-            Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-          elseif (Model%lsswr) then
-            !--- initialize,accumulate
-            Model%clstp = 1100
-          else
-            !--- accumulate
-            Model%clstp = 0100
-          endif
+        nblks = size(Model%blksz)
+
+        !--- switch for saving convective clouds - cnvc90.f
+        !--- aka Ken Campana/Yu-Tai Hou legacy
+        if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
+          !--- initialize,accumulate,convert
+          Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+        elseif (mod(Model%kdt,Model%nsswr) == 0) then
+          !--- accumulate,convert
+          Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+        elseif (Model%lsswr) then
+          !--- initialize,accumulate
+          Model%clstp = 1100
+        else
+          !--- accumulate
+          Model%clstp = 0100
         endif
-!$OMP barrier
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
         if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
@@ -168,13 +156,11 @@
             do j = 1,Model%ny
               do i = 1,Model%nx
                 ix = ix + 1
-                if (ix .gt. Tbd%blksz(nb)) then
+                if (ix .gt. Model%blksz(nb)) then
                   ix = 1
                   nb = nb + 1
                 endif
-                if (nb == Tbd%blkno) then
-                  Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
-                endif
+                Tbd(nb)%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
               enddo
             enddo
           enddo
@@ -182,28 +168,39 @@
 
         !--- o3 interpolation
         if (Model%ntoz > 0) then
-          call ozinterpol (Model%me, Tbd%blksz(Tbd%blkno), Model%idate, Model%fhour, &
-                           Grid%jindx1_o3, Grid%jindx2_o3, Tbd%ozpl, Grid%ddy_o3)
+! DH* OpenMP?
+          do nb = 1, nblks
+            call ozinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
+                             Grid(nb)%jindx1_o3, Grid(nb)%jindx2_o3,              &
+                             Tbd(nb)%ozpl, Grid(nb)%ddy_o3)
+          enddo
         endif
 
         !--- h2o interpolation
         if (Model%h2o_phys) then
-          call h2ointerpol (Model%me, Tbd%blksz(Tbd%blkno), Model%idate, Model%fhour, &
-                            Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
+! DH* OpenMP?
+          do nb = 1, nblks
+            call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
+                              Grid(nb)%jindx1_h, Grid(nb)%jindx2_h,                &
+                              Tbd(nb)%h2opl, Grid(nb)%ddy_h)
+          enddo
         endif
 
         !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
         if (Model%nscyc >  0) then
           if (mod(Model%kdt,Model%nscyc) == 1) THEN
-            call gcycle (Tbd%blksz(Tbd%blkno), Model, Grid, Sfcprop, Cldprop, Sfccycle)
+            call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
           endif
         endif
 
         !--- determine if diagnostics buckets need to be cleared
         if (mod(Model%kdt,Model%nszero) == 1) then
-          call Diag%rad_zero  (Model)
-          call Diag%phys_zero (Model)
+! DH* OpenMP?
+          do nb = 1,nblks
+            call Diag(nb)%rad_zero  (Model)
+            call Diag(nb)%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+          enddo
         endif
 
       end subroutine GFS_phys_time_vary_2_run
