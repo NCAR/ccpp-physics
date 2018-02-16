@@ -151,7 +151,7 @@ module GFS_driver
                      Init_parm%gnx, Init_parm%gny,                 &
                      Init_parm%dt_dycore, Init_parm%dt_phys,       &
                      Init_parm%bdat, Init_parm%cdat,               &
-                     Init_parm%tracer_names)
+                     Init_parm%tracer_names, Init_parm%blksz)
 
     call read_o3data  (Model%ntoz, Model%me, Model%master)
     call read_h2odata (Model%h2o_phys, Model%me, Model%master)
@@ -163,7 +163,7 @@ module GFS_driver
       call Sfcprop      (nb)%create (Init_parm%blksz(nb), Model)
       call Coupling     (nb)%create (Init_parm%blksz(nb), Model)
       call Grid         (nb)%create (Init_parm%blksz(nb), Model)
-      call Tbd          (nb)%create (Init_parm%blksz(nb), Init_parm%blksz(:), nb, Model)
+      call Tbd          (nb)%create (Init_parm%blksz(nb), nb, Model)
       call Cldprop      (nb)%create (Init_parm%blksz(nb), Model)
       call Radtend      (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
@@ -264,7 +264,6 @@ module GFS_driver
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
                                  Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
 
-    use physparam,             only: ictmflg, isolar
     use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
     use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
     use GFS_rad_time_vary,     only: GFS_rad_time_vary_run 
@@ -283,12 +282,9 @@ module GFS_driver
     type(GFS_diag_type),      intent(inout) :: Diag
     type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
 
-    !--- local variables
-    real(kind=kind_phys) :: sec
+    call GFS_phys_time_vary_1_run (Model, Tbd)
 
-    call GFS_phys_time_vary_1_run (Model, sec, Tbd%blkno)
-
-    call GFS_rad_time_vary_run (Model, Statein, Tbd, sec, ictmflg, isolar)
+    call GFS_rad_time_vary_run (Model, Statein, Tbd)
 
     call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
 
