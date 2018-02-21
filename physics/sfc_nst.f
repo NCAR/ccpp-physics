@@ -1,36 +1,141 @@
 !>  \file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
+      module sfc_nst
+
+      contains
+
 !> \defgroup GFS_NSST GFS Near Sea Surface Temperature
 !! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+!! \brief Near Sea Surface Temperature (NSST) is a temperature profile just below the sea surface. The GFS NSST scheme is used to forecast the NSST for two main purposes: supply SSTs to the atmospheric model for the calculation of air-sea heat and moisture fluxes and providing a sub-layer temperature profile forecast for use as a first guess in the Gridpoint Statistical Interpolator (GSI) data assimilation code.
+!!
+!! The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li 2015 \cite Li_2015, and Li and Derber 2009 \cite Li_Derber_2009). The GFS NSST scheme predicts the vertical profile of sea temperature between the surface and a reference level (zr), which is on the order of 5 m.  Only two physical process are considered in this scheme: diurnal thermocline layer warming and thermal skin layer (also known as sub-layer) cooling. All other process that could influence NSST are ignored in this simple scheme.
+!!
+!!This profile is a composed by subdividing the near-surface layer in three parts
+!!
+!!T(z) = Tr + T’w (z) + T’c (z),
+!!
+!!where
+!!Ts = T(z=0) is the SST
+!!T’c (z) is the temperature profile in the skin layer (0 < z <= zc)
+!!T’w (z) is the temperature profile in the warm layer (0 < z <= zr)
+!!Tr is the reference temperature
+!!zc is the depth of the skin layer
+!!
+!!Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
+!!
+!! \htmlonly <style>div.image img[src="NNST.png"]{width:10px;}</style>
+!! \endhtmlonly
+!! @image html NSST.png "Figure 1: NSST profile."
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
 
-!> \brief Brief description of the subroutine
+!> \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
-      subroutine sfc_nst                                                &
-!...................................
-!  ---  inputs:
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
+      subroutine sfc_nst_init
+      end subroutine sfc_nst_init
+
+!> \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
+!!
+!! This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
+!!
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
+      subroutine sfc_nst_finalize
+      end subroutine sfc_nst_finalize
+
+!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!!
+!! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!!
+!! \section arg_table_sfc_nst_run Argument Table
+!! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         | 0    | integer |           | in     | F        |
+!! | km             | soil_vertical_dimension                                                      | vertical layer dimension                                    | count         | 0    | integer |           | in     | F        |
+!! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            | 1    | real    | kind_phys | in     | F        |
+!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         | 1    | real    | kind_phys | in     | F        |
+!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         | 1    | real    | kind_phys | in     | F        |
+!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                              | K             | 1    | real    | kind_phys | in     | F        |
+!! | q1             | specific_humidity_at_lowest_model_layer                                      | surface layer mean specific humidity                        | kg kg-1       | 1    | real    | kind_phys | in     | F        |
+!! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature                            | K             | 1    | real    | kind_phys | in     | F        |
+!! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                         | none          | 1    | real    | kind_phys | in     | F        |
+!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                      | none          | 1    | real    | kind_phys | in     | F        |
+!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                 | Pa            | 1    | real    | kind_phys | in     | F        |
+!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         | 1    | real    | kind_phys | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag          | 1    | integer |           | in     | F        |
+!! | xlon           | longitude                                                                    | longitude                                                   | radians       | 1    | real    | kind_phys | in     | F        |
+!! | sinlat         | sine_of_latitude                                                             | sin of latitude                                             | none          | 1    | real    | kind_phys | in     | F        |
+!! | stress         | surface_wind_stress                                                          | wind stress                                                 | m2 s-2        | 1    | real    | kind_phys | in     | F        |
+!! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          | 1    | real    | kind_phys | in     | F        |
+!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         | 1    | real    | kind_phys | in     | F        |
+!! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc net sw flx into ocean                         | W m-2         | 1    | real    | kind_phys | in     | F        |
+!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount on dyn time step           | m             | 1    | real    | kind_phys | in     | F        |
+!! | timestep       | time_step_for_dynamics                                                       | timestep interval                                           | s             | 0    | real    | kind_phys | in     | F        |
+!! | kdt            | index_of_time_step                                                           | current time step index                                     | index         | 0    | integer |           | in     | F        |
+!! | solhr          | forecast_hour                                                                | fcst hour at the end of prev time step                      | h             | 0    | real    | kind_phys | in     | F        |
+!! | xcosz          | instantaneous_cosine_of_zenith_angle                                         | cosine of solar zenith angle                                | none          | 1    | real    | kind_phys | in     | F        |
+!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                          | m s-1         | 1    | real    | kind_phys | in     | F        |
+!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag          | 1    | logical |           | in     | F        |
+!! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                          | flag          | 1    | logical |           | in     | F        |
+!! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2                     | flag          | 0    | integer |           | in     | F        |
+!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                                       | mm            | 0    | integer |           | in     | F        |
+!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                                       | mm            | 0    | integer |           | in     | F        |
+!! | lprnt          | flag_print                                                                   | flag for printing diagnostics to output                     | flag          | 0    | logical |           | in     | F        |
+!! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                          | index         | 0    | integer |           | in     | F        |
+!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                              | K             | 1    | real    | kind_phys | inout  | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run                | K             | 1    | real    | kind_phys | inout  | F        |
+!! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer                   | K m           | 1    | real    | kind_phys | inout  | F        |
+!! | xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer              | ppt m         | 1    | real    | kind_phys | inout  | F        |
+!! | xu             | diurnal_thermocline_layer_x_current                                          | u-current content in diurnal thermocline layer              | m2 s-1        | 1    | real    | kind_phys | inout  | F        |
+!! | xv             | diurnal_thermocline_layer_y_current                                          | v-current content in diurnal thermocline layer              | m2 s-1        | 1    | real    | kind_phys | inout  | F        |
+!! | xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness                         | m             | 1    | real    | kind_phys | inout  | F        |
+!! | zm             | ocean_mixed_layer_thickness                                                  | mixed layer thickness                                       | m             | 1    | real    | kind_phys | inout  | F        |
+!! | xtts           | sensitivity_of_dtl_heat_content_to_surface_temperature                       | d(xt)/d(ts)                                                 | m             | 1    | real    | kind_phys | inout  | F        |
+!! | xzts           | sensitivity_of_dtl_thickness_to_surface_temperature                          | d(xz)/d(ts)                                                 | m K-1         | 1    | real    | kind_phys | inout  | F        |
+!! | dt_cool        | sub-layer_cooling_amount                                                     | sub-layer cooling amount                                    | K             | 1    | real    | kind_phys | inout  | F        |
+!! | z_c            | sub-layer_cooling_thickness                                                  | sub-layer cooling thickness                                 | m             | 1    | real    | kind_phys | inout  | F        |
+!! | c_0            | coefficient_c_0                                                              | coefficient1 to calculate d(tz)/d(ts)                       | none          | 1    | real    | kind_phys | inout  | F        |
+!! | c_d            | coefficient_c_d                                                              | coefficient2 to calculate d(tz)/d(ts)                       | none          | 1    | real    | kind_phys | inout  | F        |
+!! | w_0            | coefficient_w_0                                                              | coefficient3 to calculate d(tz)/d(ts)                       | none          | 1    | real    | kind_phys | inout  | F        |
+!! | w_d            | coefficient_w_d                                                              | coefficient4 to calculate d(tz)/d(ts)                       | none          | 1    | real    | kind_phys | inout  | F        |
+!! | d_conv         | free_convection_layer_thickness                                              | thickness of free convection layer                          | m             | 1    | real    | kind_phys | inout  | F        |
+!! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         | 1    | real    | kind_phys | inout  | F        |
+!! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             | 1    | real    | kind_phys | inout  | F        |
+!! | qsurf          | surface_specific_humidity                                                    | surface air saturation specific humidity                    | kg kg-1       | 1    | real    | kind_phys |   out  | F        |
+!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                              | W m-2         | 1    | real    | kind_phys |   out  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                      | m s-1         | 1    | real    | kind_phys |   out  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                 | kg m-2 s-1    | 1    | real    | kind_phys |   out  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 | 1    | real    | kind_phys |   out  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       | 1    | real    | kind_phys |   out  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         | 1    | real    | kind_phys |   out  | F        |
+!!
+!! \section NSST_general_algorithm General Algorithm
+!!
+!! This is the main subroutine for the NSST scheme, and it calls the DTM and TSM.
+!!
+!! \section NSST_detailed_algorithm
+!!
+!! Under construction
+!!
+!! @{
+      subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name,                    &
-     &       lprnt, ipr,                                                &
-!  --- input/output
+     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
+     &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
-     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
-!  ---  outputs:
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &
+     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &  ! in/outs from here and above
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep                     &  ! outputs
      &      )
-!
+
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -42,8 +147,8 @@
 !          ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  !
 !            prsl1, prslki, islimsk, xlon, sinlat, stress,              !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
-!            ddvel, flag_iter, flag_guess, nstf_name,                    !
-!            lprnt, ipr,                                                !
+!            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
+!            nstf_name5, lprnt, ipr,                                    !
 !       input/outputs:                                                  !
 !            tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, !
 !            z_c, c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,           !
@@ -92,6 +197,11 @@
 !     sfcemis  - real, sfc lw emissivity (fraction)                im   !
 !     dlwflx   - real, total sky sfc downward lw flux (w/m**2)     im   !
 !     sfcnsw   - real, total sky sfc netsw flx into ocean (w/m**2) im   !
+! DH*
+! The actual unit of rain passed in is m ! see below line 438, qrain(i) = ...
+! where 1000*rain in the nominator converts m to kg m^2; there is still a
+! time unit 's' missing. Need to double-check what is going on.
+! *DH
 !     rain     - real, rainfall rate     (kg/m**2/s)               im   !
 !     timestep - real, timestep interval (second)                  1    !
 !     kdt      - integer, time step counter                        1    !
@@ -101,20 +211,16 @@
 !     flag_iter- logical, execution or not                         im   !
 !                when iter = 1, flag_iter = .true. for all grids   im   !
 !                when iter = 2, flag_iter = .true. when wind < 2   im   !
-!                for both land and ocean (when nstf_name(1) > 0)   im   !
+!                for both land and ocean (when nstf_name1 > 0)     im   !
 !     flag_guess-logical, .true.=  guess step to get CD et al      im   !
 !                when iter = 1, flag_guess = .true. when wind < 2  im   !
 !                when iter = 2, flag_guess = .false. for all grids im   !
-!     nstf_name   -integer array, NSST related flag parameters     1    !
-!                nstf_name(1) : 0 = NSSTM off                      1    !
-!                               1 = NSSTM on but uncoupled         1    !
-!                               2 = NSSTM on and coupled           1    !
-!                nstf_name(2) : 1 = NSSTM spin up on               1    !
-!                               0 = NSSTM spin up off              1    !
-!                nstf_name(3) : 1 = NSST analysis on               1    !
-!                               0 = NSSTM analysis off             1    !
-!                nstf_name(4) : zsea1 in mm                        1    !
-!                nstf_name(5) : zsea2 in mm                        1    !
+!     nstf_name - integers , NSST related flag parameters          1    !
+!                nstf_name1 : 0 = NSSTM off                        1    !
+!                             1 = NSSTM on but uncoupled           1    !
+!                             2 = NSSTM on and coupled             1    !
+!                nstf_name4 : zsea1 in mm                          1    !
+!                nstf_name5 : zsea2 in mm                          1    !
 !     lprnt    - logical, control flag for check print out         1    !
 !     ipr      - integer, grid index for check print out           1    !
 !                                                                       !
@@ -181,7 +287,8 @@
 
 
 !  ---  inputs:
-      integer, intent(in) :: im, km, kdt, ipr,nstf_name(5)
+      integer, intent(in) :: im, km, kdt, ipr, nstf_name1, nstf_name4,  &
+     &       nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
@@ -310,8 +417,9 @@ cc
 
 ! run nst model: dtm + slm
 !
-      zsea1 = 0.001*real(nstf_name(4))
-      zsea2 = 0.001*real(nstf_name(5))
+      zsea1 = 0.001*real(nstf_name4)
+      zsea2 = 0.001*real(nstf_name5)
+
       do i = 1, im
         if ( flag(i) ) then
           tsea      = tsurf(i)
@@ -549,16 +657,16 @@ cc
 !         update tskin when coupled and not guess run
 !         (all other NSST variables have been updated in this case)
 !
-            if ( nstf_name(1) > 1 ) then
+            if ( nstf_name1 > 1 ) then
               tskin(i) = tsurf(i)
-            endif               ! if ( nstf_name(1) > 1  then
+            endif               ! if ( nstf_name1 > 1  then
           endif                 ! if(flag_guess(i)) then
         endif                   ! if((islimsk(i).eq. 0.) ) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
 
-      if ( nstf_name(1) > 1 ) then
+      if ( nstf_name1 > 1 ) then
 !  --- ...  latent and sensible heat flux over open water with updated tskin
 !      for the grids of open water and the iteration is on
         do i = 1, im
@@ -570,7 +678,7 @@ cc
             hflx(i)  = rch(i) * (tskin(i) - theta1(i))
           endif
         enddo
-      endif                   ! if ( nstf_name(1) > 1 ) then
+      endif                   ! if ( nstf_name1 > 1 ) then
 
 !
       do i=1,im
@@ -584,5 +692,248 @@ cc
 !     if (lprnt) print *,' tskin=',tskin(ipr)
 
       return
-      end
+      end subroutine sfc_nst_run
 !> @}
+!! @}
+      end module sfc_nst
+
+
+
+      module sfc_nst_pre
+
+      contains
+
+!> \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
+!! @{
+!! \brief Brief description of the parameterization
+!!
+!! Blah blah blah description of parameterization
+!!
+!! \section diagram Calling Hierarchy Diagram
+!!
+!! Blah blah blah diagram
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! The NSST scheme is one of the three schemes used to represent the
+!! surface in the GFS physics suite. The other two are the Noah land
+!! surface model and the sice simplified ice model.
+!!
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
+      subroutine sfc_nst_pre_init
+      end subroutine sfc_nst_pre_init
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
+      subroutine sfc_nst_pre_finalize
+      end subroutine sfc_nst_pre_finalize
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_pre_run Argument Table
+!! | local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                         | count         | 0    | integer |           | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
+!! | oro            | orography                                                                    | orography                                      | m             | 1    | real    | kind_phys | in     | F        |
+!! | oro_uf         | orography_unfiltered                                                         | unfiltered orographyo                          | m             | 1    | real    | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | in     | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
+!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | out    | F        |
+!!
+!! \section NSST_general_algorithm General Algorithm
+!!
+!! Blah blah general algorithm
+!!
+!! \section NSST_detailed_algorithm Detailed Algorithm
+!! @{
+      subroutine sfc_nst_pre_run                                        &
+     &     ( im, islimsk, oro, oro_uf, tsfc, tsurf, tskin )
+
+      use machine , only : kind_phys
+      use physcons, only: rlapse
+
+      implicit none
+
+!  ---  inputs:
+      integer, intent(in) :: im
+      integer, dimension(im), intent(in) :: islimsk
+      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      real (kind=kind_phys), dimension(im), intent(in) :: tsfc
+
+!  ---  input/outputs:
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+
+!  ---  outputs:
+      real (kind=kind_phys), dimension(im), intent(out) :: tskin
+
+!  ---  locals
+      integer :: i
+      real(kind=kind_phys) :: tem
+
+      tskin = 0.0
+
+      do i = 1, im
+        if ( islimsk(i) == 0 ) then
+          tem      = (oro(i)-oro_uf(i)) * rlapse
+          tskin(i) = tsfc(i)  + tem
+          tsurf(i) = tsurf(i) + tem
+        endif
+      enddo
+
+      return
+      end subroutine sfc_nst_pre_run
+
+!> @}
+!! @}
+      end module sfc_nst_pre
+
+
+
+
+      module sfc_nst_post
+
+      contains
+
+!> \defgroup GFS_NSST_POST GFS Near Sea Surface Temperature Post
+!! @{
+!! \brief Brief description of the parameterization
+!!
+!! Blah blah blah description of parameterization
+!!
+!! \section diagram Calling Hierarchy Diagram
+!!
+!! Blah blah blah diagram
+!!
+!! \section intraphysics Intraphysics Communication
+!!
+!! Blah blah blah intraphysics communication
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
+      subroutine sfc_nst_post_init
+      end subroutine sfc_nst_post_init
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
+      subroutine sfc_nst_post_finalize
+      end subroutine sfc_nst_post_finalize
+
+!> \brief Brief description of the subroutine
+!!
+!! Blah blah description of subroutine
+!!
+!! \section arg_table_sfc_nst_post_run Argument Table
+!! | local var name | longname                                                                     | description                                    | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|----------------------------------------------- |---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                         | count         | 0    | integer |           | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                   | flag          | 1    | integer |           | in     | F        |
+!! | oro            | orography                                                                    | orography                                      | m             | 1    | real    | kind_phys | in     | F        |
+!! | oro_uf         | orography_unfiltered                                                         | unfiltered orography                           | m             | 1    | real    | kind_phys | in     | F        |
+!! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2        | flag          | 0    | integer |           | in     | F        |
+!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                          | mm            | 0    | integer |           | in     | F        |
+!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                          | mm            | 0    | integer |           | in     | F        |
+!! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer      | K m           | 1    | real    | kind_phys | in     | F        |
+!! | xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness            | m             | 1    | real    | kind_phys | in     | F        |
+!! | dt_cool        | sub-layer_cooling_amount                                                     | sub-layer cooling amount                       | K             | 1    | real    | kind_phys | in     | F        |
+!! | z_c            | sub-layer_cooling_thickness                                                  | sub-layer cooling thickness                    | m             | 1    | real    | kind_phys | in     | F        |
+!! | rslimsk        | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                   | flag          | 1    | real    | kind_phys | in     | F        |
+!! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature               | K             | 1    | real    | kind_phys | in     | F        |
+!! | xlon           | longitude                                                                    | longitude                                      | radians       | 1    | real    | kind_phys | in     | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run   | K             | 1    | real    | kind_phys | inout  | F        |
+!! | dtzm           | mean_change_over_depth_in_sea_water_temperature                              | mean of dT(z)  (zsea1 to zsea2)                | K             | 1    | real    | kind_phys | out    | F        |
+!! | tsfc           | surface_skin_temperature                                                     | ocean surface skin temperature                 | K             | 1    | real    | kind_phys | inout  | F        |
+!!
+!! \section NSST_general_algorithm General Algorithm
+!!
+!! Blah blah general algorithm
+!!
+!! \section NSST_detailed_algorithm Detailed Algorithm
+!! @{
+      subroutine sfc_nst_post_run                                       &
+     &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
+     &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
+     &       tsurf, dtzm, tsfc                                          &
+     &     )
+
+      use machine , only : kind_phys
+      use physcons, only: rlapse
+      use module_nst_water_prop, only: get_dtzm_2d
+
+      implicit none
+
+!  ---  inputs:
+      integer, intent(in) :: im
+      integer, dimension(im), intent(in) :: islimsk
+      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
+      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
+     &      dt_cool, z_c, rslimsk, tref, xlon
+
+!  ---  input/outputs:
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+
+!  ---  outputs:
+      real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
+     &      dtzm
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsfc
+
+!  ---  locals
+      integer :: i
+      real(kind=kind_phys) :: zsea1, zsea2
+
+!     if (lprnt) print *,' tseaz2=',tseal(ipr),' tref=',tref(ipr),
+!    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),
+!    &     ' kdt=',kdt
+
+      do i = 1, im
+        if ( islimsk(i) == 0 ) then
+          tsurf(i) = tsurf(i) - (oro(i)-oro_uf(i)) * rlapse
+        endif
+      enddo
+
+!  --- ...  run nsst model  ... ---
+
+      dtzm = 0.0
+      if (nstf_name1 > 1) then
+        zsea1 = 0.001*real(nstf_name4)
+        zsea2 = 0.001*real(nstf_name5)
+        call get_dtzm_2d (xt, xz, dt_cool,                              &
+     &                    z_c, rslimsk, zsea1, zsea2,                   &
+     &                    im, 1, dtzm)
+        do i = 1, im
+          if ( islimsk(i) == 0 ) then
+            tsfc(i) = max(271.2,tref(i) + dtzm(i)) -                    &
+     &                    (oro(i)-oro_uf(i))*rlapse
+          endif
+        enddo
+      endif
+
+!     if (lprnt) print *,' tseaz2=',tsea(ipr),' tref=',tref(ipr),   &
+!    &    ' dt_cool=',dt_cool(ipr),' dt_warm=',dt_warm(ipr),' kdt=',kdt
+
+      return
+      end subroutine sfc_nst_post_run
+
+!> @}
+!! @}
+      end module sfc_nst_post

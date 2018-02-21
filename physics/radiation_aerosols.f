@@ -46,7 +46,7 @@
 !                                                                      !
 !       aerolw(IMAX,NLAY,NBDLW,1) - aerosols optical depth for lw      !
 !       aerolw(IMAX,NLAY,NBDLW,2) - aerosols single scattering albedo  !
-!       aerolw(IMAX,NLAY,NBDLW,3) - aerosols asymetry parameter        !
+!       aerolw(IMAX,NLAY,NBDLW,3) - aerosols asymmetry parameter       !
 !                                                                      !
 !                                                                      !
 !   program history:                                                   !

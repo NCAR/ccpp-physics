@@ -9,7 +9,7 @@ CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
-REPEAT_BRIEF           = YES
+REPEAT_BRIEF           = NO
 ABBREVIATE_BRIEF       =
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
@@ -30,6 +30,7 @@ OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
 EXTENSION_MAPPING      = .f=FortranFixed \
+                         .f90=FortranFree  \
                          .f=FortranFree
 MARKDOWN_SUPPORT       = YES
 AUTOLINK_SUPPORT       = YES
@@ -122,6 +123,9 @@ INPUT                  =  txt/mainpage.txt \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \
+### MP_generic
+                        ../GFS_MP_generic_post.f90 \
+                        ../GFS_calpreciptype.f90   \
 ### Land Surface
                         ../sfc_drv.f \
                         ../sfc_diff.f \

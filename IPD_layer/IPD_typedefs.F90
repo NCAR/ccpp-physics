@@ -7,21 +7,23 @@ module IPD_typedefs
                                        sfcprop_type,  coupling_type,     &
                                        grid_type,     tbd_type,          &
                                        cldprop_type,  radtend_type,      &
-                                       intdiag_type
+                                       intdiag_type,  sfccycle_type,     &
+                                       IPD_interstitial_type => interstitial_type
 
 !--------------------
 !  IPD sub-containers
 !--------------------
   type IPD_data_type
-    type(statein_type)  :: Statein
-    type(stateout_type) :: Stateout
-    type(sfcprop_type)  :: Sfcprop
-    type(coupling_type) :: Coupling
-    type(grid_type)     :: Grid
-    type(tbd_type)      :: Tbd
-    type(cldprop_type)  :: Cldprop
-    type(radtend_type)  :: Radtend
-    type(intdiag_type)  :: Intdiag
+    type(statein_type)      :: Statein
+    type(stateout_type)     :: Stateout
+    type(sfcprop_type)      :: Sfcprop
+    type(coupling_type)     :: Coupling
+    type(grid_type)         :: Grid
+    type(tbd_type)          :: Tbd
+    type(cldprop_type)      :: Cldprop
+    type(radtend_type)      :: Radtend
+    type(intdiag_type)      :: Intdiag
+    type(sfccycle_type)     :: Sfccycle
   end type IPD_data_type
 
 
@@ -29,7 +31,7 @@ module IPD_typedefs
     real(kind=kind_phys), pointer :: var2p(:)   => null()  !< 2D data saved in packed format [dim(ix)]
     real(kind=kind_phys), pointer :: var3p(:,:) => null()  !< 3D data saved in packed format [dim(ix,levs)]
   end type var_subtype
-    
+
 !-------------------------------------------
 ! IPD_restart_type
 !   data necessary for reproducible restarts
@@ -69,6 +71,7 @@ module IPD_typedefs
   public IPD_restart_type
   public IPD_diag_type
   public IPD_init_type
+  public IPD_interstitial_type
 
   CONTAINS
 !*******************************************************************************************

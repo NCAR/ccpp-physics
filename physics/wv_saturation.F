@@ -726,7 +726,7 @@
        integer typ
 
 
-      if (1) then
+      if (.true.) then
 !ice
        if (typ == 1) then
          polysvp = MurphyKoop_svp_ice(t)
