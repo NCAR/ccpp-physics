@@ -33,16 +33,16 @@
 !                                                                          !
 !    the 'radlw_rrtm3_main.f' contains:                                    !
 !                                                                          !
-!       'module_radlw_main'        -- main lw radiation transfer           !
+!       'rrtmg_lw'                 -- main lw radiation transfer           !
 !                                                                          !
-!    in the main module 'module_radlw_main' there are only two             !
+!    in the main module 'rrtmg_lw' there are only two                      !
 !    externally callable subroutines:                                      !
 !                                                                          !
 !       'lwrad'     -- main rrtm1 lw radiation routine                     !
 !       'rlwinit'   -- initialization routine                              !
 !                                                                          !
 !    all the lw radiation subprograms become contained subprograms         !
-!    in module 'module_radlw_main' and many of them are not directly       !
+!    in module 'rrtmg_lw' and many of them are not directly                !
 !    accessable from places outside the module.                            !
 !                                                                          !
 !    compilation sequence is:                                              !
@@ -61,7 +61,7 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!> \ingroup module_radlw_main
+!> \ingroup rrtmg_lw
 !> This module contains plank flux data.
 !========================================!
       module module_radlw_avplank        !
@@ -738,7 +738,7 @@
       end module module_radlw_avplank    !
 !========================================!
 
-!> \ingroup  module_radlw_main
+!> \ingroup  rrtmg_lw
 !> This module contains reference temperature and pressure.
 !!
 !!  - These pressures are chosen such that the ln of the first one
@@ -922,7 +922,7 @@
       end module module_radlw_ref        !
 !========================================!
 
-!> \ingroup module_radlw_main
+!> \ingroup rrtmg_lw
 !> This module contains cloud property coefficients.
 !========================================!
       module module_radlw_cldprlw        !
@@ -1584,7 +1584,7 @@
 !========================================!
 
 !> \defgroup module_radlw_kgbnn module_radlw_kgbnn
-!! \ingroup module_radlw_main
+!! \ingroup rrtmg_lw
 !! @{
 
 !*********************************************************************!

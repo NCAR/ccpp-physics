@@ -29,9 +29,9 @@
 !                                                                          !
 !   the 'radsw_rrtm3_main.f' contains:                                     !
 !                                                                          !
-!      'module_radsw_main'        -- main sw radiation transfer            !
+!      'rrtmg_sw'                 -- main sw radiation transfer            !
 !                                                                          !
-!   in the main module 'module_radsw_main' there are only two              !
+!   in the main module 'rrtmg_sw' there are only two                       !
 !   externally callable subroutines:                                       !
 !                                                                          !
 !      'swrad'      -- main sw radiation routine                           !
@@ -53,7 +53,7 @@
 !           (none)                                                         !
 !                                                                          !
 !   all the sw radiation subprograms become contained subprograms          !
-!   in module 'module_radsw_main' and many of them are not directly        !
+!   in module 'rrtmg_sw' and many of them are not directly                 !
 !   accessable from places outside the module.                             !
 !                                                                          !
 !    derived data type constructs used:                                    !
@@ -261,7 +261,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radsw_main module_radsw_main
+!! \defgroup rrtmg_sw rrtmg_sw
 !! This module includes NCEP's modifications of the rrtmg-sw radiation
 !! code from AER.
 !!
@@ -381,9 +381,9 @@
 !!  - mersenne_twister: program of random number generators using the
 !!    Mersenne-Twister algorithm
 !! - radsw_main.f, which contains:
-!!  - module_radsw_main: the main SW radiation computation programming
+!!  - rrtmg_sw: the main SW radiation computation programming
 !!    source codes, which contains two externally callable subroutines:
-!!   - swrad(): the main radiation routine
+!!   - rrtmg_sw_run(): the main radiation routine
 !!   - rswinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
@@ -403,7 +403,7 @@
 !!  (http://www.rtweb.aer.com/)
 !! @{
 !========================================!
-      module module_radsw_main           !
+      module rrtmg_sw                    !
 !........................................!
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
@@ -504,7 +504,7 @@
 
 !  ---  public accessable subprograms
 
-      public radsw_init, radsw_run, radsw_finalize, rswinit 
+      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
 
 
 ! =================
@@ -580,11 +580,11 @@
 !!\n                    visbm - downward surface uv+vis direct beam flux
 !!\n                    visdf - downward surface uv+vis diffused flux
 
-      subroutine radsw_init ()
-      end subroutine radsw_init
+      subroutine rrtmg_sw_init ()
+      end subroutine rrtmg_sw_init
 
 
-!! \section arg_table_radsw_run Argument Table
+!! \section arg_table_rrtmg_sw_run Argument Table
 !! | local var name  | longname                                                                                      | description                                                              | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                                       | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -637,7 +637,7 @@
 !> \section General_swrad General Algorithm
 !> @{
 !-----------------------------------
-      subroutine radsw_run                                                  &
+      subroutine rrtmg_sw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
      &       gasvmr_co2,                                                &
      &       gasvmr_n2o, gasvmr_ch4,                                    &
@@ -1457,12 +1457,12 @@
 
       return
 !...................................
-      end subroutine radsw_run
+      end subroutine rrtmg_sw_run
 !-----------------------------------
 !> @}
 
-      subroutine radsw_finalize ()
-      end subroutine radsw_finalize
+      subroutine rrtmg_sw_finalize ()
+      end subroutine rrtmg_sw_finalize
 
 
 !> This subroutine initializes non-varying module variables, conversion
@@ -5476,6 +5476,6 @@
 
 !
 !........................................!
-      end module module_radsw_main       !
+      end module rrtmg_sw                !
 !========================================!
 !! @}

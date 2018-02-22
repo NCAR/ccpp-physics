@@ -7,7 +7,7 @@
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
-      module surface_diagnose
+      module sfc_diag
       contains
   
       subroutine sfc_diag_init
@@ -110,5 +110,5 @@
       end subroutine sfc_diag_run
 !> @}
 
-      end module surface_diagnose
+      end module sfc_diag
 !> @}

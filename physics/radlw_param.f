@@ -1,7 +1,7 @@
 !>  \file radlw_param.f
 !!  This file contains LW band parameters setup.
 
-!> \ingroup  module_radlw_main
+!> \ingroup rrtmg_lw
 !! @{
 
 !!!!!  ==============================================================  !!!!!
@@ -31,9 +31,9 @@
 !                                                                          !
 !    the 'radlw_rrtm3_main.f' contains:                                    !
 !                                                                          !
-!       'module_radlw_main'        -- main lw radiation transfer           !
+!       'rrtmg_lw'        -- main lw radiation transfer                    !
 !                                                                          !
-!    in the main module 'module_radlw_main' there are only two             !
+!    in the main module 'rrtmg_lw' there are only two                      !
 !    externally callable subroutines:                                      !
 !                                                                          !
 !       'lwrad'     -- main rrtm3 lw radiation routine                     !

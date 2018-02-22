@@ -12,14 +12,14 @@
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_init Argument Table
+!! \section arg_table_sasas_shal_init Argument Table
 !!
-      subroutine sasasshal_init
-      end subroutine sasasshal_init
+      subroutine sasas_shal_init
+      end subroutine sasas_shal_init
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_run Argument Table
+!! \section arg_table_sasas_shal_run Argument Table
 !! | local var name | longname                                                  | description                                            | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|--------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                                 | count   |    0 | integer |           | in     | F        |
@@ -54,7 +54,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 ! DH* TODO add intent information for all variables
-      subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
+      subroutine sasas_shal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
 !    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
@@ -1494,15 +1494,15 @@ c
       enddo
 !!
       return
-      end subroutine sasasshal_run
+      end subroutine sasas_shal_run
 !> @}
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_init Argument Table
+!! \section arg_table_sasas_shal_init Argument Table
 !!
-      subroutine sasasshal_finalize
-      end subroutine sasasshal_finalize
+      subroutine sasas_shal_finalize
+      end subroutine sasas_shal_finalize
 !> @}
 
       end module sasas_shal
@@ -1512,7 +1512,7 @@ c
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_run Argument Table
+!! \section arg_table_sasas_shal_post_run Argument Table
 !! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
 !! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
 !! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
@@ -1524,7 +1524,7 @@ c
 !! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type                  |           | inout  | F        |
 !!
-      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+      subroutine sasas_shal_post_run (frain, rain1, cnvc, cnvw, Model,   &
      &                               Grid, Diag, Tbd)
 
         use machine,               only: kind_phys
@@ -1561,20 +1561,20 @@ c
           Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
         endif
 
-      end subroutine sasasshal_post_run
+      end subroutine sasas_shal_post_run
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_init Argument Table
+!! \section arg_table_sasas_shal_post_init Argument Table
 !!
-      subroutine sasasshal_post_init ()
-      end subroutine sasasshal_post_init
+      subroutine sasas_shal_post_init ()
+      end subroutine sasas_shal_post_init
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_finalize Argument Table
+!! \section arg_table_sasas_shal_post_finalize Argument Table
 !!
-      subroutine sasasshal_post_finalize ()
-      end subroutine sasasshal_post_finalize
+      subroutine sasas_shal_post_finalize ()
+      end subroutine sasas_shal_post_finalize
 
       end module sasas_shal_post

@@ -179,11 +179,11 @@
 !                                                                      !
 !       'module module_radsw_cntr_para'     in 'radsw_xxxx_param.f'    !
 !       'module module_radsw_parameters'    in 'radsw_xxxx_param.f'    !
-!       'module module_radsw_main'          in 'radsw_xxxx_main.f'     !
+!       'module rrtmg_sw'                   in 'radsw_xxxx_main.f'     !
 !                                                                      !
 !       'module module_radlw_cntr_para'     in 'radlw_xxxx_param.f'    !
 !       'module module_radlw_parameters'    in 'radlw_xxxx_param.f'    !
-!       'module module_radlw_main'          in 'radlw_xxxx_main.f'     !
+!       'module rrtmg_lw'                   in 'radlw_xxxx_main.f'     !
 !                                                                      !
 !    where xxxx may vary according to different scheme selection       !
 !                                                                      !
@@ -327,7 +327,7 @@
 
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
-      use module_radsw_main,         only: rswinit,  radsw_run
+      use rrtmg_sw,                  only: rswinit, rrtmg_sw_run
 
       use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
       use GFS_RRTMG_post,            only: GFS_RRTMG_post_run
@@ -337,7 +337,7 @@
       use GFS_radlw_post,            only: GFS_radlw_post_run
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-      use module_radlw_main,         only: rlwinit,  radlw_run
+      use rrtmg_lw,                  only: rlwinit, rrtmg_lw_run
       use GFS_typedefs,              only: GFS_statein_type,             &
                                            GFS_stateout_type,            &
                                            GFS_sfcprop_type,             &
@@ -623,9 +623,9 @@
 !! - cloud initialization routine:
 !! call module_radiation_clouds::cld_init()
 !! - LW radiation initialization routine:
-!! call module_radlw_main::rlwinit()
+!! call rrtmg_lw::rlwinit()
 !! - SW radiation initialization routine:
-!! call module_radsw_main::rswinit()
+!! call rrtmg_sw::rswinit()
 !     Initialization
 
       call sol_init ( me )          !  --- ...  astronomy initialization routine
@@ -1126,46 +1126,46 @@
 !          faerlw(:,:,:,2)-  lw aerosols single scattering albedo       !
 !          faerlw(:,:,:,3)-  lw aerosols asymmetry parameter            !
 !                                                                       !
-!     6. sw fluxes at toa:    (defined in 'module_radsw_main')          !
+!     6. sw fluxes at toa:    (defined in 'rrtmg_sw')                   !
 !        (topfsw_type -- derived data type for toa rad fluxes)          !
 !          topfsw(:)%upfxc  -  total sky upward flux at toa             !
 !          topfsw(:)%dnfxc  -  total sky downward flux at toa           !
 !          topfsw(:)%upfx0  -  clear sky upward flux at toa             !
 !                                                                       !
-!     7. lw fluxes at toa:    (defined in 'module_radlw_main')          !
+!     7. lw fluxes at toa:    (defined in 'rrtmg_lw')                   !
 !        (topflw_type -- derived data type for toa rad fluxes)          !
 !          topflw(:)%upfxc  -  total sky upward flux at toa             !
 !          topflw(:)%upfx0  -  clear sky upward flux at toa             !
 !                                                                       !
-!     8. sw fluxes at sfc:    (defined in 'module_radsw_main')          !
+!     8. sw fluxes at sfc:    (defined in 'rrtmg_sw')                   !
 !        (sfcfsw_type -- derived data type for sfc rad fluxes)          !
 !          sfcfsw(:)%upfxc  -  total sky upward flux at sfc             !
 !          sfcfsw(:)%dnfxc  -  total sky downward flux at sfc           !
 !          sfcfsw(:)%upfx0  -  clear sky upward flux at sfc             !
 !          sfcfsw(:)%dnfx0  -  clear sky downward flux at sfc           !
 !                                                                       !
-!     9. lw fluxes at sfc:    (defined in 'module_radlw_main')          !
+!     9. lw fluxes at sfc:    (defined in 'rrtmg_lw')                   !
 !        (sfcflw_type -- derived data type for sfc rad fluxes)          !
 !          sfcflw(:)%upfxc  -  total sky upward flux at sfc             !
 !          sfcflw(:)%dnfxc  -  total sky downward flux at sfc           !
 !          sfcflw(:)%dnfx0  -  clear sky downward flux at sfc           !
 !                                                                       !
 !! optional radiation outputs:                                          !
-!!   10. sw flux profiles:    (defined in 'module_radsw_main')          !
+!!   10. sw flux profiles:    (defined in 'rrtmg_sw')                   !
 !!       (profsw_type -- derived data type for rad vertical profiles)   !
 !!         fswprf(:,:)%upfxc - total sky upward flux                    !
 !!         fswprf(:,:)%dnfxc - total sky downward flux                  !
 !!         fswprf(:,:)%upfx0 - clear sky upward flux                    !
 !!         fswprf(:,:)%dnfx0 - clear sky downward flux                  !
 !!                                                                      !
-!!   11. lw flux profiles:    (defined in 'module_radlw_main')          !
+!!   11. lw flux profiles:    (defined in 'rrtmg_lw')                   !
 !!       (proflw_type -- derived data type for rad vertical profiles)   !
 !!         flwprf(:,:)%upfxc - total sky upward flux                    !
 !!         flwprf(:,:)%dnfxc - total sky downward flux                  !
 !!         flwprf(:,:)%upfx0 - clear sky upward flux                    !
 !!         flwprf(:,:)%dnfx0 - clear sky downward flux                  !
 !!                                                                      !
-!!   12. sw sfc components:   (defined in 'module_radsw_main')          !
+!!   12. sw sfc components:   (defined in 'rrtmg_sw')                   !
 !!       (cmpfsw_type -- derived data type for component sfc fluxes)    !
 !!         scmpsw(:)%uvbfc  -  total sky downward uv-b flux at sfc      !
 !!         scmpsw(:)%uvbf0  -  clear sky downward uv-b flux at sfc      !
@@ -1237,7 +1237,7 @@
       !                          Grid, Tbd, Cldprop, Radtend, Diag)
       ! *DH
 ! CCPP: L1598-1618
-      call radsw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
+      call rrtmg_sw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! input
           gasvmr(:, :, 1),                                             &
           gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
           Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
@@ -1269,7 +1269,7 @@
           im, tsfg, tsfa)
 
 !CCPP: L1703-1714
-      call radlw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! inputs
+      call rrtmg_lw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! inputs
           gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),           &
           gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),           &
           gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),           &
