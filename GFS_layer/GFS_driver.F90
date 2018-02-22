@@ -277,7 +277,7 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
 
-    call GFS_phys_time_vary_1_run (Model, Tbd)
+    call GFS_phys_time_vary_1_run (Model)
 
     call GFS_rad_time_vary_run (Model, Statein, Tbd)
 
