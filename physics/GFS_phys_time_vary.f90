@@ -15,37 +15,34 @@
 !! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | sec            | seconds_elapsed_since_model_initialization             | seconds elapsed since model initialization                            | s             |    0 | real                          | kind_phys | inout  | F        |
-!! | blkno          | block_number                                           | for explicit data blocking: block number of this block                | index         |    0 | integer                       |           | in     | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_tbd_type                  |           | in     | F        |
 !!
-      subroutine GFS_phys_time_vary_1_run (Model, sec, blkno)
+      subroutine GFS_phys_time_vary_1_run (Model, Tbd)
 
         use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type
+        use GFS_typedefs,          only: GFS_control_type, GFS_tbd_type
 
         implicit none
 
         type(GFS_control_type),           intent(inout) :: Model
-        real(kind=kind_phys),             intent(inout) :: sec
-        integer,                          intent(in)    :: blkno
+        type(GFS_tbd_type),               intent(in)    :: Tbd
 
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys) :: rinc(5)
 
-        !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
-        !--- update calendars and triggers
-        rinc(1:5)   = 0
-        call w3difdat(Model%jdat,Model%idat,4,rinc)
-        sec = rinc(4)
+        if (Tbd%blkno==1) then
+          !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
+          !--- update calendars and triggers
+          rinc(1:5)   = 0
+          call w3difdat(Model%jdat,Model%idat,4,rinc)
+          Model%sec = rinc(4)
 
-        if (blkno==1) then
-
-          Model%phour = sec/con_hr
+          Model%phour = Model%sec/con_hr
           !--- set current bucket hour
           Model%zhour = Model%phour
-          Model%fhour = (sec + Model%dtp)/con_hr
-          Model%kdt   = nint((sec + Model%dtp)/Model%dtp)
+          Model%fhour = (Model%sec + Model%dtp)/con_hr
+          Model%kdt   = nint((Model%sec + Model%dtp)/Model%dtp)
 
           Model%ipt    = 1
           Model%lprnt  = .false.
@@ -59,7 +56,7 @@
           Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
 
           if ((Model%debug) .and. (Model%me == Model%master)) then
-            print *,'   sec ', sec
+            print *,'   sec ', Model%sec
             print *,'   kdt ', Model%kdt
             print *,' nsswr ', Model%nsswr
             print *,' nslwr ', Model%nslwr
@@ -71,7 +68,6 @@
             print *,' solhr ', Model%solhr
           endif
         endif
-!$OMP barrier
 
       end subroutine GFS_phys_time_vary_1_run
 
@@ -144,7 +140,6 @@
             Model%clstp = 0100
           endif
         endif
-!$OMP barrier
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
         if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
@@ -168,7 +163,7 @@
             do j = 1,Model%ny
               do i = 1,Model%nx
                 ix = ix + 1
-                if (ix .gt. Tbd%blksz(nb)) then
+                if (ix .gt. Model%blksz(nb)) then
                   ix = 1
                   nb = nb + 1
                 endif
@@ -182,20 +177,20 @@
 
         !--- o3 interpolation
         if (Model%ntoz > 0) then
-          call ozinterpol (Model%me, Tbd%blksz(Tbd%blkno), Model%idate, Model%fhour, &
+          call ozinterpol (Model%me, Model%blksz(Tbd%blkno), Model%idate, Model%fhour, &
                            Grid%jindx1_o3, Grid%jindx2_o3, Tbd%ozpl, Grid%ddy_o3)
         endif
 
         !--- h2o interpolation
         if (Model%h2o_phys) then
-          call h2ointerpol (Model%me, Tbd%blksz(Tbd%blkno), Model%idate, Model%fhour, &
+          call h2ointerpol (Model%me, Model%blksz(Tbd%blkno), Model%idate, Model%fhour, &
                             Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
         endif
 
         !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
         if (Model%nscyc >  0) then
           if (mod(Model%kdt,Model%nscyc) == 1) THEN
-            call gcycle (Tbd%blksz(Tbd%blkno), Model, Grid, Sfcprop, Cldprop, Sfccycle)
+            call gcycle (Model%blksz(Tbd%blkno), Model, Grid, Sfcprop, Cldprop, Sfccycle)
           endif
         endif
 
