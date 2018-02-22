@@ -8,12 +8,12 @@ module module_physics_driver
   use cs_conv,               only: cs_convr
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
-  use sasas_deep,            only: sasasdeep_run
+  use sasas_deep,            only: sasas_deep_run
   use sfc_nst,               only: sfc_nst_run
   use sfc_nst_pre,           only: sfc_nst_pre_run
   use sfc_nst_post,          only: sfc_nst_post_run
-  use sasas_shal,            only: sasasshal_run
-  use sasas_shal_post,       only: sasasshal_post_run
+  use sasas_shal,            only: sasas_shal_run
+  use sasas_shal_post,       only: sasas_shal_post_run
   use get_prs_fv3,           only: get_prs_fv3_run
   use get_phi_fv3,           only: get_phi_fv3_run
   use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type, &
@@ -35,8 +35,8 @@ module module_physics_driver
   use GFS_suite_interstitial_4, only: GFS_suite_interstitial_4_run
   use GFS_suite_interstitial_5, only: GFS_suite_interstitial_5_run
 
-  use GFS_zhaocarr_gscond,       only: gscond_run
-  use GFS_zhaocarr_precpd,       only: precpd_run
+  use zhaocarr_gscond,           only: zhaocarr_gscond_run
+  use zhaocarr_precpd,           only: zhaocarr_precpd_run
   use GFS_calpreciptype,         only: GFS_calpreciptype_run
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
@@ -44,8 +44,8 @@ module module_physics_driver
   use lsm_noah
   use lsm_noah_pre
   use lsm_noah_post
-  use surface_exchange_coefficients
-  use surface_diagnose
+  use sfc_ex_coef
+  use sfc_diag
   use GFS_surface_loop_control_part1
   use GFS_surface_loop_control_part2
   use sfc_sice_pre,          only: sfc_sice_pre_run
@@ -1724,7 +1724,7 @@ module module_physics_driver
                         islmsk, Statein%vvl, Model%ncld, ud_mf, dd_mf,  &
                         dt_mf, cnvw, cnvc)
         elseif (Model%imfdeepcnv == 2) then
-          call sasasdeep_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
+          call sasas_deep_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
                           Statein%pgr, Statein%phil, clw(:,:,1),        &
                           clw(:,:,2), Stateout%gq0(:,:,1),              &
                           Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
@@ -2179,7 +2179,7 @@ module module_physics_driver
             endif
 
           elseif (Model%imfshalcnv == 2) then
-            call sasasshal_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
+            call sasas_shal_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
                             Statein%pgr, Statein%phil, clw(:,:,1),        &
                             clw(:,:,2), Stateout%gq0(:,:,1),              &
                             Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
@@ -2187,7 +2187,7 @@ module module_physics_driver
                             Statein%vvl, Model%ncld, Diag%hpbl, ud_mf,    &
                             dt_mf, cnvw, cnvc)
 
-            call sasasshal_post_run (frain, lwe_thickness_of_shallow_convective_precipitation_amount, cnvc, cnvw, Model, Grid, Diag, Tbd)
+            call sasas_shal_post_run (frain, lwe_thickness_of_shallow_convective_precipitation_amount, cnvc, cnvw, Model, Grid, Diag, Tbd)
 
           elseif (Model%imfshalcnv == 0) then    ! modified Tiedtke Shallow convecton
                                                  !-----------------------------------
@@ -2428,14 +2428,16 @@ module module_physics_driver
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), Model%lprnt, ipr)
             else
-              call gscond_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Model%dtf, Statein%prsl, Statein%pgr,&
+              call zhaocarr_gscond_run (size(Grid%xlon,1), size(Grid%xlon,1),    &
+                           Model%levs, Model%dtp, Model%dtf, Statein%prsl, Statein%pgr, &
                            Stateout%gq0(:,:,1), clw(:,:,1), clw(:,:,2),          &
                            Stateout%gq0(:,:,Model%ntcw),                         &
                            Stateout%gt0, Tbd%phy_f3d(:,:,1), Tbd%phy_f3d(:,:,2), &
                            Tbd%phy_f2d(:,1), Tbd%phy_f3d(:,:,3),                 &
                            Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,Model%lprnt, ipr)
 
-              call precpd_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,           &
+              call zhaocarr_precpd_run (size(Grid%xlon,1), size(Grid%xlon,1),  &
+                          Model%levs, Model%dtp, del, Statein%prsl,            &
                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),   &
                           Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,            &
                           Model%psautco, Model%prautco, Model%evpco,           &

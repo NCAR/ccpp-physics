@@ -7,7 +7,7 @@
 !!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
-      module surface_exchange_coefficients
+      module sfc_ex_coef
       contains
 
       subroutine sfc_ex_coef_init
@@ -367,5 +367,5 @@
       end subroutine sfc_ex_coef_run
 !> @}
 
-      end module surface_exchange_coefficients
+      end module sfc_ex_coef
 !> @}

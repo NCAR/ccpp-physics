@@ -3,7 +3,7 @@
 !! condensation and evaporation for use in the Zhao and Carr (1997)
 !! \cite zhao_and_carr_1997 scheme.
 
-      module GFS_zhaocarr_gscond
+      module zhaocarr_gscond
       contains
 
 !> \defgroup Zhao-Carr Zhao-Carr Microphysics
@@ -46,10 +46,10 @@
 !> \ingroup condense
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gscond_init  Argument Table
+!! \section arg_table_zhaocarr_gscond_init  Argument Table
 !!
-       subroutine gscond_init
-       end subroutine gscond_init
+       subroutine zhaocarr_gscond_init
+       end subroutine zhaocarr_gscond_init
 
 
 !> \ingroup condense
@@ -63,7 +63,7 @@
 !! steps, and on the temperature. Evaporation of cloud is allowed at
 !! points where the relative humidity is lower than the critical value
 !! required for condensation.
-!! \section arg_table_gscond_run Argument Table
+!! \section arg_table_zhaocarr_gscond_run Argument Table
 !! | local var name | longname                                                   | description                                              | units   | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                     | horizontal loop extent                                   | count   |    0 | integer |           | in     |   F      |
@@ -93,8 +93,8 @@
 !! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
 !> \section Zhao-Carr_cond_detailed Detailed Algorithm
 !> @{
-        subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1,clw2      &
-     &,                  cwm, t                                         &
+        subroutine zhaocarr_gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1  &
+     &,                  clw2, cwm, t                                   &
      &,                  tp, qp, psp, tp1, qp1, psp1, u, lprnt, ipr)
 
 
@@ -538,19 +538,19 @@
       endif
 !-----------------------------------------------------------------------
       return
-      end subroutine gscond_run
+      end subroutine zhaocarr_gscond_run
 !> @}
 
 !> \ingroup condense
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_gscond_finalize  Argument Table
+!! \section arg_table_zhaocarr_gscond_finalize  Argument Table
 !!
-       subroutine gscond_finalize
-       end subroutine gscond_finalize
+       subroutine zhaocarr_gscond_finalize
+       end subroutine zhaocarr_gscond_finalize
 
 
 !> @}
 !! @}
 
-      end module  GFS_zhaocarr_gscond
+      end module zhaocarr_gscond

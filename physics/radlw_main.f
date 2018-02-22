@@ -29,9 +29,9 @@
 !                                                                          !
 !    the 'radlw_rrtm3_main.f' contains:                                    !
 !                                                                          !
-!       'module_radlw_main'        -- main lw radiation transfer           !
+!       'rrtmg_lw'        -- main lw radiation transfer                    !
 !                                                                          !
-!    in the main module 'module_radlw_main' there are only two             !
+!    in the main module 'rrtmg_lw' there are only two                      !
 !    externally callable subroutines:                                      !
 !                                                                          !
 !                                                                          !
@@ -52,7 +52,7 @@
 !           (none)                                                         !
 !                                                                          !
 !    all the lw radiation subprograms become contained subprograms         !
-!    in module 'module_radlw_main' and many of them are not directly       !
+!    in module 'rrtmg_lw' and many of them are not directly                !
 !    accessable from places outside the module.                            !
 !                                                                          !
 !    derived data type constructs used:                                    !
@@ -235,7 +235,7 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \defgroup module_radlw_main module_radlw_main
+!> \defgroup rrtmg_lw rrtmg_lw
 !! \ingroup RRTMG
 !! This module includes NCEP's modifications of the rrtmg-lw radiation
 !! code from AER.
@@ -249,13 +249,13 @@
 !!  - module_radlw_cldprlw: cloud property coefficients
 !!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
 !! - radlw_main.f, which contains:
-!!  - module_radlw_main, which is the main LW radiation transfer
+!!  - rrtmg_lw, which is the main LW radiation transfer
 !!    program and contains two externally callable subroutines:
 !!   - lwrad(): the main LW radiation routine
 !!   - rlwinit(): the initialization routine
 !!
 !! All the LW radiation subprograms become contained subprograms in
-!! module 'module_radlw_main' and many of them are not directly
+!! module 'rrtmg_lw' and many of them are not directly
 !! accessable from places outside the module.
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
@@ -275,7 +275,7 @@
 !!  (http://www.rtweb.aer.com/)
 !! @{
 !========================================!
-      module module_radlw_main           !
+      module rrtmg_lw                    !
 !........................................!
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
@@ -382,7 +382,7 @@
 
 !  ---  public accessable subprograms
 
-      public radlw_init, radlw_run, radlw_finalize, rlwinit
+      public rrtmg_lw_init, rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
 
 
 ! ================
@@ -448,10 +448,10 @@
 !!\n                    upfxc - total sky upward flux
 !!\n                    dnfx0 - clear sky downward flux
 !!\n                    upfx0 - clear sky upward flux
-         subroutine radlw_init ()
-         end subroutine radlw_init
+         subroutine rrtmg_lw_init ()
+         end subroutine rrtmg_lw_init
 
-!! \section arg_table_radlw_run Argument Table
+!! \section arg_table_rrtmg_lw_run Argument Table
 !! | local var name  | longname                                                                                     | description                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|----------------------------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                   | air pressure layer                                         | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -499,7 +499,7 @@
 !> \section gen_lwrad General Algorithm
 !> @{
 ! --------------------------------
-      subroutine radlw_run                                              &
+      subroutine rrtmg_lw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
@@ -796,7 +796,7 @@
       endif
 
 !     if ( lprnt ) then
-!       print *,'  In radlw, isubclw, ipsdlw0,ipseed =',                &
+!       print *,'  In rrtmg_lw, isubclw, ipsdlw0,ipseed =',             &
 !    &          isubclw, ipsdlw0, ipseed
 !     endif
 
@@ -1309,11 +1309,11 @@
       enddo  lab_do_iplon
 
 !...................................
-      end subroutine radlw_run
+      end subroutine rrtmg_lw_run
 !-----------------------------------
 !> @}
-      subroutine radlw_finalize ()
-      end subroutine radlw_finalize 
+      subroutine rrtmg_lw_finalize ()
+      end subroutine rrtmg_lw_finalize 
 
 
 
@@ -6722,7 +6722,7 @@
 
 !
 !........................................!
-      end module module_radlw_main       !
+      end module rrtmg_lw                !
 !========================================!
 
 !! @}
