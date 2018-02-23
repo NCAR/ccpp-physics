@@ -13,26 +13,26 @@
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasdeep_init  Argument Table
+!! \section arg_table_sasas_deep_init  Argument Table
 !! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !!
-      subroutine sasasdeep_init
-      end subroutine sasasdeep_init
+      subroutine sasas_deep_init
+      end subroutine sasas_deep_init
 
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasdeep_finalize  Argument Table
+!! \section arg_table_sasas_deep_finalize  Argument Table
 !! | local var name | longname                                                  | description                        | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
 !!
-      subroutine sasasdeep_finalize
-      end subroutine sasasdeep_finalize
+      subroutine sasas_deep_finalize
+      end subroutine sasas_deep_finalize
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasdeep_run Argument Table
+!! \section arg_table_sasas_deep_run Argument Table
 !! | local var name | longname                                                  | description                                         | units   | rank | type    |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------|------|---------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count   |    0 | integer |           | in     | F        |
@@ -68,7 +68,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 ! DH* TODO add intent information for all variables
-      subroutine sasasdeep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,   &
+      subroutine sasas_deep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,   &
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,      &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc)
 
@@ -2312,7 +2312,7 @@ c
       enddo
 !!
       return
-      end subroutine sasasdeep_run
+      end subroutine sasas_deep_run
       !> @}
       !> @}
 

@@ -34,16 +34,16 @@
 !                                                                          !
 !    the 'radsw_rrtm3_main.f' contains:                                    !
 !                                                                          !
-!       'module_radsw_main'        -- main sw radiation transfer           !
+!       'rrtmg_sw'                 -- main sw radiation transfer           !
 !                                                                          !
-!    in the main module 'module_radsw_main' there are only two             !
+!    in the main module 'rrtmg_sw' there are only two             !
 !    externally callable subroutines:                                      !
 !                                                                          !
 !       'swrad'      -- main rrtm3 sw radiation routine                    !
 !       'rswinit'    -- initialization routine                             !
 !                                                                          !
 !    all the sw radiation subprograms become contained subprograms         !
-!    in module 'module_radsw_main' and many of them are not directly       !
+!    in module 'rrtmg_sw' and many of them are not directly       !
 !    accessable from places outside the module.                            !
 !                                                                          !
 !    compilation sequence is:                                              !
@@ -63,7 +63,7 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \ingroup module_radlw_main
+!> \ingroup rrtmg_lw
 !> This module contains the reference pressures (in logarithm form) at
 !! 59 vertical levels (TOA is omitted), and the mid-latitude summer
 !! (MLS) standard temperature profile for the 59 pressure layers that
@@ -136,7 +136,7 @@
       end module module_radsw_ref        !
 !========================================!
 
-!> \ingroup module_radlw_main
+!> \ingroup rrtmg_lw
 !> This module contains cloud radiative property coefficients.
 !!
 !! For liquid water clouds, cloud radiative property coefficients are
@@ -1924,7 +1924,7 @@
       end module module_radsw_cldprtb    !
 !========================================!
 
-!> \ingroup module_radlw_main
+!> \ingroup rrtmg_lw
 !> This module contains various indexes and coefficients for SW spectral
 !! bands, as well as the spectral distribution of solar flux. The values
 !! of spectral solar flux are derived based on a prescribed solar
@@ -2265,7 +2265,7 @@
 !========================================!
 
 !>\defgroup module_radsw_kgbnn module_radsw_kgbnn
-!>\ingroup  module_radsw_main
+!>\ingroup  rrtmg_sw
 !! @{
 
 !> This module sets up absorption coefficients for band 16: 2600-3250

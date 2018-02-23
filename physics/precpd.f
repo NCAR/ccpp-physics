@@ -2,7 +2,7 @@
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice
 
-      module GFS_zhaocarr_precpd
+      module zhaocarr_precpd
       contains
 
 !> \ingroup Zhao-Carr
@@ -12,17 +12,17 @@
 !> \ingroup precip
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_precpd_init  Argument Table
+!! \section arg_table_zhaocarr_precpd_init  Argument Table
 !!
-      subroutine precpd_init ()
-      end subroutine precpd_init
+      subroutine zhaocarr_precpd_init ()
+      end subroutine zhaocarr_precpd_init
 
 
 !> \ingroup precip
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
-!! \section arg_table_precpd_run Argument Table
+!! \section arg_table_zhaocarr_precpd_run Argument Table
 !! | local var name | longname                                                      | description                                                       | units       | rank |  type   |   kind   | intent  | optional |
 !! |----------------|---------------------------------------------------------------|-------------------------------------------------------------------|-------------|------|---------|----------|---------|----------|
 !! |  im            | horizontal_loop_extent                                        | horizontal loop extent                                            | count       |  0   | integer |          |  in     |   F      |
@@ -88,8 +88,8 @@
 !! \section Zhao-Carr_precip_detailed Detailed Algorithm
 !! @{
 ! DH* TODO add intent() information for variables
-       subroutine precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn,sr        &
-     &,                   rainp,u00k,psautco,prautco,evpco,wminco       &
+       subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
+     &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
      &,                   wk1,lprnt,jpr)
 
 !
@@ -737,17 +737,17 @@
       enddo
 !
       return
-      end subroutine precpd_run
+      end subroutine zhaocarr_precpd_run
 !> @}
 
 !> \ingroup precip
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_precpd_finalize  Argument Table
+!! \section arg_table_zhaocarr_precpd_finalize  Argument Table
 !!
-      subroutine precpd_finalize
-      end subroutine precpd_finalize
+      subroutine zhaocarr_precpd_finalize
+      end subroutine zhaocarr_precpd_finalize
 
 !> @}
 
-      end module GFS_zhaocarr_precpd
+      end module zhaocarr_precpd
