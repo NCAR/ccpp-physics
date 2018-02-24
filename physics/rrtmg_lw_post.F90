@@ -1,18 +1,18 @@
-!>\file GFS_radlw_post
+!>\file rrtmg_lw_post
 !!This file contains
-      module GFS_radlw_post 
+      module rrtmg_lw_post 
       contains
 
-!>\defgroup GFS_radlw_post GFS RRTMG/RADLW Scheme Post
+!>\defgroup rrtmg_lw_post GFS RRTMG scheme post
 !! @{
-!> \section arg_table_GFS_radlw_post_init Argument Table
+!> \section arg_table_rrtmg_lw_post_init Argument Table
 !!
-      subroutine GFS_radlw_post_init()
-      end subroutine GFS_radlw_post_init
+      subroutine rrtmg_lw_post_init()
+      end subroutine rrtmg_lw_post_init
 
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
-!> \section arg_table_GFS_radlw_post_run Argument Table
+!> \section arg_table_rrtmg_lw_post_run Argument Table
 !! | local var name    | longname                                                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent    | optional |
 !! |-------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|-----------|----------|
 !! |   Model           | FV3-GFS_Control_type                                                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | in        | F        |
@@ -27,7 +27,7 @@
 !! |   htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky heating rate due to longwave radiation                              | K s-1    |  2   | real                          | kind_phys | in        | F        |
 !!
 #endif
-      subroutine GFS_radlw_post_run (Model, Grid, Radtend, Coupling,   &
+      subroutine rrtmg_lw_post_run (Model, Grid, Radtend, Coupling,   &
                  ltp, lm, kd, tsfa, htlwc, htlw0)
     
       use machine,                   only: kind_phys
@@ -82,12 +82,12 @@
 
       endif                                ! end_if_lslwr
        
-      end subroutine GFS_radlw_post_run
+      end subroutine rrtmg_lw_post_run
 
-!> \section arg_table_GFS_radlw_post_finalize Argument Table
+!> \section arg_table_rrtmg_lw_post_finalize Argument Table
 !!
-      subroutine GFS_radlw_post_finalize ()
-      end subroutine GFS_radlw_post_finalize
+      subroutine rrtmg_lw_post_finalize ()
+      end subroutine rrtmg_lw_post_finalize
 
 !! @}
-      end module GFS_radlw_post
+      end module rrtmg_lw_post

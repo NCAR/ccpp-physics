@@ -181,12 +181,12 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
 	   ./GFS_layer/GFS_diagnostics.F90                                           \
 	   ./GFS_layer/GFS_driver.F90                                                \
-	   ./physics/GFS_RRTMG_pre.F90                                               \
-	   ./physics/GFS_RRTMG_post.F90                                              \
-	   ./physics/GFS_radsw_pre.F90                                               \
-	   ./physics/GFS_radsw_post.F90                                              \
-	   ./physics/GFS_radlw_pre.F90                                               \
-	   ./physics/GFS_radlw_post.F90                                              \
+	   ./physics/GFS_rrtmg_pre.F90                                               \
+	   ./physics/GFS_rrtmg_post.F90                                              \
+	   ./physics/rrtmg_sw_pre.F90                                                \
+	   ./physics/rrtmg_sw_post.F90                                               \
+	   ./physics/rrtmg_lw_pre.F90                                                \
+	   ./physics/rrtmg_lw_post.F90                                               \
 	   $(GFS_PHYSICS_DRIVER)                                                     \
 	   $(GFS_RADIATION_DRIVER)                                                   \
 	   ./GFS_layer/GFS_restart.F90                                               \
