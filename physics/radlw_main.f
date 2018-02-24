@@ -701,9 +701,9 @@
 
       real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
-     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
-     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow, cld_od
-
+     &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
+     &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
+     &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp
@@ -779,8 +779,39 @@
       lhlw0  = present ( hlw0 )
       lflxprf= present ( flxprf )
 
-
       colamt(:,:) = f_zero
+
+!! --- check for optional input arguments, depending on cloud method
+      if (ilwcliq > 0) then    ! use prognostic cloud method
+        if ( .not.present(cld_lwp) .or. .not.present(cld_ref_liq) .or.  &
+     &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
+     &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
+     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow)) then
+          write(0,*) 'Logic error: ilwcliq>0 requires the following',   &
+     &               ' optional arguments to be present:',              &
+     &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
+     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'
+          ! DH* this would be the place to set the exit/error flag and return - not yet implemented;
+          ! instead, sleep for 2s to allow all processes to write output to stdout, then abort
+          !ierr = 1
+          !return
+          call sleep(2)
+          stop
+          ! *DH
+        end if
+      else                     ! use diagnostic cloud method
+        if ( .not.present(cld_od) ) then
+          write(0,*) 'Logic error: ilwcliq<=0 requires the following',  &
+     &               ' optional argument to be present: cld_od'
+          ! DH* this would be the place to set the exit/error flag and return - not yet implemented;
+          ! instead, sleep for 2s to allow all processes to write output to stdout, then abort
+          !ierr = 1
+          !return
+          call sleep(2)
+          stop
+          ! *DH
+        end if
+      endif                    ! end if_ilwcliq
 
 !> -# Change random number seed value for each radiation invocation
 !!    (isubclw =1 or 2).
