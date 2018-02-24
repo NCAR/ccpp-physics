@@ -597,6 +597,11 @@
 !! | gasvmr_n2o      | volume_mixing_ratio_n2o                                                                       | volume mixing ratio no2                                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
 !! | gasvmr_ch4      | volume_mixing_ratio_ch4                                                                       | volume mixing ratio ch4                                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
 !! | gasvmr_o2       | volume_mixing_ratio_o2                                                                        | volume mixing ratio o2                                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_co       | volume_mixing_ratio_co                                                                        | volume mixing ratio co                                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc11    | volume_mixing_ratio_cfc11                                                                     | volume mixing ratio cfc11                                                | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc12    | volume_mixing_ratio_cfc12                                                                     | volume mixing ratio cfc12                                                | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_cfc22    | volume_mixing_ratio_cfc22                                                                     | volume mixing ratio cfc22                                                | kg kg-1 |    2 | real        | kind_phys | in     | F        |
+!! | gasvmr_ccl4     | volume_mixing_ratio_ccl4                                                                      | volume mixing ratio ccl4                                                 | kg kg-1 |    2 | real        | kind_phys | in     | F        |
 !! | icseed          | seed_random_numbers_sw                                                                        | seed for random number generation for shortwave radiation                | none    |    1 | integer     |           | in     | F        |
 !! | aeraod          | aerosol_optical_depth_for_shortwave_bands_01-16                                               | aerosol optical depth for shortwave bands 01-16                          | none    |    3 | real        | kind_phys | in     | F        |
 !! | aerssa          | aerosol_single_scattering_albedo_for_shortwave_bands_01-16                                    | aerosol single scattering albedo for shortwave bands 01-16               | frac    |    3 | real        | kind_phys | in     | F        |
@@ -639,9 +644,8 @@
 !-----------------------------------
       subroutine rrtmg_sw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
-     &       gasvmr_co2,                                                &
-     &       gasvmr_n2o, gasvmr_ch4,                                    &
-     &       gasvmr_o2,                                                 &    !  ---  inputs
+     &       gasvmr_co2,gasvmr_n2o,gasvmr_ch4,gasvmr_o2,gasvmr_co,      &
+     &       gasvmr_cfc11,gasvmr_cfc12,gasvmr_cfc22,gasvmr_ccl4,        &   !  ---  inputs
      &       icseed, aeraod, aerssa, aerasy,                            &
      &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
@@ -847,15 +851,20 @@
       real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir&
       real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif&
 
-      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
-      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
-      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
-      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc11
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc12
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc22
+      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ccl4
 
       real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
-     &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
-     &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
+     &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od, cld_ssa, cld_asy
 
       real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
@@ -956,6 +965,40 @@
       if ( lhswb ) then
         hswb(:,:,:) = f_zero
       endif
+
+!! --- check for optional input arguments, depending on cloud method
+      if (iswcliq > 0) then    ! use prognostic cloud method
+        if ( .not.present(cld_lwp) .or. .not.present(cld_ref_liq) .or.  &
+     &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
+     &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
+     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow)) then
+          write(0,*) 'Logic error: ilwcliq>0 requires the following',   &
+     &               ' optional arguments to be present:',              &
+     &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
+     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'
+          ! DH* this would be the place to set the exit/error flag and return - not yet implemented;
+          ! instead, sleep for 2s to allow all processes to write output to stdout, then abort
+          !ierr = 1
+          !return
+          call sleep(2)
+          stop
+          ! *DH
+        end if
+      else                     ! use diagnostic cloud method
+        if ( .not.present(cld_od) .or. .not.present(cld_ssa) .or.       &
+     &                                 .not.present(cld_asy)) then
+          write(0,*) 'Logic error: iswcliq<=0 requires the following',  &
+     &               ' optional arguments to be present:',              &
+     &               ' cld_od, cld_ssa, cld_asy'
+          ! DH* this would be the place to set the exit/error flag and return - not yet implemented;
+          ! instead, sleep for 2s to allow all processes to write output to stdout, then abort
+          !ierr = 1
+          !return
+          call sleep(2)
+          stop
+          ! *DH
+        end if
+      endif                    ! end if_iswcliq
 
 !> -# Change random number seed value for each radiation invocation
 !!    (isubcsw =1 or 2).
