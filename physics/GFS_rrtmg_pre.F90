@@ -1,19 +1,19 @@
-!> \file GFS_RRTMG_pre.f90
+!> \file GFS_rrtmg_pre.f90
 !! This file contains
-      module GFS_RRTMG_pre
+      module GFS_rrtmg_pre
 
-      public GFS_RRTMG_pre_run
+      public GFS_rrtmg_pre_run
 
       contains
 
-!> \defgroup GFS_RRTMG_pre GFS RRTMG Scheme Pre
+!> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
 !! @{
-!! \section arg_table_GFS_RRTMG_pre_init Argument Table
+!! \section arg_table_GFS_rrtmg_pre_init Argument Table
 !!
-      subroutine GFS_RRTMG_pre_init ()
-      end subroutine GFS_RRTMG_pre_init
+      subroutine GFS_rrtmg_pre_init ()
+      end subroutine GFS_rrtmg_pre_init
 
-!> \section arg_table_GFS_RRTMG_pre_run Argument Table
+!> \section arg_table_GFS_rrtmg_pre_run Argument Table
 !! | local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
 !! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
 !! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | in     | F        |
@@ -38,8 +38,6 @@
 !! |   tsfg            | surface_ground_temperature_for_radiation                      | surface ground temperature for radiation                                      | K        |  1   | real                          | kind_phys | out    | F        |
 !! |   tsfa            | surface_air_temperature_for_radiation                         | lowest model layer air temperature for radiation                              | K        |  1   | real                          | kind_phys | out    | F        |
 !! |   qlyr            | water_vapor_specific_humidity_at_layer_for_radiation          | water vapor specific humidity at vertical layer for radiation calculation     | kg kg-1  |  2   | real                          | kind_phys | out    | F        |
-!! |   nday            | daytime_points_dimension                                      | daytime points dimension                                                      | count    |  0   | integer                       |           | out    | F        |
-!! |   idxday          | daytime_points                                                | daytime points                                                                | index    |  1   | integer                       |           | out    | F        |
 !! |   olyr            | ozone_concentration_at_layer_for_radiation                    | ozone concentration                                                           | kg kg-1  |  2   | real                          | kind_phys | out    | F        |
 !! |   gasvmr_co2      | volume_mixing_ratio_co2                                       | CO2 volume mixing ratio                                                       | kg kg-1  |  2   | real                          | kind_phys | out    | F        |
 !! |   gasvmr_n2o      | volume_mixing_ratio_n2o                                       | N2O volume mixing ratio                                                       | kg kg-1  |  2   | real                          | kind_phys | out    | F        |
@@ -74,10 +72,10 @@
       ! DH* Attention - the output arguments lm, im, lmk, lmp should not be set
       ! here in the CCPP version - they are defined in the interstitial_create routine *DH
       ! DH* TODO add intent information for each variable (be careful with intent(out))!
-      subroutine GFS_RRTMG_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
+      subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
           Tbd, Cldprop, Radtend,                                     & 
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
-          tlvl, tlyr, tsfg, tsfa, qlyr, nday, idxday,  olyr,         &
+          tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
           gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
           gasvmr_co,    gasvmr_cfc11, gasvmr_cfc12,                  &
           gasvmr_cfc22, gasvmr_ccl4,  gasvmr_cfc113,                 &
@@ -131,16 +129,13 @@
 #ifdef CCPP
       integer, intent(in) :: im, lm, lmk, lmp
       integer :: me, nfxr, ntrac
-      ! nday is intent(out)
-      integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, kd, &
+      integer :: i, j, k, k1, lv, itop, ibtc, LP1, kd, &
                  lla, llb, lya, lyb, kt, kb
 #else
       integer :: me, im, lm, nfxr, ntrac
-      ! nday is intent(out)
-      integer :: i, j, k, k1, lv, itop, ibtc, nday, LP1, LMK, LMP, kd, &
+      integer :: i, j, k, k1, lv, itop, ibtc, LP1, LMK, LMP, kd, &
                  lla, llb, lya, lyb, kt, kb
 #endif
-      integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
       integer, dimension(size(Grid%xlon,1),3) :: mbota, mtopa
 
       !--- REAL VARIABLES
@@ -424,18 +419,6 @@
 
       endif                              ! end_if_ivflip
 
-!>  - Check for daytime points for SW radiation.
-
-      nday = 0
-      idxday = 0
-      do i = 1, IM
-        if (Radtend%coszen(i) >= 0.0001) then
-          nday = nday + 1
-          idxday(nday) = i
-        endif
-      enddo
-
-
 !>  - Call module_radiation_aerosols::setaer(),to setup aerosols
 !! property profile for radiation.
 
@@ -615,14 +598,14 @@
          enddo
        enddo
 
-      end subroutine GFS_RRTMG_pre_run
+      end subroutine GFS_rrtmg_pre_run
    
-!> \section arg_table_GFS_RRTMG_pre_finalize Argument Table
+!> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
 !!
-      subroutine GFS_RRTMG_pre_finalize ()
-      end subroutine GFS_RRTMG_pre_finalize
+      subroutine GFS_rrtmg_pre_finalize ()
+      end subroutine GFS_rrtmg_pre_finalize
 
 !! @}
-      end module GFS_RRTMG_pre
+      end module GFS_rrtmg_pre
 
 

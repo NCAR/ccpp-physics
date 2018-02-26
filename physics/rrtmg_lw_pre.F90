@@ -1,17 +1,17 @@
-!>\file GFS_radlw_pre.f90
+!>\file rrtmg_lw_pre.f90
 !! This file contains a call to module_radiation_surface::setemis() to
 !! setup surface emissivity for LW radiation.
-      module GFS_radlw_pre
+      module rrtmg_lw_pre
       contains
 
-!>\defgroup GFS_radlw_pre GFS RADLW Scheme Pre
+!>\defgroup rrtmg_lw_pre GFS RRTMG scheme pre
 !! @{
-!> \section arg_table_GFS_radlw_pre_init Argument Table
+!> \section arg_table_rrtmg_lw_pre_init Argument Table
 !!
-      subroutine GFS_radlw_pre_init ()
-      end subroutine GFS_radlw_pre_init 
+      subroutine rrtmg_lw_pre_init ()
+      end subroutine rrtmg_lw_pre_init 
 
-!> \section arg_table_GFS_radlw_pre_run Argument Table
+!> \section arg_table_rrtmg_lw_pre_run Argument Table
 !! | local var name    | longname                                  | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
 !! |-------------------|-------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
 !! | Model             | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_control_type              |           | in     | F        |
@@ -22,7 +22,7 @@
 !! | tsfg              | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
 !! | tsfa              | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
 !!
-      subroutine GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend, im, tsfg, tsfa)
+      subroutine rrtmg_lw_pre_run (Model, Grid, Sfcprop, Radtend, im, tsfg, tsfa)
     
       use machine,                   only: kind_phys
 
@@ -49,11 +49,11 @@
                       Radtend%semis)                              !  ---  outputs
       endif
 
-       end subroutine GFS_radlw_pre_run
+       end subroutine rrtmg_lw_pre_run
 
-!> \section arg_table_GFS_radlw_pre_finalize Argument Table
+!> \section arg_table_rrtmg_lw_pre_finalize Argument Table
 !!
-       subroutine GFS_radlw_pre_finalize ()
-       end subroutine GFS_radlw_pre_finalize
+       subroutine rrtmg_lw_pre_finalize ()
+       end subroutine rrtmg_lw_pre_finalize
 !! @}
-       end module GFS_radlw_pre
+       end module rrtmg_lw_pre

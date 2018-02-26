@@ -1,16 +1,16 @@
-!>\file GFS_RRTMG_post.f90
+!>\file GFS_rrtmg_post.f90
 !! This file contains
-       module GFS_RRTMG_post
+       module GFS_rrtmg_post
        contains
 
-!>\defgroup GFS_RRTMG_post GFS RRTMG Scheme Post
+!>\defgroup GFS_rrtmg_post GFS RRTMG Scheme Post
 !! @{
-!> \section arg_table_GFS_RRTMG_post_init Argument Table
+!> \section arg_table_GFS_rrtmg_post_init Argument Table
 !!
-       subroutine GFS_RRTMG_post_init ()
-       end subroutine GFS_RRTMG_post_init
+       subroutine GFS_rrtmg_post_init ()
+       end subroutine GFS_rrtmg_post_init
 
-!> \section arg_table_GFS_RRTMG_post_run Argument Table
+!> \section arg_table_GFS_rrtmg_post_run Argument Table
 !! | local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
 !! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
 !! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | in     | F        |
@@ -33,7 +33,7 @@
 !! |   mbota           | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |  2   | integer                       |           | in     | F        |
 !! |   clouds1         | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |  2   | real                          | kind_phys | in     | F        |
 !!
-       subroutine GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,  &
+       subroutine GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein,  &
                Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,    &
                cldsa, mtopa, mbota, clouds1)
 
@@ -160,12 +160,12 @@
         endif
       endif                                ! end_if_lssav
 !
-      end subroutine GFS_RRTMG_post_run
+      end subroutine GFS_rrtmg_post_run
 
-!> \section arg_table_GFS_RRTMG_post_finalize Argument Table
+!> \section arg_table_GFS_rrtmg_post_finalize Argument Table
 !!
-      subroutine GFS_RRTMG_post_finalize ()
-      end subroutine GFS_RRTMG_post_finalize
+      subroutine GFS_rrtmg_post_finalize ()
+      end subroutine GFS_rrtmg_post_finalize
 
 !! @}
-      end module GFS_RRTMG_post
+      end module GFS_rrtmg_post

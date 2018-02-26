@@ -1,17 +1,17 @@
-!>\file GFS_radsw_post
+!>\file rrtmg_sw_post
 !! This file contains
-      module GFS_radsw_post
+      module rrtmg_sw_post
       contains
 
-!>\defgroup GFS_radsw_post GFS RRTMG/RADSW Scheme Post
+!>\defgroup rrtmg_sw_post GFS RRTMG scheme post
 !! @{
-!> \section arg_table_GFS_radsw_post_init Argument Table
+!> \section arg_table_rrtmg_sw_post_init Argument Table
 !!
-      subroutine GFS_radsw_post_init ()
-      end subroutine GFS_radsw_post_init
+      subroutine rrtmg_sw_post_init ()
+      end subroutine rrtmg_sw_post_init
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
-!> \section arg_table_GFS_radsw_post_run Argument Table
+!> \section arg_table_rrtmg_sw_post_run Argument Table
 !! | local var name    | longname                                                                                       | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
 !! |-------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
 !! |   Model           | FV3-GFS_Control_type                                                                           | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | in     | F        |
@@ -32,7 +32,7 @@
 !! |   scmpsw          | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes      | W m-2    |  1   | cmpfsw_type                   |           | inout  | F        |
 !!
 #endif
-      subroutine GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling, &
+      subroutine rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling, &
                  ltp, nday, lm, kd, htswc, htsw0,                          &  ! --input
                  sfcalb1, sfcalb2, sfcalb3, sfcalb4, scmpsw   )   
 
@@ -128,11 +128,11 @@
  
        endif                                ! end_if_lsswr
 
-       end subroutine GFS_radsw_post_run
+       end subroutine rrtmg_sw_post_run
  
-!> \section arg_table_GFS_radsw_post_finalize Argument Table
+!> \section arg_table_rrtmg_sw_post_finalize Argument Table
 !!
-       subroutine GFS_radsw_post_finalize ()
-       end subroutine GFS_radsw_post_finalize
+       subroutine rrtmg_sw_post_finalize ()
+       end subroutine rrtmg_sw_post_finalize
 !! @}
-      end module GFS_radsw_post
+      end module rrtmg_sw_post
