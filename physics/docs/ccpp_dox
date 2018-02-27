@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "GMTB Common Community Physics Package(CCPP) Documentation"
-PROJECT_NUMBER         = "Version 0"
+PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Documentation"
+PROJECT_NUMBER         = "Version 1"
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -112,8 +112,6 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                           txt/GFS_GWDPS.txt   \
                           txt/GFS_GWDC.txt    \
                           txt/GFS_OZPHYS.txt  \
-                          txt/GFS_CALPRECIPTYPE.txt   \
-                          txt/GFS_RAYLEIGH.txt \
 ### Radiation
                         ../radiation_aerosols.f \
                         ../radiation_astronomy.f \
@@ -141,10 +139,7 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
 ### Land Surface
                         ../sfc_drv.f \
                         ../sflx.f    \
-                        ../sfcsub.f  \
                         ../sfc_diff.f \
-                        ../set_soilveg.f \
-                        ../GFS_calpreciptype.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface
@@ -156,10 +151,9 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                         ../gwdps.f \
 ### Convective Gravity Wave
                         ../gwdc.f \
-### Rayleigh damp
-                        ../rayleigh_damp.f \
 ### Prognostic Ozone
-                        ../ozphys.f
+                        ../ozinterp.f90 \
+                        ../ozphys.f \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.txt

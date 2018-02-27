@@ -20,11 +20,10 @@
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
-!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
-!>\defgroup gfs_nst_main GFS sfc_nst Main
+!> \defgroup GFS_NSST GFS Near Sea Surface Temperature 
+!>\defgroup gfs_nst_main GFS NSST Main
 !!\ingroup GFS_NSST
-!> \brief This is the second subroutine called in surface land loop.
-!!This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
@@ -88,13 +87,11 @@
 !! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         | 1    | real    | kind_phys |   out  | F        |
 !!
 !! \section NSST_general_algorithm General Algorithm
-!!
-!! This is the main subroutine for the NSST scheme, and it calls the DTM and TSM.
-!!
-!! \section NSST_detailed_algorithm Detailed Algorithm
-!!
-!!
 !> @{
+! \section NSST_detailed_algorithm Detailed Algorithm
+!
+!
+! @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
@@ -373,7 +370,7 @@ cc
           cmm(i)     = cm (i)   * wind(i)
           chh(i)     = rho_a(i) * ch(i) * wind(i)
 
-!  --- ...  latent and sensible heat flux over open water with tskin
+!> - Calculate latent and sensible heat flux over open water with tskin.
 !           at previous time step
           evap(i)    = elocp * rch(i) * (qss(i) - q0(i))
           qsurf(i)   = qss(i)
@@ -390,6 +387,9 @@ cc
       zsea1 = 0.001*real(nstf_name4)
       zsea2 = 0.001*real(nstf_name5)
 
+!> - Call module_nst_water_prop::density() to compute sea water density.
+!> - Call module_nst_water_prop::rhocoef() to compute thermal expansion 
+!! coefficient (\a alpha) and saline contraction coefficient (\a beta).
       do i = 1, im
         if ( flag(i) ) then
           tsea      = tsurf(i)
@@ -401,7 +401,7 @@ cc
           call density(tsea,sss,rho_w)                     ! sea water density
           call rhocoef(tsea,sss,rho_w,alpha,beta)          ! alpha & beta
 !
-!  calculate sensible heat flux due to rainfall
+!> - Calculate sensible heat flux (\a qrain) due to rainfall.
 !
           le       = (2.501-.00237*tsea)*1e6
           dwat     = 2.11e-5*(t1(i)/t0k)**1.94               ! water vapor diffusivity
@@ -432,7 +432,9 @@ cc
           rf_ts  = (1000.*rain(i)/rho_w)*alfac*cp_w*(1.0+rch(i)*hl_ts)
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
-!    run sub-layer cooling model/parameterization & calculate c_0, c_d
+!> - Call cool_skin(), which is the sub-layer cooling parameterization 
+!! (Fairall et al, 1996 \cite fairall_et_al_1996).
+! & calculate c_0, c_d
 !
           call cool_skin(ustar_a,f_nsol,nswsfc(i),evap(i),sss,alpha,beta
      &,                  rho_w,rho_a(i),tsea,q_ts,hl_ts,grav,le
@@ -445,7 +447,7 @@ cc
           tauy = max(stress(i),tau_min)*sina
           fc   = const_rot*sinlat(i)
 !
-!     run dtm-1p system
+!  Run DTM-1p system.
 !
           if ( (soltim > solar_time_6am .and. ifd(i) == 0.0) ) then
           else
@@ -455,6 +457,7 @@ cc
 !
 !     if (lprnt .and. i == ipr) print *,' beg xz=',xz(i)
 
+!> - Call convdepth() to calculate depth for convective adjustments.
             if ( f_nsol > 0.0 .and. xt(i) > 0.0 ) then
               call convdepth(kdt,timestep,nswsfc(i),f_nsol,sss,sep,rho_w
      &,                      alpha,beta,xt(i),xs(i),xz(i),d_conv(i))
@@ -478,6 +481,7 @@ cc
 
             rich = ri_c
 
+!> - Call the diurnal thermocline layer model dtm_1p().
             call dtm_1p(kdt,timestep,rich,taux,tauy,nswsfc(i),
      &                  f_nsol,sss,sep,q_ts,hl_ts,rho_w,alpha,beta,alon,
      &                  sinlat(i),soltim,grav,le,d_conv(i),
@@ -487,8 +491,12 @@ cc
 
 !  apply mda
             if ( xt(i) > 0.0 ) then
+!>  - If \a dtl heat content \a xt > 0.0, call dtm_1p_mda() to apply
+!!  minimum depth adjustment (mda).
               call dtm_1p_mda(xt(i),xtts(i),xz(i),xzts(i))
               if ( xz(i) >= z_w_max ) then
+!>   - If \a dtl thickness >= module_nst_parameters::z_w_max, call dtl_reset()
+!! to reset xt/xs/x/xv to zero, and xz to module_nst_parameters::z_w_max.
                 call dtl_reset(xt(i),xs(i),xu(i),xv(i),xz(i),xtts(i),
      &                                                       xzts(i))
 
@@ -498,6 +506,10 @@ cc
 
 !  apply fca
               if ( d_conv(i) > 0.0 ) then
+!>  - If thickness of free convection layer > 0.0, call dtm_1p_fca()
+!! to apply free convection adjustment.
+!>   - If \a dtl thickness >= module_nst_parameters::z_w_max(), call dtl_reset()
+!! to reset xt/xs/x/xv to zero, and xz to module_nst_parameters::z_w_max().
                 call dtm_1p_fca(d_conv(i),xt(i),xtts(i),xz(i),xzts(i))
                 if ( xz(i) >= z_w_max ) then
                   call dtl_reset
@@ -510,8 +522,14 @@ cc
 !  apply tla
               dz = min(xz(i),max(d_conv(i),delz))
 !
+!>  - Call sw_ps_9b() to compute the fraction of the solar radiation
+!! absorbed by the depth \a delz Paulson and Simpson (1981) \cite paulson_and_simpson_1981.
+!! And calculate the total heat absorbed in warm layer.
               call sw_ps_9b(delz,fw)
               q_warm = fw*nswsfc(i)-f_nsol    !total heat absorbed in warm layer
+
+!>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with 
+!! thickness of \a dz.
               if ( q_warm > 0.0 ) then
                 call cal_ttop(kdt,timestep,q_warm,rho_w,dz,
      &                        xt(i),xz(i),ttop0)
@@ -527,6 +545,7 @@ cc
 !    &,' ttop=',ttop,' ttop0=',ttop0,' xt=',xt(i),' dz=',dz
 !    &,' xznew=',(xt(i)+sqrt(xt(i)*(xt(i)-dz*ttop0)))/ttop0
 
+!>  - Call dtm_1p_tla() to apply top layer adjustment.
                 if ( ttop > ttop0 ) then
                   call dtm_1p_tla(dz,ttop0,xt(i),xtts(i),xz(i),xzts(i))
 
@@ -542,6 +561,7 @@ cc
 !     if (lprnt .and. i == ipr) print *,' beg xz5=',xz(i)
 
 !  apply mwa
+!>  - Call dt_1p_mwa() to apply maximum warming adjustment.
               t0 = (xt(i)+xt(i))/xz(i)
               if ( t0 > tw_max ) then
                 call dtm_1p_mwa(xt(i),xtts(i),xz(i),xzts(i))
@@ -554,6 +574,7 @@ cc
 !     if (lprnt .and. i == ipr) print *,' beg xz6=',xz(i)
 
 !  apply mta
+!>  - Call dtm_1p_mta() to apply maximum temperature adjustment.
        sstc = tref(i) + (xt(i)+xt(i))/xz(i) - dt_cool(i)
 
               if ( sstc > sst_max ) then
@@ -579,6 +600,7 @@ cc
 !     if (lprnt .and. i == ipr) print *,' beg xz7=',xz(i)
 
 !     update tsurf  (when flag(i) .eqv. .true. )
+!>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
           tsurf(i) = max(271.2, tref(i) + dtz )
@@ -586,6 +608,7 @@ cc
       if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
      &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
 
+!>  - Call cal_w() to calculate \a w_0 and \a w_d.
           if ( xt(i) > 0.0 ) then
             call cal_w(kdt,xz(i),xt(i),xzts(i),xtts(i),w_0(i),w_d(i))
           else
@@ -637,8 +660,8 @@ cc
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
 
       if ( nstf_name1 > 1 ) then
-!  --- ...  latent and sensible heat flux over open water with updated tskin
-!      for the grids of open water and the iteration is on
+!> - Calculate latent and sensible heat flux over open water with updated tskin
+!!      for the grids of open water and the iteration is on.
         do i = 1, im
           if ( flag(i) ) then
             qss(i)   = fpvs( tskin(i) )
@@ -673,12 +696,9 @@ cc
       contains
 
 ! \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
-!! \brief Brief description of the parameterization
-!!
-!! Blah blah blah description of parameterization
-!!
-!!
-!! \section intraphysics Intraphysics Communication
+! \brief Brief description of the parameterization
+!
+! \section intraphysics Intraphysics Communication
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land

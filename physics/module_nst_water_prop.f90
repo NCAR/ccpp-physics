@@ -1,5 +1,5 @@
 !>\file module_nst_water_prop.f90
-!>\defgroup nst_water_prop NST Water Prop Module
+!>\defgroup nst_water_prop GFS NSST Water Prop Module
 !! @{
 !>\ingroup GFS_NSST
 !!\brief

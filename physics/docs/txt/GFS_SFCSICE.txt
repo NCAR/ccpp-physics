@@ -1,7 +1,7 @@
 /**
 \page GFS_SFCSICE GFS Sea Ice Scheme
 \section des_sice 1. Description
- This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
+ This is the three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 
  Sea ice is a thin skin of frozen water covering the polar oceans.  The sea ice strongly 
  interacts with both the atmosphere above and the ocean underneath in the high

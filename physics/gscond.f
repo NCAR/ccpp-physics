@@ -6,9 +6,6 @@
       module GFS_zhaocarr_gscond
       contains
 
-!> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
-!! @{
-!!
 
 ! \brief Brief description of the subroutine
 !
@@ -17,6 +14,17 @@
        subroutine gscond_init
        end subroutine gscond_init
 
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gscond_finalize  Argument Table
+!
+       subroutine gscond_finalize
+       end subroutine gscond_finalize
+
+
+!> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
+!! @{
+!!
 !> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
 !! @{
 !! \brief This subroutine computes grid-scale condensation and evaporation of
@@ -503,13 +511,6 @@
       end subroutine gscond_run
 !> @}
 !! @}
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_gscond_finalize  Argument Table
-!
-       subroutine gscond_finalize
-       end subroutine gscond_finalize
 
 
 !! @}

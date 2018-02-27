@@ -12,7 +12,7 @@
       subroutine sfc_ex_coef_finalize
       end subroutine sfc_ex_coef_finalize
 
-!> \defgroup Sfc_ex_cal GFS Surface Sublayer Scheme
+!> \defgroup Sfc_ex_cal GFS Surface Layer 
 !!
 !> \defgroup GFS_diff_main GFS sfc_diff Main
 !! \ingroup Sfc_ex_cal

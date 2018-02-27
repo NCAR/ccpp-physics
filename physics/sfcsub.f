@@ -2,8 +2,8 @@
 !! This file sets, updates and quility controls numerous surface fields
 !! such as soil moisture and SST.
 !!
-!!\defgroup static Surface Static Fields
-!!\ingroup NOAH
+!\defgroup static Surface Static Fields
+!\ingroup Noah_Main
 !!\brief The GFS physics module "sfcsub.f" sets, updates and quality 
 !! controls numerous surface fields such as soil moisture and SST.
 !!

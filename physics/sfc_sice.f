@@ -1,6 +1,141 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
+      module sfc_sice_pre
+      contains
+!
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_pre_init  Argument Table
+!
+      subroutine sfc_sice_pre_init
+      end subroutine sfc_sice_pre_init
+
+!
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_pre_finalize  Argument Table
+!
+      subroutine sfc_sice_pre_finalize
+      end subroutine sfc_sice_pre_finalize
+
+
+! \section arg_table_sfc_sice_pre_run Argument Table
+!! | local var name | longname                                                                     | description                                                 | units         | rank | type    |
+!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|----
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer |
+!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kin
+!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kin
+!! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kin
+!! | prsik          | exner_function_at_lowest_model_interface                                     | Exner function at lowest model interface                    | none          |    1 | real    | kin
+!! | prslk          | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer          |  none         |    1 | real    | kin
+!! | cice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kin
+!! | zice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kin
+!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kin
+!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real    | kin
+!!
+      subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &
+     &                            cice, zice, tice, work3)
+
+      use machine, only : kind_phys
+
+      implicit none
+
+! --- inputs
+      integer :: im
+      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice,    &
+     &     tisfc, prsik, prslk
+
+! --- input/output
+      real(kind=kind_phys), dimension(im), intent(out) :: cice, zice,   &
+     &     tice, work3
+
+! --- locals
+      integer :: i
+
+      do i = 1, im
+! transfer ice thickness & concentration from global to local variables
+        zice(i) = hice(i)
+        cice(i) = fice(i)
+        tice(i) = tisfc(i)
+        work3(i)= prsik(i) / prslk(i)
+      enddo
+
+      return
+      end subroutine sfc_sice_pre_run
+
+      end module sfc_sice_pre
+
+      module sfc_sice_post
+      contains
+
+!
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_post_init  Argument Table
+!
+      subroutine sfc_sice_post_init
+      end subroutine sfc_sice_post_init
+
+!
+! \brief This subroutine is empty since there are no procedures needed
+! \section arg_table_sfc_sice_post_finalize  Argument Table
+!
+      subroutine sfc_sice_post_finalize
+      end subroutine sfc_sice_post_finalize
+
+
+!
+! \section arg_table_sfc_sice_post_run Argument Table
+!! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |
+!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag          |    1 | integer |           | in     | F        |
+!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
+!! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        |
+!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K             |    1 | real    | kind_phys | in     | F        |
+!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
+!! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        |
+!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
+!!
+      subroutine sfc_sice_post_run(im, islmsk, cice, zice, tice, tsfc,        &
+     &                             fice, hice, tisfc)
+
+      use machine, only : kind_phys
+
+      implicit none
+
+! --- input
+      integer :: im
+      integer, dimension(im) :: islmsk
+      real(kind=kind_phys), dimension(im), intent(in) :: cice, zice,    &
+     &     tice, tsfc
+
+! --- outputs
+      real(kind=kind_phys), dimension(im), intent(out) :: fice, hice,   &
+     &     tisfc
+
+! --- locals
+      integer :: i
+
+!--- return updated ice thickness & concentration to global arrays
+!    where there is no ice, set temperature to surface skin temperature.
+      do i = 1, im
+
+        if (islmsk(i) == 2) then
+           hice(i) = zice(i)
+           fice(i) = cice(i)
+           tisfc(i) = tice(i)
+        else
+           hice(i) = 0.0
+           fice(i) = 0.0
+           tisfc(i) = tsfc(i)
+        endif
+      enddo
+
+      end subroutine sfc_sice_post_run
+
+      end module  sfc_sice_post
+
+
       module sfc_sice
 
       contains
@@ -67,20 +202,19 @@
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real    | kind_phys |   out  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real    | kind_phys |   out  | F        |
 !!
-!!  \section general_sice_run General Algorithm
+!>  \section general_sice_run General Algorithm
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature 
 !!\n The surface temperature is determined from the diagnostic balance between
 !! the upward conduction of heat through snow and/or ice and upward flux of heat 
 !! from the surface. 
-!!
 !!  - \b Calculation \b of \b ice \b and \b snow \b changes
 !!\n In addition to calculating ice temperature changes, the ice model must
 !! also readjust the sizes of the snow and ice layers 1) to accommodate
 !! mass fluxes at the upper and lower surfaces, 2) to convert snow below
 !! the water line to ice, and 3) to equalize the thickness of the two 
 !! ice layers.
-!!  \section detailed_sice_run Detailed Algorithm
+!>  \section detailed_sice_run Detailed Algorithm
 !! @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
@@ -184,15 +318,15 @@
       implicit none
 !
 ! - Define constant parameters
-      integer,              parameter :: kmi   = 2        !>  - 2-layer of ice
+      integer,              parameter :: kmi   = 2        !< 2-layer of ice
       real(kind=kind_phys), parameter :: cpinv = 1.0/cp
       real(kind=kind_phys), parameter :: hvapi = 1.0/hvap
       real(kind=kind_phys), parameter :: elocp = hvap/cp
-      real(kind=kind_phys), parameter :: himax = 8.0      !>  -  maximum ice thickness allowed
-      real(kind=kind_phys), parameter :: himin = 0.1      !>  - minimum ice thickness required
-      real(kind=kind_phys), parameter :: hsmax = 2.0      ! maximum snow depth allowed
-      real(kind=kind_phys), parameter :: timin = 173.0    ! minimum temperature allowed for snow/ice
-      real(kind=kind_phys), parameter :: albfw = 0.06     ! albedo for lead
+      real(kind=kind_phys), parameter :: himax = 8.0      !< maximum ice thickness allowed
+      real(kind=kind_phys), parameter :: himin = 0.1      !< minimum ice thickness required
+      real(kind=kind_phys), parameter :: hsmax = 2.0      !< maximum snow depth allowed
+      real(kind=kind_phys), parameter :: timin = 173.0    !< minimum temperature allowed for snow/ice
+      real(kind=kind_phys), parameter :: albfw = 0.06     !< albedo for lead
       real(kind=kind_phys), parameter :: dsi   = 1.0/0.33
 
 !  ---  inputs:
@@ -235,7 +369,7 @@
 !
 !===> ...  begin here
 !
-!  --- ...  set flag for sea-ice
+!> - Set flag for sea-ice.
 
       do i = 1, im
         flag(i) = (islimsk(i) >= 2) .and. flag_iter(i)
@@ -245,7 +379,7 @@
         endif
       enddo
 
-!  --- ...  update sea ice temperature
+!> - Update/read sea ice temperature from soil temperature and initialize variables.
 
       do k = 1, kmi
         do i = 1, im
@@ -334,7 +468,7 @@
           chh(i) = rho(i) * ch(i) * wind
           rch(i) = chh(i) * cp
 
-!  --- ...  sensible and latent heat flux over open water & sea ice
+!> - Calculate sensible and latent heat flux over open water & sea ice.
 
           evapi(i) = elocp * rch(i) * (qssi - q0)
           evapw(i) = elocp * rch(i) * (qssw - q0)
@@ -456,6 +590,7 @@
       enddo
 !
       return
+!! @}
 
 ! =================
       contains
@@ -743,7 +878,6 @@
 !...................................
       end subroutine ice3lay
 !-----------------------------------
-!! @}
 
 ! =========================== !
 !     end contain programs    !
@@ -757,139 +891,3 @@
       end module sfc_sice
 
 
-      module sfc_sice_pre
-
-      contains
-
-!
-! \brief This subroutine is empty since there are no procedures needed
-! \section arg_table_sfc_sice_pre_init  Argument Table
-!
-      subroutine sfc_sice_pre_init
-      end subroutine sfc_sice_pre_init
-
-!
-! \brief This subroutine is empty since there are no procedures needed
-! \section arg_table_sfc_sice_pre_finalize  Argument Table
-!
-      subroutine sfc_sice_pre_finalize
-      end subroutine sfc_sice_pre_finalize
-
-
-! \section arg_table_sfc_sice_pre_run Argument Table
-!! | local var name | longname                                                                     | description                                                 | units         | rank | type    |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer |           | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys | in     | F        |
-!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kind_phys | in     | F        |
-!! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys | in     | F        |
-!! | prsik          | exner_function_at_lowest_model_interface                                     | Exner function at lowest model interface                    | none          |    1 | real    | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer          |  none         |    1 | real    | kind_phys | in     | F        |
-!! | cice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                 | frac          |    1 | real    | kind_phys |   out  | F        |
-!! | zice           | sea_ice_thickness                                                            | sea-ice thickness                                           | m             |    1 | real    | kind_phys |   out  | F        |
-!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                 | K             |    1 | real    | kind_phys |   out  | F        |
-!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real    | kind_phys |   out  | F        |
-!!
-      subroutine sfc_sice_pre_run(im, fice, hice, tisfc , prsik, prslk,       &
-     &                            cice, zice, tice, work3)
-
-      use machine, only : kind_phys
-
-      implicit none
-
-! --- inputs
-      integer :: im
-      real(kind=kind_phys), dimension(im), intent(in) :: fice, hice,    &
-     &     tisfc, prsik, prslk
-
-! --- input/output
-      real(kind=kind_phys), dimension(im), intent(out) :: cice, zice,   &
-     &     tice, work3
-
-! --- locals
-      integer :: i
-
-      do i = 1, im
-! transfer ice thickness & concentration from global to local variables
-        zice(i) = hice(i)
-        cice(i) = fice(i)
-        tice(i) = tisfc(i)
-        work3(i)= prsik(i) / prslk(i)
-      enddo
-
-      return
-      end subroutine sfc_sice_pre_run
-
-      end module sfc_sice_pre
-
-      module sfc_sice_post
-
-      contains
-
-!
-! \brief This subroutine is empty since there are no procedures needed
-! \section arg_table_sfc_sice_post_init  Argument Table
-!
-      subroutine sfc_sice_post_init
-      end subroutine sfc_sice_post_init
-
-!
-! \brief This subroutine is empty since there are no procedures needed
-! \section arg_table_sfc_sice_post_finalize  Argument Table
-!
-      subroutine sfc_sice_post_finalize
-      end subroutine sfc_sice_post_finalize
-
-
-!
-! \section arg_table_sfc_sice_post_run Argument Table
-!! | local var name | longname                                              | description                                 | units         | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|---------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count         |    0 | integer |           | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag          |    1 | integer |           | in     | F        |
-!! | cice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys | in     | F        |
-!! | zice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys | in     | F        |
-!! | tice           | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K             |    1 | real    | kind_phys | in     | F        |
-!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac          |    1 | real    | kind_phys |   out  | F        |
-!! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m             |    1 | real    | kind_phys |   out  | F        |
-!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K             |    1 | real    | kind_phys |   out  | F        |
-!!
-      subroutine sfc_sice_post_run(im, islmsk, cice, zice, tice, tsfc,        &
-     &                             fice, hice, tisfc)
-
-      use machine, only : kind_phys
-
-      implicit none
-
-! --- input
-      integer :: im
-      integer, dimension(im) :: islmsk
-      real(kind=kind_phys), dimension(im), intent(in) :: cice, zice,    &
-     &     tice, tsfc
-
-! --- outputs
-      real(kind=kind_phys), dimension(im), intent(out) :: fice, hice,   &
-     &     tisfc
-
-! --- locals
-      integer :: i
-
-!--- return updated ice thickness & concentration to global arrays
-!    where there is no ice, set temperature to surface skin temperature.
-      do i = 1, im
-
-        if (islmsk(i) == 2) then
-           hice(i) = zice(i)
-           fice(i) = cice(i)
-           tisfc(i) = tice(i)
-        else
-           hice(i) = 0.0
-           fice(i) = 0.0
-           tisfc(i) = tsfc(i)
-        endif
-      enddo
-
-      end subroutine sfc_sice_post_run
-
-      end module  sfc_sice_post

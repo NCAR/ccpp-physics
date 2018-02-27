@@ -1,5 +1,5 @@
 /**
-\page GFS_SFCLYR GFS Surface Sublayer Scheme
+\page GFS_SFCLYR GFS Surface Layer Scheme
 \section des_rough  1. Description
  It is the surface roughness length calculation based on
  the surface sublayer scheme from Zeng and Dickinson (1998)

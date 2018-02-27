@@ -16,7 +16,7 @@ where
 \n Tr is the reference temperature
 \n zc is the depth of the skin layer
 
-Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM \ref nst_module), both with an origin on Fairall et al. (1996) \cite Fairall_all_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
+Prediction for the skin layer is made using the Thermal Skin-layer Model (TSM), while prediction for the thermocline is based on the Diurnal Thermocline Model (DTM), both with an origin on Fairall et al. (1996) \cite fairall_et_al_1996. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall.
 
  @image html NSST.png "Figure 1: NSST profile."
 
@@ -31,10 +31,6 @@ This scheme includes the following components:
 
 \section gen_nst 3. General Algorithm
 \sa \ref NSST_general_algorithm
-
-\section det_nst 4. Detailed Algorithm
-\sa \ref NSST_detailed_algorithm
-
 
 
 */

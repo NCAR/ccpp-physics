@@ -1,16 +1,7 @@
 !> \file ozphys.f
 !! This file is ozone sources and sinks.
 
-!> \defgroup GFS_ozn GFS Ozone Sources and Sinks
-!! \brief The operational GFS currently parameterizes ozone production and
-!! destruction based on monthly mean coefficients provided by Naval
-!! Research Laboratory through CHEM2D chemistry model
-!! (McCormack et al. 2006 \cite mccormack_et_al_2006).
-!! Monthly and zonal mean ozone production rate and ozone destruction
-!! rate per unit ozone mixing ratio were provided by NRL based on
-!! CHEM2D model.
-!! Original version of these terms were provided by NASA/DAO based on
-!! NASA 2D Chemistry model - GSM is capable of running both versions
+!> \defgroup GFS_ozn GFS Ozone Physics 
 !!
 !! \section intra_oz Intraphysics Communication
 !! 
@@ -51,7 +42,10 @@
 
 !>\defgroup GFS_ozphys GFS ozphys Main
 !>\ingroup GFS_ozn
-!! \brief This is the main subroutine 
+!! \brief The operational GFS currently parameterizes ozone production and
+!! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
+!! Research Laboratory through CHEM2D chemistry model
+!! (McCormack et al. 2006 \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
 !! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -99,6 +93,7 @@
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
      &                     ozib(im),  colo3(im,levs+1)
 !
+!> - Calculate vertical integrated column ozone values.
       if (pl_coeff > 2) then
         colo3(:,levs+1) = 0.0
         do l=levs,1,-1
@@ -108,6 +103,7 @@
         enddo
       endif
 !
+!> - Apply vertically linear interpolation to the ozone coefficients. 
       do l=1,levs
         pmin =  1.0e10
         pmax = -1.0e10
@@ -169,7 +165,11 @@
             enddo
           endif
         endif
-
+!> - Calculate the 4 terms of prognostic ozone change during time \a dt:  
+!!  - ozp(:,:,1) - Ozone production at model layers 
+!!  - ozp(:,:,2) - Ozone tendency at model layers 
+!!  - ozp(:,:,3) - Ozone production from temperature term at model layers 
+!!  - ozp(:,:,4) - Ozone production from column ozone term at model layers
         if (pl_coeff == 4) then
           do i=1,im
             ozib(i)  = ozi(i,l)            ! no filling

@@ -2,7 +2,7 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
-!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation Scheme
+!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
 !!  \brief The GFS radiation scheme
 !!  \details Radiative processes are among the most complex and
 !! computationally intensive parts of all model physics. As an

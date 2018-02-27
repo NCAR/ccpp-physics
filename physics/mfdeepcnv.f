@@ -51,8 +51,6 @@
 !! cloud condensate in the updraft. The lateral entrainment is also enhanced
 !! to more strongly suppress convection in a drier environment.
 !!
-!!  \section intraphysics Intraphysics Communication
-!!
 
 
       module sasas_deep

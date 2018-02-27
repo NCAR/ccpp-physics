@@ -148,7 +148,27 @@
 !! | taucty         | instantaneous_y_stress_due_to_gravity_wave_drag        | meridional stress at cloud top due to convective gravity wave drag | Pa         | 1    | real    | kind_phys | out    | F        |
 !!
 !> \section gen_gwdc General Algorithm
+!! Parameterizing subgrid-scale convection-induced gravity wave
+!! momentum flux for use in large-scale models inherently requires
+!! some information from subgrid-scale cumulus parameterization.
+!! The methodology for parameterizing the zonal momentum flux induced
+!! by thermal forcing can be summarized as follows. From the cloud-base
+!! to cloud-top height, the effect of the momentum flux
+!! induced by subgrid-scale diabatic forcing is not considered because
+!! subgrid-scale cumulus convection in large-scale models is only
+!! activated in a conditionally unstable atmosphere. Below the cloud
+!! base, the momentum flux is also not considered because of the wave
+!! momentum cancellation. 
 !!
+!! The formulation of the momentum flux at the cloud top that can be broken
+!! in the upper atmosphere is similar to that of the surface drag of mountain
+!! waves by using the nonlinearity factor of thermally induced waves that is
+!! analogous to the inverse Frounde number in mountain waves. A vertical
+!! profiles of redistributed momentum flux above the cloud top can be approximated
+!! either by specifying a functional form or by using the wave saturation hypothesis
+!! in terms of the Richardson number criterion. The formulation of the minimum
+!! Richardson number including wave impact is similar to that in the mountain
+!! wave case. 
 !> \section al_gwdc Detailed Algorithm
 !> @{
       subroutine gwdc_run (im,ix,iy,km,lat,u1,v1,t1,q1,deltim,          &
@@ -341,6 +361,7 @@
      &,                     riminp=-0.99e+20, rismall=-0.9e+20
 
 !
+!> - Determine if deep convection occurs and activate convection-induced GWD scheme.
       npt = 0
       do i = 1,im
         ipt(i) = 0
@@ -442,8 +463,8 @@
      &          brunm(npt,km),   rhom(npt,km))
 
 !-----------------------------------------------------------------------
-!> -# Create local arrays with reversed vertical indices
-!!   and Initialize local variables
+!> - Create local arrays with reversed vertical indices
+!!   and Initialize local variables.
 !-----------------------------------------------------------------------
       gsqr  = grav * grav
       onebg = one / grav
@@ -685,9 +706,9 @@
 
 !-----------------------------------------------------------------------
 !
-!> -# Calculate the cloud top wind components and speed.
-!! Here, ucltop, vcltop, and windcltop are wind components and
-!!  wind speed at mid-level cloud top index
+!> - Calculate the cloud top wind components, speed and direction.
+! Here, ucltop, vcltop, and windcltop are wind components and
+!  wind speed at mid-level cloud top index
 !
 !-----------------------------------------------------------------------
 
@@ -703,12 +724,12 @@
 
 !-----------------------------------------------------------------------
 !
-!> -# Calculate the basic state wind projected in the direction of the
-!!  cloud top wind at mid level and interface level  (U, UI), where:
-!! \n  U : Basic-wind speed profile. Basic-wind is parallel to the wind
-!!             vector at the cloud top level. (mid level)
-!! \n  UI: Basic-wind speed profile. Basic-wind is parallel to the wind
-!!             vector at the cloud top level. ( interface level )
+!> - Calculate the basic state wind profiles projected in the direction of the
+!!  cloud top wind at mid level and interface level. 
+! \n  U : Basic-wind speed profile. Basic-wind is parallel to the wind
+!             vector at the cloud top level. (mid level)
+! \n  UI: Basic-wind speed profile. Basic-wind is parallel to the wind
+!             vector at the cloud top level. ( interface level )
 !  Input u(i,k) and v(i,k) is defined at mid level
 !
 !-----------------------------------------------------------------------
@@ -743,7 +764,7 @@
 
 !-----------------------------------------------------------------------
 !
-!> -# Calculate the local Richardson number
+!> - Calculate the local Richardson number:
 !! \f[
 !!    Ri=N^2/\eta^2
 !! \f]
@@ -811,7 +832,7 @@
 
 !-----------------------------------------------------------------------
 !
-!> -# Calculate the gravity wave stress at the interface level cloud top.
+!> - Calculate the gravity wave stress at the interface level cloud top.
 !
 !  kcldtopi  : The interface level cloud top index
 !  kcldtop   : The midlevel cloud top index
@@ -852,11 +873,17 @@
 !      GWDC calculation in current horizontal grid is skipped.
 !
 !  G : If mean wind at the cloud top is less than zero, GWDC
-
+!      calculation in current horizontal grid is skipped.
+!
+!-----------------------------------------------------------------------
+!D
 !>  - Wave stress at cloud top is calculated when the atmosphere
-!!    is dynamically stable at the cloud top
-!!
-!>  - The cloud top wave stress and nonlinear parameter are calculated
+!!    is dynamically stable at the cloud top.
+      do i=1,npt
+        kk = kcldtop(i)
+        if ( abs(basicui(i,kk)) > zero .and. riloc(i,kk) > ricrit) then
+!E
+!>   - The cloud top wave stress and nonlinear parameter are calculated
 !!      using density, temperature, and wind that are defined at mid
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
@@ -887,20 +914,7 @@
 !! top heights of thermal forcing. If the atmosphere is dynamically
 !! unstable at the cloud top, the convective GWD calculation is
 !! skipped at that grid point.
-!!
-!  - If mean wind at the cloud top is less than zero, GWDC
-!      calculation in current horizontal grid is skipped.
-!
 
-!>  - The stress is capped at tauctmax =  - 5\f$n/m^2\f$
-!!      in order to prevent numerical instability.
-!
-!-----------------------------------------------------------------------
-!D
-      do i=1,npt
-        kk = kcldtop(i)
-        if ( abs(basicui(i,kk)) > zero .and. riloc(i,kk) > ricrit) then
-!E
           tem       = basicum(i,kk)
           tem1      = tem * tem
           nonlinct  = gqmcldlen(i) / (bruni(i,kk)*t(i,kk)*tem1)    ! Mu
@@ -908,6 +922,8 @@
 !                                  RhoU^3c1(c2mu)^2/Ndx
           tauct     = - rhom(i,kk) * tem * tem1 * c1 * tem2 * tem2
      &              /  (bruni(i,kk)*dlen(i))
+!>   - The stress is capped at \f$\tau_{x} =  - 5n/m^2\f$
+!!      in order to prevent numerical instability.
 
           tauct         = max(tauctmax, tauct)
           tauctxl(i)    = tauct * cosphi(i)           ! X stress at cloud top
@@ -916,6 +932,12 @@
           do_gwc(i)     = .true.
         else
 !F
+!>  - If the atmosphere is dynamically unstable at the cloud top,
+!!  GWDC calculation in current horizontal grid is skipped.
+!>  - If mean wind at the cloud top is less than zero, GWDC
+!!      calculation in current horizontal grid is skipped.
+
+
           tauctxl(i) = zero
           tauctyl(i) = zero
           do_gwc(i) = .false.
@@ -954,7 +976,7 @@
 !  1 - nonlin*|c2|.
 !
 !-----------------------------------------------------------------------
-!> -# Calculate the minimum Richardson number including both the
+!> - Calculate the minimum Richardson number including both the
 !! basic-state condition and wave effects.
 !!\f[
 !! Ri_{min}\approx\frac{Ri(1-\mu|c_{2}|)}{(1+\mu Ri^{1/2}|c_{2}|)^{2}}
@@ -1009,7 +1031,7 @@
 
 !-----------------------------------------------------------------------
 !
-!> -# Calculate the gravity wave stress profile using the wave
+!> - Calculate the gravity wave stress profile using the wave
 !!  saturation hypothesis of Lindzen (1981) \cite lindzen_1981.
 !
 !  Assuming kcldtop(i)=10 and kcldbot=16,
@@ -1155,7 +1177,7 @@
 
 !!!!!! Vertical differentiation
 !!!!!!
-!> -# Calculate wind tendency in direction to the wind vector,zonal
+!> - Calculate wind tendency in direction to the wind vector,zonal
 !! wind tendency and meridional wind tendency above the cloud top
 !! level due to convectively generated gravity waves.
 
@@ -1373,7 +1395,7 @@
 !     enddo
 
 !-----------------------------------------------------------------------
-!> -# Convert back local convective GWD tendency arrays to GFS model
+!> - Convert back local convective GWD tendency arrays to GFS model
 !!    vertical indices.
 !  Outgoing (FU1,FV1)=(utgwc,vtgwc)
 !-----------------------------------------------------------------------

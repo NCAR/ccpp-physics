@@ -1,8 +1,98 @@
 !>  \file mfshalcnv.f
 !!  This file contains the entire SAMF deep convection scheme.
 
+
+      module sasas_shal_post
+      contains
+
+! \brief Brief description of the subroutine
+!
+!! \section arg_table_sasasshal_post_run Argument Table
+!! | local var name | longname                                                 | description                                                          | units   | rank | type                          |
+!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|--
+!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | k
+!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real                          | k
+!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real                          | k
+!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | k
+!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type              |
+!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type                 |
+!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type                 |
+!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type                  |
+!!
+      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+     &                               Grid, Diag, Tbd)
+
+        use machine,               only: kind_phys
+        use GFS_typedefs,          only: GFS_control_type,              &
+     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
+
+        type(GFS_grid_type),            intent(in) :: Grid
+        type(GFS_control_type),         intent(in) :: Model
+        type(GFS_diag_type),         intent(inout) :: Diag
+        type(GFS_tbd_type),          intent(inout) :: Tbd
+
+        real(kind=kind_phys), intent(in) :: frain
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
+     &     intent(in) :: rain1
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
+     &     intent(in) :: cnvw, cnvc
+
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
+        integer :: num2, num3
+
+        raincs(:)     = frain * rain1(:)
+        Diag%rainc(:) = Diag%rainc(:) + raincs(:)
+        if (Model%lssav) then
+          Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
+        endif
+        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
+     &                             (Model%npdf3d == 3)) then
+          num2 = Model%num_p3d + 2
+          num3 = num2 + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+          Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+          num2 = Model%num_p3d + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+        endif
+
+      end subroutine sasasshal_post_run
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_init Argument Table
+!
+      subroutine sasasshal_post_init ()
+      end subroutine sasasshal_post_init
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_post_finalize Argument Table
+!
+      subroutine sasasshal_post_finalize ()
+      end subroutine sasasshal_post_finalize
+
+      end module sasas_shal_post
+
+
       module sasas_shal
       contains
+
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_init Argument Table
+!
+      subroutine sasasshal_init
+      end subroutine sasasshal_init
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasshal_init Argument Table
+!
+      subroutine sasasshal_finalize
+      end subroutine sasasshal_finalize
+
 
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !> @{
@@ -19,25 +109,15 @@
 !! the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and
 !! aerosol awareness follows that of the SAMF deep convection scheme.
 !!
-!! The previous version of the shallow convection scheme (shalcnv.f)
+!! The previous version of the shallow convection scheme (\c shalcnv.f)
 !! is described in Han and Pan (2011) \cite han_and_pan_2011 and differences
-!! between the shallow and deep convection schemes are presented in 
+!! between the shallow and deep convection schemes are presented in
 !! Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2017)
 !! \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
 !! are described in Han et al. (2017) \cite han_et_al_2017 .
-!!
-!!  \section intraphysics_deep Intraphysics Communication
-!!
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasshal_init Argument Table
-!
-      subroutine sasasshal_init
-      end subroutine sasasshal_init
-
 !>\defgroup SAMF_shal_main GFS mfshalcnv Main
 !!\ingroup SAMF_shal
+!! @{
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
 !!
 !! This routine follows the \ref SAMF deep scheme quite closely, although
@@ -1704,85 +1784,8 @@ c
       return
 !! @}
       end subroutine sasasshal_run
-
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_sasasshal_init Argument Table
-!!
-      subroutine sasasshal_finalize
-      end subroutine sasasshal_finalize
-
+!! @}
 !> @}
+
       end module sasas_shal
 
-      module sasas_shal_post
-      contains
-
-! \brief Brief description of the subroutine
-!
-!! \section arg_table_sasasshal_post_run Argument Table
-!! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
-!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
-!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
-!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real                          | kind_phys | in     | F        |
-!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real                          | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | kind_phys | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type                  |           | inout  | F        |
-!!
-      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
-     &                               Grid, Diag, Tbd)
-
-        use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type,              &
-     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
-
-        type(GFS_grid_type),            intent(in) :: Grid
-        type(GFS_control_type),         intent(in) :: Model
-        type(GFS_diag_type),         intent(inout) :: Diag
-        type(GFS_tbd_type),          intent(inout) :: Tbd
-
-        real(kind=kind_phys), intent(in) :: frain
-        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
-     &     intent(in) :: rain1
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
-     &     intent(in) :: cnvw, cnvc
-
-        real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
-        integer :: num2, num3
-
-        raincs(:)     = frain * rain1(:)
-        Diag%rainc(:) = Diag%rainc(:) + raincs(:)
-        if (Model%lssav) then
-          Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
-        endif
-        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
-     &                             (Model%npdf3d == 3)) then
-          num2 = Model%num_p3d + 2
-          num3 = num2 + 1
-          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-          Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
-        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
-          num2 = Model%num_p3d + 1
-          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-        endif
-
-      end subroutine sasasshal_post_run
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasshal_post_init Argument Table
-!
-      subroutine sasasshal_post_init ()
-      end subroutine sasasshal_post_init
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasshal_post_finalize Argument Table
-!
-      subroutine sasasshal_post_finalize ()
-      end subroutine sasasshal_post_finalize
-
-      end module sasas_shal_post

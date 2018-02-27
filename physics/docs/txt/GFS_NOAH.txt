@@ -1,5 +1,5 @@
 /**
-\page GFS_NOAH GFS Noah Land Surface Scheme
+\page GFS_NOAH GFS Noah Land Surface Model
 \section des_noah 1. Description
  Land-atmosphere interactions are a main driver of Earth's surface
  water and energy budgets. The importance of the land surface is
@@ -28,34 +28,31 @@
  with arrows also represent positive feedbacks. The single horizontal
  gay-dotted line (no arrows) indicates the top of the PBL, and the seven
  small vertical dashed lines (no arrows) represent precipitation
- \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Micheal Ek, Ek and Mahrt (1994), Ek and Holtslag (2004))" width=10cm
- The land-surface model component was substantially upgraded from the Oregon
- State University (OSU) land surface model to EMC's new NOAH Land Surface Model
- (NOAH LSM) during the major implementation in the NCEP Global Forecast System
- (GFS) on May 31, 2005. Forecast System (GFS). The NOAH LSM embodies about 10
- years of upgrades (see Chen et al. 1996
- \cite chen_et_al_1996; Koren et al. 1999 \cite koren_et_al_1999; Ek et al. 2003
- \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The NOAH LSM upgrade includes:
- - An increase from two (10, 190 cm thick) to four soil layers (10, 30, 60, 100 cm thick)
- - Addition of frozen soil physics
- - Add glacial ice treatment
- - Two snowpack states (SWE, density)
- - New  formulations for infiltration and runoff account for sub-grid variability in precipitation and soil moisture
- - Revised physics of the snowpack and its influence on surface heat fluxes and albedo
- - Higher canopy resistance
- - Spatially  varying root depth
- - Surface fluxes weighted by snow cover fraction
- - Improved thermal conduction in soil/snow
- - Improved seasonality of green vegetation cover.
- - Improved evaporation treatment over bare soil and snowpack
+ \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Michael Ek, Ek and Mahrt (1994), Ek and Holtslag (2004))" width=10cm
+
+Recently, the land surface updates in 2017 GFS operational physics includes:
+ - IGBP 20-type 1-km land classification
+ - STASGO 19-type 1-km soil classification
+ - MODIS-based snow free albedo
+ - MODIS-based maximum snow albedo
+ - Diurnal albedo treatment
+ - Unify snow cover, albedo between radiation and land surface model
+ - Increase ground heat flux under deep snow
+ - Upgrade surface layer parameterization scheme \ref GFS_SFCLYR to modify the roughness-length formulation and introduce a stability parameter constraint in the Monin-Obukhov similarity theory to prevent the land-atmosphere system from fully decoupling leading to excessive cooling of 2m temperature during sunset
 
  \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=10cm
 
+This scheme include the following modules:
+ + \ref Noah_drv
+ + \ref Noah_LSM
 
 \section intra_noah 2. Intraphysics Communication
-\ref arg_table_lsm_noah_run
+ +  GFS Noah LSM Driver (\ref arg_table_lsm_Noah_run)
+ +  GFS Noah LSM Model (sflx())
 
 \section gen_al_noah 3. General Algorithm
++ GFS Noah LSM Driver (\ref general_noah_drv)
++ GFS Noah LSM Model (\ref general_sflx)
 
 
 
