@@ -151,54 +151,56 @@
 
 !-----------------------------------
 !! \section arg_table_dcyc2t3_run Argument Table
-!! | local var name | longname                                                                                       | description                                                                                          | units   | rank | type    | kind      | intent | optional |
-!! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | solhr          | forecast_hour                                                                                  | forecast time in 24-hour form                                                                        | h       | 0    | real    | kind_phys | in     | F        |
-!! | slag           | equation_of_time                                                                               | equation of time                                                                                     | radians | 0    | real    | kind_phys | in     | F        |
-!! | sdec           | sine_of_solar_declination_angle                                                                | sine of solar declination angle                                                                      | none    | 0    | real    | kind_phys | in     | F        |
-!! | cdec           | cosine_of_solar_declination_angle                                                              | cosine of solar declination angle                                                                    | none    | 0    | real    | kind_phys | in     | F        |
-!! | sinlat         | sine_of_latitude                                                                               | sine of latitude                                                                                     | none    | 1    | real    | kind_phys | in     | F        |
-!! | coslat         | cosine_of_latitude                                                                             | cosine of latitude                                                                                   | none    | 1    | real    | kind_phys | in     | F        |
-!! | xlon           | longitude                                                                                      | longitude of grid box                                                                                | radians | 1    | real    | kind_phys | in     | F        |
-!! | coszen         | cosine_of_zenith_angle                                                                         | average of cosine of zenith angle over daytime shortwave call time interval                          | none    | 1    | real    | kind_phys | in     | F        |
-!! | tsea           | surface_skin_temperature                                                                       | surface skin temperature                                                                             | K       | 1    | real    | kind_phys | in     | F        |
-!! | tf             | air_temperature_at_lowest_model_layer                                                          | air temperature at lowest model layer                                                                | K       | 1    | real    | kind_phys | in     | F        |
-!! | tsflw          | surface_midlayer_air_temperature_in_longwave_radiation                                         | surface (first layer) air temperature saved in longwave radiation call                               | K       | 1    | real    | kind_phys | in     | F        |
-!! | sfcemis        | surface_longwave_emissivity                                                                    | surface emissivity                                                                                   | frac    | 1    | real    | kind_phys | in     | F        |
-!! | sfcdsw         | surface_downwelling_shortwave_flux_on_radiation_time_step                                      | total sky surface downwelling shortwave flux on radiation time step                                  | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downwelling_shortwave_flux_on_radiation_time_step                                  | total sky surface net downwelling shortwave flux on radiation time step                              | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcdlw         | surface_downwelling_longwave_flux_on_radiation_time_step                                       | total sky surface downwelling longwave flux on radiation time step                                   | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | total sky shortwave heating rate on radiation time step                                              | K s-1   | 2    | real    | kind_phys | in     | F        |
-!! | swhc           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky shortwave heating rate on radiation time step                                              | K s-1   | 2    | real    | kind_phys | in     | F        |
-!! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                     | total sky longwave heating rate on radiation time step                                               | K s-1   | 2    | real    | kind_phys | in     | F        |
-!! | hlwc           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step  | clear sky longwave heating rate on radiation time step                                               | K s-1   | 2    | real    | kind_phys | in     | F        |
-!! | sfcnirbmu      | surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step                   | total sky surface upwelling beam near-infrared shortwave flux on radiation time step                 | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcnirdfu      | surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step                  | total sky surface upwelling diffuse near-infrared shortwave flux on radiation time step              | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcvisbmu      | surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step         | total sky surface upwelling beam ultraviolet plus visible shortwave flux on radiation time step      | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcvisdfu      | surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step        | total sky surface upwelling diffuse ultraviolet plus visible shortwave flux on radiation time step   | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcnirbmd      | surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step                 | total sky surface downwelling beam near-infrared shortwave flux on radiation time step               | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step                | total sky surface downwelling diffuse near-infrared shortwave flux on radiation time step            | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step       | total sky surface downwelling beam ultraviolet plus visible shortwave flux on radiation time step    | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | sfcvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step      | total sky surface downwelling diffuse ultraviolet plus visible shortwave flux on radiation time step | W m-2   | 1    | real    | kind_phys | in     | F        |
-!! | ix             | horizontal_dimension                                                                           | horizontal dimension                                                                                 | count   | 0    | integer |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                                         | horizontal loop extent                                                                               | count   | 0    | integer |           | in     | F        |
-!! | levs           | vertical_dimension                                                                             | number of vertical layers                                                                            | count   | 0    | integer |           | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                               | total radiative heating rate at current time                                                         | K s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky                        | clear sky radiative (shortwave + longwave) heating rate at current time                              | K s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux                                                             | surface downwelling shortwave flux at current time                                                   | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux                                                         | surface net downwelling shortwave flux at current time                                               | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                                                              | surface downwelling longwave flux at current time                                                    | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux                                                                | surface upwelling longwave flux at current time                                                      | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                                   | zenith angle temporal adjustment factor for shortwave fluxes                                         | none    | 1    | real    | kind_phys | out    | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                                                           | cosine of zenith angle at current time                                                               | none    | 1    | real    | kind_phys | out    | F        |
-!! | adjnirbmu      | surface_upwelling_direct_near_infrared_shortwave_flux                                          | surface upwelling beam near-infrared shortwave flux at current time                                  | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjnirdfu      | surface_upwelling_diffuse_near_infrared_shortwave_flux                                         | surface upwelling diffuse near-infrared shortwave flux at current time                               | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjvisbmu      | surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux                                | surface upwelling beam ultraviolet plus visible shortwave flux at current time                       | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjvisdfu      | surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux                               | surface upwelling diffuse ultraviolet plus visible shortwave flux at current time                    | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjnirbmd      | surface_downwelling_direct_near_infrared_shortwave_flux                                        | surface downwelling beam near-infrared shortwave flux at current time                                | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux                                       | surface downwelling diffuse near-infrared shortwave flux at current time                             | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux                              | surface downwelling beam ultraviolet plus visible shortwave flux at current time                     | W m-2   | 1    | real    | kind_phys | out    | F        |
-!! | adjvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux                             | surface downwelling diffuse ultraviolet plus visible shortwave flux at current time                  | W m-2   | 1    | real    | kind_phys | out    | F        |
+!! | local_name     | standard_name                                                                                  | long_name                                                                                            | units   | rank | type      | kind      | intent | optional |
+!! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | solhr          | forecast_hour                                                                                  | forecast time in 24-hour form                                                                        | h       |    0 | real      | kind_phys | in     | F        |
+!! | slag           | equation_of_time                                                                               | equation of time                                                                                     | radians |    0 | real      | kind_phys | in     | F        |
+!! | sdec           | sine_of_solar_declination_angle                                                                | sine of solar declination angle                                                                      | none    |    0 | real      | kind_phys | in     | F        |
+!! | cdec           | cosine_of_solar_declination_angle                                                              | cosine of solar declination angle                                                                    | none    |    0 | real      | kind_phys | in     | F        |
+!! | sinlat         | sine_of_latitude                                                                               | sine of latitude                                                                                     | none    |    1 | real      | kind_phys | in     | F        |
+!! | coslat         | cosine_of_latitude                                                                             | cosine of latitude                                                                                   | none    |    1 | real      | kind_phys | in     | F        |
+!! | xlon           | longitude                                                                                      | longitude of grid box                                                                                | radians |    1 | real      | kind_phys | in     | F        |
+!! | coszen         | cosine_of_zenith_angle                                                                         | average of cosine of zenith angle over daytime shortwave call time interval                          | none    |    1 | real      | kind_phys | in     | F        |
+!! | tsea           | surface_skin_temperature                                                                       | surface skin temperature                                                                             | K       |    1 | real      | kind_phys | in     | F        |
+!! | tf             | air_temperature_at_lowest_model_layer                                                          | air temperature at lowest model layer                                                                | K       |    1 | real      | kind_phys | in     | F        |
+!! | tsflw          | surface_midlayer_air_temperature_in_longwave_radiation                                         | surface (first layer) air temperature saved in longwave radiation call                               | K       |    1 | real      | kind_phys | in     | F        |
+!! | sfcemis        | surface_longwave_emissivity                                                                    | surface emissivity                                                                                   | frac    |    1 | real      | kind_phys | in     | F        |
+!! | sfcdsw         | surface_downwelling_shortwave_flux_on_radiation_time_step                                      | total sky surface downwelling shortwave flux on radiation time step                                  | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcnsw         | surface_net_downwelling_shortwave_flux_on_radiation_time_step                                  | total sky surface net downwelling shortwave flux on radiation time step                              | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcdlw         | surface_downwelling_longwave_flux_on_radiation_time_step                                       | total sky surface downwelling longwave flux on radiation time step                                   | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | total sky shortwave heating rate on radiation time step                                              | K s-1   |    2 | real      | kind_phys | in     | F        |
+!! | swhc           | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky shortwave heating rate on radiation time step                                              | K s-1   |    2 | real      | kind_phys | in     | F        |
+!! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                     | total sky longwave heating rate on radiation time step                                               | K s-1   |    2 | real      | kind_phys | in     | F        |
+!! | hlwc           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step  | clear sky longwave heating rate on radiation time step                                               | K s-1   |    2 | real      | kind_phys | in     | F        |
+!! | sfcnirbmu      | surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step                   | total sky surface upwelling beam near-infrared shortwave flux on radiation time step                 | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcnirdfu      | surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step                  | total sky surface upwelling diffuse near-infrared shortwave flux on radiation time step              | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcvisbmu      | surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step         | total sky surface upwelling beam ultraviolet plus visible shortwave flux on radiation time step      | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcvisdfu      | surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step        | total sky surface upwelling diffuse ultraviolet plus visible shortwave flux on radiation time step   | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcnirbmd      | surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step                 | total sky surface downwelling beam near-infrared shortwave flux on radiation time step               | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step                | total sky surface downwelling diffuse near-infrared shortwave flux on radiation time step            | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step       | total sky surface downwelling beam ultraviolet plus visible shortwave flux on radiation time step    | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | sfcvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step      | total sky surface downwelling diffuse ultraviolet plus visible shortwave flux on radiation time step | W m-2   |    1 | real      | kind_phys | in     | F        |
+!! | ix             | horizontal_dimension                                                                           | horizontal dimension                                                                                 | count   |    0 | integer   |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                                         | horizontal loop extent                                                                               | count   |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                                                             | number of vertical layers                                                                            | count   |    0 | integer   |           | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                               | total radiative heating rate at current time                                                         | K s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky                        | clear sky radiative (shortwave + longwave) heating rate at current time                              | K s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | adjsfcdsw      | surface_downwelling_shortwave_flux                                                             | surface downwelling shortwave flux at current time                                                   | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux                                                         | surface net downwelling shortwave flux at current time                                               | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjsfcdlw      | surface_downwelling_longwave_flux                                                              | surface downwelling longwave flux at current time                                                    | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjsfculw      | surface_upwelling_longwave_flux                                                                | surface upwelling longwave flux at current time                                                      | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                                   | zenith angle temporal adjustment factor for shortwave fluxes                                         | none    |    1 | real      | kind_phys | out    | F        |
+!! | xcosz          | instantaneous_cosine_of_zenith_angle                                                           | cosine of zenith angle at current time                                                               | none    |    1 | real      | kind_phys | out    | F        |
+!! | adjnirbmu      | surface_upwelling_direct_near_infrared_shortwave_flux                                          | surface upwelling beam near-infrared shortwave flux at current time                                  | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjnirdfu      | surface_upwelling_diffuse_near_infrared_shortwave_flux                                         | surface upwelling diffuse near-infrared shortwave flux at current time                               | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjvisbmu      | surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux                                | surface upwelling beam ultraviolet plus visible shortwave flux at current time                       | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjvisdfu      | surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux                               | surface upwelling diffuse ultraviolet plus visible shortwave flux at current time                    | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjnirbmd      | surface_downwelling_direct_near_infrared_shortwave_flux                                        | surface downwelling beam near-infrared shortwave flux at current time                                | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux                                       | surface downwelling diffuse near-infrared shortwave flux at current time                             | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux                              | surface downwelling beam ultraviolet plus visible shortwave flux at current time                     | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | adjvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux                             | surface downwelling diffuse ultraviolet plus visible shortwave flux at current time                  | W m-2   |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | error_message                                                                                  | error message for error handling in CCPP                                                             | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                                                     | error flag for error handling in CCPP                                                                | flag    |    0 | integer   |           | out    | F        |
 !!
       subroutine dcyc2t3_run                                            &
 !...................................
@@ -214,7 +216,8 @@
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,xmu,xcosz,         &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
-     &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd                    &
+     &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
+     &       errmsg,errflg
      &     )
 !
       use machine,         only : kind_phys
@@ -249,12 +252,18 @@
      &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,     &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       integer :: i, k
       real(kind=kind_phys) :: cns, ss, cc, ch, tem1, tem2
 !
 !===> ...  begin here
+!
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
       cns = con_pi * (solhr - hour12) / hour12 + slag
 !
@@ -347,17 +356,20 @@
 
 
 !! \section arg_table_dcyc2t3_post_run Argument Table
-!! | local var name | longname                               | description                                            | units   | rank | type                       | kind      | intent | optional |
-!! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                 | horizontal loop extent                                 | count   | 0    | integer                    |           | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux      | surface downwelling longwave flux at current time      | W m-2   | 1    | real                       | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   | 1    | real                       | kind_phys | in     | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   | 1    | real                       | kind_phys | in     | F        |
-!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   | 1    | real                       | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | DDT     | 0    | GFS_diag_type              |           | inout  | F        |
+!! | local_name     | standard_name                          | long_name                                              | units   | rank | type                  | kind      | intent | optional |
+!! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                 | horizontal loop extent                                 | count   |    0 | integer               |           | in     | F        |
+!! | adjsfcdlw      | surface_downwelling_longwave_flux      | surface downwelling longwave flux at current time      | W m-2   |    1 | real                  | kind_phys | in     | F        |
+!! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   |    1 | real                  | kind_phys | in     | F        |
+!! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   |    1 | real                  | kind_phys | in     | F        |
+!! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   |    1 | real                  | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | DDT     |    0 | GFS_diag_type         |           | inout  | F        |
+!! | errmsg         | error_message                          | error message for error handling in CCPP               | none    |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                             | error flag for error handling in CCPP                  | flag    |    0 | integer               |           | out    | F        |
 !!
       subroutine dcyc2t3_post_run(                                      &
-     &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)
+     &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag,  &
+     &           errmsg, errflg)
 
       use GFS_typedefs, only: GFS_diag_type
       use machine,      only: kind_phys
@@ -368,6 +380,12 @@
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw
       type(GFS_diag_type), intent(inout) :: Diag
+      character(len=*),      intent(out) :: errmsg
+      integer,               intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
       Diag%dlwsfci(:) = adjsfcdlw(:)
       Diag%ulwsfci(:) = adjsfculw(:)
