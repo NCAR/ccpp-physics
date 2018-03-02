@@ -16,7 +16,7 @@ module GFS_typedefs
        implicit none
 
 !> \section arg_table_GFS_typedefs
-!! | local var name                  | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! | local_name                      | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |---------------------------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | IPD_Control                     | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | none   | F        |
 !! | IPD_Data(nb)%Cldprop            | FV3-GFS_Cldprop_type                                   | derived type GFS_cldprop_type in FV3                    | DDT           |    0 | GFS_cldprop_type      |           | none   | F        |
@@ -77,7 +77,7 @@ module GFS_typedefs
 !   component to allow proper initialization of the GFS physics
 !--------------------------------------------------------------------------------
 !! \section arg_table_GFS_init_type
-!! | local var name | longname                                               | description                                             | units         | rank | type     |    kind   | intent | optional |
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type     |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|----------|-----------|--------|----------|
 !! | me             |                                                        | current MPI-rank                                        | none          |    0 | integer  |           | none   | F        |
 !! | master         |                                                        | master MPI-rank                                         | none          |    0 | integer  |           | none   | F        |
@@ -148,7 +148,7 @@ module GFS_typedefs
 !   prognostic state variables with layer and level specific data
 !----------------------------------------------------------------
 !! \section arg_table_GFS_statein_type
-!! | local var name                   | longname                                               | description                                            | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                       | standard_name                                          | long_name                                              | units         | rank | type    |    kind   | intent | optional |
 !! |----------------------------------|--------------------------------------------------------|--------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Statein%phii        | geopotential_at_interface                              | geopotential at model layer interfaces                 | m2 s-2        |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Statein%prsi        | air_pressure_at_interface                              | air pressure at model layer interfaces                 | Pa            |    2 | real    | kind_phys | none   | F        |
@@ -201,7 +201,7 @@ module GFS_typedefs
 !   prognostic state or tendencies after physical parameterizations
 !------------------------------------------------------------------
 !! \section arg_table_GFS_stateout_type
-!! | local var name                                  | longname                                                   | description                                                | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                                      | standard_name                                              | long_name                                                  | units         | rank | type    |    kind   | intent | optional |
 !! |-------------------------------------------------|------------------------------------------------------------|------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Stateout%gu0                       | x_wind_updated_by_physics                                  | zonal wind updated by physics                              | m s-1         |    2 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Stateout%gv0                       | y_wind_updated_by_physics                                  | meridional wind updated by physics                         | m s-1         |    2 | real    | kind_phys | none   | F        |
@@ -229,7 +229,7 @@ module GFS_typedefs
 !   surface properties that may be read in and/or updated by climatology or observations
 !---------------------------------------------------------------------------------------
 !! \section arg_table_GFS_sfcprop_type
-!! | local var name                 | longname                                                               | description                                          | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                     | standard_name                                                          | long_name                                            | units         | rank | type    |    kind   | intent | optional |
 !! |--------------------------------|------------------------------------------------------------------------|------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Sfcprop%slmsk     | sea_land_ice_mask_real                                                 | landmask: sea/land/ice=0/1/2                         | flag          |    1 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Sfcprop%tsfc      | surface_skin_temperature                                               | ocean surface skin temperature                       | K             |    1 | real    | kind_phys | none   | F        |
@@ -389,7 +389,7 @@ module GFS_typedefs
 !   fields to/from other coupled components (e.g. land/ice/ocean/etc.)
 !---------------------------------------------------------------------
 !! \section arg_table_GFS_coupling_type
-!! | local var name                       | longname                                                                                  | description                                          | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                           | standard_name                                                                             | long_name                                            | units         | rank | type    |    kind   | intent | optional |
 !! |--------------------------------------|-------------------------------------------------------------------------------------------|------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Coupling%nirbmdi        | surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step            | sfc nir beam sw downward flux                        | W m-2         |    1 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Coupling%nirdfdi        | surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step           | sfc nir diff sw downward flux                        | W m-2         |    1 | real    | kind_phys | none   | F        |
@@ -567,7 +567,7 @@ module GFS_typedefs
 !   list of those that can be modified during the run are at the bottom of the list 
 !----------------------------------------------------------------------------------
 !! \section arg_table_GFS_control_type
-!! | local var name                       | longname                                                                      | description                                             | units         | rank | type      |    kind   | intent | optional |
+!! | local_name                           | standard_name                                                                 | long_name                                               | units         | rank | type      |    kind   | intent | optional |
 !! |--------------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | IPD_Control%me                       | mpi_rank                                                                      | current MPI-rank                                        | index         |    0 | integer   |           | none   | F        |
 !! | IPD_Control%master                   |                                                                               | master MPI-rank                                         | index         |    0 | integer   |           | none   | F        |
@@ -1002,7 +1002,7 @@ module GFS_typedefs
 !   grid data needed for interpolations and length-scale calculations
 !--------------------------------------------------------------------
 !! \section arg_table_GFS_grid_type
-!! | local var name                 | longname                                               | description                                        | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                     | standard_name                                          | long_name                                          | units         | rank | type    |    kind   | intent | optional |
 !! |--------------------------------|--------------------------------------------------------|----------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Grid%xlon         | longitude                                              | grid longitude in radians                          | radians       |    1 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Grid%xlat         | latitude                                               | grid latitude in radians                           | radians       |    1 | real    | kind_phys | none   | F        |
@@ -1053,7 +1053,7 @@ module GFS_typedefs
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
 !! \section arg_table_GFS_tbd_type
-!! | local var name                                  | longname                                                                                       | description                                             | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                                      | standard_name                                                                                  | long_name                                               | units         | rank | type    |    kind   | intent | optional |
 !! |-------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Tbd%icsdsw                         | seed_random_numbers_sw                                                                         | random seeds for sub-column cloud generators sw         | none          |    1 | integer |           | none   | F        |
 !! | IPD_Data(nb)%Tbd%icsdlw                         | seed_random_numbers_lw                                                                         | random seeds for sub-column cloud generators lw         | none          |    1 | integer |           | none   | F        |
@@ -1135,7 +1135,7 @@ module GFS_typedefs
 !  cloud properties and tendencies needed by radiation from physics 
 !------------------------------------------------------------------
 !! \section arg_table_GFS_cldprop_type
-!! | local var name                            | longname                                                | description                                             | units         | rank | type    |    kind   | intent | optional |
+!! | local_name                                | standard_name                                           | long_name                                               | units         | rank | type    |    kind   | intent | optional |
 !! |-------------------------------------------|---------------------------------------------------------|---------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
 !! | IPD_Data(nb)%Cldprop%cv                   | fraction_of_convective_cloud                            | fraction of convective cloud                            | frac          |    1 | real    | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Cldprop%cvt                  | pressure_at_top_of_convective_cloud                     | convective cloud top pressure                           | Pa            |    1 | real    | kind_phys | none   | F        |
@@ -1161,7 +1161,7 @@ module GFS_typedefs
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
 !! \section arg_table_GFS_radtend_type
-!! | local var name                            | longname                                                                                      | description                                             | units         | rank | type        |    kind   | intent | optional |
+!! | local_name                                | standard_name                                                                                 | long_name                                               | units         | rank | type        |    kind   | intent | optional |
 !! |-------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | IPD_Data(nb)%Radtend%sfcfsw               | sw_fluxes_sfc                                                                                 | sw radiation fluxes at sfc                              | W m-2         |    1 | sfcfsw_type |           | none   | F        |
 !! | IPD_Data(nb)%Radtend%sfcflw               | lw_fluxes_sfc                                                                                 | lw radiation fluxes at sfc                              | W m-2         |    1 | sfcflw_type |           | none   | F        |
@@ -1221,7 +1221,7 @@ module GFS_typedefs
 !  internal diagnostic type used as arguments to gbphys and grrad 
 !----------------------------------------------------------------
 !! \section arg_table_GFS_diag_type
-!! | local var name                            | longname                                                                | description                                                     | units         | rank | type        |    kind   | intent | optional |
+!! | local_name                                | standard_name                                                           | long_name                                                       | units         | rank | type        |    kind   | intent | optional |
 !! |-------------------------------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | IPD_Data(nb)%Intdiag%fluxr                |                                                                         | accumulated 2-d fields, opt. includes aerosols                  |               |    2 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%topfsw               | sw_fluxes_top_atmosphere                                                | sw radiation fluxes at toa                                      | W m-2         |    1 | topfsw_type |           | none   | F        |
@@ -1416,7 +1416,7 @@ module GFS_typedefs
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
 !! \section arg_table_GFS_interstitial_type
-!! | local var name                                     | longname                                                                                       | description                                                                         | units         | rank | type        |    kind   | intent | optional |
+!! | local_name                                         | standard_name                                                                                  | long_name                                                                           | units         | rank | type        |    kind   | intent | optional |
 !! |----------------------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | IPD_Interstitial(nt)%adjnirbmd                     | surface_downwelling_direct_near_infrared_shortwave_flux                                        | surface downwelling beam near-infrared shortwave flux at current time               | W m-2         |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Interstitial(nt)%adjnirbmu                     | surface_upwelling_direct_near_infrared_shortwave_flux                                          | surface upwelling beam near-infrared shortwave flux at current time                 | W m-2         |    1 | real        | kind_phys | none   | F        |
@@ -1481,6 +1481,8 @@ module GFS_typedefs
 !! | IPD_Interstitial(nt)%dvsfc1                        | instantaneous_surface_y_momentum_flux                                                          | y momentum flux                                                                     | Pa            |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Interstitial(nt)%elvmax                        | maximum_subgrid_orography                                                                      | maximum of subgrid orography                                                        | m             |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Interstitial(nt)%ep1d                          | surface_upward_potential_latent_heat_flux                                                      | surface upward potential latent heat flux                                           | W m-2         |    1 | real        | kind_phys | none   | F        |
+!! | IPD_Interstitial(nt)%errmsg                        | error_message                                                                                  | error message for error handling in CCPP                                            | none          |    0 | character   | len=512   | none   | F        |
+!! | IPD_Interstitial(nt)%errflg                        | error_flag                                                                                     | error flag for error handling in CCPP                                               | flag          |    0 | integer     |           | none   | F        |
 !! | IPD_Interstitial(nt)%evap                          | kinematic_surface_upward_latent_heat_flux                                                      | kinematic surface upward latent heat flux                                           | kg kg-1 m s-1 |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Interstitial(nt)%evbs                          | soil_upward_latent_heat_flux                                                                   | soil upward latent heat flux                                                        | W m-2         |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Interstitial(nt)%evcw                          | canopy_upward_latent_heat_flux                                                                 | canopy upward latent heat flux                                                      | W m-2         |    1 | real        | kind_phys | none   | F        |
@@ -1660,6 +1662,8 @@ module GFS_typedefs
     real (kind=kind_phys), pointer      :: dvsfc1(:)        => null()  !<
     real (kind=kind_phys), pointer      :: elvmax(:)        => null()  !<
     real (kind=kind_phys), pointer      :: ep1d(:)          => null()  !<
+    character(len=512)                  :: errmsg
+    integer                             :: errflg
     real (kind=kind_phys), pointer      :: evap(:)          => null()  !<
     real (kind=kind_phys), pointer      :: evbs(:)          => null()  !<
     real (kind=kind_phys), pointer      :: evcw(:)          => null()  !<
@@ -3776,6 +3780,8 @@ module GFS_typedefs
     Interstitial%aerodp       = clear_val
     Interstitial%cldsa        = clear_val
     Interstitial%clouds       = clear_val
+    Interstitial%errmsg       = ''
+    Interstitial%errflg       = 0
     Interstitial%faerlw       = clear_val
     Interstitial%faersw       = clear_val
     Interstitial%gasvmr       = clear_val
@@ -3859,6 +3865,8 @@ module GFS_typedefs
     Interstitial%dvsfc1       = clear_val
     Interstitial%elvmax       = clear_val
     Interstitial%ep1d         = clear_val
+    Interstitial%errmsg       = ''
+    Interstitial%errflg       = 0
     Interstitial%evap         = clear_val
     Interstitial%evbs         = clear_val
     Interstitial%evcw         = clear_val
@@ -4004,6 +4012,8 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%dvsfc1      ) = ', sum(Interstitial%dvsfc1      )
     write (0,*) 'sum(Interstitial%elvmax      ) = ', sum(Interstitial%elvmax      )
     write (0,*) 'sum(Interstitial%ep1d        ) = ', sum(Interstitial%ep1d        )
+    write (0,*) 'Interstitial%errmsg            = ', trim(Interstitial%errmsg)
+    write (0,*) 'Interstitial%errflg            = ', Interstitial%errflg
     write (0,*) 'sum(Interstitial%evap        ) = ', sum(Interstitial%evap        )
     write (0,*) 'sum(Interstitial%evbs        ) = ', sum(Interstitial%evbs        )
     write (0,*) 'sum(Interstitial%evcw        ) = ', sum(Interstitial%evcw        )
