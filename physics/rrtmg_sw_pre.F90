@@ -12,24 +12,27 @@
       end subroutine rrtmg_sw_pre_init
 
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
-!! | local var name | longname                                  | description                                                          | units    | rank |  type                         |   kind    | intent | optional |
-!! |----------------|-------------------------------------------|----------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters              | DDT      | 0    | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT      | 0    | GFS_grid_type                 |           | in     | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                        | DDT      | 0    | GFS_sfcprop_type              |           | in     | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                  | DDT      | 0    | GFS_radtend_type              |           | inout  | F        |
-!! | im             | horizontal_loop_extent                    | horizontal loop extent                                               | count    | 0    | integer                       |           | in     | F        |
-!! | nday           | daytime_points_dimension                  | daytime points dimension                                             | count    | 0    | integer                       |           | out    | F        |
-!! | idxday         | daytime_points                            | daytime points                                                       | index    | 1    | integer                       |           | out    | F        |
-!! | tsfg           | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                             | K        | 1    | real                          | kind_phys | in     | F        |
-!! | tsfa           | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                     | K        | 1    | real                          | kind_phys | in     | F        |
-!! | sfcalb1        | surface_albedo_due_to_near_IR_direct      | surface albedo due to near IR direct beam                            | frac     | 1    | real                          | kind_phys | out    | F        |
-!! | sfcalb2        | surface_albedo_due_to_near_IR_diffused    | surface albedo due to near IR diffused beam                          | frac     | 1    | real                          | kind_phys | out    | F        |
-!! | sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct   | surface albedo due to UV+VIS direct beam                             | frac     | 1    | real                          | kind_phys | out    | F        |
-!! | sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused | surface albedo due to UV+VIS diffused beam                           | frac     | 1    | real                          | kind_phys | out    | F        |
+!! | local_name     | standard_name                             | long_name                                                          | units    | rank |  type            |   kind    | intent | optional |
+!! |----------------|-------------------------------------------|--------------------------------------------------------------------|----------|------|------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters            | DDT      |    0 | GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data | DDT      |    0 | GFS_grid_type    |           | in     | F        |
+!! | Sfcprop        | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                      | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
+!! | Radtend        | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
+!! | im             | horizontal_loop_extent                    | horizontal loop extent                                             | count    |    0 | integer          |           | in     | F        |
+!! | nday           | daytime_points_dimension                  | daytime points dimension                                           | count    |    0 | integer          |           | out    | F        |
+!! | idxday         | daytime_points                            | daytime points                                                     | index    |    1 | integer          |           | out    | F        |
+!! | tsfg           | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                           | K        |    1 | real             | kind_phys | in     | F        |
+!! | tsfa           | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                   | K        |    1 | real             | kind_phys | in     | F        |
+!! | sfcalb1        | surface_albedo_due_to_near_IR_direct      | surface albedo due to near IR direct beam                          | frac     |    1 | real             | kind_phys | out    | F        |
+!! | sfcalb2        | surface_albedo_due_to_near_IR_diffused    | surface albedo due to near IR diffused beam                        | frac     |    1 | real             | kind_phys | out    | F        |
+!! | sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct   | surface albedo due to UV+VIS direct beam                           | frac     |    1 | real             | kind_phys | out    | F        |
+!! | sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused | surface albedo due to UV+VIS diffused beam                         | frac     |    1 | real             | kind_phys | out    | F        |
+!! | errmsg         | error_message                             | error message for error handling in CCPP                           | none     |    0 | character        | len=*     | out    | F        |
+!! | errflg         | error_flag                                | error flag for error handling in CCPP                              | flag     |    0 | integer          |           | out    | F        |
 !!
       subroutine rrtmg_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
-          nday, idxday, tsfg, tsfa, sfcalb1, sfcalb2, sfcalb3, sfcalb4 )
+        nday, idxday, tsfg, tsfa, sfcalb1, sfcalb2, sfcalb3, sfcalb4, &
+        errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -49,9 +52,15 @@
       integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
       ! Local variables
       integer :: i
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
 !  --- ...  start radiation calculations
 !           remember to set heating rate unit to k/sec!
