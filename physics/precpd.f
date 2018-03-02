@@ -23,28 +23,30 @@
 !! precipitation (snow or rain) or evaporation of rain.
 !!
 !! \section arg_table_zhaocarr_precpd_run Argument Table
-!! | local var name | longname                                                      | description                                                       | units       | rank |  type   |   kind   | intent  | optional |
-!! |----------------|---------------------------------------------------------------|-------------------------------------------------------------------|-------------|------|---------|----------|---------|----------|
-!! |  im            | horizontal_loop_extent                                        | horizontal loop extent                                            | count       |  0   | integer |          |  in     |   F      |
-!! |  ix            | horizontal_dimension                                          | horizontal dimension                                              | count       |  0   | integer |          |  in     |   F      |
-!! |  km            | vertical_dimension                                            | vertical layer dimension                                          | count       |  0   | integer |          |  in     |   F      |
-!! |  dt            | time_step_for_physics                                         | physics time step                                                 | s           |  0   | real    | kind_phys|  in     |   F      |
-!! |  del           | air_pressure_difference_between_midlayers                     | pressure level thickness                                          | Pa          |  2   | real    | kind_phys|  in     |   F      |
-!! |  prsl          | air_pressure                                                  | layer mean pressure                                               | Pa          |  2   | real    | kind_phys|  in     |   F      |
-!! |  q             | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity                                     | kg kg-1     |  2   | real    | kind_phys|  inout  |   F      |
-!! |  cwm           | cloud_condensed_water_specific_humidity_updated_by_physics    | cloud condensed water specific humidity                           | kg kg-1     |  2   | real    | kind_phys|  inout  |   F      |
-!! |  t             | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K           |  2   | real    | kind_phys|  inout  |   F      |
-!! |  rn            | lwe_thickness_of_stratiform_precipitation_amount              | stratiform rainfall amount on physics timestep                    | m           |  1   | real    | kind_phys|  out    |   F      |
-!! |  sr            | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac        |  1   | real    | kind_phys|  out    |   F      |
-!! |  rainp         | tendency_of_rain_water_mixing_ratio_due_to_model_physics      | tendency of rain water mixing ratio due to model physics          | kg kg-1 s-1 |  2   | real    | kind_phys|  out    |   F      |
-!! |  u00k          | critical_relative_humidity                                    | critical relative humidity                                        | frac        |  2   | real    | kind_phys|  in     |   F      |
-!! |  psautco       | coefficient_from_cloud_ice_to_snow                            | conversion coefficient from cloud ice to snow                     | none        |  1   | real    | kind_phys|  in     |   F      |
-!! |  prautco       | coefficient_from_cloud_water_to_rain                          | conversion coefficient from cloud water to rain                   | none        |  1   | real    | kind_phys|  in     |   F      |
-!! |  evpco         | coefficient_for_evaporation_of_rainfall                       | coefficient for evaporation of rainfall                           | none        |  0   | real    | kind_phys|  in     |   F      |
-!! |  wminco        | cloud_condensed_water_conversion_threshold                    | conversion coefficient from cloud liquid and ice to precipitation | none        |  1   | real    | kind_phys|  in     |   F      |
-!! |  wk1           | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |  1   | real    | kind_phys|  in     |   F      |
-!! |  lprnt         | flag_print                                                    | flag for printing diagnostics to output                           | flag        |  0   | logical |          |  in     |   F      |
-!! |  jpr           | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |  0   | integer |          |  in     |   F      |
+!! | local_name     | standard_name                                                 | long_name                                                         | units       | rank |  type     |   kind    | intent | optional |
+!! |----------------|---------------------------------------------------------------|-------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
+!! |  im            | horizontal_loop_extent                                        | horizontal loop extent                                            | count       |    0 | integer   |           | in     | F        |
+!! |  ix            | horizontal_dimension                                          | horizontal dimension                                              | count       |    0 | integer   |           | in     | F        |
+!! |  km            | vertical_dimension                                            | vertical layer dimension                                          | count       |    0 | integer   |           | in     | F        |
+!! |  dt            | time_step_for_physics                                         | physics time step                                                 | s           |    0 | real      | kind_phys | in     | F        |
+!! |  del           | air_pressure_difference_between_midlayers                     | pressure level thickness                                          | Pa          |    2 | real      | kind_phys | in     | F        |
+!! |  prsl          | air_pressure                                                  | layer mean pressure                                               | Pa          |    2 | real      | kind_phys | in     | F        |
+!! |  q             | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity                                     | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! |  cwm           | cloud_condensed_water_specific_humidity_updated_by_physics    | cloud condensed water specific humidity                           | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! |  t             | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K           |    2 | real      | kind_phys | inout  | F        |
+!! |  rn            | lwe_thickness_of_stratiform_precipitation_amount              | stratiform rainfall amount on physics timestep                    | m           |    1 | real      | kind_phys | out    | F        |
+!! |  sr            | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac        |    1 | real      | kind_phys | out    | F        |
+!! |  rainp         | tendency_of_rain_water_mixing_ratio_due_to_model_physics      | tendency of rain water mixing ratio due to model physics          | kg kg-1 s-1 |    2 | real      | kind_phys | out    | F        |
+!! |  u00k          | critical_relative_humidity                                    | critical relative humidity                                        | frac        |    2 | real      | kind_phys | in     | F        |
+!! |  psautco       | coefficient_from_cloud_ice_to_snow                            | conversion coefficient from cloud ice to snow                     | none        |    1 | real      | kind_phys | in     | F        |
+!! |  prautco       | coefficient_from_cloud_water_to_rain                          | conversion coefficient from cloud water to rain                   | none        |    1 | real      | kind_phys | in     | F        |
+!! |  evpco         | coefficient_for_evaporation_of_rainfall                       | coefficient for evaporation of rainfall                           | none        |    0 | real      | kind_phys | in     | F        |
+!! |  wminco        | cloud_condensed_water_conversion_threshold                    | conversion coefficient from cloud liquid and ice to precipitation | none        |    1 | real      | kind_phys | in     | F        |
+!! |  wk1           | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |    1 | real      | kind_phys | in     | F        |
+!! |  lprnt         | flag_print                                                    | flag for printing diagnostics to output                           | flag        |    0 | logical   |           | in     | F        |
+!! |  jpr           | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |    0 | integer   |           | in     | F        |
+!! | errmsg         | error_message                                                 | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
 !!
 !! \section general General Algorithm
 !! The parameterization of precipitation is required in order to remove
@@ -90,7 +92,7 @@
 ! DH* TODO add intent() information for variables
        subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
-     &,                   wk1,lprnt,jpr)
+     &,                   wk1,lprnt,jpr,errmsg,errflg)
 
 !
 !     ******************************************************************
@@ -141,7 +143,6 @@
      &,             ttp => con_ttp, cp => con_cp
      &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
-!     include 'constant.h'
 !
       real (kind=kind_phys) g,      h1,    h1000
      &,                     d00
@@ -197,7 +198,12 @@
      &,                     praut, fi, qc, amaxrq, rqkll
       integer i, k, ihpr, n
 !
-
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !--------------  GFS psautco/prautco interstitial ----------------
       do i=1, im
         wk2(i) = 1.0-wk1(i)
