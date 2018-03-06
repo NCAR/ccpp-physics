@@ -2862,6 +2862,7 @@ module GFS_typedefs
     endif
 
     !--- set up cloud schemes and tracer elements
+    Model%npdf3d = 0
     if (Model%ncld <= 1) then
       if (Model%zhao_mic) then        ! default setup for Zhao Microphysics
         Model%num_p3d = 4
