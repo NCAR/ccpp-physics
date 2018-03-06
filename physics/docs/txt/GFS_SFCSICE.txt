@@ -46,13 +46,16 @@
  The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Fig.1).
  The upper ice layer has a variable heat capacity to represent brine pockets.
 
+ This scheme includes the following modules:
+ + \ref GFS_Ice
+ + Winton(2000) \cite winton_2000 Three-layer Thermodynamics Sea Ice Model ice3lay()
 \section intra_sice 2. Intraphysics Communication
 \image html schematic_sice.png "Fig.2  NCEP Sea Ice Model System Diagram" width=10cm
-\sa \ref arg_table_sfc_sice_run
++ GFS Sea Ice Driver(\ref arg_table_sfc_sice_run)
++ Winton(2000) \cite winton_2000 Three-layer Thermodynamics Sea Ice Model (ice3lay())
 
 \section gen_sice 3. General Algorithm 
-\sa \ref general_sice_run
-
-
++ GFS Sea Ice Driver (\ref general_sice_run)
++ Winton(2000) \cite winton_2000 Three-layer Thermodynamics Sea Ice Model (\ref gen_ice3lay)
 
 */

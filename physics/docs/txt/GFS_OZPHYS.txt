@@ -4,14 +4,16 @@
  In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems
  from the surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some
  have also added stratospheric ozone (\f$O_3\f$) as a prognostic trace constituent to their models. Examples
- include the Integrated Forecast System (IFS) of the European Centre for Medium Range Weather Forecasts (ECMWF)(Untch et al., 1999\cite untch_et_al; Dethof and Holm, 2004 \cite dethof_and_holm_2004), and the NCEP GFS (NCEP 2003). The addition
+ include the Integrated Forecast System (IFS) of the European Centre for Medium Range Weather Forecasts (ECMWF)
+(Untch et al., 1999\cite untch_et_al_1999; Dethof and Holm, 2004 \cite dethof_and_holm_2004), and the NCEP GFS (NCEP 2003). The addition
  of stratospheric ozone as a prognostic variable is expected to improve overall forecast and analyses skill of other fields,
  such as temperature and wind. The primary reasons for this are:
- - more accurate assimilation of satellite radiances from channels that are sensitive to ozone(Derber and Wu, 1998 \cite derber_and_wu_1998; John and Buehler, 2004 \cite john_and_buehler_2004);
+ - more accurate assimilation of satellite radiances from channels that are sensitive to ozone 
+  (Derber and Wu, 1998 \cite derber_and_wu_1998; John and Buehler, 2004 \cite john_and_buehler_2004);
  - utilization of correlations between ozone and wind to improve wind analyses in the upper troposphere and lower stratosphere
 (UTLS) (e.g. Riishojgaard, 1996 \cite riishojgaard_1996); 
  - more accurate radiative heating rates, and hence temperatures arising from using analysed ozone rather than climatological
-ozone in the forecast model radiation sheme (often referred to as 'ozone/radiation interaction') (Jackson and Saunders, 2002 \cite jackson_and_saunders_2002); 
+ozone in the forecast model radiation sheme (often referred to as "ozone/radiation interaction") (Jackson and Saunders, 2002 \cite jackson_and_saunders_2002); 
  - more accurate analyses and forecasts of surface ultraviolet (UV) radiation.
  
  With the extension of NWP/DA systems into the upper stratosphere, assimilation and advection alone cannot yield accurate ozone
