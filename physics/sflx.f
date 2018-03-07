@@ -111,7 +111,7 @@
 ! @{
 !      subroutine sflx                                                   & !  ---  inputs:
 !ccppdox: avoid to connect to sflx in mpbl
-    subroutine gfssflx                                                   & !  ---  inputs:
+      subroutine gfssflx                                                & !  ---  inputs:
      &     ( nsoil, couple, icein, ffrozp, dt, zlvl, sldpth,            &
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
