@@ -79,7 +79,6 @@
 !!\f]
 !! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!  \section detailed_diff Detailed Algorithm
-!!
 !!  @{
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
@@ -397,5 +396,4 @@
       return
       end subroutine sfc_ex_coef_run
 !! @}
-
       end module surface_exchange_coefficients

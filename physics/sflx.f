@@ -107,8 +107,6 @@
 !!\param[out] smcmax   real, porosity (sat val of soil mois) 
 !!\section general_sflx General Algorithm
 !! @{
-!\section detailed_sflx Detailed Algorithm
-! @{
 !      subroutine sflx                                                   & !  ---  inputs:
 !ccppdox: avoid to connect to sflx in mpbl
       subroutine gfssflx                                                & !  ---  inputs:
@@ -5684,4 +5682,3 @@ c ----------------------------------------------------------------------
       end subroutine gfssflx
 !-----------------------------------
 !! @}
-

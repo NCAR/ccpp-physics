@@ -937,6 +937,5 @@ subroutine cool_skin(ustar_a,f_nsol,f_sol_0,evap,sss,alpha,beta,rho_w,rho_a,ts,q
     xzts = 0.0
  end subroutine dtl_reset
 
-
 end module nst_module
 !! @ }

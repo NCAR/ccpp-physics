@@ -95,7 +95,6 @@
 
 
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
-!> @{
 !!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection
 !! scheme is an updated version of the previous mass-flux shallow
 !! convection scheme with scale and aerosol awareness and
@@ -1785,7 +1784,5 @@ c
 !! @}
       end subroutine sasasshal_run
 !! @}
-!> @}
-
       end module sasas_shal
 

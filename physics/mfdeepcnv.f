@@ -1,6 +1,7 @@
 !>  \file mfdeepcnv.f
 !!  This file contains the entire SAMF deep convection scheme.
 !> \defgroup SAMF GFS Scale-Aware Mass-Flux Deep Convection
+!> @{
 !> \brief The scale-aware mass-flux (SAMF) deep convection scheme is an 
 !! updated version of the previous Simplified Arakawa-Schubert (SAS) scheme 
 !! with scale and aerosol awareness and parameterizes the effect of deep 
@@ -70,8 +71,8 @@
       end subroutine sasasdeep_finalize
 
 !>\defgroup GFS_mfdeep GFS mfdeepcnv Main
+!! @{
 !!\ingroup SAMF
-!> @{
 !>\brief This subroutine contains the entirety of the SAMF deep convection scheme.
 !!
 !! For grid sizes larger than threshold value, as in Grell (1993)
@@ -2657,5 +2658,6 @@ c
       return
 !! @}
       end subroutine sasasdeep_run
+!! @}
 !> @}
       end module sasas_deep

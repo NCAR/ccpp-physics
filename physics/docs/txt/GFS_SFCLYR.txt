@@ -5,7 +5,7 @@
  the surface sublayer scheme from Zeng and Dickinson (1998)
  \cite zeng_and_dickinson_1998.
 
- \ref NOAH are largely responsible for the quality
+ \ref Noah_Main are largely responsible for the quality
  of model forecasts produced for near-surface weather parameters, such
  as 2-meter air temperature (\f$T_{2m}\f$) and surface skin temperature
  (\f$LST\f$). \f$LST\f$ is derived from the surface energy budget, and is

@@ -140,6 +140,7 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                         ../sfc_drv.f \
                         ../sflx.f    \
                         ../sfc_diff.f \
+                        ../GFS_calpreciptype.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface
@@ -156,6 +157,7 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                         ../ozphys.f \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
+                         *.f90 \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =

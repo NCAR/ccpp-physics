@@ -606,22 +606,22 @@
 !! based on Winton(2000) \cite winton_2000 .
 !! @{
 !!\ingroup gfs_sice_main
-!!\param[in] im    integer, horizontal dimension
-!!\param[in] kmi   integer, number of ice layers (2) 
-!!\param[in] fice  real, sea-ice concentration
-!!\param[in] flag  logical, ice mask flag
-!!\param[in] hfi   real, net non-solar and heat flux at surface (\f$W/m^2\f$)
-!!\param[in] hfd   real, heat flux derivative at surface 
-!!\param[in] sneti real, net solar incoming at top (\f$W/m^2\f$)
-!!\param[in] focn  real, heat flux from ocean (\f$W/m^2\f$)
-!!\param[in] delt  real, time step(\f$sec\f$)
-!!\param[in,out] snowd  real, snow depth
-!!\param[in,out] hice real, sea-ice thickness
-!!\param[in,out] stsice real, temperature at mid-point of ice levels (\f$^oC\f$)
-!!\param[in,out] tice real, surface temperature (\f$^oC\f$)
-!!\param[in,out] snof real, snowfall rate (\f$ms^{-1}\f$)
-!!\param[out] snowmt real, snow melt during delt (\f$m\f$)
-!!\param[out] gflux real, conductive heat flux (\f$W/m^2\f$)
+!\param[in] im    integer, horizontal dimension
+!\param[in] kmi   integer, number of ice layers (2) 
+!\param[in] fice  real, sea-ice concentration
+!\param[in] flag  logical, ice mask flag
+!\param[in] hfi   real, net non-solar and heat flux at surface (\f$W/m^2\f$)
+!\param[in] hfd   real, heat flux derivative at surface 
+!\param[in] sneti real, net solar incoming at top (\f$W/m^2\f$)
+!\param[in] focn  real, heat flux from ocean (\f$W/m^2\f$)
+!\param[in] delt  real, time step(\f$sec\f$)
+!\param[in,out] snowd  real, snow depth
+!\param[in,out] hice real, sea-ice thickness
+!\param[in,out] stsice real, temperature at mid-point of ice levels (\f$^oC\f$)
+!\param[in,out] tice real, surface temperature (\f$^oC\f$)
+!\param[in,out] snof real, snowfall rate (\f$ms^{-1}\f$)
+!\param[out] snowmt real, snow melt during delt (\f$m\f$)
+!\param[out] gflux real, conductive heat flux (\f$W/m^2\f$)
 !>\section gen_ice3lay General Algorithm
 !! @{
       subroutine ice3lay
