@@ -44,9 +44,9 @@
 !    
 !     declare variables.
 !
-      integer,intent(in)   :: im, ix, levs, ntcw, ncld, num_p3d
-      integer              :: n,i,k
-      logical              :: ldiag3d
+      integer, intent(in) :: im, ix, levs, ntcw, ncld, num_p3d
+      integer             :: n,i,k
+      logical, intent(in) :: ldiag3d
       real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,  &
                                                      clw1,clw2
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::   &
