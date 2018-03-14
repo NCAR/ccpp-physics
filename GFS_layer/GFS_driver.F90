@@ -175,14 +175,22 @@ module GFS_driver
     enddo
 
 #ifdef CCPP
+
 #ifdef OPENMP
     nthreads = omp_get_max_threads()
 #else
     nthreads = 1
 #endif
+
+! Initialize the Interstitial data type in parallel so that
+! each thread creates (touches) its Interstitial(nt) first
+!$OMP parallel do default (shared) &
+!$OMP            schedule (static,1) &
+!$OMP            private  (nt)
     do nt=1,nthreads
       call Interstitial (nt)%create (blkszmax, Model)
     enddo
+!$OMP end parallel do
 #endif
 
     !--- populate the grid components
