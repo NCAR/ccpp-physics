@@ -52,15 +52,13 @@
  to more strongly suppress convection in a drier environment.
 
 \section intra_deep 2. Intraphysics Communication
-\sa \ref arg_table_sasasdeep_run
+\ref arg_table_sasasdeep_run
 
 \section gen_al_deep 3. General Algorithm
-\sa \ref general_mfdeep
+\ref general_mfdeep
 
 \section det_al_deep 4. Detailed Algorithm
-\sa \ref detailed_deep
+\ref detailed_deep
  
-
-
 
 */

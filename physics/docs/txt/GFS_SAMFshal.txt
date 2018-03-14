@@ -23,13 +23,13 @@
  are described in Han et al. (2017) \cite han_et_al_2017 .
 
 \section intr_shal 2. Intraphysics Communication
-\sa \ref arg_table_sasasshal_run
+\ref arg_table_sasasshal_run
 
 \section gen_shal 3. General Algorithm
-\sa \ref general_mfshal
+\ref general_mfshal
 
 \section det_shal 4. Detailed Algorithm
-\sa \ref detailed_mfshal
+\ref detailed_mfshal
 
 
 

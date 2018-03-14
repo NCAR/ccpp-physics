@@ -92,13 +92,13 @@
 
 
 \section intra_gwdps 2. Intraphysics Communication
-\sa \ref arg_table_gwdps_run
+\ref arg_table_gwdps_run
 
 \section gen_al_gwdps 3. General Algorithm
-\sa \ref gen_gwdps
+\ref gen_gwdps
 
 \section detailed_al_gwdps 4. Detailed Algorithm
-\sa \ref det_gwdps
+\ref det_gwdps
 
 
 */

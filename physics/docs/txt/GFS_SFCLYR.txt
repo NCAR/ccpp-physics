@@ -59,10 +59,10 @@
  The daytime \f$LST\f$ increases substantially and is very close to the observations.
 
 \section intra_rough 2. Intraphysics Communication
-\sa \ref arg_table_sfc_ex_coef_run
+\ref arg_table_sfc_ex_coef_run
 
 \section gen_rough  3. General Algorithm
-\sa \ref general_diff
+\ref general_diff
 
 
 

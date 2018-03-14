@@ -14,13 +14,13 @@ This scheme includes the following subroutines:
 + mfpbl() 
 
 \section intra_pbl 2. Intraphysics Communication
-\sa \ref arg_table_edmf_run
+\ref arg_table_edmf_run
 
 \section gen_pbl 3. General Algorithm
-\sa \ref general_edmf
+\ref general_edmf
 
 \section det_pbl 4. Detailed Algorithm
-\sa \ref detailed_edmf
+\ref detailed_edmf
 
 
 

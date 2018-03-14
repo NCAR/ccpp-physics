@@ -52,10 +52,10 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
 
 
 \section intra_ozone 2. Intraphysics Communication
-\sa \ref arg_table_ozphys_run
+\ref arg_table_ozphys_run
 
 \section gen_ozone 3. General Algorithm
-\sa \ref genal_ozphys
+\ref genal_ozphys
 
 
 

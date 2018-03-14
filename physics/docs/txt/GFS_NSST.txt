@@ -27,10 +27,10 @@ This scheme includes the following components:
 + \ref nst_parameters
 
 \section intra_nst 2. Intraphysics Communication
-\sa \ref arg_table_sfc_nst_run
+\ref arg_table_sfc_nst_run
 
 \section gen_nst 3. General Algorithm
-\sa \ref NSST_general_algorithm
+\ref NSST_general_algorithm
 
 
 */

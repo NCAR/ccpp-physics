@@ -39,13 +39,13 @@
  is activated in a conditionally unstable atmosphere. 
 
 \section intra_gwdc 2. Intraphysics Communication
-\sa \ref arg_table_gwdc_run
+\ref arg_table_gwdc_run
 
 \section gena_gwdc  3. General Algorithm
-\sa \ref gen_gwdc
+\ref gen_gwdc
 
 \section det_gwdc 4. Detailed Algorithm
-\sa \ref al_gwdc
+\ref al_gwdc
 
 
 

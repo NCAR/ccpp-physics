@@ -7,7 +7,7 @@ This is the Rayleigh friction calculation with total energy conservation.
  - The winter-summer zonal wind drag in the strato-mesosphere
 
 \section intra_rayleigh 2. Intraphysics Communication
-\sa \ref arg_table_rayleigh_damp_run
+\ref arg_table_rayleigh_damp_run
 
 \section gen_ozone 3. General Algorithm
 
