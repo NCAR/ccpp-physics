@@ -282,11 +282,15 @@ module GFS_driver
     type(GFS_diag_type),      intent(inout) :: Diag
     type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
 
-    call GFS_phys_time_vary_1_run (Model, Tbd)
+    ! CCPP error handling variables (not used)
+    character(len=512) :: errmsg
+    integer            :: errflg
 
-    call GFS_rad_time_vary_run (Model, Statein, Tbd)
+    call GFS_phys_time_vary_1_run (Model, Tbd, errmsg, errflg)
 
-    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+    call GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
+
+    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle, errmsg, errflg)
 
   end subroutine GFS_time_vary_step
 
@@ -319,9 +323,13 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
     type(GFS_radtend_type),   intent(in   ) :: Radtend
     type(GFS_diag_type),      intent(inout) :: Diag
-        
+
+    ! CCPP error handling variables (not used)
+    character(len=512) :: errmsg
+    integer            :: errflg
+
     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-                             Grid, Tbd, Cldprop, Radtend, Diag)
+                             Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
 
   end subroutine GFS_stochastic_driver
 #endif

@@ -11,13 +11,15 @@
       end subroutine GFS_rad_time_vary_init
 
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
-!! | local var name    | longname                                                      | description                                                                   | units    | rank |  type                         |   kind    | intent | optional |
-!! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------------------|-----------|--------|----------|
-!! |   Model           | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |  0   | GFS_control_type              |           | inout  | F        |
-!! |   Statein         | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |  0   | GFS_statein_type              |           | in     | F        |
-!! |   Tbd             | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |  0   | GFS_tbd_type                  |           | inout  | F        |
+!! | local_name        | standard_name                                          | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
+!! |-------------------|--------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | Model             | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | Statein           | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type      |           | in     | F        |
+!! | Tbd               | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type          |           | inout  | F        |
+!! | errmsg            | error_message                                          | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg            | error_flag                                             | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_rad_time_vary_run (Model, Statein, Tbd)
+      subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
 
       use physparam,                 only: ipsd0, ipsdlim, iaerflg
       use mersenne_twister,          only: random_setseed, random_index, random_stat
@@ -34,11 +36,17 @@
       type(GFS_control_type), intent(inout) :: Model
       type(GFS_statein_type), intent(in)    :: Statein
       type(GFS_tbd_type),     intent(inout) :: Tbd
+      character(len=*),       intent(out) :: errmsg
+      integer,                intent(out) :: errflg
 
       !--- local variables
       type (random_stat) :: stat
       integer :: ix, nb, j, i, nblks, ipseed
       integer :: numrdm(Model%cnx*Model%cny*2)
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
       if (Model%lsswr .or. Model%lslwr) then
 

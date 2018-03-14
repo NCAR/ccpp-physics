@@ -12,12 +12,14 @@
       end subroutine GFS_phys_time_vary_1_finalize
 
 !> \section arg_table_GFS_phys_time_vary_1_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_tbd_type                  |           | in     | F        |
+!! | local_name     | standard_name                                          | long_name                                                             | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type      |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_1_run (Model, Tbd)
+      subroutine GFS_phys_time_vary_1_run (Model, Tbd, errmsg, errflg)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_tbd_type
@@ -26,10 +28,16 @@
 
         type(GFS_control_type),           intent(inout) :: Model
         type(GFS_tbd_type),               intent(in)    :: Tbd
+        character(len=*),                 intent(out)   :: errmsg
+        integer,                          intent(out)   :: errflg
 
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys) :: rinc(5)
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
         if (Tbd%blkno==1) then
           !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
@@ -84,17 +92,19 @@
       end subroutine GFS_phys_time_vary_2_finalize
 
 !> \section arg_table_GFS_phys_time_vary_2_run Argument Table
-!! | local var name | longname                                                                | description                                                             | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Grid           | FV3-GFS_Grid_type                                                       | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                                    | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                                        | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                    | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
-!! | Cldprop        | FV3-GFS_Cldprop_type                                                    | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                       | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Sfccycle       | FV3-GFS_Sfccycle_type                                                   | Fortran DDT containing FV3-GFS fields for surface cycling               | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
+!! | local_name     | standard_name                                          | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
+!! | Sfcprop        | FV3-GFS_Sfcprop_type                                   | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
+!! | Cldprop        | FV3-GFS_Cldprop_type                                   | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
+!! | Diag           | FV3-GFS_Diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
+!! | Sfccycle       | FV3-GFS_Sfccycle_type                                  | Fortran DDT containing FV3-GFS fields for surface cycling               | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle, errmsg, errflg)
 
         use mersenne_twister, only: random_setseed, random_number
         use machine,               only: kind_phys
@@ -113,6 +123,8 @@
         type(GFS_cldprop_type),           intent(inout) :: Cldprop
         type(GFS_diag_type),              intent(inout) :: Diag
         type(GFS_sfccycle_type),          intent(inout) :: Sfccycle
+        character(len=*),                 intent(out)   :: errmsg
+        integer,                          intent(out)   :: errflg
 
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
@@ -122,6 +134,10 @@
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
         if (Tbd%blkno==1) then
           !--- switch for saving convective clouds - cnvc90.f

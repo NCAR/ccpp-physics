@@ -12,7 +12,7 @@
       end subroutine GFS_stochastics_finalize
 
 !> \section arg_table_GFS_stochastics_run Argument Table
-!! | local var name | longname                                               | description                                             | units         | rank | type              |    kind   | intent | optional |
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type              |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type  |           | in     | F        |
 !! | Statein        | FV3-GFS_Statein_type                                   | derived type GFS_statein_type in FV3                    | DDT           |    0 | GFS_statein_type  |           | in     | F        |
@@ -24,6 +24,8 @@
 !! | Cldprop        | FV3-GFS_Cldprop_type                                   | derived type GFS_cldprop_type in FV3                    | DDT           |    0 | GFS_cldprop_type  |           | in     | F        |
 !! | Radtend        | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type  |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type     |           | inout  | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character         | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer           |           | out    | F        |
 !!
 !-------------------------------------------------------------------------
 ! GFS stochastic_driver
@@ -36,7 +38,7 @@
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
       subroutine GFS_stochastics_run (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                      Grid, Tbd, Cldprop, Radtend, Diag)
+                                      Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
 
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type, GFS_statein_type,  &
@@ -58,9 +60,16 @@
          type(GFS_cldprop_type),   intent(in   ) :: Cldprop
          type(GFS_radtend_type),   intent(in   ) :: Radtend
          type(GFS_diag_type),      intent(inout) :: Diag
+         character(len=*),         intent(out)   :: errmsg
+         integer,                  intent(out)   :: errflg
+
          !--- local variables
          integer :: k, i
          real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
          if (Model%do_sppt) then
            do k = 1,size(Statein%tgrs,2)

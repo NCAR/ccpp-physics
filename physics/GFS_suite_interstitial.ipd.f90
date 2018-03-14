@@ -11,30 +11,26 @@
       subroutine GFS_suite_interstitial_1_finalize()
       end subroutine GFS_suite_interstitial_1_finalize
 
-!> \section arg_table_GFS_suite_interstitial_1_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | tottracer      | number_of_total_tracers                                | total number of tracers                                               | count         |    0 | integer                       |           |   out  | F        |
-!! | trc_shft       | start_index_of_other_tracers                           | beginning index of the non-water tracer species                       | index         |    0 | integer                       |           |   out  | F        |
-!! | tracers        | number_of_water_tracers                                | number of water-related tracers                                       | count         |    0 | integer                       |           |   out  | F        |
-!! | ntk            | index_of_TKE                                           | index of TKE in the tracer array                                      | index         |    0 | integer                       |           |   out  | F        |
-!! | skip_macro     | flag_skip_macro                                        | flag to skip cloud macrophysics in Morrison scheme                    | flag          |    1 | logical                       |           |   out  | F        |
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys |   out  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys |   out  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys |   out  | F        |
-!!
-      subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
+      subroutine GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, &
+                                               clw, cnvc, cnvw, errmsg, errflg)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type
+
+        implicit none
 
         type(GFS_control_type),           intent(in) :: Model
         type(GFS_grid_type),              intent(in) :: Grid
         integer,                          intent(out) :: tottracer, trc_shft, tracers, ntk
         logical, dimension(size(Grid%xlon,1)), intent(out) :: skip_macro
         real(kind=kind_phys), allocatable, intent(out) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
         tottracer = 0            ! no convective transport of tracers
         if (Model%trans_trac .or. Model%cscnv) then
@@ -77,32 +73,14 @@
     subroutine GFS_suite_interstitial_2_finalize()
     end subroutine GFS_suite_interstitial_2_finalize
 
-!> \section arg_table_GFS_suite_interstitial_2_run Argument Table
-!! | local var name | longname                                                                 | description                                                             | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                     | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type              |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | rhbbot         | critical_relative_humidity_at_surface                                    | critical relative humidity at the surface                               | frac          |    0 | real                          | kind_phys |   out  | F        |
-!! | rhpbl          | critical_relative_humidity_at_PBL_top                                    | critical relative humidity at the PBL top                               | frac          |    0 | real                          | kind_phys |   out  | F        |
-!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                     | frac          |    0 | real                          | kind_phys |   out  | F        |
-!! | frain          | dynamics_to_physics_timestep_ratio                                       | ratio of dynamics timestep to physics timestep                          | none          |    0 | real                          | kind_phys |   out  | F        |
-!! | islmsk         | sea_land_ice_mask                                                        | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer                       |           |   out  | F        |
-!! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real                          | kind_phys |   out  | F        |
-!! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                     | none          |    1 | real                          | kind_phys |   out  | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                                  | updated tendency of the x wind                                          | m s-2         |    2 | real                          | kind_phys |   out  | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                  | updated tendency of the y wind                                          | m s-2         |    2 | real                          | kind_phys |   out  | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                         | updated tendency of the temperature                                     | K s-1         |    2 | real                          | kind_phys |   out  | F        |
-!! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky  | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real                          | kind_phys |   out  | F        |
-!! | dqdt           | tendency_of_tracers_due_to_model_physics                                 | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real                          | kind_phys |   out  | F        |
-!!
-    subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt)
+    subroutine GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
+                                             work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
       use physcons,              only: dxmin, dxinv
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_statein_type, GFS_diag_type
+
+      implicit none
 
       type(GFS_control_type),           intent(in) :: Model
       type(GFS_grid_type),              intent(in) :: Grid
@@ -116,7 +94,14 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
 
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
       integer :: i
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
       rhbbot = Model%crtrh(1)
       rhpbl  = Model%crtrh(2)
@@ -152,27 +137,13 @@
   subroutine GFS_suite_interstitial_3_finalize()
   end subroutine GFS_suite_interstitial_3_finalize
 
-!> \section arg_table_GFS_suite_interstitial_3_run Argument Table
-!! | local var name | longname                                                     | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT           |    0 | GFS_radtend_type              |           | in     | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                         | cosine of zenith angle at current time                                | none          | 1    | real                          | kind_phys | in     | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux                           | surface downwelling shortwave flux at current time                    | W m-2         | 1    | real                          | kind_phys | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                            | surface downwelling longwave flux at current time                     | W m-2         | 1    | real                          | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         | 1    | real                          | kind_phys | in     | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          | 1    | real                          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | flag          | 1    | integer                       |           |   out  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real                          | kind_phys |   out  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real                          | kind_phys |   out  | F        |
-!!
-  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
+  subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, &
+                                           Diag, kcnv, hflx, evap, errmsg, errflg)
 
     use machine,               only: kind_phys
     use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type, GFS_radtend_type, GFS_diag_type
+
+    implicit none
 
     type(GFS_control_type),           intent(in)    :: Model
     type(GFS_grid_type),              intent(in)    :: Grid
@@ -184,11 +155,18 @@
     real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu
     real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: hflx, evap
 
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
+
     real(kind=kind_phys), parameter :: czmin   = 0.0001      ! cos(89.994)
 
-    integer :: i
+    integer :: i, k
 
     real(kind=kind_phys) :: tem1
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
     if (Model%lssav) then      !  --- ...  accumulate/save output variables
 
@@ -252,22 +230,12 @@
   subroutine GFS_suite_update_stateout_finalize()
   end subroutine GFS_suite_update_stateout_finalize
 
-!> \section arg_table_GFS_suite_update_stateout_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Statein        | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                | updated tendency of the x wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                | updated tendency of the y wind                                        | m s-2         |    2 | real                          | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics       | updated tendency of the temperature                                   | K s-1         |    2 | real                          | kind_phys | in     | F        |
-!! | dqdt           | tendency_of_tracers_due_to_model_physics               | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real                          | kind_phys | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type             |           | inout  | F        |
-!!
-  subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
+  subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
 
     use machine,               only: kind_phys
     use GFS_typedefs,          only: GFS_control_type, GFS_statein_type, GFS_grid_type, GFS_stateout_type
+
+    implicit none
 
     type(GFS_control_type),           intent(in)    :: Model
     type(GFS_statein_type),           intent(in)    :: Statein
@@ -276,6 +244,13 @@
 
     real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs), intent(in) :: dudt, dvdt, dtdt
     real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs, Model%ntrac), intent(in) :: dqdt
+
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
     Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * Model%dtp
     Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * Model%dtp
@@ -296,28 +271,14 @@ end subroutine GFS_suite_interstitial_4_init
 subroutine GFS_suite_interstitial_4_finalize()
 end subroutine GFS_suite_interstitial_4_finalize
 
-!> \section arg_table_GFS_suite_interstitial_4_run Argument Table
-!! | local var name | longname                                                                 | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type              |           | in     | F        |
-!! | rhbbot         | critical_relative_humidity_at_surface                                    | critical relative humidity at the surface                             | frac          |    0 | real                          | kind_phys | in     | F        |
-!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                   | frac          |    0 | real                          | kind_phys | in     | F        |
-!! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes         | none          |    1 | real                          | kind_phys | in     | F        |
-!! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                   | none          |    1 | real                          | kind_phys | in     | F        |
-!! | clw            | convective_transportable_tracers                                         | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
-!! | cnvc           | convective_cloud_cover                                                   | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                                 | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
-!! | ktop           | vertical_index_at_cloud_top                                              | vertical index at cloud top                                           | index         |    1 | integer                       |           | inout  | F        |
-!! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                          | index         |    1 | integer                       |           | inout  | F        |
-!! | rhc            | critical_relative_humidity                                               | critical relative humidity                                            | frac          |    2 | real                          | kind_phys |   out  | F        |
-!!
-subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, &
+                                         ktop, kbot, rhc, errmsg, errflg)
 
   use machine,               only: kind_phys
   use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
   use physcons,              only: rhc_max
+
+  implicit none
 
   type(GFS_control_type),           intent(in)    :: Model
   type(GFS_grid_type),              intent(in)    :: Grid
@@ -329,8 +290,15 @@ subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, w
   integer, dimension(size(Grid%xlon,1)), intent(inout)                       :: ktop, kbot
   real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: rhc
 
+  character(len=*), intent(out) :: errmsg
+  integer,          intent(out) :: errflg
+
   integer :: i,k
   real(kind=kind_phys) :: tem
+
+  ! Initialize CCPP error handling variables
+  errmsg = ''
+  errflg = 0
 
   clw(:,:,1) = 0.0
   clw(:,:,2) = -999.9
@@ -341,6 +309,7 @@ subroutine GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, rhbtop, w
 
   ktop(:)  = 1
   kbot(:)  = Model%levs
+  ! DH* initialization of rhc missing! or change intent to inout?
 
   if (Model%ntcw > 0) then
     do k=1,Model%levs
@@ -366,18 +335,20 @@ end subroutine GFS_suite_interstitial_5_init
 subroutine GFS_suite_interstitial_5_finalize()
 end subroutine GFS_suite_interstitial_5_finalize
 
-!> \section arg_table_GFS_suite_interstitial_5_run Argument Table
-!! | local var name | longname                                               | description                                                           | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | clw            | convective_transportable_tracers                       | array to contain cloud water and other convective trans. tracers      | kg kg-1       |    3 | real                          | kind_phys | inout  | F        |
-!! | cnvc           | convective_cloud_cover                                 | convective cloud cover                                                | frac          |    2 | real                          | kind_phys | inout  | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity               | convective cloud water specific humidity                              | kg kg-1       |    2 | real                          | kind_phys | inout  | F        |
-!!
-subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
+subroutine GFS_suite_interstitial_5_run (clw, cnvc, cnvw, errmsg, errflg)
 
   use machine,               only: kind_phys
 
+  implicit none
+
   real(kind=kind_phys), allocatable, intent(inout) :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
+
+  character(len=*), intent(out) :: errmsg
+  integer,          intent(out) :: errflg
+
+  ! Initialize CCPP error handling variables
+  errmsg = ''
+  errflg = 0
 
   deallocate (clw)
   if (allocated(cnvc)) deallocate(cnvc)

@@ -57,23 +57,25 @@
 
 !>
 !! \section arg_table_ozphys_run Argument Table
-!! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
-!! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   | 0    | integer |           | in     | F        |
-!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   | 0    | integer |           | in     | F        |
-!! | levs           | vertical_dimension                                | number of vertical layers                         | count   | 0    | integer |           | in     | F        |
-!! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | count   | 0    | integer |           | in     | F        |
-!! | dt             | time_step_for_physics                             | physics time step                                 | s       | 0    | real    | kind_phys | in     | F        |
-!! | oz             | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | tin            | air_temperature_updated_by_physics                | updated air temperature                           | K       | 2    | real    | kind_phys | in     | F        |
-!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa) | 1    | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | prdout         | ozone_forcing                                     | ozone forcing data                                | various | 3    | real    | kind_phys | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   | 0    | integer |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    | 0    | logical |           | in     | F        |
-!! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 | 3    | real    | kind_phys | inout  | F        |
-!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   | 0    | integer |           | in     | F        |
+!! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
+!! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   |    0 | integer   |           | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                | number of vertical layers                         | count   |    0 | integer   |           | in     | F        |
+!! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | count   |    0 | integer   |           | in     | F        |
+!! | dt             | time_step_for_physics                             | physics time step                                 | s       |    0 | real      | kind_phys | in     | F        |
+!! | oz             | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | tin            | air_temperature_updated_by_physics                | updated air temperature                           | K       |    2 | real      | kind_phys | in     | F        |
+!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa) |    1 | real      | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | prdout         | ozone_forcing                                     | ozone forcing data                                | various |    3 | real      | kind_phys | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   |    0 | integer   |           | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
+!! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
+!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
+!! | errmsg         | error_message                                     | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                        | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
 !! \param[in] ix,im     integer, horizontal dimension and num of used pts
 !! \param[in] levs      integer, vertical layer dimension
@@ -96,7 +98,7 @@
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
-     &  ozp, me)
+     &  ozp, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -117,6 +119,12 @@
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
      &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
 !     safe input oz in ozi
       ozi = oz
@@ -243,16 +251,19 @@
 
 
 !! \section arg_table_ozphys_post_run Argument Table
-!! | local var name | longname                                     | description                                  | units   | rank | type                       | kind      | intent | optional |
-!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   | 0    | integer                    |           | in     | F        |
-!! | levs           | vertical_dimension                           | number of vertical layers                    | count   | 0    | integer                    |           | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   | 0    | integer                    |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    | 0    | logical                    |           | in     | F        |
-!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 | 3    | real                       | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     | 0    | GFS_diag_type              |           | inout  | F        |
+!! | local_name     | standard_name                                | long_name                                    | units   | rank | type          | kind      | intent | optional |
+!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   |    0 | integer       |           | in     | F        |
+!! | levs           | vertical_dimension                           | number of vertical layers                    | count   |    0 | integer       |           | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   |    0 | integer       |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    |    0 | logical       |           | in     | F        |
+!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 |    3 | real          | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     |    0 | GFS_diag_type |           | inout  | F        |
+!! | errmsg         | error_message                                | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
+!! | errflg         | error_flag                                   | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
 !!
-      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp, Diag)
+      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp,      &
+     &                           Diag, errmsg, errflg)
 
       use GFS_typedefs, only: GFS_diag_type
       use machine,      only: kind_phys
@@ -263,6 +274,13 @@
       logical, intent(in) :: ldiag3d
       real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
       type(GFS_diag_type), intent(inout) :: Diag
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
       if (ldiag3d) then
           Diag%dq3dt(:,:,6) = ozp(:,:,1)

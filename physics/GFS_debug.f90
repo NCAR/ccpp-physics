@@ -30,7 +30,7 @@
       end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
-!! | local var name | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
 !! | Statein        | FV3-GFS_Statein_type                                   | derived type GFS_statein_type in FV3                    | DDT           |    0 | GFS_statein_type      |           | in     | F        |
@@ -43,9 +43,12 @@
 !! | Radtend        | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                       Grid, Tbd, Cldprop, Radtend, Diag, Interstitial)
+                                       Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
+                                       errmsg, errflg)
 
          use mpi
          use omp_lib
@@ -71,10 +74,17 @@
          type(GFS_radtend_type),   intent(in   ) :: Radtend
          type(GFS_diag_type),      intent(in   ) :: Diag
          type(GFS_interstitial_type), intent(in) :: Interstitial
+         character(len=*),           intent(out) :: errmsg
+         integer,                    intent(out) :: errflg
+
          !--- local variables
          integer :: impi, iomp, ierr
          integer :: mpirank,mpisize
          integer :: omprank,ompsize
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
@@ -225,7 +235,7 @@
       end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
-!! | local var name | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
 !! | Statein        | FV3-GFS_Statein_type                                   | derived type GFS_statein_type in FV3                    | DDT           |    0 | GFS_statein_type      |           | in     | F        |
@@ -238,9 +248,12 @@
 !! | Radtend        | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                       Grid, Tbd, Cldprop, Radtend, Diag, Interstitial)
+                                           Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
+                                           errmsg, errflg)
 
          use mpi
          use omp_lib
@@ -266,10 +279,17 @@
          type(GFS_radtend_type),   intent(in   ) :: Radtend
          type(GFS_diag_type),      intent(in   ) :: Diag
          type(GFS_interstitial_type), intent(in) :: Interstitial
+         character(len=*),           intent(out) :: errmsg
+         integer,                    intent(out) :: errflg
+
          !--- local variables
          integer :: impi, iomp, ierr
          integer :: mpirank,mpisize
          integer :: omprank,ompsize
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
@@ -312,11 +332,13 @@
       end subroutine GFS_barrier_finalize
 
 !> \section arg_table_GFS_barrier_run Argument Table
-!! | local var name | longname                                               | description                                             | units         | rank | type                  |    kind   | intent | optional |
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_barrier_run (Model)
+      subroutine GFS_barrier_run (Model, errmsg, errflg)
 
          use mpi
          use omp_lib
@@ -326,11 +348,18 @@
          implicit none
 
          !--- interface variables
-         type(GFS_control_type),   intent(in   ) :: Model
+         type(GFS_control_type),   intent(in)  :: Model
+         character(len=*),         intent(out) :: errmsg
+         integer,                  intent(out) :: errflg
+
          !--- local variables
          integer :: impi, iomp, ierr
          integer :: mpirank,mpisize
          integer :: omprank,ompsize
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
@@ -339,7 +368,7 @@
 
 !$OMP BARRIER
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-         ! Keep this to allow flushing output to disk before proceeding
+         ! Keep this for flushing output to disk
          call sleep(1)
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !$OMP BARRIER
@@ -347,3 +376,62 @@
       end subroutine GFS_barrier_run
 
     end module GFS_barrier
+
+    module GFS_abort
+
+      private
+ 
+      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
+
+  contains
+
+      subroutine GFS_abort_init ()
+      end subroutine GFS_abort_init
+
+      subroutine GFS_abort_finalize ()
+      end subroutine GFS_abort_finalize
+
+!> \section arg_table_GFS_abort_run Argument Table
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_abort_run (Model, errmsg, errflg)
+
+         use mpi
+         use omp_lib
+         use machine,               only: kind_phys
+         use GFS_typedefs,          only: GFS_control_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),   intent(in)  :: Model
+         character(len=*),         intent(out) :: errmsg
+         integer,                  intent(out) :: errflg
+
+         !--- local variables
+         integer :: impi, iomp, ierr
+         integer :: mpirank,mpisize
+         integer :: omprank,ompsize
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
+         call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+         omprank = OMP_GET_THREAD_NUM()
+         ompsize = OMP_GET_NUM_THREADS()
+
+         errflg = 1
+         errmsg = 'Abort requested by user in GFS_abort_run'
+!$OMP BARRIER
+         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+!$OMP BARRIER
+
+      end subroutine GFS_abort_run
+
+    end module GFS_abort
