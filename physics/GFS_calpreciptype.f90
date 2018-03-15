@@ -306,6 +306,10 @@
         tprcp(:) = max(0.0, prec(:))  ! clu: rain -> tprcp
 
       else
+        domr  = 0.
+        domzr = 0.
+        domip = 0.
+        doms  = 0.
         do i = 1, im
           tprcp(i)  = max(0.0,prec(i))      ! clu: rain -> tprcp
           srflag(i) = 0.                    ! clu: default srflag as 'rain' (i.e. 0)

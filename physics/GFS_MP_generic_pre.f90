@@ -44,9 +44,9 @@
 !    
 !     declare variables.
 !
-      integer,intent(in)   :: im, ix, levs, ntcw, ncld , num_p3d
+      integer,intent(in)   :: im, ix, levs, ntcw, ncld, num_p3d
       integer              :: n,i,k
-      logical              ::  ldiag3d
+      logical              :: ldiag3d
       real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,  &
                                                      clw1,clw2
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::   &
@@ -54,14 +54,12 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      ! DH* MISSING TEST INITIALIZING save_t, save_qv, save_qcw, fix ix/im, array assignment?
-
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       if (ldiag3d) then
-        do i = 1, im
+        do i = 1, ix
           do k = 1, levs
             !CCPP dtdt(i,k)   = t(i,k)
             !CCPP dqdt1(i,k) =  q(i,k)
@@ -72,7 +70,7 @@
         !in FV3GFS v0 OP: ntcw=3, ncld=1, num_p3d=4, ntrac=3
         do n=ntcw,ntcw+ncld-1
           if (n == ntcw .and. num_p3d == 4 ) then
-              do i = 1, im
+              do i = 1, ix
                 do k = 1, levs
                    !CCPP dqdt3(i,k) = clw1(i,k)+clw2(i,k)   !
                    save_qcw(i,k) = clw1(i,k)+clw2(i,k)
@@ -80,6 +78,10 @@
                enddo
           endif
         enddo
+      else
+          save_t = 0.0
+          save_qv = 0.0
+          save_qcw = 0.0
       endif
 
       end subroutine GFS_MP_generic_pre_run
