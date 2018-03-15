@@ -43,7 +43,7 @@
   public
 
 !> \section arg_table_physcons
-!! | local var name        | longname                                               | description                                             | units         | rank | type              |    kind   | intent | optional |
+!! | local_name            | standard_name                                          | long_name                                               | units         | rank | type              |    kind   | intent | optional |
 !! |-----------------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
 !! | con_cp                | specific_heat_of_dry_air_at_constant_pressure          | specific heat of dry air at constant pressure           | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
 !! | con_fvirt             | ratio_of_vapor_to_dry_air_gas_constants_minus_one      | rv/rd - 1 (rv = ideal gas constant for water vapor)     | none          |    0 | real              | kind_phys | none   | F        |

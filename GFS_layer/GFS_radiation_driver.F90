@@ -179,11 +179,11 @@
 !                                                                      !
 !       'module module_radsw_cntr_para'     in 'radsw_xxxx_param.f'    !
 !       'module module_radsw_parameters'    in 'radsw_xxxx_param.f'    !
-!       'module module_radsw_main'          in 'radsw_xxxx_main.f'     !
+!       'module rrtmg_sw'                   in 'radsw_xxxx_main.f'     !
 !                                                                      !
 !       'module module_radlw_cntr_para'     in 'radlw_xxxx_param.f'    !
 !       'module module_radlw_parameters'    in 'radlw_xxxx_param.f'    !
-!       'module module_radlw_main'          in 'radlw_xxxx_main.f'     !
+!       'module rrtmg_lw'                   in 'radlw_xxxx_main.f'     !
 !                                                                      !
 !    where xxxx may vary according to different scheme selection       !
 !                                                                      !
@@ -327,17 +327,17 @@
 
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type,cmpfsw_type,NBDSW
-      use module_radsw_main,         only: rswinit,  radsw_run
+      use rrtmg_sw,                  only: rswinit, rrtmg_sw_run
 
-      use GFS_RRTMG_pre,             only: GFS_RRTMG_pre_run
-      use GFS_RRTMG_post,            only: GFS_RRTMG_post_run
-      use GFS_radsw_pre,             only: GFS_radsw_pre_run
-      use GFS_radsw_post,            only: GFS_radsw_post_run
-      use GFS_radlw_pre,             only: GFS_radlw_pre_run
-      use GFS_radlw_post,            only: GFS_radlw_post_run
+      use GFS_rrtmg_pre,             only: GFS_rrtmg_pre_run
+      use GFS_rrtmg_post,            only: GFS_rrtmg_post_run
+      use rrtmg_sw_pre,              only: rrtmg_sw_pre_run
+      use rrtmg_sw_post,             only: rrtmg_sw_post_run
+      use rrtmg_lw_pre,              only: rrtmg_lw_pre_run
+      use rrtmg_lw_post,             only: rrtmg_lw_post_run
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
-      use module_radlw_main,         only: rlwinit,  radlw_run
+      use rrtmg_lw,                  only: rlwinit, rrtmg_lw_run
       use GFS_typedefs,              only: GFS_statein_type,             &
                                            GFS_stateout_type,            &
                                            GFS_sfcprop_type,             &
@@ -623,9 +623,9 @@
 !! - cloud initialization routine:
 !! call module_radiation_clouds::cld_init()
 !! - LW radiation initialization routine:
-!! call module_radlw_main::rlwinit()
+!! call rrtmg_lw::rlwinit()
 !! - SW radiation initialization routine:
-!! call module_radsw_main::rswinit()
+!! call rrtmg_sw::rswinit()
 !     Initialization
 
       call sol_init ( me )          !  --- ...  astronomy initialization routine
@@ -648,8 +648,8 @@
 !-----------------------------------
 !> @}
 
-! Block commented out for CCXX
-#ifndef CCXX
+! Block commented out for CCPP
+#ifndef CCPP
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
 !! the time advancement loop but outside of the horizontal grid loop.
@@ -1126,46 +1126,46 @@
 !          faerlw(:,:,:,2)-  lw aerosols single scattering albedo       !
 !          faerlw(:,:,:,3)-  lw aerosols asymmetry parameter            !
 !                                                                       !
-!     6. sw fluxes at toa:    (defined in 'module_radsw_main')          !
+!     6. sw fluxes at toa:    (defined in 'rrtmg_sw')                   !
 !        (topfsw_type -- derived data type for toa rad fluxes)          !
 !          topfsw(:)%upfxc  -  total sky upward flux at toa             !
 !          topfsw(:)%dnfxc  -  total sky downward flux at toa           !
 !          topfsw(:)%upfx0  -  clear sky upward flux at toa             !
 !                                                                       !
-!     7. lw fluxes at toa:    (defined in 'module_radlw_main')          !
+!     7. lw fluxes at toa:    (defined in 'rrtmg_lw')                   !
 !        (topflw_type -- derived data type for toa rad fluxes)          !
 !          topflw(:)%upfxc  -  total sky upward flux at toa             !
 !          topflw(:)%upfx0  -  clear sky upward flux at toa             !
 !                                                                       !
-!     8. sw fluxes at sfc:    (defined in 'module_radsw_main')          !
+!     8. sw fluxes at sfc:    (defined in 'rrtmg_sw')                   !
 !        (sfcfsw_type -- derived data type for sfc rad fluxes)          !
 !          sfcfsw(:)%upfxc  -  total sky upward flux at sfc             !
 !          sfcfsw(:)%dnfxc  -  total sky downward flux at sfc           !
 !          sfcfsw(:)%upfx0  -  clear sky upward flux at sfc             !
 !          sfcfsw(:)%dnfx0  -  clear sky downward flux at sfc           !
 !                                                                       !
-!     9. lw fluxes at sfc:    (defined in 'module_radlw_main')          !
+!     9. lw fluxes at sfc:    (defined in 'rrtmg_lw')                   !
 !        (sfcflw_type -- derived data type for sfc rad fluxes)          !
 !          sfcflw(:)%upfxc  -  total sky upward flux at sfc             !
 !          sfcflw(:)%dnfxc  -  total sky downward flux at sfc           !
 !          sfcflw(:)%dnfx0  -  clear sky downward flux at sfc           !
 !                                                                       !
 !! optional radiation outputs:                                          !
-!!   10. sw flux profiles:    (defined in 'module_radsw_main')          !
+!!   10. sw flux profiles:    (defined in 'rrtmg_sw')                   !
 !!       (profsw_type -- derived data type for rad vertical profiles)   !
 !!         fswprf(:,:)%upfxc - total sky upward flux                    !
 !!         fswprf(:,:)%dnfxc - total sky downward flux                  !
 !!         fswprf(:,:)%upfx0 - clear sky upward flux                    !
 !!         fswprf(:,:)%dnfx0 - clear sky downward flux                  !
 !!                                                                      !
-!!   11. lw flux profiles:    (defined in 'module_radlw_main')          !
+!!   11. lw flux profiles:    (defined in 'rrtmg_lw')                   !
 !!       (proflw_type -- derived data type for rad vertical profiles)   !
 !!         flwprf(:,:)%upfxc - total sky upward flux                    !
 !!         flwprf(:,:)%dnfxc - total sky downward flux                  !
 !!         flwprf(:,:)%upfx0 - clear sky upward flux                    !
 !!         flwprf(:,:)%dnfx0 - clear sky downward flux                  !
 !!                                                                      !
-!!   12. sw sfc components:   (defined in 'module_radsw_main')          !
+!!   12. sw sfc components:   (defined in 'rrtmg_sw')                   !
 !!       (cmpfsw_type -- derived data type for component sfc fluxes)    !
 !!         scmpsw(:)%uvbfc  -  total sky downward uv-b flux at sfc      !
 !!         scmpsw(:)%uvbf0  -  clear sky downward uv-b flux at sfc      !
@@ -1208,11 +1208,15 @@
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
+      ! CCPP error handling variables (not used)
+      character(len=512) :: errmsg
+      integer            :: errflg
+
 ! CCPP: L1211-1577
-      call GFS_RRTMG_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input
+      call GFS_rrtmg_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input
           Tbd, Cldprop, Radtend,                                       &
           lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,            & ! output
-          tlvl, tlyr, tsfg, tsfa,  qlyr,nday, idxday, olyr,            &
+          tlvl, tlyr, tsfg, tsfa,  qlyr, olyr,                         &
           gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
           gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 &
           gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9), gasvmr(:,:,10), &
@@ -1221,80 +1225,85 @@
           clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                 &
           clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
           clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
-          cldsa, mtopa, mbota )
+          cldsa, mtopa, mbota, errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 ! CCPP: L1582-1596
-      call GFS_radsw_pre_run (Model, Grid, Sfcprop, Radtend, im,       &
-          tsfg, tsfa, sfcalb(:,1), sfcalb(:,2), sfcalb(:,3),           &
-          sfcalb(:,4) )
+      call rrtmg_sw_pre_run (Model, Grid, Sfcprop, Radtend, im,        &
+          nday, idxday, tsfg, tsfa, sfcalb(:,1), sfcalb(:,2),          &
+          sfcalb(:,3), sfcalb(:,4), errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 ! CCPP: L1598-1618
-      call radsw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! input
-          gasvmr(:, :, 1),                                             &
-          gasvmr(:, :, 2), gasvmr(:, :, 3), gasvmr(:, :, 4),           &
-          Tbd%icsdsw, faersw(:, :, :, 1), faersw(:, :, :, 2),          &
-          faersw(:, :, :, 3), sfcalb(:,1), sfcalb(:,2),sfcalb(:,3),    &
-          sfcalb(:,4),Radtend%coszen, Model%solcon,  nday, idxday, im, &
+      call rrtmg_sw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! input
+          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
+          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 &
+          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9),                 &
+          Tbd%icsdsw,                                                  &
+          faersw(:,:,:,1), faersw(:,:,:,2), faersw(:,:,:,3),           &
+          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4),          &
+          Radtend%coszen, Model%solcon,  nday, idxday, im,             &
           lmk, lmp, Model%lprnt, clouds(:,:,1), Model%lsswr,           &
-          htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! outputs
-          hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional outputs
-          cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! Optional input
-          cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
-          cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
-          cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+          htswc, Diag%topfsw, Radtend%sfcfsw,                          & ! output
+          hsw0=htsw0, fdncmp=scmpsw,                                   & ! optional output
+          cld_lwp=clouds(:,:,2), cld_ref_liq=clouds(:,:,3),            & ! optional input
+          cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
+          cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
+          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          errmsg=errmsg, errflg=errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 !CCPP: L1620-1686
-      call GFS_radsw_post_run (Model, Grid, Diag, Radtend, Coupling,   &
+      call rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling,    &
           LTP, nday, lm, kd, htswc, htsw0,                             &
-          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)
+          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw,  &
+          errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 !CCPP: L1689-1698
-      call GFS_radlw_pre_run (Model, Grid, Sfcprop, Radtend,           &
-          im, tsfg, tsfa)
+      call rrtmg_lw_pre_run (Model, Grid, Sfcprop, Radtend,            &
+          im, tsfg, tsfa, errmsg, errflg)
 
 !CCPP: L1703-1714
-      call radlw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,              & ! inputs
-          gasvmr(:, :, 1), gasvmr(:, :, 2), gasvmr(:, :, 3),           &
-          gasvmr(:, :, 4), gasvmr(:, :, 5), gasvmr(:, :, 6),           &
-          gasvmr(:, :, 7), gasvmr(:, :, 8), gasvmr(:, :, 9),           &
+      call rrtmg_lw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! input
+          gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
+          gasvmr(:,:,4), gasvmr(:,:,5), gasvmr(:,:,6),                 &
+          gasvmr(:,:,7), gasvmr(:,:,8), gasvmr(:,:,9),                 &
           Tbd%icsdlw, faerlw(:,:,:,1), faerlw(:,:,:,2), Radtend%semis, &
-          tsfg, im, lmk, lmp, Model%lprnt, clouds(:, :, 1),            &
+          tsfg, im, lmk, lmp, Model%lprnt, clouds(:,:,1),              &
           Model%lslwr,                                                 &
-          htlwc, Diag%topflw, Radtend%sfcflw,                          & ! outputs
+          htlwc, Diag%topflw, Radtend%sfcflw,                          & ! output
           hlw0=htlw0,                                                  & ! optional output
-          cld_lwp=clouds(:, :, 2), cld_ref_liq=clouds(:, :, 3),        & ! optional input
-          cld_iwp=clouds(:, :, 4), cld_ref_ice=clouds(:, :, 5),        &
-          cld_rwp=clouds(:, :, 6), cld_ref_rain=clouds(:, :, 7),       &
-          cld_swp=clouds(:, :, 8), cld_ref_snow=clouds(:, :, 9))
+          cld_lwp=clouds(:,:,2), cld_ref_liq=clouds(:,:,3),            & ! optional input
+          cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
+          cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
+          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          errmsg=errmsg, errflg=errflg)
 
 !CCPP: L1718-1747
-      call GFS_radlw_post_run (Model, Grid, Radtend, Coupling,         &
-          LTP, lm, kd, tsfa, htlwc, htlw0)
+      call rrtmg_lw_post_run (Model, Grid, Radtend, Coupling,          &
+          LTP, lm, kd, tsfa, htlwc, htlw0, errmsg, errflg)
 
 !CCPP: L1757-1841
-      call GFS_RRTMG_post_run (Model, Grid, Diag, Radtend, Statein,    &
+      call GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein,    &
           Coupling, scmpsw, im, lm, LTP, kt, kb, kd, raddt, aerodp,    &
-          cldsa, mtopa, mbota, clouds(:,:,1))
+          cldsa, mtopa, mbota, clouds(:,:,1), errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
       end subroutine GFS_radiation_driver
 #endif

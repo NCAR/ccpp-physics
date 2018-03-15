@@ -8,12 +8,12 @@ module module_physics_driver
   use cs_conv,               only: cs_convr
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
-  use sasas_deep,            only: sasasdeep_run
+  use sasas_deep,            only: sasas_deep_run
   use sfc_nst,               only: sfc_nst_run
   use sfc_nst_pre,           only: sfc_nst_pre_run
   use sfc_nst_post,          only: sfc_nst_post_run
-  use sasas_shal,            only: sasasshal_run
-  use sasas_shal_post,       only: sasasshal_post_run
+  use sasas_shal,            only: sasas_shal_run
+  use sasas_shal_post,       only: sasas_shal_post_run
   use get_prs_fv3,           only: get_prs_fv3_run
   use get_phi_fv3,           only: get_phi_fv3_run
   use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type, &
@@ -35,8 +35,8 @@ module module_physics_driver
   use GFS_suite_interstitial_4, only: GFS_suite_interstitial_4_run
   use GFS_suite_interstitial_5, only: GFS_suite_interstitial_5_run
 
-  use GFS_zhaocarr_gscond,       only: gscond_run
-  use GFS_zhaocarr_precpd,       only: precpd_run
+  use zhaocarr_gscond,           only: zhaocarr_gscond_run
+  use zhaocarr_precpd,           only: zhaocarr_precpd_run
   use GFS_calpreciptype,         only: GFS_calpreciptype_run
   use GFS_MP_generic_post,       only: GFS_MP_generic_post_run
   use GFS_MP_generic_pre,        only: GFS_MP_generic_pre_run
@@ -44,8 +44,8 @@ module module_physics_driver
   use lsm_noah
   use lsm_noah_pre
   use lsm_noah_post
-  use surface_exchange_coefficients
-  use surface_diagnose
+  use sfc_ex_coef
+  use sfc_diag
   use GFS_surface_loop_control_part1
   use GFS_surface_loop_control_part2
   use sfc_sice_pre,          only: sfc_sice_pre_run
@@ -566,6 +566,10 @@ module module_physics_driver
 !      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs) ::  &
 !          initial_t, initial_qv
 
+      ! CCPP error handling variables (not used)
+      character(len=512) :: errmsg
+      integer            :: errflg
+
 !
 !
 !===> ...  begin here
@@ -618,7 +622,7 @@ module module_physics_driver
       !   allocate (cnvc(size(Grid%xlon,1),Model%levs), cnvw(size(Grid%xlon,1),Model%levs))
       ! endif
 
-      call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw)
+      call GFS_suite_interstitial_1_run (Model, Grid, tottracer, trc_shft, tracers, ntk, skip_macro, clw, cnvc, cnvw, errmsg, errflg)
 !
 !  ---  set initial quantities for stochastic physics deltas
       if (Model%do_sppt) then
@@ -661,13 +665,13 @@ module module_physics_driver
 #else
 !GFDL   Adjust the geopotential height hydrostatically in a way consistent with FV3 discretization
       call get_prs_fv3_run (size(Grid%xlon,1), Model%levs, Statein%phii, Statein%prsi, &
-                            Statein%tgrs, Statein%qgrs(:,:,1), del, del_gz)
+                            Statein%tgrs, Statein%qgrs(:,:,1), del, del_gz, errmsg, errflg)
 
 #endif
 
       call GFS_suite_interstitial_2_run (Model, Grid, Sfcprop, Statein, &
         Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, work1, work2, &
-        dudt, dvdt, dtdt, dtdtc, dqdt )
+        dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
 
 !  --- ...  frain=factor for centered difference scheme correction of rain amount.
@@ -678,7 +682,7 @@ module module_physics_driver
       call sfc_sice_pre_run                                             &
      &              (size(Grid%xlon,1), Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc,     &
      &               Statein%prsik(:,1), Statein%prslk(:,1),            &
-     &               cice, zice, tice, work3)
+     &               cice, zice, tice, work3, errmsg, errflg)
       do i = 1, size(Grid%xlon,1)
 !GFDL        tem1       = con_rerth * (con_pi+con_pi)*coslat(i)/nlons(i)
 !GFDL        tem2       = con_rerth * con_pi / latr
@@ -760,7 +764,8 @@ module module_physics_driver
 !  ---  outputs:
              adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,        &
              adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                    &
-             adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd                     &
+             adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd,                    &
+             errmsg, errflg                                                 &
            )
 
 !
@@ -815,11 +820,11 @@ module module_physics_driver
 !         endif
 !       endif    ! end if_lssav_block
       call GFS_suite_interstitial_3_run (Model, Grid, Statein, Radtend, xcosz, &
-        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap)
+        adjsfcdsw, adjsfcdlw, adjsfculw, xmu, Diag, kcnv, hflx, evap, errmsg, errflg)
       call GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein,&
         adjsfcdlw, Diag, sigmaf, islmsk, soiltyp, vegtype, slopetyp, work3,    &
-        gabsbdlw, tsurf, flag_guess, flag_iter, ep1d)
-      call GFS_PBL_generic_pre_run (size(Grid%xlon,1), Model%levs, kinver)
+        gabsbdlw, tsurf, flag_guess, flag_iter, ep1d, errmsg, errflg)
+      call GFS_PBL_generic_pre_run (size(Grid%xlon,1), Model%levs, kinver, errmsg, errflg)
 
       !kcnv(:)   = 0
       !kinver(:) = Model%levs
@@ -890,7 +895,7 @@ module module_physics_driver
 !      Diag%smcwlt2(:) = 0.0
 !      Diag%smcref2(:) = 0.0
       call lsm_noah_pre_run(size(Grid%xlon,1),Model%lsoil,drain,runof,evbs,evcw,trans,sbsno, &
-                            snowc,snohf,Diag%smcwlt2,Diag%smcref2)
+                            snowc,snohf,Diag%smcwlt2,Diag%smcref2,errmsg,errflg)
 
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
@@ -908,7 +913,7 @@ module module_physics_driver
                        Sfcprop%ffmm,  Sfcprop%ffhh, Sfcprop%uustar,       &
                        wind,  Tbd%phy_f2d(:,Model%num_p2d), fm10, fh2,    &
                        sigmaf, vegtype, Sfcprop%shdmax, Model%ivegsrc,    &
-                       tsurf, flag_iter, Model%redrag)
+                       tsurf, flag_iter, Model%redrag, errmsg, errflg)
 
 !  --- ...  lu: update flag_guess
 
@@ -917,7 +922,7 @@ module module_physics_driver
 !            flag_guess(i) = .true.
 !          endif
 !        enddo
-        call GFS_surface_loop_control_part1_run(size(Grid%xlon,1),iter,wind,flag_guess)
+        call GFS_surface_loop_control_part1_run(size(Grid%xlon,1),iter,wind,flag_guess,errmsg,errflg)
 
         if (Model%nstf_name(1) > 0) then
 
@@ -926,7 +931,7 @@ module module_physics_driver
 !  --- Input/output
                                tsurf,                                          &
 !  ---  outputs:
-                               tseal)
+                               tseal, errmsg, errflg)
 
           call sfc_nst_run (size(Grid%xlon,1), Model%lsoil, Statein%pgr, Statein%ugrs(:,1),   &
                             Statein%vgrs(:,1), Statein%tgrs(:,1),              &
@@ -936,7 +941,7 @@ module module_physics_driver
                             adjsfcnsw, Sfcprop%tprcp, Model%dtf, Model%kdt, Model%solhr,   &
                             xcosz, Tbd%phy_f2d(:,Model%num_p2d), flag_iter,    &
                             flag_guess, Model%nstf_name(1), Model%nstf_name(4),&
-                            Model%nstf_name(5), Model%lprnt, ipr,                    &
+                            Model%nstf_name(5), Model%lprnt, ipr,              &
 !  --- Input/output
                             tseal, tsurf, Sfcprop%xt, Sfcprop%xs, Sfcprop%xu,  &
                             Sfcprop%xv, Sfcprop%xz, Sfcprop%zm, Sfcprop%xtts,  &
@@ -944,7 +949,8 @@ module module_physics_driver
                             Sfcprop%c_0, Sfcprop%c_d, Sfcprop%w_0, Sfcprop%w_d,&
                             Sfcprop%d_conv, Sfcprop%ifd, Sfcprop%qrain,        &
 !  ---  outputs:
-                            qss, gflx, Diag%cmm, Diag%chh, evap, hflx, ep1d)
+                            qss, gflx, Diag%cmm, Diag%chh, evap, hflx, ep1d,   &
+                            errmsg, errflg)
 
 
           call sfc_nst_post_run(size(Grid%xlon,1), islmsk, Sfcprop%oro, Sfcprop%oro_uf,       &
@@ -955,7 +961,7 @@ module module_physics_driver
 !  --- Input/output
                                 tsurf,                                         &
 !  ---  outputs:
-                                dtzm, Sfcprop%tsfc)
+                                dtzm, Sfcprop%tsfc, errmsg, errflg)
 
         else
 
@@ -1001,7 +1007,7 @@ module module_physics_driver
 !  ---  outputs:
             Sfcprop%sncovr, qss, gflx, drain, evap, hflx, ep1d, runof, &
             Diag%cmm, Diag%chh, evbs, evcw, sbsno, snowc, Diag%soilm,  &
-            snohf, Diag%smcwlt2, Diag%smcref2, Diag%wet1)
+            snohf, Diag%smcwlt2, Diag%smcref2, Diag%wet1, errmsg, errflg)
 
 !     if (Model%lprnt) write(0,*)' tseae=',tsea(ipr),' tsurf=',tsurf(ipr),iter
 !    &,' phy_f2d=',phy_f2d(ipr,num_p2d)
@@ -1035,7 +1041,7 @@ module module_physics_driver
             Sfcprop%tprcp, Sfcprop%stc, ep1d,                           &
 !  ---  outputs:
             Sfcprop%snowd, qss, snowmt, gflx, Diag%cmm, Diag%chh, evap, &
-            hflx)
+            hflx, errmsg, errflg)
 
         if (Model%cplflx) then
           do i = 1, size(Grid%xlon,1)
@@ -1075,12 +1081,12 @@ module module_physics_driver
 !         endif
 !        enddo
         call GFS_surface_loop_control_part2_run(size(Grid%xlon,1),iter,wind,flag_guess,&
-             flag_iter,islmsk,Model%nstf_name(1))
+             flag_iter,islmsk,Model%nstf_name(1), errmsg, errflg)
 
       enddo   ! end iter_loop
 
       call dcyc2t3_post_run (                                           &
-           size(Grid%xlon,1), adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag)
+           size(Grid%xlon,1), adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag, errmsg, errflg)
 
 
 !      Diag%epi(:)     = ep1d(:)
@@ -1101,7 +1107,7 @@ module module_physics_driver
                      Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
                      Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
-                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
+                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2, errmsg, errflg)
 
       Tbd%phy_f2d(:,Model%num_p2d) = 0.0
 
@@ -1162,7 +1168,7 @@ module module_physics_driver
       endif
 
       call GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, &
-        trans, sbsno, snowc, snohf, Diag, Sfcprop)
+        trans, sbsno, snowc, snohf, Diag, Sfcprop, errmsg, errflg)
 
 !!!!!!!!!!!!!!!!!Commented by Moorthi on July 18, 2012 !!!!!!!!!!!!!!!!!!!
 !     do i = 1, size(Grid%xlon,1)
@@ -1211,7 +1217,7 @@ module module_physics_driver
                          Statein%prslk, Statein%phii, Statein%phil, Model%dtp,          &
                          Model%dspheat, dusfc1, dvsfc1, dtsfc1, dqsfc1, Diag%hpbl,&
                          gamt, gamq, dkt, kinver, Model%xkzm_m, Model%xkzm_h,     &
-                         Model%xkzm_s, Model%lprnt, ipr)
+                         Model%xkzm_s, Model%lprnt, ipr, errmsg, errflg)
 !     if (Model%lprnt)  write(0,*)' dtdtm=',(dtdt(ipr,k),k=1,15)
 !     if (Model%lprnt)  write(0,*)' dqdtm=',(dqdt(ipr,k,1),k=1,15)
         elseif (.not. Model%old_monin) then
@@ -1283,7 +1289,7 @@ module module_physics_driver
       endif
 
       call GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1,   &
-        dtsfc1, dqsfc1, dudt, dvdt, dtdt, dqdt, xmu, Diag)
+        dtsfc1, dqsfc1, dudt, dvdt, dtdt, dqdt, xmu, Diag, errmsg, errflg)
 ! !-------------------------------------------------------lssav if loop ----------
 !       if (Model%lssav) then
 !         Diag%dusfc (:) = Diag%dusfc(:) + dusfc1(:)*Model%dtf
@@ -1389,7 +1395,7 @@ module module_physics_driver
       call gwdps_pre_run (                      &
            size(Grid%xlon,1), Model%nmtvr, Sfcprop%hprime, &
            hprime, oc, oa4, clx, theta,         &
-           sigma, gamma, elvmax)
+           sigma, gamma, elvmax, errmsg, errflg)
 
 
 !     write(0,*)' before gwd clstp=',clstp,' kdt=',Model%kdt,' lat=',lat
@@ -1403,7 +1409,7 @@ module module_physics_driver
            hprime, oc, oa4, clx, theta,                   &
            sigma, gamma, elvmax, dusfcg, dvsfcg,          &
            con_g, con_cp, con_rd, con_rv, Model%lonr,     &
-           Model%nmtvr, Model%cdmbgwd, Model%me, Model%lprnt,ipr)
+           Model%nmtvr, Model%cdmbgwd, Model%me, Model%lprnt,ipr,errmsg,errflg)
 
 !     if (Model%lprnt)  print *,' dudtg=',dudt(ipr,:)
 
@@ -1427,16 +1433,16 @@ module module_physics_driver
            Model%lssav, Model%ldiag3d, Model%dtf,  &
            dusfcg, dvsfcg, dudt, dvdt, dtdt, &
            Diag%dugwd, Diag%dvgwd,           &
-           Diag%du3dt(:,:,2), Diag%dv3dt(:,:,2), Diag%dt3dt(:,:,2))
+           Diag%du3dt(:,:,2), Diag%dv3dt(:,:,2), Diag%dt3dt(:,:,2), errmsg, errflg)
 
 
 !    Rayleigh damping  near the model top
 !      if( .not. Model%lsidea .and. Model%ral_ts > 0.0) then
       call rayleigh_damp_run (                               &
            Model%lsidea, size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, dvdt, dudt, dtdt, &
-           Statein%ugrs, Statein%vgrs, Model%dtp, con_cp,          &
+           Statein%ugrs, Statein%vgrs, Model%dtp, con_cp,    &
            Model%levr, Statein%pgr, Statein%prsl,            &
-           Model%prslrd0, Model%ral_ts)
+           Model%prslrd0, Model%ral_ts, errmsg, errflg)
 !      endif
 
 !     if (Model%lprnt) then
@@ -1449,7 +1455,7 @@ module module_physics_driver
       ! Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * Model%dtp
       ! Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * Model%dtp
 
-      call GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout)
+      call GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
 
 !     if (Model%lprnt) then
 !                write(7000,*)' ugrs=',ugrs(ipr,:)
@@ -1487,7 +1493,7 @@ module module_physics_driver
                Stateout%gq0(:,:,Model%ntoz),                            &
                Stateout%gt0, oz_pres, Statein%prsl,                     &
                Tbd%ozpl, oz_coeff, del, Model%ldiag3d,                  &
-               dq3dt_loc(:,:,6:6+oz_coeff-1), Model%me)
+               dq3dt_loc(:,:,6:6+oz_coeff-1), Model%me, errmsg, errflg)
 !          if (Model%ldiag3d) then
 !            Diag%dq3dt(:,:,6) = dq3dt_loc(:,:,6)
 !            Diag%dq3dt(:,:,7) = dq3dt_loc(:,:,7)
@@ -1495,7 +1501,7 @@ module module_physics_driver
 !            Diag%dq3dt(:,:,9) = dq3dt_loc(:,:,9)
 !          endif
           call ozphys_post_run (                                        &
-               size(Grid%xlon,1), Model%levs, oz_coeff, Model%ldiag3d, dq3dt_loc(:,:,6:6+oz_coeff-1), Diag)
+               size(Grid%xlon,1), Model%levs, oz_coeff, Model%ldiag3d, dq3dt_loc(:,:,6:6+oz_coeff-1), Diag, errmsg, errflg)
         endif
       endif
 
@@ -1550,7 +1556,7 @@ module module_physics_driver
       !   dqdt(:,:,1) = Stateout%gq0(:,:,1)
       ! endif   ! end if_ldiag3d/lgocart
 
-      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, save_u, save_v, save_t, save_qv, save_qcw)
+      call GFS_DCNV_generic_pre_run (Model, Stateout, Grid, save_u, save_v, save_t, save_qv, save_qcw, errmsg, errflg)
 
 #ifdef GFS_HYDRO
       call get_phi(size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%ntrac, Stateout%gt0, Stateout%gq0,    &
@@ -1560,7 +1566,7 @@ module module_physics_driver
 #else
 !GFDL   Adjust the height hydrostatically in a way consistent with FV3 discretization
       call get_phi_fv3_run (size(Grid%xlon,1), Model%levs, Stateout%gt0, Stateout%gq0(:,:,1), &
-                            del_gz, Statein%phii, Statein%phil)
+                            del_gz, Statein%phii, Statein%phil, errmsg, errflg)
 #endif
 
 !     if (Model%lprnt) then
@@ -1568,7 +1574,7 @@ module module_physics_driver
 !       print *,' phil2=',phil(ipr,:)
 !     endif
       call GFS_suite_interstitial_4_run (Model, Grid, Statein, rhbbot, &
-        rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc)
+        rhbtop, work1, work2, clw, cnvc, cnvw, ktop, kbot, rhc, errmsg, errflg)
       ! clw(:,:,1) = 0.0
       ! clw(:,:,2) = -999.9
       ! if ((Model%imfdeepcnv >= 0) .or. (Model%imfshalcnv > 0)) then
@@ -1614,7 +1620,8 @@ module module_physics_driver
 !            prautco_l(:) = Model%prautco(1)*work1(:) + Model%prautco(2)*work2(:)
 !zhang: zhao_carr_pre
 !            clw(:,:,1) = Stateout%gq0(:,:,Model%ntcw)
-             call GFS_zhao_carr_pre_run (size(Grid%xlon,1),size(Grid%xlon,1), Model%levs,Stateout%gq0(:,:,Model%ntcw),clw(:,:,1))
+             call GFS_zhao_carr_pre_run (size(Grid%xlon,1),size(Grid%xlon,1), &
+                Model%levs,Stateout%gq0(:,:,Model%ntcw),clw(:,:,1),errmsg,errflg)
           endif  ! end if_num_p3d
         endif    ! end if (ncld == 2)
       else    ! if_ntcw
@@ -1724,13 +1731,13 @@ module module_physics_driver
                         islmsk, Statein%vvl, Model%ncld, ud_mf, dd_mf,  &
                         dt_mf, cnvw, cnvc)
         elseif (Model%imfdeepcnv == 2) then
-          call sasasdeep_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
+          call sasas_deep_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
                           Statein%pgr, Statein%phil, clw(:,:,1),        &
                           clw(:,:,2), Stateout%gq0(:,:,1),              &
                           Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
                           cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv, islmsk,       &
                           Grid%area, Statein%vvl, Model%ncld, ud_mf,    &
-                          dd_mf, dt_mf, cnvw, cnvc)
+                          dd_mf, dt_mf, cnvw, cnvc, errmsg, errflg)
 !         if (Model%lprnt) print *,' lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)
         elseif (Model%imfdeepcnv == 0) then         ! random cloud top
           call sascnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del,              &
@@ -1923,7 +1930,7 @@ module module_physics_driver
 !       endif   ! end if_lssav
 
       call GFS_DCNV_generic_post_run (Grid, Model, Stateout, frain, lwe_thickness_of_deep_convective_precipitation_amount, cld1d, &
-        save_u, save_v, save_t, save_qv, ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd)
+        save_u, save_v, save_t, save_qv, ud_mf, dd_mf, dt_mf, cnvw, cnvc, Diag, Tbd, errmsg, errflg)
 !
 !       update dqdt_v to include moisture tendency due to deep convection
       if (Model%lgocart) then
@@ -1972,7 +1979,7 @@ module module_physics_driver
 
         call gwdc_pre_run (                                             &
              size(Grid%xlon,1), Model%cgwf, Grid%dx, work1, work2, dlength, cldf,      &
-             Model%levs, kbot, ktop, Model%dtp, Stateout%gt0, save_t, del, cumabs)
+             Model%levs, kbot, ktop, Model%dtp, Stateout%gt0, save_t, del, cumabs, errmsg, errflg)
 
 !       do i = 1, size(Grid%xlon,1)
 !         do k = kbot(i), ktop(i)
@@ -2047,7 +2054,7 @@ module module_physics_driver
              Statein%tgrs, Statein%qgrs(:,:,1), Model%dtp, Statein%prsl,      &
              Statein%prsi, del, cumabs, ktop, kbot, kcnv, cldf,         &
              con_g, con_cp, con_rd, con_fvirt, con_pi, dlength,         &
-             Model%lprnt, ipr, Model%fhour, gwdcu, gwdcv, dusfcg, dvsfcg)
+             Model%lprnt, ipr, Model%fhour, gwdcu, gwdcv, dusfcg, dvsfcg, errmsg, errflg)
 
 !       if (Model%lprnt) then
 !         if (fhour >= fhourpr) then
@@ -2104,7 +2111,7 @@ module module_physics_driver
              size(Grid%xlon,1), Model%levs, Model%lssav, Model%ldiag3d, Model%dtf, Model%dtp, con_cp,       &
              dusfcg, dvsfcg, gwdcu, gwdcv,                                 &
              Diag%dugwd, Diag%dvgwd, Diag%du3dt(:,:,4), Diag%dv3dt(:,:,4), &
-             Stateout%gu0, Stateout%gv0, Stateout%gt0)
+             Stateout%gu0, Stateout%gv0, Stateout%gt0, errmsg, errflg)
 
 !       if (Model%lprnt) then
 !         if (fhour >= fhourpr) then
@@ -2140,7 +2147,7 @@ module module_physics_driver
       !   save_qv(:,:) = Stateout%gq0(:,:,1)
       ! endif
 
-      call GFS_SCNV_generic_pre_run (Model, Stateout, Grid, save_t, save_qv)
+      call GFS_SCNV_generic_pre_run (Model, Stateout, Grid, save_t, save_qv, errmsg, errflg)
 
 !     write(0,*)' before do_shoc shal clstp=',clstp,' kdt=',Model%kdt,
 !    &         ' lat=',lat
@@ -2179,15 +2186,16 @@ module module_physics_driver
             endif
 
           elseif (Model%imfshalcnv == 2) then
-            call sasasshal_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
+            call sasas_shal_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
                             Statein%pgr, Statein%phil, clw(:,:,1),        &
                             clw(:,:,2), Stateout%gq0(:,:,1),              &
                             Stateout%gt0, Stateout%gu0, Stateout%gv0,     &
                             lwe_thickness_of_shallow_convective_precipitation_amount, kbot, ktop, kcnv, islmsk, Grid%area,   &
                             Statein%vvl, Model%ncld, Diag%hpbl, ud_mf,    &
-                            dt_mf, cnvw, cnvc)
+                            dt_mf, cnvw, cnvc, errmsg, errflg)
 
-            call sasasshal_post_run (frain, lwe_thickness_of_shallow_convective_precipitation_amount, cnvc, cnvw, Model, Grid, Diag, Tbd)
+            call sasas_shal_post_run (frain, lwe_thickness_of_shallow_convective_precipitation_amount, cnvc, cnvw, &
+                                      Model, Grid, Diag, Tbd, errmsg, errflg)
 
           elseif (Model%imfshalcnv == 0) then    ! modified Tiedtke Shallow convecton
                                                  !-----------------------------------
@@ -2243,7 +2251,7 @@ module module_physics_driver
 !           enddo
 !         enddo
 
-        call GFS_SCNV_generic_post_run (Model, Stateout, Grid, save_t, save_qv, frain, Diag, clw)
+        call GFS_SCNV_generic_post_run (Model, Stateout, Grid, save_t, save_qv, frain, Diag, clw, errmsg, errflg)
 
 !       if (Model%lprnt) then
 !         write(0,*)' prsl=',prsl(ipr,:)
@@ -2344,7 +2352,7 @@ module module_physics_driver
 !  Legacy routine which determines convectve clouds - should be removed at some point
 
       call cnvc90_run (Model%clstp, size(Grid%xlon,1), size(Grid%xlon,1), Diag%rainc, kbot, ktop, Model%levs, Statein%prsi,  &
-                       Tbd%acv, Tbd%acvb, Tbd%acvt, Cldprop%cv, Cldprop%cvb, Cldprop%cvt)
+                       Tbd%acv, Tbd%acvb, Tbd%acvt, Cldprop%cv, Cldprop%cvb, Cldprop%cvt, errmsg, errflg)
 
       if (Model%moist_adj) then       ! moist convective adjustment
 !                                     ---------------------------
@@ -2392,7 +2400,7 @@ module module_physics_driver
        call GFS_MP_generic_pre_run (size(Grid%xlon,1), size(Grid%xlon,1),Model%levs,clw(:,:,1),clw(:,:,2),            &
                              Model%ldiag3d, Model%ntcw, Model%ncld,               &
                              Model%num_p3d, Stateout%gt0,Stateout%gq0(:,:,1),     &
-                             save_t, save_qv, save_qcw )
+                             save_t, save_qv, save_qcw, errmsg, errflg)
 
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)
       if (Model%lgocart) then
@@ -2428,18 +2436,20 @@ module module_physics_driver
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), Model%lprnt, ipr)
             else
-              call gscond_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Model%dtf, Statein%prsl, Statein%pgr,&
+              call zhaocarr_gscond_run (size(Grid%xlon,1), size(Grid%xlon,1),    &
+                           Model%levs, Model%dtp, Model%dtf, Statein%prsl, Statein%pgr, &
                            Stateout%gq0(:,:,1), clw(:,:,1), clw(:,:,2),          &
                            Stateout%gq0(:,:,Model%ntcw),                         &
                            Stateout%gt0, Tbd%phy_f3d(:,:,1), Tbd%phy_f3d(:,:,2), &
                            Tbd%phy_f2d(:,1), Tbd%phy_f3d(:,:,3),                 &
-                           Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,Model%lprnt, ipr)
+                           Tbd%phy_f3d(:,:,4), Tbd%phy_f2d(:,2), rhc,Model%lprnt, ipr, errmsg, errflg)
 
-              call precpd_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,           &
+              call zhaocarr_precpd_run (size(Grid%xlon,1), size(Grid%xlon,1),  &
+                          Model%levs, Model%dtp, del, Statein%prsl,            &
                           Stateout%gq0(:,:,1), Stateout%gq0(:,:,Model%ntcw),   &
                           Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,            &
                           Model%psautco, Model%prautco, Model%evpco,           &
-                          Model%wminco, work1, Model%lprnt, ipr)
+                          Model%wminco, work1, Model%lprnt, ipr, errmsg, errflg)
             endif
 !           if (Model%lprnt) then
 !             write(0,*)' prsl=',prsl(ipr,:)
@@ -2627,7 +2637,7 @@ module module_physics_driver
                             Diag%rainc,frain,lwe_thickness_of_stratiform_precipitation_amount, Statein%phii, Model%num_p3d, &
                             Sfcprop%tsfc, Diag%sr, Tbd%phy_f3d(:,:,3),           &   ! input !zhang:Tbd%phy_f3d(:,:,3) comes from gscond_run
                             Diag%rain, domr, domzr, domip, doms, Sfcprop%srflag, &   ! output
-                            Sfcprop%tprcp)
+                            Sfcprop%tprcp, errmsg, errflg)
 
       call GFS_MP_generic_post_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtf, del,               &
                          Model%lssav, Model%ldiag3d, Diag%rain,frain,     &
@@ -2635,7 +2645,7 @@ module module_physics_driver
                          Stateout%gq0(:,:,Model%ntcw),                    &
                          Stateout%gt0, Stateout%gq0(:,:,1),               &
                          save_t, save_qv, Diag%totprcp, Diag%dt3dt(:,:,6),&
-                         Diag%dq3dt(:,:,4), Diag%pwat)
+                         Diag%dq3dt(:,:,4), Diag%pwat, errmsg, errflg)
 
 !      if (Model%cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !        i = min(3,Model%num_p3d)
@@ -2720,7 +2730,7 @@ module module_physics_driver
                      Statein%tgrs(:,1), Statein%qgrs(:,1,1), Sfcprop%tsfc, qss,   &
                      Sfcprop%f10m, Diag%u10m, Diag%v10m,              &
                      Sfcprop%t2m, Sfcprop%q2m, work3, evap,           &
-                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2)
+                     Sfcprop%ffmm, Sfcprop%ffhh, fm10, fh2, errmsg, errflg)
 
         if (Model%lssav) then
           Diag%tmpmax (:) = max(Diag%tmpmax (:),Sfcprop%t2m(:))
@@ -2738,12 +2748,12 @@ module module_physics_driver
 !        Diag%srunoff(:) = Diag%srunoff(:) + runof(:) * tem
 !      endif
       call lsm_noah_post_run(size(Grid%xlon,1),Model%lsoil,Model%lssav,Model%dtf,drain,runof,&
-                             Diag%runoff,Diag%srunoff)
+                             Diag%runoff,Diag%srunoff, errmsg, errflg)
 
 !  --- ...  xw: return updated ice thickness & concentration to global array
       call sfc_sice_post_run                                            &
      &                (size(Grid%xlon,1), islmsk, cice, zice, tice, Sfcprop%tsfc,      &
-     &                Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc)
+     &                Sfcprop%fice, Sfcprop%hice, Sfcprop%tisfc, errmsg, errflg)
 !DRS  do i = 1, size(Grid%xlon,1)
 !DRS
 !DRS      Sfcprop%hice(i)  = zice(i)
@@ -2813,7 +2823,7 @@ module module_physics_driver
         enddo
       endif
 
-      call GFS_suite_interstitial_5_run (clw, cnvc, cnvw)
+      call GFS_suite_interstitial_5_run (clw, cnvc, cnvw, errmsg, errflg)
       !deallocate (clw)
       if (Model%do_shoc) then
         deallocate (qpl, qpi, ncpl, ncpi)
@@ -2841,7 +2851,7 @@ module module_physics_driver
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
       return
 !...................................

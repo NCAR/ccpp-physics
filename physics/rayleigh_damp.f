@@ -8,28 +8,30 @@
 
 
 !! \section arg_table_rayleigh_damp_run Argument Table
-!! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
-!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|
-!! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       | 0    | logical |           | in     | F        |
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | count      | 0    | integer |           | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | count      | 0    | integer |           | in     | F        |
-!! | km             | vertical_dimension                                   | number of vertical layers                            | count      | 0    | integer |           | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      | 2    | real    | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_model_physics     | air temperature tendency due to model physics        | K s-1      | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind                                               | zonal wind                                           | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | v1             | y_wind                                               | meridional wind                                      | m s-1      | 2    | real    | kind_phys | in     | F        |
-!! | dt             | time_step_for_physics                                | physics time step                                    | s          | 0    | real    | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 | 0    | real    | kind_phys | in     | F        |
-!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | count      | 0    | integer |           | in     | F        |
-!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         | 1    | real    | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         | 2    | real    | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         | 0    | real    | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          | 0    | real    | kind_phys | in     | F        |
+!! | local_name     | standard_name                                        | long_name                                            | units      | rank | type      | kind      | intent | optional |
+!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       |    0 | logical   |           | in     | F        |
+!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | count      |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | count      |    0 | integer   |           | in     | F        |
+!! | km             | vertical_dimension                                   | number of vertical layers                            | count      |    0 | integer   |           | in     | F        |
+!! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      |    2 | real      | kind_phys | inout  | F        |
+!! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      |    2 | real      | kind_phys | inout  | F        |
+!! | C              | tendency_of_air_temperature_due_to_model_physics     | air temperature tendency due to model physics        | K s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | u1             | x_wind                                               | zonal wind                                           | m s-1      |    2 | real      | kind_phys | in     | F        |
+!! | v1             | y_wind                                               | meridional wind                                      | m s-1      |    2 | real      | kind_phys | in     | F        |
+!! | dt             | time_step_for_physics                                | physics time step                                    | s          |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
+!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | count      |    0 | integer   |           | in     | F        |
+!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         |    1 | real      | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         |    2 | real      | kind_phys | in     | F        |
+!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         |    0 | real      | kind_phys | in     | F        |
+!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          |    0 | real      | kind_phys | in     | F        |
+!! | errmsg         | error_message                                        | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                           | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine rayleigh_damp_run (
      &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,
-     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts)
+     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -76,6 +78,8 @@
       real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
       real(kind=kind_phys),intent(in)    :: U1(IX,KM), V1(IX,KM)
       real(kind=kind_phys),intent(inout) :: A(IX,KM), B(IX,KM), C(IX,KM)
+      character(len=*),    intent(out)   :: errmsg
+      integer,             intent(out)   :: errflg
 
 !--- local variables
       real(kind=kind_phys), parameter :: cons1=1.0, cons2=2.0, half=0.5
@@ -83,6 +87,10 @@
      &,                    ENG0, ENG1, tem1, tem2, dti, hfbcpdt, rtrd
       real(kind=kind_phys) tx1(im)
       integer              i, k
+!
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
       if (lsidea .or. ral_ts <= 0.0 .or. prslrd0 == 0.0) return
 !
@@ -115,7 +123,6 @@
           C(I,K)  = C(I,K) + max((ENG0-ENG1),0.0) * hfbcpdt
         ENDDO
       ENDDO
-
 
       RETURN
       end subroutine rayleigh_damp_run

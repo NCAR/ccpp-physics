@@ -12,52 +12,53 @@
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_init Argument Table
+!! \section arg_table_sasas_shal_init Argument Table
 !!
-      subroutine sasasshal_init
-      end subroutine sasasshal_init
+      subroutine sasas_shal_init
+      end subroutine sasas_shal_init
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_run Argument Table
-!! | local var name | longname                                                  | description                                            | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------|--------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                    | horizontal loop extent                                 | count   |    0 | integer |           | in     | F        |
-!! | ix             | horizontal_dimension                                      | horizontal dimension                                   | count   |    0 | integer |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension                               | count   |    0 | integer |           | in     | F        |
-!! | delt           | time_step_for_physics                                     | physics time step                                      | s       |    0 | real    | kind_phys | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                                    | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | prslp          | air_pressure                                              | mean layer pressure                                    | Pa      | 2    | real    | kind_phys | in     | F        |
-!! | psp            | surface_air_pressure                                      | surface pressure                                       | Pa      | 1    | real    | kind_phys | in     | F        |
-!! | phil           | geopotential                                              | layer geopotential                                     | m2 s-2  | 2    | real    | kind_phys | in     | F        |
-!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity                            | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity                          | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                        | kg kg-1 | 2    | real    | kind_phys | inout  | F        |
-!! | t1             | air_temperature_updated_by_physics                        | updated temperature                                    | K       | 2    | real    | kind_phys | inout  | F        |
-!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                               | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                               | m s-1   | 2    | real    | kind_phys | inout  | F        |
-!! | rn             | lwe_thickness_of_shallow_convective_precipitation_amount  | shallow convective rainfall amount on physics timestep | m       | 1    | real    | kind_phys | out    | F        |
-!! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                                    | index   | 1    | integer |           | out    | F        |
-!! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                                     | index   | 1    | integer |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                           | flag    | 1    | integer |           | out    | F        |
-!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                           | flag    | 1    | integer |           | in     | F        |
-!! | garea          | cell_area                                                 | grid cell area                                         | m2      | 1    | real    | kind_phys | in     | F        |
-!! | dot            | omega                                                     | layer mean vertical velocity                           | Pa s-1  | 2    | real    | kind_phys | in     | F        |
-!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors                                 | count   |    0 | integer |           | in     | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                       | PBL top height                                         | m       | 1    | real    | kind_phys | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                             | kg m-2  | 2    | real    | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                         | kg m-2  | 2    | real    | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity               | kg kg-1 | 2    | real    | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    | 2    | real    | kind_phys | out    | F        |
+!! \section arg_table_sasas_shal_run Argument Table
+!! | local_name     | standard_name                                             | long_name                                              | units   | rank | type      |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|--------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                    | horizontal loop extent                                 | count   |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                      | horizontal dimension                                   | count   |    0 | integer   |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                               | count   |    0 | integer   |           | in     | F        |
+!! | delt           | time_step_for_physics                                     | physics time step                                      | s       |    0 | real      | kind_phys | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                 | pres(k) - pres(k+1)                                    | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                              | mean layer pressure                                    | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                      | surface pressure                                       | Pa      |    1 | real      | kind_phys | in     | F        |
+!! | phil           | geopotential                                              | layer geopotential                                     | m2 s-2  |    2 | real      | kind_phys | in     | F        |
+!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity                            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity                          | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                        | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                        | updated temperature                                    | K       |    2 | real      | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                               | m s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                               | m s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | rn             | lwe_thickness_of_shallow_convective_precipitation_amount  | shallow convective rainfall amount on physics timestep | m       |    1 | real      | kind_phys | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                                    | index   |    1 | integer   |           | out    | F        |
+!! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                                     | index   |    1 | integer   |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                           | flag    |    1 | integer   |           | out    | F        |
+!! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                           | flag    |    1 | integer   |           | in     | F        |
+!! | garea          | cell_area                                                 | grid cell area                                         | m2      |    1 | real      | kind_phys | in     | F        |
+!! | dot            | omega                                                     | layer mean vertical velocity                           | Pa s-1  |    2 | real      | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                    | number of hydrometeors                                 | count   |    0 | integer   |           | in     | F        |
+!! | hpbl           | atmosphere_boundary_layer_thickness                       | PBL top height                                         | m       |    1 | real      | kind_phys | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                             | kg m-2  |    2 | real      | kind_phys | out    | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                         | kg m-2  |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity               | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    |    2 | real      | kind_phys | out    | F        |
+!! | errmsg         | error_message                                             | error message for error handling in CCPP               | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                | error flag for error handling in CCPP                  | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
 ! DH* TODO add intent information for all variables
-      subroutine sasasshal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
+      subroutine sasas_shal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1, &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc)
-!    &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,me)
+     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
 
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -186,7 +187,13 @@ c  cloud water
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 !
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
 c-----------------------------------------------------------------------
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
@@ -1494,15 +1501,16 @@ c
 !!
       return
 
-      end subroutine sasasshal_run
+      end subroutine sasas_shal_run
+
 !> @}
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_init Argument Table
+!! \section arg_table_sasas_shal_init Argument Table
 !!
-      subroutine sasasshal_finalize
-      end subroutine sasasshal_finalize
+      subroutine sasas_shal_finalize
+      end subroutine sasas_shal_finalize
 !> @}
 
       end module sasas_shal
@@ -1512,25 +1520,28 @@ c
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_run Argument Table
-!! | local var name | longname                                                 | description                                                          | units   | rank | type                          |    kind   | intent | optional |
-!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|-------------------------------|-----------|--------|----------|
-!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real                          | kind_phys | in     | F        |
-!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real                          | kind_phys | in     | F        |
-!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real                          | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real                          | kind_phys | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type              |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type                  |           | inout  | F        |
+!! \section arg_table_sasas_shal_post_run Argument Table
+!! | local_name     | standard_name                                            | long_name                                                            | units   | rank | type             |    kind   | intent | optional |
+!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|------------------|-----------|--------|----------|
+!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
+!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real             | kind_phys | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type    |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type    |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type     |           | inout  | F        |
+!! | errmsg         | error_message                                            | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | error_flag                                               | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
 !!
-      subroutine sasasshal_post_run (frain, rain1, cnvc, cnvw, Model,   &
-     &                               Grid, Diag, Tbd)
+      subroutine sasas_shal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+     &                                Grid, Diag, Tbd, errmsg, errflg)
 
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type,              &
      &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
-
+        implicit none
+!
         type(GFS_grid_type),            intent(in) :: Grid
         type(GFS_control_type),         intent(in) :: Model
         type(GFS_diag_type),         intent(inout) :: Diag
@@ -1542,8 +1553,15 @@ c
         real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
      &     intent(in) :: cnvw, cnvc
 
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
         real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
         integer :: num2, num3
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
         raincs(:)     = frain * rain1(:)
         Diag%rainc(:) = Diag%rainc(:) + raincs(:)
@@ -1561,20 +1579,20 @@ c
           Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
         endif
 
-      end subroutine sasasshal_post_run
+      end subroutine sasas_shal_post_run
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_init Argument Table
+!! \section arg_table_sasas_shal_post_init Argument Table
 !!
-      subroutine sasasshal_post_init ()
-      end subroutine sasasshal_post_init
+      subroutine sasas_shal_post_init ()
+      end subroutine sasas_shal_post_init
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_sasasshal_post_finalize Argument Table
+!! \section arg_table_sasas_shal_post_finalize Argument Table
 !!
-      subroutine sasasshal_post_finalize ()
-      end subroutine sasasshal_post_finalize
+      subroutine sasas_shal_post_finalize ()
+      end subroutine sasas_shal_post_finalize
 
       end module sasas_shal_post

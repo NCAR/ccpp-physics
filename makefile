@@ -181,12 +181,12 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
 	   ./GFS_layer/GFS_diagnostics.F90                                           \
 	   ./GFS_layer/GFS_driver.F90                                                \
-	   ./physics/GFS_RRTMG_pre.F90                                               \
-	   ./physics/GFS_RRTMG_post.F90                                              \
-	   ./physics/GFS_radsw_pre.F90                                               \
-	   ./physics/GFS_radsw_post.F90                                              \
-	   ./physics/GFS_radlw_pre.F90                                               \
-	   ./physics/GFS_radlw_post.F90                                              \
+	   ./physics/GFS_rrtmg_pre.F90                                               \
+	   ./physics/GFS_rrtmg_post.F90                                              \
+	   ./physics/rrtmg_sw_pre.F90                                                \
+	   ./physics/rrtmg_sw_post.F90                                               \
+	   ./physics/rrtmg_lw_pre.F90                                                \
+	   ./physics/rrtmg_lw_post.F90                                               \
 	   $(GFS_PHYSICS_DRIVER)                                                     \
 	   $(GFS_RADIATION_DRIVER)                                                   \
 	   ./GFS_layer/GFS_restart.F90                                               \
@@ -238,8 +238,14 @@ endif
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
 
+# this has no effect, because radiation_aerosols.o is in physics, not in gfsphys
 ./radiation_aerosols.o : ./gfsphys/radiation_aerosols.f
 	$(FC) $(CPPDEFS) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
+
+# Reduce optimization for sfc_sice for bit-for-bit reproducibility
+FFLAGS_REDUCED_OPT=$(subst -O2,-O1,$(subst -xCORE-AVX2,-xCORE-AVX-I,$(FFLAGS)))
+./physics/sfc_sice.o : ./physics/sfc_sice.f
+	$(FC) $(CPPDEFS) $(FFLAGS_REDUCED_OPT) $(OTHER_FFLAGS) -c $< -o $@
 
 ./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
 	$(FC) $(CPPDEFS) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
