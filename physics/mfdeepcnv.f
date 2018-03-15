@@ -1,35 +1,53 @@
 !>  \file mfdeepcnv.f
-!!  This file contains the entire SAMF deep convection scheme.
+!!  This file contains the entire scale-aware mass-flux (SAMF) 
+!! deep convection scheme.
+
+      module sasas_deep
+      contains
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_init  Argument Table
+      subroutine sasasdeep_init
+      end subroutine sasasdeep_init
+
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_sasasdeep_finalize  Argument Table
+      subroutine sasasdeep_finalize
+      end subroutine sasasdeep_finalize
+
 !> \defgroup SAMF GFS Scale-Aware Mass-Flux Deep Convection
 !> @{
-!> \brief The scale-aware mass-flux (SAMF) deep convection scheme is an 
-!! updated version of the previous Simplified Arakawa-Schubert (SAS) scheme 
-!! with scale and aerosol awareness and parameterizes the effect of deep 
-!! convection on the environment (represented by the model state variables) 
+!> \brief The scale-aware mass-flux (SAMF) deep convection scheme is an
+!! updated version of the previous Simplified Arakawa-Schubert (SAS) scheme
+!! with scale and aerosol awareness and parameterizes the effect of deep
+!! convection on the environment (represented by the model state variables)
 !! in the following way. First, a simple cloud model is used to determine
-!! the change in model state variables due to one entraining/detraining cloud 
-!! type, per unit cloud-base mass flux. Next, the total change in state variables 
-!! is retrieved by determining the actual cloud base mass flux using the 
-!! quasi-equilibrium assumption (for grid sizes larger than a threshold value 
-!! [currently set to 8 km]) or a mean updraft velocity (for grid sizes smaller 
-!! than the threshold value). With a scale-aware parameterization, the 
-!! cloud mass flux decreases with increasing grid resolution. A simple 
-!! aerosol-aware parameterization is employed, where rain conversion in 
-!! the convective updraft is modified by aerosol number concentration. 
-!! The name SAS is replaced with SAMF as for the smaller grid sizes, 
-!! the parameterization does not use Arakawa-Schubert's quasi-equilibrium 
-!! assumption any longer where the cloud work function (interpreted as 
-!! entrainment-moderated convective available potential energy [CAPE]) 
+!! the change in model state variables due to one entraining/detraining cloud
+!! type, per unit cloud-base mass flux. Next, the total change in state variables
+!! is retrieved by determining the actual cloud base mass flux using the
+!! quasi-equilibrium assumption (for grid sizes larger than a threshold value
+!! [currently set to 8 km]) or a mean updraft velocity (for grid sizes smaller
+!! than the threshold value). With a scale-aware parameterization, the
+!! cloud mass flux decreases with increasing grid resolution. A simple
+!! aerosol-aware parameterization is employed, where rain conversion in
+!! the convective updraft is modified by aerosol number concentration.
+!! The name SAS is replaced with SAMF as for the smaller grid sizes,
+!! the parameterization does not use Arakawa-Schubert's quasi-equilibrium
+!! assumption any longer where the cloud work function (interpreted as
+!! entrainment-moderated convective available potential energy [CAPE])
 !! by the large scale dynamics is in balance with the consumption of the
 !! cloud work function by the convection.
 !!
-!! The SAS scheme uses the working concepts put forth in Arakawa and 
+!! The SAS scheme uses the working concepts put forth in Arakawa and
 !! Schubert (1974) \cite arakawa_and_schubert_1974 but includes modifications
 !! and simplifications from Grell (1993) \cite grell_1993 such as saturated
 !! downdrafts and only one cloud type (the deepest possible), rather than
 !! a spectrum based on cloud top heights or assumed entrainment rates.
 !! The scheme was implemented for the GFS in 1995 by Pan and Wu
-!! \cite pan_and_wu_1995, with further modifications discussed in 
+!! \cite pan_and_wu_1995, with further modifications discussed in
 !! Han and Pan (2011) \cite han_and_pan_2011 , including the calculation
 !! of cloud top, a greater CFL-criterion-based maximum cloud base mass flux,
 !! updated cloud model entrainment and detrainment, improved convective
@@ -52,24 +70,6 @@
 !! cloud condensate in the updraft. The lateral entrainment is also enhanced
 !! to more strongly suppress convection in a drier environment.
 !!
-
-
-      module sasas_deep
-      contains
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_init  Argument Table
-      subroutine sasasdeep_init
-      end subroutine sasasdeep_init
-
-
-! \brief Brief description of the subroutine
-!
-! \section arg_table_sasasdeep_finalize  Argument Table
-      subroutine sasasdeep_finalize
-      end subroutine sasasdeep_finalize
-
 !>\defgroup GFS_mfdeep GFS mfdeepcnv Main
 !! @{
 !!\ingroup SAMF
