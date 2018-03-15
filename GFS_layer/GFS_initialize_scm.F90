@@ -41,7 +41,7 @@ module GFS_initialize_scm
   end subroutine GFS_initialize_scm_finalize
 
 !> \section arg_table_GFS_initialize_scm_run Argument Table
-!! | local var name       | longname                                                    | description                                                             | units         | rank | type                          |    kind   | intent | optional |
+!! | local_name       | standard_name                                                    | long_name                                                             | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model                | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
 !! | Statein              | FV3-GFS_Statein_type                                        | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type              |           | inout  | F        |
@@ -64,12 +64,15 @@ module GFS_initialize_scm
 !! | ozone_pres           | natural_log_of_ozone_forcing_data_pressure_levels_from_host | natural logarithm of the pressure levels of the ozone forcing data      | Pa            |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_time           | time_levels_in_ozone_forcing_data_from_host                 | time values of the ozone forcing data coming from host                  | day           |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_forcing_in     | ozone_forcing_from_host                                     | ozone forcing data from host                                            | various       |    4 | real                          | kind_phys | in     | F        |
+!! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
   subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,     &
                              Coupling, Grid, Tbd, Cldprop, Radtend, &
                              Diag, Sfccycle, Interstitial, Init_parm, n_ozone_lats, &
                              n_ozone_layers, n_ozone_times, n_ozone_coefficients, &
-                             ozone_lat, ozone_pres, ozone_time, ozone_forcing_in)
+                             ozone_lat, ozone_pres, ozone_time, ozone_forcing_in, &
+                             errmsg, errflg)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -98,10 +101,17 @@ module GFS_initialize_scm
 
     integer, intent(in) :: n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times
     real(kind=kind_phys), intent(in) :: ozone_lat(:), ozone_pres(:), ozone_time(:), ozone_forcing_in(:,:,:,:)
+
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
 !
 !     !--- local variables
      real(kind=kind_phys), allocatable :: si(:)
      real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
+
+     ! Initialize CCPP error handling variables
+     errmsg = ''
+     errflg = 0
 
 !     !--- set control properties (including namelist read)
     call Model%init (Init_parm%nlunit, Init_parm%fn_nml,           &
@@ -113,7 +123,7 @@ module GFS_initialize_scm
                      Init_parm%dt_dycore, Init_parm%dt_phys,       &
                      Init_parm%bdat, Init_parm%cdat,               &
                      Init_parm%tracer_names, Init_parm%blksz)
-    
+
      !allocate memory for the variables stored in ozne_def and set them
      allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
      allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))

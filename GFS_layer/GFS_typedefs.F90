@@ -2699,7 +2699,6 @@ module GFS_typedefs
     Model%nshoc_2d         = nshoc_2d
     Model%nshoc_3d         = nshoc_3d
     Model%ncnvcld3d        = ncnvcld3d
-    Model%npdf3d           = 0
     Model%nctp             = nctp
 
     !--- debug flag
