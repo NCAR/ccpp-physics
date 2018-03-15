@@ -1,15 +1,24 @@
-!> \file GFS_calpreciptype.F90
-!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype)
-!! and its post. It is adopted from post but was made into a column to used by GFS model.
+!> \file GFS_calpreciptype.f90
+!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype),
+!! which provides precipitation forcing for LSM.
 
+!>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
+!!\brief This scheme contains the subroutine that calculates dominant
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM
+!!
+!!\section intraphysics Intraphysics Communication
+!
       module GFS_calpreciptype
       contains
-
-!> \section arg_table_GFS_calpreciptype_init Argument Table
-!!
+! \section arg_table_GFS_calpreciptype_init Argument Table
+!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
 
+!>\defgroup gfs_calpreciptype GFS calpreciptype Main
+!!\ingroup CALPRECIPTYPE 
+!!\brief This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
 !> \section arg_table_GFS_calpreciptype_run Argument Table
 !! | local var name | longname                                                               | description                                                | units   | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -41,6 +50,10 @@
 !! |    srflag      | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                     | flag    | 1    | real    | kind_phys | out    |  F       |
 !! |    tprcp       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m       | 1    | real    | kind_phys | out    |  F       |
 !!
+!! \section general_calpreciptype General Algorithm
+!!
+!! \section detailed_calpreciptype Detailed Algorithm
+!! @{
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                              &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1, &
@@ -308,6 +321,7 @@
 
       return
       end subroutine GFS_calpreciptype_run
+!! @}
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -1513,8 +1527,8 @@
       return
       end subroutine calwxt_dominant
 
-!> \section arg_table_GFS_calpreciptype_finalize Argument table
-!!
+! \section arg_table_GFS_calpreciptype_finalize Argument table
+!
       subroutine GFS_calpreciptype_finalize
       end subroutine GFS_calpreciptype_finalize
 

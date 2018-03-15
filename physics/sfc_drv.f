@@ -1,11 +1,9 @@
 !>  \file sfc_drv.f
-!!  This file contains the NOAH land surface scheme.
+!!  This file contains the Noah land surface scheme driver.
 
-!> \defgroup NOAH NOAH Land Surface pre
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+! \defgroup NOAH_pre Noah Land Surface Pre
+!  \brief Brief description of the parameterization
+! @{
 
       module lsm_noah_pre
       contains
@@ -16,9 +14,9 @@
       subroutine lsm_noah_pre_finalize
       end subroutine lsm_noah_pre_finalize
 
-!> \brief Brief description of the subroutine
+!! \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsm_noah_pre_run Arguments
+!! \section arg_table_lsm_noah_pre_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -34,9 +32,9 @@
 !!| smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point | soil water fraction at wilting point       | frac       | 1    | real    | kind_phys | inout  | F        |
 !!| smcref2        | threshold_volume_fraction_of_condensed_water_in_soil        | soil moisture threshold                    | frac       | 1    | real    | kind_phys | inout  | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
+!  \section general General Algorithm
+!  \section detailed Detailed Algorithm
+!  @{
       subroutine lsm_noah_pre_run                                       &
      &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
      &   smcref2                                                        &
@@ -63,17 +61,14 @@
 
       end subroutine lsm_noah_pre_run
 
-!> @}
       end module lsm_noah_pre
 
-!> @}
+! @}
 
-!> \defgroup NOAH NOAH Land Surface post
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-
+! \defgroup NOAH_post NOAH Land Surface post
+! @{
+!  \brief Brief description of the parameterization
+!  \section intraphysics Intraphysics Communication
       module lsm_noah_post
       contains
 
@@ -83,9 +78,9 @@
       subroutine lsm_noah_post_finalize
       end subroutine lsm_noah_post_finalize
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_post_run Arguments
+! \brief Brief description of the subroutine
+!
+!! \section arg_table_lsm_noah_post_run Argument Table
 !!| local var name | longname                                                    | description                                | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer |           | in     | F        |
@@ -125,15 +120,9 @@
 
       end subroutine lsm_noah_post_run
 
-!> @}
+!! @}
       end module lsm_noah_post
-!> @}
-
-!> \defgroup NOAH NOAH Land Surface
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+!! @}
 
       module lsm_noah
       contains
@@ -251,9 +240,15 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_run Arguments
+
+!> \defgroup Noah_Main GFS Noah Land Surface Model 
+!> \defgroup Noah_drv GFS Noah LSM Driver
+!!\ingroup Noah_Main
+!!  \brief This is Noah LSM driver module, with the functionality of 
+!! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
+!! variables for return to the parent model suite including unit conversion, as well 
+!! as diagnotics calculation. 
+!! \section arg_table_lsm_Noah_run Argument Table
 !!| local var name | longname                                                                     | description                                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count      |    0 | integer |           | in     | F        |
@@ -320,9 +315,10 @@
 !!| smcref2        | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!| wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac       |    1 | real    | kind_phys |   out  | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section general_noah_drv General Algorithm
 !!  @{
+!  \section detailed_noah Detailed Algorithm
+!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
@@ -417,13 +413,13 @@
 !===> ...  begin here
 !
 
-!  --- ...  set flag for land points
+!> - Set flag for land points.
 
       do i = 1, im
         flag(i) = (islimsk(i) == 1)
       enddo
 
-!  --- ...  save land-related prognostic fields for guess run
+!> - Save land-related prognostic fields for guess run.
 
       do i = 1, im
         if (flag(i) .and. flag_guess(i)) then
@@ -490,16 +486,16 @@
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
 
-!  --- ...  noah: prepare variables to run noah lsm
-!   1. configuration information (c):
-!      ------------------------------
-!    couple  - couple-uncouple flag (=1: coupled, =0: uncoupled)
-!    ffrozp  - flag for snow-rain detection (1.=snow, 0.=rain)
-!    ice     - sea-ice flag (=1: sea-ice, =0: land)
-!    dt      - timestep (sec) (dt should not exceed 3600 secs) = delt
-!    zlvl    - height (m) above ground of atmospheric forcing variables
-!    nsoil   - number of soil layers (at least 2)
-!    sldpth  - the thickness of each soil layer (m)
+!> - Prepare variables to run Noah LSM: 
+!!  -   1. configuration information (c):
+!!\n  ----------------------------------------
+!!\n  \a couple  - couple-uncouple flag (=1: coupled, =0: uncoupled)
+!!\n  \a ffrozp  - flag for snow-rain detection (1.=snow, 0.=rain)
+!!\n  \a ice     - sea-ice flag (=1: sea-ice, =0: land)
+!!\n  \a dt      - timestep (sec) (dt should not exceed 3600 secs) = delt
+!!\n  \a zlvl    - height (\f$m\f$) above ground of atmospheric forcing variables
+!!\n  \a nsoil   - number of soil layers (at least 2)
+!!\n  \a sldpth  - the thickness of each soil layer (\f$m\f$)
 
           couple = 1                      ! run noah lsm in 'couple' mode
 
@@ -518,15 +514,15 @@
             sldpth(k) = zsoil(i,k-1) - zsoil(i,k)
           enddo
 
-!   2. forcing data (f):
-!      -----------------
-!    lwdn    - lw dw radiation flux (w/m2)
-!    solnet  - net sw radiation flux (dn-up) (w/m2)
-!    sfcprs  - pressure at height zlvl above ground (pascals)
-!    prcp    - precip rate (kg m-2 s-1)
-!    sfctmp  - air temperature (k) at height zlvl above ground
-!    th2     - air potential temperature (k) at height zlvl above ground
-!    q2      - mixing ratio at height zlvl above ground (kg kg-1)
+!>  -   2. forcing data (f):
+!!\n  ---------------------------------------
+!!\n  \a lwdn    - lw dw radiation flux (\f$W m^{-2}\f$)
+!!\n  \a solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
+!!\n  \a sfcprs  - pressure at height zlvl above ground (pascals)
+!!\n  \a prcp    - precip rate (\f$kg m^{-2} s^{-1}\f$)
+!!\n  \a sfctmp  - air temperature (\f$K\f$) at height zlvl above ground
+!!\n  \a th2     - air potential temperature (\f$K\f$) at height zlvl above ground
+!!\n  \a q2      - mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
 
           lwdn   = dlwflx(i)         !..downward lw flux at sfc in w/m2
           swdn   = dswsfc(i)         !..downward sw flux at sfc in w/m2
@@ -539,27 +535,27 @@
           th2    = theta1(i)
           q2     = q0(i)
 
-!   3. other forcing (input) data (i):
-!      ------------------------------
-!    sfcspd  - wind speed (m s-1) at height zlvl above ground
-!    q2sat   - sat mixing ratio at height zlvl above ground (kg kg-1)
-!    dqsdt2  - slope of sat specific humidity curve at t=sfctmp (kg kg-1 k-1)
+!>  -   3. other forcing (input) data (i):
+!!\n   ---------------------------------------
+!!\n  \a sfcspd  - wind speed (\f$m s^{-1}\f$) at height zlvl above ground
+!!\n  \a q2sat   - sat mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
+!!\n  \a dqsdt2  - slope of sat specific humidity curve at t=sfctmp (\f$kg kg^{-1} k^{-1}\f$)
 
           sfcspd = wind(i)
           q2sat =  qs1(i)
           dqsdt2 = q2sat * a23m4/(sfctmp-a4)**2
 
-!   4. canopy/soil characteristics (s):
-!      --------------------------------
-!    vegtyp  - vegetation type (integer index)                       -> vtype
-!    soiltyp - soil type (integer index)                             -> stype
-!    slopetyp- class of sfc slope (integer index)                    -> slope
-!    shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
-!    shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
-!    ptu     - photo thermal unit (plant phenology for annuals/crops)
-!    alb     - backround snow-free surface albedo (fraction)
-!    snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
-!    tbot    - bottom soil temperature (local yearly-mean sfc air temp)
+!>  -   4. canopy/soil characteristics (s):
+!!\n      ------------------------------------
+!!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
+!!\n \a soiltyp - soil type (integer index)                         -> stype
+!!\n \a slopetyp- class of sfc slope (integer index)                -> slope
+!!\n \a shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
+!!\n \a shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
+!!\n \a ptu     - photo thermal unit (plant phenology for annuals/crops)
+!!\n \a alb     - backround snow-free surface albedo (fraction)
+!!\n \a snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
+!!\n \a tbot    - bottom soil temperature (local yearly-mean sfc air temp)
 
           vtype = vegtype(i)
           stype = soiltyp(i)
@@ -574,18 +570,19 @@
           alb  = sfalb(i)
           tbot = tg3(i)
 
-!   5. history (state) variables (h):
-!      ------------------------------
-!    cmc     - canopy moisture content (m)
-!    t1      - ground/canopy/snowpack) effective skin temperature (k)   -> tsea
-!    stc(nsoil) - soil temp (k)                                         -> stsoil
-!    smc(nsoil) - total soil moisture content (volumetric fraction)     -> smsoil
-!    sh2o(nsoil)- unfrozen soil moisture content (volumetric fraction)  -> slsoil
-!    snowh   - actual snow depth (m)
-!    sneqv   - liquid water-equivalent snow depth (m)
-!    albedo  - surface albedo including snow effect (unitless fraction)
-!    ch      - surface exchange coefficient for heat and moisture (m s-1) -> chx
-!    cm      - surface exchange coefficient for momentum (m s-1)          -> cmx
+!>  -   5. history (state) variables (h):
+!!\n      ------------------------------
+!!\n \a cmc        - canopy moisture content (\f$m\f$)
+!!\n \a t1         - ground/canopy/snowpack effective skin temperature (\f$K\f$)   -> tsea
+!!\n \a stc(nsoil) - soil temp (\f$K\f$)                                         -> stsoil
+!!\n \a smc(nsoil) - total soil moisture content (volumetric fraction)     -> smsoil
+!!\n \a sh2o(nsoil)- unfrozen soil moisture content (volumetric fraction)  -> slsoil
+!!\n \a snowh      - actual snow depth (\f$m\f$)
+!!\n \a sneqv      - liquid water-equivalent snow depth (\f$m\f$)
+!!\n \a albedo     - surface albedo including snow effect (unitless fraction)
+!!\n \a ch         - surface exchange coefficient for heat and moisture (\f$m s^{-1}\f$) -> chx
+!!\n \a cm         - surface exchange coefficient for momentum (\f$m s^{-1}\f$)          -> cmx
+!!\n \a z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
 
           cmc = canopy(i) * 0.001            ! convert from mm to m
           tsea = tsurf(i)                    ! clu_q2m_iter
@@ -610,9 +607,10 @@
 !  ---- ... outside sflx, roughness uses cm as unit
           z0 = zorl(i)/100.
 
-!  --- ...  call noah lsm
+!> - Call Noah LSM gfssflx(). 
 
-          call sflx                                                     &
+!          call sflx                                                     &
+          call gfssflx                                                  & ! ccppdox: these is sflx in mpbl
 !  ---  inputs:
      &     ( nsoil, couple, ice, ffrozp, delt, zlvl, sldpth,            &
      &       swdn, solnet, lwdn, sfcems, sfcprs, sfctmp,                &
@@ -628,16 +626,16 @@
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
      &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
 
-!  --- ...  noah: prepare variables for return to parent mode
-!   6. output (o):
-!      -----------
-!    eta     - actual latent heat flux (w m-2: positive, if upward from sfc)
-!    sheat   - sensible heat flux (w m-2: positive, if upward from sfc)
-!    beta    - ratio of actual/potential evap (dimensionless)
-!    etp     - potential evaporation (w m-2)
-!    ssoil   - soil heat flux (w m-2: negative if downward from surface)
-!    runoff1 - surface runoff (m s-1), not infiltrating the surface
-!    runoff2 - subsurface runoff (m s-1), drainage out bottom
+!> - Noah LSM: prepare variables for return to parent model and unit conversion.
+!>  -   6. output (o):
+!!\n  ------------------------------
+!!\n \a eta     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a sheat   - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a beta    - ratio of actual/potential evap (dimensionless)
+!!\n \a etp     - potential evaporation (\f$W m^{-2}\f$)
+!!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
+!!\n \a runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
+!!\n \a runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
 
           evap(i)  = eta
           hflx(i)  = sheat
@@ -719,7 +717,7 @@
         endif   ! end if_flag_iter_and_flag_block
       enddo   ! end do_i_loop
 
-!   --- ...  compute qsurf (specific humidity at sfc)
+!> - Compute specific humidity at surface (\a qsurf).
 
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
@@ -728,6 +726,8 @@
         endif
       enddo
 
+!> - Compute surface upward sensible heat flux (\a hflx) and evaporation
+!! flux (\a evap). 
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
           tem     = 1.0 / rho(i)
@@ -736,7 +736,7 @@
         endif
       enddo
 
-!  --- ...  restore land-related prognostic fields for guess run
+!> - Restore land-related prognostic fields for guess run.
 
       do i = 1, im
         if (flag(i)) then
@@ -764,7 +764,6 @@
 !      end subroutine sfc_drv
       end subroutine lsm_noah_run
 !-----------------------------------
-!> @}
+!! @}
 
       end module lsm_noah
-!> @}

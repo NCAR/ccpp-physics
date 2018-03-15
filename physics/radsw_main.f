@@ -261,8 +261,8 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radsw_main module_radsw_main
-!! This module includes NCEP's modifications of the rrtmg-sw radiation
+!! \defgroup module_radsw_main GFS RADSW Main
+!! This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!
 !! The SW radiation model in the current NOAA Environmental Modeling
@@ -381,10 +381,8 @@
 !!  - mersenne_twister: program of random number generators using the
 !!    Mersenne-Twister algorithm
 !! - radsw_main.f, which contains:
-!!  - module_radsw_main: the main SW radiation computation programming
-!!    source codes, which contains two externally callable subroutines:
-!!   - swrad(): the main radiation routine
-!!   - rswinit(): the initialization routine
+!!  - swrad_run(): the main radiation routine
+!!  - rswinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -401,7 +399,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module module_radsw_main           !
 !........................................!
@@ -434,30 +431,30 @@
 !    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
 !    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
 
-!> \name constant values
+! \name constant values
 
       real (kind=kind_phys), parameter :: eps     = 1.0e-6
       real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
-!> pade approx constant
+! pade approx constant
       real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
       real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
       real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
       real (kind=kind_phys), parameter :: flimit  = 1.0e-20
-!> internal solar constant
+! internal solar constant
       real (kind=kind_phys), parameter :: s0      = 1368.22
 
       real (kind=kind_phys), parameter :: f_zero  = 0.0
       real (kind=kind_phys), parameter :: f_one   = 1.0
 
-!> \name atomic weights for conversion from mass to volume mixing ratios
+! \name atomic weights for conversion from mass to volume mixing ratios
       real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
       real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
-!> \name band indices
+! \name band indices
       integer, dimension(nblow:nbhgh) :: nspa, nspb
-!> band index for sfc flux
+! band index for sfc flux
       integer, dimension(nblow:nbhgh) :: idxsfc
-!> band index for cld prop
+! band index for cld prop
       integer, dimension(nblow:nbhgh) :: idxebc
 
       data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
@@ -480,26 +477,26 @@
 !    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
 !    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
 
-!> uv-b band index
+! uv-b band index
       integer, parameter :: nuvb = 27
 
-!>\name logical flags for optional output fields
+!\name logical flags for optional output fields
       logical :: lhswb  = .false.
       logical :: lhsw0  = .false.
       logical :: lflxprf= .false.
       logical :: lfdncmp= .false.
 
 
-!> those data will be set up only once by "rswinit"
+! those data will be set up only once by "rswinit"
       real (kind=kind_phys) :: exp_tbl(0:NTBMX)
 
 
-!> the factor for heating rates (in k/day, or k/sec set by subroutine
+! the factor for heating rates (in k/day, or k/sec set by subroutine
 !!  'rswinit')
       real (kind=kind_phys) :: heatfac
 
 
-!> initial permutation seed used for sub-column cloud scheme
+! initial permutation seed used for sub-column cloud scheme
       integer, parameter :: ipsdsw0 = 1
 
 !  ---  public accessable subprograms
@@ -511,79 +508,12 @@
       contains
 ! =================
 
-!> This subroutine is the main SW radiation routine.
-!!\param plyr           model layer mean pressure in mb
-!!\param plvl           model level pressure in mb
-!!\param tlyr           model layer mean temperature in K
-!!\param tlvl           model level temperature in K (not in use)
-!!\param qlyr           layer specific humidity in gm/gm
-!!\param olyr           layer ozone concentration in gm/gm
-!!\param gasvmr         atmospheric constent gases
-!!\n                    (:,:,1)  - co2 volume mixing ratio
-!!\n                    (:,:,2)  - n2o volume mixing ratio
-!!\n                    (:,:,3)  - ch4 volume mixing ratio
-!!\n                    (:,:,4)  - o2  volume mixing ratio
-!!\n                    (:,:,5)  - co  volume mixing ratio (not used)
-!!\n                    (:,:,6)  - cfc11 volume mixing ratio (not used)
-!!\n                    (:,:,7)  - cfc12 volume mixing ratio (not used)
-!!\n                    (:,:,8)  - cfc22 volume mixing ratio (not used)
-!!\n                    (:,:,9)  - ccl4  volume mixing ratio (not used)
-!!\param clouds         cloud profile
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer in-cloud liq water path (\f$g/m^2\f$)
-!!\n                    (:,:,3)  - mean eff radius for liq cloud (micron)
-!!\n                    (:,:,4)  - layer in-cloud ice water path (\f$g/m^2\f$)
-!!\n                    (:,:,5)  - mean eff radius for ice cloud (micron)
-!!\n                    (:,:,6)  - layer rain drop water path (\f$g/m^2\f$)
-!!\n                    (:,:,7)  - mean eff radius for rain drop (micron)
-!!\n                    (:,:,8)  - layer snow flake water path (\f$g/m^2\f$)
-!!\n                    (:,:,9)  - mean eff radius for snow flake (micron)
-!!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties
-!!\n                    (:,:,:,1) - optical depth
-!!\n                    (:,:,:,2) - single scattering albedo
-!!\n                    (:,:,:,3) - asymmetry parameter
-!!\param sfcalb         surface albedo in fraction
-!!\n                    (:,1) - near ir direct beam albedo
-!!\n                    (:,2) - near ir diffused albedo
-!!\n                    (:,3) - uv+vis direct beam albedo
-!!\n                    (:,4) - uv+vis diffused albedo
-!!\param cosz           cosine of solar zenith angle
-!!\param solcon         solar constant (\f$W/m^2\f$)
-!!\param NDAY           num of daytime points
-!!\param idxday         index array for daytime points
-!!\param npts           number of horizontal points
-!!\param nlay,nlp1      vertical layer/lavel numbers
-!!\param lprnt          logical check print flag
-!!\param hswc           total sky heating rates (k/sec or k/day)
-!!\param topflx         radiation fluxes at toa (\f$W/m^2\f$), components:
-!!\n                    upfxc - total sky upward flux at toa
-!!\n                    dnflx - total sky downward flux at toa
-!!\n                    upfx0 - clear sky upward flux at toa
-!!\param sfcflx         radiation fluxes at sfc (\f$W/m^2\f$), components:
-!!\n                    upfxc - total sky upward flux at sfc
-!!\n                    dnfxc - total sky downward flux at sfc
-!!\n                    upfx0 - clear sky upward flux at sfc
-!!\n                    dnfx0 - clear sky downward flux at sfc
-!!\param hswb           spectral band total sky heating rates
-!!\param hsw0           clear sky heating rates (k/sec or k/day)
-!!\param flxprf         level radiation fluxes (\f$ W/m^2 \f$), components:
-!!\n                    dnfxc - total sky downward flux at interface
-!!\n                    upfxc - total sky upward flux at interface
-!!\n                    dnfx0 - clear sky downward flux at interface
-!!\n                    upfx0 - clear sky upward flux at interface
-!!\param fdncmp         surface downward fluxes (\f$W/m^2\f$), components:
-!!\n                    uvbfc - total sky downward uv-b flux at sfc
-!!\n                    uvbf0 - clear sky downward uv-b flux at sfc
-!!\n                    nirbm - downward surface nir direct beam flux
-!!\n                    nirdf - downward surface nir diffused flux
-!!\n                    visbm - downward surface uv+vis direct beam flux
-!!\n                    visdf - downward surface uv+vis diffused flux
 
       subroutine swrad_init ()
       end subroutine swrad_init
 
-
+!>\ingroup module_radsw_main
+!>/brief This subroutine is the main SW radiation routine.
 !! \section arg_table_swrad_run Argument Table
 !! | local var name  | longname                                                                                      | description                                                              | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
@@ -634,7 +564,7 @@
 !! | cld_ssa         | cloud_single_scattering_albedo                                                                | cloud single scattering albedo                                           | frac    |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymmetry_parameter                                                                     | cloud asymmetry parameter                                                | none    |    2 | real        | kind_phys | in     | T        |
 !!
-!> \section General_swrad General Algorithm
+!> \section gen_swrad General Algorithm
 !> @{
 !-----------------------------------
       subroutine swrad_run                                                  &
@@ -1465,6 +1395,7 @@
       end subroutine swrad_finalize
 
 
+!>\ingroup module_radsw_main
 !> This subroutine initializes non-varying module variables, conversion
 !! factors, and look-up tables.
 !!\param me             print control for parallel process
@@ -3990,7 +3921,7 @@
 !!\param sfluxzen         spectral distribution of incoming solar flux
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
-!>\section gen_al General Algorithm
+!>\section gen_al_taumol General Algorithm
 !! @{
 !-----------------------------------
       subroutine taumol                                                 &
@@ -4246,7 +4177,7 @@
       contains
 ! =================
 
-!> The subroutine computes the optical depth in band 16:  2600-3250
+! The subroutine computes the optical depth in band 16:  2600-3250
 !! cm-1 (low - h2o,ch4; high - ch4)
 !-----------------------------------
       subroutine taumol16
@@ -5478,4 +5409,3 @@
 !........................................!
       end module module_radsw_main       !
 !========================================!
-!! @}

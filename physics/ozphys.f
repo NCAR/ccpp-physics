@@ -1,41 +1,27 @@
 !> \file ozphys.f
 !! This file is ozone sources and sinks.
 
-!> \defgroup GFS_ozn GFS Ozone Sources and Sinks
-!! The operational GFS currently parameterizes ozone production and
-!! destruction based on monthly mean coefficients provided by Naval
-!! Research Laboratory through CHEM2D chemistry model
-!! (McCormack et al. 2006 \cite mccormack_et_al_2006).
-!! Monthly and zonal mean ozone production rate and ozone destruction
-!! rate per unit ozone mixing ratio were provided by NRL based on
-!! CHEM2D model.
-!! Original version of these terms were provided by NASA/DAO based on
-!! NASA 2D Chemistry model - GSM is capable of running both versions
+!> \defgroup GFS_ozn GFS Ozone Physics 
 !!
 !! \section intra_oz Intraphysics Communication
-!! - Routine OZPHYS is called from GBPHYS after call to RAYLEIGH_DAMP
-!! @{
-
-
-
+!! 
       module ozphys_pre
-
       contains
 
-!! \section arg_table_ozphys_pre_init Argument Table
-!!
+! \section arg_table_ozphys_pre_init Argument Table
+!
       subroutine ozphys_pre_init()
       end subroutine ozphys_pre_init
 
 
-!! \section arg_table_ozphys_pre_run Argument Table
-!!
+! \section arg_table_ozphys_pre_run Argument Table
+!
       subroutine ozphys_pre_run()
       end subroutine ozphys_pre_run
 
 
-!! \section arg_table_ozphys_pre_finalize Argument Table
-!!
+! \section arg_table_ozphys_pre_finalize Argument Table
+!
       subroutine ozphys_pre_finalize()
       end subroutine ozphys_pre_finalize
 
@@ -43,21 +29,23 @@
       end module ozphys_pre
 
 
-
-
       module ozphys
 
       contains
 
-!> \ingroup GFS_ozphys
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_ozphys_init Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_ozphys_init Argument Table
 !!
       subroutine ozphys_init()
       end subroutine ozphys_init
 
-!>
+!>\defgroup GFS_ozphys GFS ozphys Main
+!>\ingroup GFS_ozn
+!! \brief The operational GFS currently parameterizes ozone production and
+!! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
+!! Research Laboratory through CHEM2D chemistry model
+!! (McCormack et al. 2006 \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
 !! | local var name | longname                                          | description                                       | units   | rank | type    | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -78,28 +66,11 @@
 !! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 | 3    | real    | kind_phys | inout  | F        |
 !! | me             | mpi_rank                                          | rank of the current MPI task                      | index   | 0    | integer | default   | in     | F        |
 !!
-!! \param[in] ix,im     integer, horizontal dimension and num of used pts
-!! \param[in] levs      integer, vertical layer dimension
-!! \param[in] ko3       integer, number of layers for ozone data
-!! \param[in] dt        real, physics time step in seconds
-!! \param[in] ozi       real, updated ozone
-!! \param[out] ozo      real, updated ozone
-!! \param[in] tin       real, updated temperature
-!! \param[in] po3       real, (ko3), ozone forcing data level pressure
-!!                      (ln(Pa))
-!! \param[in] prsl      real, (ix,levs),mean layer pressure
-!! \param[in] prdout    real, (ix,ko3,pl_coeff),ozone forcing data
-!! \param[in] pl_coeff  integer, number coefficients in ozone forcing
-!! \param[in] delp      real, (ix,levs)
-!! \param[in] ldiag3d   logical, flag for 3d diagnostic fields
-!! \param[out] ozp      real, ozone change due to physics
-!! \param[in] me        integer, pe number - used for debug prints
-!! \section gen_al General Algorithm
+!! \section genal_ozphys General Algorithm
 !> @{
-      subroutine ozphys_run (                                           &
-     &  ix, im, levs, ko3, dt, ozi, ozo, tin, po3,                      &
-     &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
-     &  ozp, me)
+      subroutine ozphys_run (ix, im, levs, ko3, dt, ozi, ozo, tin, po3, &
+     &                       prsl, prdout, pl_coeff, delp, ldiag3d,     &
+     &                       ozp, me)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -121,6 +92,7 @@
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
      &                     ozib(im),  colo3(im,levs+1)
 !
+!> - Calculate vertical integrated column ozone values.
       if (pl_coeff > 2) then
         colo3(:,levs+1) = 0.0
         do l=levs,1,-1
@@ -130,6 +102,7 @@
         enddo
       endif
 !
+!> - Apply vertically linear interpolation to the ozone coefficients. 
       do l=1,levs
         pmin =  1.0e10
         pmax = -1.0e10
@@ -191,7 +164,11 @@
             enddo
           endif
         endif
-
+!> - Calculate the 4 terms of prognostic ozone change during time \a dt:  
+!!  - ozp(:,:,1) - Ozone production at model layers 
+!!  - ozp(:,:,2) - Ozone tendency at model layers 
+!!  - ozp(:,:,3) - Ozone production from temperature term at model layers 
+!!  - ozp(:,:,4) - Ozone production from column ozone term at model layers
         if (pl_coeff == 4) then
           do i=1,im
             ozib(i)  = ozi(i,l)            ! no filling
@@ -215,34 +192,29 @@
 !
       return
       end subroutine ozphys_run
-!! @}
 !> @}
 
-!> \ingroup GFS_ozphys
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_ozphys_finalize Argument Table
+! \brief Brief description of the subroutine
+!
+! \section arg_table_ozphys_finalize Argument Table
 !!
       subroutine ozphys_finalize()
       end subroutine ozphys_finalize
 
-
       end module ozphys
-
-
 
 
       module ozphys_post
 
       contains
 
-!! \section arg_table_ozphys_post_init Argument Table
-!!
+! \section arg_table_ozphys_post_init Argument Table
+!
       subroutine ozphys_post_init()
       end subroutine ozphys_post_init
 
 
-!! \section arg_table_ozphys_post_run Argument Table
+! \section arg_table_ozphys_post_run Argument Table
 !! | local var name | longname                                     | description                                  | units   | rank | type                       | kind      | intent | optional |
 !! |----------------|----------------------------------------------|----------------------------------------------|---------|------|----------------------------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                         | horizontal dimension                         | count   | 0    | integer                    |           | in     | F        |
@@ -272,8 +244,8 @@
       end subroutine ozphys_post_run
 
 
-!! \section arg_table_ozphys_post_finalize Argument Table
-!!
+! \section arg_table_ozphys_post_finalize Argument Table
+!
       subroutine ozphys_post_finalize()
       end subroutine ozphys_post_finalize
 

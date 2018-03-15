@@ -2,6 +2,97 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
+!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
+!!  \brief The GFS radiation scheme
+!!  \details Radiative processes are among the most complex and
+!! computationally intensive parts of all model physics. As an
+!! essential component of modeling the atmosphere, radiation directly
+!! and indirectly connects all physics processes with model dynamics,
+!! and it regulates the overall earth-atmosphere energy exchanges and
+!! transformations.
+!!
+!! The schematic radiation module structure is shown in Table 1.
+!! \image html schematic_Rad_mod.png "Table 1: Schematic Radiation Module Structure" width=10cm
+!!
+!> GFS radiation package is intended to provide a fast and accurate
+!! method of determining the total radiative flux at any given
+!! location. These calculations provide both the total radiative flux
+!! at the ground surface, which is needed to establish the surface
+!! energy budget, and the vertical radiative flux divergence, which is
+!! used to calculate the radiative heating and cooling rates of a given
+!! atmospheric layer. The magnitude of the terms in the surface energy
+!! budget can set the stage for moist deep convection and are crucial
+!! to the formation of low-level clouds. In addition, the vertical
+!! radiative flux divergence can produce substantial cooling,
+!! particularly at the tops of clouds, which can have strong dynamical
+!! effects on cloud evolution.
+!!
+!! It uses a correlated-k distribution method and a transmittance lookup
+!! table that is linearly scaled by optical depth to achieve high
+!! accuracy and efficiency. The algorithm contains 140 unevenly
+!! distributed quadrature points (reduced from the original set of 256)
+!! to integrate the cumulative probability distribution functions of
+!! absorption over 16 spectral bands. It employs the
+!! Clough-Kneizys-Davies (CKD_2.4) continuum model (Clough et al. 1992
+!! \cite clough_et_al_1992) to compute absorption by water vapor at the
+!! continuum band. Longwave cloud radiative properties external to the
+!! RRTM depend on cloud liquid/ice water path and the effective radius
+!! of ice particles and water droplets (Hu and Stamnes 1993
+!! \cite hu_and_stamnes_1993; Ebert and Curry 1992 \cite ebert_and_curry_1992).
+!!
+!! Changes to Radiation Parameterization since 2007:
+!! \n The longwave (LW) and the shortwave (SW) radiation
+!! parameterizations in NCEP's operational GFS are both modified and
+!! optimized versions of the Rapid Radiative Transfer Model for GCMs
+!! (RRTMG_LW v2.3 and RRTMG_SW v2.3, respectively) developed at AER
+!! (Iacono et al. 2008 \cite iacono_et_al_2008,Mlawer et al. 1997
+!! \cite mlawer_et_al_1997, Iacono et al., 2000 \cite iacono_et_al_2000,
+!! Clough et al., 2005 \cite clough_et_al_2005). The LW algorithm
+!! contains 140 unevenly distributed g-points (quadrature points) in 16
+!! broad spectral bands, while the SW algorithm includes 112 g-points
+!! in 14 bands. In addition to the major atmospheric absorbing gases of
+!! ozone, water vapor, and carbon dioxide, the algorithm also includes
+!! various minor absorbing species such as methane, nitrous oxide,
+!! oxygen, and in the longwave up to four types of halocarbons (CFCs).
+!! To represent statistically the unresolved subgrid cloud variability
+!! when dealing multi layered clouds, a Monte-Carlo Independent Column
+!! Approximation (McICA) method is used in the RRTMG radiative transfer.
+!! A maximum-random cloud overlap method is used in both LW and SW
+!! radiation calculations. Cloud condensate path and effective radius
+!! for water and ice are used for the calculation of cloud-radiative
+!! properties. Hu and Stamnes's method (1993) \cite hu_and_stamnes_1993
+!! is used to treat water clouds in both LW and SW parameterizations.
+!! For ice clouds. Fu's parameterizations (1996,1998) \cite fu_1996
+!! \cite fu_et_al_1998 are used in the SW and LW, respectively.
+!!
+!! In the operational GFS, a climatological tropospheric aerosol with
+!! a 5-degree horizontal resolution is used in both LW and SW
+!! radiations. A generalized spectral mapping formulation was developed
+!! to compute radiative properties of various aerosol components for
+!! each of the radiation spectral bands. A separate stratospheric
+!! volcanic aerosol parameterization was added that is capable of
+!! handling volcanic events. In SW, a new table of incoming solar
+!! constants is derived covering time period of 1850-2019 (Vandendool,
+!! personal communivation). An eleven-year solar cycle approximation
+!! will be used for time out of the window period in long term climate
+!! simulations. The SW albedo parameterization uses surface vegetation
+!! type based seasonal climatology similar to that described in the
+!! NCEP OFFICE Note 441 (Hou et al. 2002 \cite hou_et_al_2002) but with
+!! a modification in the treatment of solar zenith angle dependency over
+!! snow-free land surface (Yang et al. 2008 \cite yang_et_al_2008).
+!! Similarly, vegetation type based non-black-body surface emissivity
+!! is used for the LW radiation. Concentrations of atmospheric
+!! greenhouse gases are either obtained from global network
+!! measurements, such as carbon dioxide (CO2), or taking the
+!! climatological constants, the actual CO2 value for the forecast time
+!! is an estimation based on the most recent five-year observations. In
+!! the lower atmosphere (<3km) a monthly mean CO2 distribution in 15
+!! degree horizontal resolution is used, while a global mean monthly
+!! value is used in the upper atmosphere.
+!!
+!> \section intraphysics Intraphysics Communication
+
+!
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
@@ -235,9 +326,9 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \defgroup module_radlw_main module_radlw_main
+!> \defgroup module_radlw_main GFS RADLW Main
 !! \ingroup RRTMG
-!! This module includes NCEP's modifications of the rrtmg-lw radiation
+!! This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
 !! The RRTM-LW package includes three files:
@@ -249,14 +340,8 @@
 !!  - module_radlw_cldprlw: cloud property coefficients
 !!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
 !! - radlw_main.f, which contains:
-!!  - module_radlw_main, which is the main LW radiation transfer
-!!    program and contains two externally callable subroutines:
-!!   - lwrad(): the main LW radiation routine
-!!   - rlwinit(): the initialization routine
-!!
-!! All the LW radiation subprograms become contained subprograms in
-!! module 'module_radlw_main' and many of them are not directly
-!! accessable from places outside the module.
+!!  - lwrad_run(): the main LW radiation routine
+!!  - rlwinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -273,7 +358,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module module_radlw_main           !
 !........................................!
@@ -389,68 +473,11 @@
       contains
 ! ================
 
-!> This subroutine is the main LW radiation routine.
-!!\param plyr           model layer mean pressure in mb
-!!\param plvl           model interface pressure in mb
-!!\param tlyr           model layer mean temperature in K
-!!\param tlvl           model interface temperature in K
-!!\param qlyr           layer specific humidity in gm/gm
-!!\param olyr           layer ozone concentration in gm/gm
-!!\param gasvmr         atmospheric gases amount:
-!!\n                    (:,:,1)  - co2 volume mixing ratio
-!!\n                    (:,:,2)  - n2o volume mixing ratio
-!!\n                    (:,:,3)  - ch4 volume mixing ratio
-!!\n                    (:,:,4)  - o2  volume mixing ratio
-!!\n                    (:,:,5)  - co  volume mixing ratio
-!!\n                    (:,:,6)  - cfc11 volume mixing ratio
-!!\n                    (:,:,7)  - cfc12 volume mixing ratio
-!!\n                    (:,:,8)  - cfc22 volume mixing ratio
-!!\n                    (:,:,9)  - ccl4  volume mixing ratio
-!!\param clouds         layer cloud profile
-!!\n   for  ilwcliq > 0  ---
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer in-cloud liq water path (\f$ g/m^2 \f$)
-!!\n                    (:,:,3)  - mean eff radius for liq cloud (micron)
-!!\n                    (:,:,4)  - layer in-cloud ice water path (\f$ g/m^2 \f$)
-!!\n                    (:,:,5)  - mean eff radius for ice cloud (micron)
-!!\n                    (:,:,6)  - layer rain drop water path    (\f$ g/m^2 \f$)
-!!\n                    (:,:,7)  - mean eff radius for rain drop (micron)
-!!\n                    (:,:,8)  - layer snow flake water path   (\f$ g/m^2 \f$)
-!!\n                    (:,:,9)  - mean eff radius for snow flake(micron)
-!!\n   for  ilwcliq = 0  ---
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer cloud optical depth
-!!\n                    (:,:,3)  - layer cloud single scattering albedo
-!!\n                    (:,:,4)  - layer cloud asymmetry factor
-!!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties
-!!\n                    (:,:,:,1) - optical depth
-!!\n                    (:,:,:,2) - single scattering albedo
-!!\n                    (:,:,:,3) - asymmetry parameter
-!!\param sfemis         surface emissivity
-!!\param sfgtmp         surface ground temperature in K
-!!\param npts           total number of horizontal points
-!!\param nlay, nlp1     total number of vertical layers, levels
-!!\param lprnt          cntl flag for diagnostic print out
-!!\param hlwc           total sky heating rate in k/day or k/sec
-!!\param topflx         radiation fluxes at top, components
-!!\n                    upfxc - total sky upward flux at top (\f$ w/m^2 \f$)
-!!\n                    upfx0 - clear sky upward flux at top (\f$ w/m^2 \f$)
-!!\param sfcflx         radiation fluxes at sfc, components
-!!\n                    upfxc - total sky upward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    dnfxc - total sky downward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    upfx0 - clear sky upward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    dnfx0 - clear sky downward flux at sfc (\f$ w/m^2 \f$)
-!!\param hlwb           spectral band total sky heating rates
-!!\param hlw0           clear sky heating rates (k/sec or k/day)
-!!\param flxprf         level radiation fluxes (\f$ w/m^2 \f$), components
-!!\n                    dnfxc - total sky downward flux
-!!\n                    upfxc - total sky upward flux
-!!\n                    dnfx0 - clear sky downward flux
-!!\n                    upfx0 - clear sky upward flux
          subroutine lwrad_init ()
          end subroutine lwrad_init
 
+!>\ingroup module_radlw_main
+!> This subroutine is the main LW radiation routine.
 !! \section arg_table_lwrad_run Argument Table
 !! | local var name  | longname                                                                                     | description                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|----------------------------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
@@ -1316,7 +1343,7 @@
       end subroutine lwrad_finalize 
 
 
-
+!>\ingroup module_radlw_main
 !> This subroutine performs calculations necessary for the initialization
 !! of the longwave model.  lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
@@ -3919,8 +3946,8 @@
       contains
 ! =================
 
-!> band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
-!!  (high key - h2o; high minor - n2)
+! band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
+!  (high key - h2o; high minor - n2)
 ! ----------------------------------
       subroutine taugb01
 ! ..................................
@@ -6725,4 +6752,3 @@
       end module module_radlw_main       !
 !========================================!
 
-!! @}

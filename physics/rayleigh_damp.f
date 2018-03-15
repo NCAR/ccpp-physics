@@ -1,12 +1,27 @@
+!>\file rayleigh_damp.f
+!! This file contains the Rayleigh friction calculation with total
+!! energy conservation.
       module rayleigh_damp
       contains
-
-!! \section arg_table_rayleigh_damp_init Argument Table
-!!
+!>\defgroup GFS_rayleigh GFS Rayleigh Damping Calculation
+!! \brief This is the Rayleigh friction calculation with total energy conservation.
+!! Role of Rayleigh friction, it attempts to resolve two issues:
+!! - The top lid model effects, sponge layer to suppress resolved wave reflections and extra-heating
+!! - The winter-summer zonal wind drag in the strato-mesosphere
+! \section arg_table_rayleigh_damp_init Argument Table
+!
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
 
+!>\defgroup rayleigh_main  Rayleigh Damping Main
+!!\ingroup GFS_rayleigh
+!!\brief This is the Rayleigh friction calculation with total energy conservation.
+!! Role of Rayleigh friction, it attempts to resolve two issues:
+!! - The top lid model effects, sponge layer to suppress resolved wave reflections and extra-heating
+!! - The winter-summer zonal wind drag in the strato-mesosphere
+!!
+!!
 !! \section arg_table_rayleigh_damp_run Argument Table
 !! | local var name | longname                                             | description                                          | units      | rank | type    | kind      | intent | optional |
 !! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|---------|-----------|--------|----------|

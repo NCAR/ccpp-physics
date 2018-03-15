@@ -1,11 +1,7 @@
 !>  \file sfc_diff.f
-!!  This file contains the surface exchange coefficient calculation scheme.
-
-!> \defgroup Sfc_ex_cal Surface Exchange Coefficient Calculation
-!! @{
-!!  \brief Brief description of the scheme
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
+!!  This file contains the surface roughness length formulation based on 
+!! the surface sublayer scheme from Zeng and Dickinson (1998) 
+!! \cite zeng_and_dickinson_1998. It is the first subroutine called in surface layer loop.
 
       module surface_exchange_coefficients
       contains
@@ -16,10 +12,13 @@
       subroutine sfc_ex_coef_finalize
       end subroutine sfc_ex_coef_finalize
 
-!      subroutine sfc_diff(im,ps,u1,v1,t1,q1,z1,
-!> \brief Brief description of the subroutine
+!> \defgroup Sfc_ex_cal GFS Surface Layer 
 !!
-!! \section arg_table_sfc_ex_coef_run Arguments
+!> \defgroup GFS_diff_main GFS sfc_diff Main
+!! \ingroup Sfc_ex_cal
+!> \brief This is the first subroutine called in surface layer loop to 
+!! calculate surface roughness length.
+!! \section arg_table_sfc_ex_coef_run Argument Table
 !!| local var name | longname                                                    | description                                     | units      | rank | type    |    kind   | intent | optional |
 !!|----------------|-------------------------------------------------------------|-------------------------------------------------|------------|------|---------|-----------|--------|----------|
 !!| im             | horizontal_loop_extent                                      | horizontal loop extent                          | count      |    0 | integer |           | in     | F        |
@@ -54,8 +53,32 @@
 !!| flag_iter      | flag_for_iteration                                          | flag for iteration                              | flag       | 1    | logical |           | in     | F        |
 !!| redrag         | flag_for_reduced_drag_coefficient_over_sea                  | flag for reduced drag coefficient over sea      | flag       | 0    | logical |           | in     | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!>  \section general_diff General Algorithm
+!! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
+!!  in Zeng et al.(1998) \cite zeng_et_al_1998). 
+!! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
+!! -# Calculate the new vegetation-dependent formulation of thermal roughness length (Zheng et al. (2009)
+!! \cite zheng_et_al_2009).
+!! Zheng et al.(2009) \cite zheng_et_al_2009 proposed a new formulation on
+!! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
+!! \f[
+!!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
+!! \f]
+!! where \f$Z_{0m}^,\f$ is the effective momentum roughness length
+!! computed in the following equation for each grid, \f$Z_{0t}\f$
+!! is the roughness lenghth for heat, \f$C_{zil}\f$ is a coefficient
+!! (taken as 0.8), k is the Von Karman constant (0.4),
+!! \f$\nu=1.5\times10^{-5}m^{2}s^{-1}\f$ is the molecular viscosity,
+!! \f$u*\f$ is the friction velocity, and \f$Z_{0g}\f$ is the bare
+!! soil roughness length for momentum (taken as 0.01).
+!! \n In order to consider the convergence of \f$Z_{0m}\f$ between
+!! fully vegetated and bare soil, the effective \f$Z_{0m}^,\f$ is
+!! computed:
+!! \f[
+!!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
+!!\f]
+!! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
+!!  \section detailed_diff Detailed Algorithm
 !!  @{
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
@@ -150,12 +173,14 @@
 !
 
           if(islimsk(i) == 0) then            ! over ocean
+! - Over the ocean, calculate friction velocity in eq.(A10) in Zeng et al. (1998) \cite zeng_et_al_1998 .
             ustar(i) = sqrt(grav * z0 / charnock)
 
 !**  test xubin's new z0
 
 !           ztmax  = z0max
 
+! - Over the ocean, calculate the roughness Reynolds number:
             restar = max(ustar(i)*z0max*visi, 0.000001)
 
 !           restar = log(restar)
@@ -165,6 +190,8 @@
 !           rat    = rat    / (1. + (bb2 + cc2*restar) * restar))
 !  rat taken from zeng, zhao and dickinson 1997
 
+! - Over the ocean, calculate the roughness length of temperature
+!! (see eq.(25) and (26) in Zeng et al. (1998) \cite zeng_et_al_1998).
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax  = z0max * exp(-rat)
 
@@ -175,7 +202,7 @@
             tem1 = 1.0  - tem2
 
             if( ivegsrc == 1 ) then
-
+! - Calculate the roughness length of momentum over land and sea ice.
               if (vegtype(i) == 10) then
                 z0max = exp( tem2*log01 + tem1*log07 )
               elseif (vegtype(i) == 6) then
@@ -207,6 +234,8 @@
                 endif
 
             endif
+! - Calculate the roughness length for heat (see eq.(1) of Zheng et al. (2012)
+!! \cite zheng_et_al_2012 ) .
             z0max = max(z0max,1.0e-6)
 !
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
@@ -328,6 +357,8 @@
 !
 !  finish the exchange coefficient computation to provide fm and fh
 !
+! - Finish the exchange coefficient computation to provide cm, ch, stress as input of other 
+! \a sfc schemes.
           fm(i)     = fm(i) - pm
           fh(i)     = fh(i) - ph
           fm10(i)   = fm10(i) - pm10
@@ -364,7 +395,5 @@
 
       return
       end subroutine sfc_ex_coef_run
-!> @}
-
+!! @}
       end module surface_exchange_coefficients
-!> @}

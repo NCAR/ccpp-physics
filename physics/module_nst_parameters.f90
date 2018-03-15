@@ -1,3 +1,9 @@
+!>\file module_nst_parameters.f90
+!>\defgroup nst_parameters GFS NSST Parameter Module
+!! \ingroup GFS_NSST
+!!\brief This module includes constants and parameters used in GFS
+!! near sea surface temperature scheme.
+!! @{
 module module_nst_parameters
   use machine, only :  kind_phys &
        ,kind_rad ! for astronomy (date) calculations
@@ -23,56 +29,45 @@ module module_nst_parameters
        niter_z_w  = 5, &
        niter_sfs  = 5
   real (kind=kind_phys), parameter :: & 
-       !
-       ! general constants
         sec_in_day=86400.       &
        ,sec_in_hour=3600.       &
        ,solar_time_6am=21600.0  &
-       ,const_rot=0.000073      &          ! constant to calculate corioli force
+       ,const_rot=0.000073      &          !< constant to calculate corioli force
        ,ri_c=0.65               & 
        ,ri_g=0.25               & 
-       ,eps_z_w=0.01            &          ! criteria to finish iterations for z_w
-       ,eps_conv=0.01           &          ! criteria to finish iterations for d_conv
-       ,eps_sfs=0.01            &          ! criteria to finish iterations for d_sfs
-       ,z_w_max=30.0            &          ! max warm layer thickness
-!      ,z_w_max=100.0           &          ! max warm layer thickness
-       ,z_w_min=0.2             &          ! min warm layer thickness
-       ,z_w_ini=0.2             &          ! initial warm layer thickness in dtl_onset
-       ,z_c_max=0.01            &          ! maximum of sub-layer thickness (m)
-       ,z_c_ini=0.001           &          ! initial value of z_c
-       ,ustar_a_min=0.031       &          ! minimum of friction wind speed (m/s): 0.031 ~ 1m/s at 10 m hight
-       ,tau_min=0.005           &          ! minimum of wind stress for dtm
-       ,exp_const=9.5           &          ! coefficient in exponet profile
-       ,delz=0.1                &          ! vertical increment for integral calculation   (m)
-       ,von=0.4                 &          ! von karman's "constant"      !
-       ,t0k=273.16              &          !  celsius to kelvin
+       ,eps_z_w=0.01            &          !< criteria to finish iterations for z_w
+       ,eps_conv=0.01           &          !< criteria to finish iterations for d_conv
+       ,eps_sfs=0.01            &          !< criteria to finish iterations for d_sfs
+       ,z_w_max=30.0            &          !< max warm layer thickness
+       ,z_w_min=0.2             &          !< min warm layer thickness
+       ,z_w_ini=0.2             &          !< initial warm layer thickness in dtl_onset
+       ,z_c_max=0.01            &          !< maximum of sub-layer thickness (m)
+       ,z_c_ini=0.001           &          !< initial value of z_c
+       ,ustar_a_min=0.031       &          !< minimum of friction wind speed (m/s): 0.031 ~ 1m/s at 10 m hight
+       ,tau_min=0.005           &          !< minimum of wind stress for dtm
+       ,exp_const=9.5           &          !< coefficient in exponet profile
+       ,delz=0.1                &          !< vertical increment for integral calculation   (m)
+       ,von=0.4                 &          !< von karman's "constant"      
+       ,t0k=273.16              &          !<  celsius to kelvin
        ,gray=0.97               &
        ,sst_max=308.16          &
        ,tw_max=5.0              &
        ,wd_max=2.0              &
-       ,omg_m =1.0              &          ! trace factor to apply salinity effect
-       ,omg_rot = 1.0           &          ! trace factor to apply rotation effect
-       ,omg_sh = 1.0            &          ! trace factor to apply sensible heat due to rainfall effect
-!dbgz
-       ,visw=1.e-6 &                       !m2/s kinematic viscosity water
+       ,omg_m =1.0              &          !< trace factor to apply salinity effect
+       ,omg_rot = 1.0           &          !< trace factor to apply rotation effect
+       ,omg_sh = 1.0            &          !< trace factor to apply sensible heat due to rainfall effect
+       ,visw=1.e-6 &                       !< m2/s kinematic viscosity water
        ,novalue=0 &
-!       ,novalue=-1.0e+10 & 
        ,smallnumber=1.e-6 & 
-!      ,timestep_oc=sec_in_day/24. &          ! time step in the ocean model (1 hours)
-       ,timestep_oc=sec_in_day/8. &           ! time step in the ocean model (3 hours)
+       ,timestep_oc=sec_in_day/8. &        !< time step in the ocean model (3 hours)
        ,radian=2.*pi/180.       & 
        ,rad2deg=180./pi       & 
-       ! sea constants and coefficients
-       !
-       ,cp_w=4000.   &                     ! specific heat water (j/kg/k )
-       ,rho0_w=1022.0 &                    ! density water (kg/m3 ) (or 1024.438)
-       ,vis_w=1.e-6  &                     ! kinematic viscosity water (m2/s )
-       ,tc_w=0.6    &                      ! thermal conductivity water (w/m/k )
-       ,capa_w =3950.0 &                   ! heat capacity of sea water      !
-       !
-       ! air constants and coefficients
-       !
-       ,thref =1.0e-3      ! reference value of specific volume (m**3/kg) 
+       ,cp_w=4000.   &                     !< specific heat water (j/kg/k )
+       ,rho0_w=1022.0 &                    !< density water (kg/m3 ) (or 1024.438)
+       ,vis_w=1.e-6  &                     !< kinematic viscosity water (m2/s )
+       ,tc_w=0.6    &                      !< thermal conductivity water (w/m/k )
+       ,capa_w =3950.0 &                   !< heat capacity of sea water      !
+       ,thref =1.0e-3                      !< reference value of specific volume (m**3/kg) 
 
 !!$!============================================
 !!$
@@ -141,3 +136,4 @@ module module_nst_parameters
 !!$
 !!$
 end module module_nst_parameters
+!! @}

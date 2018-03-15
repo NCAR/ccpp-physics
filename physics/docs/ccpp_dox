@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "CCPP Physics Documentation"
-PROJECT_NUMBER         = ""
+PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Documentation"
+PROJECT_NUMBER         = "Version 1"
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -85,8 +85,8 @@ GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
-SHOW_USED_FILES        = YES
-SHOW_FILES             = YES
+SHOW_USED_FILES        = YES 
+SHOW_FILES             = YES 
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            = ccpp_dox_layout.xml
@@ -99,9 +99,20 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  txt/mainpage.txt \
+INPUT                  =  txt/mainpage_bootstrapped.txt \
+                          txt/GFS_RRTMG.txt \
+                          txt/GFS_SAMFdeep.txt \
+                          txt/GFS_SAMFshal.txt \
+                          txt/GFS_HEDMF.txt \
+                          txt/GFS_ZHAOC.txt   \
+                          txt/GFS_SFCLYR.txt  \
+                          txt/GFS_SFCSICE.txt \
+                          txt/GFS_NOAH.txt    \
+                          txt/GFS_NSST.txt    \
+                          txt/GFS_GWDPS.txt   \
+                          txt/GFS_GWDC.txt    \
+                          txt/GFS_OZPHYS.txt  \
 ### Radiation
-                        ../../GFS_layer/GFS_radiation_driver.F90 \
                         ../radiation_aerosols.f \
                         ../radiation_astronomy.f \
                         ../radiation_clouds.f \
@@ -113,6 +124,7 @@ INPUT                  =  txt/mainpage.txt \
                         ../radsw_datatb.f \
                         ../radsw_main.f \
                         ../radsw_param.f \
+                        ../GFS_radupdate.f90  \
 ### Deep Convection
                         ../mfdeepcnv.f \
 ### Shallow Convection
@@ -120,27 +132,32 @@ INPUT                  =  txt/mainpage.txt \
 ### PBL
                         ../moninedmf.f \
                         ../mfpbl.f \
+                        ../tridi.f    \
 ### Microphysics
                         ../precpd.f \
                         ../gscond.f \
-### MP_generic
-                        ../GFS_MP_generic_post.f90 \
-                        ../GFS_calpreciptype.f90   \
 ### Land Surface
                         ../sfc_drv.f \
+                        ../sflx.f    \
                         ../sfc_diff.f \
+                        ../GFS_calpreciptype.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface
                         ../sfc_nst.f \
+                        ../module_nst_model.f90 \
+                        ../module_nst_water_prop.f90 \
+                        ../module_nst_parameters.f90 \
 ### Orographic Gravity Wave
                         ../gwdps.f \
 ### Convective Gravity Wave
                         ../gwdc.f \
 ### Prognostic Ozone
-                        ../ozphys.f
+                        ../ozinterp.f90 \
+                        ../ozphys.f \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
+                         *.f90 \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =
@@ -285,7 +302,7 @@ ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 EXTERNAL_PAGES         = YES
 PERL_PATH              = /usr/bin/perl
-CLASS_DIAGRAMS         = NO
+CLASS_DIAGRAMS         = YES
 MSCGEN_PATH            =
 DIA_PATH               =
 HIDE_UNDOC_RELATIONS   = YES
@@ -296,7 +313,7 @@ DOT_FONTSIZE           = 10
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
-GROUP_GRAPHS           = YES
+GROUP_GRAPHS           = NO
 UML_LOOK               = NO
 UML_LIMIT_NUM_FIELDS   = 10
 TEMPLATE_RELATIONS     = NO

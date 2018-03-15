@@ -6,63 +6,30 @@
       module GFS_zhaocarr_gscond
       contains
 
-!> \defgroup Zhao-Carr Zhao-Carr Microphysics
-!! @{
-!! \brief The GFS scheme for large-scale condensation and precipitation
-!! , based on Zhao and Carr (1997) \cite zhao_and_carr_1997
-!! and Sundqvist et al. (1989) \cite sundqvist_et_al_1989 .
-!! \image  html  schematic_MPS.png "Figure 1: Schematic illustration of the precipitation scheme" width=10cm
-!! \details Figure 1 shows a  schematic illustration of this scheme.
-!! There are two sources of prognostic cloud condensate, convective
-!! detrainment (see convection) and grid-sale
-!! condensate. The sinks of cloud condensate are grid-scale
-!! precipitation and evaporation of the cloud condensate. Evaporation
-!! of rain in the unsaturated layers below the level of condensation
-!! is also taken into account. All precipitation that penetrates the
-!! lowest atmospheric layer is allowed to fall to the surface.
-!! Subsequent to the May 2001 implementation, excessive amounts of
-!! light precipitation were noted. This was addressed through a minor
-!! implementation in August 2001, which involved a slight modification
-!! of the autoconversion rate of ice. At the same time, an
-!! empirically-based calculation of the effective radius for ice
-!! crystals (Heymsfield and McFarquhar 1996
-!! \cite heymsfield_and_mcfarquhar_1996) was introduced.
-!> \section tune Important Tunable Parameters
-!! The parameters below, which can be set through a namelist, influence
-!! the amount of cloud condensate in the atmosphere and thus the cloud
-!! radiative properties:
-!! - PSAUTCO, PRAUTCO: Auto conversion coefficients (ice and water)
-!! - WMINCO(2): Coefficients for minimum value of cloud condensate to
-!! conversion from condensate (water and ice)  to precipitation
-!! - EVPCO: Coefficient for evaporation of precipitation
-!!
-!! \section intramps Intraphysics Communication
-!! - Routine GSCOND is called from GBPHYS after call to SHALCNV
-!! - Routine PRECPD is called from GBPHYS after call to GSCOND
 
-!> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
-!! @{
-
-!> \ingroup condense
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gscond_init  Argument Table
-!!
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gscond_init  Argument Table
+!
        subroutine gscond_init
        end subroutine gscond_init
 
+! \brief Brief description of the subroutine
+!
+! \section arg_table_gscond_finalize  Argument Table
+!
+       subroutine gscond_finalize
+       end subroutine gscond_finalize
 
-!> \ingroup condense
+
+!> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
+!! @{
+!!
+!> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
+!! @{
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
-!! There are two sources of condensation, one from large-scale
-!! processes and the other from convective processes. Both of them
-!! produce either cloud water or cloud ice, depending on the cloud
-!! substance at and above the grid point at current and previous time
-!! steps, and on the temperature. Evaporation of cloud is allowed at
-!! points where the relative humidity is lower than the critical value
-!! required for condensation.
 !! \section arg_table_gscond_run Argument Table
 !! | local var name | longname                                                   | description                                              | units   | rank |  type   |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|---------|-----------|--------|----------|
@@ -88,9 +55,13 @@
 !! | lprnt          | flag_print                                                 | flag for printing diagnostics to output                  | flag    |    0 | logical |           | in     |   F      |
 !! | ipr            | horizontal_index_of_printed_column                         | horizontal index of printed column                       | index   |    0 | integer |           | in     |   F      |
 !!
-!! \section def Definition of symbols
-!! - \f$C_{g}\f$: grid-scale condensation rate (\f$s^{-1}\f$)
-!! - \f$E_{c}\f$: evaporation rate of cloud (\f$s^{-1}\f$)
+!> \section general_gscond General Algorithm
+!! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction betwee
+!! cloud water and cloud ice (table2 of Zhao and Carr (1997) \cite zhao_and_carr_1997).
+!! -# Calculate the changes in \f$t\f$, \f$q\f$ and \f$p\f$ due to all the processes except microphysics.
+!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of Zhao and Carr (1997) \cite zhao_and_carr_1997)
+!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of Zhao and Carr (1997) \cite zhao_and_carr_1997) 
+!! -# update t,q,cwm due to cloud evaporation and condensation process
 !> \section Zhao-Carr_cond_detailed Detailed Algorithm
 !> @{
         subroutine gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1,clw2      &
@@ -352,7 +323,7 @@
 !!  E_{c}=\frac{cwm}{dt}
 !! \f]
 !!  - If cloud fraction \f$b>1.0\times10^{-3}\f$, condense water vapor
-!! in to cloud condensate (\f$C_{g}\f$).
+!! into cloud condensate (\f$C_{g}\f$).
 !!\n Using \f$q=fq_{s}\f$, \f$q_{s}=\epsilon e_{s}/p\f$, and the
 !! Clausius-Clapeyron equation \f$de_{s}/dT=\epsilon Le_{s}/RT^{2}\f$,
 !! where \f$q_{s}\f$ is the saturation specific humidity,\f$e_{s}\f$
@@ -498,7 +469,7 @@
       enddo                                    ! end of k-loop!
 !
 !*********************************************************************
-!> -# End of the condensation/evaporation loop (end of i-loop,k-loop)
+!> -# End of the condensation/evaporation loop (end of i-loop,k-loop).
 !*********************************************************************
 !
 
@@ -539,17 +510,9 @@
       return
       end subroutine gscond_run
 !> @}
-
-!> \ingroup condense
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gscond_finalize  Argument Table
-!!
-       subroutine gscond_finalize
-       end subroutine gscond_finalize
+!! @}
 
 
-!> @}
 !! @}
 
       end module  GFS_zhaocarr_gscond

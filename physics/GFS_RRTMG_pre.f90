@@ -1,12 +1,14 @@
 !> \file GFS_RRTMG_pre.f90
 !! This file contains
+
       module GFS_RRTMG_pre
 
       public GFS_RRTMG_pre_run
 
       contains
 
-!> \defgroup GFS_RRTMG_pre GFS RRTMG Scheme Pre
+!> \defgroup GFS_RRTMG_pre GFS RRTMG Pre
+!>\ingroup RRTMG
 !! @{
 !! \section arg_table_GFS_RRTMG_pre_init Argument Table
 !!

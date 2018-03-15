@@ -3,7 +3,8 @@
        module GFS_RRTMG_post
        contains
 
-!>\defgroup GFS_RRTMG_post GFS RRTMG Scheme Post
+!>\defgroup GFS_RRTMG_post GFS RRTMG  Post
+!>\ingroup RRTMG
 !! @{
 !> \section arg_table_GFS_RRTMG_post_init Argument Table
 !!
