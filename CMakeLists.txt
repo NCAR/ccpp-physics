@@ -23,7 +23,7 @@ enable_language(Fortran)
 #------------------------------------------------------------------------------
 # CMake Modules
 # Set the CMake module path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmtb-ccpp/cmake")
 
 #------------------------------------------------------------------------------
 # Find OpenMP for C/C++
