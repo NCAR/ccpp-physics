@@ -1,0 +1,369 @@
+module GFS_initialize_scm
+  use machine,                  only: kind_phys
+  use GFS_typedefs,             only: GFS_init_type,                          &
+                                      GFS_statein_type,  GFS_stateout_type,   &
+                                      GFS_sfcprop_type,  GFS_coupling_type,   &
+                                      GFS_control_type,  GFS_grid_type,       &
+                                      GFS_tbd_type,      GFS_cldprop_type,    &
+                                      GFS_radtend_type,  GFS_diag_type,       &
+                                      GFS_sfccycle_type, GFS_interstitial_type
+
+  use funcphys,                 only: gfuncphys
+
+  implicit none
+
+  private
+
+!------------------
+! Module parameters
+!------------------
+
+!----------------------------
+! Module variable definitions
+!----------------------------
+
+!----------------
+! Public entities
+!----------------
+  public  GFS_initialize_scm_init, GFS_initialize_scm_run, GFS_initialize_scm_finalize
+
+  CONTAINS
+!*******************************************************************************************
+
+!--------------
+! GFS initialze
+!--------------
+
+  subroutine GFS_initialize_scm_init()
+  end subroutine GFS_initialize_scm_init
+
+  subroutine GFS_initialize_scm_finalize()
+  end subroutine GFS_initialize_scm_finalize
+
+!> \section arg_table_GFS_initialize_scm_run Argument Table
+!! | local var name       | longname                                                    | description                                                             | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | Model                | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
+!! | Statein              | FV3-GFS_Statein_type                                        | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type              |           | inout  | F        |
+!! | Stateout             | FV3-GFS_Stateout_type                                       | Fortran DDT containing FV3-GFS prognostic state to return to dycore     | DDT           |    0 | GFS_stateout_type             |           | inout  | F        |
+!! | Sfcprop              | FV3-GFS_Sfcprop_type                                        | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
+!! | Coupling             | FV3-GFS_Coupling_type                                       | derived type GFS_coupling_type in FV3                                   | DDT           |    0 | GFS_coupling_type             |           | inout  | F        |
+!! | Grid                 | FV3-GFS_Grid_type                                           | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | inout  | F        |
+!! | Tbd                  | FV3-GFS_Tbd_type                                            | derived type GFS_tbd_type in FV3                                        | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
+!! | Cldprop              | FV3-GFS_Cldprop_type                                        | derived type GFS_cldprop_type in FV3                                    | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
+!! | Radtend              | FV3-GFS_Radtend_type                                        | derived type GFS_radtend_type in FV3                                    | DDT           |    0 | GFS_radtend_type              |           | inout  | F        |
+!! | Diag                 | FV3-GFS_Diag_type                                           | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
+!! | Sfccycle             | FV3-GFS_Sfccycle_type                                       | derived type GFS_sfccycle_type in FV3                                   | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
+!! | Interstitial         | FV3-GFS_Interstitial_type                                   | derived type GFS_interstitial_type in FV3                               | DDT           |    0 | GFS_interstitial_type         |           | inout  | F        |
+!! | Init_parm            | FV3-GFS_Init_type                                           | dervied type GFS_init_type in FV3                                       | DDT           |    0 | GFS_init_type                 |           | in     | F        |
+!! | n_ozone_layers       | vertical_dimension_of_ozone_forcing_data_from_host          | number of vertical layers in ozone forcing data coming from host        | count         |    0 | integer                       |           | in     | F        |
+!! | n_ozone_lats         | number_of_latitutde_points_in_ozone_forcing_data_from_host  | number of latitude points in ozone forcing data coming from host        | count         |    0 | integer                       |           | in     | F        |
+!! | n_ozone_times        | number_of_time_levels_in_ozone_forcing_data_from_host       | number of time levels in ozone forcing data coming from host            | count         |    0 | integer                       |           | in     | F        |
+!! | n_ozone_coefficients | number_of_coefficients_in_ozone_forcing_data_from_host      | number of coeffcients in ozone forcing data coming from host            | count         |    0 | integer                       |           | in     | F        |
+!! | ozone_lat           | latitude_of_ozone_forcing_data_from_host                    | latitude value of the ozone forcing data coming from host               | degree        |    1 | real                          | kind_phys | in     | F        |
+!! | ozone_pres           | natural_log_of_ozone_forcing_data_pressure_levels_from_host | natural logarithm of the pressure levels of the ozone forcing data      | Pa            |    1 | real                          | kind_phys | in     | F        |
+!! | ozone_time           | time_levels_in_ozone_forcing_data_from_host                 | time values of the ozone forcing data coming from host                  | day           |    1 | real                          | kind_phys | in     | F        |
+!! | ozone_forcing_in     | ozone_forcing_from_host                                     | ozone forcing data from host                                            | various       |    4 | real                          | kind_phys | in     | F        |
+!!
+  subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,     &
+                             Coupling, Grid, Tbd, Cldprop, Radtend, &
+                             Diag, Sfccycle, Interstitial, Init_parm, n_ozone_lats, &
+                             n_ozone_layers, n_ozone_times, n_ozone_coefficients, &
+                             ozone_lat, ozone_pres, ozone_time, ozone_forcing_in)
+
+    use module_microphysics, only: gsmconst
+    use cldwat2m_micro,      only: ini_micro
+    use aer_cloud,           only: aer_cloud_init
+    use module_ras,          only: ras_init
+    use ozne_def,            only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
+#ifdef OPENMP
+    use omp_lib
+#endif
+
+
+    !--- interface variables
+    type(GFS_control_type),      intent(inout) :: Model
+    type(GFS_statein_type),      intent(inout) :: Statein
+    type(GFS_stateout_type),     intent(inout) :: Stateout
+    type(GFS_sfcprop_type),      intent(inout) :: Sfcprop
+    type(GFS_coupling_type),     intent(inout) :: Coupling
+    type(GFS_grid_type),         intent(inout) :: Grid
+    type(GFS_tbd_type),          intent(inout) :: Tbd
+    type(GFS_cldprop_type),      intent(inout) :: Cldprop
+    type(GFS_radtend_type),      intent(inout) :: Radtend
+    type(GFS_diag_type),         intent(inout) :: Diag
+    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle
+    type(GFS_interstitial_type), intent(inout) :: Interstitial
+    type(GFS_init_type),         intent(in)    :: Init_parm
+
+    integer, intent(in) :: n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times
+    real(kind=kind_phys), intent(in) :: ozone_lat(:), ozone_pres(:), ozone_time(:), ozone_forcing_in(:,:,:,:)
+!
+!     !--- local variables
+     real(kind=kind_phys), allocatable :: si(:)
+     real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
+
+!     !--- set control properties (including namelist read)
+    call Model%init (Init_parm%nlunit, Init_parm%fn_nml,           &
+                     Init_parm%me, Init_parm%master,               &
+                     Init_parm%logunit, Init_parm%isc,             &
+                     Init_parm%jsc, Init_parm%nx, Init_parm%ny,    &
+                     Init_parm%levs, Init_parm%cnx, Init_parm%cny, &
+                     Init_parm%gnx, Init_parm%gny,                 &
+                     Init_parm%dt_dycore, Init_parm%dt_phys,       &
+                     Init_parm%bdat, Init_parm%cdat,               &
+                     Init_parm%tracer_names, Init_parm%blksz)
+    
+     !allocate memory for the variables stored in ozne_def and set them
+     allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
+     allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
+     latsozp = n_ozone_lats
+     levozp = n_ozone_layers
+     timeoz = n_ozone_times
+     oz_coeff = n_ozone_coefficients
+     oz_lat = ozone_lat
+     oz_pres = ozone_pres
+     oz_time = ozone_time
+     ozplin = ozone_forcing_in
+
+      call Statein%create(1, Model)
+      call Stateout%create(1, Model)
+      call Sfcprop%create(1, Model)
+      call Coupling%create(1, Model)
+      call Grid%create(1, Model)
+      call Tbd%create(1, 1, Model)
+      call Cldprop%create(1, Model)
+      call Radtend%create(1, Model)
+      !--- internal representation of diagnostics
+      call Diag%create(1, Model)
+      !--- internal representation of sfccycle
+      call Sfccycle%create(1, Model)
+!
+! #ifdef CCPP
+! #ifdef OPENMP
+!     nthreads = omp_get_max_threads()
+! #else
+!     nthreads = 1
+! #endif
+
+      call Interstitial%create(1, Model)
+
+
+! #endif
+!
+!     !--- populate the grid components
+    call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
+
+
+
+!     !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
+     call gfuncphys ()
+!
+     call gsmconst (Model%dtp, Model%me, .TRUE.)
+!
+!     !--- define sigma level for radiation initialization
+!     !--- The formula converting hybrid sigma pressure coefficients to sigma coefficients follows Eckermann (2009, MWR)
+!     !--- ps is replaced with p0. The value of p0 uses that in http://www.emc.ncep.noaa.gov/officenotes/newernotes/on461.pdf
+!     !--- ak/bk have been flipped from their original FV3 orientation and are defined sfc -> toa
+    allocate(si(Model%levr+1))
+    si = (Init_parm%ak + Init_parm%bk * p_ref - Init_parm%ak(Model%levr+1)) &
+             / (p_ref - Init_parm%ak(Model%levr+1))
+    call rad_initialize (si, Model%levr, Model%ictm, Model%isol, &
+           Model%ico2, Model%iaer, Model%ialb, Model%iems,       &
+           Model%ntcw, Model%num_p3d, Model%npdf3d, Model%ntoz,  &
+           Model%iovr_sw, Model%iovr_lw, Model%isubc_sw,         &
+           Model%isubc_lw, Model%crick_proof, Model%ccnorm,      &
+           Model%norad_precip, Model%idate,Model%iflip, Model%me)
+    deallocate (si)
+!
+!     !--- initialize Morrison-Gettleman microphysics
+    if (Model%ncld == 2) then
+      call ini_micro (Model%mg_dcs, Model%mg_qcvar, Model%mg_ts_auto_ice)
+      call aer_cloud_init ()
+    endif
+!
+!     !--- initialize ras
+     if (Model%ras) call ras_init (Model%levs, Model%me)
+!
+!     !--- initialize soil vegetation
+     call set_soilveg(Model%me, Model%isot, Model%ivegsrc, Model%nlunit)
+!
+!     !--- lsidea initialization
+    if (Model%lsidea) then
+      print *,' LSIDEA is active but needs to be reworked for FV3 - shutting down'
+      stop
+      !--- NEED TO get the logic from the old phys/gloopb.f initialization area
+    endif
+!
+!     !--- sncovr may not exist in ICs from chgres.
+!     !--- FV3GFS handles this as part of the IC ingest
+!     !--- this not is placed here to alert users to the need to study
+!     !--- the FV3GFS_io.F90 module
+
+   end subroutine GFS_initialize_scm_run
+
+   !------------------
+   ! GFS_grid_populate
+   !------------------
+   subroutine GFS_grid_populate (Grid, xlon, xlat, area)
+     use physcons,                 only: pi => con_pi
+
+     implicit none
+
+     type(GFS_grid_type)              :: Grid
+     real(kind=kind_phys), intent(in) :: xlon(:,:)
+     real(kind=kind_phys), intent(in) :: xlat(:,:)
+     real(kind=kind_phys), intent(in) :: area(:,:)
+
+     !--- local variables
+     integer :: n_columns, i
+
+     n_columns = size(Grid%xlon)
+
+     do i=1, n_columns
+       Grid%xlon = xlon(i,1)
+       Grid%xlat = xlat(i,1)
+       Grid%xlat_d(i) = xlat(i,1) * 180.0_kind_phys/pi
+       Grid%sinlat(i) = sin(Grid%xlat(i))
+       Grid%coslat(i) = sqrt(1.0_kind_phys - Grid%sinlat(i)*Grid%sinlat(i))
+       Grid%area(i)   = area(i,1)
+       Grid%dx(i)     = sqrt(area(i,1))
+     end do
+
+   end subroutine GFS_grid_populate
+
+end module GFS_initialize_scm
+!
+!
+! #ifndef CCPP
+! !-------------------------------------------------------------------------
+! ! time_vary_step
+! !-------------------------------------------------------------------------
+! !    routine called prior to radiation and physics steps to handle:
+! !      1) sets up various time/date variables
+! !      2) sets up various triggers
+! !      3) defines random seed indices for radiation (in a reproducible way)
+! !      5) interpolates coefficients for prognostic ozone calculation
+! !      6) performs surface data cycling via the GFS gcycle routine
+! !-------------------------------------------------------------------------
+!   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
+!                                  Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
+!
+!     use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
+!     use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
+!     use GFS_rad_time_vary,     only: GFS_rad_time_vary_run
+!     implicit none
+!
+!     !--- interface variables
+!     type(GFS_control_type),   intent(inout) :: Model
+!     type(GFS_statein_type),   intent(inout) :: Statein
+!     type(GFS_stateout_type),  intent(inout) :: Stateout
+!     type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
+!     type(GFS_coupling_type),  intent(inout) :: Coupling
+!     type(GFS_grid_type),      intent(inout) :: Grid
+!     type(GFS_tbd_type),       intent(inout) :: Tbd
+!     type(GFS_cldprop_type),   intent(inout) :: Cldprop
+!     type(GFS_radtend_type),   intent(inout) :: Radtend
+!     type(GFS_diag_type),      intent(inout) :: Diag
+!     type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
+!
+!     call GFS_phys_time_vary_1_run (Model, Tbd)
+!
+!     call GFS_rad_time_vary_run (Model, Statein, Tbd)
+!
+!     call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
+!
+!   end subroutine GFS_time_vary_step
+!
+!
+! !-------------------------------------------------------------------------
+! ! GFS stochastic_driver
+! !-------------------------------------------------------------------------
+! !    routine called prior to radiation and physics steps to handle:
+! !      1) sets up various time/date variables
+! !      2) sets up various triggers
+! !      3) defines random seed indices for radiation (in a reproducible way)
+! !      5) interpolates coefficients for prognostic ozone calculation
+! !      6) performs surface data cycling via the GFS gcycle routine
+! !-------------------------------------------------------------------------
+!   subroutine GFS_stochastic_driver (Model, Statein, Stateout, Sfcprop, Coupling, &
+!                                     Grid, Tbd, Cldprop, Radtend, Diag)
+!
+!     use GFS_stochastics, only: GFS_stochastics_run
+!
+!     implicit none
+!
+!     !--- interface variables
+!     type(GFS_control_type),   intent(in   ) :: Model
+!     type(GFS_statein_type),   intent(in   ) :: Statein
+!     type(GFS_stateout_type),  intent(in   ) :: Stateout
+!     type(GFS_sfcprop_type),   intent(in   ) :: Sfcprop
+!     type(GFS_coupling_type),  intent(inout) :: Coupling
+!     type(GFS_grid_type),      intent(in   ) :: Grid
+!     type(GFS_tbd_type),       intent(in   ) :: Tbd
+!     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
+!     type(GFS_radtend_type),   intent(in   ) :: Radtend
+!     type(GFS_diag_type),      intent(inout) :: Diag
+!
+!     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
+!                              Grid, Tbd, Cldprop, Radtend, Diag)
+!
+!   end subroutine GFS_stochastic_driver
+! #endif
+!
+!
+
+  ! subroutine GFS_initialize_scm_ozone_and_h20_setup(n_columns, n_levels, lats, pres, &
+  !   n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times, &
+  !   ozone_lat, ozone_pres, ozone_time, ozone_forcing_in)
+  !   use ozne_def, only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
+  !   integer, intent(in) :: n_columns, n_levels
+  !   real(kind_phys), intent(in) :: lats(:), pres(:)
+  !
+  !   integer, intent(inout) :: n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times
+  !   real(kind_phys), allocatable, intent(inout) :: ozone_lat(:), ozone_pres(:), ozone_time(:), ozone_forcing_in(:,:,:,:)
+  !
+  !   !set ozone forcing array dimensions
+  !   n_ozone_lats = n_columns
+  !   n_ozone_layers = n_levels
+  !   n_ozone_coefficients = 4
+  !   n_ozone_times = 2
+  !
+  !   !reallocate ozone forcing latitutes, pressure levels, and times using the array dimensions set here
+  !   if(allocated(ozone_lat)) then
+  !     deallocate(ozone_lat)
+  !     allocate(ozone_lat(n_ozone_lats))
+  !   endif
+  !   ozone_lat = lats
+  !
+  !   if(allocated(ozone_pres)) then
+  !     deallocate(ozone_pres)
+  !     allocate(ozone_pres(n_ozone_layers))
+  !   endif
+  !   ozone_pres = pres
+  !
+  !   if(allocated(ozone_time)) then
+  !     deallocate(ozone_time)
+  !     allocate(ozone_time(n_ozone_times+1))
+  !   endif
+  !   ozone_time = (/12.0, 13.0, 14.0/)
+  !
+  !   if(allocated(ozone_forcing_in))then
+  !     deallocate(ozone_forcing_in)
+  !     allocate(ozone_forcing_in(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
+  !   endif
+  !   ozone_forcing_in = 0.0
+  !
+  !   !allocate memory for the variables stored in ozne_def and set them
+  !   allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
+  !   allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
+  !   latsozp = n_ozone_lats
+  !   levozp = n_ozone_layers
+  !   timeoz = n_ozone_times
+  !   oz_coeff = n_ozone_coefficients
+  !   oz_lat = ozone_lat
+  !   oz_pres = ozone_pres
+  !   oz_time = ozone_time
+  !   ozplin = ozone_forcing_in
+  !
+  ! end subroutine GFS_initialize_scm_ozone_and_h20_setup

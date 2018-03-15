@@ -115,7 +115,7 @@ set(SOURCES
     ./physics/wam_f107_kp_mod.f90
     ./physics/num_parthds.F
     ./physics/gocart_tracer_config_stub.f
-    ./GFS_layer/GFS_driver_gmtb_scm.F90
+    ./GFS_layer/GFS_initialize_scm.F90
     ./physics/cldwat2m_micro.F
     ./physics/wv_saturation.F
     ./physics/aer_cloud.F
@@ -207,7 +207,7 @@ set(SOURCES
     ./physics/GFS_surface_loop_control_part0_cap.F90
     ./physics/GFS_phys_time_vary_2_cap.F90
     ./physics/GFS_phys_time_vary_1_cap.F90
-    ./physics/gwdc_pre_cap.F90
+    ./physics/dcyc2t3_cap.F90
     ./physics/GFS_surface_loop_control_part1_cap.F90
     ./physics/sfc_sice_cap.F90
     ./physics/sfc_nst_post_cap.F90
@@ -227,8 +227,9 @@ set(SOURCES
     ./physics/GFS_rad_time_vary_cap.F90
     ./physics/lsm_noah_post_cap.F90
     ./physics/sasasdeep_cap.F90
-    ./physics/dcyc2t3_cap.F90
+    ./physics/GFS_initialize_scm_cap.F90
     ./physics/GFS_DCNV_generic_pre_cap.F90
+    ./physics/gwdc_pre_cap.F90
     ./physics/sfc_diag_cap.F90
     ./physics/rayleigh_damp_cap.F90
     ./physics/GFS_radlw_post_cap.F90
