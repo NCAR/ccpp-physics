@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Documentation"
-PROJECT_NUMBER         = "Version 1"
+PROJECT_NUMBER         = "Version 0"
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -89,7 +89,7 @@ SHOW_USED_FILES        = YES
 SHOW_FILES             = YES 
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
-LAYOUT_FILE            = ccpp_dox_layout.xml
+LAYOUT_FILE            = 
 CITE_BIB_FILES         = library.bib
 QUIET                  = NO
 WARNINGS               = YES
@@ -99,7 +99,7 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  txt/mainpage_bootstrapped.txt \
+INPUT                  =  txt/mainpage.txt \
                           txt/GFS_RRTMG.txt \
                           txt/GFS_SAMFdeep.txt \
                           txt/GFS_SAMFshal.txt \
@@ -112,6 +112,8 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
                           txt/GFS_GWDPS.txt   \
                           txt/GFS_GWDC.txt    \
                           txt/GFS_OZPHYS.txt  \
+                          txt/GFS_CALPRECIPTYPE.txt   \
+                          txt/GFS_RAYLEIGH.txt    \
 ### Radiation
                         ../radiation_aerosols.f \
                         ../radiation_astronomy.f \
@@ -139,25 +141,24 @@ INPUT                  =  txt/mainpage_bootstrapped.txt \
 ### Land Surface
                         ../sfc_drv.f \
                         ../sflx.f    \
+                        ../sfcsub.f  \
                         ../sfc_diff.f \
+                        ../set_soilveg.f \
                         ../GFS_calpreciptype.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### Ocean Surface
                         ../sfc_nst.f \
-                        ../module_nst_model.f90 \
-                        ../module_nst_water_prop.f90 \
-                        ../module_nst_parameters.f90 \
 ### Orographic Gravity Wave
                         ../gwdps.f \
 ### Convective Gravity Wave
                         ../gwdc.f \
+### Rayleigh damp
+                        ../rayleigh_damp.f \
 ### Prognostic Ozone
-                        ../ozinterp.f90 \
-                        ../ozphys.f \
+                        ../ozphys.f
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
-                         *.f90 \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =
@@ -190,11 +191,11 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            =
-HTML_FOOTER            =
+HTML_HEADER            = ./bootstrapped/header.html
+HTML_FOOTER            = ./bootstrapped/footer.html
 HTML_STYLESHEET        =
-HTML_EXTRA_STYLESHEET  = ccpp_dox_extra_style.css
-HTML_EXTRA_FILES       =
+HTML_EXTRA_STYLESHEET  = ./bootstrapped/customdoxygen.css
+HTML_EXTRA_FILES       = ./bootstrapped/doxy-boot.js
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
@@ -224,7 +225,7 @@ QHG_LOCATION           =
 GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = YES
-GENERATE_TREEVIEW      = YES
+GENERATE_TREEVIEW      = NO
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
@@ -302,7 +303,7 @@ ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 EXTERNAL_PAGES         = YES
 PERL_PATH              = /usr/bin/perl
-CLASS_DIAGRAMS         = YES
+CLASS_DIAGRAMS         = NO
 MSCGEN_PATH            =
 DIA_PATH               =
 HIDE_UNDOC_RELATIONS   = YES
@@ -312,8 +313,8 @@ DOT_FONTNAME           = Helvetica
 DOT_FONTSIZE           = 10
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
-COLLABORATION_GRAPH    = YES
-GROUP_GRAPHS           = NO
+COLLABORATION_GRAPH    = NO
+GROUP_GRAPHS           = YES
 UML_LOOK               = NO
 UML_LIMIT_NUM_FIELDS   = 10
 TEMPLATE_RELATIONS     = NO

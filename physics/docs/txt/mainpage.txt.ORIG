@@ -1,0 +1,48 @@
+/**
+\mainpage 2017 GFS Operational Physics
+
+\section updates 2017 GFS Physics Upgrades
+Effective on Wednesday July 19, 2017, beginning with the 1200 UTC run, NCEP has upgraded the GFS physics as follows:
+  - Implement Near Surface Sea Temperature (NSST) to replace Real-Time Global SST (RTGSST) to provide more realistic ocean boundary conditions
+  - Changes to cumulus convection
+    - Scale-aware, aerosol-aware
+    - Rain conversion rate decreases with decreasing air temperature above freezing level
+    - Convective adjustment time in deep convection proportional to convective turn-over time with CAPE approaching zero after adjustment time
+    - Cloud base mass flux in shallow convection as a function of mean updraft velocity
+    - Convection trigger condition to suppress the unrealistic summertime spotty precipitation over high mountains
+    - Convective cloudiness enhanced by suspended cloud condensate in updraft 
+  - A 50% reduction in Rayleigh damping in the upper stratosphere above 2 hPa that improves stratospheric fields
+  - Land surface changes:
+    - IGBP 20-type 1-km land classification
+    - STASGO 19-type 1-km soil classification
+    - MODIS-based snow free albedo
+    - MODIS-based maximum snow albedo
+    - Diurnal albedo treatment
+    - Unify snow cover, albedo between radiation and land surface model
+    - Increase ground heat flux under deep snow
+  - Upgrade surface layer parameterization scheme to modify the roughness-length formulation and introduce a stability parameter constraint in the Monin-Obukhov similarity theory to prevent the land-atmosphere system from fully decoupling leading to excessive cooling of 2m temperature during sunset
+
+Changes in the land surface and stability parameter should reduce a near surface wintertime cold bias, a rapid temperature drop during sunset and reduce a blockiness apparent in some near-surface fields. Some nighttime warm biases were introduced. Changes in convection should reduce a positive bias in light amounts of precipitation and unrealistic summertime spotty precipitation over high mountains and increase skill in forecasting precipitation. NSST is expected to improve tropical forecasts and may affect mid-latitude oceanic storms. Reducing Rayleigh damping improved wind and temperature forecast in the upper stratosphere. 
+
+Details on the changes and evaluation of the changes of the entire Global Forecast System can be found at:
+\n  http://www.emc.ncep.noaa.gov/gmb/noor/GFS2017/GFS2017.htm
+
+\section schemes CCPP Physics Documentation
+Please check DTC website https://dtcenter.org/community-code/ipd-ccpp for GMTB IPD/CCPP infrastructure and governance information.
+\n The documentation found here corresponds to the state of the operational GFS physics suite as of 2017. Documentation for the operational physics suite can be access through these links:
+  - \ref RRTMG
+  - \ref SAMF
+  - \ref SAMF_shal
+  - \ref HEDMF
+  - \ref Zhao-Carr
+  - \ref Sfc_ex_cal
+  - \ref GFS_Ice
+  - \ref NOAH
+  - \ref GFS_NSST
+  - \ref GFS_ogwd
+  - \ref GFS_rayleigh
+  - \ref GFS_cgwd
+  - \ref GFS_ozn
+  - \ref CALPRECIPTYPE
+
+*/
