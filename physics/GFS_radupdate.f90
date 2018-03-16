@@ -1,6 +1,15 @@
+!>\file GFS_radupdate.f90
+!! This file calls many update subroutines to check and update radiation required but 
+!! time varying data sets and module variables.
        module GFS_radupdate
        contains
 
+!>\defgroup GFS_radupdate_run RRTMG Update
+!!\ingroup RRTMG
+!>\brief This subroutine calls many update subroutines to check and update radiation
+!! required but time varying data sets and module variables.
+!>\section gen_radupdate General Algorithm
+!> @{
        subroutine GFS_radupdate_run ( idate,jdate,deltsw,deltim,lsswr, me, &
      &       slag,sdec,cdec,solcon, ictmflg, isolar)
 
@@ -170,5 +179,6 @@
 !...................................
       end subroutine GFS_radupdate_run
 !-----------------------------------
+!> @}
 
       end module GFS_radupdate

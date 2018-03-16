@@ -1,15 +1,24 @@
-!> \file GFS_calpreciptype.F90
-!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype)
-!! and its post. It is adopted from post but was made into a column to used by GFS model.
+!> \file GFS_calpreciptype.f90
+!! This file contains the subroutine that calculates dominant precipitation type (calpreciptype),
+!! which provides precipitation forcing for LSM.
 
+!>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
+!!\brief This scheme contains the subroutine that calculates dominant
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM
+!!
+!!\section intraphysics Intraphysics Communication
+!
       module GFS_calpreciptype
       contains
-
-!> \section arg_table_GFS_calpreciptype_init Argument Table
-!!
+! \section arg_table_GFS_calpreciptype_init Argument Table
+!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
 
+!>\defgroup gfs_calpreciptype GFS calpreciptype Main
+!!\ingroup CALPRECIPTYPE 
+!!\brief This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
 !> \section arg_table_GFS_calpreciptype_run Argument Table
 !! | local_name     | standard_name                                                          | long_name                                                  | units   | rank |  type     |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -43,6 +52,8 @@
 !! | errmsg         | error_message                                                          | error message for error handling in CCPP                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                             | error flag for error handling in CCPP                      | flag    |    0 | integer   |           | out    | F        |
 !!
+!! \section detailed_calpreciptype Detailed Algorithm
+!! @{
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                                 &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1,    &
@@ -306,10 +317,6 @@
         tprcp(:) = max(0.0, prec(:))  ! clu: rain -> tprcp
 
       else
-        domr  = 0.
-        domzr = 0.
-        domip = 0.
-        doms  = 0.
         do i = 1, im
           tprcp(i)  = max(0.0,prec(i))      ! clu: rain -> tprcp
           srflag(i) = 0.                    ! clu: default srflag as 'rain' (i.e. 0)
@@ -321,6 +328,7 @@
 
       return
       end subroutine GFS_calpreciptype_run
+!! @}
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -1526,8 +1534,8 @@
       return
       end subroutine calwxt_dominant
 
-!> \section arg_table_GFS_calpreciptype_finalize Argument table
-!!
+! \section arg_table_GFS_calpreciptype_finalize Argument table
+!
       subroutine GFS_calpreciptype_finalize
       end subroutine GFS_calpreciptype_finalize
 

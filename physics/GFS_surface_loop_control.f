@@ -122,7 +122,6 @@
 !> \defgroup GFS_surface_loop_control GFS_surface_loop_control scheme
 !! @{
 !!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
 !!  \section intraphysics Intraphysics Communication
 
       module GFS_surface_loop_control_part2

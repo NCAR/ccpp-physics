@@ -76,8 +76,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_astronomy module_radiation_astronomy
-!! @{
+!! \defgroup module_radiation_astronomy RRTMG Astronomy Module
 !> This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !! \version NCEP-Radiation_astronomy v5.2  Jan 2013
@@ -108,28 +107,28 @@
 !     real (kind=kind_phys), parameter :: pid12  = con_pi/f12  ! angle per hour
       real (kind=kind_phys), parameter :: pid12  = (2.0*asin(1.0))/f12
 
-!> \name Module variable (to be set in module_radiation_astronomy::sol_init):
+! \name Module variable (to be set in module_radiation_astronomy::sol_init):
       real (kind=kind_phys), public    :: solc0 = con_solr
       integer   :: isolflg = 10
       character(26) :: solar_fname = ' '
 
-!> \name Module variables (to be set in module_radiation_astronomy::sol_update)
+! \name Module variables (to be set in module_radiation_astronomy::sol_update)
 
-!> equation of time
+! equation of time
       real (kind=kind_phys) :: sollag=0.0
-!> sine of the solar declination angle
+! sine of the solar declination angle
       real (kind=kind_phys) :: sindec=0.0
-!> cosine of the solar declination angle
+! cosine of the solar declination angle
       real (kind=kind_phys) :: cosdec=0.0
-!> solar angle increment per interation of cosz calc
+! solar angle increment per interation of cosz calc
       real (kind=kind_phys) :: anginc=0.0
-!> saved monthly solar constants (isolflg=4 only)
+! saved monthly solar constants (isolflg=4 only)
       real (kind=kind_phys) :: smon_sav(12)
       data smon_sav(1:12) / 12*con_solr /
 
-!> saved year  of data used
+! saved year  of data used
       integer               :: iyr_sav =0
-!> total number of zenith angle iterations
+! total number of zenith angle iterations
       integer               :: nstp    =6
 
       public  sol_init, sol_update, coszmn
@@ -1008,4 +1007,3 @@
 !...........................................!
       end module module_radiation_astronomy !
 !===========================================!
-!> @}

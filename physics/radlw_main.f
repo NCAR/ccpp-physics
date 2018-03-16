@@ -2,6 +2,8 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
+!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
+!
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
@@ -235,9 +237,9 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!> \defgroup rrtmg_lw rrtmg_lw
+!> \defgroup module_radlw_main GFS RADLW Main
 !! \ingroup RRTMG
-!! This module includes NCEP's modifications of the rrtmg-lw radiation
+!! This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
 !! The RRTM-LW package includes three files:
@@ -249,14 +251,8 @@
 !!  - module_radlw_cldprlw: cloud property coefficients
 !!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
 !! - radlw_main.f, which contains:
-!!  - rrtmg_lw, which is the main LW radiation transfer
-!!    program and contains two externally callable subroutines:
-!!   - lwrad(): the main LW radiation routine
-!!   - rlwinit(): the initialization routine
-!!
-!! All the LW radiation subprograms become contained subprograms in
-!! module 'rrtmg_lw' and many of them are not directly
-!! accessable from places outside the module.
+!!  - lwrad_run(): the main LW radiation routine
+!!  - rlwinit(): the initialization routine
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -273,7 +269,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module rrtmg_lw                    !
 !........................................!
@@ -1291,6 +1286,7 @@
 
 
 
+!>\ingroup module_radlw_main
 !> This subroutine performs calculations necessary for the initialization
 !! of the longwave model.  lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
@@ -6699,4 +6695,3 @@
       end module rrtmg_lw                !
 !========================================!
 
-!! @}

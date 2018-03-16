@@ -33,6 +33,7 @@
 !     declare variables.
 
       integer,intent(in)   :: im, ix, levs
+      integer              :: i,k
       real(kind=kind_phys),dimension(ix,levs), intent(in)  ::  cwm 
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::  clw1
 
