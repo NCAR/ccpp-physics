@@ -164,7 +164,16 @@ module GFS_initialize_scm
 !     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
 
+    !--- read in and initialize ozone and water
+    if (Model%ntoz > 0) then
+      call setindxoz (Init_parm%blksz, Grid%xlat_d, Grid%jindx1_o3, &
+                        Grid%jindx2_o3, Grid%ddy_o3)
+    endif
 
+    if (Model%h2o_phys) then
+      call setindxh2o (Init_parm%blksz, Grid%xlat_d, Grid%jindx1_h, &
+                         Grid%jindx2_h, Grid%ddy_h)
+    endif
 
 !     !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
      call gfuncphys ()
