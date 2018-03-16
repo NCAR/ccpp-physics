@@ -263,7 +263,7 @@ else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
   message ("This program has only been compiled with gfortran and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
-endif
+endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
 
 #apply general fortran tags to all fortran source files
 if(${CMAKE_VERSION} LESS 3.3)
