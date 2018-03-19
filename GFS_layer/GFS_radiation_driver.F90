@@ -648,8 +648,8 @@
 !-----------------------------------
 !> @}
 
-! Block commented out for CCXX
-#ifndef CCXX
+! Block commented out for CCPP
+#ifndef CCPP
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
 !! the time advancement loop but outside of the horizontal grid loop.
@@ -1208,6 +1208,10 @@
       real(kind = kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP, NBDLW, NF_AELW) :: faerlw
       type (cmpfsw_type),    dimension(size(Grid%xlon,1)) :: scmpsw
 
+      ! CCPP error handling variables (not used)
+      character(len=512) :: errmsg
+      integer            :: errflg
+
 ! CCPP: L1211-1577
       call GFS_rrtmg_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input
           Tbd, Cldprop, Radtend,                                       &  
@@ -1221,20 +1225,20 @@
           clouds(:,:,1), clouds(:,:,2), clouds(:,:,3),                 &
           clouds(:,:,4), clouds(:,:,5), clouds(:,:,6),                 &
           clouds(:,:,7), clouds(:,:,8), clouds(:,:,9),                 &
-          cldsa, mtopa, mbota )
+          cldsa, mtopa, mbota, errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 ! CCPP: L1582-1596
       call rrtmg_sw_pre_run (Model, Grid, Sfcprop, Radtend, im,        &
           nday, idxday, tsfg, tsfa, sfcalb(:,1), sfcalb(:,2),          &
-          sfcalb(:,3), sfcalb(:,4) )
+          sfcalb(:,3), sfcalb(:,4), errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 ! CCPP: L1598-1618
       call rrtmg_sw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! input
@@ -1251,24 +1255,26 @@
           cld_lwp=clouds(:,:,2), cld_ref_liq=clouds(:,:,3),            & ! optional input
           cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
           cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
-          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9))
+          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          errmsg=errmsg, errflg=errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 !CCPP: L1620-1686
       call rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling,    &
           LTP, nday, lm, kd, htswc, htsw0,                             &
-          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw)  
+          sfcalb(:,1), sfcalb(:,2), sfcalb(:,3), sfcalb(:,4), scmpsw,  &
+          errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
 !CCPP: L1689-1698
       call rrtmg_lw_pre_run (Model, Grid, Sfcprop, Radtend,            &
-          im, tsfg, tsfa)
+          im, tsfg, tsfa, errmsg, errflg)
 
 !CCPP: L1703-1714
       call rrtmg_lw_run (plyr, plvl, tlyr, tlvl, qlyr, olyr,           & ! input
@@ -1283,20 +1289,21 @@
           cld_lwp=clouds(:,:,2), cld_ref_liq=clouds(:,:,3),            & ! optional input
           cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
           cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
-          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9))
+          cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          errmsg=errmsg, errflg=errflg)
 
 !CCPP: L1718-1747
       call rrtmg_lw_post_run (Model, Grid, Radtend, Coupling,          &
-          LTP, lm, kd, tsfa, htlwc, htlw0)
+          LTP, lm, kd, tsfa, htlwc, htlw0, errmsg, errflg)
 
 !CCPP: L1757-1841
       call GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein,    &
           Coupling, scmpsw, im, lm, LTP, kt, kb, kd, raddt, aerodp,    &
-          cldsa, mtopa, mbota, clouds(:,:,1))
+          cldsa, mtopa, mbota, clouds(:,:,1), errmsg, errflg)
 
       ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-      !                          Grid, Tbd, Cldprop, Radtend, Diag)
+      !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
       ! *DH
       end subroutine GFS_radiation_driver
 #endif

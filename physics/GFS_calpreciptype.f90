@@ -11,41 +11,44 @@
       end subroutine GFS_calpreciptype_init
 
 !> \section arg_table_GFS_calpreciptype_run Argument Table
-!! | local var name | longname                                                               | description                                                | units   | rank |  type   |   kind    | intent | optional |
-!! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|---------|-----------|--------|----------|
-!! |    kdt         | index_of_time_step                                                     | current time step index                                    | index   | 0    | integer |           | in     |  F       |
-!! |    nrcm        | array_dimension_of_random_number                                       | second dimension of random number array                    | count   | 0    | integer |           | in     |  F       |
-!! |    im          | horizontal_loop_extent                                                 | horizontal loop extent                                     | count   | 0    | integer |           | in     |  F       |
-!! |    ix          | horizontal_dimension                                                   | horizontal dimension                                       | count   | 0    | integer |           | in     |  F       |
-!! |    lm          | vertical_dimension                                                     | vertical layer dimension                                   | count   | 0    | integer |           | in     |  F       |
-!! |    lp1         | vertical_interface_dimension                                           | vertical interface dimension                               | count   | 0    | integer |           | in     |  F       |
-!! |    randomno    | random_number_array                                                    | random number array                                        | none    | 2    | real    | kind_phys | in     |  F       |
-!! |    cal_pre     | flag_for_precipitation_type_algorithm                                  | flag controls precip type algorithm                        | flag    | 0    | logical |           | in     |  F       |
-!! |    gt0         | air_temperature_updated_by_physics                                     | layer mean air temperature                                 | K       | 2    | real    | kind_phys | in     |  F       |
-!! |    gq0         | water_vapor_specific_humidity_updated_by_physics                       | water vapor specific humidity                              | kg kg-1 | 2    | real    | kind_phys | in     |  F       |
-!! |    prsl        | air_pressure                                                           | layer mean pressure                                        | Pa      | 2    | real    | kind_phys | in     |  F       |
-!! |    prsi        | air_pressure_at_interface                                              | pressure at layer interface                                | Pa      | 2    | real    | kind_phys | in     |  F       |
-!! |    rainc       | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep  | convective rainfall amount on dynamics timestep            | m       | 1    | real    | kind_phys | in     |  F       |
-!! |    frain       | dynamics_to_physics_timestep_ratio                                     | dtf/dtp, dynamics to physics timestep ratio                | none    | 0    | real    | kind_phys | in     |  F       |
-!! |    rain1       | lwe_thickness_of_stratiform_precipitation_amount                       | stratiform rainfall amount on physics timestep             | m       | 1    | real    | kind_phys | in     |  F       |
-!! |    phii        | geopotential_at_interface                                              | geopotential at model layer interfaces                     | m2 s-2  | 2    | real    | kind_phys | in     |  F       |
-!! |    n3dfercld   | array_dimension_of_microphysics                                        | number of 3D arrays needed for microphysics                | count   | 0    | integer |           | in     |  F       |
-!! |    tskin       | surface_skin_temperature                                               | surface skin temperature                                   | K       | 1    | real    | kind_phys | in     |  F       |
-!! |    sr          | ratio_of_snowfall_to_rainfall                                          | ratio of snowfall to rainfall                              | frac    | 1    | real    | kind_phys | in     |  F       |
-!! |    phy_f3d     | air_temperature_at_previous_time_step                                  | air temperature at previous time step                      | K       | 2    | real    | kind_phys | in     |  F       |
-!! |    prec        | lwe_thickness_of_precipitation_amount_on_dynamics_timestep             | total rainfall amount on dynamics timestep                 | m       | 1    | real    | kind_phys | out    |  F       |
-!! |    domr        | dominant_rain_type                                                     | dominant rain type                                         | none    | 1    | real    | kind_phys | out    |  F       |
-!! |    domzr       | dominant_freezing_rain_type                                            | dominant freezing rain type                                | none    | 1    | real    | kind_phys | out    |  F       |
-!! |    domip       | dominant_sleet_type                                                    | dominant sleet type                                        | none    | 1    | real    | kind_phys | out    |  F       |
-!! |    doms        | dominant_snow_type                                                     | dominant snow type                                         | none    | 1    | real    | kind_phys | out    |  F       |
-!! |    srflag      | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                     | flag    | 1    | real    | kind_phys | out    |  F       |
-!! |    tprcp       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m       | 1    | real    | kind_phys | out    |  F       |
+!! | local_name     | standard_name                                                          | long_name                                                  | units   | rank |  type     |   kind    | intent | optional |
+!! |----------------|------------------------------------------------------------------------|------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | kdt            | index_of_time_step                                                     | current time step index                                    | index   |    0 | integer   |           | in     | F        |
+!! | nrcm           | array_dimension_of_random_number                                       | second dimension of random number array                    | count   |    0 | integer   |           | in     | F        |
+!! | im             | horizontal_loop_extent                                                 | horizontal loop extent                                     | count   |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                                   | horizontal dimension                                       | count   |    0 | integer   |           | in     | F        |
+!! | lm             | vertical_dimension                                                     | vertical layer dimension                                   | count   |    0 | integer   |           | in     | F        |
+!! | lp1            | vertical_interface_dimension                                           | vertical interface dimension                               | count   |    0 | integer   |           | in     | F        |
+!! | randomno       | random_number_array                                                    | random number array                                        | none    |    2 | real      | kind_phys | in     | F        |
+!! | cal_pre        | flag_for_precipitation_type_algorithm                                  | flag controls precip type algorithm                        | flag    |    0 | logical   |           | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                                     | layer mean air temperature                                 | K       |    2 | real      | kind_phys | in     | F        |
+!! | gq0            | water_vapor_specific_humidity_updated_by_physics                       | water vapor specific humidity                              | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                                           | layer mean pressure                                        | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | prsi           | air_pressure_at_interface                                              | pressure at layer interface                                | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | rainc          | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep  | convective rainfall amount on dynamics timestep            | m       |    1 | real      | kind_phys | in     | F        |
+!! | frain          | dynamics_to_physics_timestep_ratio                                     | dtf/dtp, dynamics to physics timestep ratio                | none    |    0 | real      | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_stratiform_precipitation_amount                       | stratiform rainfall amount on physics timestep             | m       |    1 | real      | kind_phys | in     | F        |
+!! | phii           | geopotential_at_interface                                              | geopotential at model layer interfaces                     | m2 s-2  |    2 | real      | kind_phys | in     | F        |
+!! | n3dfercld      | array_dimension_of_microphysics                                        | number of 3D arrays needed for microphysics                | count   |    0 | integer   |           | in     | F        |
+!! | tskin          | surface_skin_temperature                                               | surface skin temperature                                   | K       |    1 | real      | kind_phys | in     | F        |
+!! | sr             | ratio_of_snowfall_to_rainfall                                          | ratio of snowfall to rainfall                              | frac    |    1 | real      | kind_phys | in     | F        |
+!! | phy_f3d        | air_temperature_at_previous_time_step                                  | air temperature at previous time step                      | K       |    2 | real      | kind_phys | in     | F        |
+!! | prec           | lwe_thickness_of_precipitation_amount_on_dynamics_timestep             | total rainfall amount on dynamics timestep                 | m       |    1 | real      | kind_phys | out    | F        |
+!! | domr           | dominant_rain_type                                                     | dominant rain type                                         | none    |    1 | real      | kind_phys | out    | F        |
+!! | domzr          | dominant_freezing_rain_type                                            | dominant freezing rain type                                | none    |    1 | real      | kind_phys | out    | F        |
+!! | domip          | dominant_sleet_type                                                    | dominant sleet type                                        | none    |    1 | real      | kind_phys | out    | F        |
+!! | doms           | dominant_snow_type                                                     | dominant snow type                                         | none    |    1 | real      | kind_phys | out    | F        |
+!! | srflag         | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                     | flag    |    1 | real      | kind_phys | out    | F        |
+!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | error_message                                                          | error message for error handling in CCPP                   | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                             | error flag for error handling in CCPP                      | flag    |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                                 &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1,    &
                                phii,n3dfercld,tskin,sr,phy_f3d,         & !input
-                               prec, domr,domzr,domip,doms,srflag,tprcp)  !output
+                               prec,domr,domzr,domip,doms,srflag,tprcp, & !output
+                               errmsg,errflg)
 
 !$$$  subprogram documentation block
 !                .      .    .
@@ -68,27 +71,34 @@
 !
 !     declare variables.
 !
-      integer,intent(in) :: kdt,nrcm,im,ix,lm,lp1,n3dfercld
-      logical            :: cal_pre
+      integer,                               intent(in)  :: kdt,nrcm,im,ix,lm,lp1,n3dfercld
+      logical,                               intent(in)  :: cal_pre
       real(kind=kind_phys),                  intent(in)  :: randomno(ix,nrcm)
-      real(kind=kind_phys),dimension(im),    intent(in)  :: sr,tskin, &
-                                                     rainc,rain1
+      real(kind=kind_phys),dimension(im),    intent(in)  :: sr,tskin,rainc,rain1
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl,phy_f3d
       real(kind=kind_phys),dimension(ix,lp1),intent(in)  :: prsi,phii
       real(kind=kind_phys),dimension(im),    intent(out) :: domr,domzr,domip,doms
-      real(kind=kind_phys),dimension(im),    intent(out) :: srflag,tprcp, prec
+      real(kind=kind_phys),dimension(im),    intent(out) :: srflag,tprcp,prec
+      character(len=*),                      intent(out) :: errmsg
+      integer,                               intent(out) :: errflg
+
+      ! Local variables
       real(kind=kind_phys),dimension(im)                 :: t850
       real(kind=kind_phys), parameter :: p850    = 85000.0
 
       integer,             dimension(nalg) :: sleet,rain,freezr,snow
       real(kind=kind_phys),dimension(lm)   :: t,q,pmid,f_rimef
       real(kind=kind_phys),dimension(lp1)  :: pint,zint
-      real(kind=kind_phys), allocatable    :: twet(:),rh(:),td(:)
-!
+      real(kind=kind_phys),allocatable     :: twet(:),rh(:),td(:)
+
       integer i,iwx,isno,iip,izr,irain,k,k1
       real(kind=kind_phys) es,qc,pv,tdpd,pr,tr,pk,tlcl,thelcl,qwet,frain,  &
                            time_vert,time_ncep,time_ramer,time_bourg,time_revised,&
                            time_dominant,btim,timef,ranl(2)
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
 !
 !     computes wet bulb here since two algorithms use it
@@ -296,6 +306,10 @@
         tprcp(:) = max(0.0, prec(:))  ! clu: rain -> tprcp
 
       else
+        domr  = 0.
+        domzr = 0.
+        domip = 0.
+        doms  = 0.
         do i = 1, im
           tprcp(i)  = max(0.0,prec(i))      ! clu: rain -> tprcp
           srflag(i) = 0.                    ! clu: default srflag as 'rain' (i.e. 0)

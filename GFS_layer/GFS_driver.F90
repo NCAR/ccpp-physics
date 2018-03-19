@@ -172,14 +172,22 @@ module GFS_driver
     enddo
 
 #ifdef CCPP
+
 #ifdef OPENMP
     nthreads = omp_get_max_threads()
 #else
     nthreads = 1
 #endif
+
+! Initialize the Interstitial data type in parallel so that
+! each thread creates (touches) its Interstitial(nt) first
+!$OMP parallel do default (shared) &
+!$OMP            schedule (static,1) &
+!$OMP            private  (nt)
     do nt=1,nthreads
       call Interstitial (nt)%create (blkszmax, Model)
     enddo
+!$OMP end parallel do
 #endif
 
     !--- populate the grid components
@@ -277,11 +285,15 @@ module GFS_driver
     type(GFS_radtend_type),   intent(inout) :: Radtend(:)
     type(GFS_diag_type),      intent(inout) :: Diag(:)
 
-    call GFS_phys_time_vary_1_run (Model)
+    ! CCPP error handling variables (not used)
+    character(len=512) :: errmsg
+    integer            :: errflg
 
-    call GFS_rad_time_vary_run (Model, Statein, Tbd)
+    call GFS_phys_time_vary_1_run (Model, errmsg, errflg)
 
-    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag)
+    call GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
+
+    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
   end subroutine GFS_time_vary_step
 
@@ -315,9 +327,13 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
     type(GFS_radtend_type),   intent(in   ) :: Radtend
     type(GFS_diag_type),      intent(inout) :: Diag
-        
+
+    ! CCPP error handling variables (not used)
+    character(len=512) :: errmsg
+    integer            :: errflg
+
     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-                             Grid, Tbd, Cldprop, Radtend, Diag)
+                             Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
 
   end subroutine GFS_stochastic_driver
 #endif
