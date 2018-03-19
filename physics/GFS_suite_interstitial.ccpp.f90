@@ -404,7 +404,7 @@
 
       ktop(:)  = 1
       kbot(:)  = Model%levs
-      ! DH* initialization of rhc missing! or change intent to inout?
+      rhc(:,:) = 0.0
 
       if (Model%ntcw > 0) then
         do k=1,Model%levs

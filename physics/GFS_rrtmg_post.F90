@@ -53,6 +53,7 @@
 
       implicit none
 
+      ! Interface variables
       type(GFS_control_type),              intent(in)    :: Model
       type(GFS_grid_type),                 intent(in)    :: Grid
       type(GFS_statein_type),              intent(in)    :: Statein
@@ -61,15 +62,20 @@
       type(GFS_diag_type),                 intent(inout) :: Diag
       type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(in) :: scmpsw
 
+      integer,              intent(in) :: im, lm, ltp, kt, kb, kd
+      real(kind=kind_phys), intent(in) :: raddt
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),          intent(in) :: aerodp
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),              intent(in) :: cldsa
+      integer,              dimension(size(Grid%xlon,1),3),              intent(in) :: mbota, mtopa
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds1
+
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      integer :: i, j, im, lm, k, k1, itop, ibtc, kd, kt, kb, ltp
-      real(kind=kind_phys) :: tem0d, raddt 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5)       :: cldsa
-      integer, dimension(size(Grid%xlon,1),3) :: mbota, mtopa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: clouds1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
+      ! Local variables
+      integer :: i, j, k, k1, itop, ibtc
+      real(kind=kind_phys) :: tem0d
 
       ! Initialize CCPP error handling variables
       errmsg = ''
