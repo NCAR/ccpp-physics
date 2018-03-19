@@ -709,7 +709,8 @@
 !
       return
       end subroutine zhaocarr_precpd_run
-!> @}
+!! @}
+!! @}
 
 !! \brief Brief description of the subroutine
 !!
@@ -718,6 +719,5 @@
       subroutine zhaocarr_precpd_finalize
       end subroutine zhaocarr_precpd_finalize
 
-!> @}
 
       end module zhaocarr_precpd

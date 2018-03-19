@@ -23,7 +23,7 @@
  are described in Han et al. (2017) \cite han_et_al_2017 .
 
 \section intr_shal 2. Intraphysics Communication
-\ref arg_table_sasasshal_run
+\ref arg_table_sasas_shal_run
 
 \section gen_shal 3. General Algorithm
 \ref general_mfshal

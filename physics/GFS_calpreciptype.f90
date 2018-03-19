@@ -11,10 +11,16 @@
 !
       module GFS_calpreciptype
       contains
-! \section arg_table_GFS_calpreciptype_init Argument Table
-!
+!! \section arg_table_GFS_calpreciptype_init Argument Table
+!!
       subroutine GFS_calpreciptype_init
       end subroutine GFS_calpreciptype_init
+
+!! \section arg_table_GFS_calpreciptype_finalize Argument table
+!!
+      subroutine GFS_calpreciptype_finalize
+      end subroutine GFS_calpreciptype_finalize
+
 
 !>\defgroup gfs_calpreciptype GFS calpreciptype Main
 !!\ingroup CALPRECIPTYPE 
@@ -52,8 +58,6 @@
 !! | errmsg         | error_message                                                          | error message for error handling in CCPP                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                             | error flag for error handling in CCPP                      | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section detailed_calpreciptype Detailed Algorithm
-!! @{
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno,  &
                                cal_pre,                                 &
                                gt0,gq0,prsl,prsi, rainc,frain,rain1,    &
@@ -328,7 +332,6 @@
 
       return
       end subroutine GFS_calpreciptype_run
-!! @}
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !
@@ -1534,9 +1537,5 @@
       return
       end subroutine calwxt_dominant
 
-! \section arg_table_GFS_calpreciptype_finalize Argument table
-!
-      subroutine GFS_calpreciptype_finalize
-      end subroutine GFS_calpreciptype_finalize
 
       end module GFS_calpreciptype

@@ -101,12 +101,12 @@
  value is used in the upper atmosphere.
 
 \section  intraphysics_rrtmg 2. Intraphysics Communication
- + For RRTMG-Longwave radiation parameterization: \ref arg_table_lwrad_run
- + For RRTMG-Shortwave radiation parameterization: \ref arg_table_swrad_run 
+ + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)
+ + For RRTMG-Shortwave radiation parameterization (\ref arg_table_rrtmg_sw_run) 
 
 \section  gen_al_rrtmg 3. General Algorithm
- + For RRTMG-Longwave radiation parameterization: \ref gen_lwrad
- + For RRTMG-Shortwave radiation parameterization: \ref gen_swrad
+ + For RRTMG-Longwave radiation parameterization (\ref gen_lwrad)
+ + For RRTMG-Shortwave radiation parameterization (\ref gen_swrad)
 
 
 */

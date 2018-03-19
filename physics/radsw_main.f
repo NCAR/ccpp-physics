@@ -260,6 +260,118 @@
 !!!!!  ==============================================================  !!!!!
 
 
+!========================================!
+      module rrtmg_sw                    !
+!........................................!
+!
+      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
+     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
+     &                             iswmode, kind_phys
+      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
+     &                             con_amw, con_amo3
+
+      use module_radsw_parameters
+      use mersenne_twister, only : random_setseed, random_number,       &
+     &                             random_stat
+      use module_radsw_ref, only : preflog, tref
+      use module_radsw_sflux
+!
+      implicit none
+!
+      private
+!
+!  ---  version tag and last revision date
+      character(40), parameter ::                                       &
+     &   VTAGSW='NCEP SW v5.1  Nov 2012 -RRTMG-SW v3.8   '
+!    &   VTAGSW='NCEP SW v5.0  Aug 2012 -RRTMG-SW v3.8   '
+!    &   VTAGSW='RRTMG-SW v3.8   Nov 2009'
+!    &   VTAGSW='RRTMG-SW v3.7   Nov 2009'
+!    &   VTAGSW='RRTMG-SW v3.61  Oct 2008'
+!    &   VTAGSW='RRTMG-SW v3.5   Oct 2008'
+!    &   VTAGSW='RRTM-SW 112v2.3 Apr 2007'
+!    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
+!    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
+
+! \name constant values
+
+      real (kind=kind_phys), parameter :: eps     = 1.0e-6
+      real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
+! pade approx constant
+      real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
+      real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
+      real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
+      real (kind=kind_phys), parameter :: flimit  = 1.0e-20
+! internal solar constant
+      real (kind=kind_phys), parameter :: s0      = 1368.22
+
+      real (kind=kind_phys), parameter :: f_zero  = 0.0
+      real (kind=kind_phys), parameter :: f_one   = 1.0
+
+! \name atomic weights for conversion from mass to volume mixing ratios
+      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
+      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
+
+! \name band indices
+      integer, dimension(nblow:nbhgh) :: nspa, nspb
+! band index for sfc flux
+      integer, dimension(nblow:nbhgh) :: idxsfc
+! band index for cld prop
+      integer, dimension(nblow:nbhgh) :: idxebc
+
+      data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
+      data nspb(:) /  1, 5, 1, 1, 1, 5, 1, 0, 1, 0, 0, 1, 5, 1 /
+
+!     data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1 /  ! band index for sfc flux
+      data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1 /  ! band index for sfc flux
+      data idxebc(:) / 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 5 /  ! band index for cld prop
+
+!  ---  band wavenumber intervals
+!     real (kind=kind_phys), dimension(nblow:nbhgh):: wavenum1,wavenum2
+!     data wavenum1(:)  /                                               &
+!    &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
+!    &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
+!     data wavenum2(:)  /                                               &
+!              3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
+!    &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /
+!     real (kind=kind_phys), dimension(nblow:nbhgh) :: delwave
+!     data delwave(:)   /                                               &
+!    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
+!    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
+
+! uv-b band index
+      integer, parameter :: nuvb = 27
+
+!\name logical flags for optional output fields
+      logical :: lhswb  = .false.
+      logical :: lhsw0  = .false.
+      logical :: lflxprf= .false.
+      logical :: lfdncmp= .false.
+
+
+! those data will be set up only once by "rswinit"
+      real (kind=kind_phys) :: exp_tbl(0:NTBMX)
+
+
+! the factor for heating rates (in k/day, or k/sec set by subroutine
+!!  'rswinit')
+      real (kind=kind_phys) :: heatfac
+
+
+! initial permutation seed used for sub-column cloud scheme
+      integer, parameter :: ipsdsw0 = 1
+
+!  ---  public accessable subprograms
+
+      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
+
+
+! =================
+      contains
+! =================
+
+      subroutine rrtmg_sw_init ()
+      end subroutine rrtmg_sw_init
+
 !> \ingroup RRTMG
 !! \defgroup module_radsw_main GFS RADSW Main
 !! This module includes NCEP's modifications of the RRTMG-SW radiation
@@ -381,10 +493,7 @@
 !!  - mersenne_twister: program of random number generators using the
 !!    Mersenne-Twister algorithm
 !! - radsw_main.f, which contains:
-!!  - rrtmg_sw: the main SW radiation computation programming
-!!    source codes, which contains two externally callable subroutines:
-!!   - rrtmg_sw_run(): the main radiation routine
-!!   - rswinit(): the initialization routine
+!!  - rrtmg_sw: the main SW radiation computation source codes
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
@@ -401,119 +510,6 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
-!========================================!
-      module rrtmg_sw                    !
-!........................................!
-!
-      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
-     &                             iswmode, kind_phys
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
-
-      use module_radsw_parameters
-      use mersenne_twister, only : random_setseed, random_number,       &
-     &                             random_stat
-      use module_radsw_ref, only : preflog, tref
-      use module_radsw_sflux
-!
-      implicit none
-!
-      private
-!
-!  ---  version tag and last revision date
-      character(40), parameter ::                                       &
-     &   VTAGSW='NCEP SW v5.1  Nov 2012 -RRTMG-SW v3.8   '
-!    &   VTAGSW='NCEP SW v5.0  Aug 2012 -RRTMG-SW v3.8   '
-!    &   VTAGSW='RRTMG-SW v3.8   Nov 2009'
-!    &   VTAGSW='RRTMG-SW v3.7   Nov 2009'
-!    &   VTAGSW='RRTMG-SW v3.61  Oct 2008'
-!    &   VTAGSW='RRTMG-SW v3.5   Oct 2008'
-!    &   VTAGSW='RRTM-SW 112v2.3 Apr 2007'
-!    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
-!    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
-
-! \name constant values
-
-      real (kind=kind_phys), parameter :: eps     = 1.0e-6
-      real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
-! pade approx constant
-      real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
-      real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
-      real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
-      real (kind=kind_phys), parameter :: flimit  = 1.0e-20
-! internal solar constant
-      real (kind=kind_phys), parameter :: s0      = 1368.22
-
-      real (kind=kind_phys), parameter :: f_zero  = 0.0
-      real (kind=kind_phys), parameter :: f_one   = 1.0
-
-! \name atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
-
-! \name band indices
-      integer, dimension(nblow:nbhgh) :: nspa, nspb
-! band index for sfc flux
-      integer, dimension(nblow:nbhgh) :: idxsfc
-! band index for cld prop
-      integer, dimension(nblow:nbhgh) :: idxebc
-
-      data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
-      data nspb(:) /  1, 5, 1, 1, 1, 5, 1, 0, 1, 0, 0, 1, 5, 1 /
-
-!     data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1 /  ! band index for sfc flux
-      data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1 /  ! band index for sfc flux
-      data idxebc(:) / 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 5 /  ! band index for cld prop
-
-!  ---  band wavenumber intervals
-!     real (kind=kind_phys), dimension(nblow:nbhgh):: wavenum1,wavenum2
-!     data wavenum1(:)  /                                               &
-!    &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
-!    &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
-!     data wavenum2(:)  /                                               &
-!              3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
-!    &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /
-!     real (kind=kind_phys), dimension(nblow:nbhgh) :: delwave
-!     data delwave(:)   /                                               &
-!    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
-!    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
-
-! uv-b band index
-      integer, parameter :: nuvb = 27
-
-!\name logical flags for optional output fields
-      logical :: lhswb  = .false.
-      logical :: lhsw0  = .false.
-      logical :: lflxprf= .false.
-      logical :: lfdncmp= .false.
-
-
-! those data will be set up only once by "rswinit"
-      real (kind=kind_phys) :: exp_tbl(0:NTBMX)
-
-
-! the factor for heating rates (in k/day, or k/sec set by subroutine
-!!  'rswinit')
-      real (kind=kind_phys) :: heatfac
-
-
-! initial permutation seed used for sub-column cloud scheme
-      integer, parameter :: ipsdsw0 = 1
-
-!  ---  public accessable subprograms
-
-      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
-
-
-! =================
-      contains
-! =================
-
-      subroutine rrtmg_sw_init ()
-      end subroutine rrtmg_sw_init
-
-!> This subroutine is the main SW radiation routine.
 !! \section arg_table_rrtmg_sw_run Argument Table
 !! | local_name      | standard_name                                                                                  | long_name                                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|

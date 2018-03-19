@@ -236,39 +236,6 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-
-!> \defgroup module_radlw_main GFS RADLW Main
-!! \ingroup RRTMG
-!! This module includes NCEP's modifications of the RRTMG-LW radiation
-!! code from AER.
-!!
-!! The RRTM-LW package includes three files:
-!! - radlw_param.f, which contains:
-!!  - module_radlw_parameters: band parameters set up
-!! - radlw_datatb.f, which contains modules:
-!!  - module_radlw_avplank: plank flux data
-!!  - module_radlw_ref: reference temperature and pressure
-!!  - module_radlw_cldprlw: cloud property coefficients
-!!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
-!! - radlw_main.f, which contains:
-!!  - lwrad_run(): the main LW radiation routine
-!!  - rlwinit(): the initialization routine
-!!
-!!\author   Eli J. Mlawer, emlawer@aer.com
-!!\author   Jennifer S. Delamere, jdelamer@aer.com
-!!\author   Michael J. Iacono, miacono@aer.com
-!!\author   Shepard A. Clough
-!!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
-!!
-!! The authors wish to acknowledge the contributions of the
-!! following people:  Steven J. Taubman, Karen Cady-Pereira,
-!! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
-!!
-!!\copyright  2002-2007, Atmospheric & Environmental Research, Inc. (AER).
-!!  This software may be used, copied, or redistributed as long as it is
-!!  not sold and this copyright notice is reproduced on each copy made.
-!!  This model is provided as is without any express or implied warranties.
-!!  (http://www.rtweb.aer.com/)
 !========================================!
       module rrtmg_lw                    !
 !........................................!
@@ -387,7 +354,38 @@
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
-!> This subroutine is the main LW radiation routine.
+!> \defgroup module_radlw_main GFS RADLW Main
+!! \ingroup RRTMG
+!! This module includes NCEP's modifications of the RRTMG-LW radiation
+!! code from AER.
+!!
+!! The RRTM-LW package includes three files:
+!! - radlw_param.f, which contains:
+!!  - module_radlw_parameters: band parameters set up
+!! - radlw_datatb.f, which contains modules:
+!!  - module_radlw_avplank: plank flux data
+!!  - module_radlw_ref: reference temperature and pressure
+!!  - module_radlw_cldprlw: cloud property coefficients
+!!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
+!! - radlw_main.f, which contains:
+!!  - rrtmg_lw_run(): the main LW radiation routine
+!!  - rlwinit(): the initialization routine
+!!
+!!\author   Eli J. Mlawer, emlawer@aer.com
+!!\author   Jennifer S. Delamere, jdelamer@aer.com
+!!\author   Michael J. Iacono, miacono@aer.com
+!!\author   Shepard A. Clough
+!!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
+!!
+!! The authors wish to acknowledge the contributions of the
+!! following people:  Steven J. Taubman, Karen Cady-Pereira,
+!! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
+!!
+!!\copyright  2002-2007, Atmospheric & Environmental Research, Inc. (AER).
+!!  This software may be used, copied, or redistributed as long as it is
+!!  not sold and this copyright notice is reproduced on each copy made.
+!!  This model is provided as is without any express or implied warranties.
+!!  (http://www.rtweb.aer.com/)
 !! \section arg_table_rrtmg_lw_run Argument Table
 !! | local_name      | standard_name                                                                                 | long_name                                                 | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
