@@ -65,7 +65,6 @@
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-! DH* TODO add intent information for all variables
       subroutine sasas_deep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,      &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
@@ -81,25 +80,25 @@
 !
 ! In the current NCEP spectral model im <= ix for reduced grid numbers
 ! near the pole and a parallel computing. For FV3, im=ix.
-      integer            im, ix,  km, ncloud,                           &
-     &                   kbot(im), ktop(im), kcnv(im)
-
-      real(kind=kind_phys) delt
-      real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
-      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
-     &                     ql1(ix,km),ql2(ix,km), q1(ix,km), t1(ix,km), &
-     &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
-     &                     cldwrk(im), rn(im),      garea(im),          &
-     &                     dot(ix,km), phil(ix,km),                     &
-     &                     cnvw(ix,km),cnvc(ix,km),                     &
-     &                     ud_mf(im,km),dd_mf(im,km),dt_mf(im,km) ! hchuang code change mass flux output
-
+! Interface variables
+      integer, intent(in)  :: im, ix,  km, ncloud
+      integer, intent(out) :: kbot(im), ktop(im), kcnv(im)
+      real(kind=kind_phys), intent(in) :: delt
+      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
+     &                     prslp(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(inout) :: ql1(ix,km), ql2(ix,km),    &
+     &                     q1(ix,km), t1(ix,km), u1(ix,km),  v1(ix,km)
+      real(kind=kind_phys), intent(out) :: cldwrk(im), rn(im)
+      integer, dimension(im), intent(in) :: islimsk
+      real(kind=kind_phys), intent(in) :: garea(im), dot(ix,km)
+      real(kind=kind_phys), intent(out) :: ud_mf(im,km), dd_mf(im,km),  &
+     &                     dt_mf(im,km), cnvw(ix,km), cnvc(ix,km)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-
+! Local variables
+      real(kind=kind_phys) ps(im), del(ix,km), prsl(ix,km)
 !
       integer              i, indx, jmn, k, kk, km1, n
-      integer, dimension(im), intent(in) :: islimsk
 !     integer              latd,lond
 !
       real(kind=kind_phys) clam,    cxlamu,  cxlamd,
@@ -2206,6 +2205,7 @@ c  precipitation rate converted to actual precip
 c  in unit of m instead of kg
 c
       do i = 1, im
+        kcnv(i) = 0
         if(cnvflg(i)) then
 c
 c  in the event of upper level rain evaporation and lower level downdraft

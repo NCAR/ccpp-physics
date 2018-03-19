@@ -71,12 +71,11 @@
 !! | errmsg            | error_message                                                 | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg            | error_flag                                                    | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
 !!
-      ! DH* Attention - the output arguments lm, im, lmk, lmp should not be set
-      ! here in the CCPP version - they are defined in the interstitial_create routine *DH
-      ! DH* TODO add intent information for each variable (be careful with intent(out))!
-      subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   &  ! input
+      ! Attention - the output arguments lm, im, lmk, lmp must not be set
+      ! in the CCPP version - they are defined in the interstitial_create routine
+      subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
           Tbd, Cldprop, Radtend,                                     & 
-          lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           &  ! output
+          lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           & ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
           gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
           gasvmr_co,    gasvmr_cfc11, gasvmr_cfc12,                  &
@@ -130,51 +129,75 @@
 
 #ifdef CCPP
       integer, intent(in) :: im, lm, lmk, lmp
-      integer :: me, nfxr, ntrac
-      integer :: i, j, k, k1, lv, itop, ibtc, LP1, kd, &
-                 lla, llb, lya, lyb, kt, kb
 #else
-      integer :: me, im, lm, nfxr, ntrac
-      integer :: i, j, k, k1, lv, itop, ibtc, LP1, LMK, LMP, kd, &
-                 lla, llb, lya, lyb, kt, kb
+      integer, intent(out) :: im, lm, lmk, lmp
 #endif
-      integer, dimension(size(Grid%xlon,1),3) :: mbota, mtopa
+      integer,              intent(out) :: kd, kt, kb
+      real(kind=kind_phys), intent(out) :: raddt
 
-      !--- REAL VARIABLES
-      real(kind=kind_phys) :: raddt, es, qs, delt, tem0d
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP), intent(out) :: plvl
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: plyr
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP), intent(out) :: tlvl
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: tlyr
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                  intent(out) :: tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                  intent(out) :: tsfa
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: qlyr
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: olyr
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: &
-           tsfa, cvt1, cvb1, tem1d, tsfg, tskn
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_co2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_n2o
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_ch4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_o2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_co
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_cfc11
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_cfc12
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_cfc22
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_ccl4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: gasvmr_cfc113
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5)       :: cldsa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1)   :: aerodp
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW), intent(out) :: faersw1
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW), intent(out) :: faersw2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW), intent(out) :: faersw3
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW), intent(out) :: faerlw1
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW), intent(out) :: faerlw2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW), intent(out) :: faerlw3
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),            intent(out) :: aerodp
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds1
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds3
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds5
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds6
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds7
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds8
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: clouds9
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),                intent(out) :: cldsa
+      integer,              dimension(size(Grid%xlon,1),3),                intent(out) :: mbota
+      integer,              dimension(size(Grid%xlon,1),3),                intent(out) :: mtopa
+
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
+
+      ! Local variables
+      integer :: me, nfxr, ntrac
+
+      integer :: i, j, k, k1, lv, itop, ibtc, LP1, lla, llb, lya, lyb
+
+      real(kind=kind_phys) :: es, qs, delt, tem0d
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: cvt1, cvb1, tem1d, tskn
+
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
-           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, plyr, tlyr, &
-           qlyr, olyr, rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
-           tem2db, cldcov, deltaq, cnvc, cnvw
-
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP) :: plvl, tlvl
+                          htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
+                          rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
+                          tem2db, cldcov, deltaq, cnvc, cnvw
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,2:Model%ntrac) :: tracer1
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
-
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP)::  &
-            clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,          &
-            clouds7, clouds8, clouds9
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP)::  &
-           gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,       &   
-           gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW):: &
-           faersw1,  faersw2, faersw3
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW):: &
-           faerlw1, faerlw2, faerlw3
-
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
-
 !
 !===> ...  begin here
 !
@@ -433,10 +456,10 @@
 
 !check  print *,' in grrad : calling setaer '
 
-      call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, &  !  ---  inputs
-                   tracer1, Grid%xlon, Grid%xlat, IM, LMK, LMP,    &
-                   Model%lsswr,Model%lslwr,                        &
-                   faersw,faerlw,aerodp)                              !  ---  outputs
+      call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, & !  ---  inputs
+                   tracer1, Grid%xlon, Grid%xlat, IM, LMK, LMP,   &
+                   Model%lsswr, Model%lslwr,                      &
+                   faersw, faerlw, aerodp)                          !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW

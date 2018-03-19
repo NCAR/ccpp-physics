@@ -269,7 +269,7 @@
 !! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                      | angle with respect to east of maximum subgrid orographic variations                                      | degrees    |    1 | real      | kind_phys | in     | F        |
 !! | sigma          | slope_of_subgrid_orography                                                    | slope of subgrid orography                                                                               | none       |    1 | real      | kind_phys | in     | F        |
 !! | gamma          | anisotropy_of_subgrid_orography                                               | anisotropy of subgrid orography                                                                          | none       |    1 | real      | kind_phys | in     | F        |
-!! | elvmax         | maximum_subgrid_orography                                                     | maximum of subgrid orography                                                                             | m          |    1 | real      | kind_phys | in     | F        |
+!! | elvmax         | maximum_subgrid_orography                                                     | maximum of subgrid orography                                                                             | m          |    1 | real      | kind_phys | inout  | F        |
 !! | dusfc          | instantaneous_x_stress_due_to_gravity_wave_drag                               | zonal surface stress due to orographic gravity wave drag                                                 | Pa         |    1 | real      | kind_phys | out    | F        |
 !! | dvsfc          | instantaneous_y_stress_due_to_gravity_wave_drag                               | meridional surface stress due to orographic gravity wave drag                                            | Pa         |    1 | real      | kind_phys | out    | F        |
 !! | g              | gravitational_acceleration                                                    | gravitational acceleration                                                                               | m s-2      |    0 | real      | kind_phys | in     | F        |
@@ -432,18 +432,37 @@
 !   ********************************************************************
       USE MACHINE , ONLY : kind_phys
       implicit none
-      integer im, ix, km, imx, kdt, ipr, me
-      integer KPBL(IM)                 ! Index for the PBL top layer!
-      real(kind=kind_phys) deltim, G, CP, RD, RV,      cdmbgwd(2)
-      real(kind=kind_phys) A(IX,KM),    B(IX,KM),      C(IX,KM),        &
+!
+      ! Interface variables
+      integer, intent(in) :: im, ix, km, imx, kdt, ipr, me
+      integer, intent(in) :: KPBL(IM) ! Index for the PBL top layer!
+      ! DH* adding intent(in) information for the following variables
+      ! changes the results on Theia/Intel - skip for bit-for-bit results *DH
+!      real(kind=kind_phys), intent(in) ::                               &
+!     &                     deltim, G, CP, RD, RV, cdmbgwd(2)
+      real(kind=kind_phys) deltim, G, CP, RD, RV, cdmbgwd(2)
+      ! *DH
+      real(kind=kind_phys), intent(inout) ::                            &
+     &                     A(IX,KM), B(IX,KM), C(IX,KM)
+      real(kind=kind_phys), intent(in) ::                               &
      &                     U1(IX,KM),   V1(IX,KM),     T1(IX,KM),       &
      &                     Q1(IX,KM),   PRSI(IX,KM+1), DEL(IX,KM),      &
      &                     PRSL(IX,KM), PRSLK(IX,KM),  PHIL(IX,KM),     &
      &                     PHII(IX,KM+1)
-      real(kind=kind_phys) OC(IM),     OA4(IX,4), CLX4(IX,4)            &
-     &,                    HPRIME(IM)
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     OC(IM), OA4(IX,4), CLX4(IX,4), HPRIME(IM)
+      real(kind=kind_phys), intent(inout) :: ELVMAX(IM)
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     THETA(IM), SIGMA(IM), GAMMA(IM)
+      real(kind=kind_phys), intent(out) :: DUSFC(IM), DVSFC(IM)
+      integer, intent(in) :: nmtvr
+      logical, intent(in) :: lprnt
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+      ! Local variables
 ! for lm mtn blocking
-      real(kind=kind_phys) ELVMAX(IM),THETA(IM),SIGMA(IM),GAMMA(IM)
+!
       real(kind=kind_phys) wk(IM)
       real(kind=kind_phys) bnv2lm(IM,KM),PE(IM),EK(IM),ZBK(IM),UP(IM)
       real(kind=kind_phys) DB(IM,KM),ANG(IM,KM),UDS(IM,KM)
@@ -499,8 +518,8 @@
 !
       real(kind=kind_phys) TAUB(IM),  XN(IM),     YN(IM),    UBAR(IM)     &
      &,                    VBAR(IM),  ULOW(IM),   OA(IM),    CLX(IM)      &
-     &,                    ROLL(IM),  ULOI(IM),   DUSFC(IM), DVSFC(IM)    &
-     &,                    DTFAC(IM), XLINV(IM),  DELKS(IM), DELKS1(IM)
+     &,                    ROLL(IM),  ULOI(IM),   DTFAC(IM), XLINV(IM)    &
+     &,                    DELKS(IM), DELKS1(IM)
 !
       real(kind=kind_phys) BNV2(IM,KM),  TAUP(IM,KM+1), ri_n(IM,KM)       &
      &,                    TAUD(IM,KM),  RO(IM,KM),     VTK(IM,KM)        &
@@ -511,7 +530,7 @@
       integer   kref(IM), kint(im), iwk(im), ipt(im)
 ! for lm mtn blocking
       integer   kreflm(IM), iwklm(im)
-      integer   idxzb(im), ktrial, klevm1, nmtvr
+      integer   idxzb(im), ktrial, klevm1
 !
       real(kind=kind_phys) gor,    gocp,  fv,    gr2,  bnv,  fr           &
      &,                    brvf,   cleff, tem,   tem1,  tem2, temc, temv  &
@@ -522,13 +541,7 @@
       integer kmm1, kmm2, lcap, lcapp1, kbps, kbpsp1,kbpsm1               &
      &, kmps, idir, nwd, i, j, k, klcap, kp1, kmpbl, npt, npr             &
      &, kmll
-!    &, kmll,kmds,ihit,jhit
-      logical lprnt
 !
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-!
-      ! DH* TODO ADD INTENT INFORMATION FOR ALL VARIABLES *DH
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
