@@ -28,8 +28,8 @@ contains
 !! | prsi           | air_pressure_at_interface                                                         | interface pressure                                                                  | Pa         |    2 | real      | kind_phys | in     | F        |
 !! | tgrs           | air_temperature                                                                   | mid-layer temperature                                                               | K          |    2 | real      | kind_phys | in     | F        |
 !! | qgrs1          | water_vapor_specific_humidity                                                     | mid-layer specific humidity of water vapor                                          | kg kg-1    |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                         | difference between mid-layer pressures                                              | Pa         |    2 | real      | kind_phys | inout  | F        |
-!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 |    2 | real      | kind_phys | inout  | F        |
+!! | del            | air_pressure_difference_between_midlayers                                         | difference between mid-layer pressures                                              | Pa         |    2 | real      | kind_phys | out    | F        |
+!! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                                                     | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                        | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
 !!
@@ -43,8 +43,8 @@ contains
      real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: prsi
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: tgrs
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: qgrs1
-     real(kind=kind_phys), dimension(ix,levs),       intent(inout) :: del
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
+     real(kind=kind_phys), dimension(ix,levs),       intent(out)   :: del
+     real(kind=kind_phys), dimension(ix,levs+1),     intent(out)   :: del_gz
      character(len=*),                               intent(out)   :: errmsg
      integer,                                        intent(out)   :: errflg
 
@@ -106,8 +106,8 @@ contains
 !! | gt0            | air_temperature_updated_by_physics                                                | updated air temperature                                                             | K          |    2 | real      | kind_phys | in     | F        |
 !! | gq01           | water_vapor_specific_humidity_updated_by_physics                                  | mid-layer specific humidity of water vapor                                          | kg kg-1    |    2 | real      | kind_phys | in     | F        |
 !! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 |    2 | real      | kind_phys | inout  | F        |
-!! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | inout  | F        |
-!! | phil           | geopotential                                                                      | mid-layer geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | inout  | F        |
+!! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | out    | F        |
+!! | phil           | geopotential                                                                      | mid-layer geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                                                     | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                        | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
 !!
@@ -120,11 +120,10 @@ contains
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gt0
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gq01
      real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: phii
-     real(kind=kind_phys), dimension(ix,levs),       intent(inout) :: phil
+     real(kind=kind_phys), dimension(ix,levs+1),     intent(out)   :: phii
+     real(kind=kind_phys), dimension(ix,levs),       intent(out)   :: phil
      character(len=*),                               intent(out)   :: errmsg
      integer,                                        intent(out)   :: errflg
-     ! DH* phii and phil are intent(out), but not del_gz (because of levs+1 not being set)?
 
      ! Local variables
      integer :: i, k

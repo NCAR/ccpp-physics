@@ -321,25 +321,25 @@
 !! | trans          | transpiration_flux                                                           | total plant transpiration rate                                  | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                        | K             |    1 | real      | kind_phys | inout  | F        |
 !! | zorl           | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | inout  | F        |
-!! | sncovr1        | surface_snow_area_fraction_for_diagnostics                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | out    | F        |
-!! | qsurf          | surface_specific_humidity                                                    | surface specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | out    | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | upward soil heat flux                                           | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | drain          | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | surface upward sensible heat flux                               | K m s-1       |    1 | real      | kind_phys | out    | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | runoff         | surface_runoff_flux                                                          | surface runoff flux                                             | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | out    | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
-!! | evbs           | soil_upward_latent_heat_flux                                                 | soil upward latent heat flux                                    | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | evcw           | canopy_upward_latent_heat_flux                                               | canopy upward latent heat flux                                  | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux                          | latent heat flux from snow depo/subl                            | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | snowc          | surface_snow_area_fraction                                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | out    | F        |
-!! | stm            | soil_moisture_content                                                        | soil moisture content                                           | kg m-2        |    1 | real      | kind_phys | out    | F        |
-!! | snohf          | snow_freezing_rain_upward_latent_heat_flux                                   | latent heat flux due to snow and frz rain                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point                  | soil water fraction at wilting point                            | frac          |    1 | real      | kind_phys | out    | F        |
-!! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac          |    1 | real      | kind_phys | out    | F        |
-!! | wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | out    | F        |
+!! | sncovr1        | surface_snow_area_fraction_for_diagnostics                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | qsurf          | surface_specific_humidity                                                    | surface specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | gflux          | upward_heat_flux_in_soil                                                     | upward soil heat flux                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | drain          | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | g m-2 s-1     |    1 | real      | kind_phys | inout  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | surface upward sensible heat flux                               | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | runoff         | surface_runoff_flux                                                          | surface runoff flux                                             | g m-2 s-1     |    1 | real      | kind_phys | inout  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | evbs           | soil_upward_latent_heat_flux                                                 | soil upward latent heat flux                                    | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | evcw           | canopy_upward_latent_heat_flux                                               | canopy upward latent heat flux                                  | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux                          | latent heat flux from snow depo/subl                            | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | snowc          | surface_snow_area_fraction                                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | stm            | soil_moisture_content                                                        | soil moisture content                                           | kg m-2        |    1 | real      | kind_phys | inout  | F        |
+!! | snohf          | snow_freezing_rain_upward_latent_heat_flux                                   | latent heat flux due to snow and frz rain                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point                  | soil water fraction at wilting point                            | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -404,7 +404,7 @@
      &       smc, stc, slc
 
 !  ---  output:
-      real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
+      real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
      &       wet1

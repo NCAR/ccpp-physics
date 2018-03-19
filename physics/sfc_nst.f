@@ -108,13 +108,13 @@
 !! | d_conv         | free_convection_layer_thickness                                              | thickness of free convection layer                          | m             |    1 | real      | kind_phys | inout  | F        |
 !! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         |    1 | real      | kind_phys | inout  | F        |
 !! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity                                                    | surface air saturation specific humidity                    | kg kg-1       |    1 | real      | kind_phys | out    | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                              | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                      | m s-1         |    1 | real      | kind_phys | out    | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                 | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | out    | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | qsurf          | surface_specific_humidity                                                    | surface air saturation specific humidity                    | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                              | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                 | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -307,7 +307,7 @@
      &      z_c, c_0, c_d, w_0, w_d, d_conv, ifd, qrain
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(out) ::              &
+      real (kind=kind_phys), dimension(im), intent(inout) ::            &
      &       qsurf, gflux, cmm, chh, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg

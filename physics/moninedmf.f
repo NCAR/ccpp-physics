@@ -72,8 +72,8 @@
 !! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux                     | W m-2         |    1 | real      | kind_phys | out    | F        |
 !! | dqsfc          | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
 !! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | out    | F        |
-!! | hgamt          | countergradient_mixing_term_for_temperature                                 | countergradient mixing term for temperature           | K             |    1 | real      | kind_phys | out    | F        |
-!! | hgamq          | countergradient_mixing_term_for_water_vapor                                 | countergradient mixing term for water vapor           | kg kg-1       |    1 | real      | kind_phys | out    | F        |
+!! | hgamt          | countergradient_mixing_term_for_temperature                                 | countergradient mixing term for temperature           | K             |    1 | real      | kind_phys | inout  | F        |
+!! | hgamq          | countergradient_mixing_term_for_water_vapor                                 | countergradient mixing term for water vapor           | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | dkt            | atmosphere_heat_diffusivity                                                 | diffusivity for heat                                  | m2 s-1        |    2 | real      | kind_phys | out    | F        |
 !! | kinver         | index_of_highest_temperature_inversion                                      | index of highest temperature inversion                | index         |    1 | integer   |           | in     | F        |
 !! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real      | kind_phys | in     | F        |
@@ -100,7 +100,6 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed Detailed Algorithm
 !!  @{
-! DH* TODO add intent() information for variables
       subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
@@ -117,13 +116,11 @@
 !
 !     arguments
 !
-      logical lprnt
-      integer ipr
-      integer ix, im, km, ntrac, ntcw, kpbl(im), kinver(im)
-!
-      real(kind=kind_phys) delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys) dv(im,km),     du(im,km),                    &
-     &                     tau(im,km),    rtg(im,km,ntrac),             &
+      integer, intent(in) :: ix, im, km, ntrac, ntcw
+      real(kind=kind_phys), intent(inout) ::                            &
+     &                     dv(im,km),     du(im,km),                    &
+     &                     tau(im,km),    rtg(im,km,ntrac)              &
+      real(kind=kind_phys), intent(in) ::                               &
      &                     u1(ix,km),     v1(ix,km),                    &
      &                     t1(ix,km),     q1(ix,km,ntrac),              &
      &                     swh(ix,km),    hlw(ix,km),                   &
@@ -131,19 +128,33 @@
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
-     &                     tsea(im),                                    &
-     &                                    spd1(im),                     &
+     &                     tsea(im),      heat(im),                     &
+     &                     evap(im),      stress(im),                   &
+     &                     spd1(im)
+      integer, intent(out) :: kpbl(im)
+      real(kind=kind_phys), intent(in) ::                               &
      &                     prsi(ix,km+1), del(ix,km),                   &
      &                     prsl(ix,km),   prslk(ix,km),                 &
      &                     phii(ix,km+1), phil(ix,km),                  &
+     &                     delt
+      logical, intent(in) :: dspheat
+!          flag for tke dissipative heating
+      real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      hpblx(im),                    &
+     &                     hpbl(im),      dkt(im,km-1)
+! DH* even though these two variables are effectively intent(out), since
+! they are not used anywhere else than in this routine, declaring them
+! as intent(out) and initializing them (see comment DH* further down)
+! correctly changes the results on Theia with the Intel compiler. This
+! seems to be one of those Intel optimization issues we encountered
+! earlier for sfc_sice.f, see PR #47 for gmtb-gfsphysics *DH
+      real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
-!
-      logical dspheat
-!          flag for tke dissipative heating
-!
+      integer, intent(in) :: kinver(im)
+      real(kind=kind_phys), intent(in) :: xkzm_m, xkzm_h, xkzm_s
+      logical, intent(in) :: lprnt
+      integer, intent(in) :: ipr
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !          error handling variables for CCPP
@@ -155,25 +166,24 @@
       integer kx1(im), kpblx(im)
 !
 !     real(kind=kind_phys) betaq(im), betat(im),   betaw(im),
-      real(kind=kind_phys) evap(im),  heat(im),    phih(im),            &
-     &                     phim(im),  rbdn(im),    rbup(im),            &
-     &                     stress(im),beta(im),    sflux(im),           &
+      real(kind=kind_phys) phih(im),  phim(im),    rbdn(im),            &
+     &                     hpblx(im), rbup(im),    beta(im),            &
+     &                     sflux(im),                                   &
      &                     z0(im),    crb(im),     wstar(im),           &
      &                     zol(im),   ustmin(im),  ustar(im),           &
      &                     thermal(im),wscale(im), wscaleu(im)
 !
-      real(kind=kind_phys) theta(im,km),thvx(im,km),  thlvx(im,km),     &
-     &                     qlx(im,km),  thetae(im,km),                  &
-     &                     qtx(im,km),  bf(im,km-1),  diss(im,km),      &
-     &                     radx(im,km-1),                               &
-     &                     govrth(im),  hrad(im),                       &
-!    &                     hradm(im),   radmin(im),   vrad(im),         &
-     &                     radmin(im),  vrad(im),                       &
-     &                     zd(im),      zdd(im),      thlvx1(im)
+      real(kind=kind_phys) theta(im,km),  thvx(im,km),   thlvx(im,km),  &
+     &                     qlx(im,km),    thetae(im,km), thlvx1(im),    &
+     &                     qtx(im,km),    bf(im,km-1),   diss(im,km),   &
+     &                     radx(im,km-1), govrth(im),    hrad(im),      &
+!    &                     hradm(im),     radmin(im),    vrad(im),      &
+     &                     radmin(im),    vrad(im),      zd(im),        &
+     &                     zdd(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
      &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
-     &                     dku(im,km-1), dkt(im,km-1), xkzmo(im,km-1),  &
+     &                     dku(im,km-1), xkzmo(im,km-1),                &
      &                     cku(im,km-1), ckt(im,km-1),                  &
      &                     ti(im,km-1),  shr2(im,km-1),                 &
      &                     al(im,km-1),  ad(im,km),                     &
@@ -580,6 +590,11 @@ c
            thermal(i)= thermal(i)+max(vpert,0.)
            hgamt(i)  = max(hgamt(i),0.0)
            hgamq(i)  = max(hgamq(i),0.0)
+         ! DH* see my comment above for issues on Theia/Intel
+         ! with making hgamt and hgamq intent(out) variables *DH
+         !else
+         !  hgamt(i)  = 0.0
+         !  hgamq(i)  = 0.0
          endif
       enddo
 !
