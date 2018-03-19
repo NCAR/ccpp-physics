@@ -30,8 +30,8 @@
 !! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
-!  \section general General Algorithm
-!  \section detailed Detailed Algorithm
+!  \section lsm_pre_general General Algorithm
+!  \section lsm_pre_detailed Detailed Algorithm
 !  @{
       subroutine lsm_noah_pre_run                                       &
      &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
@@ -97,8 +97,8 @@
 !! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section lsm_post_general General Algorithm
+!!  \section lsm_post_detailed Detailed Algorithm
 !!  @{
 
       subroutine lsm_noah_post_run                                      &
