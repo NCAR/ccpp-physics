@@ -204,7 +204,9 @@ module GFS_initialize_scm
    ! GFS_grid_populate
    !------------------
   subroutine GFS_grid_populate (Grid, xlon, xlat, area)
-    use physcons,                 only: pi => con_pi
+    use machine,             only: kind_phys
+    use physcons,            only: pi => con_pi
+    use GFS_typedefs,        only: GFS_grid_type
 
     implicit none
 
