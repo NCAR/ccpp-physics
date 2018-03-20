@@ -1,26 +1,8 @@
 module GFS_initialize_scm
-  use machine,                  only: kind_phys
-  use GFS_typedefs,             only: GFS_init_type,                          &
-                                      GFS_statein_type,  GFS_stateout_type,   &
-                                      GFS_sfcprop_type,  GFS_coupling_type,   &
-                                      GFS_control_type,  GFS_grid_type,       &
-                                      GFS_tbd_type,      GFS_cldprop_type,    &
-                                      GFS_radtend_type,  GFS_diag_type,       &
-                                      GFS_sfccycle_type, GFS_interstitial_type
-
-  use funcphys,                 only: gfuncphys
 
   implicit none
 
   private
-
-!------------------
-! Module parameters
-!------------------
-
-!----------------------------
-! Module variable definitions
-!----------------------------
 
 !----------------
 ! Public entities
@@ -74,6 +56,15 @@ module GFS_initialize_scm
                              ozone_lat, ozone_pres, ozone_time, ozone_forcing_in, &
                              errmsg, errflg)
 
+    use machine,             only: kind_phys
+    use GFS_typedefs,        only: GFS_init_type,                          &
+                                   GFS_statein_type,  GFS_stateout_type,   &
+                                   GFS_sfcprop_type,  GFS_coupling_type,   &
+                                   GFS_control_type,  GFS_grid_type,       &
+                                   GFS_tbd_type,      GFS_cldprop_type,    &
+                                   GFS_radtend_type,  GFS_diag_type,       &
+                                   GFS_sfccycle_type, GFS_interstitial_type
+    use funcphys,            only: gfuncphys
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
     use aer_cloud,           only: aer_cloud_init
@@ -82,7 +73,6 @@ module GFS_initialize_scm
 #ifdef OPENMP
     use omp_lib
 #endif
-
 
     !--- interface variables
     type(GFS_control_type),      intent(inout) :: Model
@@ -104,14 +94,14 @@ module GFS_initialize_scm
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
-!
-!     !--- local variables
-     real(kind=kind_phys), allocatable :: si(:)
-     real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
+    !
+    !     !--- local variables
+    real(kind=kind_phys), allocatable :: si(:)
+    real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
 
-     ! Initialize CCPP error handling variables
-     errmsg = ''
-     errflg = 0
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
 !     !--- set control properties (including namelist read)
     call Model%init (Init_parm%nlunit, Init_parm%fn_nml,           &
@@ -124,43 +114,32 @@ module GFS_initialize_scm
                      Init_parm%bdat, Init_parm%cdat,               &
                      Init_parm%tracer_names, Init_parm%blksz)
 
-     !allocate memory for the variables stored in ozne_def and set them
-     allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
-     allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
-     latsozp = n_ozone_lats
-     levozp = n_ozone_layers
-     timeoz = n_ozone_times
-     oz_coeff = n_ozone_coefficients
-     oz_lat = ozone_lat
-     oz_pres = ozone_pres
-     oz_time = ozone_time
-     ozplin = ozone_forcing_in
+    !allocate memory for the variables stored in ozne_def and set them
+    allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
+    allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
+    latsozp = n_ozone_lats
+    levozp = n_ozone_layers
+    timeoz = n_ozone_times
+    oz_coeff = n_ozone_coefficients
+    oz_lat = ozone_lat
+    oz_pres = ozone_pres
+    oz_time = ozone_time
+    ozplin = ozone_forcing_in
 
-      call Statein%create(1, Model)
-      call Stateout%create(1, Model)
-      call Sfcprop%create(1, Model)
-      call Coupling%create(1, Model)
-      call Grid%create(1, Model)
-      call Tbd%create(1, 1, Model)
-      call Cldprop%create(1, Model)
-      call Radtend%create(1, Model)
-      !--- internal representation of diagnostics
-      call Diag%create(1, Model)
-      !--- internal representation of sfccycle
-      call Sfccycle%create(1, Model)
-!
-! #ifdef CCPP
-! #ifdef OPENMP
-!     nthreads = omp_get_max_threads()
-! #else
-!     nthreads = 1
-! #endif
+    call Statein%create(1, Model)
+    call Stateout%create(1, Model)
+    call Sfcprop%create(1, Model)
+    call Coupling%create(1, Model)
+    call Grid%create(1, Model)
+    call Tbd%create(1, 1, Model)
+    call Cldprop%create(1, Model)
+    call Radtend%create(1, Model)
+    !--- internal representation of diagnostics
+    call Diag%create(1, Model)
+    !--- internal representation of sfccycle
+    call Sfccycle%create(1, Model)
+    call Interstitial%create(1, Model)
 
-      call Interstitial%create(1, Model)
-
-
-! #endif
-!
 !     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
 
@@ -176,9 +155,9 @@ module GFS_initialize_scm
     endif
 
 !     !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
-     call gfuncphys ()
+    call gfuncphys ()
 !
-     call gsmconst (Model%dtp, Model%me, .TRUE.)
+    call gsmconst (Model%dtp, Model%me, .TRUE.)
 !
 !     !--- define sigma level for radiation initialization
 !     !--- The formula converting hybrid sigma pressure coefficients to sigma coefficients follows Eckermann (2009, MWR)
@@ -202,10 +181,10 @@ module GFS_initialize_scm
     endif
 !
 !     !--- initialize ras
-     if (Model%ras) call ras_init (Model%levs, Model%me)
+    if (Model%ras) call ras_init (Model%levs, Model%me)
 !
 !     !--- initialize soil vegetation
-     call set_soilveg(Model%me, Model%isot, Model%ivegsrc, Model%nlunit)
+    call set_soilveg(Model%me, Model%isot, Model%ivegsrc, Model%nlunit)
 !
 !     !--- lsidea initialization
     if (Model%lsidea) then
@@ -219,170 +198,36 @@ module GFS_initialize_scm
 !     !--- this not is placed here to alert users to the need to study
 !     !--- the FV3GFS_io.F90 module
 
-   end subroutine GFS_initialize_scm_run
+  end subroutine GFS_initialize_scm_run
 
    !------------------
    ! GFS_grid_populate
    !------------------
-   subroutine GFS_grid_populate (Grid, xlon, xlat, area)
-     use physcons,                 only: pi => con_pi
+  subroutine GFS_grid_populate (Grid, xlon, xlat, area)
+    use physcons,                 only: pi => con_pi
 
-     implicit none
+    implicit none
 
-     type(GFS_grid_type)              :: Grid
-     real(kind=kind_phys), intent(in) :: xlon(:,:)
-     real(kind=kind_phys), intent(in) :: xlat(:,:)
-     real(kind=kind_phys), intent(in) :: area(:,:)
+    type(GFS_grid_type)              :: Grid
+    real(kind=kind_phys), intent(in) :: xlon(:,:)
+    real(kind=kind_phys), intent(in) :: xlat(:,:)
+    real(kind=kind_phys), intent(in) :: area(:,:)
 
-     !--- local variables
-     integer :: n_columns, i
+    !--- local variables
+    integer :: n_columns, i
 
-     n_columns = size(Grid%xlon)
+    n_columns = size(Grid%xlon)
 
-     do i=1, n_columns
-       Grid%xlon = xlon(i,1)
-       Grid%xlat = xlat(i,1)
-       Grid%xlat_d(i) = xlat(i,1) * 180.0_kind_phys/pi
-       Grid%sinlat(i) = sin(Grid%xlat(i))
-       Grid%coslat(i) = sqrt(1.0_kind_phys - Grid%sinlat(i)*Grid%sinlat(i))
-       Grid%area(i)   = area(i,1)
-       Grid%dx(i)     = sqrt(area(i,1))
-     end do
+    do i=1, n_columns
+     Grid%xlon = xlon(i,1)
+     Grid%xlat = xlat(i,1)
+     Grid%xlat_d(i) = xlat(i,1) * 180.0_kind_phys/pi
+     Grid%sinlat(i) = sin(Grid%xlat(i))
+     Grid%coslat(i) = sqrt(1.0_kind_phys - Grid%sinlat(i)*Grid%sinlat(i))
+     Grid%area(i)   = area(i,1)
+     Grid%dx(i)     = sqrt(area(i,1))
+    end do
 
-   end subroutine GFS_grid_populate
+  end subroutine GFS_grid_populate
 
 end module GFS_initialize_scm
-!
-!
-! #ifndef CCPP
-! !-------------------------------------------------------------------------
-! ! time_vary_step
-! !-------------------------------------------------------------------------
-! !    routine called prior to radiation and physics steps to handle:
-! !      1) sets up various time/date variables
-! !      2) sets up various triggers
-! !      3) defines random seed indices for radiation (in a reproducible way)
-! !      5) interpolates coefficients for prognostic ozone calculation
-! !      6) performs surface data cycling via the GFS gcycle routine
-! !-------------------------------------------------------------------------
-!   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
-!                                  Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
-!
-!     use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
-!     use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
-!     use GFS_rad_time_vary,     only: GFS_rad_time_vary_run
-!     implicit none
-!
-!     !--- interface variables
-!     type(GFS_control_type),   intent(inout) :: Model
-!     type(GFS_statein_type),   intent(inout) :: Statein
-!     type(GFS_stateout_type),  intent(inout) :: Stateout
-!     type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
-!     type(GFS_coupling_type),  intent(inout) :: Coupling
-!     type(GFS_grid_type),      intent(inout) :: Grid
-!     type(GFS_tbd_type),       intent(inout) :: Tbd
-!     type(GFS_cldprop_type),   intent(inout) :: Cldprop
-!     type(GFS_radtend_type),   intent(inout) :: Radtend
-!     type(GFS_diag_type),      intent(inout) :: Diag
-!     type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
-!
-!     call GFS_phys_time_vary_1_run (Model, Tbd)
-!
-!     call GFS_rad_time_vary_run (Model, Statein, Tbd)
-!
-!     call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle)
-!
-!   end subroutine GFS_time_vary_step
-!
-!
-! !-------------------------------------------------------------------------
-! ! GFS stochastic_driver
-! !-------------------------------------------------------------------------
-! !    routine called prior to radiation and physics steps to handle:
-! !      1) sets up various time/date variables
-! !      2) sets up various triggers
-! !      3) defines random seed indices for radiation (in a reproducible way)
-! !      5) interpolates coefficients for prognostic ozone calculation
-! !      6) performs surface data cycling via the GFS gcycle routine
-! !-------------------------------------------------------------------------
-!   subroutine GFS_stochastic_driver (Model, Statein, Stateout, Sfcprop, Coupling, &
-!                                     Grid, Tbd, Cldprop, Radtend, Diag)
-!
-!     use GFS_stochastics, only: GFS_stochastics_run
-!
-!     implicit none
-!
-!     !--- interface variables
-!     type(GFS_control_type),   intent(in   ) :: Model
-!     type(GFS_statein_type),   intent(in   ) :: Statein
-!     type(GFS_stateout_type),  intent(in   ) :: Stateout
-!     type(GFS_sfcprop_type),   intent(in   ) :: Sfcprop
-!     type(GFS_coupling_type),  intent(inout) :: Coupling
-!     type(GFS_grid_type),      intent(in   ) :: Grid
-!     type(GFS_tbd_type),       intent(in   ) :: Tbd
-!     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
-!     type(GFS_radtend_type),   intent(in   ) :: Radtend
-!     type(GFS_diag_type),      intent(inout) :: Diag
-!
-!     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
-!                              Grid, Tbd, Cldprop, Radtend, Diag)
-!
-!   end subroutine GFS_stochastic_driver
-! #endif
-!
-!
-
-  ! subroutine GFS_initialize_scm_ozone_and_h20_setup(n_columns, n_levels, lats, pres, &
-  !   n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times, &
-  !   ozone_lat, ozone_pres, ozone_time, ozone_forcing_in)
-  !   use ozne_def, only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
-  !   integer, intent(in) :: n_columns, n_levels
-  !   real(kind_phys), intent(in) :: lats(:), pres(:)
-  !
-  !   integer, intent(inout) :: n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times
-  !   real(kind_phys), allocatable, intent(inout) :: ozone_lat(:), ozone_pres(:), ozone_time(:), ozone_forcing_in(:,:,:,:)
-  !
-  !   !set ozone forcing array dimensions
-  !   n_ozone_lats = n_columns
-  !   n_ozone_layers = n_levels
-  !   n_ozone_coefficients = 4
-  !   n_ozone_times = 2
-  !
-  !   !reallocate ozone forcing latitutes, pressure levels, and times using the array dimensions set here
-  !   if(allocated(ozone_lat)) then
-  !     deallocate(ozone_lat)
-  !     allocate(ozone_lat(n_ozone_lats))
-  !   endif
-  !   ozone_lat = lats
-  !
-  !   if(allocated(ozone_pres)) then
-  !     deallocate(ozone_pres)
-  !     allocate(ozone_pres(n_ozone_layers))
-  !   endif
-  !   ozone_pres = pres
-  !
-  !   if(allocated(ozone_time)) then
-  !     deallocate(ozone_time)
-  !     allocate(ozone_time(n_ozone_times+1))
-  !   endif
-  !   ozone_time = (/12.0, 13.0, 14.0/)
-  !
-  !   if(allocated(ozone_forcing_in))then
-  !     deallocate(ozone_forcing_in)
-  !     allocate(ozone_forcing_in(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
-  !   endif
-  !   ozone_forcing_in = 0.0
-  !
-  !   !allocate memory for the variables stored in ozne_def and set them
-  !   allocate(oz_lat(n_ozone_lats), oz_pres(n_ozone_layers), oz_time(n_ozone_times+1))
-  !   allocate(ozplin(n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times))
-  !   latsozp = n_ozone_lats
-  !   levozp = n_ozone_layers
-  !   timeoz = n_ozone_times
-  !   oz_coeff = n_ozone_coefficients
-  !   oz_lat = ozone_lat
-  !   oz_pres = ozone_pres
-  !   oz_time = ozone_time
-  !   ozplin = ozone_forcing_in
-  !
-  ! end subroutine GFS_initialize_scm_ozone_and_h20_setup

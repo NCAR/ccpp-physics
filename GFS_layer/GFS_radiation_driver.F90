@@ -1,7 +1,7 @@
 !> \file grrad.f This file is the radiation driver module. It prepares
 !! the atmospheric profiles and invokes the main radiation calculation.
 
-!> \defgroup RRTMG RRTMG Shortwave/Longwave Radiation
+!> \defgroup rad RRTMG Shortwave/Longwave Radiation Scheme
 !> @{
 !!  \brief The GFS radiation scheme
 !!  \details Radiative processes are among the most complex and
