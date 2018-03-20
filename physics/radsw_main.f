@@ -546,13 +546,13 @@
 !! | lprnt           | flag_print                                                                                     | flag to print                                                            | flag    |    0 | logical     |           | in     | F        |
 !! | cld_cf          | total_cloud_fraction                                                                           | total cloud fraction                                                     | frac    |    2 | real        | kind_phys | in     | F        |
 !! | lsswr           | flag_to_calc_sw                                                                                | flag to calculate SW irradiances                                         | flag    |    0 | logical     |           | in     | F        |
-!! | hswc            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | shortwave total sky heating rate                                         | K s-1   |    2 | real        | kind_phys | out    | F        |
-!! | topflx          | sw_fluxes_top_atmosphere                                                                       | shortwave total sky fluxes at the top of the atm                         | W m-2   |    1 | topfsw_type |           | out    | F        |
-!! | sfcflx          | sw_fluxes_sfc                                                                                  | shortwave total sky fluxes at the Earth surface                          | W m-2   |    1 | sfcfsw_type |           | out    | F        |
-!! | hsw0            | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | shortwave clear sky heating rate                                         | K s-1   |    2 | real        | kind_phys | out    | T        |
-!! | hswb            | sw_heating_rate_spectral                                                                       | shortwave total sky heating rate (spectral)                              | K s-1   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | sw_fluxes                                                                                      | sw fluxes total sky / csk and up / down at levels                        | W m-2   |    2 | profsw_type |           | out    | T        |
-!! | fdncmp          | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes | W m-2   |    1 | cmpfsw_type |           | out    | T        |
+!! | hswc            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | shortwave total sky heating rate                                         | K s-1   |    2 | real        | kind_phys | inout  | F        |
+!! | topflx          | sw_fluxes_top_atmosphere                                                                       | shortwave total sky fluxes at the top of the atm                         | W m-2   |    1 | topfsw_type |           | inout  | F        |
+!! | sfcflx          | sw_fluxes_sfc                                                                                  | shortwave total sky fluxes at the Earth surface                          | W m-2   |    1 | sfcfsw_type |           | inout  | F        |
+!! | hsw0            | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | shortwave clear sky heating rate                                         | K s-1   |    2 | real        | kind_phys | inout  | T        |
+!! | hswb            | sw_heating_rate_spectral                                                                       | shortwave total sky heating rate (spectral)                              | K s-1   |    3 | real        | kind_phys | inout  | T        |
+!! | flxprf          | sw_fluxes                                                                                      | sw fluxes total sky / csk and up / down at levels                        | W m-2   |    2 | profsw_type |           | inout  | T        |
+!! | fdncmp          | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes | W m-2   |    1 | cmpfsw_type |           | inout  | T        |
 !! | cld_lwp         | cloud_liquid_water_path                                                                        | cloud liquid water path                                                  | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                         | mean effective radius for liquid cloud                                   | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                                                                           | cloud ice water path                                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -802,24 +802,24 @@
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(npts,nlay), intent(out) :: hswc
+      real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hswc
 
-      type (topfsw_type),    dimension(npts), intent(out) :: topflx
-      type (sfcfsw_type),    dimension(npts), intent(out) :: sfcflx
+      type (topfsw_type),    dimension(npts), intent(inout) :: topflx
+      type (sfcfsw_type),    dimension(npts), intent(inout) :: sfcflx
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !! ---  optional outputs:
       real (kind=kind_phys), dimension(npts,nlay,nbdsw), optional,      &
-     &       intent(out) :: hswb
+     &       intent(inout) :: hswb
 
       real (kind=kind_phys), dimension(npts,nlay),       optional,      &
-     &       intent(out) :: hsw0
+     &       intent(inout) :: hsw0
       type (profsw_type),    dimension(npts,nlp1),       optional,      &
-     &       intent(out) :: flxprf
+     &       intent(inout) :: flxprf
       type (cmpfsw_type),    dimension(npts),            optional,      &
-     &       intent(out) :: fdncmp
+     &       intent(inout) :: fdncmp
 
 !  ---  locals:
       real (kind=kind_phys), dimension(nlay,ngptsw) :: cldfmc,          &

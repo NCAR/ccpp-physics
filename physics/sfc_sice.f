@@ -52,14 +52,14 @@
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real      | kind_phys | inout  | F        |
 !! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | snwdph         | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                     | mm            |    1 | real      | kind_phys | out    | F        |
-!! | qsurf          | surface_specific_humidity                                                    | sfc air saturation specific humidity                            | kg kg-1       |    1 | real      | kind_phys | out    | F        |
-!! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real      | kind_phys | out    | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                                  | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | out    | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real      | kind_phys | out    | F        |
+!! | snwdph         | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                     | mm            |    1 | real      | kind_phys | inout  | F        |
+!! | qsurf          | surface_specific_humidity                                                    | sfc air saturation specific humidity                            | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real      | kind_phys | inout  | F        |
+!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                                  | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -211,7 +211,7 @@
       real (kind=kind_phys), dimension(im,km), intent(inout) :: stc
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(out) :: snwdph,      &
+      real (kind=kind_phys), dimension(im), intent(inout) :: snwdph,    &
      &       qsurf, snowmt, gflux, cmm, chh, evap, hflx
 
       character(len=*), intent(out) :: errmsg

@@ -9,7 +9,7 @@
 !
 !> \section arg_table_gwdc_pre_init Argument Table
 !!
-      subroutine gwdc_pre_init ()
+      subroutine gwdc_pre_init()
       end subroutine gwdc_pre_init
 
 ! \brief Brief description of the subroutine
@@ -228,22 +228,19 @@
 !
 !-----------------------------------------------------------------------
 
-      integer im, ix, km, lat, ipr
-      integer ktop(im),kbot(im),kcnv(im)
-
-!     real(kind=kind_phys) grav,cp,rd,fv,fhour,fhourpr,deltim
-      real(kind=kind_phys) grav,cp,rd,fv,fhour,deltim,pi
-      real(kind=kind_phys), dimension(im)      :: qmax                  &
-     &,                                           tauctx, taucty
-      real(kind=kind_phys), dimension(im)      :: cldf,dlength
-      real(kind=kind_phys), dimension(ix,km)   :: u1,v1,t1,q1,          &
-     &                                            pmid1,dpmid1
-!    &,                                           cumchr1
-      real(kind=kind_phys), dimension(ix,km)   :: utgwc,vtgwc
-      real(kind=kind_phys), dimension(ix,km+1) :: pint1
-
-      logical lprnt
-
+      integer, intent(in) :: im, ix, km, lat, ipr
+      integer, intent(in) :: ktop(im),kbot(im),kcnv(im)
+      real(kind=kind_phys), intent(in) :: grav,cp,rd,fv,fhour,deltim,pi
+      real(kind=kind_phys), dimension(im), intent(in) :: qmax
+      real(kind=kind_phys), dimension(im), intent(out) :: tauctx,taucty
+      real(kind=kind_phys), dimension(im), intent(in) :: cldf,dlength
+      real(kind=kind_phys), dimension(ix,km), intent(in) :: u1,v1,t1,   &
+     &                                                  q1,pmid1,dpmid1
+      real(kind=kind_phys), dimension(ix,km), intent(out) :: utgwc,vtgwc
+      real(kind=kind_phys), dimension(ix,km+1), intent(in) :: pint1
+!
+      logical, intent(in) :: lprnt
+!
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 

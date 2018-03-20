@@ -415,12 +415,12 @@
 !! | lprnt           | flag_print                                                                                    | flag to print                                             | flag    |    0 | logical     |           | in     | F        |
 !! | cld_cf          | total_cloud_fraction                                                                          | total cloud fraction                                      | frac    |    2 | real        | kind_phys | in     | F        |
 !! | lslwr           | flag_to_calc_lw                                                                               | flag to calculate LW irradiances                          | flag    |    0 | logical     |           | in     | F        |
-!! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | longwave total sky heating rate                           | K s-1   |    2 | real        | kind_phys | out    | F        |
-!! | topflx          | lw_fluxes_top_atmosphere                                                                      | longwave total sky fluxes at the top of the atm           | W m-2   |    1 | topflw_type |           | out    | F        |
-!! | sfcflx          | lw_fluxes_sfc                                                                                 | longwave total sky fluxes at the Earth surface            | W m-2   |    1 | sfcflw_type |           | out    | F        |
-!! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                           | K s-1   |    2 | real        | kind_phys | out    | T        |
-!! | hlwb            | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                | K s-1   |    3 | real        | kind_phys | out    | T        |
-!! | flxprf          | lw_fluxes                                                                                     | lw fluxes total sky / csk and up / down at levels         | W m-2   |    2 | proflw_type |           | out    | T        |
+!! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | longwave total sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | F        |
+!! | topflx          | lw_fluxes_top_atmosphere                                                                      | longwave total sky fluxes at the top of the atm           | W m-2   |    1 | topflw_type |           | inout  | F        |
+!! | sfcflx          | lw_fluxes_sfc                                                                                 | longwave total sky fluxes at the Earth surface            | W m-2   |    1 | sfcflw_type |           | inout  | F        |
+!! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | T        |
+!! | hlwb            | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                | K s-1   |    3 | real        | kind_phys | inout  | T        |
+!! | flxprf          | lw_fluxes                                                                                     | lw fluxes total sky / csk and up / down at levels         | W m-2   |    2 | proflw_type |           | inout  | T        |
 !! | cld_lwp         | cloud_liquid_water_path                                                                       | cloud liquid water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                        | mean effective radius for liquid cloud                    | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_iwp         | cloud_ice_water_path                                                                          | cloud ice water path                                      | g m-2   |    2 | real        | kind_phys | in     | T        |
@@ -649,21 +649,21 @@
      &       aeraod, aerssa
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(npts,nlay), intent(out) :: hlwc
+      real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hlwc
 
-      type (topflw_type),    dimension(npts), intent(out) :: topflx
-      type (sfcflw_type),    dimension(npts), intent(out) :: sfcflx
+      type (topflw_type),    dimension(npts), intent(inout) :: topflx
+      type (sfcflw_type),    dimension(npts), intent(inout) :: sfcflx
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !! ---  optional outputs:
       real (kind=kind_phys), dimension(npts,nlay,nbands),optional,      &
-     &       intent(out) :: hlwb
+     &       intent(inout) :: hlwb
       real (kind=kind_phys), dimension(npts,nlay),       optional,      &
-     &       intent(out) :: hlw0
+     &       intent(inout) :: hlw0
       type (proflw_type),    dimension(npts,nlp1),       optional,      &
-     &       intent(out) :: flxprf
+     &       intent(inout) :: flxprf
       logical, intent(in) :: lslwr
 
 !  ---  locals:

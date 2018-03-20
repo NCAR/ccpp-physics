@@ -48,29 +48,35 @@
                  t,q,save_t,save_qv,                                  &
                  totprcp,dt3dt6,dq3dt4,pwat,errmsg,errflg)              ! output
 
-!
       use machine,               only: kind_phys
       use physcons,              only:  con_g
 
       implicit none
-!
-!     declare variables.
-!
-      integer,intent(in)   :: im, ix, levs, ntcw, ncld
-      integer              :: ic,i,k
-      logical              :: lssav, ldiag3d
-      real(kind=kind_phys) :: frain, dtf, tem
-      real(kind=kind_phys),dimension(im)           :: work1
-      real(kind=kind_phys),dimension(im), intent(in)      :: rain
-      real(kind=kind_phys),dimension(ix,levs), intent(in) :: t,q,       &
-                                             cwm, del, save_t,          &
-                                             save_qv
-      real(kind=kind_phys),dimension(im), intent(inout)   :: totprcp
-      real(kind=kind_phys),dimension(im), intent(out)     :: pwat
-      real(kind=kind_phys),dimension(ix,levs), intent(inout)  ::        &
-                                                        dt3dt6,dq3dt4
+
+      ! Interface variables
+      integer,              intent(in) :: im, ix, levs, ntcw, ncld
+      logical,              intent(in) :: lssav, ldiag3d
+      real(kind=kind_phys), intent(in) :: dtf
+      real(kind=kind_phys), intent(in) :: frain
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: del
+      real(kind=kind_phys), dimension(im),      intent(in)    :: rain
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: cwm
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: t
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: q
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: save_t
+      real(kind=kind_phys), dimension(ix,levs), intent(in)    :: save_qv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: totprcp
+      real(kind=kind_phys), dimension(ix,levs), intent(inout) :: dt3dt6
+      real(kind=kind_phys), dimension(ix,levs), intent(inout) :: dq3dt4
+      real(kind=kind_phys), dimension(im),      intent(out)   :: pwat
+
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
+
+      ! Local variables
+      integer              :: ic,i,k
+      real(kind=kind_phys) :: tem
+      real(kind=kind_phys), dimension(im) :: work1
 
 !     CONSTANT PARAMETERS
       real(kind=kind_phys), parameter :: onebg   = 1.0/con_g

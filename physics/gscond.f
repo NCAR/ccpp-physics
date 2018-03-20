@@ -71,7 +71,6 @@
      &,                  tp1, qp1, psp1, u, lprnt, ipr, errmsg, errflg)
 
 !
-! DH* TODO - add intent information for all variables
 !     ******************************************************************
 !     *                                                                *
 !     *  subroutine for grid-scale condensation & evaporation          *
@@ -96,6 +95,23 @@
 !      use namelist_def, only: nsdfi,fhdfi
       implicit none
 !
+! Interface variables
+      integer,              intent(in)    :: im, ix, km, ipr
+      real(kind=kind_phys), intent(in)    :: dt, dtf
+      real(kind=kind_phys), intent(in)    :: prsl(ix,km), ps(im)
+      real(kind=kind_phys), intent(inout) :: q(ix,km)
+      real(kind=kind_phys), intent(in)    :: clw1(ix,km), clw2(ix,km)
+      real(kind=kind_phys), intent(out)   :: cwm(ix,km)
+      real(kind=kind_phys), intent(inout) :: t(ix,km)                   &
+     &,                     tp(ix,km),   qp(ix,km),   psp(im)           &
+     &,                     tp1(ix,km),  qp1(ix,km),  psp1(im)
+      real(kind=kind_phys), intent(in)    :: u(im,km)
+      logical,              intent(in)    :: lprnt
+!
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+! Local variables
       real (kind=kind_phys) h1
      &,                     d00,  elwv, eliv
      &,                     epsq
@@ -107,14 +123,7 @@
 !
       real(kind=kind_phys), parameter :: cons_0=0.0, cons_m15=-15.0
 !
-      integer im, ix, km, ipr
-      real (kind=kind_phys) q(ix,km),    t(ix,km), cwm(ix,km)           & 
-     &,                     clw1(ix,km), clw2(ix,km)                    &
-     &,                     prsl(ix,km), ps(im), dt,  dtf               &
-     &,                     tp(ix,km),   qp(ix,km),   psp(im)           &
-     &,                     tp1(ix,km),  qp1(ix,km),  psp1(im)
-!
-      real (kind=kind_phys)  qi(im), qint(im), u(im,km), ccrik, e0
+      real (kind=kind_phys)  qi(im), qint(im), ccrik, e0
      &,                      cond,   rdt, us, cclimit, climit
      &,                      tmt0, tmt15, qik, cwmik
      &,                      ai, qw, u00ik, tik, pres, pp0, fi
@@ -125,10 +134,6 @@
      &,                      el2orc, albycp
 !     real (kind=kind_phys) vprs(im)
       integer iw(im,km), i, k, iwik
-      logical lprnt
-!
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
 !
       ! Initialize CCPP error handling variables
       errmsg = ''

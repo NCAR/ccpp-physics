@@ -69,7 +69,6 @@
 !!
 !! \section genal_ozphys General Algorithm
 !> @{
-! DH* TODO add intent() information for variables
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
@@ -82,20 +81,24 @@
       use physcons, only : grav => con_g
       implicit none
 !
-      real, parameter :: gravi=1.0/grav
-      integer im, ix, levs, ko3, pl_coeff, me
-      real(kind=kind_phys) oz(ix,levs), po3(ko3),                       &
-     &                     prsl(ix,levs),  tin(ix,levs), delp(ix,levs), &
-     &                     prdout(ix,ko3,pl_coeff),                     &
-     &                     ozp(ix,levs,pl_coeff), dt
+      ! Interface variables
+      integer, intent(in) :: im, ix, levs, ko3, pl_coeff, me
+      real(kind=kind_phys), intent(inout) ::                            &
+     &                     oz(ix,levs), ozp(ix,levs,pl_coeff)
+      real(kind=kind_phys), intent(in) ::
+     &                     dt, po3(ko3), prdout(ix,ko3,pl_coeff),       &
+     &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs)
+      logical, intent(in) :: ldiag3d
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 !
+      ! Local variables
+      real, parameter :: gravi=1.0/grav
       integer k,kmax,kmin,l,i,j
-      logical              ldiag3d, flg(im)
+      logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
      &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
 !
       ! Initialize CCPP error handling variables
       errmsg = ''

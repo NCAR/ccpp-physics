@@ -62,9 +62,9 @@
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                               | m s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                 | updated y-direction wind                               | m s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | rn             | lwe_thickness_of_shallow_convective_precipitation_amount  | shallow convective rainfall amount on physics timestep | m       |    1 | real      | kind_phys | out    | F        |
-!! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                                    | index   |    1 | integer   |           | out    | F        |
-!! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                                     | index   |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                           | flag    |    1 | integer   |           | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                              | index at cloud base                                    | index   |    1 | integer   |           | inout  | F        |
+!! | ktop           | vertical_index_at_cloud_top                               | index at cloud top                                     | index   |    1 | integer   |           | inout  | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                           | flag    |    1 | integer   |           | inout  | F        |
 !! | islimsk        | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                           | flag    |    1 | integer   |           | in     | F        |
 !! | garea          | cell_area                                                 | grid cell area                                         | m2      |    1 | real      | kind_phys | in     | F        |
 !! | dot            | omega                                                     | layer mean vertical velocity                           | Pa s-1  |    2 | real      | kind_phys | in     | F        |
@@ -92,7 +92,6 @@
 !!
 !!  \section detailed_mfshal Detailed Algorithm
 !!  @{
-! DH* TODO add intent information for all variables
       subroutine sasas_shal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1, &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
@@ -107,24 +106,32 @@
 !
 ! In the current NCEP spectral model im <= ix for reduced grid numbers
 ! near the pole and a parallel computing. For FV3, im=ix.
-      integer            im, ix,  km, ncloud,                           &
-     &                   kbot(im), ktop(im), kcnv(im)
-!    &,                  me
-      real(kind=kind_phys) delt
-      real(kind=kind_phys) psp(im),    delp(ix,km), prslp(ix,km)
-      real(kind=kind_phys) ps(im),     del(ix,km),  prsl(ix,km),        &
-     &                     ql1(ix,km), ql2(ix,km),  q1(ix,km),          &
-     &                     t1(ix,km),                                   &
-     &                     u1(ix,km),  v1(ix,km),                       & !rcs(im),
-     &                     rn(im),     garea(im),                       &
-     &                     dot(ix,km), phil(ix,km), hpbl(im),           &
-     &                     cnvw(ix,km),cnvc(ix,km)                      &
-     &,                    ud_mf(im,km),dt_mf(im,km)                    & ! hchuang code change mass flux output
-
+!
+! Interface variables
+      integer, intent(in) :: im, ix,  km, ncloud
+      integer, intent(inout) :: kbot(im), ktop(im), kcnv(im)
+!
+      real(kind=kind_phys), intent(in) :: delt
+      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
+     &                     prslp(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(inout) :: ql1(ix,km), ql2(ix,km),    &
+     &                     q1(ix,km), t1(ix,km), u1(ix,km), v1(ix,km)
+      real(kind=kind_phys), intent(out) :: rn(im)
+!
+      integer, intent(in) :: islimsk(im)
+      real(kind=kind_phys), intent(in) :: garea(im), dot(ix,km),        &
+     &                     hpbl(im)
+      real(kind=kind_phys), intent(out) :: cnvw(ix,km), cnvc(ix,km),    &
+     &                     ud_mf(im,km), dt_mf(im,km)                     ! hchuang code change mass flux output
+!
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+! Local variables
+      real(kind=kind_phys) ps(im), del(ix,km), prsl(ix,km)
 !
       integer              i,j,indx, k, kk, km1, n
       integer              kpbl(im)
-      integer, dimension(im), intent(in) :: islimsk
 !
       real(kind=kind_phys) dellat,  delta,
      &                     c0l,     c0s,     d0,
@@ -225,9 +232,6 @@ c  cloud water
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 !
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-!
 c-----------------------------------------------------------------------
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -273,7 +277,13 @@ c
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
-      if(totflg) return
+      if (totflg) then
+        cnvw  = 0.
+        cnvc  = 0.
+        ud_mf = 0.
+        dt_mf = 0.
+        return
+      endif
 !!
 !>  - determine aerosol-aware rain conversion parameter over land
       do i=1,im
