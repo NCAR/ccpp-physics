@@ -733,10 +733,10 @@ cc
 !! | errmsg         | error_message                                          | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
 !!
-! \section NSST_general_algorithm General Algorithm
+! \section NSST_general_pre_algorithm General Algorithm
 !!
 !!
-! \section NSST_detailed_algorithm Detailed Algorithm
+! \section NSST_detailed_pre_algorithm Detailed Algorithm
 !! @{
       subroutine sfc_nst_pre_run                                        &
      &    (im, islimsk, oro, oro_uf, tsfc, tsurf, tskin, errmsg, errflg)
@@ -834,12 +834,9 @@ cc
 !! | errmsg         | error_message                                          | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section NSST_general_algorithm General Algorithm
+!! \section NSST_general_post_algorithm General Algorithm
 !!
-! \section NSST_general_algorithm General Algorithm
-!
-!
-! \section NSST_detailed_algorithm Detailed Algorithm
+!! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
      &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &

@@ -490,7 +490,7 @@
 !!  - module_radsw_kgbnn: absorption coefficents for 14 bands, where
 !!    nn = 16-29
 !! - radsw_main.f, which contains:
-!!  - \ref module_radsw_main: the main SW radiation computation source codes
+!!  - module_radsw_main: the main SW radiation computation source codes
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com
