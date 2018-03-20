@@ -83,7 +83,7 @@
       integer, intent(in) :: im, ix, levs, ko3, pl_coeff, me
       real(kind=kind_phys), intent(inout) ::                            &
      &                     oz(ix,levs), ozp(ix,levs,pl_coeff)
-      real(kind=kind_phys), intent(in) ::
+      real(kind=kind_phys), intent(in) ::                               &
      &                     dt, po3(ko3), prdout(ix,ko3,pl_coeff),       &
      &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs)
       logical, intent(in) :: ldiag3d
