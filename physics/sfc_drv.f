@@ -12,7 +12,7 @@
 
 !! \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsm_Noah_pre_run Argument Table
+!! \section arg_table_lsm_noah_pre_run Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
@@ -30,9 +30,6 @@
 !! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
-!  \section lsm_pre_general General Algorithm
-!  \section lsm_pre_detailed Detailed Algorithm
-!  @{
       subroutine lsm_noah_pre_run                                       &
      &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
      &   smcref2,errmsg,errflg                                          &
@@ -70,7 +67,6 @@
 
       end module lsm_noah_pre
 
-! @}
 
       module lsm_noah_post
       contains
@@ -83,7 +79,7 @@
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_lsm_Noah_post_run Argument Table
+!! \section arg_table_lsm_noah_post_run Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
@@ -260,7 +256,7 @@
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well 
 !! as diagnotics calculation. 
-!! \section arg_table_lsm_Noah_run Argument Table
+!! \section arg_table_lsm_noah_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |

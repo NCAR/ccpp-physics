@@ -4,8 +4,8 @@
       module rayleigh_damp
       contains
 
-! \section arg_table_rayleigh_damp_init Argument Table
-!
+!> \section arg_table_rayleigh_damp_init Argument Table
+!!
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 

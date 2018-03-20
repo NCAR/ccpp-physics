@@ -9,17 +9,17 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_gscond_init  Argument Table
-!
-       subroutine gscond_init
-       end subroutine gscond_init
+!> \section arg_table_gscond_init  Argument Table
+!!
+       subroutine zhaocarr_gscond_init
+       end subroutine zhaocarr_gscond_init
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_gscond_finalize  Argument Table
-!
-       subroutine gscond_finalize
-       end subroutine gscond_finalize
+!> \section arg_table_gscond_finalize  Argument Table
+!!
+       subroutine zhaocarr_gscond_finalize
+       end subroutine zhaocarr_gscond_finalize
 
 
 !> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
@@ -30,7 +30,7 @@
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
-!! \section arg_table_gscond_run Argument Table
+!! \section arg_table_zhaocarr_gscond_run Argument Table
 !! | local_name     | standard_name                                              | long_name                                                | units   | rank |  type     |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------|----------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                     | horizontal loop extent                                   | count   |    0 | integer   |           | in     | F        |

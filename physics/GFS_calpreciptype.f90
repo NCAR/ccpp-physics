@@ -5,10 +5,8 @@
 !>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
 !!\brief This scheme contains the subroutine that calculates dominant
 !! precipitation type and its post, which provides precipitation forcing
-!! to LSM
+!! to LSM.
 !!
-!!\section intraphysics Intraphysics Communication
-!
       module GFS_calpreciptype
       contains
 !! \section arg_table_GFS_calpreciptype_init Argument Table

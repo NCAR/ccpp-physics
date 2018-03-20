@@ -8,20 +8,20 @@
       module ozphys_pre
       contains
 
-! \section arg_table_ozphys_pre_init Argument Table
-!
+!> \section arg_table_ozphys_pre_init Argument Table
+!!
       subroutine ozphys_pre_init()
       end subroutine ozphys_pre_init
 
 
-! \section arg_table_ozphys_pre_run Argument Table
-!
+!> \section arg_table_ozphys_pre_run Argument Table
+!!
       subroutine ozphys_pre_run()
       end subroutine ozphys_pre_run
 
 
-! \section arg_table_ozphys_pre_finalize Argument Table
-!
+!> \section arg_table_ozphys_pre_finalize Argument Table
+!!
       subroutine ozphys_pre_finalize()
       end subroutine ozphys_pre_finalize
 
@@ -35,7 +35,7 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_ozphys_init Argument Table
+!> \section arg_table_ozphys_init Argument Table
 !!
       subroutine ozphys_init()
       end subroutine ozphys_init
@@ -208,7 +208,7 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_ozphys_finalize Argument Table
+!> \section arg_table_ozphys_finalize Argument Table
 !!
       subroutine ozphys_finalize()
       end subroutine ozphys_finalize
@@ -220,8 +220,8 @@
 
       contains
 
-! \section arg_table_ozphys_post_init Argument Table
-!
+!> \section arg_table_ozphys_post_init Argument Table
+!!
       subroutine ozphys_post_init()
       end subroutine ozphys_post_init
 
@@ -270,8 +270,8 @@
       end subroutine ozphys_post_run
 
 
-! \section arg_table_ozphys_post_finalize Argument Table
-!
+!> \section arg_table_ozphys_post_finalize Argument Table
+!!
       subroutine ozphys_post_finalize()
       end subroutine ozphys_post_finalize
 

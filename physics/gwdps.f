@@ -7,8 +7,8 @@
 
       contains
 
-! \section arg_table_gwdps_pre_init Argument Table
-!
+!> \section arg_table_gwdps_pre_init Argument Table
+!!
       subroutine gwdps_pre_init()
       end subroutine gwdps_pre_init
 
@@ -108,8 +108,8 @@
 ! \ingroup GFS_ogwd
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_gwdps_pre_finalize Argument Table
-!
+!> \section arg_table_gwdps_pre_finalize Argument Table
+!!
       subroutine gwdps_pre_finalize()
       end subroutine gwdps_pre_finalize
 
@@ -121,8 +121,8 @@
 
       contains
 
-! \section arg_table_gwdps_init Argument Table
-!
+!> \section arg_table_gwdps_init Argument Table
+!!
       subroutine gwdps_init()
       end subroutine gwdps_init
 
@@ -1256,8 +1256,8 @@
 !> @}
 
 !
-! \section arg_table_gwdps_finalize Argument Table
-!
+!> \section arg_table_gwdps_finalize Argument Table
+!!
       subroutine gwdps_finalize()
       end subroutine gwdps_finalize
 
@@ -1269,8 +1269,8 @@
 
       contains
 
-! \section arg_table_gwdps_post_init Argument Table
-!
+!! \section arg_table_gwdps_post_init Argument Table
+!!
       subroutine gwdps_post_init()
       end subroutine gwdps_post_init
 
@@ -1328,8 +1328,8 @@
 
       end subroutine gwdps_post_run
 
-! \section arg_table_gwdps_post_finalize Argument Table
-!
+!> \section arg_table_gwdps_post_finalize Argument Table
+!!
       subroutine gwdps_post_finalize()
       end subroutine gwdps_post_finalize
 

@@ -40,8 +40,6 @@
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer              :: i,k
-
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
