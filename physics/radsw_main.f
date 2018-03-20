@@ -489,11 +489,8 @@
 !!                        distribution of solar flux
 !!  - module_radsw_kgbnn: absorption coefficents for 14 bands, where
 !!    nn = 16-29
-!! -  mersenne_twister.f, which contains:
-!!  - mersenne_twister: program of random number generators using the
-!!    Mersenne-Twister algorithm
 !! - radsw_main.f, which contains:
-!!  - rrtmg_sw: the main SW radiation computation source codes
+!!  - \ref module_radsw_main: the main SW radiation computation source codes
 !!
 !!\author   Eli J. Mlawer, emlawer@aer.com
 !!\author   Jennifer S. Delamere, jdelamer@aer.com

@@ -705,30 +705,21 @@ cc
       contains
 
 ! \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
-! \brief Brief description of the parameterization
-!
-! \section intraphysics Intraphysics Communication
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land
 !! surface model and the sice simplified ice model.
-!!
-!> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_nst_init  Argument Table
 !!
       subroutine sfc_nst_pre_init
       end subroutine sfc_nst_pre_init
 
-!> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_pre_finalize
       end subroutine sfc_nst_pre_finalize
 
-!> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_nst_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                      | units | rank | type      |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|----------------------------------------------- |-------|------|-----------|-----------|--------|----------|

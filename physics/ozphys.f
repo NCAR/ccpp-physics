@@ -3,8 +3,6 @@
 
 !> \defgroup GFS_ozn GFS Ozone Physics 
 !!
-!! \section intra_oz Intraphysics Communication
-!! 
       module ozphys_pre
       contains
 

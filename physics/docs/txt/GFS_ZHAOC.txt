@@ -60,7 +60,7 @@
  \cite heymsfield_and_mcfarquhar_1996) was introduced.
 
 \section intro_zhao 2. Intraphysics Communication
- + For grid-scale condensation and evaporation of cloud process (\ref arg_table_gscond_run)
+ + For grid-scale condensation and evaporation of cloud process (\ref arg_table_zhaocarr_gscond_run)
  + For precipitation (snow or rain) production (\ref arg_table_zhaocarr_precpd_run)
 
 \section Gen_zhao  3. General Algorithm

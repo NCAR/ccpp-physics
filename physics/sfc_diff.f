@@ -13,11 +13,9 @@
       end subroutine sfc_ex_coef_finalize
 
 !> \defgroup sfc_layer GFS Surface Layer 
-!!
 !> \defgroup GFS_diff_main GFS sfc_diff Main
-!! \ingroup Sfc_layer
-!> \brief This is the first subroutine called in surface layer loop to 
-!! calculate surface roughness length.
+!! \ingroup sfc_layer
+!> \brief This  subroutine calculates surface roughness length.
 !! \section arg_table_sfc_ex_coef_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|

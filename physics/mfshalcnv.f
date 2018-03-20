@@ -1,6 +1,83 @@
 !>  \file mfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
+      module sasas_shal_post
+      contains
+
+!! \section arg_table_sasas_shal_post_run Argument Table
+!! | local_name     | standard_name                                            | long_name                                                            | units   | rank | type             |    kind   | intent | optional |
+!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|------------------|-----------|--------|----------|
+!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
+!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real             | kind_phys | in     | F        |
+!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type    |           | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type    |           | inout  | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type     |           | inout  | F        |
+!! | errmsg         | error_message                                            | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | error_flag                                               | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
+!!
+      subroutine sasas_shal_post_run (frain, rain1, cnvc, cnvw, Model,   &
+     &                                Grid, Diag, Tbd, errmsg, errflg)
+
+        use machine,               only: kind_phys
+        use GFS_typedefs,          only: GFS_control_type,              &
+     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
+        implicit none
+!
+        type(GFS_grid_type),            intent(in) :: Grid
+        type(GFS_control_type),         intent(in) :: Model
+        type(GFS_diag_type),         intent(inout) :: Diag
+        type(GFS_tbd_type),          intent(inout) :: Tbd
+
+        real(kind=kind_phys), intent(in) :: frain
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
+     &     intent(in) :: rain1
+        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
+     &     intent(in) :: cnvw, cnvc
+
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
+        integer :: num2, num3
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        raincs(:)     = frain * rain1(:)
+        Diag%rainc(:) = Diag%rainc(:) + raincs(:)
+        if (Model%lssav) then
+          Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
+        endif
+        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
+     &                             (Model%npdf3d == 3)) then
+          num2 = Model%num_p3d + 2
+          num3 = num2 + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+          Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
+        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
+          num2 = Model%num_p3d + 1
+          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
+        endif
+
+      end subroutine sasas_shal_post_run
+
+!! \section arg_table_sasas_shal_post_init Argument Table
+!!
+      subroutine sasas_shal_post_init ()
+      end subroutine sasas_shal_post_init
+
+!! \section arg_table_sasas_shal_post_finalize Argument Table
+!!
+      subroutine sasas_shal_post_finalize ()
+      end subroutine sasas_shal_post_finalize
+
+      end module sasas_shal_post
+
+
       module sasas_shal
       contains
 
@@ -1729,78 +1806,3 @@ c
 
       end module sasas_shal
 
-      module sasas_shal_post
-      contains
-
-!! \section arg_table_sasas_shal_post_run Argument Table
-!! | local_name     | standard_name                                            | long_name                                                            | units   | rank | type             |    kind   | intent | optional |
-!! |----------------|----------------------------------------------------------|----------------------------------------------------------------------|---------|------|------------------|-----------|--------|----------|
-!! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
-!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
-!! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real             | kind_phys | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type    |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type    |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type     |           | inout  | F        |
-!! | errmsg         | error_message                                            | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                               | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
-!!
-      subroutine sasas_shal_post_run (frain, rain1, cnvc, cnvw, Model,   &
-     &                                Grid, Diag, Tbd, errmsg, errflg)
-
-        use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type,              &
-     &     GFS_grid_type, GFS_diag_type, GFS_tbd_type
-        implicit none
-!
-        type(GFS_grid_type),            intent(in) :: Grid
-        type(GFS_control_type),         intent(in) :: Model
-        type(GFS_diag_type),         intent(inout) :: Diag
-        type(GFS_tbd_type),          intent(inout) :: Tbd
-
-        real(kind=kind_phys), intent(in) :: frain
-        real(kind=kind_phys), dimension(size(Grid%xlon,1)),             &
-     &     intent(in) :: rain1
-        real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs),  &
-     &     intent(in) :: cnvw, cnvc
-
-        character(len=*), intent(out) :: errmsg
-        integer,          intent(out) :: errflg
-
-        real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: raincs
-        integer :: num2, num3
-
-        ! Initialize CCPP error handling variables
-        errmsg = ''
-        errflg = 0
-
-        raincs(:)     = frain * rain1(:)
-        Diag%rainc(:) = Diag%rainc(:) + raincs(:)
-        if (Model%lssav) then
-          Diag%cnvprcp(:) = Diag%cnvprcp(:) + raincs(:)
-        endif
-        if ((Model%shcnvcw) .and. (Model%num_p3d == 4) .and.            &
-     &                             (Model%npdf3d == 3)) then
-          num2 = Model%num_p3d + 2
-          num3 = num2 + 1
-          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-          Tbd%phy_f3d(:,:,num3) = cnvc(:,:)
-        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then
-          num2 = Model%num_p3d + 1
-          Tbd%phy_f3d(:,:,num2) = cnvw(:,:)
-        endif
-
-      end subroutine sasas_shal_post_run
-
-!! \section arg_table_sasas_shal_post_init Argument Table
-!!
-      subroutine sasas_shal_post_init ()
-      end subroutine sasas_shal_post_init
-
-!! \section arg_table_sasas_shal_post_finalize Argument Table
-!!
-      subroutine sasas_shal_post_finalize ()
-      end subroutine sasas_shal_post_finalize
-
-      end module sasas_shal_post

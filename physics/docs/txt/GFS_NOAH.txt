@@ -47,7 +47,7 @@ This scheme includes the following modules:
  + \ref Noah_LSM
 
 \section intra_noah 2. Intraphysics Communication
- +  GFS Noah LSM Driver (\ref arg_table_lsm_Noah_run)
+ +  GFS Noah LSM Driver (\ref arg_table_lsm_noah_run)
  +  GFS Noah LSM Model (gfssflx())
 
 \section gen_al_noah 3. General Algorithm

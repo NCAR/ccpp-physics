@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Documentation"
-PROJECT_NUMBER         = "Version 1"
+PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Scientific Documentation"
+PROJECT_NUMBER         = "Version 1.0"
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
