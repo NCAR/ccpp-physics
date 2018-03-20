@@ -1511,9 +1511,7 @@ c
       enddo
 !!
       return
-
       end subroutine sasas_shal_run
-
 !> @}
 
 !> \brief Brief description of the subroutine

@@ -209,7 +209,6 @@
 !! hypothesis in order to find wave breaking levels in terms of the
 !! Richardon number criterion using the nonlinearity factor of
 !! thermally induced waves.
-
 !> \param[in] IM       horizontal number of used pts
 !> \param[in] IX       horizontal dimension
 !> \param[in] KM       vertical layer dimension

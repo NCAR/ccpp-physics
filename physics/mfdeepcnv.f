@@ -384,6 +384,7 @@ c     evef    = 0.07
 !> hydrostatic height assume zero terr and initially assume
 !!   updraft entrainment rate as an inverse function of height
 
+
       do k = 1, km
         do i=1,im
           zo(i,k) = phil(i,k) / g

@@ -1,4 +1,3 @@
-
 # All CCPP schemes are defined here.
 #
 # This file is auto-generated using ccpp_prebuild.py
@@ -10,4 +9,4 @@ SCHEMES_F90 =
 
 SCHEMES_f =
 
-SCHEMES_f90 = 
+SCHEMES_f90 =

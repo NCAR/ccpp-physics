@@ -1270,7 +1270,6 @@ C      return
 C      end
 C
 C-----------------------------------------------------------------------
-
 !>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate u- and v-momentum at \f$ t + \Delta t \f$; part of two-part process to calculate time tendencies due to vertical diffusion.
 !!

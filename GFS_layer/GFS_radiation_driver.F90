@@ -1214,7 +1214,7 @@
 
 ! CCPP: L1211-1577
       call GFS_rrtmg_pre_run (Model, Grid, Sfcprop,  Statein,          & ! input
-          Tbd, Cldprop, Radtend,                                       &
+          Tbd, Cldprop, Radtend,                                       &  
           lm, im, lmk, lmp, kd, kt, kb,  raddt, plvl, plyr,            & ! output
           tlvl, tlyr, tsfg, tsfa,  qlyr, olyr,                         &
           gasvmr(:,:,1), gasvmr(:,:,2), gasvmr(:,:,3),                 &
