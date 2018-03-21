@@ -23,7 +23,7 @@ module GFS_initialize_scm
   end subroutine GFS_initialize_scm_finalize
 
 !> \section arg_table_GFS_initialize_scm_run Argument Table
-!! | local_name       | standard_name                                                    | long_name                                                             | units         | rank | type                          |    kind   | intent | optional |
+!! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model                | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
 !! | Statein              | FV3-GFS_Statein_type                                        | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type              |           | inout  | F        |
@@ -42,16 +42,16 @@ module GFS_initialize_scm
 !! | n_ozone_lats         | number_of_latitutde_points_in_ozone_forcing_data_from_host  | number of latitude points in ozone forcing data coming from host        | count         |    0 | integer                       |           | in     | F        |
 !! | n_ozone_times        | number_of_time_levels_in_ozone_forcing_data_from_host       | number of time levels in ozone forcing data coming from host            | count         |    0 | integer                       |           | in     | F        |
 !! | n_ozone_coefficients | number_of_coefficients_in_ozone_forcing_data_from_host      | number of coeffcients in ozone forcing data coming from host            | count         |    0 | integer                       |           | in     | F        |
-!! | ozone_lat           | latitude_of_ozone_forcing_data_from_host                    | latitude value of the ozone forcing data coming from host               | degree        |    1 | real                          | kind_phys | in     | F        |
+!! | ozone_lat            | latitude_of_ozone_forcing_data_from_host                    | latitude value of the ozone forcing data coming from host               | degree        |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_pres           | natural_log_of_ozone_forcing_data_pressure_levels_from_host | natural logarithm of the pressure levels of the ozone forcing data      | Pa            |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_time           | time_levels_in_ozone_forcing_data_from_host                 | time values of the ozone forcing data coming from host                  | day           |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_forcing_in     | ozone_forcing_from_host                                     | ozone forcing data from host                                            | various       |    4 | real                          | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
-  subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,     &
-                             Coupling, Grid, Tbd, Cldprop, Radtend, &
-                             Diag, Sfccycle, Interstitial, Init_parm, n_ozone_lats, &
+  subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,           &
+                             Coupling, Grid, Tbd, Cldprop, Radtend, Diag,         &
+                             Sfccycle, Interstitial, Init_parm, n_ozone_lats,     &
                              n_ozone_layers, n_ozone_times, n_ozone_coefficients, &
                              ozone_lat, ozone_pres, ozone_time, ozone_forcing_in, &
                              errmsg, errflg)
@@ -70,9 +70,6 @@ module GFS_initialize_scm
     use aer_cloud,           only: aer_cloud_init
     use module_ras,          only: ras_init
     use ozne_def,            only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
-#ifdef OPENMP
-    use omp_lib
-#endif
 
     !--- interface variables
     type(GFS_control_type),      intent(inout) :: Model
