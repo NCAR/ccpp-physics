@@ -1,3 +1,8 @@
+!>\file module_nst_water_prop.f90
+!>\defgroup nst_water_prop GFS NSST Water Prop Module
+!! @{
+!>\ingroup GFS_NSST
+!!\brief
 module module_nst_water_prop
   use machine, only : kind_phys
   use module_nst_parameters, only : t0k
@@ -34,6 +39,8 @@ module module_nst_water_prop
   end interface
 contains
   ! ------------------------------------------------------
+!> This subroutine computes thermal expansion coefficient (alpha)
+!! and saline contraction coefficient (beta). 
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
 
@@ -76,6 +83,7 @@ contains
 
   end subroutine rhocoef
   ! ----------------------------------------
+!> This subroutine computes sea water density.
   subroutine density(t, s, rho)
     ! ----------------------------------------
     implicit none
@@ -112,6 +120,8 @@ contains
   !
   !======================
   !
+!> This subroutine computes the fraction of the solar radiation absorbed 
+!! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z 
@@ -447,6 +457,7 @@ function grv(lat)
   !print *,'grav=',grv,lat
 end function grv
 
+!>This subroutine computes solar time from the julian date.
 subroutine solar_time_from_julian(jday,xlon,soltim)
   !
   ! calculate solar time from the julian date
@@ -470,6 +481,8 @@ end subroutine solar_time_from_julian
 !
 !***********************************************************************
 !
+!> This subroutine computes julian day and fraction from year,
+!! month, day and time UTC.
       subroutine compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
 !fpp$ noconcur r
 !$$$  subprogram documentation block
@@ -517,6 +530,7 @@ end subroutine solar_time_from_julian
       endif
       end subroutine compjd
 
+!>This subroutine computes dtm (the mean of \f$dT(z)\f$). 
  subroutine get_dtzm_point(xt,xz,dt_cool,zc,z1,z2,dtm)
 ! ===================================================================== !
 !                                                                       !
@@ -701,3 +715,4 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_2d
 
 end module module_nst_water_prop
+!! @}

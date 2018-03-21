@@ -2,8 +2,8 @@
 !! This file contains module radcons
 
 
-!> \ingroup rad 
-!! \defgroup radcons radcons
+!> \defgroup radcons GFS RRTMG Contants
+!! \ingroup RRTMG
 !! This module contains some of the most frequently used math and physics 
 !! constants for GCM models.
 !! @{

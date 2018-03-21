@@ -33,13 +33,12 @@
 !     declare variables.
 
       integer,intent(in)   :: im, ix, levs
+      integer              :: i,k
       real(kind=kind_phys),dimension(ix,levs), intent(in)  ::  cwm 
       real(kind=kind_phys),dimension(ix,levs), intent(out) ::  clw1
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-
-      integer              :: i,k
 
       ! Initialize CCPP error handling variables
       errmsg = ''
