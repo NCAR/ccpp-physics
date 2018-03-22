@@ -107,7 +107,7 @@
       integer, intent(in) :: im, km
 
       logical, intent(in) :: flag_lssav
-      real, intent (in)   :: dtf
+      real(kind=kind_phys), intent (in)   :: dtf
 
       real(kind=kind_phys), dimension(im), intent(in   )  ::            &
      &    drain, runof
