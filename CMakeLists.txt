@@ -1,6 +1,9 @@
 #------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 2.8.11)
 
+# Use rpaths on MacOSX
+set(CMAKE_MACOSX_RPATH 1)
+
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
     project(check VERSION 0.0.1)
@@ -14,7 +17,7 @@ endif(POLICY CMP0048)
 
 #------------------------------------------------------------------------------
 set(PACKAGE "gfsphysics")
-set(AUTHORS  "Grant J. Firl")
+set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 
 #------------------------------------------------------------------------------
 # Enable Fortran
@@ -26,29 +29,20 @@ enable_language(Fortran)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmtb-ccpp/cmake")
 
 #------------------------------------------------------------------------------
-# Find OpenMP for C/C++
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  message(STATUS "Enabled OpenMP support for C/C++ compiler")
-else(OPENMP_FOUND)
-  message (STATUS "C/C++ compiler does not support OpenMP")
+# Find OpenMP for C/C++/Fortran
+if (OPENMP)
+  find_package(OpenMP)
+  if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+    message(STATUS "Enabled OpenMP support for C/C++/Fortran compiler")
+  else(OPENMP_FOUND)
+    message (FATAL_ERROR "C/C++/Fortran compiler does not support OpenMP")
+  endif()
+else(OPENMP)
+    message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
 endif()
-
-#------------------------------------------------------------------------------
-# Find OpenMP for Fortran
-FIND_PACKAGE(OpenMP_Fortran)
-if(OpenMP_FLAG_DETECTED)
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-  message(STATUS "Enabled OpenMP support for Fortran compiler")
-else(OpenMP_FLAG_DETECTED)
-  message (STATUS "Fortran compiler does not support OpenMP")
-endif()
-
-message (STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
-message (STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-message (STATUS "CMAKE_Fortran_FLAGS: ${CMAKE_Fortran_FLAGS}")
 
 #------------------------------------------------------------------------------
 # The Fortran compiler/linker flag inserted by cmake to create shared libraries
@@ -66,8 +60,8 @@ endif()
 #------------------------------------------------------------------------------
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to 'Debug' as none was specified.")
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
@@ -245,6 +239,7 @@ set(SOURCES
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   set(f_flags -ffree-line-length-none)
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
 
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
@@ -262,7 +257,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
-  message ("This program has only been compiled with gfortran and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
+  message (FATAL_ERROR "This program has only been compiled with gfortran and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
 
 #apply general fortran tags to all fortran source files
@@ -301,5 +296,5 @@ add_library(gfsphysics ${SOURCES})
 target_link_libraries(gfsphysics LINK_PUBLIC ${LIBS} w3 sp bacio)
 set_target_properties(gfsphysics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
-                                     COMPILE_FLAGS ${OpenMP_Fortran_FLAGS}
-                                     LINK_FLAGS ${OpenMP_Fortran_FLAGS})
+                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}"
+                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
