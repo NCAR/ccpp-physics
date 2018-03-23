@@ -75,7 +75,7 @@
 
       close(kozpl)
 
-  END SUBROUTINE read_o3data
+      END SUBROUTINE read_o3data
 !
 !**********************************************************************
 !

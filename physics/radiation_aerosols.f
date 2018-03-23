@@ -116,8 +116,7 @@
 
 
 !> \ingroup RRTMG
-!! \defgroup module_radiation_aerosols module_radiation_aerosols
-!> @{
+!! \defgroup module_radiation_aerosols RRTMG Aerosols Module
 !!  This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
@@ -167,28 +166,28 @@
 !    &   VTAGAER='NCEP-Radiation_aerosols  v5.0  Aug 2012 '
 
 ! --- general use parameter constants:
-!> num of output fields for SW rad
+! num of output fields for SW rad
       integer, parameter, public :: NF_AESW = 3
-!> num of output fields for LW rad
+! num of output fields for LW rad
       integer, parameter, public :: NF_AELW = 3
-!> starting band number in ir region
+! starting band number in ir region
       integer, parameter, public :: NLWSTR  = 1
-!> num of species for output aod (opnl)
+! num of species for output aod (opnl)
       integer, parameter, public :: NSPC    = 5
-!> total+species
+! total+species
       integer, parameter, public :: NSPC1   = NSPC + 1
 
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
 
 !  ---  module control parameters set in subroutine "aer_init"
-!> number of actual bands for sw aerosols; calculated according to
+! number of actual bands for sw aerosols; calculated according to
 !! laswflg setting
       integer, save :: NSWBND  = NBDSW
-!> number of actual bands for lw aerosols; calculated according to
+! number of actual bands for lw aerosols; calculated according to
 !! lalwflg and lalw1bd settings
       integer, save :: NLWBND  = NBDLW
-!> total number of bands for sw+lw aerosols
+! total number of bands for sw+lw aerosols
       integer, save :: NSWLWBD = NBDSW+NBDLW
 
 ! --------------------------------------------------------------------- !
@@ -197,15 +196,15 @@
 ! --------------------------------------------------------------------- !
 
 !  ---  parameter constants:
-!> num of wvnum regions where solar flux is constant
+! num of wvnum regions where solar flux is constant
       integer, parameter, public :: NWVSOL  = 151
 
-!> total num of wvnum included
+! total num of wvnum included
       integer, parameter, public :: NWVTOT  = 57600
-!> total num of wvnum in ir range
+! total num of wvnum in ir range
       integer, parameter, public :: NWVTIR  = 4000
 
-!> number of wavenumbers in each region where the solar flux is constant
+! number of wavenumbers in each region where the solar flux is constant
       integer, dimension(NWVSOL), save :: nwvns0
 
       data nwvns0   / 100,  11,  14,  18,  24,  33,  50,  83,  12,  12, &
@@ -221,7 +220,7 @@
      & 483, 505, 529, 554, 580, 610, 641, 675, 711, 751, 793, 841, 891, &
      & 947,1008,1075,1150,1231,1323,1425,1538,1667,1633,14300 /
 
-!> solar flux \f$w/m^2\f$ in each wvnumb region where it is constant
+! solar flux \f$w/m^2\f$ in each wvnumb region where it is constant
       real (kind=kind_phys), dimension(NWVSOL), save :: s0intv
 
       data  s0intv(  1: 50)       /                                     &
@@ -264,22 +263,22 @@
 ! --------------------------------------------------------------------- !
 
 !  ---  parameter constants:
-!> lower limit (year) data available
+! lower limit (year) data available
       integer, parameter :: MINVYR = 1850
-!> upper limit (year) data available
+! upper limit (year) data available
       integer, parameter :: MAXVYR = 1999
 
-!> monthly, 45-deg lat-zone aerosols data set in subroutine 'aer_init'
+! monthly, 45-deg lat-zone aerosols data set in subroutine 'aer_init'
       integer, allocatable, save :: ivolae(:,:,:)
 
 !  ---  static control variables:
-!> starting year of data in the input file
+! starting year of data in the input file
       integer :: kyrstr
-!> ending year of data in the input file
+! ending year of data in the input file
       integer :: kyrend
-!> the year of data in use in the input file
+! the year of data in use in the input file
       integer :: kyrsav
-!> the month of data in use in the input file
+! the month of data in use in the input file
       integer :: kmonsav
 
 ! --------------------------------------------------------------------- !
@@ -288,27 +287,27 @@
 ! --------------------------------------------------------------------- !
 
 !  ---  parameters and constants:
-!> num of max componets in a profile
+! num of max componets in a profile
       integer, parameter :: NXC = 5
-!> num of aerosols profile structures
+! num of aerosols profile structures
       integer, parameter :: NAE = 7
-!> num of atmos aerosols domains
+! num of atmos aerosols domains
       integer, parameter :: NDM = 5
-!> num of lon-points in glb aeros data set
+! num of lon-points in glb aeros data set
       integer, parameter :: IMXAE = 72
-!> num of lat-points in glb aeros data set
+! num of lat-points in glb aeros data set
       integer, parameter :: JMXAE = 37
-!> num of bands for clim aer data (opac)
+! num of bands for clim aer data (opac)
       integer, parameter :: NAERBND=61
-!> num of rh levels for rh-dep components
+! num of rh levels for rh-dep components
       integer, parameter :: NRHLEV =8
-!> num of rh independent aeros species
+! num of rh independent aeros species
       integer, parameter :: NCM1 = 6
-!> num of rh dependent aeros species
+! num of rh dependent aeros species
       integer, parameter :: NCM2 = 4
       integer, parameter :: NCM  = NCM1+NCM2
 
-!> predefined relative humidity levels
+! predefined relative humidity levels
       real (kind=kind_phys), dimension(NRHLEV), save :: rhlev
       data  rhlev (:) / 0.0, 0.5, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99 /
 
@@ -319,11 +318,11 @@
 !      prsref(NDM,NAE)  - ref pressure lev (sfc to toa) in mb (100Pa)
 !      sigref(NDM,NAE)  - ref sigma lev (sfc to toa)
 
-!> scale height of aerosols (km)
+! scale height of aerosols (km)
       real (kind=kind_phys), save, dimension(NDM,NAE) :: haer
-!> ref pressure lev (sfc to toa) in mb (100Pa)
+! ref pressure lev (sfc to toa) in mb (100Pa)
       real (kind=kind_phys), save, dimension(NDM,NAE) :: prsref
-!> ref sigma lev (sfc to toa)
+! ref sigma lev (sfc to toa)
       real (kind=kind_phys), save, dimension(NDM,NAE) :: sigref
 
 !  ---  the following arrays are allocate and setup in subr 'clim_aerinit'
@@ -360,37 +359,37 @@
 !      cmixg (NXC*IMXAE*JMXAE)   - aeros component mixing ratio
 !      denng ( 2 *IMXAE*JMXAE)   - aerosols number density
 
-!> \name topospheric aerosol profile distribution
+! \name topospheric aerosol profile distribution
 
-!> aeros component mixing ratio
+! aeros component mixing ratio
       real (kind=kind_phys), dimension(NXC,IMXAE,JMXAE), save :: cmixg
-!> aeros number density
+! aeros number density
       real (kind=kind_phys), dimension( 2 ,IMXAE,JMXAE), save :: denng
-!> aeros component index
+! aeros component index
       integer,               dimension(NXC,IMXAE,JMXAE), save :: idxcg
-!> aeros profile index
+! aeros profile index
       integer,               dimension(    IMXAE,JMXAE), save :: kprfg
 
 ! --------------------------------------------------------------------- !
 !   section-4 : module variables for gocart aerosol optical properties  !
 ! --------------------------------------------------------------------- !
 
-!> \name module variables for gocart aerosol optical properties
+! \name module variables for gocart aerosol optical properties
 
 !  ---  parameters and constants:
 !   - KCM, KCM1, KCM2 are determined from subroutine 'set_aerspc'
-!> num of bands for aer data (gocart)
+! num of bands for aer data (gocart)
       integer, parameter :: KAERBND=61
-!> num of rh levels for rh-dep components
+! num of rh levels for rh-dep components
       integer, parameter :: KRHLEV =36
 !*    integer, parameter :: KCM1 = 8   ! num of rh independent aer !species
 !*    integer, parameter :: KCM2 = 5   ! num of rh dependent aer species
 !*    integer, parameter :: KCM  = KCM1 + KCM2
-!> num of rh indep aerosols (set in subr set_aerspc)
+! num of rh indep aerosols (set in subr set_aerspc)
       integer, save      :: KCM1 = 0
-!> num of rh dep aerosols (set in subr set_aerspc)
+! num of rh dep aerosols (set in subr set_aerspc)
       integer, save      :: KCM2 = 0
-!> =KCM1+KCM2 (set in subr set_aerspc)
+! =KCM1+KCM2 (set in subr set_aerspc)
       integer, save      :: KCM
 
       real (kind=kind_phys), dimension(KRHLEV) :: rhlev_grt             &
@@ -430,32 +429,32 @@
 !      rhdpssa0_grt(KAERBND,KRHLEV,KCM2) - single scattering albedo
 !      rhdpasy0_grt(KAERBND,KRHLEV,KCM2) - asymmetry parameter
 
-!> spectral band structure: ending wavenumber (\f$cm^-1\f$) for each band
+! spectral band structure: ending wavenumber (\f$cm^-1\f$) for each band
       integer,               allocatable, dimension(:) :: iendwv_grt
 ! relative humidity independent aerosol optical properties:
 !! species : dust (8 bins)
 
-!> \name relative humidity independent aerosol optical properties:
-!! species : dust (8 bins)
+! \name relative humidity independent aerosol optical properties:
+! species : dust (8 bins)
 
-!> extinction coefficient
+! extinction coefficient
       real (kind=kind_phys),allocatable, dimension(:,:)  :: rhidext0_grt
-!> single scattering albedo
+! single scattering albedo
       real (kind=kind_phys),allocatable, dimension(:,:)  :: rhidssa0_grt
-!> asymmetry parameter
+! asymmetry parameter
       real (kind=kind_phys), allocatable, dimension(:,:) :: rhidasy0_grt
 !
 ! relative humidity dependent aerosol optical properties:
 ! species : soot, suso, waso, ssam, sscm
 
-!> \name relative humidity dependent aerosol optical properties:
-!! species : soot, suso, waso, ssam, sscm
+! \name relative humidity dependent aerosol optical properties:
+! species : soot, suso, waso, ssam, sscm
 
-!> extinction coefficient
+! extinction coefficient
       real (kind=kind_phys),allocatable,dimension(:,:,:) :: rhdpext0_grt
-!> single scattering albedo
+! single scattering albedo
       real (kind=kind_phys),allocatable,dimension(:,:,:) :: rhdpssa0_grt
-!> asymmetry parameter
+! asymmetry parameter
       real (kind=kind_phys),allocatable,dimension(:,:,:) :: rhdpasy0_grt
 
 !   - relative humidity independent aerosol optical properties:
@@ -467,31 +466,31 @@
 !      ssarhd_grt(KRHLEV,KCM2,NSWLWBD) - single scattering albedo for sw+lw band
 !      asyrhd_grt(KRHLEV,KCM2,NSWLWBD) - asymmetry parameter for sw+lw band
 
-!>\name relative humidity independent aerosol optical properties
+!\name relative humidity independent aerosol optical properties
 
-!> extinction coefficient for SW+LW spectral band
+! extinction coefficient for SW+LW spectral band
       real (kind=kind_phys),allocatable,save,dimension(:,:) ::          &
      &      extrhi_grt
-!> single scattering albedo for SW+LW spectral band
+! single scattering albedo for SW+LW spectral band
       real (kind=kind_phys),allocatable,save,dimension(:,:) ::          &
      &      ssarhi_grt
-!> asymmetry parameter for SW+LW spectral band
+! asymmetry parameter for SW+LW spectral band
       real (kind=kind_phys),allocatable,save,dimension(:,:) ::          &
      &      asyrhi_grt
 
-!> \name relative humidity dependent aerosol optical properties
+! \name relative humidity dependent aerosol optical properties
 
-!> extinction coefficient for SW+LW spectral band
+! extinction coefficient for SW+LW spectral band
       real (kind=kind_phys),allocatable,save,dimension(:,:,:) ::        &
      &      extrhd_grt
-!> single scattering albedo for SW+LW band
+! single scattering albedo for SW+LW band
       real (kind=kind_phys),allocatable,save,dimension(:,:,:) ::        &
      &      ssarhd_grt
-!> asymmetry parameter for SW+LW band
+! asymmetry parameter for SW+LW band
       real (kind=kind_phys),allocatable,save,dimension(:,:,:) ::        &
      &      asyrhd_grt
 
-!> \name module variables for gocart aerosol clim data set
+! \name module variables for gocart aerosol clim data set
 
 ! --------------------------------------------------------------------- !
 !   section-5 : module variables for gocart aerosol climo data set      !
@@ -509,14 +508,14 @@
 !      vertical coordinate (sigma for geos3/hybrid_sigma_pressure for geos4)
 !      aerosol units (mass concentration for geos3/mixing ratio for geos4)
 
-!> num of lon-points in geos dataset
+! num of lon-points in geos dataset
       integer, parameter :: IMXG = 144
-!> num of lat-points in geos dataset
+! num of lat-points in geos dataset
       integer, parameter :: JMXG = 91
-!> num of vertical layers in geos dataset
+! num of vertical layers in geos dataset
       integer, parameter :: KMXG = 30
 !*    integer, parameter :: NMXG = 12
-!> to be determined by set_aerspc
+! to be determined by set_aerspc
       integer, save      :: NMXG
 
       real (kind=kind_phys), parameter :: dltx = 360.0 / float(IMXG)
@@ -528,22 +527,20 @@
 !     dmclmg  - aerosol dry mass in g/m3         IMXG*JMXG*KMXG*NMXG
 !               or aerosol mixing ratio in mol/mol or Kg/Kg
 
-!> pressure in cb
+! pressure in cb
       real (kind=kind_phys),allocatable, save:: psclmg(:,:,:)
-!> aerosol dry mass in g/m3 or aerosol mixing ration in mol/mol or Kg/Kg
+! aerosol dry mass in g/m3 or aerosol mixing ration in mol/mol or Kg/Kg
       real (kind=kind_phys),allocatable, save:: dmclmg(:,:,:,:)
 
 !   - geos-gocart lat/lon arrays
-!> geos-gocart longitude arrays
       real (kind=kind_phys), allocatable, save, dimension(:):: geos_rlon
-!> geos-gocart latitude arrays
       real (kind=kind_phys), allocatable, save, dimension(:):: geos_rlat
 
-!> control flag for gocart climo data set: xxxx as default; ver3 for geos3;
+! control flag for gocart climo data set: xxxx as default; ver3 for geos3;
 !! ver4 for geos4; 0000 for unknown data
       character*4, save  :: gocart_climo = 'xxxx'
 
-!> molecular wght of gocart aerosol species
+! molecular wght of gocart aerosol species
       real (kind=kind_io4), allocatable :: molwgt(:)
 
 ! ---------------------------------------------------------------------
@@ -553,21 +550,21 @@
 ! ---------------------------------------------------------------------
 ! !
 
-!> logical parameter for gocart initialization control
+! logical parameter for gocart initialization control
       logical, save :: lgrtint = .true.
 
-!> logical parameter for gocart debug print control
+! logical parameter for gocart debug print control
 !     logical, save :: lckprnt = .true.
       logical, save :: lckprnt = .false.
 
 !  --- the following index/flag/weight are set up in 'set_aerspc'
 
-!> merging coefficients for fcst/clim; determined from fdaer
+! merging coefficients for fcst/clim; determined from fdaer
       real (kind=kind_phys), save :: ctaer = f_zero   ! user specified wgt
 
-!> option to get fcst gocart aerosol field
+! option to get fcst gocart aerosol field
       logical, save :: get_fcst = .true.
-!> option to get clim gocart aerosol field
+! option to get clim gocart aerosol field
       logical, save :: get_clim = .true.
 
 !  ------  gocart aerosol specification    ------
@@ -588,8 +585,8 @@
 !      OC (waso) and BC (soot)
 !
 
-!> index for rh dependent aerosol optical properties (2nd
-!! dimension for extrhd_grt, ssarhd_grt, and asyrhd_grt)
+! index for rh dependent aerosol optical properties (2nd
+! dimension for extrhd_grt, ssarhd_grt, and asyrhd_grt)
       integer, save :: isoot, iwaso, isuso, issam, isscm
 
 !   - index for rh independent aerosol optical properties (1st
@@ -598,8 +595,6 @@
 
 !   - index for gocart aerosol species to be included in the
 !     calculations of aerosol optical properties (ext, ssa, asy)
-!>  index for gocart aerosol species to be included in the
-!!  calculations of aerosol optical properties (ext, ssa, asy)
       type  gocart_index_type
 ! dust
          integer :: dust1, dust2, dust3, dust4, dust5
@@ -614,7 +609,7 @@
       endtype
       type (gocart_index_type), save :: dm_indx
 
-!>  index for gocart aerosols from prognostic tracer fields
+!  index for gocart aerosols from prognostic tracer fields
       type  tracer_index_type
 ! dust
          integer :: du001, du002, du003, du004, du005
@@ -630,14 +625,14 @@
       type (tracer_index_type), save :: dmfcs_indx
 
 !   - grid components to be included in the aeropt calculations
-!> number of aerosol grid components
+! number of aerosol grid components
       integer, save                  :: num_gridcomp = 0
-!> aerosol grid components
+! aerosol grid components
       character, allocatable , save  :: gridcomp(:)*2
 
-!> default full-package setting
+! default full-package setting
       integer, parameter          :: max_num_gridcomp = 5
-!> data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
+! data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
       character*2                 :: max_gridcomp(max_num_gridcomp)
       data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
 
@@ -653,16 +648,16 @@
 !      idxspc (NCM)         - index conversion array
 !      lspcaod              - logical flag for aod from individual species
 !
-!> index conversion array:data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
+! index conversion array:data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
       integer, dimension(NCM) :: idxspc
       data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
 !
 !   - wvn550 is the wavenumber (1/cm) of wavelenth 550nm for diagnostic aod output
 !     nv_aod is the sw spectral band covering wvn550 (comp in aer_init)
 !
-!> the wavenumber (\f$cm^-1\f$) of wavelength 550nm for diagnostic aod output
+! the wavenumber (\f$cm^-1\f$) of wavelength 550nm for diagnostic aod output
       real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55
-!> the sw spectral band covering wvn550 (comp in aer_init)
+! the sw spectral band covering wvn550 (comp in aer_init)
       integer, save      :: nv_aod = 1
 
 !  ---  public interfaces
@@ -928,6 +923,7 @@
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
 !>\section gel_set_spec General Algorithm
+!! @{
 !--------------------------------
       subroutine set_spectrum
 !................................
@@ -1018,7 +1014,7 @@
 !................................
       end subroutine set_spectrum
 !--------------------------------
-
+!! @}
 
 !> The initialization program for stratospheric volcanic aerosols.
 !-----------------------------
@@ -5498,4 +5494,3 @@
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!
-!> @}

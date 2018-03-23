@@ -1,3 +1,8 @@
+!>\file module_nst_model.f90
+!>\defgroup nst_module GFS NSST Diurnal Thermocline Model
+!! @{
+!>\ingroup GFS_NSST
+!!\brief This is the module of diurnal thermocline layer model (DTM).
 module nst_module
 
 !
@@ -14,6 +19,7 @@ module nst_module
 
  contains
 
+!> This subroutine contains the module of diurnal thermocline layer model.
  subroutine dtm_1p(kdt,timestep,rich,tox,toy,i0,q,sss,sep,q_ts,hl_ts,rho,      &
                    alpha,beta,alon,sinlat,soltim,grav,le,d_conv,               &
                    xt,xs,xu,xv,xz,xzts,xtts)
@@ -73,6 +79,7 @@ module nst_module
 
  end subroutine dtm_1p
 
+!> This subroutine integrates one time step with modified Euler method.
  subroutine eulerm(kdt,timestep,rich,tox,toy,i0,q,sss,sep,q_ts,hl_ts,rho,alpha,&
                    beta,alon,sinlat,soltim,grav,le,d_conv,                     &
                    xt,xs,xu,xv,xz,xzts,xtts)
@@ -292,6 +299,7 @@ module nst_module
    
  end subroutine dtm_1p_zwa
 
+!> This subroutine applies free convection adjustment(fca).
  subroutine dtm_1p_fca(d_conv,xt,xtts,xz,xzts)
 
 !  apply xz adjustment:  free convection adjustment (fca);
@@ -308,6 +316,7 @@ module nst_module
 
  end subroutine dtm_1p_fca
 
+!> This subroutine applies top layer adjustment (tla).
  subroutine dtm_1p_tla(dz,te,xt,xtts,xz,xzts)
 
 !  apply xz adjustment: top layer adjustment (tla);
@@ -326,6 +335,7 @@ module nst_module
 !  xzts = xtts*(1.0+0.5*(2.0*xt-dz*te)/sqrt(xt*(xt-dz*te)))/te
  end subroutine dtm_1p_tla
 
+!> This subroutine applies maximum warming adjustment (mwa).
  subroutine dtm_1p_mwa(xt,xtts,xz,xzts)
 
 !  apply xz adjustment: maximum warming adjustment (mwa)
@@ -338,6 +348,7 @@ module nst_module
 !  xzts = 2.0*xtts/tw_max
  end subroutine dtm_1p_mwa
 
+!>This subroutine applies minimum depth adjustment (xz adjustment).
  subroutine dtm_1p_mda(xt,xtts,xz,xzts)
 
 !  apply xz adjustment: minimum depth adjustment (mda)
@@ -353,6 +364,7 @@ module nst_module
 
  end subroutine dtm_1p_mda
 
+!> This subroutine applies maximum temperature adjustment (mta).
  subroutine dtm_1p_mta(dta,xt,xtts,xz,xzts)
 
 !  apply xz adjustment: maximum temperature adjustment (mta)
@@ -372,6 +384,7 @@ module nst_module
 
  end subroutine dtm_1p_mta
 
+!> This subroutine calculates depth for convective adjustment.
 subroutine convdepth(kdt,timestep,i0,q,sss,sep,rho,alpha,beta,xt,xs,xz,d_conv)
 
 !
@@ -608,6 +621,8 @@ subroutine convdepth(kdt,timestep,i0,q,sss,sep,rho,alpha,beta,xt,xs,xz,d_conv)
 
  end subroutine dtm_onset
 
+!> This subroutine computes coefficients (\a w_0 and \a w_d) to 
+!! calculate d(tw)/d(ts).
  subroutine cal_w(kdt,xz,xt,xzts,xtts,w_0,w_d)
 !
 ! abstract: calculate w_0,w_d
@@ -637,7 +652,8 @@ subroutine convdepth(kdt,timestep,i0,q,sss,sep,rho,alpha,beta,xt,xs,xz,d_conv)
 ! endif
  end subroutine cal_w
 
-
+!> This subroutine calculates the diurnal warming amount at the top layer
+!! with thickness of \a delz.
  subroutine cal_ttop(kdt,timestep,q_warm,rho,dz,xt,xz,ttop)
 !
 ! abstract: calculate
@@ -771,6 +787,8 @@ subroutine convdepth(kdt,timestep,i0,q,sss,sep,rho,alpha,beta,xt,xs,xz,d_conv)
 ! write(*,'(a,i4,9f9.4))') ' cal_tztr : ',kdt,xt,c_0,c_d,w_0,w_d,zc,zw,z,tztr
  end subroutine cal_tztr
 
+!> This subroutine contains the upper ocean cool-skin parameterization 
+!! (Fairall et al, 1996 \cite fairall_et_al_1996).
 subroutine cool_skin(ustar_a,f_nsol,f_sol_0,evap,sss,alpha,beta,rho_w,rho_a,ts,q_ts,hl_ts,grav,le,deltat_c,z_c,c_0,c_d)
 !
 ! upper ocean cool-skin parameterizaion, fairall et al, 1996.
@@ -919,6 +937,5 @@ subroutine cool_skin(ustar_a,f_nsol,f_sol_0,evap,sss,alpha,beta,rho_w,rho_a,ts,q
     xzts = 0.0
  end subroutine dtl_reset
 
-
 end module nst_module
-
+!! @ }

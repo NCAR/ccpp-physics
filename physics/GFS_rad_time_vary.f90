@@ -4,6 +4,7 @@
       contains
 
 !>\defgroup GFS_rad_time_vary GFS RRTMG Update 
+!!\ingroup RRTMG
 !! @{
 !! \section arg_table_GFS_rad_time_vary_init Argument Table
 !!

@@ -2,6 +2,8 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
+!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
+!
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
@@ -234,46 +236,6 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-
-!> \defgroup rrtmg_lw rrtmg_lw
-!! \ingroup RRTMG
-!! This module includes NCEP's modifications of the rrtmg-lw radiation
-!! code from AER.
-!!
-!! The RRTM-LW package includes three files:
-!! - radlw_param.f, which contains:
-!!  - module_radlw_parameters: band parameters set up
-!! - radlw_datatb.f, which contains modules:
-!!  - module_radlw_avplank: plank flux data
-!!  - module_radlw_ref: reference temperature and pressure
-!!  - module_radlw_cldprlw: cloud property coefficients
-!!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
-!! - radlw_main.f, which contains:
-!!  - rrtmg_lw, which is the main LW radiation transfer
-!!    program and contains two externally callable subroutines:
-!!   - lwrad(): the main LW radiation routine
-!!   - rlwinit(): the initialization routine
-!!
-!! All the LW radiation subprograms become contained subprograms in
-!! module 'rrtmg_lw' and many of them are not directly
-!! accessable from places outside the module.
-!!
-!!\author   Eli J. Mlawer, emlawer@aer.com
-!!\author   Jennifer S. Delamere, jdelamer@aer.com
-!!\author   Michael J. Iacono, miacono@aer.com
-!!\author   Shepard A. Clough
-!!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
-!!
-!! The authors wish to acknowledge the contributions of the
-!! following people:  Steven J. Taubman, Karen Cady-Pereira,
-!! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
-!!
-!!\copyright  2002-2007, Atmospheric & Environmental Research, Inc. (AER).
-!!  This software may be used, copied, or redistributed as long as it is
-!!  not sold and this copyright notice is reproduced on each copy made.
-!!  This model is provided as is without any express or implied warranties.
-!!  (http://www.rtweb.aer.com/)
-!! @{
 !========================================!
       module rrtmg_lw                    !
 !........................................!
@@ -389,68 +351,41 @@
       contains
 ! ================
 
-!> This subroutine is the main LW radiation routine.
-!!\param plyr           model layer mean pressure in mb
-!!\param plvl           model interface pressure in mb
-!!\param tlyr           model layer mean temperature in K
-!!\param tlvl           model interface temperature in K
-!!\param qlyr           layer specific humidity in gm/gm
-!!\param olyr           layer ozone concentration in gm/gm
-!!\param gasvmr         atmospheric gases amount:
-!!\n                    (:,:,1)  - co2 volume mixing ratio
-!!\n                    (:,:,2)  - n2o volume mixing ratio
-!!\n                    (:,:,3)  - ch4 volume mixing ratio
-!!\n                    (:,:,4)  - o2  volume mixing ratio
-!!\n                    (:,:,5)  - co  volume mixing ratio
-!!\n                    (:,:,6)  - cfc11 volume mixing ratio
-!!\n                    (:,:,7)  - cfc12 volume mixing ratio
-!!\n                    (:,:,8)  - cfc22 volume mixing ratio
-!!\n                    (:,:,9)  - ccl4  volume mixing ratio
-!!\param clouds         layer cloud profile
-!!\n   for  ilwcliq > 0  ---
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer in-cloud liq water path (\f$ g/m^2 \f$)
-!!\n                    (:,:,3)  - mean eff radius for liq cloud (micron)
-!!\n                    (:,:,4)  - layer in-cloud ice water path (\f$ g/m^2 \f$)
-!!\n                    (:,:,5)  - mean eff radius for ice cloud (micron)
-!!\n                    (:,:,6)  - layer rain drop water path    (\f$ g/m^2 \f$)
-!!\n                    (:,:,7)  - mean eff radius for rain drop (micron)
-!!\n                    (:,:,8)  - layer snow flake water path   (\f$ g/m^2 \f$)
-!!\n                    (:,:,9)  - mean eff radius for snow flake(micron)
-!!\n   for  ilwcliq = 0  ---
-!!\n                    (:,:,1)  - layer total cloud fraction
-!!\n                    (:,:,2)  - layer cloud optical depth
-!!\n                    (:,:,3)  - layer cloud single scattering albedo
-!!\n                    (:,:,4)  - layer cloud asymmetry factor
-!!\param icseed         auxiliary special cloud related array.
-!!\param aerosols       aerosol optical properties
-!!\n                    (:,:,:,1) - optical depth
-!!\n                    (:,:,:,2) - single scattering albedo
-!!\n                    (:,:,:,3) - asymmetry parameter
-!!\param sfemis         surface emissivity
-!!\param sfgtmp         surface ground temperature in K
-!!\param npts           total number of horizontal points
-!!\param nlay, nlp1     total number of vertical layers, levels
-!!\param lprnt          cntl flag for diagnostic print out
-!!\param hlwc           total sky heating rate in k/day or k/sec
-!!\param topflx         radiation fluxes at top, components
-!!\n                    upfxc - total sky upward flux at top (\f$ w/m^2 \f$)
-!!\n                    upfx0 - clear sky upward flux at top (\f$ w/m^2 \f$)
-!!\param sfcflx         radiation fluxes at sfc, components
-!!\n                    upfxc - total sky upward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    dnfxc - total sky downward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    upfx0 - clear sky upward flux at sfc (\f$ w/m^2 \f$)
-!!\n                    dnfx0 - clear sky downward flux at sfc (\f$ w/m^2 \f$)
-!!\param hlwb           spectral band total sky heating rates
-!!\param hlw0           clear sky heating rates (k/sec or k/day)
-!!\param flxprf         level radiation fluxes (\f$ w/m^2 \f$), components
-!!\n                    dnfxc - total sky downward flux
-!!\n                    upfxc - total sky upward flux
-!!\n                    dnfx0 - clear sky downward flux
-!!\n                    upfx0 - clear sky upward flux
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
+!> \defgroup module_radlw_main GFS RADLW Main
+!! \ingroup RRTMG
+!! This module includes NCEP's modifications of the RRTMG-LW radiation
+!! code from AER.
+!!
+!! The RRTM-LW package includes three files:
+!! - radlw_param.f, which contains:
+!!  - module_radlw_parameters: band parameters set up
+!! - radlw_datatb.f, which contains modules:
+!!  - module_radlw_avplank: plank flux data
+!!  - module_radlw_ref: reference temperature and pressure
+!!  - module_radlw_cldprlw: cloud property coefficients
+!!  - module_radlw_kgbnn: absorption coeffients for 16 bands, where nn = 01-16
+!! - radlw_main.f, which contains:
+!!  - rrtmg_lw_run(): the main LW radiation routine
+!!  - rlwinit(): the initialization routine
+!!
+!!\author   Eli J. Mlawer, emlawer@aer.com
+!!\author   Jennifer S. Delamere, jdelamer@aer.com
+!!\author   Michael J. Iacono, miacono@aer.com
+!!\author   Shepard A. Clough
+!!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
+!!
+!! The authors wish to acknowledge the contributions of the
+!! following people:  Steven J. Taubman, Karen Cady-Pereira,
+!! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
+!!
+!!\copyright  2002-2007, Atmospheric & Environmental Research, Inc. (AER).
+!!  This software may be used, copied, or redistributed as long as it is
+!!  not sold and this copyright notice is reproduced on each copy made.
+!!  This model is provided as is without any express or implied warranties.
+!!  (http://www.rtweb.aer.com/)
 !! \section arg_table_rrtmg_lw_run Argument Table
 !! | local_name      | standard_name                                                                                 | long_name                                                 | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
@@ -1349,6 +1284,7 @@
 
 
 
+!>\ingroup module_radlw_main
 !> This subroutine performs calculations necessary for the initialization
 !! of the longwave model.  lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
@@ -6757,4 +6693,3 @@
       end module rrtmg_lw                !
 !========================================!
 
-!! @}

@@ -3,9 +3,6 @@
 
 !> \defgroup Sfc_diag Land Surface Diagnose Calculation
 !! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
 
       module sfc_diag
       contains
