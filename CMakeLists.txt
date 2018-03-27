@@ -29,19 +29,16 @@ enable_language(Fortran)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
 
 #------------------------------------------------------------------------------
-# Find OpenMP for C/C++/Fortran
+# Set OpenMP flags for C/C++/Fortran
 if (OPENMP)
-  find_package(OpenMP)
-  if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-    message(STATUS "Enabled OpenMP support for C/C++/Fortran compiler")
-  else(OPENMP_FOUND)
-    message (FATAL_ERROR "C/C++/Fortran compiler does not support OpenMP")
-  endif()
+  include(detect_openmp)
+  detect_openmp()
+  set (CMAKE_Fortran_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+  message(STATUS "Enable OpenMP support for C/C++/Fortran compiler")
 else(OPENMP)
-    message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
+  message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
 endif()
 
 #------------------------------------------------------------------------------
@@ -296,5 +293,5 @@ add_library(ccppphys ${SOURCES})
 target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
-                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}"
-                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
+                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
