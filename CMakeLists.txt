@@ -6,9 +6,9 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(check VERSION 0.0.1)
+    project(ccppphys VERSION 0.0.1)
 else(POLICY CMP0048)
-    project(check)
+    project(ccppphys)
     set(PROJECT_VERSION 0.0.1)
     set(PROJECT_VERSION_MAJOR 0)
     set(PROJECT_VERSION_MINOR 0)
@@ -16,7 +16,7 @@ else(POLICY CMP0048)
 endif(POLICY CMP0048)
 
 #------------------------------------------------------------------------------
-set(PACKAGE "gfsphysics")
+set(PACKAGE "ccppphys")
 set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 
 #------------------------------------------------------------------------------
@@ -292,9 +292,9 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 #list(APPEND SOURCES ${CMAKE_CURRENT_BINARY_DIR}/scm_test1_cap.f90)
 
 
-add_library(gfsphysics ${SOURCES})
-target_link_libraries(gfsphysics LINK_PUBLIC ${LIBS} w3 sp bacio)
-set_target_properties(gfsphysics PROPERTIES VERSION ${PROJECT_VERSION}
+add_library(ccppphys ${SOURCES})
+target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
+set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
