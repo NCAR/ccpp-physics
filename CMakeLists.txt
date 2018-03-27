@@ -26,7 +26,7 @@ enable_language(Fortran)
 #------------------------------------------------------------------------------
 # CMake Modules
 # Set the CMake module path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmtb-ccpp/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
 
 #------------------------------------------------------------------------------
 # Find OpenMP for C/C++/Fortran
@@ -268,9 +268,9 @@ else(${CMAKE_VERSION} LESS 3.3)
   add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
 endif (${CMAKE_VERSION} LESS 3.3)
 
-SET(W3LIB_SRC ${CMAKE_SOURCE_DIR}/w3nco/v2.0.6/src)
-SET(BACIOLIB_SRC ${CMAKE_SOURCE_DIR}/bacio/v2.0.1/src)
-SET(SPLIB_SRC ${CMAKE_SOURCE_DIR}/sp/v2.0.2/src)
+SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
+SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
+SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
 
 #add "sibling" directories (must specify the build directory too)
 ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
