@@ -187,7 +187,7 @@
 ! as intent(out) and initializing them (see comment DH* further down)
 ! correctly changes the results on Theia with the Intel compiler. This
 ! seems to be one of those Intel optimization issues we encountered
-! earlier for sfc_sice.f, see PR #47 for gmtb-gfsphysics *DH
+! earlier for sfc_sice.f, see PR #47 for ccpp-physics *DH
       real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
       integer, intent(in) :: kinver(im)
