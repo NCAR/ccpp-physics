@@ -6,9 +6,9 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(check VERSION 0.0.1)
+    project(ccppphys VERSION 0.0.1)
 else(POLICY CMP0048)
-    project(check)
+    project(ccppphys)
     set(PROJECT_VERSION 0.0.1)
     set(PROJECT_VERSION_MAJOR 0)
     set(PROJECT_VERSION_MINOR 0)
@@ -16,7 +16,7 @@ else(POLICY CMP0048)
 endif(POLICY CMP0048)
 
 #------------------------------------------------------------------------------
-set(PACKAGE "gfsphysics")
+set(PACKAGE "ccppphys")
 set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 
 #------------------------------------------------------------------------------
@@ -26,22 +26,19 @@ enable_language(Fortran)
 #------------------------------------------------------------------------------
 # CMake Modules
 # Set the CMake module path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmtb-ccpp/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
 
 #------------------------------------------------------------------------------
-# Find OpenMP for C/C++/Fortran
+# Set OpenMP flags for C/C++/Fortran
 if (OPENMP)
-  find_package(OpenMP)
-  if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-    message(STATUS "Enabled OpenMP support for C/C++/Fortran compiler")
-  else(OPENMP_FOUND)
-    message (FATAL_ERROR "C/C++/Fortran compiler does not support OpenMP")
-  endif()
+  include(detect_openmp)
+  detect_openmp()
+  set (CMAKE_Fortran_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+  message(STATUS "Enable OpenMP support for C/C++/Fortran compiler")
 else(OPENMP)
-    message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
+  message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
 endif()
 
 #------------------------------------------------------------------------------
@@ -268,9 +265,9 @@ else(${CMAKE_VERSION} LESS 3.3)
   add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
 endif (${CMAKE_VERSION} LESS 3.3)
 
-SET(W3LIB_SRC ${CMAKE_SOURCE_DIR}/w3nco/v2.0.6/src)
-SET(BACIOLIB_SRC ${CMAKE_SOURCE_DIR}/bacio/v2.0.1/src)
-SET(SPLIB_SRC ${CMAKE_SOURCE_DIR}/sp/v2.0.2/src)
+SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
+SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
+SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
 
 #add "sibling" directories (must specify the build directory too)
 ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
@@ -292,9 +289,9 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 #list(APPEND SOURCES ${CMAKE_CURRENT_BINARY_DIR}/scm_test1_cap.f90)
 
 
-add_library(gfsphysics ${SOURCES})
-target_link_libraries(gfsphysics LINK_PUBLIC ${LIBS} w3 sp bacio)
-set_target_properties(gfsphysics PROPERTIES VERSION ${PROJECT_VERSION}
+add_library(ccppphys ${SOURCES})
+target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
+set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
-                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}"
-                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
+                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS}")

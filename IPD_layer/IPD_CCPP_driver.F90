@@ -120,8 +120,10 @@ module IPD_CCPP_driver
       ! Allocate cdata structures
       allocate(cdata_block(1:nBlocks,1:nThreads))
 
+#ifndef __PGI
       ! Loop over blocks for each of the threads
-!$OMP parallel default (shared) &
+!$OMP parallel num_threads (nThreads) &
+!$OMP          default (shared) &
 !$OMP          private (nb,nt) &
 !$OMP          reduction (+:ierr)
 #ifdef OPENMP
@@ -129,9 +131,17 @@ module IPD_CCPP_driver
 #else
       nt = 1
 #endif
+#else
+      do nt=1,nThreads
+#endif
       do nb = 1,nBlocks
+#ifndef __PGI
         !--- Initialize CCPP, use suite from scalar cdata to avoid reading the SDF multiple times
         call ccpp_init(ccpp_suite, cdata_block(nb,nt), ierr, suite=cdata%suite)
+#else
+        !--- Initialize CCPP, cannot use suite from scalar cdata with PGI (crashes)
+        call ccpp_init(ccpp_suite, cdata_block(nb,nt), ierr)
+#endif
         if (ierr/=0) then
           write(0,'(2(a,i4))') "An error occurred in IPD_step 0 for block ", nb, " and thread ", nt
           exit
@@ -140,7 +150,11 @@ module IPD_CCPP_driver
 #include "ccpp_fields.inc"
 ! End include auto-generated list of calls to ccpp_field_add
       end do
+#ifndef __PGI
 !$OMP end parallel
+#else
+      end do
+#endif
       if (ierr/=0) return
 
     ! Time vary steps
@@ -152,7 +166,8 @@ module IPD_CCPP_driver
     ! Radiation, physics and stochastics
     else if (step==2 .or. step==3 .or. step==4) then
 
-!$OMP parallel do default (none) &
+!$OMP parallel do num_threads (nThreads) &
+!$OMP            default (none) &
 !$OMP            schedule (dynamic,1) &
 !$OMP            shared   (nBlocks, cdata_block, step, IPD_Interstitial) &
 !$OMP            private  (nb, nt) &
@@ -175,7 +190,8 @@ module IPD_CCPP_driver
     ! Finalize
     else if (step==5) then
 
-!$OMP parallel default (shared) &
+!$OMP parallel num_threads (nThreads) &
+!$OMP          default (shared) &
 !$OMP          private (nb,nt) &
 !$OMP          reduction (+:ierr)
 #ifdef OPENMP

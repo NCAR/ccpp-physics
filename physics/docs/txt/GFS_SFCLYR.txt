@@ -23,7 +23,7 @@
  and water vapor transfer no such dynamical mechanism exists. Zeng and
  Dickinson (1998) \cite zeng_and_dickinson_1998 found that the surface
  skin temperature can be at least 10 K higher when considering the surface
- sublayer (or the variable ratio of the \f$Z_{0m}/Z_{0t}\f$ than without
+ sublayer (or the variable ratio of the \f$Z_{0m}/Z_{0t}\f$ ) than without
  in the desert summer afternoon.
 
  In May 2011, the new vegetation-dependent formulations of
