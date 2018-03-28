@@ -18,6 +18,7 @@
  prognostically produced, enabling this scheme to predict precipitation type.
 
  \image  html  GFS_zhaocarr_schematic.png "Figure 1: Schematic illustration of the precipitation scheme" width=10cm
+ \image  latex  GFS_zhaocarr_schematic.png "Figure 1: Schematic illustration of the precipitation scheme" width=10cm
 
  The parameterization of precipitation is required in order to remove
  water from the atmosphere and transport it to the ground.
