@@ -1,7 +1,6 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface roughness length formulation based on 
-!! the surface sublayer scheme from Zeng and Dickinson (1998) 
-!! \cite zeng_and_dickinson_1998. It is the first subroutine called in surface layer loop.
+!! the surface sublayer scheme from \cite zeng_and_dickinson_1998. It is the first subroutine called in surface layer loop.
 
       module sfc_ex_coef
       contains
@@ -12,11 +11,9 @@
       subroutine sfc_ex_coef_finalize
       end subroutine sfc_ex_coef_finalize
 
-!> \defgroup sfc_layer GFS Surface Layer 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
-!! \ingroup sfc_layer
 !> \brief This  subroutine calculates surface roughness length.
-!! \section arg_table_sfc_ex_coef_run Argument Table
+!> \section arg_table_sfc_ex_coef_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count      |    0 | integer   |           | in     | F        |
@@ -53,13 +50,12 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag       |    0 | integer   |           | out    | F        |
 !!
-!>  \section general_diff General Algorithm
+!>  \section general_diff GFS Surface Layer Scheme General Algorithm
 !! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
-!!  in Zeng et al.(1998) \cite zeng_et_al_1998). 
+!!  in \cite zeng_et_al_1998). 
 !! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
-!! -# Calculate the new vegetation-dependent formulation of thermal roughness length (Zheng et al. (2009)
-!! \cite zheng_et_al_2009).
-!! Zheng et al.(2009) \cite zheng_et_al_2009 proposed a new formulation on
+!! -# Calculate the new vegetation-dependent formulation of thermal roughness length (\cite zheng_et_al_2009).
+!! \cite zheng_et_al_2009 proposed a new formulation on
 !! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
 !! \f[
 !!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
@@ -78,7 +74,7 @@
 !!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
 !!\f]
 !! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
-!!  \section detailed_diff Detailed Algorithm
+!>  \section detailed_diff Detailed Algorithm
 !!  @{
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
@@ -191,7 +187,7 @@
 !
 
           if(islimsk(i) == 0) then            ! over ocean
-! - Over the ocean, calculate friction velocity in eq.(A10) in Zeng et al. (1998) \cite zeng_et_al_1998 .
+! - Over the ocean, calculate friction velocity in eq.(A10) in \cite zeng_et_al_1998 .
             ustar(i) = sqrt(grav * z0 / charnock)
 
 !**  test xubin's new z0
@@ -209,7 +205,7 @@
 !  rat taken from zeng, zhao and dickinson 1997
 
 ! - Over the ocean, calculate the roughness length of temperature
-!! (see eq.(25) and (26) in Zeng et al. (1998) \cite zeng_et_al_1998).
+!! (see eq.(25) and (26) in \cite zeng_et_al_1998).
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax  = z0max * exp(-rat)
 
@@ -252,8 +248,7 @@
                 endif
 
             endif
-! - Calculate the roughness length for heat (see eq.(1) of Zheng et al. (2012)
-!! \cite zheng_et_al_2012 ) .
+! - Calculate the roughness length for heat (see eq.(1) of \cite zheng_et_al_2012 ) .
             z0max = max(z0max,1.0e-6)
 !
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil

@@ -74,8 +74,7 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!> \ingroup RRTMG
-!! \defgroup module_radiation_surface RRTMG Surface Module
+!> \defgroup module_radiation_surface RRTMG Surface Module
 !! @{
 !> This module sets up surface albedo for sw radiation and surface
 !! emissivity for lw radiation.
@@ -123,7 +122,7 @@
       contains
 ! =================
 
-
+!> \ingroup module_radiation_surface
 !> This subroutine is the initialization program for surface radiation
 !! related quantities (albedo, emissivity, etc.)
 !!\param me       print control flag
@@ -268,10 +267,10 @@
 !-----------------------------------
 !! @}
 
-
+!> \ingroup module_radiation_surface
 !> This subroutine computes four components of surface albedos (i.e.,
 !! vis-nir, direct-diffused) according to control flag ialbflg.
-!! \n 1) climatological surface albedo scheme (Briegleb 1992 \cite briegleb_1992)
+!! \n 1) climatological surface albedo scheme (\cite briegleb_1992)
 !! \n 2) MODIS retrieval based scheme from Boston univ.
 !!\param slmsk      (IMAX), sea(0),land(1),ice(2) mask on fcst model grid
 !!\param snowf      (IMAX), snow depth water equivalent in mm
@@ -620,6 +619,7 @@
 !-----------------------------------
 !! @}
 
+!> \ingroup module_radiation_surface
 !> This subroutine computes surface emissivity for LW radiation.
 !!\param xlon      (IMAX), longitude in radiance, ok for both 0->2pi
 !!                  or -pi -> +pi ranges

@@ -9,17 +9,17 @@ Welcome to the GMTB Common Community Physics Package (CCPP) V1.0 scientific docu
 
 Documentation for the individual physics scheme can be accessed through the following links:
  + @ref GFS_RRTMG 
- + @ref GFS_SAMFdeep
- + @ref GFS_SAMFshal
- + @ref GFS_HEDMF
- + @ref GFS_ZHAOC
- + @ref GFS_SFCLYR 
- + @ref GFS_SFCSICE
- + @ref GFS_NOAH 
+ + @ref GFS_SFCLYR
  + @ref GFS_NSST
- + @ref GFS_GWDPS 
- + @ref GFS_GWDC
+ + @ref GFS_NOAH
+ + @ref GFS_SFCSICE
+ + @ref GFS_HEDMF
+ + @ref GFS_GWDPS
  + @ref GFS_OZPHYS
+ + @ref GFS_SAMFdeep
+ + @ref GFS_GWDC
+ + @ref GFS_SAMFshal
+ + @ref GFS_ZHAOC
 
  You can find more information about 
 <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.

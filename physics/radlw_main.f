@@ -2,7 +2,7 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
-!>\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
+!\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
 !
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
@@ -331,12 +331,12 @@
       real (kind=kind_phys) :: fluxfac, heatfac, semiss0(nbands)
       data semiss0(:) / nbands*1.0 /
 
-      real (kind=kind_phys) :: tau_tbl(0:ntbl)  !clr-sky opt dep (for cldy transfer)
-      real (kind=kind_phys) :: exp_tbl(0:ntbl)  !transmittance lookup table
-      real (kind=kind_phys) :: tfn_tbl(0:ntbl)  !tau transition function; i.e. the
-                                                !transition of planck func from mean lyr
-                                                !temp to lyr boundary temp as a func of
-                                                !opt dep. "linear in tau" method is used.
+      real (kind=kind_phys) :: tau_tbl(0:ntbl)  !< clr-sky opt dep (for cldy transfer)
+      real (kind=kind_phys) :: exp_tbl(0:ntbl)  !< transmittance lookup table
+      real (kind=kind_phys) :: tfn_tbl(0:ntbl)  !< tau transition function; i.e. the
+                                                !< transition of planck func from mean lyr
+                                                !< temp to lyr boundary temp as a func of
+                                                !< opt dep. "linear in tau" method is used.
 
 !  ---  the following variables are used for sub-column cloud scheme
 
@@ -354,9 +354,8 @@
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
-!> \defgroup module_radlw_main GFS RADLW Main
-!! \ingroup RRTMG
-!! This module includes NCEP's modifications of the RRTMG-LW radiation
+!> \defgroup module_radlw_main GFS radlw Main
+!! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
 !! The RRTM-LW package includes three files:
@@ -371,15 +370,7 @@
 !!  - rrtmg_lw_run(): the main LW radiation routine
 !!  - rlwinit(): the initialization routine
 !!
-!!\author   Eli J. Mlawer, emlawer@aer.com
-!!\author   Jennifer S. Delamere, jdelamer@aer.com
-!!\author   Michael J. Iacono, miacono@aer.com
-!!\author   Shepard A. Clough
 !!\version NCEP LW v5.1  Nov 2012 -RRTMG-LW v4.82
-!!
-!! The authors wish to acknowledge the contributions of the
-!! following people:  Steven J. Taubman, Karen Cady-Pereira,
-!! Patrick D. Brown, Ronald E. Farren, Luke Chen, Robert Bergstrom.
 !!
 !!\copyright  2002-2007, Atmospheric & Environmental Research, Inc. (AER).
 !!  This software may be used, copied, or redistributed as long as it is
@@ -433,9 +424,8 @@
 !! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                    | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !!
-!> \section gen_lwrad General Algorithm
+!> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{
-! --------------------------------
       subroutine rrtmg_lw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
@@ -868,7 +858,7 @@
             enddo
           enddo
 
-!> -# Read cloud optical properties
+!> -# Read cloud optical properties.
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
@@ -1284,13 +1274,12 @@
 
 
 
-!>\ingroup module_radlw_main
-!> This subroutine performs calculations necessary for the initialization
+!> \ingroup module_radlw_main
+!> \brief This subroutine performs calculations necessary for the initialization
 !! of the longwave model.  lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
 !! spectral band are reduced from 256 g-point intervals to 140.
 !!\param me        print control for parallel process
-!-----------------------------------
       subroutine rlwinit                                                &
      &     ( me ) !  ---  inputs
 !  ---  outputs: (none)
@@ -1487,7 +1476,8 @@
 !-----------------------------------
 
 
-!> This subroutine computes the cloud optical depth(s) for each cloudy
+!>\ingroup module_radlw_main
+!> \brief This subroutine computes the cloud optical depth(s) for each cloudy
 !! layer and g-point interval.
 !!\param cfrac           layer cloud fraction
 !!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
@@ -1515,7 +1505,6 @@
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop General Algorithm
 !> @{
-! ----------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
      &       nlay, nlp1, ipseed,                                        &
@@ -1818,12 +1807,12 @@
 ! ----------------------------------
 !> @}
 
-!> This suroutine computes sub-colum cloud profile flag array.
+!>\ingroup module_radlw_main
+!>\brief This suroutine computes sub-colum cloud profile flag array.
 !!\param cldf        layer cloud fraction
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param lcloudy     sub-colum cloud profile flag array
-! ----------------------------------
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed,                                         &!  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
@@ -1980,6 +1969,7 @@
       end subroutine mcica_subcol
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> This subroutine computes various coefficients needed in radiative
 !! transfer calculations.
 !!\param pavel           layer pressure (mb)
@@ -2278,7 +2268,7 @@
       end subroutine setcoef
 ! ----------------------------------
 
-
+!>\ingroup module_radlw_main
 !> This subroutine computes the upward/downward radiative fluxes, and
 !! heating rates for both clear or cloudy atmosphere. Clouds assumed as
 !! randomly overlaping in a vertical column.
@@ -2673,6 +2663,7 @@
 ! ----------------------------------
 
 
+!>\ingroup module_radlw_main
 !> This subroutine computes the upward/downward radiative fluxes, and
 !! heating rates for both clear or cloudy atmosphere. Clouds are
 !! assumed as in maximum-randomly overlaping in a vertical column.
@@ -3265,8 +3256,8 @@
 ! ---------------------------------
 !> @}
 
-
-!> This subroutine computes the upward/downward radiative fluxes, and
+!>\ingroup module_radlw_main
+!> \brief This subroutine computes the upward/downward radiative fluxes, and
 !! heating rates for both clear or cloudy atmosphere.Clouds are treated
 !! with the mcica stochastic approach.
 !!\param semiss       lw surface emissivity
@@ -3659,9 +3650,10 @@
 ! ----------------------------------
 !> @}
 
-!> This subroutine contains optical depths developed for the rapid
+!>\ingroup module_radlw_main
+!>\brief This subroutine contains optical depths developed for the rapid
 !! radiative transfer model.
-!!\brief This file contains the subroutines taugbn (where n goes from
+!!\ It contains the subroutines taugbn (where n goes from
 !! 1 to 16). taugbn calculates the optical depths and planck fractions
 !! per g-value and layer for band n.
 !!\param laytrop          tropopause layer index (unitless) layer at
@@ -3703,7 +3695,6 @@
 !!\param nlay             total number of layers
 !!\param fracs            planck fractions
 !!\param tautot           total optical depth (gas+aerosols)
-! ----------------------------------
       subroutine taumol                                                 &
      &     ( laytrop,pavel,coldry,colamt,colbrd,wx,tauaer,              & !  ---  inputs
      &       rfrate,fac00,fac01,fac10,fac11,jp,jt,jt1,                  &
@@ -3887,6 +3878,7 @@
       contains
 ! =================
 
+!>\ingroup module_radlw_main
 !> band 1:  10-350 cm-1 (low key - h2o; low minor - n2);
 !!  (high key - h2o; high minor - n2)
 ! ----------------------------------
@@ -3995,6 +3987,7 @@
       end subroutine taugb01
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 2:  350-500 cm-1 (low key - h2o; high key - h2o)
 ! ----------------------------------
       subroutine taugb02
@@ -4072,6 +4065,7 @@
       end subroutine taugb02
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 3:  500-630 cm-1 (low key - h2o,co2; low minor - n2o);
 !!                        (high key - h2o,co2; high minor - n2o)
 ! ----------------------------------
@@ -4380,6 +4374,7 @@
       end subroutine taugb03
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 4:  630-700 cm-1 (low key - h2o,co2; high key - o3,co2)
 ! ----------------------------------
       subroutine taugb04
@@ -4624,6 +4619,7 @@
       end subroutine taugb04
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 5:  700-820 cm-1 (low key - h2o,co2; low minor - o3, ccl4)
 !!                       (high key - o3,co2)
 ! ----------------------------------
@@ -4887,6 +4883,7 @@
       end subroutine taugb05
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 6:  820-980 cm-1 (low key - h2o; low minor - co2)
 !!                       (high key - none; high minor - cfc11, cfc12)
 ! ----------------------------------
@@ -4974,6 +4971,7 @@
       end subroutine taugb06
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 7:  980-1080 cm-1 (low key - h2o,o3; low minor - co2)
 !!                        (high key - o3; high minor - co2)
 ! ----------------------------------
@@ -5235,6 +5233,7 @@
       end subroutine taugb07
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 8:  1080-1180 cm-1 (low key - h2o; low minor - co2,o3,n2o)
 !!                         (high key - o3; high minor - co2, n2o)
 ! ----------------------------------
@@ -5360,6 +5359,7 @@
       end subroutine taugb08
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 9:  1180-1390 cm-1 (low key - h2o,ch4; low minor - n2o)
 !!                         (high key - ch4; high minor - n2o)
 ! ----------------------------------
@@ -5610,6 +5610,7 @@
       end subroutine taugb09
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 10:  1390-1480 cm-1 (low key - h2o; high key - h2o)
 ! ----------------------------------
       subroutine taugb10
@@ -5685,6 +5686,7 @@
       end subroutine taugb10
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 11:  1480-1800 cm-1 (low - h2o; low minor - o2)
 !!                          (high key - h2o; high minor - o2)
 ! ----------------------------------
@@ -5778,6 +5780,7 @@
       end subroutine taugb11
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 12:  1800-2080 cm-1 (low - h2o,co2; high - nothing)
 ! ----------------------------------
       subroutine taugb12
@@ -5963,6 +5966,7 @@
       end subroutine taugb12
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 13:  2080-2250 cm-1 (low key-h2o,n2o; high minor-o3 minor)
 ! ----------------------------------
       subroutine taugb13
@@ -6210,6 +6214,7 @@
       end subroutine taugb13
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 14:  2250-2380 cm-1 (low - co2; high - co2)
 ! ----------------------------------
       subroutine taugb14
@@ -6279,6 +6284,7 @@
       end subroutine taugb14
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 15:  2380-2600 cm-1 (low - n2o,co2; low minor - n2)
 !!                          (high - nothing)
 ! ----------------------------------
@@ -6490,6 +6496,7 @@
       end subroutine taugb15
 ! ----------------------------------
 
+!>\ingroup module_radlw_main
 !> Band 16:  2600-3250 cm-1 (low key- h2o,ch4; high key - ch4)
 ! ----------------------------------
       subroutine taugb16

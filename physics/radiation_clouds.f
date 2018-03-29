@@ -145,9 +145,9 @@
 !!!!!                       end descriptions                       !!!!!
 !!!!!  ==========================================================  !!!!!
 
-!> \ingroup RRTMG
-!! \defgroup module_radiation_clouds RRTMG Clouds Module
-!! This module computes cloud related quantities for radiation
+! \ingroup RRTMG
+!> \defgroup module_radiation_clouds RRTMG Clouds Module
+!! \brief This module computes cloud related quantities for radiation
 !! computations.
 !!
 !! Knowledge of cloud properties and their vertical structure is
@@ -181,7 +181,7 @@
 !!
 !! -# GFS Cloud Fraction
 !! \n The cloud fraction in a given grid box of the GFS model is
-!! computed using the parameterization scheme of Xu and Randall(1996)
+!! computed using the parameterization scheme of 
 !! \cite xu_and_randall_1996 :
 !!  \f[
 !!  \sigma =RH^{k_{1}}\left[1-exp\left(-\frac{k_{2}q_{l}}{\left[\left(1-RH\right)q_{s}\right]^{k_{3}}}\right)\right]
@@ -193,7 +193,7 @@
 !!  cloud water and ice in radiation based on temperature. Cloud drop
 !! effective radius ranges 5-10 microns over land depending on
 !!  temperature. Ice crystal radius is function of ice water content
-!! (Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996).
+!! (\cite heymsfield_and_mcfarquhar_1996).
 !!  Maximum-randomly cloud overlapping is used in both long-wave
 !! radiation and short-wave radiation. Convective clouds are not
 !! considered in radiation.
@@ -204,20 +204,19 @@
 !! GFS model. The first method makes use of a diagnostic cloud scheme,
 !! in which cloud properties are determined based on model-predicted
 !! temperature, pressure, and boundary layer circulation from
-!! Harshvardhan et al. (1989) \cite harshvardhan_et_al_1989 . The
+!! \cite harshvardhan_et_al_1989 . The
 !! diagnostic scheme is now replaced with a prognostic scheme that uses
 !! cloud condensate information instead (NCEP Office Note 441).
 !! \n For the parameterization of effective radius,\f$r_{ew}\f$, of
 !! water droplet, we fix \f$r_{ew}\f$ to a value of \f$10\mu m\f$ over
-!! the oceans. Over the land, \f$\f$ is defined as:
+!! the oceans. Over the land, \f$r_{ew}\f$ is defined as:
 !!\f[
-!! r_{ew} = 5+5\times F
+!! r_{ew} = 5+5 \times F
 !!\f]
 !! Thus, the effective radius of cloud water droplets will reach to a
 !! minimum values of \f$5\mu m\f$ when F=0, and to a maximum value of
 !! \f$10\mu m\f$ when the ice fraction is increasing.
-!! \n For ice clouds, following Heymsfield and McFarquhar (1996)
-!!  \cite heymsfield_and_mcfarquhar_1996,
+!! \n For ice clouds, following \cite heymsfield_and_mcfarquhar_1996,
 !! we have made the effective ice droplet radius to be an empirical
 !! function of ice water concentration (IWC) and environmental temperature as:
 !! \f[
@@ -328,7 +327,7 @@
       contains
 ! =================
 
-
+!> \ingroup module_radiation_clouds
 !> This subroutine is an initialization program for cloud-radiation
 !! calculations and sets up boundary layer cloud top.
 !!\param si              model vertical sigma layer interface
@@ -336,7 +335,6 @@
 !!\param me              print control flag
 !!\section gen_cld_init General Algorithm
 !> @{
-!-----------------------------------
       subroutine cld_init                                               &
      &     ( si, NLAY, me ) !  ---  inputs
 !  ---  outputs:
@@ -454,6 +452,7 @@
 !-----------------------------------
 !> @}
 
+!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! zhao/moorthi's prognostic cloud microphysics scheme.
 !!\param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
@@ -486,7 +485,6 @@
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
 !>\section gen_progcld1 General Algorithm
 !> @{
-!-----------------------------------
       subroutine progcld1                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk, IX, NLAY, NLP1,                           &
@@ -839,8 +837,8 @@
         enddo
       endif
 
-!> -# Compute effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
+!> -# Compute effective ice cloud droplet radius following 
+!!    \cite heymsfield_and_mcfarquhar_1996.
 
       do k = 1, NLAY
         do i = 1, IX
@@ -907,6 +905,7 @@
 !-----------------------------------
 !> @}
 
+!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using ferrier's
 !! prognostic cloud microphysics scheme.
 !!\param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
@@ -943,7 +942,6 @@
 !!\param mbot  (IX,3), vertical indices for low, mid, hi cloud bases
 !>\section gen_progcld2 General Algorithm
 !> @{
-!-----------------------------------
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk, f_ice,f_rain,r_rime,flgmin,               &
@@ -1407,6 +1405,7 @@
 !-----------------------------------
 !> @}
 
+!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! zhao/moorthi's prognostic cloud microphysics scheme + pdfcld.
 !!\param plyr       (ix,nlay), model layer mean pressure in mb (100pa)
@@ -1442,7 +1441,6 @@
 !!\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
 !!\section gen_progcld3 General Algorithm
 !> @{
-!-----------------------------------
       subroutine progcld3                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          &    !  ---  inputs:
      &       xlat,xlon,slmsk,                                           &
@@ -1771,8 +1769,8 @@
         enddo
       endif
 
-!> -# Calculate effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
+!> -# Calculate effective ice cloud droplet radius following 
+!! \cite heymsfield_and_mcfarquhar_1996.
 
       do k = 1, nlay
         do i = 1, ix
@@ -1839,6 +1837,7 @@
 !-----------------------------------
 !> @}
 
+!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! zhao/moorthi's prognostic cloud microphysics scheme.
 !!\param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
@@ -1870,7 +1869,6 @@
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
 !>\section gen_progclduni General Algorithm
 !> @{
-!-----------------------------------
       subroutine progclduni                                             &
      &     ( plyr,plvl,tlyr,tvly,clw,ciw,                               &    !  ---  inputs:
      &       xlat,xlon,slmsk, IX, NLAY, NLP1, cldcov,                   &
@@ -2099,8 +2097,8 @@
         enddo
       endif
 
-!> -# Compute effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
+!> -# Compute effective ice cloud droplet radius following 
+!! \cite heymsfield_and_mcfarquhar_1996.
 
       do k = 1, NLAY
         do i = 1, IX
@@ -2167,6 +2165,7 @@
 !-----------------------------------
 !> @}
 
+!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud fractions for radiation calculations.
 !!\param plyr      (IX,NLAY), model layer mean pressure in mb (100Pa)
 !!\param plvl      (IX,NLP1), model level pressure in mb (100Pa)
@@ -2192,7 +2191,6 @@
 !!\param mbot      (IX,3), vertical indices for low, mid, hi cloud bases
 !!\section gen_diagcld1 General Algorithm
 !> @{
-!-----------------------------------
       subroutine diagcld1                                               &
      &     ( plyr,plvl,tlyr,rhly,vvel,cv,cvt,cvb,                       &    !  ---  inputs:
      &       xlat,xlon,slmsk,                                           &
@@ -2790,7 +2788,7 @@
 !-----------------------------------
 !> @}
 
-
+!> \ingroup module_radiation_clouds
 !> This subroutine computes high, mid, low, total, and boundary cloud
 !! fractions and cloud top/bottom layer indices for model diagnostic
 !! output. The three cloud domain boundaries are defined by ptopc. The
@@ -2809,7 +2807,6 @@
 !!
 !>\section detail Detailed Algorithm
 !! @{
-!-----------------------------------                                    !
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv,                               &       !  ---  inputs:
      &       IX, NLAY,                                                  &
@@ -3133,8 +3130,8 @@
 !-----------------------------------
 !! @}
 
+!> \ingroup module_radiation_clouds
 !> cld-rh relations obtained from mitchell-hahn procedure.
-!-----------------------------------                                    !
       subroutine rhtable                                                &
      &     ( me                                                         &         !  ---  inputs:
      &,      ier )                                                                !  ---  outputs:

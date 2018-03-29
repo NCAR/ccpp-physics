@@ -111,7 +111,7 @@ c-----------------------------------------------------------------------
         enddo
       enddo
 !>  ## Determine an updraft parcel's entrainment rate, buoyancy, and vertical velocity.
-!!  Calculate the entrainment rate according to equation 16 in Siebesma et al. (2007) \cite siebesma_et_al_2007 for all levels (xlamue) and a default entrainment rate (xlamax) for use above the PBL top.
+!!  Calculate the entrainment rate according to equation 16 in \cite siebesma_et_al_2007 for all levels (xlamue) and a default entrainment rate (xlamax) for use above the PBL top.
       do i=1,im
         if(cnvflg(i)) then
           k = kpbl(i) / 2
@@ -137,7 +137,7 @@ c-----------------------------------------------------------------------
 c
 c  compute thermal excess
 c
-!>  Using equations 17 and 7 from Siebesma et al (2007) \cite siebesma_et_al_2007 along with \f$u_*\f$, \f$w_*\f$, and the previously diagnosed PBL height, the initial \f$\theta_v\f$ of the updraft (and its surface buoyancy) is calculated.
+!>  Using equations 17 and 7 from \cite siebesma_et_al_2007 along with \f$u_*\f$, \f$w_*\f$, and the previously diagnosed PBL height, the initial \f$\theta_v\f$ of the updraft (and its surface buoyancy) is calculated.
       do i=1,im
         if(cnvflg(i)) then
           tem = zl(i,1)/hpbl(i)
@@ -154,7 +154,7 @@ c
 c
 c  compute potential temperature and buoyancy for updraft air parcel
 c
-!>  From the second level to the middle of the vertical domain, the updraft virtual potential temperature is calculated using the entraining updraft equation as in equation 10 of Siebesma et al (2007) \cite siebesma_et_al_2007, discretized as
+!>  From the second level to the middle of the vertical domain, the updraft virtual potential temperature is calculated using the entraining updraft equation as in equation 10 of \cite siebesma_et_al_2007, discretized as
 !!  \f[
 !!  \frac{\theta_{v,u}^k - \theta_{v,u}^{k-1}}{\Delta z}=-\epsilon^{k-1}\left[\frac{1}{2}\left(\theta_{v,u}^k + \theta_{v,u}^{k-1}\right)-\frac{1}{2}\left(\overline{\theta_{v}}^k + \overline{\theta_v}^{k-1}\right)\right]
 !!  \f]
@@ -175,11 +175,11 @@ c
 c
 c  compute updraft velocity square(wu2)
 c
-!>  Rather than use the vertical velocity equation given as equation 15 in Siebesma et al (2007) \cite siebesma_et_al_2007 (which parameterizes the pressure term in terms of the updraft vertical velocity itself), this scheme uses the more widely used form of the steady state vertical velocity equation given as equation 6 in Soares et al. (2004) \cite soares_et_al_2004 discretized as
+!>  Rather than use the vertical velocity equation given as equation 15 in \cite siebesma_et_al_2007 (which parameterizes the pressure term in terms of the updraft vertical velocity itself), this scheme uses the more widely used form of the steady state vertical velocity equation given as equation 6 in \cite soares_et_al_2004 discretized as
 !!  \f[
 !!  \frac{w_{u,k}^2 - w_{u,k-1}^2}{\Delta z} = -2b_1\frac{1}{2}\left(\epsilon_k + \epsilon_{k-1}\right)\frac{1}{2}\left(w_{u,k}^2 + w_{u,k-1}^2\right) + 2b_2B
 !!  \f]
-!! The constants used in the scheme are labeled \f$bb1 = 2b_1\f$ and \f$bb2 = 2b_2\f$ and are tuned to be equal to 1.8 and 3.5, respectively, close to the values proposed by Soares et al. (2004) \cite soares_et_al_2004 .
+!! The constants used in the scheme are labeled \f$bb1 = 2b_1\f$ and \f$bb2 = 2b_2\f$ and are tuned to be equal to 1.8 and 3.5, respectively, close to the values proposed by \cite soares_et_al_2004 .
 !     tem = 1.-2.*f1
 !     bb1 = 2. * b1 / tem
 !     bb2 = 2. / tem
@@ -326,7 +326,7 @@ c
 !!  \f[
 !!  M = a_uw_u
 !!  \f]
-!!  where \f$a_u\f$ is the tunable parameter that represents the fractional area of updrafts (currently set to 0.08). Limit the computed mass flux to be less than \f$\frac{\Delta z}{\Delta t}\f$. This is different than what is done in Siebesma et al. (2007) \cite siebesma_et_al_2007 where the mass flux is the product of a tunable constant and the diagnosed standard deviation of \f$w\f$.
+!!  where \f$a_u\f$ is the tunable parameter that represents the fractional area of updrafts (currently set to 0.08). Limit the computed mass flux to be less than \f$\frac{\Delta z}{\Delta t}\f$. This is different than what is done in \cite siebesma_et_al_2007 where the mass flux is the product of a tunable constant and the diagnosed standard deviation of \f$w\f$.
       do k = 1, kmpbl
         do i = 1, im
           if (cnvflg(i) .and. k < kpbl(i)) then
@@ -349,7 +349,7 @@ c
 !!  \f[
 !!  \frac{\phi_{u,k} - \phi_{u,k-1}}{\Delta z}=-\epsilon_{k-1}\left[\frac{1}{2}\left(\phi_{u,k} + \phi_{u,k-1}\right)-\frac{1}{2}\left(\overline{\phi}_k + \overline{\phi}_{k-1}\right)\right]
 !!  \f]
-!!  The exception is for the horizontal momentum components, which have been modified to account for the updraft-induced pressure gradient force, and use the following equation, following Han and Pan (2006) \cite han_and_pan_2006
+!!  The exception is for the horizontal momentum components, which have been modified to account for the updraft-induced pressure gradient force, and use the following equation, following \cite han_and_pan_2006
 !!  \f[
 !!  \frac{\partial v}{\partial z} = -\epsilon\left(v_u - \overline{v}\right)+d_1\frac{\partial \overline{v}}{\partial z}
 !!  \f]

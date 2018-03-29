@@ -16,21 +16,16 @@
  aerosol awareness follows that of the SAMF deep convection scheme.
 
  The previous version of the shallow convection scheme (shalcnv.f)
- is described in Han and Pan (2011) \cite han_and_pan_2011 and differences
+ is described in \cite han_and_pan_2011 and differences
  between the shallow and deep convection schemes are presented in
- Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2017)
- \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
- are described in Han et al. (2017) \cite han_et_al_2017 .
+ \cite han_and_pan_2011 and \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
+ are described in \cite han_et_al_2017 .
 
 \section intr_shal Intraphysics Communication
 \ref arg_table_sasas_shal_run
 
 \section gen_shal General Algorithm
 \ref general_mfshal
-
-\section det_shal Detailed Algorithm
-\ref detailed_mfshal
-
 
 
 */

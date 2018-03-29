@@ -22,24 +22,22 @@
  by the large scale dynamics is in balance with the consumption of the
  cloud work function by the convection.
 
- The SAS scheme uses the working concepts put forth in Arakawa and
- Schubert (1974) \cite arakawa_and_schubert_1974 but includes modifications
- and simplifications from Grell (1993) \cite grell_1993 such as saturated
+ The SAS scheme uses the working concepts put forth 
+ in \cite arakawa_and_schubert_1974 but includes modifications
+ and simplifications from \cite grell_1993 such as saturated
  downdrafts and only one cloud type (the deepest possible), rather than
  a spectrum based on cloud top heights or assumed entrainment rates.
- The scheme was implemented for the GFS in 1995 by Pan and Wu
- \cite pan_and_wu_1995, with further modifications discussed in
- Han and Pan (2011) \cite han_and_pan_2011 , including the calculation
+ The scheme was implemented for the GFS in 1995 by \cite pan_and_wu_1995, 
+ with further modifications discussed in \cite han_and_pan_2011 , including the calculation
  of cloud top, a greater CFL-criterion-based maximum cloud base mass flux,
  updated cloud model entrainment and detrainment, improved convective
  transport of horizontal momentum, a more general triggering function,
  and the inclusion of convective overshooting.
 
  The SAMF scheme updates the SAS scheme with scale- and aerosol-aware
- parameterizations from Han et al. (2017) \cite han_et_al_2017 based on
- the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 and
- Grell and Freitas (2014) \cite grell_and_freitas_2014 for scale awareness
- and by Lim (2011) \cite lim_2011 for aerosol awareness. The ratio of
+ parameterizations from \cite han_et_al_2017 based on
+ the studies by \cite arakawa_and_wu_2013 and \cite grell_and_freitas_2014 for scale awareness
+ and by \cite lim_2011 for aerosol awareness. The ratio of
  advective time to convective turnover time is also taken into account
  for the scale-aware parameterization. Along with the scale- and aerosol-aware
  parameterizations, more changes are made to the SAMF scheme. The cloud
@@ -56,9 +54,5 @@
 
 \section gen_al_deep General Algorithm
 \ref general_mfdeep
-
-\section det_al_deep Detailed Algorithm
-\ref detailed_deep
- 
 
 */

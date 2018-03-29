@@ -44,43 +44,41 @@
  frictional forces by being in contact with the mountain surfaces
  for longer time as well as the interaction of the atmospheric
  environment with vortex shedding which occurs in numerous
- observations. Lott and Miller (1997) \cite lott_and_miller_1997,
+ observations. \cite lott_and_miller_1997,
  incorporated the dividing streamline and mountain blocking in
  conjunction with sub-grid scale vertically propagating gravity wave
  parameterization in the context of NWP. The dividing streamline is
  seen as a source of gravity waves to the atmosphere above and
  nonlinear subgrid low-level mountain drag effect below.
 
- Gravity-wave drag is simulated as described by Alpert et al.
- (1988) \cite alpert_et_al_1988. The parameterization includes
+ Gravity-wave drag is simulated as described by \cite alpert_et_al_1988. 
+ The parameterization includes
  determination of the momentum flux due to gravity waves at the
  surface, as well as upper levels. The surface stress is a nonlinear
  function of the surface wind speed and the local Froude number,
- following Pierrehumbert (1987) \cite pierrehumbert_1987. Vertical
+ following \cite pierrehumbert_1987. Vertical
  variations in the momentum flux occur when the local Richardson
  number is less than 0.25 (the stress vanishes), or when wave
  breaking occurs (local Froude number becomes critical); in the
- latter case, the momentum flux is reduced according to the
- Lindzen(1981) \cite lindzen_1981 wave saturation hypothesis.
+ latter case, the momentum flux is reduced according to \cite lindzen_1981 
+ wave saturation hypothesis.
  Modifications are made to avoid instability when the critical layer
  is near the surface, since the time scale for gravity-wave drag is
  shorter than the model time step. The treatment of the GWD in the lower troposphere is enhanced
- according to Kim and Arakawa (1995) \cite kim_and_arakawa_1995 .
+ according to \cite kim_and_arakawa_1995 .
  Orographic Std Dev (HPRIME), Convexity(OC), Asymmetry (OA4) and Lx
- (CLX4) are input topographic statistics needed (see Appendix in Kim
- and Arakawa (1995) \cite kim_and_arakawa_1995) .
+ (CLX4) are input topographic statistics needed (see Appendix in \cite kim_and_arakawa_1995) .
 
- Mountain blocking influences are incorporated following the Lott
- and Miller (1997) \cite lott_and_miller_1997 parameterization with
+ Mountain blocking influences are incorporated following  
+ \cite lott_and_miller_1997 parameterization with
  minor changes, including their dividing streamline concept. The
  model subgrid scale orography is represented by four parameters,
- after Baines and Palmer (1990) \cite baines_and_palmer_1990, the
+ after \cite baines_and_palmer_1990, the
  standard deviation (HPRIME), the anisotropy (GAMMA), the slope
  (SIGMA) and the geographical orientation of the orography (THETA).
  These are calculated off-line as a function of model resolution in
  the fortran code ml01rg2.f, with script mlb2.sh (see Appendix:
- Specification of subgrid-scale orography in Lott and Miller (1997)
- \cite lott_and_miller_1997).
+ Specification of subgrid-scale orography in \cite lott_and_miller_1997).
 
  The orographic GWD parameterizations automatically scales
  with model resolution. For example, the T574L64 version of GFS uses
