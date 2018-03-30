@@ -12,7 +12,7 @@
       end subroutine sfc_ex_coef_finalize
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
-!> \brief This  subroutine calculates surface roughness length.
+!> \brief This subroutine calculates surface roughness length.
 !> \section arg_table_sfc_ex_coef_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -51,6 +51,7 @@
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
+!! @{
 !! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
 !!  in \cite zeng_et_al_1998). 
 !! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
@@ -74,8 +75,9 @@
 !!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
 !!\f]
 !! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
-!>  \section detailed_diff Detailed Algorithm
-!!  @{
+!!
+!> \section detail_diff Detailed Algorithm
+!! @{ 
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
      &                    snwdph,tskin,z0rl,cm,ch,rb,                   &

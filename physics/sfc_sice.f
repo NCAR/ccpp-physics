@@ -211,9 +211,10 @@
 !! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of
 !! the bottom of the ice is fixed at \f$T_f\f$, the freezing temperature of seawater. The temperature of
 !! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
-!! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 8.1).
+!! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets.
-!!
+!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!! \image latex GFS_sice_wonton2000_fig1.eps "Schematic representation of the three-layer model" width=5cm
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature 
 !!\n The surface temperature is determined from the diagnostic balance between

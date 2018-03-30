@@ -9,7 +9,7 @@
  and it regulates the overall earth-atmosphere energy exchanges and
  transformations.
 
- The schematic radiation module structure is shown in Figure 2.1.
+ The schematic radiation module structure is shown in Figure 1.
  \image html schematic_Rad_mod.png "Figure 1: Schematic Radiation Module Structure" width=10cm
  \image latex schematic_Rad_mod.eps "Schematic Radiation Module Structure" width=10cm
 
@@ -30,7 +30,7 @@
  parameterizations in NCEP's operational GFS are both modified and
  optimized versions of the Rapid Radiative Transfer Model for GCMs
  (RRTMG_LW v2.3 and RRTMG_SW v2.3, respectively) developed at AER \a inc.
- (Atmospheric and Environmental Research, https://www.aer.com)
+ (Atmospheric and Environmental Research)
  (\cite iacono_et_al_2008; \cite mlawer_et_al_1997; \cite iacono_et_al_2000;
  \cite clough_et_al_2005). The LW algorithm
  contains 140 unevenly distributed g-points (quadrature points) in 16

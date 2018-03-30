@@ -15,7 +15,7 @@
  and land cover change or management (\cite hirsch_et_al_2015; 
  \cite findell_et_al_2017) are topics of active research.
 
- Figure 6 is a schematic of local land-atmosphere interactions in a
+ Figure 1 is a schematic of local land-atmosphere interactions in a
  quiescent synoptic regime, including the soil moisture-precipitation
  (SM-P) feedback pathways.  Solid arrows indicate a positive feedback
  pathway, and large dashed arrows represent a negative feedback, while

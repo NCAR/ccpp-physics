@@ -29,12 +29,10 @@
  has been coupled to GFS. It predicts sea ice/snow thickness,
  the surface temperature and ice temperature structure. In each model grid box, the heat and moisture
  fluxes and albedo are treated separately for the ice and the open water.
- \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
- \image latex GFS_sice_wonton2000_fig1.eps "Schematic representation of the three-layer model" width=5cm
 
 \section intra_sice Intraphysics Communication
 + GFS Sea Ice Driver(\ref arg_table_sfc_sice_run)
-+ \cite winton_2000 Three-layer Thermodynamics Sea Ice Model (ice3lay())
++ Three-layer Thermodynamics Sea Ice Model (ice3lay()) \cite winton_2000
 
 \section gen_sice General Algorithm 
 + \ref general_sice_run
