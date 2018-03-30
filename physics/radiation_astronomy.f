@@ -75,9 +75,9 @@
 
 
 
-!> \ingroup RRTMG
-!! \defgroup module_radiation_astronomy RRTMG Astronomy Module
-!> This module sets up astronomical quantities for solar radiation
+! \ingroup RRTMG
+!> \defgroup module_radiation_astronomy RRTMG Astronomy Module
+!> \brief This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !! \version NCEP-Radiation_astronomy v5.2  Jan 2013
 !========================================!
@@ -138,6 +138,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_astronomy 
 !> This subroutine initializes astronomy process, and set up module
 !! constants.
 !!\param me         print message control flag
@@ -298,7 +299,7 @@
       end subroutine sol_init
 !-----------------------------------
 
-
+!>\ingroup module_radiation_astronomy 
 !> This subroutine computes solar parameters at forecast time.
 !!\param jdate     ncep absolute date and time at fcst time
 !!                 (yr, mon, day, t-zone, hr, min, sec, mil-sec)
@@ -624,7 +625,7 @@
 !-----------------------------------
 !! @}
 
-
+!>\ingroup module_radiation_astronomy
 !> This subroutine computes radius vector, declination and right
 !! ascension of sun, and equation of time
 !-----------------------------------
@@ -783,7 +784,7 @@
       end subroutine solar
 !-----------------------------------
 
-
+!>\ingroup module_radiation_astronomy
 !> This subroutine computes mean cos solar zenith angle over SW calling
 !! interval.
 !!\param xlon       (IM), grids' longitudes in radians, work both on
@@ -883,7 +884,7 @@
       end subroutine coszmn
 !-----------------------------------
 
-
+!>\ingroup module_radiation_astronomy
 !> This subroutine prints out forecast date, time, and astronomy
 !! quantities.
 !-----------------------------------

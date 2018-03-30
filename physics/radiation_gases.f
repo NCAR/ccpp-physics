@@ -104,8 +104,7 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!> \ingroup RRTMG
-!! \defgroup module_radiation_gases RRTMG Gases Module
+!> \defgroup module_radiation_gases RRTMG Gases Module
 !> This module sets up ozone climatological profiles and other constant
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
 !! data are entered as mixing ratio by volume, except ozone which is
@@ -210,6 +209,7 @@
       contains
 ! =================
 
+!> \ingroup module_radiation_gases
 !> This subroutine sets up ozone, co2, etc. parameters. If climatology
 !! ozone then read in monthly ozone data.
 !!\param me         print message control flag
@@ -499,6 +499,7 @@
       end subroutine gas_init
 !-----------------------------------
 
+!> \ingroup module_radiation_gases
 !> This subroutine reads in 2-d monthly co2 data set for a specified
 !! year. Data are in a 15 degree lat/lon horizontal resolution.
 !!\param iyear      year of the requested data for fcst
@@ -882,6 +883,7 @@
 !-----------------------------------
 !! @}
 
+!> \ingroup module_radiation_gases
 !> This subroutine sets up global distribution of radiation absorbing
 !! gases in volume mixing ratio. Currently only co2 has the options
 !! from observed values, all other gases are asigned to the
@@ -1046,6 +1048,7 @@
       end subroutine getgases
 !-----------------------------------
 
+!> \ingroup module_radiation_gases
 !> This subroutine sets up climatological ozone profile for radiation
 !! calculation. This code is originally written by Shrinivas Moorthi.
 !!\param prslk       (IMAX,LM), exner function = \f$(p/p0)^{rocp}\f$

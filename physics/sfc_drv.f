@@ -249,9 +249,8 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
-!> \defgroup Noah_Main GFS Noah Land Surface Model 
+! \defgroup Noah_Main GFS Noah Land Surface Model 
 !> \defgroup Noah_drv GFS Noah LSM Driver
-!!\ingroup Noah_Main
 !!  \brief This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well 
@@ -325,9 +324,9 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_noah_drv General Algorithm
+!!  \section general_noah_drv GFS Noah Driver General Algorithm
 !!  @{
-!  \section detailed_noah Detailed Algorithm
+!  \section detailed_noah GFS Noah Driver Detailed Algorithm
 !  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &

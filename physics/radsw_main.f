@@ -373,14 +373,13 @@
       end subroutine rrtmg_sw_init
 
 !> \ingroup RRTMG
-!! \defgroup module_radsw_main GFS RADSW Main
+!! \defgroup module_radsw_main GFS radsw Main
 !! This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!
 !! The SW radiation model in the current NOAA Environmental Modeling
 !! System (NEMS) was adapted from the RRTM radiation model developed by
-!! AER Inc. (Clough et al., 2005 \cite clough_et_al_2005;
-!! Mlawer et al., 1997 \cite mlawer_et_al_1997). It contains 14
+!! AER Inc. (\cite clough_et_al_2005; \cite mlawer_et_al_1997). It contains 14
 !! spectral bands spanning a spectral wavenumber range of
 !! \f$50000-820 cm^{-1}\f$ (corresponding to a wavelength range
 !! \f$0.2-12.2\mu m\f$), each spectral band focuses on a specific set of
@@ -424,12 +423,10 @@
 !! and speed, RRTMG-SW uses a two-stream approximation method with a
 !! delta-function adjustment. Several variations of the delta-two
 !! method are included in the radiation transfer code; each holds its
-!! own strength and shortcomings (King and Harshvadhan, 1986
-!! \cite king_and_harshvardhan_1986 ;
-!! \f$R\ddot{a}is\ddot{a}nen\f$,2002 \cite raisanen_2002 ;
-!! Barker et al., 2015 \cite barker_et_al_2015). The default (the same
+!! own strength and shortcomings (\cite king_and_harshvardhan_1986;
+!! \cite raisanen_2002; \cite barker_et_al_2015). The default (the same
 !! in operation runs) selection (iswmode=2) activates the Practical
-!! Improved Flux Method (PIFM) by Zdunkowski et al.(1980)
+!! Improved Flux Method (PIFM) by 
 !! \cite zdunkowski_et_al_1980 . In dealing with a column of cloudy
 !! atmosphere, two approaches are included in the RRTMG-SW. One is the
 !! commonly used treatment that sees each of the cloud contaminated
@@ -449,8 +446,7 @@
 !! cloud-free part and cloudy part are combined together to obtain the
 !! final result.
 !!\n On the other hand, the Monte-Carlo Independent Column Approximation
-!! (McICA) (Pincus et al.,2003 \cite pincus_et_al_2003 ;
-!! \f$R\ddot{a}is\ddot{a}nen\f$ and Barker, 2004
+!! (McICA) (\cite pincus_et_al_2003;
 !! \cite raisanen_and_barker_2004), provides a simple and effective way
 !! to solve cloud overlapping issue without increasing computational
 !! burden. The method is based on the concept of an ICA scheme that
@@ -564,7 +560,7 @@
 !! | errmsg          | error_message                                                                                  | error message for error handling in CCPP                                 | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                     | error flag for error handling in CCPP                                    | flag    |    0 | integer     |           | out    | F        |
 !!
-!> \section gen_swrad General Algorithm
+!> \section gen_swrad RRTMG Shortwave Radiation Scheme General Algorithm
 !> @{
 !-----------------------------------
       subroutine rrtmg_sw_run                                           &
@@ -1588,6 +1584,7 @@
       end subroutine rswinit
 !-----------------------------------
 
+!>\ingroup module_radsw_main
 !> This subroutine computes the cloud optical properties for each
 !! cloudy layer and g-point interval.
 !!\param cfrac          layer cloud fraction
@@ -1977,7 +1974,7 @@
 !-----------------------------------
 !> @}
 
-
+!>\ingroup module_radsw_main
 !> This subroutine computes the sub-colum cloud profile flag array.
 !!\param cldf        layer cloud fraction
 !!\param nlay        number of model vertical layers
@@ -2141,6 +2138,7 @@
       end subroutine mcica_subcol
 ! ----------------------------------
 
+!>\ingroup module_radsw_main
 !> This subroutine computes various coefficients needed in radiative
 !! transfer calculation.
 !!\param pavel           layer pressure (mb)
@@ -2316,6 +2314,7 @@
       end subroutine setcoef
 ! ----------------------------------
 
+!>\ingroup module_radsw_main
 !> This subroutine computes the shortwave radiative fluxes using
 !! two-stream method.
 !!\param ssolar           incoming solar flux at top
@@ -3078,6 +3077,7 @@
 !-----------------------------------
 !> @}
 
+!>\ingroup module_radsw_main
 !> This subroutine computes the shortwave radiative fluxes using
 !! two-stream method of h. barder and mcica,the monte-carlo independent
 !! column approximation, for the representation of sub-grid cloud
@@ -3811,6 +3811,7 @@
       end subroutine spcvrtm
 !-----------------------------------
 
+!>\ingroup module_radsw_main
 !> This subroutine is called by spcvrtc() and spcvrtm(), and computes
 !! the upward and downward radiation fluxes.
 !!\param zrefb           layer direct beam reflectivity
@@ -3921,6 +3922,7 @@
 !-----------------------------------
 !> @}
 
+!>\ingroup module_radsw_main
 !> This subroutine calculates optical depths for gaseous absorption and
 !! rayleigh scattering
 !!\n subroutine called taumol## (## = 16-29)
@@ -4214,6 +4216,7 @@
       contains
 ! =================
 
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 16:  2600-3250
 !! cm-1 (low - h2o,ch4; high - ch4)
 !-----------------------------------
@@ -4310,7 +4313,7 @@
       end subroutine taumol16
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 17:  3250-4000
 !! cm-1 (low - h2o,co2; high - h2o,co2)
 !-----------------------------------
@@ -4433,7 +4436,7 @@
       end subroutine taumol17
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 18:  4000-4650
 !! cm-1 (low - h2o,ch4; high - ch4)
 !-----------------------------------
@@ -4530,6 +4533,7 @@
       end subroutine taumol18
 !-----------------------------------
 
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 19:  4650-5150
 !! cm-1 (low - h2o,co2; high - co2)
 !-----------------------------------
@@ -4625,7 +4629,7 @@
       end subroutine taumol19
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 20:  5150-6150
 !! cm-1 (low - h2o; high - h2o)
 !-----------------------------------
@@ -4707,7 +4711,7 @@
       end subroutine taumol20
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 21:  6150-7700
 !! cm-1 (low - h2o,co2; high - h2o,co2)
 !-----------------------------------
@@ -4829,7 +4833,7 @@
       end subroutine taumol21
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 22:  7700-8050
 !! cm-1 (low - h2o,o2; high - o2)
 !-----------------------------------
@@ -4938,7 +4942,7 @@
       end subroutine taumol22
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 23:  8050-12850
 !! cm-1 (low - h2o; high - nothing)
 !-----------------------------------
@@ -5001,7 +5005,7 @@
       end subroutine taumol23
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 24:  12850-16000
 !! cm-1 (low - h2o,o2; high - o2)
 !-----------------------------------
@@ -5097,7 +5101,7 @@
       end subroutine taumol24
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 25:  16000-22650
 !! cm-1 (low - h2o; high - nothing)
 !-----------------------------------
@@ -5153,7 +5157,7 @@
       end subroutine taumol25
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 26:  22650-29000
 !! cm-1 (low - nothing; high - nothing)
 !-----------------------------------
@@ -5189,7 +5193,7 @@
       end subroutine taumol26
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 27:  29000-38000
 !! cm-1 (low - o3; high - o3)
 !-----------------------------------
@@ -5251,7 +5255,7 @@
       end subroutine taumol27
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 28:  38000-50000
 !! cm-1 (low - o3,o2; high - o3,o2)
 !-----------------------------------
@@ -5360,7 +5364,7 @@
       end subroutine taumol28
 !-----------------------------------
 
-
+!>\ingroup module_radsw_main
 !> The subroutine computes the optical depth in band 29:  820-2600
 !! cm-1 (low - h2o; high - co2)
 !-----------------------------------

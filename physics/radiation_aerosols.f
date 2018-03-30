@@ -117,7 +117,7 @@
 
 !> \ingroup RRTMG
 !! \defgroup module_radiation_aerosols RRTMG Aerosols Module
-!!  This module contains climatological atmospheric aerosol schemes for
+!! \brief This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
 !!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
@@ -288,7 +288,7 @@
 
 !  ---  parameters and constants:
 ! num of max componets in a profile
-      integer, parameter :: NXC = 5
+      integer, parameter :: NXC = 5     !< num of max componets in a profile
 ! num of aerosols profile structures
       integer, parameter :: NAE = 7
 ! num of atmos aerosols domains
@@ -669,6 +669,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> The initialization program is to set up necessary parameters and
 !! working arrays.
 !!
@@ -823,6 +824,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine writes aerosol parameter configuration to run log file.
 !--------------------------------
       subroutine wrt_aerlog
@@ -919,6 +921,7 @@
       end subroutine wrt_aerlog
 !--------------------------------
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine defines the one wavenumber solar fluxes based on toa
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
@@ -1016,6 +1019,7 @@
 !--------------------------------
 !! @}
 
+!>\ingroup module_radiation_aerosols
 !> The initialization program for stratospheric volcanic aerosols.
 !-----------------------------
       subroutine set_volcaer
@@ -1061,7 +1065,7 @@
 !-----------------------------------
 !!@}
 
-
+!>\ingroup module_radiation_aerosols
 !> This subroutine is the opac-climatology aerosol initialization
 !! program to set up necessary parameters and working arrays.
 !>\param solfwv     (NWVTOT), solar flux for each individual wavenumber
@@ -1158,6 +1162,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> The initialization program for climatological aerosols. The program
 !! reads and maps the pre-tabulated aerosol optical spectral data onto
 !! corresponding SW radiation spectral bands.
@@ -1524,6 +1529,7 @@
 !--------------------------------
 !! @}
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine computes mean aerosols optical properties over each
 !! SW radiation spectral band for each of the species components. This
 !! program follows GFDL's approach for thick cloud optical property in
@@ -1787,7 +1793,7 @@
 !-----------------------------------
 !!@}
 
-
+!>\ingroup module_radiation_aerosols
 !> This subroutine checks and updates time varying climatology aerosol
 !! data sets.
 !!
@@ -1855,6 +1861,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine updates the monthly global distribution of aerosol
 !! profiles in five degree horizontal resolution.
 !--------------------------------
@@ -2015,7 +2022,7 @@
       end subroutine trop_update
 !--------------------------------
 
-
+!>\ingroup module_radiation_aerosols
 !> This subroutine searches historical volcanic data sets to find and
 !! read in monthly 45-degree lat-zone band of optical depth.
 !--------------------------------
