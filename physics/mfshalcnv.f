@@ -91,33 +91,10 @@
 !>\defgroup SAMF_shal_main GFS mfshalcnv Main
 !! @{
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
-!! The scale-aware mass-flux shallow (SAMF_shal) convection
+!! The scale-aware mass-flux shallow  convection
 !! scheme is an updated version of the previous mass-flux shallow
 !! convection scheme with scale and aerosol awareness and
 !! parameterizes the effect of shallow convection on the environment.
-!! The SAMF_shal scheme is similar to the SAMF deep convection scheme
-!! but with a few key differences. First, no quasi-equilibrium assumption
-!! is used for any grid size and the shallow cloud base mass flux is
-!! parameterized using a mean updraft velocity. Further, there are no
-!! convective downdrafts, the entrainment rate is greater than for deep
-!! convection, and the shallow convection is limited to not extend over
-!! the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and
-!! aerosol awareness follows that of the SAMF deep convection scheme.
-!!
-!! The previous version of the shallow convection scheme (\c shalcnv.f)
-!! is described in \cite han_and_pan_2011 and differences
-!! between the shallow and deep convection schemes are presented in
-!! \cite han_and_pan_2011 and \cite han_et_al_2017. 
-!! Details of scale- and aerosol-aware parameterizations
-!! are described in \cite han_et_al_2017 .
-!!
-!! This routine follows the \ref SAMF deep scheme quite closely, although
-!! it can be interpreted as only having the "static" and "feedback" control
-!! portions, since the "dynamic" control is not necessary to find the
-!! cloud base mass flux. The algorithm is simplified from SAMF deep
-!! convection by excluding convective downdrafts and being confined to
-!! operate below \f$p=0.7p_{sfc}\f$. Also, entrainment is both simpler
-!! and stronger in magnitude compared to the deep scheme.
 !!
 !! \section arg_table_sasas_shal_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                              | units   | rank | type      |    kind   | intent | optional |
