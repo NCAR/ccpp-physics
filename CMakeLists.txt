@@ -244,7 +244,6 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -fdefault-real-8 -fdefault-double-8")
 elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
-  set(f_flags -extend-source 132)
 
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
