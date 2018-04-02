@@ -184,7 +184,7 @@
 !> \section gen_gwdps GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
 !! -# Calculate orographic wave drag
-!> \section det_gwdps Detailed Algorithm
+!> \section det_gwdps GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdps_run(                                             &
      &           IM,IX,KM,A,B,C,U1,V1,T1,Q1,KPBL,                       &

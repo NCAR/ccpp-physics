@@ -171,7 +171,7 @@
 !!  - gethml():get diagnostic hi, mid, low,total,BL clouds
 !!  - rhtable():rh lookup table for diag cloud scheme
 !!
-!> \section gen_al_clouds  General Algorithm
+!> \section gen_al_clouds  RRTMG Clouds Module General Algorithm
 !! @{
 !! -# Cloud Liquid/Ice Water Path (LWP,IWP)
 !!\n We define the fraction of liquid and ice cloud as:
@@ -333,7 +333,7 @@
 !!\param si              model vertical sigma layer interface
 !!\param NLAY            vertical layer number
 !!\param me              print control flag
-!!\section gen_cld_init General Algorithm
+!!\section gen_cld_init CLD_INIT General Algorithm
 !> @{
       subroutine cld_init                                               &
      &     ( si, NLAY, me ) !  ---  inputs
@@ -483,7 +483,7 @@
 !!\param clds       (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progcld1 General Algorithm
+!>\section gen_progcld1 PROGCLD1 General Algorithm
 !> @{
       subroutine progcld1                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
@@ -940,7 +940,7 @@
 !!\param clds  (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop  (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot  (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progcld2 General Algorithm
+!>\section gen_progcld2 PROGCLD2 General Algorithm
 !> @{
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
@@ -1439,7 +1439,7 @@
 !!\param clds      (ix,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop      (ix,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
-!!\section gen_progcld3 General Algorithm
+!!\section gen_progcld3 PROGCLD3 General Algorithm
 !> @{
       subroutine progcld3                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          &    !  ---  inputs:
@@ -1867,7 +1867,7 @@
 !!\param clds       (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progclduni General Algorithm
+!>\section gen_progclduni PROGCLDUNI General Algorithm
 !> @{
       subroutine progclduni                                             &
      &     ( plyr,plvl,tlyr,tvly,clw,ciw,                               &    !  ---  inputs:
@@ -2189,7 +2189,7 @@
 !!\param clds      (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop      (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot      (IX,3), vertical indices for low, mid, hi cloud bases
-!!\section gen_diagcld1 General Algorithm
+!!\section gen_diagcld1 DIAGCLD1 General Algorithm
 !> @{
       subroutine diagcld1                                               &
      &     ( plyr,plvl,tlyr,rhly,vvel,cv,cvt,cvb,                       &    !  ---  inputs:
@@ -2805,7 +2805,7 @@
 !> \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
 !> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
-!>\section detail Detailed Algorithm
+!>\section detail GETHML Detailed Algorithm
 !! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv,                               &       !  ---  inputs:

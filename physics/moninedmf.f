@@ -132,7 +132,7 @@
 !!  -# Solve for the temperature and moisture tendencies due to vertical mixing.
 !!  -# Calculate heating due to TKE dissipation and add to the tendency for temperature.
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
-!!  \section detailed_edmf Detailed Algorithm
+!!  \section detailed_edmf GFS HEDMF PBL Scheme Detailed Algorithm
 !!  @{
       subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &

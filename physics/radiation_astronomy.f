@@ -314,7 +314,7 @@
 !!\param sdec, cdec         sin and cos of the solar declination angle
 !!\param solcon             sun-earth distance adjusted solar constant
 !!                           \f$(w/m^2)\f$
-!>\section gen_sol_update General Algorithm
+!>\section gen_sol_update SOL_UPDATE General Algorithm
 !! @{
 !-----------------------------------
       subroutine sol_update                                             &

@@ -2,7 +2,6 @@
 !! This file is the entity of GFS Noah LSM Model(Version 2.7).
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!!\ingroup Noah_Main
 !!\brief This is the entity of GFS Noah LSM model of physics subroutines.
 !! It is a soil/veg/snowpack land-surface model to update soil moisture, soil
 !! ice, soil temperature, skin temperature, snowpack water content, snowdepth,

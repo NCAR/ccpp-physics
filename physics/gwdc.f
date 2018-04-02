@@ -180,7 +180,7 @@
 !! Richardson number including wave impact is similar to that in the mountain
 !! wave case.
 !!
-!> \section al_gwdc Detailed Algorithm
+!> \section al_gwdc GFS Convective GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdc_run (im,ix,km,lat,u1,v1,t1,q1,deltim,             &
      &           pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,           &
@@ -904,7 +904,7 @@
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
 !! The parameter \f$\mu\f$ is the nonlinearity factor of thermally
-!! induced internal gravity waves defined by eq.(17) in \cite chun_and_baik_1998:
+!! induced internal gravity waves defined by eq.(17) in \cite chun_and_baik_1998 :
 !! \f[
 !!  \mu=\frac{gQ_{0}a_{1}}{c_{p}T_{0}NU^{2}}
 !! \f]

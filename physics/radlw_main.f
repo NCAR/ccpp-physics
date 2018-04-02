@@ -1503,7 +1503,7 @@
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
-!!\section gen_cldprop General Algorithm
+!!\section gen_cldprop CLDPROP General Algorithm
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
@@ -2302,7 +2302,7 @@
 !!\param totdclfl    clear sky downward flux \f$(w/m^2)\f$
 !!\param htrcl       clear sky heating rate (k/sec or k/day)
 !!\param htrb        spectral band lw heating rate (k/day)
-!!\section gen_rtrn General Algorithm
+!!\section gen_rtrn RTRN General Algorithm
 ! ----------------------------------
       subroutine rtrn                                                   &
      &     ( semiss,delp,cldfrc,taucld,tautot,pklay,pklev,              & !  ---  inputs
@@ -2685,7 +2685,7 @@
 !!\param totdclfl      clear sky downward flux (\f$w/m^2\f$)
 !!\param htrcl         clear sky heating rate (k/sec or k/day)
 !!\param htrb          spectral band lw heating rate (k/day)
-!!\section gen_rtrnmr General Algorithm
+!!\section gen_rtrnmr RTRNMR General Algorithm
 !> @{
 ! ----------------------------------
       subroutine rtrnmr                                                 &
@@ -3278,7 +3278,7 @@
 !!\param totdclfl     clear sky downward flux \f$(w/m^2)\f$
 !!\param htrcl        clear sky heating rate (k/sec or k/day)
 !!\param htrb         spectral band lw heating rate (k/day)
-!!\section gen_rtrnmc General Algorithm
+!!\section gen_rtrnmc RTRNMC General Algorithm
 !> @{
 ! ---------------------------------
       subroutine rtrnmc                                                 &
