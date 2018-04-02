@@ -2805,7 +2805,7 @@
 !> \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
 !> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
-!>\section detail Detailed Algorithm
+!>\section detail GETHML Detailed Algorithm
 !! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv,                               &       !  ---  inputs:
