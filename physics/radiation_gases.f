@@ -509,7 +509,7 @@
 !!\param loz1st     clim ozone 1st time update control flag
 !!\param ldoco2     co2 update control flag
 !!\param me         print message control flag
-!>\section gen_gas_update General Algorithm
+!>\section gen_gas_update GAS_UPDATE General Algorithm
 !! @{
 !-----------------------------------
       subroutine gas_update                                             &

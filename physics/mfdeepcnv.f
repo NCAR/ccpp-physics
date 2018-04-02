@@ -106,7 +106,7 @@
 !!  -# For the "feedback control", calculate updated values of the state
 !! variables by multiplying the cloud base mass flux and the tendencies
 !! calculated per unit cloud base mass flux from the static control.
-!!  \section detailed_deep Detailed Algorithm
+!!  \section detailed_deep GFS SAMF Deep Convection Scheme Detailed Algorithm
 !!  @{
       subroutine sasas_deep_run(im,ix,km,delt,delp,prslp,psp,phil,ql1,  &
      &     ql2,q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,      &

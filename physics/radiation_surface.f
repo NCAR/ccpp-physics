@@ -126,7 +126,7 @@
 !> This subroutine is the initialization program for surface radiation
 !! related quantities (albedo, emissivity, etc.)
 !!\param me       print control flag
-!>\section gen_sfc_init General Algorithm
+!>\section gen_sfc_init SFC_INIT General Algorithm
 !! @{
 !-----------------------------------
       subroutine sfc_init                                               &
@@ -301,7 +301,7 @@
 !!\n                    ( :, 2) -     near ir diffused albedo
 !!\n                    ( :, 3) -     uv+vis direct beam albedo
 !!\n                    ( :, 4) -     uv+vis diffused albedo
-!!\section general General Algorithm
+!!\section general_setalb SETALB General Algorithm
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
@@ -634,7 +634,7 @@
 !!\param hprif     (IMAX), topographic standard deviation in m
 !!\param IMAX       array horizontal dimension
 !!\param sfcemis  (IMAX), surface emissivity
-!!\section general_setemis General Algorithm
+!!\section general_setemis SETEMIS General Algorithm
 !> @{
 !-----------------------------------
       subroutine setemis                                                &

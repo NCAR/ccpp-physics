@@ -392,7 +392,7 @@
 ! =KCM1+KCM2 (set in subr set_aerspc)
       integer, save      :: KCM
 
-      real (kind=kind_phys), dimension(KRHLEV) :: rhlev_grt             &
+      real (kind=kind_phys), dimension(KRHLEV) :: rhlev_grt             
       data  rhlev_grt (:)/ .00, .05, .10, .15, .20, .25, .30, .35,      &
      &      .40, .45, .50, .55, .60, .65, .70, .75, .80, .81, .82,      &
      &      .83, .84, .85, .86, .87, .88, .89, .90, .91, .92, .93,      &
@@ -675,7 +675,7 @@
 !!
 !>\param NLAY    number of model vertical layers (not used)
 !>\param me      print message control flag
-!>\section gen_al General Algorithm
+!>\section aer_init_gen_al AER_INIT General Algorithm
 !! @{
 !-----------------------------------
       subroutine aer_init                                               &
@@ -925,7 +925,7 @@
 !> This subroutine defines the one wavenumber solar fluxes based on toa
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
-!>\section gel_set_spec General Algorithm
+!>\section gel_set_spec SET_SPECTRUM General Algorithm
 !! @{
 !--------------------------------
       subroutine set_spectrum
@@ -1074,7 +1074,7 @@
 !!                  \f$(w/m^2)\f$
 !!\param me         print message control flag
 !!
-!!\section gen_clim_aerinit General Algorithm
+!!\section gen_clim_aerinit CLIM_AERINIT General Algorithm
 !!@{
 !-----------------------------------
       subroutine clim_aerinit                                           &
@@ -1166,7 +1166,7 @@
 !> The initialization program for climatological aerosols. The program
 !! reads and maps the pre-tabulated aerosol optical spectral data onto
 !! corresponding SW radiation spectral bands.
-!!\section det_set_aercoef General Algorithm
+!!\section det_set_aercoef SET_AERCOEF General Algorithm
 !! @{
 !--------------------------------
       subroutine set_aercoef
@@ -1796,11 +1796,10 @@
 !>\ingroup module_radiation_aerosols
 !> This subroutine checks and updates time varying climatology aerosol
 !! data sets.
-!!
 !>\param iyear    4-digit calender year
 !!\param imon     month of the year
 !!\param me       print message control flag
-!>\section gen_aer_upd General Algorithm
+!>\section gen_aer_upd AER_UPDATE General Algorithm
 !! @{
 !-----------------------------------
       subroutine aer_update                                             &
@@ -2153,6 +2152,7 @@
 !! @}
 
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine computes aerosols optical properties.
 !>\param prsi    (IMAX,NLP1), pressure at interface in mb
 !!\param prsl    (IMAX,NLAY), layer mean pressure in mb
@@ -2177,7 +2177,7 @@
 !!\n                    (:,:,:,2): single scattering albedo
 !!\n                    (:,:,:,3): asymmetry parameter
 !!\param aerodp    (IMAX,NSPC1), vertically integrated optical depth
-!>\section general_setaer General Algorithm
+!>\section general_setaer SETAER General Algorithm
 !> @{
 !-----------------------------------
       subroutine setaer                                                 &
@@ -2739,6 +2739,7 @@
 !> @}
 
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine maps the 5 degree global climatological aerosol data
 !! set onto model grids, and compute aerosol optical properties for SW
 !! and LW radiations.
@@ -2765,7 +2766,7 @@
 !!\n                              (:,:,:,2): single scattering albedo
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
-!!\section gel_aer_pro General Algorithm
+!!\section gel_aer_pro AER_PROPERTY General Algorithm
 !> @{
 !-----------------------------------
       subroutine aer_property                                           &
@@ -3192,6 +3193,7 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine computes aerosols optical properties in NSWLWBD
 !! bands. there are seven different vertical profile structures. in the
 !! troposphere, aerosol distribution at each grid point is composed
@@ -3506,6 +3508,7 @@
 !! gocart_init : set_aerspc, rd_gocart_clim, rd_gocart_luts, optavg_grt
 !! setgocartaer: aeropt_grt, map_aermr
 
+!>\ingroup module_radiation_aerosols
 !> The initialization program for gocart aerosols
 !! - determine weight and index for aerosol composition/luts
 !! - read in monthly global distribution of gocart aerosols
@@ -3524,9 +3527,9 @@
 !!\param NSWLWBD          total num of bands calc for sw+lw aeros opt prop
 !!\param imon             month of the year
 !!\param me               print message control flag
-!!\param raddt
+!!\param raddt            radiation time step
 !!\param fdaer
-!>\section gel_go_ini General Algorithm
+!>\section gel_go_ini GOCART_INIT General Algorithm
 !! @{
 !-----------------------------------
       subroutine gocart_init                                            &
@@ -3843,8 +3846,11 @@
       contains
 ! =================
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine determines merging coefficients ctaer; setup aerosol
-!!  specification.
+!!  specification. The current version only supports prognostic aerosols
+!! (from GOCART in-line calculations) and climo aerosols (from GEOS-GOCART
+!! runs).
 !-----------------------------
       subroutine set_aerspc(raddt,fdaer)
 !.............................
@@ -4143,6 +4149,7 @@
       end subroutine set_aerspc
 
 !-----------------------------------
+!>\ingroup module_radiation_aerosols
 !> This subroutine reads input gocart aerosol optical data from Mie
 !! code calculations.
 !-----------------------------
@@ -4318,6 +4325,7 @@
       end subroutine rd_gocart_luts
 !-----------------------------------
 !                                                                      !
+!>\ingroup module_radiation_aerosols
 !> This subroutine computes mean aerosols optical properties over each
 !! SW/LW radiation spectral band for each of the species components.
 !! This program follows GFDL's approach for thick cloud optical property
@@ -4536,6 +4544,7 @@
       end subroutine optavg_grt
 !--------------------------------
 !
+!>\ingroup module_radiation_aerosols
 !> This subroutine:
 !! - 1. read in aerosol dry mass and surface pressure from GEOS3-GOCART
 !! C3.1 2000 monthly dataset or aerosol mixing ratio and surface
@@ -4862,6 +4871,7 @@
 !-----------------------------------
 !! @}
 
+!>\ingroup module_radiation_aerosols
 !> This subroutine computes SW + LW aerosol optical properties for
 !! gocart aerosol species (merged from fcst and clim fields).
 !!
@@ -4889,7 +4899,7 @@
 !!\n               (:,:,:,1): optical depth
 !!\n               (:,:,:,2): single scattering albedo
 !!\n               (:,:,:,3): asymmetry parameter
-!>\section gen_setgo General Algorithm
+!>\section gen_setgo SETGOCARTAER General Algorithm
 !!@{
 !-----------------------------------
       subroutine setgocartaer                                           &
@@ -5167,7 +5177,7 @@
       contains
 ! =================
 
-!>\ingroup setaer
+!>\ingroup module_radiation_aerosols
 !> This subroutine maps input tracer fields (trcly) to local tracer
 !! array (aermr).
 !-----------------------------
@@ -5254,7 +5264,7 @@
 !-----------------------------------
 
 
-!>\ingroup setaer
+!>\ingroup module_radiation_aerosols
 !! This subroutine computes aerosols optical properties in NSWLWBD
 !! SW/LW bands. Aerosol distribution at each grid point is composed
 !! from up to NMXG aerosol species (from NUM_GRIDCOMP components).

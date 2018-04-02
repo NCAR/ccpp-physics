@@ -76,8 +76,6 @@
 !!\f]
 !! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-!> \section detail_diff Detailed Algorithm
-!! @{ 
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
      &                    snwdph,tskin,z0rl,cm,ch,rb,                   &
@@ -410,5 +408,4 @@
 
       return
       end subroutine sfc_ex_coef_run
-!! @}
       end module sfc_ex_coef

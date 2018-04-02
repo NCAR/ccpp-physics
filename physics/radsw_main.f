@@ -1617,7 +1617,7 @@
 !!                      (asy = asycw / ssacw)
 !!\param cldfrc         cloud fraction of grid mean value
 !!\param cldfmc         cloud fraction for each sub-column
-!!\section General_cldprop General Algorithm
+!!\section General_cldprop CLDPROP General Algorithm
 !> @{
 !-----------------------------------
       subroutine cldprop                                                &
@@ -2352,7 +2352,7 @@
 !!\param sfdf0            clr sky sfc dnwd diff flux (nir/uv+vis)
 !!\param suvbfc           tot sky sfc dnwd uv-b flux
 !!\param suvbf0           clr sky sfc dnwd uv-b flux
-!!\section General_spcvrtc General Algorithm
+!!\section General_spcvrtc SPCVRTC General Algorithm
 !> @{
 !-----------------------------------
       subroutine spcvrtc                                                &
@@ -3823,7 +3823,7 @@
 !!\param NLAY, NLP1      number of layers/levels
 !!\param zfu             upward flux at layer interface
 !!\param zfd             downward flux at layer interface
-!!\section General_swflux General Algorithm
+!!\section General_vrtqdr VRTQDR General Algorithm
 !> @{
 !-----------------------------------
       subroutine vrtqdr                                                 &
@@ -3960,7 +3960,7 @@
 !!\param sfluxzen         spectral distribution of incoming solar flux
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
-!>\section gen_al_taumol General Algorithm
+!>\section gen_al_taumol TAUMOL General Algorithm
 !! @{
 !-----------------------------------
       subroutine taumol                                                 &

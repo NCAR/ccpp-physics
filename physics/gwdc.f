@@ -180,7 +180,7 @@
 !! Richardson number including wave impact is similar to that in the mountain
 !! wave case.
 !!
-!> \section al_gwdc Detailed Algorithm
+!> \section al_gwdc GFS Convective GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdc_run (im,ix,km,lat,u1,v1,t1,q1,deltim,             &
      &           pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,           &

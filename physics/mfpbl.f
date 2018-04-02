@@ -29,11 +29,11 @@
 !!  \param[in,out] ucko updraft u component of horizontal momentum (\f$ m s^{-1} \f$)
 !!  \param[in,out] vcko updraft v component of horizontal momentum (\f$ m s^{-1} \f$)
 !!
-!!  \section general_mfpbl General Algorithm
+!!  \section general_mfpbl MFPBL General Algorithm
 !!  -# Determine an updraft parcel's entrainment rate, buoyancy, and vertical velocity.
 !!  -# Recalculate the PBL height (previously calculated in moninedmf) and the parcel's entrainment rate.
 !!  -# Calculate the mass flux profile and updraft properties.
-!!  \section detailed_mfpbl Detailed Algorithm
+!!  \section detailed_mfpbl MFPBL Detailed Algorithm
 !!  @{
       subroutine mfpbl(im,ix,km,ntrac,delt,cnvflg,                      &
      &   zl,zm,thvx,q1,t1,u1,v1,hpbl,kpbl,                              &
