@@ -274,6 +274,10 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 !
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+!
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
 !>  - Convert input pressure terms to centibar units.
