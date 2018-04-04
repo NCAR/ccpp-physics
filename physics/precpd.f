@@ -43,7 +43,7 @@
 !! | errmsg         | error_message                                                 | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                    | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
 !!
-!> \section general_precpd GFS Zhao-Carr Precipitation Production Scheme General Algorithm
+!> \section general_precpd GFS precpd Scheme General Algorithm
 !! The following two equations can be used to calculate the
 !! precipitation rates of rain and snow at each module level:
 !!\f[
@@ -66,7 +66,7 @@
 !! -# Calculate melting of snow (\f$P_{sm1}\f$ and \f$P_{sm2}\f$, \f$P_{sacw}\f$).
 !! -# Update t and q due to precipitation (snow or rain) production.
 !! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
-!! \section Zhao-Carr_precip_detailed GFS Zhao-Carr Precipitation Production Scheme Detailed Algorithm
+!! \section Zhao-Carr_precip_detailed GFS precpd Scheme Detailed Algorithm
 !! @{
        subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &

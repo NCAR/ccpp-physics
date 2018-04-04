@@ -213,6 +213,8 @@
 !> This subroutine sets up ozone, co2, etc. parameters. If climatology
 !! ozone then read in monthly ozone data.
 !!\param me         print message control flag
+!>\section gas_init_gen gas_init General Algorithm
+!! @{
 !-----------------------------------
       subroutine gas_init                                               &
      &     ( me )!  ---  inputs:
@@ -497,6 +499,7 @@
 !
 !...................................
       end subroutine gas_init
+!! @}
 !-----------------------------------
 
 !> \ingroup module_radiation_gases
@@ -509,7 +512,7 @@
 !!\param loz1st     clim ozone 1st time update control flag
 !!\param ldoco2     co2 update control flag
 !!\param me         print message control flag
-!>\section gen_gas_update GAS_UPDATE General Algorithm
+!>\section gen_gas_update gas_update General Algorithm
 !! @{
 !-----------------------------------
       subroutine gas_update                                             &
@@ -905,6 +908,8 @@
 !!\n                    (:,:,8)           - cfc22
 !!\n                    (:,:,9)           - ccl4
 !!\n                    (:,:,10)          - cfc113
+!>\section getgases_gen getgases General Algorithm
+!! @{
 !-----------------------------------
       subroutine getgases                                               &
      &     ( plvl, xlon, xlat,                                          & ! ---  inputs
@@ -1046,6 +1051,7 @@
       return
 !...................................
       end subroutine getgases
+!! @}
 !-----------------------------------
 
 !> \ingroup module_radiation_gases
@@ -1057,6 +1063,8 @@
 !!\param IMAX, LM    horizontal and vertical dimensions
 !!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing
 !!                   ratio (g/g)
+!>\section getozn_gen getozn General Algorithm
+!! @{
 !-----------------------------------
       subroutine getozn                                                 &
      &     ( prslk,xlat,                                                &                    !  ---  inputs
@@ -1162,6 +1170,7 @@
       return
 !...................................
       end subroutine getozn
+!! @}
 !-----------------------------------
 
 !

@@ -1432,6 +1432,8 @@
 !> This subroutine initializes non-varying module variables, conversion
 !! factors, and look-up tables.
 !!\param me             print control for parallel process
+!>\section rswinit_gen rswinit General Algorithm
+!! @{
 !-----------------------------------
       subroutine rswinit                                                &
      &     ( me ) !  ---  inputs:
@@ -1543,7 +1545,7 @@
         endif
       endif
 
-!  --- ...  check cloud flags for consistency
+!> -# Check cloud flags for consistency.
 
       if ((icldflg == 0 .and. iswcliq /= 0) .or.                        &
      &    (icldflg == 1 .and. iswcliq == 0)) then
@@ -1552,8 +1554,8 @@
         stop
       endif
 
-!  --- ...  setup constant factors for heating rate
-!           the 1.0e-2 is to convert pressure from mb to N/m**2
+!> -# Setup constant factors for heating rate
+!! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$ .
 
       if (iswrate == 1) then
 !       heatfac = 8.4391
@@ -1563,8 +1565,8 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!  --- ...  define exponential lookup tables for transmittance. tau is
-!           computed as a function of the tau transition function, and
+!> -# Define exponential lookup tables for transmittance. 
+!          tau is  computed as a function of the \a tau transition function, and
 !           transmittance is calculated as a function of tau.  all tables
 !           are computed at intervals of 0.0001.  the inverse of the
 !           constant used in the Pade approximation to the tau transition
@@ -1582,6 +1584,7 @@
       return
 !...................................
       end subroutine rswinit
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -1617,7 +1620,7 @@
 !!                      (asy = asycw / ssacw)
 !!\param cldfrc         cloud fraction of grid mean value
 !!\param cldfmc         cloud fraction for each sub-column
-!!\section General_cldprop CLDPROP General Algorithm
+!!\section General_cldprop cldprop General Algorithm
 !> @{
 !-----------------------------------
       subroutine cldprop                                                &
@@ -1749,14 +1752,14 @@
         lab_do_k : do k = 1, nlay
           lab_if_cld : if (cfrac(k) > ftiny) then
 
-!>    - Compute optical properties for rain and snow.
+!>  - Compute optical properties for rain and snow.
 !!\n    For rain: tauran/ssaran/asyran
 !!\n    For snow: tausnw/ssasnw/asysnw
-!>    - Calculation of absorption coefficients due to water clouds
+!>  - Calculation of absorption coefficients due to water clouds
 !!\n    For water clouds: tauliq/ssaliq/asyliq
-!>    - Calculation of absorption coefficients due to ice clouds
+!>  - Calculation of absorption coefficients due to ice clouds
 !!\n    For ice clouds: tauice/ssaice/asyice
-!>    - For Prognostic cloud scheme: sum up the cloud optical property:
+!>  - For Prognostic cloud scheme: sum up the cloud optical property:
 !!\n     \f$ taucw=tauliq+tauice+tauran+tausnw \f$
 !!\n     \f$ ssacw=ssaliq+ssaice+ssaran+ssasnw \f$
 !!\n     \f$ asycw=asyliq+asyice+asyran+asysnw \f$
@@ -1769,12 +1772,12 @@
 
             tauran = cldran * a0r
 
-!  ---  if use fu's formula it needs to be normalized by snow/ice density
-!       !not use snow density = 0.1 g/cm**3 = 0.1 g/(mu * m**2)
-!       use ice density = 0.9167 g/cm**3 = 0.9167 g/(mu * m**2)
-!       1/0.9167 = 1.09087
-!       factor 1.5396=8/(3*sqrt(3)) converts reff to generalized ice particle size
-!       use newer factor value 1.0315
+!>  - If use fu's formula it needs to be normalized by snow/ice density.
+!! not use snow density = 0.1 g/cm**3 = 0.1 g/(mu * m**2)
+!!\n use ice density = 0.9167 g/cm**3 = 0.9167 g/(mu * m**2)
+!!\n       1/0.9167 = 1.09087
+!!\n       factor 1.5396=8/(3*sqrt(3)) converts reff to generalized ice particle size
+!!       use newer factor value 1.0315
             if (cldsnw>f_zero .and. refsnw>10.0_kind_phys) then
 !             tausnw = cldsnw * (a0s + a1s/refsnw)
               tausnw = cldsnw*1.09087*(a0s + a1s/dgesnw)     ! fu's formula
@@ -1794,7 +1797,7 @@
             refliq = reliq(k)
             refice = reice(k)
 
-!  --- ...  calculation of absorption coefficients due to water clouds.
+!>  - Calculation of absorption coefficients due to water clouds.
 
             if ( cldliq <= f_zero ) then
               do ib = nblow, nbhgh
@@ -1825,7 +1828,7 @@
               endif   ! end if_iswcliq_block
             endif   ! end if_cldliq_block
 
-!  --- ...  calculation of absorption coefficients due to ice clouds.
+!>  - Calculation of absorption coefficients due to ice clouds.
 
             if ( cldice <= f_zero ) then
               do ib = nblow, nbhgh
@@ -1835,8 +1838,8 @@
               enddo
             else
 
-!  --- ...  ebert and curry approach for all particle sizes though somewhat
-!           unjustified for large ice particles
+!>   - ebert and curry approach for all particle sizes though somewhat
+!! unjustified for large ice particles.
 
               if ( iswcice == 1 ) then
                 refice = min(130.0_kind_phys,max(13.0_kind_phys,refice))
@@ -1856,7 +1859,7 @@
                   asyice(ib) = ssaice(ib) * asycoice
                 enddo
 
-!  --- ...  streamer approach for ice effective radius between 5.0 and 131.0 microns
+!>   - streamer approach for ice effective radius between 5.0 and 131.0 microns.
 
               elseif ( iswcice == 2 ) then
                 refice = min(131.0_kind_phys,max(5.0_kind_phys,refice))
@@ -1879,8 +1882,8 @@
                   asyice(ib) = ssaice(ib) * asycoice
                 enddo
 
-!  --- ...  fu's approach for ice effective radius between 4.8 and 135 microns
-!           (generalized effective size from 5 to 140 microns)
+!>   - fu's approach for ice effective radius between 4.8 and 135 microns
+!! (generalized effective size from 5 to 140 microns).
 
               elseif ( iswcice == 3 ) then
                 dgeice = max( 5.0, min( 140.0, 1.0315*refice ))
@@ -1980,6 +1983,8 @@
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param lcloudy     sub-colum cloud profile flag array
+!!\section mcica_subcol_gen mcica_subcol General Algorithm
+!! @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed,                                         &       !  ---  inputs
@@ -2026,7 +2031,7 @@
 !
 !===> ...  begin here
 !
-!  --- ...  advance randum number generator by ipseed values
+!> -# Advance randum number generator by ipseed values.
 
       call random_setseed                                               &
 !  ---  inputs:
@@ -2035,7 +2040,7 @@
      &      stat                                                        &
      &    )
 
-!  --- ...  sub-column set up according to overlapping assumption
+!> -# Sub-column set up according to overlapping assumption.
 
       select case ( iovrsw )
 
@@ -2123,7 +2128,7 @@
 
       end select
 
-!  --- ...  generate subcolumns for homogeneous clouds
+!> -# Generate subcolumns for homogeneous clouds.
 
       do k = 1, nlay
         tem1 = f_one - cldf(k)
@@ -2136,6 +2141,7 @@
       return
 ! ..................................
       end subroutine mcica_subcol
+!! @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2163,6 +2169,8 @@
 !!\param forfrac         factor for temperature interpolation of
 !!                       reference w.v. foreign-continuum data
 !!\param indfor          index of lower ref temp for forfac
+!>\section setcoef_gen_rw setcoef General Algorithm
+!! @{
 ! ----------------------------------
       subroutine setcoef                                                &
      &     ( pavel,tavel,h2ovmr, nlay,nlp1,                             &    !  ---  inputs
@@ -2233,22 +2241,22 @@
 
         forfac(k) = pavel(k)*stpfac / (tavel(k)*(f_one + h2ovmr(k)))
 
-!  --- ...  find the two reference pressures on either side of the
-!           layer pressure.  store them in jp and jp1.  store in fp the
-!           fraction of the difference (in ln(pressure)) between these
-!           two values that the layer pressure lies.
+!> -# Find the two reference pressures on either side of the
+!! layer pressure.  store them in jp and jp1.  store in fp the
+!! fraction of the difference (in ln(pressure)) between these
+!! two values that the layer pressure lies.
 
         plog  = log(pavel(k))
         jp(k) = max(1, min(58, int(36.0 - 5.0*(plog+0.04)) ))
         jp1   = jp(k) + 1
         fp    = 5.0 * (preflog(jp(k)) - plog)
 
-!  --- ...  determine, for each reference pressure (jp and jp1), which
-!          reference temperature (these are different for each reference
-!          pressure) is nearest the layer temperature but does not exceed it.
-!          store these indices in jt and jt1, resp. store in ft (resp. ft1)
-!          the fraction of the way between jt (jt1) and the next highest
-!          reference temperature that the layer temperature falls.
+!> -# Determine, for each reference pressure (jp and jp1), which
+!! reference temperature (these are different for each reference
+!! pressure) is nearest the layer temperature but does not exceed it.
+!! store these indices in jt and jt1, resp. store in ft (resp. ft1)
+!! the fraction of the way between jt (jt1) and the next highest
+!! reference temperature that the layer temperature falls.
 
         tem1 = (tavel(k) - tref(jp(k))) / 15.0
         tem2 = (tavel(k) - tref(jp1  )) / 15.0
@@ -2257,12 +2265,12 @@
         ft  = tem1 - float(jt (k) - 3)
         ft1 = tem2 - float(jt1(k) - 3)
 
-!  --- ...  we have now isolated the layer ln pressure and temperature,
-!           between two reference pressures and two reference temperatures
-!           (for each reference pressure).  we multiply the pressure
-!           fraction fp with the appropriate temperature fractions to get
-!           the factors that will be needed for the interpolation that yields
-!           the optical depths (performed in routines taugbn for band n).
+!> -# We have now isolated the layer ln pressure and temperature,
+!! between two reference pressures and two reference temperatures
+!! (for each reference pressure).  we multiply the pressure
+!! fraction fp with the appropriate temperature fractions to get
+!! the factors that will be needed for the interpolation that yields
+!! the optical depths (performed in routines taugbn for band n).
 
         fp1 = f_one - fp
         fac10(k) = fp1 * ft
@@ -2270,22 +2278,22 @@
         fac11(k) = fp  * ft1
         fac01(k) = fp  * (f_one - ft1)
 
-!  --- ...  if the pressure is less than ~100mb, perform a different
-!           set of species interpolations.
+!> -# If the pressure is less than ~100mb, perform a different
+!! set of species interpolations.
 
         if ( plog > 4.56 ) then
 
           laytrop =  k
 
-!  --- ...  set up factors needed to separately include the water vapor
-!           foreign-continuum in the calculation of absorption coefficient.
+!> -# Set up factors needed to separately include the water vapor
+!! foreign-continuum in the calculation of absorption coefficient.
 
           tem1 = (332.0 - tavel(k)) / 36.0
           indfor (k) = min(2, max(1, int(tem1)))
           forfrac(k) = tem1 - float(indfor(k))
 
-!  --- ...  set up factors needed to separately include the water vapor
-!           self-continuum in the calculation of absorption coefficient.
+!> -# Set up factors needed to separately include the water vapor
+!! self-continuum in the calculation of absorption coefficient.
 
           tem2 = (tavel(k) - 188.0) / 7.2
           indself (k) = min(9, max(1, int(tem2)-7))
@@ -2312,6 +2320,7 @@
       return
 ! ..................................
       end subroutine setcoef
+!! @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2352,8 +2361,8 @@
 !!\param sfdf0            clr sky sfc dnwd diff flux (nir/uv+vis)
 !!\param suvbfc           tot sky sfc dnwd uv-b flux
 !!\param suvbf0           clr sky sfc dnwd uv-b flux
-!!\section General_spcvrtc SPCVRTC General Algorithm
-!> @{
+!>\section General_spcvrtc spcvrtc General Algorithm
+!! @{
 !-----------------------------------
       subroutine spcvrtc                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfrc,              &  !  ---  inputs
@@ -2536,7 +2545,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!  --- ...  loop over all g-points in each band
+!> -# Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -2546,7 +2555,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!> -# Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -3117,6 +3126,8 @@
 !!\param sfdf0         clr sky sfc dnwd diff flux (nir/uv+vis)
 !!\param suvbfc        tot sky sfc dnwd uv-b flux
 !!\param suvbf0        clr sky sfc dnwd uv-b flux
+!>\section spcvrtm_gen spcvrtm General Algorithm
+!! @{
 !-----------------------------------
       subroutine spcvrtm                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfmc,              &   !  ---  inputs
@@ -3809,6 +3820,7 @@
       return
 !...................................
       end subroutine spcvrtm
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -3823,7 +3835,7 @@
 !!\param NLAY, NLP1      number of layers/levels
 !!\param zfu             upward flux at layer interface
 !!\param zfd             downward flux at layer interface
-!!\section General_vrtqdr VRTQDR General Algorithm
+!!\section General_vrtqdr vrtqdr General Algorithm
 !> @{
 !-----------------------------------
       subroutine vrtqdr                                                 &
@@ -3960,7 +3972,7 @@
 !!\param sfluxzen         spectral distribution of incoming solar flux
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
-!>\section gen_al_taumol TAUMOL General Algorithm
+!>\section gen_al_taumol taumol General Algorithm
 !! @{
 !-----------------------------------
       subroutine taumol                                                 &

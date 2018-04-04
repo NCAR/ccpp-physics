@@ -333,7 +333,7 @@
 !!\param si              model vertical sigma layer interface
 !!\param NLAY            vertical layer number
 !!\param me              print control flag
-!!\section gen_cld_init CLD_INIT General Algorithm
+!>\section gen_cld_init cld_init General Algorithm
 !> @{
       subroutine cld_init                                               &
      &     ( si, NLAY, me ) !  ---  inputs
@@ -483,7 +483,7 @@
 !!\param clds       (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progcld1 PROGCLD1 General Algorithm
+!>\section gen_progcld1 progcld1 General Algorithm
 !> @{
       subroutine progcld1                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
@@ -940,7 +940,7 @@
 !!\param clds  (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop  (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot  (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progcld2 PROGCLD2 General Algorithm
+!>\section gen_progcld2 progcld2 General Algorithm
 !> @{
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
@@ -1439,7 +1439,7 @@
 !!\param clds      (ix,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop      (ix,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
-!!\section gen_progcld3 PROGCLD3 General Algorithm
+!>\section gen_progcld3 progcld3 General Algorithm
 !> @{
       subroutine progcld3                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          &    !  ---  inputs:
@@ -1867,7 +1867,7 @@
 !!\param clds       (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
-!>\section gen_progclduni PROGCLDUNI General Algorithm
+!>\section gen_progclduni progclduni General Algorithm
 !> @{
       subroutine progclduni                                             &
      &     ( plyr,plvl,tlyr,tvly,clw,ciw,                               &    !  ---  inputs:
@@ -2189,7 +2189,7 @@
 !!\param clds      (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop      (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot      (IX,3), vertical indices for low, mid, hi cloud bases
-!!\section gen_diagcld1 DIAGCLD1 General Algorithm
+!!\section gen_diagcld1 diagcld1 General Algorithm
 !> @{
       subroutine diagcld1                                               &
      &     ( plyr,plvl,tlyr,rhly,vvel,cv,cvt,cvb,                       &    !  ---  inputs:
@@ -2805,7 +2805,7 @@
 !> \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
 !> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
-!>\section detail GETHML Detailed Algorithm
+!>\section detail gethml General Algorithm
 !! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv,                               &       !  ---  inputs:
@@ -3132,6 +3132,7 @@
 
 !> \ingroup module_radiation_clouds
 !> cld-rh relations obtained from mitchell-hahn procedure.
+!\section rhtable_gen rhtable General Algorithm
       subroutine rhtable                                                &
      &     ( me                                                         &         !  ---  inputs:
      &,      ier )                                                                !  ---  outputs:

@@ -140,18 +140,19 @@
 !> \brief This module contains cloud radiative property coefficients.
 !!
 !! For liquid water clouds, cloud radiative property coefficients are
-!! derived from Hu and Stamnes method (1993)\cite hu_and_stamnes_1993.
+!! derived from \cite hu_and_stamnes_1993.
 !! For ice clouds, there are various choices for model applications,
-!! including data tables derived from Ebert and Curry (1992)
-!! \cite ebert_and_curry_1992, from the Streamer scheme (Key,2002
-!! \cite key_2002), or from Fu (1996) \cite fu_1996 . Components of
+!! including data tables derived from 
+!! \cite ebert_and_curry_1992, from the Streamer scheme 
+!! \cite key_2002, or from \cite fu_1996 . Components of
 !! snow particles and rain droplets are not parameterized in the
 !! operational NEMS/GSM cloud microphysics scheme, and their radiative
 !! properties are neither well established yet. Coefficients for those
 !! components listed in the module are more experimental oriented that
 !! include the entries for snow from Fu (2001, personal communications),
-!! and for rain from Chou and Suarez (1999) \cite chou_and_suarez_1999.
-!!\n In common practices, the cloud radiative properties (optical depth,
+!! and for rain from \cite chou_and_suarez_1999.
+!!
+!! In common practices, the cloud radiative properties (optical depth,
 !! single scattering albedo, and asymmetry factor) are usually parametized
 !! in the form of a truncated Laurent series (generalized Taylor series)
 !!\f[

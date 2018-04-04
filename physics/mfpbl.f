@@ -5,35 +5,35 @@
 !!  \brief This subroutine is used for calculating the mass flux and updraft properties.
 !!
 !!  The mfpbl routines works as follows: if the PBL is convective, first, the ascending parcel entrainment rate is calculated as a function of height. Next, a surface parcel is initiated according to surface layer properties and the updraft buoyancy is calculated as a function of height. Next, using the buoyancy and entrainment values, the parcel vertical velocity is calculated using a well known steady-state budget equation. With the profile of updraft vertical velocity, the PBL height is recalculated as the height where the updraft vertical velocity returns to 0, and the entrainment profile is updated with the new PBL height. Finally, the mass flux profile is calculated using the updraft vertical velocity and assumed updraft fraction and the updraft properties are calculated using the updated entrainment profile, surface values, and environmental profiles.
-!!  \param[in] im number of used points
-!!  \param[in] ix horizontal dimension
-!!  \param[in] km vertical layer dimension
-!!  \param[in] ntrac number of tracers
-!!  \param[in] delt physics time step
-!!  \param[in] cnvflg flag to denote a strongly unstable (convective) PBL
-!!  \param[in] zl height of grid centers
-!!  \param[in] zm height of grid interfaces
-!!  \param[in] thvx virtual potential temperature at grid centers (\f$ K \f$)
-!!  \param[in] q1 layer mean tracer concentration (units?)
-!!  \param[in] t1 layer mean temperature (\f$ K \f$)
-!!  \param[in] u1 u component of layer wind (\f$ m s^{-1} \f$)
-!!  \param[in] v1 v component of layer wind (\f$ m s^{-1} \f$)
-!!  \param[in,out] hpbl PBL top height (m)
-!!  \param[in,out] kpbl PBL top index
-!!  \param[in] sflx total surface heat flux (units?)
-!!  \param[in] ustar surface friction velocity
-!!  \param[in] wstar convective velocity scale
-!!  \param[out] xmf updraft mass flux
-!!  \param[in,out] tcko updraft temperature (\f$ K \f$)
-!!  \param[in,out] qcko updraft tracer concentration (units?)
-!!  \param[in,out] ucko updraft u component of horizontal momentum (\f$ m s^{-1} \f$)
-!!  \param[in,out] vcko updraft v component of horizontal momentum (\f$ m s^{-1} \f$)
+!!  \param[in] im      integer, number of used points
+!!  \param[in] ix      integer, horizontal dimension
+!!  \param[in] km      integer, vertical layer dimension
+!!  \param[in] ntrac   integer, number of tracers
+!!  \param[in] delt    real, physics time step
+!!  \param[in] cnvflg  logical, im, flag to denote a strongly unstable (convective) PBL
+!!  \param[in] zl      real, (im, km), height of grid centers
+!!  \param[in] zm      real, (im, km+1), height of grid interfaces
+!!  \param[in] thvx    real, (im, km), virtual potential temperature at grid centers (\f$ K \f$)
+!!  \param[in] q1      real, (ix, km, ntrac), layer mean tracer concentration (units?)
+!!  \param[in] t1      real, (ix, km), layer mean temperature (\f$ K \f$)
+!!  \param[in] u1      real, (ix, km), u component of layer wind (\f$ m s^{-1} \f$)
+!!  \param[in] v1      real, (ix, km), v component of layer wind (\f$ m s^{-1} \f$)
+!!  \param[in,out] hpbl  real, im, PBL top height (m)
+!!  \param[in,out] kpbl  integer, im, PBL top index
+!!  \param[in] sflx      real, im, total surface heat flux (units?)
+!!  \param[in] ustar   real, im, surface friction velocity
+!!  \param[in] wstar   real, im, convective velocity scale
+!!  \param[out] xmf    real, (im, km), updraft mass flux
+!!  \param[in,out] tcko  real, (im, km), updraft temperature (\f$ K \f$)
+!!  \param[in,out] qcko  real, (im, km, ntrac), updraft tracer concentration (units?)
+!!  \param[in,out] ucko  real, (im, km), updraft u component of horizontal momentum (\f$ m s^{-1} \f$)
+!!  \param[in,out] vcko  real, (im, km), updraft v component of horizontal momentum (\f$ m s^{-1} \f$)
 !!
-!!  \section general_mfpbl MFPBL General Algorithm
+!!  \section general_mfpbl mfpbl General Algorithm
 !!  -# Determine an updraft parcel's entrainment rate, buoyancy, and vertical velocity.
 !!  -# Recalculate the PBL height (previously calculated in moninedmf) and the parcel's entrainment rate.
 !!  -# Calculate the mass flux profile and updraft properties.
-!!  \section detailed_mfpbl MFPBL Detailed Algorithm
+!!  \section detailed_mfpbl mfpbl Detailed Algorithm
 !!  @{
       subroutine mfpbl(im,ix,km,ntrac,delt,cnvflg,                      &
      &   zl,zm,thvx,q1,t1,u1,v1,hpbl,kpbl,                              &
