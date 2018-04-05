@@ -1,6 +1,6 @@
 !>  \file sfc_diff.f
 !!  This file contains the surface roughness length formulation based on 
-!! the surface sublayer scheme from \cite zeng_and_dickinson_1998. It is the first subroutine called in surface layer loop.
+!! the surface sublayer scheme in \cite zeng_and_dickinson_1998. 
 
       module sfc_ex_coef
       contains
@@ -13,6 +13,9 @@
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
 !> \brief This subroutine calculates surface roughness length.
+!!
+!! This subroutine includes the surface roughness length formulation
+!! based on the surface sublayer scheme in \cite zeng_and_dickinson_1998.
 !> \section arg_table_sfc_ex_coef_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -76,8 +79,6 @@
 !!\f]
 !! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-!> \section detail_diff Detailed Algorithm
-!! @{ 
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
      &                    snwdph,tskin,z0rl,cm,ch,rb,                   &

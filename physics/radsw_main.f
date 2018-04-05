@@ -1432,6 +1432,8 @@
 !> This subroutine initializes non-varying module variables, conversion
 !! factors, and look-up tables.
 !!\param me             print control for parallel process
+!>\section rswinit_gen rswinit General Algorithm
+!! @{
 !-----------------------------------
       subroutine rswinit                                                &
      &     ( me ) !  ---  inputs:
@@ -1543,7 +1545,7 @@
         endif
       endif
 
-!  --- ...  check cloud flags for consistency
+!> -# Check cloud flags for consistency.
 
       if ((icldflg == 0 .and. iswcliq /= 0) .or.                        &
      &    (icldflg == 1 .and. iswcliq == 0)) then
@@ -1552,8 +1554,8 @@
         stop
       endif
 
-!  --- ...  setup constant factors for heating rate
-!           the 1.0e-2 is to convert pressure from mb to N/m**2
+!> -# Setup constant factors for heating rate
+!! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$ .
 
       if (iswrate == 1) then
 !       heatfac = 8.4391
@@ -1563,8 +1565,8 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!  --- ...  define exponential lookup tables for transmittance. tau is
-!           computed as a function of the tau transition function, and
+!> -# Define exponential lookup tables for transmittance. 
+!          tau is  computed as a function of the \a tau transition function, and
 !           transmittance is calculated as a function of tau.  all tables
 !           are computed at intervals of 0.0001.  the inverse of the
 !           constant used in the Pade approximation to the tau transition
@@ -1582,6 +1584,7 @@
       return
 !...................................
       end subroutine rswinit
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -1617,7 +1620,7 @@
 !!                      (asy = asycw / ssacw)
 !!\param cldfrc         cloud fraction of grid mean value
 !!\param cldfmc         cloud fraction for each sub-column
-!!\section General_cldprop General Algorithm
+!!\section General_cldprop cldprop General Algorithm
 !> @{
 !-----------------------------------
       subroutine cldprop                                                &
@@ -1749,14 +1752,14 @@
         lab_do_k : do k = 1, nlay
           lab_if_cld : if (cfrac(k) > ftiny) then
 
-!>    - Compute optical properties for rain and snow.
+!>  - Compute optical properties for rain and snow.
 !!\n    For rain: tauran/ssaran/asyran
 !!\n    For snow: tausnw/ssasnw/asysnw
-!>    - Calculation of absorption coefficients due to water clouds
+!>  - Calculation of absorption coefficients due to water clouds
 !!\n    For water clouds: tauliq/ssaliq/asyliq
-!>    - Calculation of absorption coefficients due to ice clouds
+!>  - Calculation of absorption coefficients due to ice clouds
 !!\n    For ice clouds: tauice/ssaice/asyice
-!>    - For Prognostic cloud scheme: sum up the cloud optical property:
+!>  - For Prognostic cloud scheme: sum up the cloud optical property:
 !!\n     \f$ taucw=tauliq+tauice+tauran+tausnw \f$
 !!\n     \f$ ssacw=ssaliq+ssaice+ssaran+ssasnw \f$
 !!\n     \f$ asycw=asyliq+asyice+asyran+asysnw \f$
@@ -1769,12 +1772,12 @@
 
             tauran = cldran * a0r
 
-!  ---  if use fu's formula it needs to be normalized by snow/ice density
-!       !not use snow density = 0.1 g/cm**3 = 0.1 g/(mu * m**2)
-!       use ice density = 0.9167 g/cm**3 = 0.9167 g/(mu * m**2)
-!       1/0.9167 = 1.09087
-!       factor 1.5396=8/(3*sqrt(3)) converts reff to generalized ice particle size
-!       use newer factor value 1.0315
+!>  - If use fu's formula it needs to be normalized by snow/ice density.
+!! not use snow density = 0.1 g/cm**3 = 0.1 g/(mu * m**2)
+!!\n use ice density = 0.9167 g/cm**3 = 0.9167 g/(mu * m**2)
+!!\n       1/0.9167 = 1.09087
+!!\n       factor 1.5396=8/(3*sqrt(3)) converts reff to generalized ice particle size
+!!       use newer factor value 1.0315
             if (cldsnw>f_zero .and. refsnw>10.0_kind_phys) then
 !             tausnw = cldsnw * (a0s + a1s/refsnw)
               tausnw = cldsnw*1.09087*(a0s + a1s/dgesnw)     ! fu's formula
@@ -1794,7 +1797,7 @@
             refliq = reliq(k)
             refice = reice(k)
 
-!  --- ...  calculation of absorption coefficients due to water clouds.
+!>  - Calculation of absorption coefficients due to water clouds.
 
             if ( cldliq <= f_zero ) then
               do ib = nblow, nbhgh
@@ -1825,7 +1828,7 @@
               endif   ! end if_iswcliq_block
             endif   ! end if_cldliq_block
 
-!  --- ...  calculation of absorption coefficients due to ice clouds.
+!>  - Calculation of absorption coefficients due to ice clouds.
 
             if ( cldice <= f_zero ) then
               do ib = nblow, nbhgh
@@ -1835,8 +1838,8 @@
               enddo
             else
 
-!  --- ...  ebert and curry approach for all particle sizes though somewhat
-!           unjustified for large ice particles
+!>   - ebert and curry approach for all particle sizes though somewhat
+!! unjustified for large ice particles.
 
               if ( iswcice == 1 ) then
                 refice = min(130.0_kind_phys,max(13.0_kind_phys,refice))
@@ -1856,7 +1859,7 @@
                   asyice(ib) = ssaice(ib) * asycoice
                 enddo
 
-!  --- ...  streamer approach for ice effective radius between 5.0 and 131.0 microns
+!>   - streamer approach for ice effective radius between 5.0 and 131.0 microns.
 
               elseif ( iswcice == 2 ) then
                 refice = min(131.0_kind_phys,max(5.0_kind_phys,refice))
@@ -1879,8 +1882,8 @@
                   asyice(ib) = ssaice(ib) * asycoice
                 enddo
 
-!  --- ...  fu's approach for ice effective radius between 4.8 and 135 microns
-!           (generalized effective size from 5 to 140 microns)
+!>   - fu's approach for ice effective radius between 4.8 and 135 microns
+!! (generalized effective size from 5 to 140 microns).
 
               elseif ( iswcice == 3 ) then
                 dgeice = max( 5.0, min( 140.0, 1.0315*refice ))
@@ -1980,6 +1983,8 @@
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param lcloudy     sub-colum cloud profile flag array
+!!\section mcica_subcol_gen mcica_subcol General Algorithm
+!! @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed,                                         &       !  ---  inputs
@@ -2026,7 +2031,7 @@
 !
 !===> ...  begin here
 !
-!  --- ...  advance randum number generator by ipseed values
+!> -# Advance randum number generator by ipseed values.
 
       call random_setseed                                               &
 !  ---  inputs:
@@ -2035,7 +2040,7 @@
      &      stat                                                        &
      &    )
 
-!  --- ...  sub-column set up according to overlapping assumption
+!> -# Sub-column set up according to overlapping assumption.
 
       select case ( iovrsw )
 
@@ -2123,7 +2128,7 @@
 
       end select
 
-!  --- ...  generate subcolumns for homogeneous clouds
+!> -# Generate subcolumns for homogeneous clouds.
 
       do k = 1, nlay
         tem1 = f_one - cldf(k)
@@ -2136,6 +2141,7 @@
       return
 ! ..................................
       end subroutine mcica_subcol
+!! @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2163,6 +2169,8 @@
 !!\param forfrac         factor for temperature interpolation of
 !!                       reference w.v. foreign-continuum data
 !!\param indfor          index of lower ref temp for forfac
+!>\section setcoef_gen_rw setcoef General Algorithm
+!! @{
 ! ----------------------------------
       subroutine setcoef                                                &
      &     ( pavel,tavel,h2ovmr, nlay,nlp1,                             &    !  ---  inputs
@@ -2233,22 +2241,22 @@
 
         forfac(k) = pavel(k)*stpfac / (tavel(k)*(f_one + h2ovmr(k)))
 
-!  --- ...  find the two reference pressures on either side of the
-!           layer pressure.  store them in jp and jp1.  store in fp the
-!           fraction of the difference (in ln(pressure)) between these
-!           two values that the layer pressure lies.
+!> -# Find the two reference pressures on either side of the
+!! layer pressure.  store them in jp and jp1.  store in fp the
+!! fraction of the difference (in ln(pressure)) between these
+!! two values that the layer pressure lies.
 
         plog  = log(pavel(k))
         jp(k) = max(1, min(58, int(36.0 - 5.0*(plog+0.04)) ))
         jp1   = jp(k) + 1
         fp    = 5.0 * (preflog(jp(k)) - plog)
 
-!  --- ...  determine, for each reference pressure (jp and jp1), which
-!          reference temperature (these are different for each reference
-!          pressure) is nearest the layer temperature but does not exceed it.
-!          store these indices in jt and jt1, resp. store in ft (resp. ft1)
-!          the fraction of the way between jt (jt1) and the next highest
-!          reference temperature that the layer temperature falls.
+!> -# Determine, for each reference pressure (jp and jp1), which
+!! reference temperature (these are different for each reference
+!! pressure) is nearest the layer temperature but does not exceed it.
+!! store these indices in jt and jt1, resp. store in ft (resp. ft1)
+!! the fraction of the way between jt (jt1) and the next highest
+!! reference temperature that the layer temperature falls.
 
         tem1 = (tavel(k) - tref(jp(k))) / 15.0
         tem2 = (tavel(k) - tref(jp1  )) / 15.0
@@ -2257,12 +2265,12 @@
         ft  = tem1 - float(jt (k) - 3)
         ft1 = tem2 - float(jt1(k) - 3)
 
-!  --- ...  we have now isolated the layer ln pressure and temperature,
-!           between two reference pressures and two reference temperatures
-!           (for each reference pressure).  we multiply the pressure
-!           fraction fp with the appropriate temperature fractions to get
-!           the factors that will be needed for the interpolation that yields
-!           the optical depths (performed in routines taugbn for band n).
+!> -# We have now isolated the layer ln pressure and temperature,
+!! between two reference pressures and two reference temperatures
+!! (for each reference pressure).  we multiply the pressure
+!! fraction fp with the appropriate temperature fractions to get
+!! the factors that will be needed for the interpolation that yields
+!! the optical depths (performed in routines taugbn for band n).
 
         fp1 = f_one - fp
         fac10(k) = fp1 * ft
@@ -2270,22 +2278,22 @@
         fac11(k) = fp  * ft1
         fac01(k) = fp  * (f_one - ft1)
 
-!  --- ...  if the pressure is less than ~100mb, perform a different
-!           set of species interpolations.
+!> -# If the pressure is less than ~100mb, perform a different
+!! set of species interpolations.
 
         if ( plog > 4.56 ) then
 
           laytrop =  k
 
-!  --- ...  set up factors needed to separately include the water vapor
-!           foreign-continuum in the calculation of absorption coefficient.
+!> -# Set up factors needed to separately include the water vapor
+!! foreign-continuum in the calculation of absorption coefficient.
 
           tem1 = (332.0 - tavel(k)) / 36.0
           indfor (k) = min(2, max(1, int(tem1)))
           forfrac(k) = tem1 - float(indfor(k))
 
-!  --- ...  set up factors needed to separately include the water vapor
-!           self-continuum in the calculation of absorption coefficient.
+!> -# Set up factors needed to separately include the water vapor
+!! self-continuum in the calculation of absorption coefficient.
 
           tem2 = (tavel(k) - 188.0) / 7.2
           indself (k) = min(9, max(1, int(tem2)-7))
@@ -2312,6 +2320,7 @@
       return
 ! ..................................
       end subroutine setcoef
+!! @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2352,8 +2361,8 @@
 !!\param sfdf0            clr sky sfc dnwd diff flux (nir/uv+vis)
 !!\param suvbfc           tot sky sfc dnwd uv-b flux
 !!\param suvbf0           clr sky sfc dnwd uv-b flux
-!!\section General_spcvrtc General Algorithm
-!> @{
+!>\section General_spcvrtc spcvrtc General Algorithm
+!! @{
 !-----------------------------------
       subroutine spcvrtc                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfrc,              &  !  ---  inputs
@@ -2536,7 +2545,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!  --- ...  loop over all g-points in each band
+!> -# Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -2546,7 +2555,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!> -# Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -2564,14 +2573,14 @@
 
 !> -# Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for clear-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for both
-!!      conservative and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation
-!!      fluxes
+!    - Set up toa direct beam and surface values (beam and diff).
+!    - Delta scaling for clear-sky condition.
+!    - General two-stream expressions for physparam::iswmode .
+!    - Compute homogeneous reflectance and transmittance for both
+!      conservative and non-conservative scattering.
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance.
+!    - Call swflux() to compute the upward and downward radiation
+!      fluxes.
 
         do k = nlay, 1, -1
           kp = k + 1
@@ -2582,12 +2591,12 @@
           zssaw = min( oneminus, zssa0 / ztau0 )
           zasyw = zasy0 / max( ftiny, zssa0 )
 
-!  --- ...  saving clear-sky quantities for later total-sky usage
+!>  - Saving clear-sky quantities for later total-sky usage.
           ztaus(k) = ztau0
           zssas(k) = zssa0
           zasys(k) = zasy0
 
-!  --- ...  delta scaling for clear-sky condition
+!>  - Delta scaling for clear-sky condition.
           za1 = zasyw * zasyw
           za2 = zssaw * za1
 
@@ -2597,7 +2606,12 @@
           zasy1 = zasyw / (f_one + zasyw)         ! to reduce truncation error
           zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n  control parameters in module "physparam"                             
+!!\n    iswmode - control flag for 2-stream transfer schemes               
+!!\n              = 1 delta-eddington    (joseph et al., 1976)             
+!!\n              = 2 pifm               (zdunkowski et al., 1980)         
+!!\n              = 3 discrete ordinates (liou, 1973)                      
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
             zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -2613,7 +2627,8 @@
           endif
           zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both conservative
+!! scattering and non-conservative scattering.
 
           if ( zssaw >= zcrit ) then    ! for conservative scattering
             za1 = zgam1 * cosz - zgam3
@@ -2708,9 +2723,8 @@
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
           endif    ! end if_zssaw_block
 
-!  --- ...  direct beam transmittance. use exponential lookup table
-!           for transmittance, or expansion of exponential for low
-!           optical depth
+!>  -  Calculate direct beam transmittance. use exponential lookup table
+!! for transmittance, or expansion of exponential for low optical depth.
 
           zr1 = ztau1 * sntz
           if ( zr1 <= od_lo ) then
@@ -2724,7 +2738,7 @@
           ztdbt(k)  = zexp3 * ztdbt(kp)
           zldbt(kp) = zexp3
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
           zr1 = ztau0 * sntz
@@ -2740,6 +2754,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -2748,13 +2763,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!! --- ...  surface downward beam/diffused flux components
+!> -# Compute surface downward beam/diffused flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -2774,17 +2789,17 @@
 
 !> -# Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for total-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for
-!!      conservative scattering and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for total-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for
+!      conservative scattering and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         if ( cf1 > eps ) then
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!>  - Set up toa direct beam and surface values (beam and diff).
           ztdbt0 = f_one
           zldbt(1) = f_zero
 
@@ -2800,7 +2815,7 @@
               zssaw = min(oneminus, zssa0 / ztau0)
               zasyw = zasy0 / max(ftiny, zssa0)
 
-!  --- ...  delta scaling for total-sky condition
+!>  - Perform delta scaling for total-sky condition.
               za1 = zasyw * zasyw
               za2 = zssaw * za1
 
@@ -2810,7 +2825,13 @@
               zasy1 = zasyw / (f_one + zasyw)
               zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n  control parameters in module "physparam"
+!!\n    iswmode - control flag for 2-stream transfer schemes
+!!\n              = 1 delta-eddington    (joseph et al., 1976)
+!!\n              = 2 pifm               (zdunkowski et al., 1980)
+!!\n              = 3 discrete ordinates (liou, 1973)
+
               if ( iswmode == 1 ) then
                 zgam1 = 1.75 - zssa1 * (f_one + zasy3)
                 zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -2831,7 +2852,8 @@
               ztrab1 = ztrab(kp)
               ztrad1 = ztrad(kp)
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both conservative
+!! and non-conservative scattering.
 
               if ( zssaw >= zcrit ) then    ! for conservative scattering
                 za1 = zgam1 * cosz - zgam3
@@ -2950,7 +2972,7 @@
               zldbt(kp) = zc0*zldbt(kp) + zc1*zexp3
               ztdbt(k) = zldbt(kp) * ztdbt(kp)
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
               zr1 = ztau0 * sntz
@@ -2975,7 +2997,7 @@
             endif    ! end if_zc1_block
           enddo   ! end do_k_loop
 
-!  --- ...  perform vertical quadrature
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -2985,14 +3007,14 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
           do k = 1, nlp1
             fxupc(k,ib) = fxupc(k,ib) + zsolar*zfu(k)
             fxdnc(k,ib) = fxdnc(k,ib) + zsolar*zfd(k)
           enddo
 
 !> -# Process and save outputs.
-! --- ...  surface downward beam/diffused flux components
+!!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3023,7 +3045,7 @@
         fsfcd0 = fsfcd0 + fxdn0(1,ib)
       enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
       ibd = nuvb - nblow + 1
       suvbf0 = fxdn0(1,ibd)
 
@@ -3039,13 +3061,13 @@
         fsfcuc = fsfcu0
         fsfcdc = fsfcd0
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = sfbm0(1)
         sfdfc(1) = sfdf0(1)
         sfbmc(2) = sfbm0(2)
         sfdfc(2) = sfdf0(2)
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
         suvbfc = suvbf0
       else                        ! cloudy column, compute total-sky fluxes
         do ib = 1, nbdsw
@@ -3061,10 +3083,10 @@
           fsfcdc = fsfcdc + fxdnc(1,ib)
         enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
         suvbfc = fxdnc(1,ibd)
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = cf1*sfbmc(1) + cf0*sfbm0(1)
         sfbmc(2) = cf1*sfbmc(2) + cf0*sfbm0(2)
         sfdfc(1) = cf1*sfdfc(1) + cf0*sfdf0(1)
@@ -3117,6 +3139,8 @@
 !!\param sfdf0         clr sky sfc dnwd diff flux (nir/uv+vis)
 !!\param suvbfc        tot sky sfc dnwd uv-b flux
 !!\param suvbf0        clr sky sfc dnwd uv-b flux
+!>\section spcvrtm_gen spcvrtm General Algorithm
+!! @{
 !-----------------------------------
       subroutine spcvrtm                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfmc,              &   !  ---  inputs
@@ -3300,7 +3324,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!  --- ...  loop over all g-points in each band
+!> -# Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -3310,7 +3334,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!> -# Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -3328,13 +3352,13 @@
 
 !> -# Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for clear-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for both
-!!      conservative and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for clear-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for both
+!      conservative and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         do k = nlay, 1, -1
           kp = k + 1
@@ -3345,12 +3369,12 @@
           zssaw = min( oneminus, zssa0 / ztau0 )
           zasyw = zasy0 / max( ftiny, zssa0 )
 
-!  --- ...  saving clear-sky quantities for later total-sky usage
+!>  - Saving clear-sky quantities for later total-sky usage.
           ztaus(k) = ztau0
           zssas(k) = zssa0
           zasys(k) = zasy0
 
-!  --- ...  delta scaling for clear-sky condition
+!>  - Delta scaling for clear-sky condition.
           za1 = zasyw * zasyw
           za2 = zssaw * za1
 
@@ -3360,7 +3384,12 @@
           zasy1 = zasyw / (f_one + zasyw)         ! to reduce truncation error
           zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n control parameters in module "physparam" 
+!!\n iswmode - control flag for 2-stream transfer schemes 
+!!\n           = 1 delta-eddington (joseph et al., 1976) 
+!!\n           = 2 pifm (zdunkowski et al., 1980) 
+!!\n           = 3 discrete ordinates (liou, 1973)
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
             zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -3376,7 +3405,7 @@
           endif
           zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance.
 
           if ( zssaw >= zcrit ) then    ! for conservative scattering
             za1 = zgam1 * cosz - zgam3
@@ -3471,9 +3500,8 @@
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
           endif    ! end if_zssaw_block
 
-!  --- ...  direct beam transmittance. use exponential lookup table
-!           for transmittance, or expansion of exponential for low
-!           optical depth
+!>  - Calculate direct beam transmittance. use exponential lookup table
+!! for transmittance, or expansion of exponential for low optical depth.
 
           zr1 = ztau1 * sntz
           if ( zr1 <= od_lo ) then
@@ -3487,7 +3515,7 @@
           ztdbt(k)  = zexp3 * ztdbt(kp)
           zldbt(kp) = zexp3
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
           zr1 = ztau0 * sntz
@@ -3503,6 +3531,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -3511,13 +3540,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!! --- ...  surface downward beam/diffuse flux components
+!> -# Compute surface downward beam/diffuse flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3537,17 +3566,17 @@
 
 !> -# Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for total-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for
-!!      conservative scattering and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for total-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for
+!      conservative scattering and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         if ( cf1 > eps ) then
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!>  - Set up toa direct beam and surface values (beam and diff).
           ztdbt0 = f_one
           zldbt(1) = f_zero
 
@@ -3561,7 +3590,7 @@
               zssaw = min(oneminus, zssa0 / ztau0)
               zasyw = zasy0 / max(ftiny, zssa0)
 
-!  --- ...  delta scaling for total-sky condition
+!>  - Perform delta scaling for total-sky condition.
               za1 = zasyw * zasyw
               za2 = zssaw * za1
 
@@ -3571,7 +3600,7 @@
               zasy1 = zasyw / (f_one + zasyw)
               zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions.
               if ( iswmode == 1 ) then
                 zgam1 = 1.75 - zssa1 * (f_one + zasy3)
                 zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -3587,7 +3616,8 @@
               endif
               zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both convertive 
+!! and non-convertive scattering.
 
               if ( zssaw >= zcrit ) then    ! for conservative scattering
                 za1 = zgam1 * cosz - zgam3
@@ -3717,13 +3747,13 @@
 !  --- ...  direct beam transmittance
               ztdbt(k) = zldbt(kp) * ztdbt(kp)
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  -  Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
               ztdbt0 = zldbt0(k) * ztdbt0
 
             endif    ! end if_cldfmc_block
           enddo   ! end do_k_loop
 
-!  --- ...  perform vertical quadrature
+!> -# Call vrtqdr(), to  perform vertical quadrature
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -3740,7 +3770,7 @@
           enddo
 
 !> -# Process and save outputs.
-! --- ...  surface downward beam/diffused flux components
+!!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3771,7 +3801,7 @@
         fsfcd0 = fsfcd0 + fxdn0(1,ib)
       enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
       ibd = nuvb - nblow + 1
       suvbf0 = fxdn0(1,ibd)
 
@@ -3787,13 +3817,13 @@
         fsfcuc = fsfcu0
         fsfcdc = fsfcd0
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = sfbm0(1)
         sfdfc(1) = sfdf0(1)
         sfbmc(2) = sfbm0(2)
         sfdfc(2) = sfdf0(2)
 
-!! --- ...  uv-b surface downward flux
+!>  -  uv-b surface downward flux
         suvbfc = suvbf0
       else                        ! cloudy column, compute total-sky fluxes
         do ib = 1, nbdsw
@@ -3809,6 +3839,7 @@
       return
 !...................................
       end subroutine spcvrtm
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -3823,7 +3854,7 @@
 !!\param NLAY, NLP1      number of layers/levels
 !!\param zfu             upward flux at layer interface
 !!\param zfd             downward flux at layer interface
-!!\section General_swflux General Algorithm
+!!\section General_vrtqdr vrtqdr General Algorithm
 !> @{
 !-----------------------------------
       subroutine vrtqdr                                                 &
@@ -3960,7 +3991,7 @@
 !!\param sfluxzen         spectral distribution of incoming solar flux
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
-!>\section gen_al_taumol General Algorithm
+!>\section gen_al_taumol taumol General Algorithm
 !! @{
 !-----------------------------------
       subroutine taumol                                                 &

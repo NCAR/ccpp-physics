@@ -226,7 +226,7 @@
 !! mass fluxes at the upper and lower surfaces, 2) to convert snow below
 !! the water line to ice, and 3) to equalize the thickness of the two 
 !! ice layers.
-!>  \section detailed_sice_run Detailed Algorithm
+!>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !!  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &

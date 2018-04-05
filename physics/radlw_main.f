@@ -1276,10 +1276,15 @@
 
 !> \ingroup module_radlw_main
 !> \brief This subroutine performs calculations necessary for the initialization
-!! of the longwave model.  lookup tables are computed for use in the lw
+!! of the longwave model, which includes non-varying model variables, conversion
+!! factors, and look-up tables  
+!!
+!! Lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
 !! spectral band are reduced from 256 g-point intervals to 140.
 !!\param me        print control for parallel process
+!!\section rlwinit_gen rlwinit General Algorithm
+!! @{
       subroutine rlwinit                                                &
      &     ( me ) !  ---  inputs
 !  ---  outputs: (none)
@@ -1403,7 +1408,7 @@
         endif
       endif
 
-!  --- ...  check cloud flags for consistency
+!> -# Check cloud flags for consistency.
 
       if ((icldflg == 0 .and. ilwcliq /= 0) .or.                        &
      &    (icldflg == 1 .and. ilwcliq == 0)) then
@@ -1412,12 +1417,12 @@
         stop
       endif
 
-!  --- ...  setup default surface emissivity for each band here
+!> -# Setup default surface emissivity for each band.
 
       semiss0(:) = f_one
 
-!  --- ...  setup constant factors for flux and heating rate
-!           the 1.0e-2 is to convert pressure from mb to N/m**2
+!> -# Setup constant factors for flux and heating rate
+!! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$.
 
       pival = 2.0 * asin(f_one)
       fluxfac = pival * 2.0d4
@@ -1431,16 +1436,16 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!  --- ...  compute lookup tables for transmittance, tau transition
-!           function, and clear sky tau (for the cloudy sky radiative
-!           transfer).  tau is computed as a function of the tau
-!           transition function, transmittance is calculated as a
-!           function of tau, and the tau transition function is
-!           calculated using the linear in tau formulation at values of
-!           tau above 0.01.  tf is approximated as tau/6 for tau < 0.01.
-!           all tables are computed at intervals of 0.001.  the inverse
-!           of the constant used in the pade approximation to the tau
-!           transition function is set to b.
+!> -# Compute lookup tables for transmittance, tau transition
+!! function, and clear sky tau (for the cloudy sky radiative
+!! transfer).  tau is computed as a function of the tau
+!! transition function, transmittance is calculated as a
+!! function of tau, and the tau transition function is
+!! calculated using the linear in tau formulation at values of
+!! tau above 0.01.  tf is approximated as tau/6 for tau < 0.01.
+!! all tables are computed at intervals of 0.001.  the inverse
+!! of the constant used in the pade approximation to the tau
+!! transition function is set to b.
 
       tau_tbl(0) = f_zero
       exp_tbl(0) = f_one
@@ -1473,6 +1478,7 @@
 
 !...................................
       end subroutine rlwinit
+!! @}
 !-----------------------------------
 
 
@@ -1489,7 +1495,6 @@
 !!\param cdat2           effective radius for rain drop (micron)
 !!\param cdat3           layer snow flake water path(\f$g/m^2\f$)
 !!\param cdat4           mean effective radius for snow flake(micron)
-!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
 !!\param cliqp           not used
 !!\param cicep           not used
 !!\param reliq           not used
@@ -1503,7 +1508,7 @@
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
-!!\section gen_cldprop General Algorithm
+!!\section gen_cldprop cldprop General Algorithm
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
@@ -1813,6 +1818,8 @@
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param lcloudy     sub-colum cloud profile flag array
+!!\section mcica_subcol_gen mcica_subcol General Algorithm
+!! @{
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed,                                         &!  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
@@ -1857,7 +1864,7 @@
 !
 !===> ...  begin here
 !
-!  --- ...  advance randum number generator by ipseed values
+!> -# Call random_setseed() to advance randum number generator by ipseed values.
 
       call random_setseed                                               &
 !  ---  inputs:
@@ -1866,7 +1873,10 @@
      &      stat                                                        &
      &    )
 
-!  --- ...  sub-column set up according to overlapping assumption
+!> -# Sub-column set up according to overlapping assumption:
+!!  - For random overlap, pick a random value at every level 
+!!  - For max-random overlap, pick a random value at every level
+!!  - For maximum overlap, pick same random numebr at every level
 
       select case ( iovrlw )
 
@@ -1937,7 +1947,7 @@
 !           enddo
 !         enddo
 
-        case( 2 )        ! maximum overlap, pick same random numebr at every level
+        case( 2 )        !<  - For maximum overlap, pick same random numebr at every level
 
           call random_number                                            &
 !  ---  inputs: ( none )
@@ -1954,7 +1964,7 @@
 
       end select
 
-!  --- ...  generate subcolumns for homogeneous clouds
+!> -# Generate subcolumns for homogeneous clouds.
 
       do k = 1, nlay
         tem1 = f_one - cldf(k)
@@ -1967,6 +1977,7 @@
       return
 ! ..................................
       end subroutine mcica_subcol
+!! @}
 ! ----------------------------------
 
 !>\ingroup module_radlw_main
@@ -2009,6 +2020,8 @@
 !!\param minorfrac       factor for minor gases
 !!\param scaleminor,scaleminorn2         scale factors for minor gases
 !!\param indminor        index of lower ref temp for minor gases
+!>\section setcoef_gen setcoef General Algorithm
+!! 
 ! ----------------------------------
       subroutine setcoef                                                &
      &     ( pavel,tavel,tz,stemp,h2ovmr,colamt,coldry,colbrd,          & !  ---  inputs:
@@ -2105,10 +2118,10 @@
 !
 !===> ... begin here
 !
-!  --- ...  calculate information needed by the radiative transfer routine
-!           that is specific to this atmosphere, especially some of the
-!           coefficients and indices needed to compute the optical depths
-!           by interpolating data from stored reference atmospheres.
+!> -# Calculate information needed by the radiative transfer routine
+!! that is specific to this atmosphere, especially some of the
+!! coefficients and indices needed to compute the optical depths
+!! by interpolating data from stored reference atmospheres.
 
       indlay = min(180, max(1, int(stemp-159.0) ))
       indlev = min(180, max(1, int(tz(0)-159.0) ))
@@ -2122,8 +2135,8 @@
       enddo
 
 !  --- ...  begin layer loop
-!           calculate the integrated Planck functions for each band at the
-!           surface, level, and layer temperatures.
+!> -# Calculate the integrated Planck functions for each band at the
+!! surface, level, and layer temperatures.
 
       laytrop = 0
 
@@ -2144,10 +2157,10 @@
      &               * (totplnk(indlev+1,i) - totplnk(indlev,i)) )
         enddo
 
-!  --- ...  find the two reference pressures on either side of the
-!           layer pressure. store them in jp and jp1. store in fp the
-!           fraction of the difference (in ln(pressure)) between these
-!           two values that the layer pressure lies.
+!> -# Find the two reference pressures on either side of the
+!! layer pressure. store them in jp and jp1. store in fp the
+!! fraction of the difference (in ln(pressure)) between these
+!! two values that the layer pressure lies.
 
         plog = log(pavel(k))
         jp(k)= max(1, min(58, int(36.0 - 5.0*(plog+0.04)) ))
@@ -2156,13 +2169,13 @@
         fp   = max(f_zero, min(f_one, 5.0*(preflog(jp(k))-plog) ))
 !org    fp   = 5.0 * (preflog(jp(k)) - plog)
 
-!  --- ...  determine, for each reference pressure (jp and jp1), which
-!           reference temperature (these are different for each
-!           reference pressure) is nearest the layer temperature but does
-!           not exceed it. store these indices in jt and jt1, resp.
-!           store in ft (resp. ft1) the fraction of the way between jt
-!           (jt1) and the next highest reference temperature that the
-!           layer temperature falls.
+!> -# Determine, for each reference pressure (jp and jp1), which
+!! reference temperature (these are different for each
+!! reference pressure) is nearest the layer temperature but does
+!! not exceed it. store these indices in jt and jt1, resp.
+!! store in ft (resp. ft1) the fraction of the way between jt
+!! (jt1) and the next highest reference temperature that the
+!! layer temperature falls.
 
         tem1 = (tavel(k)-tref(jp(k))) / 15.0
         tem2 = (tavel(k)-tref(jp1  )) / 15.0
@@ -2174,12 +2187,12 @@
 !org    ft  = tem1 - float(jt (k) - 3)
 !org    ft1 = tem2 - float(jt1(k) - 3)
 
-!  --- ...  we have now isolated the layer ln pressure and temperature,
-!           between two reference pressures and two reference temperatures
-!           (for each reference pressure).  we multiply the pressure
-!           fraction fp with the appropriate temperature fractions to get
-!           the factors that will be needed for the interpolation that yields
-!           the optical depths (performed in routines taugbn for band n)
+!> -# We have now isolated the layer ln pressure and temperature,
+!! between two reference pressures and two reference temperatures
+!!(for each reference pressure).  we multiply the pressure
+!! fraction fp with the appropriate temperature fractions to get
+!! the factors that will be needed for the interpolation that yields
+!! the optical depths (performed in routines taugbn for band n).
 
         tem1 = f_one - fp
         fac10(k) = tem1 * ft
@@ -2190,8 +2203,8 @@
         forfac(k) = pavel(k)*stpfac / (tavel(k)*(1.0 + h2ovmr(k)))
         selffac(k) = h2ovmr(k) * forfac(k)
 
-!  --- ...  set up factors needed to separately include the minor gases
-!           in the calculation of absorption coefficient
+!> -# Set up factors needed to separately include the minor gases
+!! in the calculation of absorption coefficient.
 
         scaleminor(k) = pavel(k) / tavel(k)
         scaleminorn2(k) = (pavel(k) / tavel(k))                         &
@@ -2200,8 +2213,8 @@
         indminor(k) = min(18, max(1, int(tem1)))
         minorfrac(k) = tem1 - float(indminor(k))
 
-!  --- ...  if the pressure is less than ~100mb, perform a different
-!           set of species interpolations.
+!> -# If the pressure is less than ~100mb, perform a different
+!! set of species interpolations.
 
         if (plog > 4.56) then
 
@@ -2211,15 +2224,15 @@
           indfor(k) = min(2, max(1, int(tem1)))
           forfrac(k) = tem1 - float(indfor(k))
 
-!  --- ...  set up factors needed to separately include the water vapor
-!           self-continuum in the calculation of absorption coefficient.
+!> -# Set up factors needed to separately include the water vapor
+!! self-continuum in the calculation of absorption coefficient.
 
           tem1 = (tavel(k) - 188.0) / 7.2
           indself(k) = min(9, max(1, int(tem1)-7))
           selffrac(k) = tem1 - float(indself(k) + 7)
 
-!  --- ...  setup reference ratio to be used in calculation of binary
-!           species parameter in lower atmosphere.
+!> -# Setup reference ratio to be used in calculation of binary
+!! species parameter in lower atmosphere.
 
           rfrate(k,1,1) = chi_mls(1,jp(k)) / chi_mls(2,jp(k))
           rfrate(k,1,2) = chi_mls(1,jp(k)+1) / chi_mls(2,jp(k)+1)
@@ -2245,8 +2258,8 @@
           indself(k) = 0
           selffrac(k) = f_zero
 
-!  --- ...  setup reference ratio to be used in calculation of binary
-!           species parameter in upper atmosphere.
+!> -# Setup reference ratio to be used in calculation of binary
+!! species parameter in upper atmosphere.
 
           rfrate(k,1,1) = chi_mls(1,jp(k)) / chi_mls(2,jp(k))
           rfrate(k,1,2) = chi_mls(1,jp(k)+1) / chi_mls(2,jp(k)+1)
@@ -2256,7 +2269,7 @@
 
         endif
 
-!  --- ...  rescale selffac and forfac for use in taumol
+!> -# Rescale \a selffac and \a forfac for use in taumol.
 
         selffac(k) = colamt(k,1) * selffac(k)
         forfac(k)  = colamt(k,1) * forfac(k)
@@ -2302,7 +2315,8 @@
 !!\param totdclfl    clear sky downward flux \f$(w/m^2)\f$
 !!\param htrcl       clear sky heating rate (k/sec or k/day)
 !!\param htrb        spectral band lw heating rate (k/day)
-!!\section gen_rtrn General Algorithm
+!>\section gen_rtrn rtrn General Algorithm
+!! @{
 ! ----------------------------------
       subroutine rtrn                                                   &
      &     ( semiss,delp,cldfrc,taucld,tautot,pklay,pklev,              & !  ---  inputs
@@ -2660,6 +2674,7 @@
 
 ! ..................................
       end subroutine rtrn
+!! @}
 ! ----------------------------------
 
 
@@ -2685,7 +2700,7 @@
 !!\param totdclfl      clear sky downward flux (\f$w/m^2\f$)
 !!\param htrcl         clear sky heating rate (k/sec or k/day)
 !!\param htrb          spectral band lw heating rate (k/day)
-!!\section gen_rtrnmr General Algorithm
+!!\section gen_rtrnmr rtrnmr General Algorithm
 !> @{
 ! ----------------------------------
       subroutine rtrnmr                                                 &
@@ -3260,6 +3275,7 @@
 !> \brief This subroutine computes the upward/downward radiative fluxes, and
 !! heating rates for both clear or cloudy atmosphere.Clouds are treated
 !! with the mcica stochastic approach.
+!!
 !!\param semiss       lw surface emissivity
 !!\param delp         layer pressure thickness (mb)
 !!\param cldfmc       layer cloud fraction (sub-column)
@@ -3278,7 +3294,7 @@
 !!\param totdclfl     clear sky downward flux \f$(w/m^2)\f$
 !!\param htrcl        clear sky heating rate (k/sec or k/day)
 !!\param htrb         spectral band lw heating rate (k/day)
-!!\section gen_rtrnmc General Algorithm
+!!\section gen_rtrnmc rtrnmc General Algorithm
 !> @{
 ! ---------------------------------
       subroutine rtrnmc                                                 &
@@ -3546,15 +3562,15 @@
         reflct = f_one - semiss(ib)
         rad0 = semiss(ib) * fracs(ig,1) * pklay(ib,0)
 
-!> -# Compute total sky radiance
+!> -# Compute total sky radiance.
         radtotu = rad0 + reflct*radtotd
         toturad(0,ib) = toturad(0,ib) + radtotu
 
-!> -# Compute clear sky radiance
+!> -# Compute clear sky radiance.
         radclru = rad0 + reflct*radclrd
         clrurad(0,ib) = clrurad(0,ib) + radclru
 
-!> -# Upward radiative transfer loop
+!> -# Upward radiative transfer loop.
 !!\n  - Compute total sky radiance
 !!\n  - Compute clear sky radiance
 
@@ -3614,7 +3630,7 @@
         totdclfl(k) = totdclfl(k) * flxfac
       enddo
 
-!  --- ...  calculate net fluxes and heating rates
+!> -# Calculate net fluxes and heating rates.
       fnet(0) = totuflux(0) - totdflux(0)
 
       do k = 1, nlay
@@ -3623,7 +3639,7 @@
         htr (k) = (fnet(k-1) - fnet(k)) * rfdelp(k)
       enddo
 
-!! --- ...  optional clear sky heating rates
+!> -# Optional clear sky heating rates.
       if ( lhlw0 ) then
         fnetc(0) = totuclfl(0) - totdclfl(0)
 
@@ -3633,7 +3649,7 @@
         enddo
       endif
 
-!! --- ...  optional spectral band heating rates
+!> -# Optional spectral band heating rates.
       if ( lhlwb ) then
         do ib = 1, nbands
           fnet(0) = (toturad(0,ib) - totdrad(0,ib)) * flxfac
@@ -3653,8 +3669,9 @@
 !>\ingroup module_radlw_main
 !>\brief This subroutine contains optical depths developed for the rapid
 !! radiative transfer model.
-!!\ It contains the subroutines taugbn (where n goes from
-!! 1 to 16). taugbn calculates the optical depths and planck fractions
+!!
+!! It contains the subroutines \a taugbn (where n goes from
+!! 1 to 16). \a taugbn calculates the optical depths and planck fractions
 !! per g-value and layer for band n.
 !!\param laytrop          tropopause layer index (unitless) layer at
 !!                        which switch is made for key species
@@ -3695,6 +3712,9 @@
 !!\param nlay             total number of layers
 !!\param fracs            planck fractions
 !!\param tautot           total optical depth (gas+aerosols)
+!>\section taumol_gen taumol General Algorithm
+!! @{
+!! subprograms called:  taugb## (## = 01 -16) 
       subroutine taumol                                                 &
      &     ( laytrop,pavel,coldry,colamt,colbrd,wx,tauaer,              & !  ---  inputs
      &       rfrate,fac00,fac01,fac10,fac11,jp,jt,jt1,                  &
@@ -6692,6 +6712,7 @@
 
 ! ..................................
       end subroutine taumol
+!! @}
 !-----------------------------------
 
 

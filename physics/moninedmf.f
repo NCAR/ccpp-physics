@@ -13,9 +13,7 @@
       subroutine edmf_finalize ()
       end subroutine edmf_finalize
 
-! \defgroup HEDMF GFS Hybrid Eddy-Diffusivity Mass-Flux PBL and Free Atmospheric Turbulence
-!  @{
-!>\defgroup GFS_edmf_main GFS HEDMF Main
+!>\defgroup GFS_edmf_main GFS moninedmf Main
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport 
 !! scheme used for subgrid-scale vertical turbulent mixing in the PBL 
 !! and above. It blends the traditional first-order approach that has 
@@ -118,7 +116,7 @@
 !! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_edmf GFS HEDMF PBL Scheme General Algorithm
+!!  \section general_edmf GFS moninedmf PBL Scheme General Algorithm
 !!  -# Compute preliminary variables from input arguments.
 !!  -# Calculate the first estimate of the PBL height ("Predictor step").
 !!  -# Calculate Monin-Obukhov similarity parameters.
@@ -132,7 +130,7 @@
 !!  -# Solve for the temperature and moisture tendencies due to vertical mixing.
 !!  -# Calculate heating due to TKE dissipation and add to the tendency for temperature.
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
-!!  \section detailed_edmf Detailed Algorithm
+!!  \section detailed_edmf GFS moninedmf PBL Scheme Detailed Algorithm
 !!  @{
       subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &

@@ -739,11 +739,11 @@
 
 !> \ingroup module_radlw_main 
 !> This module contains reference temperature and pressure.
-!!  - These pressures are chosen such that the ln of the first one
-!!    has only a few non-zero digits (i.e. ln(pref(1)) = 6.96000) and
-!!    each subsequent ln(pref) differs from the previous one by 0.2.
-!!  - These temperatures are associated with the respective
-!!    pressures for the MLS standard atmosphere.
+!  - These pressures are chosen such that the ln of the first one
+!    has only a few non-zero digits (i.e. ln(pref(1)) = 6.96000) and
+!    each subsequent ln(pref) differs from the previous one by 0.2.
+!  - These temperatures are associated with the respective
+!    pressures for the MLS standard atmosphere.
       module module_radlw_ref            !
 !........................................!
 !
@@ -956,7 +956,7 @@
 !     real (kind=kind_phys), parameter :: absliqb = 0.0903614
 
 ! --- for iflagliq = 1
-!> Hu and Stamnes method \cite hu_and_stamnes_1993 . the liquid water
+!> \cite hu_and_stamnes_1993 method . the liquid water
 !! absorption coefficients are listed for a range of effective radii
 !! from 2.5 to 59.5 microns in increments of 1.0 micron.
       real (kind=kind_phys), dimension(58,NBANDS) :: absliq1
@@ -1201,7 +1201,7 @@
 !!    data absice0 / 0.0029,  1.0 /       ! moorthi's coeff
 
 !> for iflagice = 1, absice1 are the ice water absorption coefficients used for
-!! ebert and curry method \cite ebert_and_curry_1992 .
+!! \cite ebert_and_curry_1992 method .
       real (kind=kind_phys), dimension(2,5) :: absice1
 
       data absice1 / 0.0036, 1.136,  0.0068, 0.600,  0.0003, 1.338,      &

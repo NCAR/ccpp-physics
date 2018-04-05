@@ -142,6 +142,8 @@
 !> This subroutine initializes astronomy process, and set up module
 !! constants.
 !!\param me         print message control flag
+!>\section sol_init_gen sol_init General Algorithm
+!! @{
       subroutine sol_init                                               &
      &     ( me ) !  ---  inputs
 !  ---  outputs: ( none )
@@ -297,6 +299,7 @@
       return
 !...................................
       end subroutine sol_init
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radiation_astronomy 
@@ -314,7 +317,7 @@
 !!\param sdec, cdec         sin and cos of the solar declination angle
 !!\param solcon             sun-earth distance adjusted solar constant
 !!                           \f$(w/m^2)\f$
-!>\section gen_sol_update General Algorithm
+!>\section gen_sol_update sol_update General Algorithm
 !! @{
 !-----------------------------------
       subroutine sol_update                                             &
@@ -627,7 +630,14 @@
 
 !>\ingroup module_radiation_astronomy
 !> This subroutine computes radius vector, declination and right
-!! ascension of sun, and equation of time
+!! ascension of sun, and equation of time.
+!!\param[in] jd   julian day
+!!\param[in] fjd  fraction of the julian day
+!!\param[out] r1  earth-sun radius vector
+!!\param[out] dlt declination of sun in radians
+!!\param[out] alp right ascension of sun in radians
+!>\section solar_gen solar General Algorithm
+!! @{
 !-----------------------------------
       subroutine solar                                                  &
      &     ( jd, fjd,                                                   &       !  ---  inputs
@@ -782,21 +792,24 @@
       return
 !...................................
       end subroutine solar
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radiation_astronomy
 !> This subroutine computes mean cos solar zenith angle over SW calling
 !! interval.
-!!\param xlon       (IM), grids' longitudes in radians, work both on
+!!\param xlon       grids' longitudes in radians, work both on
 !!                  zonal, 0->2pi and -pi->+pi arrangements
-!!\param sinlat     (IM), sine of the corresponding latitudes
-!!\param coslat     (IM), cosine of the corresponding latitudes
+!!\param sinlat     sine of the corresponding latitudes
+!!\param coslat     cosine of the corresponding latitudes
 !!\param solhr      time after 00z in hours
 !!\param IM         num of grids in horizontal dimension
 !!\param me         print message control flag
-!!\param coszen     (IM), average of cosz for daytime only in sw call
+!!\param coszen     average of cosz for daytime only in sw call
 !!                  interval
-!!\param coszdg     (IM), average of cosz over entire sw call interval
+!!\param coszdg     average of cosz over entire sw call interval
+!>\section coszmn_gen coszmn General Algorithm
+!! @{
 !-----------------------------------
       subroutine coszmn                                                 &
      &     ( xlon,sinlat,coslat,solhr, IM, me,                          &     !  ---  inputs
@@ -882,11 +895,20 @@
       return
 !...................................
       end subroutine coszmn
+!! @}
 !-----------------------------------
 
 !>\ingroup module_radiation_astronomy
 !> This subroutine prints out forecast date, time, and astronomy
 !! quantities.
+!!\param[in] jd    forecast julian day
+!!\param[in] fjd   forecast fraction of julian day
+!!\param[in] dlt   declination angle of sun in radians
+!!\param[in] alp   right ascension of sun in radians
+!!\param[in] r1    earth-sun radius vector in meter
+!!\param[in] solc  solar constant in \f$w/m^2\f$
+!>\section prtime_gen prtime General Algorithm
+!! @{
 !-----------------------------------
       subroutine prtime                                                 &
      &     ( jd, fjd, dlt, alp, r1, solc                                &    !  ---  inputs
@@ -1002,6 +1024,7 @@
       return
 !...................................
       end subroutine prtime
+!! @}
 !-----------------------------------
 
 !
