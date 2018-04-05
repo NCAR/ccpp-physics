@@ -79,6 +79,11 @@
 !> This module sets up surface albedo for sw radiation and surface
 !! emissivity for lw radiation.
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
+!!
+!! In the module, the externally callabe subroutines are : 
+!! + sfc_init(): initialization radiation surface data     
+!! + setalb(): set up four-component surface albedoes    
+!! + setemis(): set up surface emissivity for lw radiation
 !========================================!
       module module_radiation_surface    !
 !........................................!
@@ -98,23 +103,14 @@
 !    &   VTAGSFC='NCEP-Radiation_surface   v5.0  Aug 2012 '
 
 !  ---  constant parameters
-! num of sfc albedo components
-      integer, parameter, public :: NF_ALBD = 4
-
-! num of longitude points in global emis-type map
-      integer, parameter, public :: IMXEMS = 360
-
-! num of latitude points in global emis-type map
-      integer, parameter, public :: JMXEMS = 180
-
+      integer, parameter, public :: NF_ALBD = 4     !< number of surface albedo components
+      integer, parameter, public :: IMXEMS = 360    !< number of longtitude points in global emis-type map
+      integer, parameter, public :: JMXEMS = 180    !< number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: rad2dg= 180.0 / con_pi
-
-! global surface emissivity index array
-      integer, allocatable  ::  idxems(:,:)
-! global surface emissivity contrl flag set up in 'sfc_init'
-      integer :: iemslw = 0
+      integer, allocatable  ::  idxems(:,:)         !< global surface emissivity index array
+      integer :: iemslw = 0                         !< global surface emissivity control flag set up in 'sfc_init'
 !
       public  sfc_init, setalb, setemis
 

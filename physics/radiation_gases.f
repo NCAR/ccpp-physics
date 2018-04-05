@@ -134,33 +134,21 @@
      &   VTAGGAS='NCEP-Radiation_gases     v5.1  Nov 2012 '
 !    &   VTAGGAS='NCEP-Radiation_gases     v5.0  Aug 2012 '
 
-! \name parameter constants
+      integer, parameter, public :: NF_VGAS = 10   !< number of gas species
+      integer, parameter         :: IMXCO2  = 24   !< input CO2 data longitude points
+      integer, parameter         :: JMXCO2  = 12   !< input CO2 data latitude points
+      integer, parameter         :: MINYEAR = 1957 !< earlist year 2D CO2 data available
 
-! number of gas species
-      integer, parameter, public :: NF_VGAS = 10
-! input co2 dat lon points
-      integer, parameter         :: IMXCO2  = 24
-! input co2 data lat points
-      integer, parameter         :: JMXCO2  = 12
-! earlist year 2-d co2 data available
-      integer, parameter         :: MINYEAR = 1957
+      real (kind=kind_phys), parameter :: resco2=15.0            !< horizontal resolution in degree
+      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi    !< rad->deg conversion
+      real (kind=kind_phys), parameter :: prsco2=788.0           !< pressure limitation for 2D CO2 (mb)
+      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi      !< half of pi
 
-! horizontal resolution in degree
-      real (kind=kind_phys), parameter :: resco2=15.0
-! rad->deg conversion
-      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi
-! pressure limitation for 2-d co2 (mb)
-      real (kind=kind_phys), parameter :: prsco2=788.0
-! half of pi
-      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi
-
-!\name parameter constants for gas volume mixing ratioes
-
-      real (kind=kind_phys), parameter :: co2vmr_def = 350.0e-6
-      real (kind=kind_phys), parameter :: n2ovmr_def = 0.31e-6
-      real (kind=kind_phys), parameter :: ch4vmr_def = 1.50e-6
-      real (kind=kind_phys), parameter :: o2vmr_def  = 0.209
-      real (kind=kind_phys), parameter :: covmr_def  = 1.50e-8
+      real (kind=kind_phys), parameter :: co2vmr_def = 350.0e-6  !< parameter constant for CO2 volume mixing ratio
+      real (kind=kind_phys), parameter :: n2ovmr_def = 0.31e-6   !< parameter constant for N2O volume mixing ratio
+      real (kind=kind_phys), parameter :: ch4vmr_def = 1.50e-6   !< parameter constant for CH4 volume mixing ratio
+      real (kind=kind_phys), parameter :: o2vmr_def  = 0.209     !< parameter constant for O2  volume mixing ratio
+      real (kind=kind_phys), parameter :: covmr_def  = 1.50e-8   !< parameter constant for CO  colume mixing ratio
 ! aer 2003 value
       real (kind=kind_phys), parameter :: f11vmr_def = 3.520e-10
 ! aer 2003 value
@@ -182,13 +170,13 @@
 
 !  ---  module variables to be set in subroutin gas_init and/or gas_update
 
-! \name variables for climatology ozone (ioznflg = 0)
+! variables for climatology ozone (ioznflg = 0)
 
       real (kind=kind_phys), allocatable :: pkstr(:), o3r(:,:,:)
       integer :: k1oz = 0,  k2oz = 0
       real (kind=kind_phys) :: facoz = 0.0
 
-!\name  arrays for co2 2-d monthly data and global mean values from observed data
+!  arrays for co2 2-d monthly data and global mean values from observed data
 
       real (kind=kind_phys), allocatable :: co2vmr_sav(:,:,:)
       real (kind=kind_phys), allocatable :: co2cyc_sav(:,:,:)

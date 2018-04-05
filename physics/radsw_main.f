@@ -2573,14 +2573,14 @@
 
 !> -# Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for clear-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for both
-!!      conservative and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation
-!!      fluxes
+!    - Set up toa direct beam and surface values (beam and diff).
+!    - Delta scaling for clear-sky condition.
+!    - General two-stream expressions for physparam::iswmode .
+!    - Compute homogeneous reflectance and transmittance for both
+!      conservative and non-conservative scattering.
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance.
+!    - Call swflux() to compute the upward and downward radiation
+!      fluxes.
 
         do k = nlay, 1, -1
           kp = k + 1
@@ -2591,12 +2591,12 @@
           zssaw = min( oneminus, zssa0 / ztau0 )
           zasyw = zasy0 / max( ftiny, zssa0 )
 
-!  --- ...  saving clear-sky quantities for later total-sky usage
+!>  - Saving clear-sky quantities for later total-sky usage.
           ztaus(k) = ztau0
           zssas(k) = zssa0
           zasys(k) = zasy0
 
-!  --- ...  delta scaling for clear-sky condition
+!>  - Delta scaling for clear-sky condition.
           za1 = zasyw * zasyw
           za2 = zssaw * za1
 
@@ -2606,7 +2606,12 @@
           zasy1 = zasyw / (f_one + zasyw)         ! to reduce truncation error
           zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n  control parameters in module "physparam"                             
+!!\n    iswmode - control flag for 2-stream transfer schemes               
+!!\n              = 1 delta-eddington    (joseph et al., 1976)             
+!!\n              = 2 pifm               (zdunkowski et al., 1980)         
+!!\n              = 3 discrete ordinates (liou, 1973)                      
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
             zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -2622,7 +2627,8 @@
           endif
           zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both conservative
+!! scattering and non-conservative scattering.
 
           if ( zssaw >= zcrit ) then    ! for conservative scattering
             za1 = zgam1 * cosz - zgam3
@@ -2717,9 +2723,8 @@
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
           endif    ! end if_zssaw_block
 
-!  --- ...  direct beam transmittance. use exponential lookup table
-!           for transmittance, or expansion of exponential for low
-!           optical depth
+!>  -  Calculate direct beam transmittance. use exponential lookup table
+!! for transmittance, or expansion of exponential for low optical depth.
 
           zr1 = ztau1 * sntz
           if ( zr1 <= od_lo ) then
@@ -2733,7 +2738,7 @@
           ztdbt(k)  = zexp3 * ztdbt(kp)
           zldbt(kp) = zexp3
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
           zr1 = ztau0 * sntz
@@ -2749,6 +2754,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -2757,13 +2763,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!! --- ...  surface downward beam/diffused flux components
+!> -# Compute surface downward beam/diffused flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -2783,17 +2789,17 @@
 
 !> -# Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for total-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for
-!!      conservative scattering and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for total-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for
+!      conservative scattering and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         if ( cf1 > eps ) then
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!>  - Set up toa direct beam and surface values (beam and diff).
           ztdbt0 = f_one
           zldbt(1) = f_zero
 
@@ -2809,7 +2815,7 @@
               zssaw = min(oneminus, zssa0 / ztau0)
               zasyw = zasy0 / max(ftiny, zssa0)
 
-!  --- ...  delta scaling for total-sky condition
+!>  - Perform delta scaling for total-sky condition.
               za1 = zasyw * zasyw
               za2 = zssaw * za1
 
@@ -2819,7 +2825,13 @@
               zasy1 = zasyw / (f_one + zasyw)
               zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n  control parameters in module "physparam"
+!!\n    iswmode - control flag for 2-stream transfer schemes
+!!\n              = 1 delta-eddington    (joseph et al., 1976)
+!!\n              = 2 pifm               (zdunkowski et al., 1980)
+!!\n              = 3 discrete ordinates (liou, 1973)
+
               if ( iswmode == 1 ) then
                 zgam1 = 1.75 - zssa1 * (f_one + zasy3)
                 zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -2840,7 +2852,8 @@
               ztrab1 = ztrab(kp)
               ztrad1 = ztrad(kp)
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both conservative
+!! and non-conservative scattering.
 
               if ( zssaw >= zcrit ) then    ! for conservative scattering
                 za1 = zgam1 * cosz - zgam3
@@ -2959,7 +2972,7 @@
               zldbt(kp) = zc0*zldbt(kp) + zc1*zexp3
               ztdbt(k) = zldbt(kp) * ztdbt(kp)
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
               zr1 = ztau0 * sntz
@@ -2984,7 +2997,7 @@
             endif    ! end if_zc1_block
           enddo   ! end do_k_loop
 
-!  --- ...  perform vertical quadrature
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -2994,14 +3007,14 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
           do k = 1, nlp1
             fxupc(k,ib) = fxupc(k,ib) + zsolar*zfu(k)
             fxdnc(k,ib) = fxdnc(k,ib) + zsolar*zfd(k)
           enddo
 
 !> -# Process and save outputs.
-! --- ...  surface downward beam/diffused flux components
+!!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3032,7 +3045,7 @@
         fsfcd0 = fsfcd0 + fxdn0(1,ib)
       enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
       ibd = nuvb - nblow + 1
       suvbf0 = fxdn0(1,ibd)
 
@@ -3048,13 +3061,13 @@
         fsfcuc = fsfcu0
         fsfcdc = fsfcd0
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = sfbm0(1)
         sfdfc(1) = sfdf0(1)
         sfbmc(2) = sfbm0(2)
         sfdfc(2) = sfdf0(2)
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
         suvbfc = suvbf0
       else                        ! cloudy column, compute total-sky fluxes
         do ib = 1, nbdsw
@@ -3070,10 +3083,10 @@
           fsfcdc = fsfcdc + fxdnc(1,ib)
         enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
         suvbfc = fxdnc(1,ibd)
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = cf1*sfbmc(1) + cf0*sfbm0(1)
         sfbmc(2) = cf1*sfbmc(2) + cf0*sfbm0(2)
         sfdfc(1) = cf1*sfdfc(1) + cf0*sfdf0(1)
@@ -3311,7 +3324,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!  --- ...  loop over all g-points in each band
+!> -# Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -3321,7 +3334,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!> -# Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -3339,13 +3352,13 @@
 
 !> -# Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for clear-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for both
-!!      conservative and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for clear-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for both
+!      conservative and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         do k = nlay, 1, -1
           kp = k + 1
@@ -3356,12 +3369,12 @@
           zssaw = min( oneminus, zssa0 / ztau0 )
           zasyw = zasy0 / max( ftiny, zssa0 )
 
-!  --- ...  saving clear-sky quantities for later total-sky usage
+!>  - Saving clear-sky quantities for later total-sky usage.
           ztaus(k) = ztau0
           zssas(k) = zssa0
           zasys(k) = zasy0
 
-!  --- ...  delta scaling for clear-sky condition
+!>  - Delta scaling for clear-sky condition.
           za1 = zasyw * zasyw
           za2 = zssaw * za1
 
@@ -3371,7 +3384,12 @@
           zasy1 = zasyw / (f_one + zasyw)         ! to reduce truncation error
           zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions:
+!!\n control parameters in module "physparam" 
+!!\n iswmode - control flag for 2-stream transfer schemes 
+!!\n           = 1 delta-eddington (joseph et al., 1976) 
+!!\n           = 2 pifm (zdunkowski et al., 1980) 
+!!\n           = 3 discrete ordinates (liou, 1973)
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
             zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -3387,7 +3405,7 @@
           endif
           zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance.
 
           if ( zssaw >= zcrit ) then    ! for conservative scattering
             za1 = zgam1 * cosz - zgam3
@@ -3482,9 +3500,8 @@
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
           endif    ! end if_zssaw_block
 
-!  --- ...  direct beam transmittance. use exponential lookup table
-!           for transmittance, or expansion of exponential for low
-!           optical depth
+!>  - Calculate direct beam transmittance. use exponential lookup table
+!! for transmittance, or expansion of exponential for low optical depth.
 
           zr1 = ztau1 * sntz
           if ( zr1 <= od_lo ) then
@@ -3498,7 +3515,7 @@
           ztdbt(k)  = zexp3 * ztdbt(kp)
           zldbt(kp) = zexp3
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  - Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
 !           (must use 'orig', unscaled cloud optical depth)
 
           zr1 = ztau0 * sntz
@@ -3514,6 +3531,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
+!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -3522,13 +3540,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!  --- ...  compute upward and downward fluxes at levels
+!> -# Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!! --- ...  surface downward beam/diffuse flux components
+!> -# Compute surface downward beam/diffuse flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3548,17 +3566,17 @@
 
 !> -# Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
-!!    - Set up toa direct beam and surface values (beam and diff)
-!!    - Delta scaling for total-sky condition
-!!    - General two-stream expressions for physparam::iswmode
-!!    - Compute homogeneous reflectance and transmittance for
-!!      conservative scattering and non-conservative scattering
-!!    - Pre-delta-scaling clear and cloudy direct beam transmittance
-!!    - Call swflux() to compute the upward and downward radiation fluxes
+!    - Set up toa direct beam and surface values (beam and diff)
+!    - Delta scaling for total-sky condition
+!    - General two-stream expressions for physparam::iswmode
+!    - Compute homogeneous reflectance and transmittance for
+!      conservative scattering and non-conservative scattering
+!    - Pre-delta-scaling clear and cloudy direct beam transmittance
+!    - Call swflux() to compute the upward and downward radiation fluxes
 
         if ( cf1 > eps ) then
 
-!  --- ...  set up toa direct beam and surface values (beam and diff)
+!>  - Set up toa direct beam and surface values (beam and diff).
           ztdbt0 = f_one
           zldbt(1) = f_zero
 
@@ -3572,7 +3590,7 @@
               zssaw = min(oneminus, zssa0 / ztau0)
               zasyw = zasy0 / max(ftiny, zssa0)
 
-!  --- ...  delta scaling for total-sky condition
+!>  - Perform delta scaling for total-sky condition.
               za1 = zasyw * zasyw
               za2 = zssaw * za1
 
@@ -3582,7 +3600,7 @@
               zasy1 = zasyw / (f_one + zasyw)
               zasy3 = 0.75 * zasy1
 
-!  --- ...  general two-stream expressions
+!>  - Perform general two-stream expressions.
               if ( iswmode == 1 ) then
                 zgam1 = 1.75 - zssa1 * (f_one + zasy3)
                 zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -3598,7 +3616,8 @@
               endif
               zgam4 = f_one - zgam3
 
-!  --- ...  compute homogeneous reflectance and transmittance
+!>  - Compute homogeneous reflectance and transmittance for both convertive 
+!! and non-convertive scattering.
 
               if ( zssaw >= zcrit ) then    ! for conservative scattering
                 za1 = zgam1 * cosz - zgam3
@@ -3728,13 +3747,13 @@
 !  --- ...  direct beam transmittance
               ztdbt(k) = zldbt(kp) * ztdbt(kp)
 
-!  --- ...  pre-delta-scaling clear and cloudy direct beam transmittance
+!>  -  Calculate pre-delta-scaling clear and cloudy direct beam transmittance.
               ztdbt0 = zldbt0(k) * ztdbt0
 
             endif    ! end if_cldfmc_block
           enddo   ! end do_k_loop
 
-!  --- ...  perform vertical quadrature
+!> -# Call vrtqdr(), to  perform vertical quadrature
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -3751,7 +3770,7 @@
           enddo
 
 !> -# Process and save outputs.
-! --- ...  surface downward beam/diffused flux components
+!!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3782,7 +3801,7 @@
         fsfcd0 = fsfcd0 + fxdn0(1,ib)
       enddo
 
-!! --- ...  uv-b surface downward flux
+!>  - uv-b surface downward flux
       ibd = nuvb - nblow + 1
       suvbf0 = fxdn0(1,ibd)
 
@@ -3798,13 +3817,13 @@
         fsfcuc = fsfcu0
         fsfcdc = fsfcd0
 
-!! --- ...  surface downward beam/diffused flux components
+!>  - surface downward beam/diffused flux components
         sfbmc(1) = sfbm0(1)
         sfdfc(1) = sfdf0(1)
         sfbmc(2) = sfbm0(2)
         sfdfc(2) = sfdf0(2)
 
-!! --- ...  uv-b surface downward flux
+!>  -  uv-b surface downward flux
         suvbfc = suvbf0
       else                        ! cloudy column, compute total-sky fluxes
         do ib = 1, nbdsw
