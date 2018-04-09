@@ -1,8 +1,8 @@
 !> \file ozphys.f
 !! This file is ozone sources and sinks.
 
-!> \defgroup GFS_ozn GFS Ozone Physics 
-!!
+! \defgroup GFS_ozn GFS Ozone Physics 
+!
       module ozphys_pre
       contains
 
@@ -39,11 +39,10 @@
       end subroutine ozphys_init
 
 !>\defgroup GFS_ozphys GFS ozphys Main
-!>\ingroup GFS_ozn
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
-!! (McCormack et al. 2006 \cite mccormack_et_al_2006).
+!! (\cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
 !! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -65,7 +64,7 @@
 !! | errmsg         | error_message                                     | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                        | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section genal_ozphys General Algorithm
+!! \section genal_ozphys GFS Ozone Physics Scheme General Algorithm
 !> @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &

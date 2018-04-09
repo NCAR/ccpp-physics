@@ -1,6 +1,6 @@
 !> \file gscond.f
 !! This file contains the subroutine that calculates grid-scale
-!! condensation and evaporation for use in the Zhao and Carr (1997)
+!! condensation and evaporation for use in 
 !! \cite zhao_and_carr_1997 scheme.
 
       module zhaocarr_gscond
@@ -21,12 +21,7 @@
        subroutine zhaocarr_gscond_finalize
        end subroutine zhaocarr_gscond_finalize
 
-
-!> \defgroup Zhao-Carr GFS Zhao-Carr Microphysics
-!! @{
-!!
-!> \defgroup condense Grid-Scale Condensation and Evaporation of Cloud
-!! @{
+!> \defgroup condense GFS gscond Main
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
@@ -57,14 +52,14 @@
 !! | errmsg         | error_message                                              | error message for error handling in CCPP                 | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                 | error flag for error handling in CCPP                    | flag    |    0 | integer   |           | out    | F        |
 !!
-!> \section general_gscond General Algorithm
+!> \section general_gscond GFS gscond Scheme General Algorithm
 !! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction betwee
-!! cloud water and cloud ice (table2 of Zhao and Carr (1997) \cite zhao_and_carr_1997).
+!! cloud water and cloud ice (table2 of \cite zhao_and_carr_1997).
 !! -# Calculate the changes in \f$t\f$, \f$q\f$ and \f$p\f$ due to all the processes except microphysics.
-!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of Zhao and Carr (1997) \cite zhao_and_carr_1997)
-!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of Zhao and Carr (1997) \cite zhao_and_carr_1997) 
+!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of \cite zhao_and_carr_1997)
+!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of \cite zhao_and_carr_1997) 
 !! -# update t,q,cwm due to cloud evaporation and condensation process
-!> \section Zhao-Carr_cond_detailed Detailed Algorithm
+!> \section Zhao-Carr_cond_detailed GFS gscond Scheme Detailed Algorithm
 !> @{
         subroutine zhaocarr_gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1  &
      &,                  clw2, cwm, t, tp, qp, psp                      &
@@ -217,7 +212,7 @@
 !> -# Compute ice-water identification number IW.
 !!\n  The distinction between cloud water and cloud ice is made by the
 !! cloud identification number IW, which is zero for cloud water and
-!! unity for cloud ice (Table 2 in zhao and Carr (1997)
+!! unity for cloud ice (Table 2 in 
 !! \cite zhao_and_carr_1997):
 !!  - All clouds are defined to consist of liquid water below the
 !! freezing level (\f$T\geq 0^oC\f$) and of ice particles above the
@@ -293,7 +288,7 @@
             rqik = qik/qc
           endif
 
-!>  - According to Sundqvist et al. (1989) \cite sundqvist_et_al_1989,
+!>  - According to \cite sundqvist_et_al_1989,
 !! estimate cloud fraction \f$b\f$ at a grid point from relative
 !! humidity \f$f\f$ using the equation
 !!\f[
@@ -330,7 +325,7 @@
 !!\f]
 !! where \f$dt\f$ is the time step for precipitation calculation in the
 !! model. It is a simplified version of a higher-order cloud
-!! evaporation algorithm (Rutledge and Hobbs 1983
+!! evaporation algorithm (
 !! \cite rutledge_and_hobbs_1983). In the case where all clouds will
 !! evaporate before \f$u\f$ is reached, the following equation is used:
 !! \f[
@@ -352,7 +347,7 @@
 !!   M=A_{q}-\frac{f\epsilon Lq_{s}}{RT^{2}}A_{t}+\frac{fq_{s}}{p}A_{p}
 !!\f]
 !! To close the system, an equation for the relative humidity tendency
-!! \f$f_{t}\f$ was derived by Sundqvist et al. (1989)
+!! \f$f_{t}\f$ was derived by 
 !! \cite sundqvist_et_al_1989 using the hypothesis that the quantity
 !! \f$M+E_{c}\f$ is divided into one part,\f$bM\f$,which condenses
 !! in the already cloudy portion of a grid square, and another part,
@@ -363,8 +358,7 @@
 !!  f_{t}=\frac{2(1-b)(f_{s}-u)[(1-b)M+E_{c}]}{2q_{s}(1-b)(f_{s}-u)+cwm/b}
 !!\f]
 !!  - Check and correct if over condensation occurs.
-!!  - Update  t, q and cwm (according to Eqs(6) and (7) in Zhao and
-!! Carr (1997) \cite zhao_and_carr_1997)
+!!  - Update  t, q and cwm (according to Eqs(6) and (7) in \cite zhao_and_carr_1997)
 !!\f[
 !!   cwm=cwm+(C_{g}-E_{c})\times dt
 !!\f]
@@ -524,9 +518,9 @@
       return
       end subroutine zhaocarr_gscond_run
 !> @}
-!! @}
+! @}
 
 
-!! @}
+! @}
 
       end module zhaocarr_gscond

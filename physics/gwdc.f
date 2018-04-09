@@ -1,6 +1,6 @@
 !> \file gwdc.f This file is the original code for parameterization of
-!! stationary convection forced gravity wave drag based on Chun and
-!! Baik(1998) \cite chun_and_baik_1998 .
+!! stationary convection forced gravity wave drag based on 
+!! \cite chun_and_baik_1998 .
 
       module gwdc_pre
       contains
@@ -114,11 +114,10 @@
       subroutine gwdc_init()
       end subroutine gwdc_init
 
-!> \defgroup GFS_cgwd GFS Convective Gravity Wave Drag
+! \defgroup GFS_cgwd GFS Convective Gravity Wave Drag
 !> \defgroup GFS_gwdc_run GFS gwdc Main
-!! \ingroup GFS_cgwd
 !! \brief This subroutine is the parameterization of convective gravity wave
-!! drag based on the theory given by Chun and Baik (1998)
+!! drag based on the theory given by 
 !! \cite chun_and_baik_1998 modified for implementation into the
 !! GFS/CFS by Ake Johansson(Aug 2005).
 !!
@@ -158,7 +157,7 @@
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
 !!
-!>\section gen_gwdc General Algorithm
+!>\section gen_gwdc GFS Convective GWD Scheme General Algorithm
 !! Parameterizing subgrid-scale convection-induced gravity wave
 !! momentum flux for use in large-scale models inherently requires
 !! some information from subgrid-scale cumulus parameterization.
@@ -181,7 +180,7 @@
 !! Richardson number including wave impact is similar to that in the mountain
 !! wave case.
 !!
-!> \section al_gwdc Detailed Algorithm
+!> \section al_gwdc GFS Convective GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdc_run (im,ix,km,lat,u1,v1,t1,q1,deltim,             &
      &           pmid1,pint1,dpmid1,qmax,ktop,kbot,kcnv,cldf,           &
@@ -905,8 +904,7 @@
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
 !! The parameter \f$\mu\f$ is the nonlinearity factor of thermally
-!! induced internal gravity waves defined by eq.(17) in Chun and
-!! Baik, 1998 \cite chun_and_baik_1998
+!! induced internal gravity waves defined by eq.(17) in \cite chun_and_baik_1998 :
 !! \f[
 !!  \mu=\frac{gQ_{0}a_{1}}{c_{p}T_{0}NU^{2}}
 !! \f]

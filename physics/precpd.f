@@ -12,8 +12,7 @@
       subroutine zhaocarr_precpd_init ()
       end subroutine zhaocarr_precpd_init
 
-!> \defgroup precip Precipitation (snow or rain) Production
-!> \ingroup Zhao-Carr
+!> \defgroup precip GFS precpd Main
 !! @{
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
@@ -44,14 +43,30 @@
 !! | errmsg         | error_message                                                 | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                    | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
 !!
-!> \section general_precpd General Algorithm
+!> \section general_precpd GFS precpd Scheme General Algorithm
+!! The following two equations can be used to calculate the
+!! precipitation rates of rain and snow at each module level:
+!!\f[
+!! P_{r}(\eta)=\frac{p_{s}-p_{t}}{g\eta_{s}}\int_{\eta}^{\eta_{t}}(P_{raut}+P_{racw}+P_{sacw}+P_{sm1}+P_{sm2}-E_{rr})d\eta
+!! \f]
+!! and
+!! \f[
+!! P_{s}(\eta)=\frac{p_{s}-p_{t}}{g\eta_{s}}\int_{\eta}^{\eta_{t}}(P_{saut}+P_{saci}-P_{sm1}-P_{sm2}-E_{rs})d\eta
+!! \f]
+!! where \f$p_{s}\f$ and\f$p_{t}\f$ are the surface pressure and the
+!! pressure at the top of model domain, respectively, and \f$g\f$ is
+!! gravity. The implementation of the precipitation scheme also
+!! includes a simplified procedure of computing \f$P_{r}\f$
+!! and \f$P_{s}\f$ (\cite zhao_and_carr_1997).
+!!
+!! The calculation is as follows:
 !! -# Calculate precipitation production by auto conversion and accretion (\f$P_{saut}\f$, \f$P_{saci}\f$, \f$P_{raut}\f$).
 !!  - The accretion of cloud water by rain, \f$P_{racw}\f$, is not included in the current operational scheme.
 !! -# Calculate evaporation of precipitation (\f$E_{rr}\f$ and \f$E_{rs}\f$).
 !! -# Calculate melting of snow (\f$P_{sm1}\f$ and \f$P_{sm2}\f$, \f$P_{sacw}\f$).
 !! -# Update t and q due to precipitation (snow or rain) production.
 !! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
-!! \section Zhao-Carr_precip_detailed Detailed Algorithm
+!! \section Zhao-Carr_precip_detailed GFS precpd Scheme Detailed Algorithm
 !! @{
        subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
@@ -405,7 +420,7 @@
 !
 !> -# Precipitation production by auto conversion and accretion
 !!  - The autoconversion of cloud ice to snow (\f$P_{saut}\f$) is simulated
-!! using the equation from Lin et al. (1983) \cite lin_et_al_1983
+!! using the equation from \cite lin_et_al_1983
 !!\f[
 !!   P_{saut}=a_{1}(cwm-wmini)
 !!\f]
@@ -426,7 +441,7 @@
 !! coefficient \f$C_{s}\f$ is a function of temperature since the open
 !! structures of ice crystals at relative warm temperatures are more
 !! likely to stick, given a collision, than crystals of other shapes
-!! (Rogers 1979 \cite rogers_1979). Above the freezing level,
+!! (\cite rogers_1979). Above the freezing level,
 !! \f$C_{s}\f$ is expressed by
 !!\f[
 !!   C_{s}=c_{1}exp\left[ 0.025\left(T-273.15\right)\right]
@@ -455,7 +470,7 @@
                precsl(n) = precsl(n) + (wws - ww(n)) * condt(n)
             else                                    !  liquid water
 !
-!>  - Following Sundqvist et al. (1989) \cite sundqvist_et_al_1989,
+!>  - Following \cite sundqvist_et_al_1989,
 !! the autoconversion of cloud water to rain (\f$P_{raut}\f$) can be
 !! parameterized from the cloud water mixing ratio \f$m\f$ and cloud
 !! coverage \f$b\f$, that is,
@@ -512,8 +527,7 @@
 !! the layers below cloud base. Through this process, some of the
 !! precipitating water is evaporated back to the atmosphere and the
 !! precipitation efficiency is reduced.
-!!  - Evaporation of rain is calculated using the equation (Sundqvist
-!! 1988 \cite sundqvist_1988):
+!!  - Evaporation of rain is calculated using the equation (\cite sundqvist_1988):
 !!\f[
 !!   E_{rr}= evpco \times (u-f)(P_{r})^{\beta}
 !!\f]

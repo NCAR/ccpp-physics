@@ -2,20 +2,18 @@
 !! This file is the entity of GFS Noah LSM Model(Version 2.7).
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!!\ingroup Noah_Main
 !!\brief This is the entity of GFS Noah LSM model of physics subroutines.
 !! It is a soil/veg/snowpack land-surface model to update soil moisture, soil
 !! ice, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance
-!! (excluding input atmospheric forcings of downward radiation \ref RRTMG and 
-!! precipitation \ref CALPRECIPTYPE).
+!! (excluding input atmospheric forcings of downward radiation and 
+!! precipitation ).
 !!
 !! The land-surface model component was substantially upgraded from the Oregon
 !! State University (OSU) land surface model to EMC's new Noah Land Surface Model
 !! (Noah LSM) during the major implementation in the NCEP Global Forecast System
 !! (GFS) on May 31, 2005. Forecast System (GFS). The Noah LSM embodies about 10
-!! years of upgrades (see Chen et al. 1996
-!! \cite chen_et_al_1996; Koren et al. 1999 \cite koren_et_al_1999; Ek et al. 2003
+!! years of upgrades (see \cite chen_et_al_1996; \cite koren_et_al_1999; 
 !! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The Noah LSM upgrade includes:
 !!  - An increase from two (10, 190 cm thick) to four soil layers (10, 30, 60, 100 cm thick)
 !!  - Addition of frozen soil physics
@@ -105,7 +103,7 @@
 !!\param[out] smcdry   real, dry soil moisture threshold (volumetric) 
 !!\param[out] smcref   real, soil moisture threshold (volumetric) 
 !!\param[out] smcmax   real, porosity (sat val of soil mois) 
-!!\section general_sflx General Algorithm
+!!\section general_sflx GFS Noah LSM General Algorithm
 !! @{
 !      subroutine sflx                                                   & !  ---  inputs:
 !ccppdox: avoid to connect to sflx in mpbl
@@ -590,8 +588,7 @@
 
       else
 !>  - For non-glacial land case, call tdfcnd() to calculate the thermal
-!! diffusivity of top soil layer (Peters-Lidard et al.(1998)
-!! \cite peters-lidard_et_al_1998).
+!! diffusivity of top soil layer (\cite peters-lidard_et_al_1998).
 
 !  --- ...  next calculate the subsurface heat flux, which first requires
 !           calculation of the thermal diffusivity.  treatment of the
@@ -626,7 +623,7 @@
 
 !>   - Add subsurface heat flux reduction effect from the 
 !!  overlying green canopy, adapted from section 2.1.2 of 
-!!  Peters-Lidard et al. (1997) \cite peters-lidard_et_al_1997.
+!!  \cite peters-lidard_et_al_1997.
 
         df1 = df1 * exp( sbeta*shdfac )
 
@@ -909,6 +906,7 @@
 !*************************************!
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates albedo including snow effect (0 -> 1).
 !!\ingroup Noah_LSM
       subroutine alcalc
@@ -993,6 +991,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates canopy resistance which depends on incoming
 !! solar radiation, air temperature, atmospheric water vapor pressure
 !! deficit at the lowest model level, and soil moisture (preferably unfrozen
@@ -1150,6 +1149,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates snow termal conductivity
       subroutine csnow
 !...................................
@@ -1212,6 +1212,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil moisture and heat flux values and 
 !! update soil moisture content and soil heat content values for the
 !! case when no snow pack is present.
@@ -1478,6 +1479,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates potential evaporation for the current point.
 !! various partial sums/products are also calculated and passed back
 !! to the calling routine for later use
@@ -1587,6 +1589,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine internally sets default values or optionally read-in 
 !! via namelist i/o, all soil and vegetation parateters requied for the execusion
 !! of the Noah LSM.
@@ -1879,8 +1882,9 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates surface layer exchange coefficients
-!! via iterative process(see chen et al. 1997 \cite chen_et_al_1997).
+!! via iterative process(see \cite chen_et_al_1997).
       subroutine sfcdif
 !...................................
 !  ---  inputs:
@@ -2166,6 +2170,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates snow fraction (0->1).
       subroutine snfrac
 !...................................
@@ -2236,6 +2241,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil moisture and heat flux values and 
 !! update soil moisture content and soil heat content values for the
 !! case when a snow pack is present.
@@ -2754,6 +2760,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates snow depth and densitity to account
 !! for the new snowfall. new values of snow depth & density returned.
       subroutine snow_new
@@ -2828,6 +2835,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates total roughness length over snow.
       subroutine snowz0
 !...................................
@@ -2879,6 +2887,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates thermal diffusivity and conductivity
 !! of the soil for a given point and time.
       subroutine tdfcnd                                                 &
@@ -3023,6 +3032,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil moisture flux. The soil moisture
 !! content (smc - a per unit volume measurement) is a dependent variable
 !! that is updated with prognostic equations. The canopy moisture content
@@ -3174,6 +3184,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine updates the temperature state of the soil column
 !! based on the thermal diffusion equation and update the frozen soil
 !! moisture content based on the temperature.
@@ -3338,6 +3349,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil moisture flux. The soil moisture
 !! content (smc - a per unit vulume measurement) is a dependent variable
 !! that is updated with prognostic equations. The canopy moisture content
@@ -3549,6 +3561,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates compaction of a snowpack under conditions of 
 !! increasing snow density, as obtained from an approximate solution of 
 !! E. Anderson's differential equation (3.29),NOAA technical report NWS 19,
@@ -3716,6 +3729,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subrtouine calculates direct soil evaporation.
       subroutine devap                                                  &
 !...................................
@@ -3786,10 +3800,11 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates amount of supercooled liquid soil water
 !! content if temperature is below 273.15K (t0). It requires Newton-type
 !! iteration to solve the nonlinear implicit equation given in eqn 17
-!! of Koren et al.(1999) \cite koren_et_al_1999.
+!! of \cite koren_et_al_1999.
 !!
 !! New version (June 2001): much faster and more accurate Newton iteration
 !! achieved by first taking log of eqn cited above -- less than 4 (typically
@@ -3948,6 +3963,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates the right hand side of the time tendency 
 !! term of the soil thermal diffusion equation. Also to compute (prepare)
 !! the matrix coefficients for the tri-diagonal matrix of the implicit time
@@ -4296,6 +4312,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates the right hand side of the time tendency
 !! term of the soil thermal diffusion equation for sea-ice (ice = 1) or
 !! glacial-ice (ice).
@@ -4471,6 +4488,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates/updates the soil temperature field.
       subroutine hstep                                                  &
 !...................................
@@ -4571,6 +4589,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine inverts (solve) the tri-diagonal matrix problem.
       subroutine rosr12                                                 &
 !...................................
@@ -4674,6 +4693,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates sink/source term of the termal diffusion equation.
       subroutine snksrc                                                 &
 !...................................
@@ -4816,6 +4836,7 @@
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates the right hand side of the time tendency
 !! term of the soil water diffusion equation. Also to compute
 !! (prepare) the matrix coefficients for the tri-diagonal matrix of 
@@ -5130,6 +5151,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates/updates soil moisture content values and
 !! canopy moisture content values.
       subroutine sstep                                                  &
@@ -5278,6 +5300,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates temperature on the boundary of the 
 !! layer by interpolation of the middle layer temperatures.
       subroutine tbnd                                                   &
@@ -5350,6 +5373,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil layer average temperature (tavg)
 !! in freezing/thawing layer using up, down, and middle layer
 !! temperature (tup, tdn, tm), where tup is at top boundary of layer,
@@ -5459,6 +5483,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates transpiration for the veg class.
       subroutine transp                                                    &
 !...................................
@@ -5592,6 +5617,7 @@ c ----------------------------------------------------------------------
 
 
 !-----------------------------------
+!>\ingroup Noah_LSM
 !> This subroutine calculates soil water diffusivity and soil
 !! hydraulic conductivity.
       subroutine wdfcnd                                                 &
