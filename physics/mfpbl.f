@@ -4,7 +4,13 @@
 !>  \ingroup GFS_edmf_main
 !!  \brief This subroutine is used for calculating the mass flux and updraft properties.
 !!
-!!  The mfpbl routines works as follows: if the PBL is convective, first, the ascending parcel entrainment rate is calculated as a function of height. Next, a surface parcel is initiated according to surface layer properties and the updraft buoyancy is calculated as a function of height. Next, using the buoyancy and entrainment values, the parcel vertical velocity is calculated using a well known steady-state budget equation. With the profile of updraft vertical velocity, the PBL height is recalculated as the height where the updraft vertical velocity returns to 0, and the entrainment profile is updated with the new PBL height. Finally, the mass flux profile is calculated using the updraft vertical velocity and assumed updraft fraction and the updraft properties are calculated using the updated entrainment profile, surface values, and environmental profiles.
+!!  The mfpbl routines works as follows: if the PBL is convective, first, the ascending parcel entrainment rate is calculated as a
+!!  function of height. Next, a surface parcel is initiated according to surface layer properties and the updraft buoyancy is calculated
+!!  as a function of height. Next, using the buoyancy and entrainment values, the parcel vertical velocity is calculated using a well
+!!  known steady-state budget equation. With the profile of updraft vertical velocity, the PBL height is recalculated as the height
+!!  where the updraft vertical velocity returns to 0, and the entrainment profile is updated with the new PBL height. Finally, the mass
+!!  flux profile is calculated using the updraft vertical velocity and assumed updraft fraction and the updraft properties are calculated
+!!  using the updated entrainment profile, surface values, and environmental profiles.
 !!  \param[in] im      integer, number of used points
 !!  \param[in] ix      integer, horizontal dimension
 !!  \param[in] km      integer, vertical layer dimension
