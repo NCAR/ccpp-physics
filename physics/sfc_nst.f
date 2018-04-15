@@ -20,9 +20,7 @@
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
-!> \defgroup GFS_NSST GFS Near Sea Surface Temperature 
-!>\defgroup gfs_nst_main GFS NSST Main
-!!\ingroup GFS_NSST
+!>\defgroup gfs_nst_main GFS sfc_nst Main
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
@@ -88,12 +86,8 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
-!! \section NSST_general_algorithm General Algorithm
+!! \section NSST_general_algorithm GFS Near Sea Surface Temperature Scheme General Algorithm
 !> @{
-! \section NSST_detailed_algorithm Detailed Algorithm
-!
-!
-! @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
@@ -442,7 +436,7 @@ cc
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
 !> - Call cool_skin(), which is the sub-layer cooling parameterization 
-!! (Fairall et al, 1996 \cite fairall_et_al_1996).
+!! (\cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
           call cool_skin(ustar_a,f_nsol,nswsfc(i),evap(i),sss,alpha,beta
@@ -532,7 +526,7 @@ cc
               dz = min(xz(i),max(d_conv(i),delz))
 !
 !>  - Call sw_ps_9b() to compute the fraction of the solar radiation
-!! absorbed by the depth \a delz Paulson and Simpson (1981) \cite paulson_and_simpson_1981.
+!! absorbed by the depth \a delz (\cite paulson_and_simpson_1981).
 !! And calculate the total heat absorbed in warm layer.
               call sw_ps_9b(delz,fw)
               q_warm = fw*nswsfc(i)-f_nsol    !total heat absorbed in warm layer
@@ -733,10 +727,7 @@ cc
 !! | errmsg         | error_message                                          | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
 !!
-! \section NSST_general_pre_algorithm General Algorithm
-!!
-!!
-! \section NSST_detailed_pre_algorithm Detailed Algorithm
+!> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run                                        &
      &    (im, islimsk, oro, oro_uf, tsfc, tsurf, tskin, errmsg, errflg)

@@ -1,8 +1,8 @@
 !>  \file radsw_param.f
 !!  This file contains SW band parameters setup.
 
-!>  \defgroup radsw_param GFS RADSW param Module 
-!! \ingroup RRTMG
+!  \defgroup radsw_param GFS RADSW param Module 
+! \ingroup RRTMG
 
 !!!!!  ==============================================================  !!!!!
 !!!!!              sw-rrtm3 radiation package description              !!!!!
@@ -59,10 +59,9 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!>\ingroup radsw_param
+!>\ingroup module_radsw_main
 !> This module is for specifying the band structures and program parameters
 !! used by the RRTMG-SW scheme.
-!========================================!
       module module_radsw_parameters     !
 !........................................!
 

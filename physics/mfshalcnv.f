@@ -87,39 +87,14 @@
       subroutine sasas_shal_init
       end subroutine sasas_shal_init
 
-!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
+! \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !>\defgroup SAMF_shal_main GFS mfshalcnv Main
-!!\ingroup SAMF_shal
 !! @{
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
-!!
-!! The scale-aware mass-flux shallow (SAMF_shal) convection
+!! The scale-aware mass-flux shallow  convection
 !! scheme is an updated version of the previous mass-flux shallow
 !! convection scheme with scale and aerosol awareness and
 !! parameterizes the effect of shallow convection on the environment.
-!! The SAMF_shal scheme is similar to the SAMF deep convection scheme
-!! but with a few key differences. First, no quasi-equilibrium assumption
-!! is used for any grid size and the shallow cloud base mass flux is
-!! parameterized using a mean updraft velocity. Further, there are no
-!! convective downdrafts, the entrainment rate is greater than for deep
-!! convection, and the shallow convection is limited to not extend over
-!! the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and
-!! aerosol awareness follows that of the SAMF deep convection scheme.
-!!
-!! The previous version of the shallow convection scheme (\c shalcnv.f)
-!! is described in Han and Pan (2011) \cite han_and_pan_2011 and differences
-!! between the shallow and deep convection schemes are presented in
-!! Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2017)
-!! \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
-!! are described in Han et al. (2017) \cite han_et_al_2017 .
-!!
-!! This routine follows the \ref SAMF deep scheme quite closely, although
-!! it can be interpreted as only having the "static" and "feedback" control
-!! portions, since the "dynamic" control is not necessary to find the
-!! cloud base mass flux. The algorithm is simplified from SAMF deep
-!! convection by excluding convective downdrafts and being confined to
-!! operate below \f$p=0.7p_{sfc}\f$. Also, entrainment is both simpler
-!! and stronger in magnitude compared to the deep scheme.
 !!
 !! \section arg_table_sasas_shal_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                              | units   | rank | type      |    kind   | intent | optional |
@@ -154,7 +129,7 @@
 !! | errmsg         | error_message                                             | error message for error handling in CCPP               | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                | error flag for error handling in CCPP                  | flag    |    0 | integer   |           | out    | F        |
 !!
-!>  \section general_mfshal General Algorithm
+!>  \section general_mfshal GFS SAMF Shallow Convection Scheme General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback
 !!  control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining
@@ -167,7 +142,7 @@
 !!  variables by multiplying the cloud base mass flux and the tendencies
 !! calculated per unit cloud base mass flux from the static control.
 !!
-!!  \section detailed_mfshal Detailed Algorithm
+!!  \section detailed_mfshal GFS SAMF Shallow Convection Scheme Detailed Algorithm
 !!  @{
       subroutine sasas_shal_run (im,ix,km,delt,delp,prslp,psp,phil,ql1, &
      &     ql2,q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,garea,             &
@@ -373,7 +348,7 @@ c
 !
 !>  - determine rain conversion parameter above the freezing level
 !! which exponentially decreases with decreasing temperature from
-!! Han et al.'s (2017) \cite han_et_al_2017 equation 8.
+!! \cite han_et_al_2017 equation 8.
       do k = 1, km
         do i = 1, im
           if(t1(i,k) > 273.16) then
@@ -658,8 +633,8 @@ c
       enddo
       if(totflg) return
 !!
-!> - Determine the vertical pressure velocity at the LFC. After Han and
-!! Pan (2011) \cite han_and_pan_2011 , determine the maximum pressure
+!> - Determine the vertical pressure velocity at the LFC. After 
+!! \cite han_and_pan_2011 , determine the maximum pressure
 !! thickness between a parcel's starting level and the LFC. If a parcel
 !! doesn't reach the LFC within the critical thickness, then the convective
 !! inhibition is deemed too great for convection to be triggered, and the
@@ -729,7 +704,7 @@ c
 c  determine updraft mass flux for the subcloud layers
 c
 !> - Calculate the normalized mass flux for subcloud and in-cloud layers
-!! according to Pan and Wu (1995) \cite pan_and_wu_1995 equation 1:
+!! according to \cite pan_and_wu_1995 equation 1:
 !!  \f[
 !!  \frac{1}{\eta}\frac{\partial \eta}{\partial z} = \lambda_e - \lambda_d
 !!  \f]
@@ -788,10 +763,10 @@ c
 !
 !> - Calculate the cloud properties as a parcel ascends, modified by
 !! entrainment and detrainment. Discretization follows Appendix B of
-!! Grell (1993) \cite grell_1993 . Following Han and Pan (2006) 
+!! \cite grell_1993 . Following 
 !! \cite han_and_pan_2006, the convective momentum transport is reduced
 !! by the convection-induced pressure gradient force by the constant
-!! "pgcon", currently set to 0.55 after Zhang and Wu (2003)
+!! "pgcon", currently set to 0.55 after 
 !! \cite zhang_and_wu_2003 .
       do k = 2, km1
         do i = 1, im
@@ -826,8 +801,8 @@ c
 !! calculated with/without entrainment must be less than a threshold
 !! (currently 25 hPa). Otherwise, convection is inhibited and the scheme
 !! returns to the calling routine without modifying the state variables.
-!! This is the subcloud dryness trigger modification discussed in Han
-!! and Pan (2011) \cite han_and_pan_2011.
+!! This is the subcloud dryness trigger modification discussed in 
+!! \cite han_and_pan_2011.
       do i=1,im
         flg(i) = cnvflg(i)
         kbcon1(i) = kmax(i)
@@ -866,7 +841,7 @@ c
 c  calculate convective inhibition
 c
 !> - Calculate additional trigger condition of the convective inhibition
-!! (CIN) according to Han et al.'s (2017) \cite han_et_al_2017 equation 13.
+!! (CIN) according to \cite han_et_al_2017 equation 13.
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -956,7 +931,7 @@ c
 c  specify upper limit of mass flux at cloud base
 c
 !> - Calculate the maximum value of the cloud base mass flux using the
-!! CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011,
+!! CFL-criterion-based formula of \cite han_and_pan_2011,
 !! equation 7.
       do i = 1, im
         if(cnvflg(i)) then
@@ -984,7 +959,7 @@ c
       enddo
 !> - Calculate the moisture content of the entraining/detraining parcel
 !! (qcko) and the value it would have if just saturated (qrch), according
-!! to equation A.14 in Grell (1993) \cite grell_1993 . Their difference
+!! to equation A.14 in \cite grell_1993 . Their difference
 !! is the amount of convective cloud water (qlk = rain + condensate).
 !! Determine the portion of convective cloud water that remains suspended
 !! and the portion that is converted into convective precipitation (pwo).
@@ -1079,13 +1054,13 @@ c
 !
 !  calculate cloud work function
 !
-!> - Calculate the cloud work function according to Pan and Wu (1995)
+!> - Calculate the cloud work function according to 
 !! \cite pan_and_wu_1995 equation 4:
 !!  \f[
 !!  A_u=\int_{z_0}^{z_t}\frac{g}{c_pT(z)}\frac{\eta}{1 + \gamma}[h(z)-h^*(z)]dz
 !!  \f]
-!! (discretized according to Grell (1993) \cite grell_1993 equation B.10
-!! using B.2 and B.3 of Arakawa and Schubert (1974) \cite arakawa_and_schubert_1974
+!! (discretized according to \cite grell_1993 equation B.10
+!! using B.2 and B.3 of \cite arakawa_and_schubert_1974
 !! and assuming \f$\eta=1\f$) where \f$A_u\f$ is the updraft cloud work function,
 !! \f$z_0\f$ and \f$z_t\f$ are cloud base and cloud top, respectively,
 !! \f$\gamma = \frac{L}{c_p}\left(\frac{\partial \overline{q_s}}{\partial T}\right)_p\f$
@@ -1124,8 +1099,8 @@ c    which is the final cloud top
 c    limited to the level of P/Ps=0.7
 c
 !> - Continue calculating the cloud work function past the point of
-!! neutral buoyancy to represent overshooting according to Han and Pan
-!! (2011) \cite han_and_pan_2011 . Convective overshooting stops when
+!! neutral buoyancy to represent overshooting according to 
+!! \cite han_and_pan_2011 . Convective overshooting stops when
 !! \f$ cA_u < 0\f$ where \f$c\f$ is currently 10%, or when 10% of the
 !! updraft cloud work function has been consumed by the stable buoyancy
 !! force. Overshooting is also limited to the level where \f$p=0.7p_{sfc}\f$.
@@ -1213,8 +1188,7 @@ c
       enddo
 !
 !  compute updraft velocity square(wu2)
-!> - Calculate updraft velocity square(wu2) according to Han et al.'s
-!! (2017) \cite han_et_al_2017 equation 7.
+!> - Calculate updraft velocity square(wu2) according to \cite han_et_al_2017 equation 7.
 !
 !     bb1 = 2. * (1.+bet1*cd1)
 !     bb2 = 2. / (f1*(1.+gam1))
@@ -1325,7 +1299,7 @@ c
 c--- compute precipitation efficiency in terms of windshear
 c
 !! - Calculate the wind shear and precipitation efficiency according to
-!! equation 58 in Fritsch and Chappell (1980) \cite fritsch_and_chappell_1980 :
+!! equation 58 in \cite fritsch_and_chappell_1980 :
 !! \f[
 !! E = 1.591 - 0.639\frac{\Delta V}{\Delta z} + 0.0953\left(\frac{\Delta V}{\Delta z}\right)^2 - 0.00496\left(\frac{\Delta V}{\Delta z}\right)^3
 !! \f]
@@ -1368,7 +1342,7 @@ c
 !> ## Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !> - Calculate the change in moist static energy, moisture mixing ratio,
 !! and horizontal winds per unit cloud base mass flux for all layers
-!! below cloud top from equations B.14 and B.15 from Grell (1993)
+!! below cloud top from equations B.14 and B.15 from 
 !! \cite grell_1993, and for the cloud top from B.16 and B.17.
       do k = 1, km
         do i = 1, im
@@ -1452,7 +1426,7 @@ c
 !
 !  compute convective turn-over time
 !
-!> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008,
+!> - Following \cite bechtold_et_al_2008,
 !! calculate the convective turnover time using the mean updraft velocity
 !! (wc) and the cloud depth. It is also proportional to the grid size (gdx).
       do i= 1, im
@@ -1497,8 +1471,8 @@ c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity
 c
-!> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
-!!  As discussed in Han et al. (2017) \cite han_et_al_2017 , when dtconv
+!> - From \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
+!!  As discussed in \cite han_et_al_2017 , when dtconv
 !! is larger than tauadv, the convective mixing is not fully conducted
 !! before the cumulus cloud is advected out of the grid cell. In this
 !! case, therefore, the cloud base mass flux is further reduced in
@@ -1515,8 +1489,8 @@ c
 !
 !> - For scale-aware parameterization, the updraft fraction (sigmagfm)
 !! is first computed as a function of the lateral entrainment rate at
-!! cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4
-!! and 5), following the study by Grell and Freitas (2014)
+!! cloud base (see \cite han_et_al_2017 equation 4
+!! and 5), following the study by 
 !! \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
@@ -1531,11 +1505,11 @@ c
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical
 !! convective eddy transport of mass flux as a function of updraft
-!! fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013
-!! (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2).
+!! fraction from the studies by \cite arakawa_and_wu_2013
+!! (also see \cite han_et_al_2017 equation 1 and 2).
 !! The final cloud base mass flux with scale-aware parameterization is
 !! obtained from the mass flux when sigmagfm << 1, multiplied by the
-!! reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
+!! reduction factor (\cite han_et_al_2017 equation 2).
       do i = 1, im
         if(cnvflg(i)) then
           if (gdx(i) < dxcrt) then

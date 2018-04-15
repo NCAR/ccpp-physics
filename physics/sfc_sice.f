@@ -155,11 +155,10 @@
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
-!> \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
-!! @{
-!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
+! \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
+!  \brief  This is three-layer thermodynomics sea-ice model based on \cite winton_2000.
 !>\defgroup gfs_sice_main GFS sfc_sice Main
-!! \ingroup GFS_Ice
+!!  \brief  This is three-layer thermodynomics sea-ice model based on \cite winton_2000.
 !! \section arg_table_sfc_sice_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -206,7 +205,16 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
-!>  \section general_sice_run General Algorithm
+!>  \section general_sice_run GFS Sea Ice Driver General Algorithm
+!!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
+!! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
+!! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of
+!! the bottom of the ice is fixed at \f$T_f\f$, the freezing temperature of seawater. The temperature of
+!! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
+!! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 1).
+!! The upper ice layer has a variable heat capacity to represent brine pockets.
+!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!! \image latex GFS_sice_wonton2000_fig1.eps "Schematic representation of the three-layer model" width=5cm
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature 
 !!\n The surface temperature is determined from the diagnostic balance between
@@ -218,7 +226,7 @@
 !! mass fluxes at the upper and lower surfaces, 2) to convert snow below
 !! the water line to ice, and 3) to equalize the thickness of the two 
 !! ice layers.
-!>  \section detailed_sice_run Detailed Algorithm
+!>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !!  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
@@ -615,7 +623,7 @@
 
 !-----------------------------------
 !> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
-!! based on Winton(2000) \cite winton_2000 .
+!! based on \cite winton_2000 .
 !! @{
 !!\ingroup gfs_sice_main
 !\param[in] im    integer, horizontal dimension
@@ -634,7 +642,7 @@
 !\param[in,out] snof real, snowfall rate (\f$ms^{-1}\f$)
 !\param[out] snowmt real, snow melt during delt (\f$m\f$)
 !\param[out] gflux real, conductive heat flux (\f$W/m^2\f$)
-!>\section gen_ice3lay General Algorithm
+!>\section gen_ice3lay Three-layer Thermodynamics Sea Ice Model General Algorithm
 !! @{
       subroutine ice3lay
 !...................................
@@ -789,11 +797,11 @@
           ai   = hfi(i) - sneti(i) + ip - tice(i)*bi  ! +v sol input here
 !>  - Calculate the effective conductive coupling of the snow-ice layer 
 !! between the surface and the upper layer ice temperature \f$h_i/4\f$
-!! beneath the snow-ice interface (see \a eq.(5) in Winton(2000) \cite winton_2000).
+!! beneath the snow-ice interface (see \a eq.(5) in \cite winton_2000).
           k12  = ki4*ks / (ks*hice(i) + ki4*snowd(i))
 
 !>  - Calculate the conductive coupling between the two ice temperature 
-!! points (see \a eq.(10) in Winton(2000) \cite winton_2000).
+!! points (see \a eq.(10) in \cite winton_2000).
           k32  = (ki+ki) / hice(i)
 
           wrk    = 1.0 / (dt6*k32 + dici*hice(i))
@@ -808,7 +816,7 @@
           c1    = dili * tfi * dt2i * hice(i)
 
 !>  - Calculate the new upper ice temperature following \a eq.(21)
-!! in Winton(2000) \cite winton_2000. 
+!! in \cite winton_2000. 
           stsice(i,1) = -(sqrt(b1*b1 - 4.0*a1*c1) + b1)/(a1+a1)
           tice(i) = (k12*stsice(i,1) - ai) / (k12 + bi)
 
@@ -830,7 +838,7 @@
             snowd(i) = snowd(i) + snof(i)*delt
           endif
 !>  - Calculate the new lower ice temperature following \a eq.(15)
-!! in Winton(2000) \cite winton_2000.
+!! in \cite winton_2000.
           stsice(i,2) = (dt2*k32*(stsice(i,1) + tfw + tfw)              &
      &                +  dici*hice(i)*stsice(i,2)) * wrk
 
