@@ -35,7 +35,6 @@ module GFS_initialize_scm
 !! | Cldprop              | FV3-GFS_Cldprop_type                                        | derived type GFS_cldprop_type in FV3                                    | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
 !! | Radtend              | FV3-GFS_Radtend_type                                        | derived type GFS_radtend_type in FV3                                    | DDT           |    0 | GFS_radtend_type              |           | inout  | F        |
 !! | Diag                 | FV3-GFS_Diag_type                                           | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Sfccycle             | FV3-GFS_Sfccycle_type                                       | derived type GFS_sfccycle_type in FV3                                   | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
 !! | Interstitial         | FV3-GFS_Interstitial_type                                   | derived type GFS_interstitial_type in FV3                               | DDT           |    0 | GFS_interstitial_type         |           | inout  | F        |
 !! | Init_parm            | FV3-GFS_Init_type                                           | dervied type GFS_init_type in FV3                                       | DDT           |    0 | GFS_init_type                 |           | in     | F        |
 !! | n_ozone_layers       | vertical_dimension_of_ozone_forcing_data_from_host          | number of vertical layers in ozone forcing data coming from host        | count         |    0 | integer                       |           | in     | F        |
@@ -51,7 +50,7 @@ module GFS_initialize_scm
 !!
   subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,           &
                              Coupling, Grid, Tbd, Cldprop, Radtend, Diag,         &
-                             Sfccycle, Interstitial, Init_parm, n_ozone_lats,     &
+                             Interstitial, Init_parm, n_ozone_lats,               &
                              n_ozone_layers, n_ozone_times, n_ozone_coefficients, &
                              ozone_lat, ozone_pres, ozone_time, ozone_forcing_in, &
                              errmsg, errflg)
@@ -63,7 +62,7 @@ module GFS_initialize_scm
                                    GFS_control_type,  GFS_grid_type,       &
                                    GFS_tbd_type,      GFS_cldprop_type,    &
                                    GFS_radtend_type,  GFS_diag_type,       &
-                                   GFS_sfccycle_type, GFS_interstitial_type
+                                   GFS_interstitial_type
     use funcphys,            only: gfuncphys
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -82,7 +81,6 @@ module GFS_initialize_scm
     type(GFS_cldprop_type),      intent(inout) :: Cldprop
     type(GFS_radtend_type),      intent(inout) :: Radtend
     type(GFS_diag_type),         intent(inout) :: Diag
-    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle
     type(GFS_interstitial_type), intent(inout) :: Interstitial
     type(GFS_init_type),         intent(in)    :: Init_parm
 
@@ -133,8 +131,7 @@ module GFS_initialize_scm
     call Radtend%create(1, Model)
     !--- internal representation of diagnostics
     call Diag%create(1, Model)
-    !--- internal representation of sfccycle
-    call Sfccycle%create(1, Model)
+    !--- internal representation of interstitials for CCPP physics
     call Interstitial%create(1, Model)
 
 !     !--- populate the grid components
