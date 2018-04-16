@@ -126,11 +126,11 @@ set(SOURCES
     ./physics/radlw_datatb.f
     ./physics/set_soilveg.f
     ./physics/namelist_soilveg.f
-    ./physics/GFS_phys_time_vary.f90
+    ./physics/GFS_phys_time_vary.scm.f90
     ./physics/ozinterp.f90
     ./physics/h2ointerp.f90
     ./physics/gcycle.f90
-    ./physics/GFS_rad_time_vary.f90
+    ./physics/GFS_rad_time_vary.scm.f90
     ./physics/GFS_radupdate.f90
     ./physics/GFS_suite_interstitial.ccpp.f90
     ./physics/get_prs_fv3.f90
