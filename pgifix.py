@@ -6,12 +6,16 @@ import subprocess
 import sys
 
 parser = argparse.ArgumentParser(description='Fix cap objects produced by PGI compiler')
-parser.add_argument("cap")
+parser.add_argument("--cmake", default=False, action='store_true')
+parser.add_argument("caps", nargs='+')
+
+FIXCMD_TEMPLATE = 'objcopy '
 
 def parse_args():
     args = parser.parse_args()
-    cap = args.cap
-    return cap
+    cmake = args.cmake
+    caps = args.caps
+    return (cmake, caps)
 
 def execute(cmd, debug = True, abort = True):
     """Runs a local command in a shell. Waits for completion and
@@ -39,9 +43,14 @@ def execute(cmd, debug = True, abort = True):
             print message
     return (status, stdout.rstrip('\n'), stderr.rstrip('\n'))
 
-def correct_cap_object_names(fixcmd, cap):
+def correct_cap_object_names(fixcmd, cmake, cap):
     (cappath, capname) = os.path.split(cap)
-    pgiprefix = capname.rstrip('.o').lower() + '_'
+    # Determine pgi-prepended prefix to remove, different
+    # for cmake builds and make builds (object filename)
+    if cmake:
+        pgiprefix = capname.rstrip('.F90.o').lower() + '_'
+    else:
+        pgiprefix = capname.rstrip('.o').lower() + '_'
     # Get list of all symbols in cap object
     nmcmd = 'nm {0}'.format(cap)
     (status, stdout, stderr) = execute(nmcmd)
@@ -74,10 +83,10 @@ def correct_object_names(fixcmd, cap):
     execute(mvcmd)
 
 def main():
-    cap = parse_args()
-    fixcmd = 'objcopy '
-    fixcmd = correct_cap_object_names(fixcmd, cap)
-    if not fixcmd == 'objcopy ':
+    (cmake, caps) = parse_args()
+    for cap in caps:
+        fixcmd = FIXCMD_TEMPLATE
+        fixcmd = correct_cap_object_names(fixcmd, cmake, cap)
         correct_object_names(fixcmd, cap)
 
 if __name__ == '__main__':
