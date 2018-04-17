@@ -126,11 +126,11 @@ set(SOURCES
     ./physics/radlw_datatb.f
     ./physics/set_soilveg.f
     ./physics/namelist_soilveg.f
-    ./physics/GFS_phys_time_vary.f90
+    ./physics/GFS_phys_time_vary.scm.f90
     ./physics/ozinterp.f90
     ./physics/h2ointerp.f90
     ./physics/gcycle.f90
-    ./physics/GFS_rad_time_vary.f90
+    ./physics/GFS_rad_time_vary.scm.f90
     ./physics/GFS_radupdate.f90
     ./physics/GFS_suite_interstitial.ccpp.f90
     ./physics/get_prs_fv3.f90
@@ -166,6 +166,9 @@ set(SOURCES
     ./physics/precpd.f
     ./physics/GFS_calpreciptype.f90
     ./physics/GFS_MP_generic_post.f90
+)
+
+set(CAPS
     ./physics/cnvc90_cap.F90
     ./physics/lsm_noah_pre_cap.F90
     ./physics/GFS_DCNV_generic_post_cap.F90
@@ -235,31 +238,34 @@ set(SOURCES
 )
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
-  set(f_flags -ffree-line-length-none)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
-
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -fdefault-real-8 -fdefault-double-8")
 elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
-
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -r8")
+elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
+  SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
+  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -r8")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
-  message (FATAL_ERROR "This program has only been compiled with gfortran and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
+  message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
 
 #apply general fortran tags to all fortran source files
 if(${CMAKE_VERSION} LESS 3.3)
   string (REPLACE ";" " " f_flags_str "${f_flags}")
-  SET_PROPERTY(SOURCE ${GFS_phys_source_code} APPEND_STRING PROPERTY COMPILE_FLAGS " ${f_flags_str}")
+  SET_PROPERTY(SOURCE ${SOURCES} ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " ${f_flags_str}")
 else(${CMAKE_VERSION} LESS 3.3)
   add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
 endif (${CMAKE_VERSION} LESS 3.3)
@@ -287,10 +293,24 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 #)
 #list(APPEND SOURCES ${CMAKE_CURRENT_BINARY_DIR}/scm_test1_cap.f90)
 
-
-add_library(ccppphys ${SOURCES})
+add_library(ccppphys ${SOURCES} ${CAPS})
 target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
+# DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
+if (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+set(CAPOBJS)
+foreach(cap ${CAPS})
+    string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
+    list(APPEND CAPOBJS ${capobj})
+endforeach(cap)
+
+add_custom_command(TARGET ccppphys
+                   PRE_LINK
+                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                   COMMENT "Running pgifix_wrapper.py over all scheme caps")
+endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+# *DH end hack for PGI compiler
