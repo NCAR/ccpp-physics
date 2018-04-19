@@ -80,6 +80,9 @@ set(CCPP_LIB_DIRS "" CACHE FILEPATH "Path to ccpp library")
 link_directories(${CCPP_LIB_DIRS})
 list(APPEND LIBS "ccpp")
 
+# Add the required preprocessor flags so that cmake can sort out the dependencies
+ADD_DEFINITIONS(-DNEMS_GSM)
+
 #------------------------------------------------------------------------------
 # Set the sources
 set(SOURCES
@@ -242,14 +245,14 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
-  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
 elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
 
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
-  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-DNEMS_GSM -r8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
