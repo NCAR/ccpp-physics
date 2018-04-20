@@ -271,7 +271,7 @@
 !  ---  constant values
       real (kind=kind_phys), parameter :: eps     = 1.0e-6
       real (kind=kind_phys), parameter :: oneminus= 1.0-eps
-      real (kind=kind_phys), parameter :: cldmin  = 1.0e-80
+      real (kind=kind_phys), parameter :: cldmin  = tiny(cldmin)
       real (kind=kind_phys), parameter :: bpade   = 1.0/0.278  ! pade approx constant
       real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
       real (kind=kind_phys), parameter :: wtdiff  = 0.5        ! weight for radiance to flux conversion
