@@ -160,7 +160,7 @@ module IPD_CCPP_driver
     ! Time vary steps
     else if (step==1) then
 
-      call ccpp_run(cdata%suite%ipds(step), cdata, ierr)
+      call ccpp_run(cdata%suite%groups(step), cdata, ierr)
       if (ierr/=0) return
 
     ! Radiation, physics and stochastics
@@ -178,7 +178,7 @@ module IPD_CCPP_driver
 #else
         nt = 1
 #endif
-        call ccpp_run(cdata_block(nb,nt)%suite%ipds(step), cdata_block(nb,nt), ierr)
+        call ccpp_run(cdata_block(nb,nt)%suite%groups(step), cdata_block(nb,nt), ierr)
         if (ierr/=0) then
           write(0,'(3(a,i4),a)') "An error occurred in IPD_step ", step, " for block ", nb, " and thread ", nt, &
                                & "; error message: '" // trim(IPD_Interstitial(nt)%errmsg) // "'"
