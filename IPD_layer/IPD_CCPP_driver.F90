@@ -59,7 +59,7 @@ module IPD_CCPP_driver
     real(kind=kind_phys),                intent(inout), optional :: l_salp_data
     real(kind=kind_phys),                intent(inout), optional :: l_snupx(max_vegtyp)
     character(len=256),                  intent(in),    optional :: ccpp_suite
-    integer,                             intent(in)              :: step
+    character(len=*),                    intent(in)              :: step
     integer,                             intent(out)             :: ierr
     ! Local variables
     integer :: nb
@@ -73,7 +73,7 @@ module IPD_CCPP_driver
     nThreads = 1
 #endif
 
-    if (step==0) then
+    if (trim(step)=="init") then
 
       if (.not. present(Init_parm)) then
         call ccpp_error('Error, IPD init step called without mandatory Init_parm argument')
@@ -88,13 +88,17 @@ module IPD_CCPP_driver
         ierr = 1
         return
       else if (.not. present(ccpp_suite)) then
-        call ccpp_error('Error, IPD init step called without mandatory ccpp_suite argument')
+         call ccpp_error('Error, IPD init step called without mandatory ccpp_suite argument')
         ierr = 1
         return
       end if
 
+      !--- Initialize CCPP framework
       call ccpp_init(ccpp_suite, cdata, ierr)
-      if (ierr/=0) return
+      if (ierr/=0) then
+          call ccpp_error('An error occurred in ccpp_init')
+          return
+        end if
 
       !--- Add the DDTs to the CCPP data structure for IPD initialization
       call ccpp_field_add(cdata, 'IPD_Control',      '', c_loc(IPD_Control),      ierr=ierr)
@@ -114,8 +118,12 @@ module IPD_CCPP_driver
       call ccpp_field_add(cdata, 'snupx',                l_snupx,                 ierr=ierr)
       if (ierr/=0) return
 
-      call ccpp_run(cdata%suite%init, cdata, ierr)
-      if (ierr/=0) return
+      !--- Initialize CCPP physics
+      call ccpp_physics_init(cdata, ierr)
+      if (ierr/=0) then
+        call ccpp_error('An error occurred in ccpp_physics_init')
+        return
+      end if
 
       ! Allocate cdata structures
       allocate(cdata_block(1:nBlocks,1:nThreads))
@@ -136,14 +144,14 @@ module IPD_CCPP_driver
 #endif
       do nb = 1,nBlocks
 #ifndef __PGI
-        !--- Initialize CCPP, use suite from scalar cdata to avoid reading the SDF multiple times
+        !--- Initialize CCPP framework for blocks/threads, use suite from scalar cdata to avoid reading the SDF multiple times
         call ccpp_init(ccpp_suite, cdata_block(nb,nt), ierr, suite=cdata%suite)
 #else
-        !--- Initialize CCPP, cannot use suite from scalar cdata with PGI (crashes)
+        !--- Initialize CCPP framework for blocks/threads, cannot use suite from scalar cdata with PGI (crashes)
         call ccpp_init(ccpp_suite, cdata_block(nb,nt), ierr)
 #endif
         if (ierr/=0) then
-          write(0,'(2(a,i4))') "An error occurred in IPD_step 0 for block ", nb, " and thread ", nt
+          write(0,'(2(a,i4))') "An error occurred in ccpp_init for block ", nb, " and thread ", nt
           exit
         end if
 ! Begin include auto-generated list of calls to ccpp_field_add
@@ -158,13 +166,17 @@ module IPD_CCPP_driver
       if (ierr/=0) return
 
     ! Time vary steps
-    else if (step==1) then
+    else if (trim(step)=="time_vary") then
 
-      call ccpp_run(cdata%suite%groups(step), cdata, ierr)
-      if (ierr/=0) return
+      call ccpp_physics_run(cdata, group_name="time_vary", ierr=ierr)
+      if (ierr/=0) then
+        write(0,'(a,a)') "An error occurred in IPD time_vary step", &
+                       & "; error message from ccpp_physics_run: ", &
+                       & trim(IPD_Interstitial(nt)%errmsg)
+      end if
 
     ! Radiation, physics and stochastics
-    else if (step==2 .or. step==3 .or. step==4) then
+    else if (trim(step)=="radiation" .or. trim(step)=="physics" .or. trim(step)=="stochastics") then
 
 !$OMP parallel do num_threads (nThreads) &
 !$OMP            default (none) &
@@ -178,17 +190,19 @@ module IPD_CCPP_driver
 #else
         nt = 1
 #endif
-        call ccpp_run(cdata_block(nb,nt)%suite%groups(step), cdata_block(nb,nt), ierr)
+        call ccpp_physics_run(cdata_block(nb,nt), group_name=trim(step), ierr=ierr)
         if (ierr/=0) then
-          write(0,'(3(a,i4),a)') "An error occurred in IPD_step ", step, " for block ", nb, " and thread ", nt, &
-                               & "; error message: '" // trim(IPD_Interstitial(nt)%errmsg) // "'"
+          write(0,'(3a,i0,a,i0,2a)') "An error occurred in IPD ", trim(step), &
+                               & " step for block ", nb, " and thread ", nt,  &
+                               & "; error message from ccpp_physics_run: ",   &
+                               & trim(IPD_Interstitial(nt)%errmsg)
         end if
       end do
 !$OMP end parallel do
       if (ierr/=0) return
 
     ! Finalize
-    else if (step==5) then
+    else if (trim(step)=="finalize") then
 
 !$OMP parallel num_threads (nThreads) &
 !$OMP          default (shared) &
@@ -200,10 +214,18 @@ module IPD_CCPP_driver
       nt = 1
 #endif
       do nb = 1,nBlocks
-        !--- Initialize CCPP
+        !--- Finalize CCPP physics for blocks/threads
+        call ccpp_physics_finalize(cdata_block(nb,nt), ierr)
+        if (ierr/=0) then
+           write(0,'(a,i4,a,i4)') "An error occurred in ccpp_physics_finalize for block ", nb, " and thread ", nt
+           exit
+        end if
+      end do
+      do nb = 1,nBlocks
+        !--- Finalize CCPP framework for blocks/threads
         call ccpp_finalize(cdata_block(nb,nt), ierr)
         if (ierr/=0) then
-           write(0,'(a,i4,a,i4)') "An error occurred in IPD_step 5 for block ", nb, " and thread ", nt
+           write(0,'(a,i4,a,i4)') "An error occurred in ccpp_finalize for block ", nb, " and thread ", nt
            exit
         end if
       end do
@@ -213,14 +235,22 @@ module IPD_CCPP_driver
       ! Deallocate cdata structure for blocks and threads
       deallocate(cdata_block)
 
+      !--- Finalize CCPP physics
+      call ccpp_physics_finalize(cdata, ierr)
+      if (ierr/=0) then
+         write(0,'(a)') "An error occurred in ccpp_physics_finalize"
+         return
+      end if
+      !--- Finalize CCPP framework
       call ccpp_finalize(cdata, ierr)
       if (ierr/=0) then
-         write(0,'(a)') "An error occurred in IPD_step 5"
+         write(0,'(a)') "An error occurred in ccpp_finalize"
+         return
       end if
 
     else
 
-      call ccpp_error('Error, undefined step for ccpp_run')
+      write(0,'(2a)') 'Error, undefined IPD step ', trim(step)
       ierr = 1
       return
 
