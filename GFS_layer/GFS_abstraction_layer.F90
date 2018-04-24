@@ -15,13 +15,15 @@ module physics_abstraction_layer
 
 #ifdef CCPP
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
-                             time_vary_step   =>  GFS_time_vary_step
+                             time_vary_step   =>  GFS_time_vary_step,   &
+                             finalize         =>  GFS_finalize
 #else
   use GFS_driver,      only: initialize       =>  GFS_initialize,       &
                              time_vary_step   =>  GFS_time_vary_step,   &
                              radiation_step1  =>  GFS_radiation_driver, &
                              physics_step1    =>  GFS_physics_driver,   &
-                             physics_step2    =>  GFS_stochastic_driver
+                             physics_step2    =>  GFS_stochastic_driver,&
+                             finalize         =>  GFS_finalize
 #endif
 
 !----------------------
@@ -50,6 +52,7 @@ module physics_abstraction_layer
   public  physics_step1
   public  physics_step2
 #endif
+  public  finalize
 
 CONTAINS
 

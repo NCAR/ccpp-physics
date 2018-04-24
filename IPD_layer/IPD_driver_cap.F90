@@ -34,7 +34,8 @@ module IPD_driver_cap
                             IPD_interstitial_type
     use            :: IPD_driver,                                      &
                       only: IPD_initialize,                            &
-                            IPD_setup_step
+                            IPD_setup_step,                            &
+                            IPD_finalize
     use            :: machine,                                         &
                       only: kind_phys
     use            :: namelist_soilveg,                                &
@@ -44,7 +45,8 @@ module IPD_driver_cap
     private
 
     public :: ipd_initialize_cap,     &
-              ipd_setup_step_cap
+              ipd_setup_step_cap,     &
+              ipd_finalize_cap
 
     contains
 
@@ -172,5 +174,16 @@ module IPD_driver_cap
                             IPD_Restart=IPD_Restart)
 
     end function IPD_setup_step_cap
+
+    function ipd_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+        call IPD_finalize()
+
+    end function ipd_finalize_cap
 
 end module IPD_driver_cap
