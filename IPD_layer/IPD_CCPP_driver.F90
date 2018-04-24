@@ -5,12 +5,16 @@ module IPD_CCPP_driver
                                 IPD_diag_type,     IPD_restart_type, &
                                 IPD_interstitial_type
 
-  use ccpp_types,         only: ccpp_t
-  use ccpp_errors,        only: ccpp_error, ccpp_debug
-  use ccpp,               only: ccpp_init, ccpp_finalize
-  use ccpp_fcall,         only: ccpp_run
-  use ccpp_fields,        only: ccpp_field_add
-
+  use ccpp_api,           only: ccpp_t,                              &
+                                ccpp_error,                          &
+                                ccpp_debug,                          &
+                                ccpp_init,                           &
+                                ccpp_finalize,                       &
+                                ccpp_physics_init,                   &
+                                ccpp_physics_run,                    &
+                                ccpp_physics_finalize,               &
+                                ccpp_field_add
+  
 ! Begin include auto-generated list of modules for ccpp
 #include "ccpp_modules.inc"
 ! End include auto-generated list of modules for ccpp

@@ -19,12 +19,10 @@ module IPD_driver_cap
 
     use, intrinsic :: iso_c_binding,                                   &
                       only: c_f_pointer, c_ptr, c_int32_t
-    use            :: ccpp_types,                                      &
-                      only: ccpp_t
-    use            :: ccpp_fields,                                     &
-                      only: ccpp_field_get
-    use            :: ccpp_errors,                                     &
-                      only: ccpp_error
+    use            :: ccpp_api,                                        &
+                      only: ccpp_t,                                    &
+                            ccpp_field_get,                            &
+                            ccpp_error
     use            :: IPD_typedefs,                                    &
                       only: IPD_init_type,                             &
                             IPD_control_type,                          &
