@@ -110,6 +110,7 @@ set(SOURCES
     ./physics/num_parthds.F
     ./physics/gocart_tracer_config_stub.f
     ./GFS_layer/GFS_initialize_scm.F90
+    ./GFS_layer/GFS_finalize_scm.F90
     ./physics/cldwat2m_micro.F
     ./physics/wv_saturation.F
     ./physics/aer_cloud.F
@@ -223,6 +224,7 @@ set(CAPS
     ./physics/zhaocarr_precpd_cap.F90
     ./physics/sasas_deep_cap.F90
     ./physics/GFS_initialize_scm_cap.F90
+    ./physics/GFS_finalize_scm_cap.F90
     ./physics/GFS_DCNV_generic_pre_cap.F90
     ./physics/gwdc_pre_cap.F90
     ./physics/zhaocarr_gscond_cap.F90
