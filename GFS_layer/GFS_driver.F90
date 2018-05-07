@@ -7,7 +7,7 @@ module GFS_driver
                                       GFS_control_type,  GFS_grid_type,       &
                                       GFS_tbd_type,      GFS_cldprop_type,    &
                                       GFS_radtend_type,  GFS_diag_type,       &
-                                      GFS_sfccycle_type, GFS_interstitial_type
+                                      GFS_interstitial_type
 #ifndef CCPP
   use module_radiation_driver,  only: GFS_radiation_driver
   use module_physics_driver,    only: GFS_physics_driver
@@ -85,23 +85,24 @@ module GFS_driver
 ! Public entities
 !----------------
   public  GFS_initialize              !< GFS initialization routine
-#ifndef CCPP
   public  GFS_time_vary_step          !< perform operations needed prior radiation or physics
+#ifndef CCPP
   public  GFS_radiation_driver        !< radiation_driver (was grrad)
   public  GFS_physics_driver          !< physics_driver (was gbphys)
   public  GFS_stochastic_driver       !< stochastic physics
 #endif
+  public  GFS_finalize
 
   CONTAINS
 !*******************************************************************************************
 
 
-!--------------
-! GFS initialze
-!--------------
+!---------------
+! GFS initialize
+!---------------
   subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,     &
                              Coupling, Grid, Tbd, Cldprop, Radtend, &
-                             Diag, Sfccycle, Interstitial, Init_parm)
+                             Diag, Interstitial, Init_parm)
 
     use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
@@ -122,7 +123,6 @@ module GFS_driver
     type(GFS_cldprop_type),      intent(inout) :: Cldprop(:)
     type(GFS_radtend_type),      intent(inout) :: Radtend(:)
     type(GFS_diag_type),         intent(inout) :: Diag(:)
-    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle(:)
     type(GFS_interstitial_type), intent(inout) :: Interstitial(:)
     type(GFS_init_type),         intent(in)    :: Init_parm
 
@@ -168,8 +168,6 @@ module GFS_driver
       call Radtend      (nb)%create (Init_parm%blksz(nb), Model)
       !--- internal representation of diagnostics
       call Diag         (nb)%create (Init_parm%blksz(nb), Model)
-      !--- internal representation of sfccycle
-      call Sfccycle     (nb)%create (Init_parm%blksz(nb), Model)
       !--- maximum blocksize
       blkszmax = max(blkszmax, Init_parm%blksz(nb))
     enddo
@@ -258,7 +256,6 @@ module GFS_driver
   end subroutine GFS_initialize
 
 
-#ifndef CCPP
 !-------------------------------------------------------------------------
 ! time_vary_step
 !-------------------------------------------------------------------------
@@ -270,7 +267,7 @@ module GFS_driver
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                 Grid, Tbd, Cldprop, Radtend, Diag, Sfccycle)
+                                 Grid, Tbd, Cldprop, Radtend, Diag)
 
     use GFS_phys_time_vary_1,  only: GFS_phys_time_vary_1_run
     use GFS_phys_time_vary_2,  only: GFS_phys_time_vary_2_run
@@ -279,30 +276,30 @@ module GFS_driver
 
     !--- interface variables
     type(GFS_control_type),   intent(inout) :: Model
-    type(GFS_statein_type),   intent(inout) :: Statein
-    type(GFS_stateout_type),  intent(inout) :: Stateout
-    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop
-    type(GFS_coupling_type),  intent(inout) :: Coupling
-    type(GFS_grid_type),      intent(inout) :: Grid
-    type(GFS_tbd_type),       intent(inout) :: Tbd
-    type(GFS_cldprop_type),   intent(inout) :: Cldprop
-    type(GFS_radtend_type),   intent(inout) :: Radtend
-    type(GFS_diag_type),      intent(inout) :: Diag
-    type(GFS_sfccycle_type),  intent(inout) :: Sfccycle
+    type(GFS_statein_type),   intent(inout) :: Statein(:)
+    type(GFS_stateout_type),  intent(inout) :: Stateout(:)
+    type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(:)
+    type(GFS_coupling_type),  intent(inout) :: Coupling(:)
+    type(GFS_grid_type),      intent(inout) :: Grid(:)
+    type(GFS_tbd_type),       intent(inout) :: Tbd(:)
+    type(GFS_cldprop_type),   intent(inout) :: Cldprop(:)
+    type(GFS_radtend_type),   intent(inout) :: Radtend(:)
+    type(GFS_diag_type),      intent(inout) :: Diag(:)
 
     ! CCPP error handling variables (not used)
     character(len=512) :: errmsg
     integer            :: errflg
 
-    call GFS_phys_time_vary_1_run (Model, Tbd, errmsg, errflg)
+    call GFS_phys_time_vary_1_run (Model, errmsg, errflg)
 
     call GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
 
-    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle, errmsg, errflg)
+    call GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
   end subroutine GFS_time_vary_step
 
 
+#ifndef CCPP
 !-------------------------------------------------------------------------
 ! GFS stochastic_driver
 !-------------------------------------------------------------------------
@@ -381,5 +378,12 @@ module GFS_driver
     enddo
 
   end subroutine GFS_grid_populate
+
+
+!-------------
+! GFS finalize
+!-------------
+  subroutine GFS_finalize ()
+  end subroutine GFS_finalize
 
 end module GFS_driver

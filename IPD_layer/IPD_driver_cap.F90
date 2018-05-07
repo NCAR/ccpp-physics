@@ -19,12 +19,10 @@ module IPD_driver_cap
 
     use, intrinsic :: iso_c_binding,                                   &
                       only: c_f_pointer, c_ptr, c_int32_t
-    use            :: ccpp_types,                                      &
-                      only: ccpp_t
-    use            :: ccpp_fields,                                     &
-                      only: ccpp_field_get
-    use            :: ccpp_errors,                                     &
-                      only: ccpp_error
+    use            :: ccpp_api,                                        &
+                      only: ccpp_t,                                    &
+                            ccpp_field_get,                            &
+                            ccpp_error
     use            :: IPD_typedefs,                                    &
                       only: IPD_init_type,                             &
                             IPD_control_type,                          &
@@ -33,7 +31,9 @@ module IPD_driver_cap
                             IPD_diag_type,                             &
                             IPD_interstitial_type
     use            :: IPD_driver,                                      &
-                      only: IPD_initialize
+                      only: IPD_initialize,                            &
+                            IPD_setup_step,                            &
+                            IPD_finalize
     use            :: machine,                                         &
                       only: kind_phys
     use            :: namelist_soilveg,                                &
@@ -42,7 +42,9 @@ module IPD_driver_cap
 
     private
 
-    public :: ipd_initialize_cap
+    public :: ipd_initialize_cap,     &
+              ipd_setup_step_cap,     &
+              ipd_finalize_cap
 
     contains
 
@@ -120,5 +122,66 @@ module IPD_driver_cap
         l_salp_data = salp_data
 
     end function ipd_initialize_cap
+
+    function ipd_setup_step_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        integer, allocatable             :: dims(:)
+        type(ccpp_t),           pointer  :: cdata
+        type(IPD_control_type), pointer  :: IPD_Control
+        type(IPD_data_type),    pointer  :: IPD_Data(:)
+        type(IPD_diag_type),    pointer  :: IPD_Diag(:)
+        type(IPD_restart_type), pointer  :: IPD_Restart
+        type(c_ptr)                      :: tmp
+
+        ierr = 0
+
+        call c_f_pointer(ptr, cdata)
+
+        call ccpp_field_get(cdata, 'IPD_Control', tmp, ierr)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve IPD_Control')
+        end if
+        call c_f_pointer(tmp, IPD_Control)
+
+        call ccpp_field_get(cdata, 'IPD_Data', tmp, ierr, dims=dims)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve IPD_Data')
+        end if
+        call c_f_pointer(tmp, IPD_Data, dims)
+        deallocate(dims)
+
+        call ccpp_field_get(cdata, 'IPD_Diag', tmp, ierr, dims=dims)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve IPD_Diag')
+        end if
+        call c_f_pointer(tmp, IPD_Diag, dims)
+        deallocate(dims)
+
+        call ccpp_field_get(cdata, 'IPD_Restart', tmp, ierr)
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve IPD_Restart')
+        end if
+        call c_f_pointer(tmp, IPD_Restart)
+
+        call IPD_setup_step(IPD_Control=IPD_Control, &
+                            IPD_Data=IPD_Data,       &
+                            IPD_Diag=IPD_Diag,       &
+                            IPD_Restart=IPD_Restart)
+
+    end function IPD_setup_step_cap
+
+    function ipd_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+        call IPD_finalize()
+
+    end function ipd_finalize_cap
 
 end module IPD_driver_cap

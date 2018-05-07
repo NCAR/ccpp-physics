@@ -142,7 +142,7 @@ SRCS_f90 = \
 	   ./physics/GFS_MP_generic_post.f90                                         \
 	   ./physics/GFS_MP_generic_pre.f90                                          \
 	   ./physics/GFS_zhao_carr_pre.f90                                           \
-	   ./physics/GFS_rad_time_vary.f90                                           \
+	   ./physics/GFS_rad_time_vary.fv3.f90                                       \
 	   ./physics/GFS_radupdate.f90                                               \
 	   ./physics/cs_conv.f90                                                     \
 	   ./physics/funcphys.f90                                                    \
@@ -153,7 +153,7 @@ SRCS_f90 = \
 	   ./physics/GFS_SCNV_generic.f90                                            \
 	   ./physics/GFS_PBL_generic.f90                                             \
 	   $(GFS_SUITE_INTERSTITIAL)                                                 \
-	   ./physics/GFS_phys_time_vary.f90                                          \
+	   ./physics/GFS_phys_time_vary.fv3.f90                                      \
 	   ./physics/GFS_stochastics.f90                                             \
 	   ./physics/GFS_surface_generic.f90                                         \
 	   ./physics/h2ointerp.f90                                                   \

@@ -100,19 +100,17 @@
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                   | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
 !! | Cldprop        | FV3-GFS_Cldprop_type                                   | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | Sfccycle       | FV3-GFS_Sfccycle_type                                  | Fortran DDT containing FV3-GFS fields for surface cycling               | DDT           |    0 | GFS_sfccycle_type             |           | inout  | F        |
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Sfccycle, errmsg, errflg)
+      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
         use mersenne_twister, only: random_setseed, random_number
         use machine,               only: kind_phys
         use physcons,              only: dxmin, dxinv
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
                                          GFS_Tbd_type, GFS_sfcprop_type,  &
-                                         GFS_cldprop_type, GFS_diag_type, &
-                                         GFS_sfccycle_type
+                                         GFS_cldprop_type, GFS_diag_type
 
         implicit none
 
@@ -122,7 +120,6 @@
         type(GFS_sfcprop_type),           intent(inout) :: Sfcprop
         type(GFS_cldprop_type),           intent(inout) :: Cldprop
         type(GFS_diag_type),              intent(inout) :: Diag
-        type(GFS_sfccycle_type),          intent(inout) :: Sfccycle
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -203,12 +200,14 @@
                             Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
         endif
 
+        !--- original FV3 code, not needed for SCM; also not compatible with the way
+        !    the time vary steps are run (over each block) --> cannot use
         !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
-        if (Model%nscyc >  0) then
-          if (mod(Model%kdt,Model%nscyc) == 1) THEN
-            call gcycle (Model%blksz(Tbd%blkno), Model, Grid, Sfcprop, Cldprop, Sfccycle)
-          endif
-        endif
+        !if (Model%nscyc >  0) then
+        !  if (mod(Model%kdt,Model%nscyc) == 1) THEN
+        !    call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
+        !  endif
+        !endif
 
         !--- determine if diagnostics buckets need to be cleared
         if (mod(Model%kdt,Model%nszero) == 1) then
