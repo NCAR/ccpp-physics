@@ -170,6 +170,7 @@ set(SOURCES
     ./physics/precpd.f
     ./physics/GFS_calpreciptype.f90
     ./physics/GFS_MP_generic_post.f90
+    ./physics/gmtb_scm_sfc_flux_spec.f90
 )
 
 set(CAPS
@@ -188,6 +189,7 @@ set(CAPS
     ./physics/GFS_zhao_carr_pre_cap.F90
     ./physics/GFS_PBL_generic_pre_cap.F90
     ./physics/gwdps_post_cap.F90
+    ./physics/gmtb_scm_sfc_flux_spec_cap.F90
     ./physics/GFS_suite_interstitial_1_cap.F90
     ./physics/sfc_sice_pre_cap.F90
     ./physics/GFS_suite_interstitial_2_cap.F90

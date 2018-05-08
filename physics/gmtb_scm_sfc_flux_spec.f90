@@ -12,10 +12,6 @@ module gmtb_scm_sfc_flux_spec
   CONTAINS
 !*******************************************************************************************
 
-!--------------
-! GFS initialze
-!--------------
-
   subroutine gmtb_scm_sfc_flux_spec_init()
   end subroutine gmtb_scm_sfc_flux_spec_init
 
@@ -23,80 +19,77 @@ module gmtb_scm_sfc_flux_spec
   end subroutine gmtb_scm_sfc_flux_spec_finalize
 
 !> \section arg_table_gmtb_scm_sfc_flux_spec_run Argument Table
-!! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | z1             | height_above_mean_sea_level_at_lowest_model_layer                            | height above mean sea level at 1st model layer              | m          |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | p1          | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | roughness_length           | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | in  | F        |
-!! | sh_flux           | kinematic_surface_upward_sensible_heat_flux                                  | surface upward sensible heat flux                               | K m s-1       |    1 | real      | kind_phys | in  | F        |
-!! | lh_flux           | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | in  | F        |
-!! | exner_inverse         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | T_surf      | surface_skin_temperature                                               | ocean surface skin temperature                       | K             |    1 | real    | kind_phys | in   | F        |
-!! | u_star    | surface_friction_velocity                                              | boundary layer parameter                             | m s-1         |    1 | real    | kind_phys | out   | F        |
-!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! | local_name       | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
+!! |------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | u1               | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | v1               | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | z1               | height_above_mean_sea_level_at_lowest_model_layer                            | height above mean sea level at 1st model layer                  | m             |    1 | real      | kind_phys | in     | F        |
+!! | t1               | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
+!! | q1               | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | p1               | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | roughness_length | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | in     | F        |
+!! | spec_sh_flux     | specified_kinematic_surface_upward_sensible_heat_flux                        | specified kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
+!! | spec_lh_flux     | specified_kinematic_surface_upward_latent_heat_flux                          | specified kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
+!! | exner_inverse    | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
+!! | T_surf           | surface_skin_temperature                                                     | ocean surface skin temperature                                  | K             |    1 | real      | kind_phys | in     | F        |
+!! | cp               | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | grav             | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
+!! | hvap             | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of vaporization of water at 0C                      | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | rd               | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | fvirt            | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | rv/rd - 1 (rv = ideal gas constant for water vapor)             | none          |    0 | real      | kind_phys | in     | F        |
+!! | vonKarman        | vonKarman_constant                                                           | vonKarman constant                                              | none          |    0 | real      | kind_phys | in     | F        |
+!! | sh_flux          | kinematic_surface_upward_sensible_heat_flux                                  | surface upward sensible heat flux                               | K m s-1       |    1 | real      | kind_phys | out    | F        |
+!! | lh_flux          | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
+!! | u_star           | surface_friction_velocity                                                    | boundary layer parameter                                        | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | sfc_stress       | surface_wind_stress                                                          | surface wind stress                                             | m2 s-2        |    1 | real      | kind_phys | out    | F        |
+!! | cm               | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | thermal exchange coefficient                                    | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
+!! | ch               | surface_drag_wind_speed_for_momentum_in_air                                  | momentum exchange coefficient                                   | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | fm               | Monin-Obukhov_similarity_function_for_momentum                               | Monin-Obukhov similarity function for momentum                  | none          |    1 | real      | kind_phys | out    | F        |
+!! | fh               | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity function for heat                      | none          |    1 | real      | kind_phys | out    | F        |
+!! | rb               | bulk_richardson_number_at_lowest_model_level                                 | bulk Richardson number at the surface                           | none          |    1 | real      | kind_phys | out    | F        |
+!! | u10m             | x_wind_at_10m                                                                | 10 meter u wind speed                                           | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | v10m             | y_wind_at_10m                                                                | 10 meter v wind speed                                           | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | wind1            | wind_speed_at_lowest_model_layer                                             | wind speed at lowest model level                                | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | qss              | surface_specific_humidity                                                    | surface air saturation specific humidity                        | kg kg-1       |    1 | real      | kind_phys | out    | F        |
+!! | t2m              | temperature_at_2m                                                            | 2 meter temperature                                             | K             |    1 | real      | kind_phys | out    | F        |
+!! | q2m              | specific_humidity_at_2m                                                      | 2 meter specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg           | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
+!! | errflg           | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
-  subroutine gmtb_scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, sh_flux, lh_flux, exner_inverse, &
-    T_surf, u_star, sfc_stress, cm, ch, fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, &
-                             errmsg, errflg)
+  subroutine gmtb_scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
+    exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, u_star, sfc_stress, cm, ch, &
+    fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
 
     use machine,             only: kind_phys
-    use GFS_typedefs,        only: GFS_init_type,                          &
-                                   GFS_statein_type,  GFS_stateout_type,   &
-                                   GFS_sfcprop_type,  GFS_coupling_type,   &
-                                   GFS_control_type,  GFS_grid_type,       &
-                                   GFS_tbd_type,      GFS_cldprop_type,    &
-                                   GFS_radtend_type,  GFS_diag_type,       &
-                                   GFS_sfccycle_type, GFS_interstitial_type
-    use funcphys,            only: gfuncphys
-    use module_microphysics, only: gsmconst
-    use cldwat2m_micro,      only: ini_micro
-    use aer_cloud,           only: aer_cloud_init
-    use module_ras,          only: ras_init
-    use ozne_def,            only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
 
-    !--- interface variables
-    type(GFS_control_type),      intent(inout) :: Model
-    type(GFS_statein_type),      intent(inout) :: Statein
-    type(GFS_stateout_type),     intent(inout) :: Stateout
-    type(GFS_sfcprop_type),      intent(inout) :: Sfcprop
-    type(GFS_coupling_type),     intent(inout) :: Coupling
-    type(GFS_grid_type),         intent(inout) :: Grid
-    type(GFS_tbd_type),          intent(inout) :: Tbd
-    type(GFS_cldprop_type),      intent(inout) :: Cldprop
-    type(GFS_radtend_type),      intent(inout) :: Radtend
-    type(GFS_diag_type),         intent(inout) :: Diag
-    type(GFS_sfccycle_type),     intent(inout) :: Sfccycle
-    type(GFS_interstitial_type), intent(inout) :: Interstitial
-    type(GFS_init_type),         intent(in)    :: Init_parm
-
-    integer, intent(in) :: n_ozone_lats, n_ozone_layers, n_ozone_coefficients, n_ozone_times
-    real(kind=kind_phys), intent(in) :: ozone_lat(:), ozone_pres(:), ozone_time(:), ozone_forcing_in(:,:,:,:)
+    real(kind=kind_phys), intent(in) :: u1(:), v1(:), z1(:), t1(:), q1(:), p1(:), roughness_length(:), &
+      spec_sh_flux(:), spec_lh_flux(:), exner_inverse(:), T_surf(:)
+    real(kind=kind_phys), intent(in) :: cp, grav, hvap, rd, fvirt, vonKarman
+    real(kind=kind_phys), intent(out) :: sh_flux(:), lh_flux(:), u_star(:), sfc_stress(:), &
+      cm(:), ch(:), fm(:), fh(:), rb(:), u10m(:), v10m(:), wind1(:), qss(:), t2m(:), q2m(:)
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
-    !
-    !     !--- local variables
-    real(kind=kind_phys), allocatable :: si(:)
-    real(kind=kind_phys), parameter   :: p_ref = 101325.0d0
+
+    integer :: i
+
+    real(kind=kind_phys) :: rho, q1_non_neg, w_thv1, rho_cp_inverse, rho_hvap_inverse, Obukhov_length, thv1, tvs, &
+      dtv, adtv, wind10m, u_fraction, roughness_length_m
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
-    roughness_length_m(:) = 0.01*roughness_length(:)
-
 !     !--- set control properties (including namelist read)
   !calculate u_star from wind profiles (need roughness length, and wind and height at lowest model level)
   do i=1, size(z1)
+    sh_flux(i) = spec_sh_flux(i)
+    lh_flux(i) = spec_lh_flux(i)
 
+    roughness_length_m = 0.01*roughness_length(i)
 
     wind1(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
-    u_star(i) = vonKarman*wind1(i)/(log(z1(i)/roughness_length_m(i)))
+    u_star(i) = vonKarman*wind1(i)/(log(z1(i)/roughness_length_m))
 
     !calculate variables related to u_star
     sfc_stress(i) = u_star(i)*u_star(i)
@@ -110,23 +103,23 @@ module gmtb_scm_sfc_flux_spec
 
     !calculate the Obukhov length from the specified surface fluxes
     q1_non_neg       = max( q1(i), 1.0e-8 )
-    rho      = p1(i) / (rd*t1(i)*(1.0 + rvrdm1*q1_non_neg))
+    rho      = p1(i) / (rd*t1(i)*(1.0 + fvirt*q1_non_neg))
     rho_cp_inverse = 1.0/(rho*cp)
     rho_hvap_inverse = 1.0/(rho*hvap)
 
-    thv1    = t1(i) * exner_inverse(i) * (1.0 + rvrdm1*q1_non_neg)
+    thv1    = t1(i) * exner_inverse(i) * (1.0 + fvirt*q1_non_neg)
     ! sh_flux = rho_cp_inverse*sh_flux_wm2(i)
     ! lh_flux = rho_hvap_inverse*lh_flux_wm2(i)
-    w_thv1 = sh_flux(i)*exner_inverse(i) + rvrdm1*t1(i)*lh_flux(i)
+    w_thv1 = sh_flux(i)*exner_inverse(i) + fvirt*t1(i)*lh_flux(i)
 
     Obukhov_length = -u_star(i)*u_star(i)*u_star(i)*thv1/(vonKarman*grav*w_thv1)
 
     !calculate the bulk Richardson number and the M-O function for scalars
-    tvs     = T_surf(i)*(1.0 + rvrdm1*q1_non_neg)
+    tvs     = T_surf(i)*(1.0 + fvirt*q1_non_neg)
 
     dtv     = thv1 - tvs
     adtv    = max(abs(dtv),0.001)
-    dtv     = sign(1._dp,dtv) * adtv
+    dtv     = sign(1._kind_phys,dtv) * adtv
     rb(i)   = max(-5000.0, (grav+grav) * dtv * z1(i) / ((thv1 + tvs) * wind1(i) * wind1(i)))
 
     fh(i) = rb(i)*fm(i)*fm(i)*Obukhov_length/z1(i)
@@ -135,7 +128,7 @@ module gmtb_scm_sfc_flux_spec
     !calculate sfc_diag variables (bypassing t2m and q2m for now)
     !should calculate qss, but it is not needed in moninedmf (q2m depends on qss - will implement later)
 
-    wind10m = u_star(i)/vonKarman*log(10.0/roughness_length_m(i))
+    wind10m = u_star(i)/vonKarman*log(10.0/roughness_length_m)
     u_fraction = sqrt(1.0 - v1(i)**2/wind1(i)**2)
     u10m(i) = u_fraction*wind10m
     v10m(i) = sqrt(wind10m**2 - u10m(i)**2)
