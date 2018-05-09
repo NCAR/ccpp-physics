@@ -164,8 +164,7 @@ SRCS_f90 = \
 	   ./physics/ozinterp.f90                                                    \
 	   ./physics/physcons.f90                                                    \
 	   ./physics/radcons.f90                                                     \
-	   ./physics/wam_f107_kp_mod.f90                                             \
-	   ./physics/GFS_debug.f90
+	   ./physics/wam_f107_kp_mod.f90
 
 SRCS_F   = \
 	   ./physics/aer_cloud.F                                                     \
@@ -187,6 +186,7 @@ SRCS_F90 = \
 	   ./physics/rrtmg_sw_post.F90                                               \
 	   ./physics/rrtmg_lw_pre.F90                                                \
 	   ./physics/rrtmg_lw_post.F90                                               \
+	   ./physics/GFS_debug.F90                                                   \
 	   $(GFS_PHYSICS_DRIVER)                                                     \
 	   $(GFS_RADIATION_DRIVER)                                                   \
 	   ./GFS_layer/GFS_restart.F90                                               \
