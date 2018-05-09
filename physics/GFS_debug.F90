@@ -1,5 +1,4 @@
-!> \file GFS_debug.f90
-!!  Contains code previously in GFS_diagtoscreen_driver.
+!> \file GFS_debug.F90
 
     module GFS_diagtoscreen
 
@@ -50,8 +49,12 @@
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                        errmsg, errflg)
 
+#ifdef MPI
          use mpi
+#endif
+#ifdef OPENMP
          use omp_lib
+#endif
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type, GFS_statein_type,  &
                                           GFS_stateout_type, GFS_sfcprop_type, &
@@ -86,13 +89,27 @@
          errmsg = ''
          errflg = 0
 
+#ifdef MPI
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+#else
+         mpirank = 0
+         mpisize = 1
+#endif
+#ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = OMP_GET_NUM_THREADS()
+#else
+         omprank = 0
+         ompsize = 1
+#endif
 
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
@@ -121,13 +138,21 @@
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htsw0',            Tbd%htsw0)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Model%sec',            Model%sec)
                  end if
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
              end do
-             call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#ifdef MPI
+         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
          end do
 
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
 
       end subroutine GFS_diagtoscreen_run
 
@@ -255,8 +280,12 @@
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                            errmsg, errflg)
 
+#ifdef MPI
          use mpi
+#endif
+#ifdef OPENMP
          use omp_lib
+#endif
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type, GFS_statein_type,  &
                                           GFS_stateout_type, GFS_sfcprop_type, &
@@ -291,26 +320,48 @@
          errmsg = ''
          errflg = 0
 
+#ifdef MPI
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+#else
+         mpirank = 0
+         mpisize = 1
+#endif
+#ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = OMP_GET_NUM_THREADS()
+#else
+         omprank = 0
+         ompsize = 1
+#endif
 
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
                      call Interstitial%mprint(mpirank,omprank,Tbd%blkno)
                  end if
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
              end do
-             call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#ifdef MPI
+         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
          end do
 
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
 
       end subroutine GFS_interstitialtoscreen_run
 
@@ -340,8 +391,12 @@
 !!
       subroutine GFS_barrier_run (Model, errmsg, errflg)
 
+#ifdef MPI
          use mpi
+#endif
+#ifdef OPENMP
          use omp_lib
+#endif
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type
 
@@ -361,17 +416,32 @@
          errmsg = ''
          errflg = 0
 
+#ifdef MPI
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+#else
+         mpirank = 0
+         mpisize = 1
+#endif
+#ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = OMP_GET_NUM_THREADS()
+#else
+         omprank = 0
+         ompsize = 1
+#endif
 
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+#endif
          ! Keep this for flushing output to disk
          call sleep(1)
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-!$OMP BARRIER
+#endif
 
       end subroutine GFS_barrier_run
 
@@ -400,8 +470,12 @@
 !!
       subroutine GFS_abort_run (Model, errmsg, errflg)
 
+#ifdef MPI
          use mpi
+#endif
+#ifdef OPENMP
          use omp_lib
+#endif
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type
 
@@ -421,16 +495,30 @@
          errmsg = ''
          errflg = 0
 
+#ifdef MPI
          call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
          call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+#else
+         mpirank = 0
+         mpisize = 1
+#endif
+#ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = OMP_GET_NUM_THREADS()
+#else
+         omprank = 0
+         ompsize = 1
+#endif
 
          errflg = 1
          errmsg = 'Abort requested by user in GFS_abort_run'
+
+#ifdef OPENMP
 !$OMP BARRIER
+#endif
+#ifdef MPI
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-!$OMP BARRIER
+#endif
 
       end subroutine GFS_abort_run
 
