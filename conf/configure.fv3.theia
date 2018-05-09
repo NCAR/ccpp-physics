@@ -50,6 +50,7 @@ VERBOSE =
 OPENMP = Y
 AVX2 = Y
 HYDRO = N
+CCPP = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -131,15 +132,15 @@ LDFLAGS_VERBOSE := -Wl,-V,--verbose,-cref,-M
 # start with blank LIBS
 LIBS :=
 
-ifneq ($(REPRO),)
+ifeq ($(REPRO),Y)
 CFLAGS += $(CFLAGS_REPRO)
 FFLAGS += $(FFLAGS_REPRO)
 FAST :=
-else ifneq ($(DEBUG),)
+else ifeq ($(DEBUG),Y)
 CFLAGS += $(CFLAGS_DEBUG)
 FFLAGS += $(FFLAGS_DEBUG)
 FAST :=
-else ifneq ($(TEST),)
+else ifeq ($(TEST),Y)
 CFLAGS += $(CFLAGS_TEST)
 FFLAGS += $(FFLAGS_TEST)
 FAST :=
@@ -149,16 +150,24 @@ FFLAGS += $(FFLAGS_OPT)
 FAST := $(TRANSCENDENTALS)
 endif
 
-ifneq ($(OPENMP),)
+ifeq ($(OPENMP),Y)
+CPPDEFS += -DOPENMP
 CFLAGS += $(CFLAGS_OPENMP)
 FFLAGS += $(FFLAGS_OPENMP)
 LDFLAGS += $(LDFLAGS_OPENMP)
 endif
 
-ifneq ($(VERBOSE),)
+ifeq ($(VERBOSE),Y)
 CFLAGS += $(CFLAGS_VERBOSE)
 FFLAGS += $(FFLAGS_VERBOSE)
 LDFLAGS += $(LDFLAGS_VERBOSE)
+endif
+
+ifeq ($(CCPP),Y)
+CPPDEFS += -DCCPP
+CFLAGS += -I$(PATH_CCPP)/include
+FFLAGS += -I$(PATH_CCPP)/include
+LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
 endif
 
 LDFLAGS += $(LIBS)
