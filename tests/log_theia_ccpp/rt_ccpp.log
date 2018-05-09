@@ -1,0 +1,580 @@
++ hostname
+tfe09
++ [[ 3 -eq 0 ]]
++ trap '{ echo "rt.sh interrupted"; rt_trap ; }' INT
++ trap '{ echo "rt.sh quit"; rt_trap ; }' QUIT
++ trap '{ echo "rt.sh terminated"; rt_trap ; }' TERM
++ trap '{ echo "rt.sh error on line $LINENO"; rt_trap ; }' ERR
++ trap '{ echo "rt.sh finished"; cleanup ; }' EXIT
++++ dirname ./rt.sh
+++ cd .
+++ pwd -P
++ readonly PATHRT=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests
++ PATHRT=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests
++ cd /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests
+++ cd /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/..
+++ pwd
++ readonly PATHTR=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test
++ PATHTR=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test
++ readonly LOCKDIR=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/lock
++ LOCKDIR=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/lock
++ mkdir /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/lock
+++ hostname
++ echo tfe09 116005
++ source detect_machine.sh
+++ export ACCNR=gmtb
+++ ACCNR=gmtb
+++ case $(hostname -f) in
++++ hostname -f
+++ MACHINE_ID=theia
+++ echo 'Machine: ' theia '    Account: ' gmtb
+Machine:  theia     Account:  gmtb
+++ '[' theia = theia ']'
+++ AP=account_params
+++ '[' gmtb = null ']'
++++ account_params
++++ grep '^\s*Allocation: [0-9]'
++++ grep gmtb
++++ awk '{print $4}'
+++ cphr=96401.81
++++ echo 96401.81
++++ wc -w
+++ nr=1
+++ '[' 1 -eq 0 ']'
+++ echo 'Account: ' 'gmtb, available: ' 96401.81 ' CPU hrs'
+Account:  gmtb, available:  96401.81  CPU hrs
++ source rt_utils.sh
+++ set -ex
+++ [[ ./rt.sh = \r\t\_\u\t\i\l\s\.\s\h ]]
++ [[ theia = wcoss ]]
++ [[ theia = wcoss_cray ]]
++ [[ theia = gaea ]]
++ [[ theia = theia ]]
++ source /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/NEMS/src/conf/module-setup.sh.inc
+++ __ms_function_name=setup__test_function__116005
+++ eval 'setup__test_function__116005() { /bin/true ; }'
++++ eval '__text="text" ; if [[ $__text =~ ^(t).* ]] ; then printf "%s" ${.sh.match[1]} ; fi'
++++ cat
+++ __ms_ksh_test=
++++ eval 'if ( set | grep setup__test_function__116005 | grep -v name > /dev/null 2>&1 ) ; then echo t ; fi '
++++ cat
+++ __ms_bash_test=t
+++ [[ ! -z '' ]]
+++ [[ ! -z t ]]
+++ __ms_shell=bash
+++ [[ -d /lfs3 ]]
+++ [[ -d /scratch3 ]]
+++ eval module help
+++ module purge
++++ /apps/lmod/7.7.18/libexec/lmod bash purge
+++ eval '__LMOD_REF_COUNT_MODULEPATH="/apps/lmod/lmod/modulefiles/Core:1;/apps/modules/modulefiles/Linux:1;/apps/modules/modulefiles:1;/opt/cray/modulefiles:1;/opt/cray/craype/default/modulefiles:1";' export '__LMOD_REF_COUNT_MODULEPATH;' 'MODULEPATH="/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles";' export 'MODULEPATH;' '_ModuleTable001_="X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXt9LG1wYXRoQT17Ii9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlIiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eCIsIi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLH0sWyJzeXN0ZW1CYXNlTVBBVEgiXT0iL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmU6L2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eDovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVz";' export '_ModuleTable001_;' '_ModuleTable002_="Oi9vcHQvY3JheS9tb2R1bGVmaWxlczovb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLH0=";' export '_ModuleTable002_;' '_ModuleTable_Sz_="2";' export '_ModuleTable_Sz_;'
++++ __LMOD_REF_COUNT_MODULEPATH='/apps/lmod/lmod/modulefiles/Core:1;/apps/modules/modulefiles/Linux:1;/apps/modules/modulefiles:1;/opt/cray/modulefiles:1;/opt/cray/craype/default/modulefiles:1'
++++ export __LMOD_REF_COUNT_MODULEPATH
++++ MODULEPATH=/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles
++++ export MODULEPATH
++++ _ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXt9LG1wYXRoQT17Ii9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlIiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eCIsIi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLH0sWyJzeXN0ZW1CYXNlTVBBVEgiXT0iL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmU6L2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eDovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVz
++++ export _ModuleTable001_
++++ _ModuleTable002_=Oi9vcHQvY3JheS9tb2R1bGVmaWxlczovb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLH0=
++++ export _ModuleTable002_
++++ _ModuleTable_Sz_=2
++++ export _ModuleTable_Sz_
++++ : -s sh
+++ eval
+++ unset __ms_shell
+++ unset __ms_ksh_test
+++ unset __ms_bash_test
+++ unset setup__test_function__116005
+++ unset __ms_function_name
++ module load rocoto
+++ /apps/lmod/7.7.18/libexec/lmod bash load rocoto
++ eval '__LMOD_REF_COUNT_LOADEDMODULES="rocoto/1.2.4:1";' export '__LMOD_REF_COUNT_LOADEDMODULES;' 'LOADEDMODULES="rocoto/1.2.4";' export 'LOADEDMODULES;' '__LMOD_REF_COUNT_MANPATH="/apps/rocoto/1.2.4/man:1;/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1";' export '__LMOD_REF_COUNT_MANPATH;' 'MANPATH="/apps/rocoto/1.2.4/man:/apps/lmod/lmod/share/man::/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man";' export 'MANPATH;' 'MODULEPATH="/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles";' export 'MODULEPATH;' '__LMOD_REF_COUNT_PATH="/apps/rocoto/1.2.4/bin:1;/home/Dom.Heinzeller/bin:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1";' export '__LMOD_REF_COUNT_PATH;' 'PATH="/apps/rocoto/1.2.4/bin:/home/Dom.Heinzeller/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin";' export 'PATH;' '__LMOD_REF_COUNT__LMFILES_="/apps/modules/modulefiles/rocoto/1.2.4:1";' export '__LMOD_REF_COUNT__LMFILES_;' '_LMFILES_="/apps/modules/modulefiles/rocoto/1.2.4";' export '_LMFILES_;' '_ModuleTable001_="X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXtyb2NvdG89e1siZm4iXT0iL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9yb2NvdG8vMS4yLjQiLFsiZnVsbE5hbWUiXT0icm9jb3RvLzEuMi40IixbImxvYWRPcmRlciJdPTEscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0icm9jb3RvIix9LH0sbXBhdGhBPXsiL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLCIvYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4IiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcyIsIi9vcHQv";' export '_ModuleTable001_;' '_ModuleTable002_="Y3JheS9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfSxbInN5c3RlbUJhc2VNUEFUSCJdPSIvYXBwcy9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZTovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4Oi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXM6L29wdC9jcmF5L21vZHVsZWZpbGVzOi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfQ==";' export '_ModuleTable002_;' '_ModuleTable_Sz_="2";' export '_ModuleTable_Sz_;'
+++ __LMOD_REF_COUNT_LOADEDMODULES=rocoto/1.2.4:1
+++ export __LMOD_REF_COUNT_LOADEDMODULES
+++ LOADEDMODULES=rocoto/1.2.4
+++ export LOADEDMODULES
+++ __LMOD_REF_COUNT_MANPATH='/apps/rocoto/1.2.4/man:1;/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1'
+++ export __LMOD_REF_COUNT_MANPATH
+++ MANPATH=/apps/rocoto/1.2.4/man:/apps/lmod/lmod/share/man::/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man
+++ export MANPATH
+++ MODULEPATH=/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles
+++ export MODULEPATH
+++ __LMOD_REF_COUNT_PATH='/apps/rocoto/1.2.4/bin:1;/home/Dom.Heinzeller/bin:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1'
+++ export __LMOD_REF_COUNT_PATH
+++ PATH=/apps/rocoto/1.2.4/bin:/home/Dom.Heinzeller/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin
+++ export PATH
+++ __LMOD_REF_COUNT__LMFILES_=/apps/modules/modulefiles/rocoto/1.2.4:1
+++ export __LMOD_REF_COUNT__LMFILES_
+++ _LMFILES_=/apps/modules/modulefiles/rocoto/1.2.4
+++ export _LMFILES_
+++ _ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXtyb2NvdG89e1siZm4iXT0iL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9yb2NvdG8vMS4yLjQiLFsiZnVsbE5hbWUiXT0icm9jb3RvLzEuMi40IixbImxvYWRPcmRlciJdPTEscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0icm9jb3RvIix9LH0sbXBhdGhBPXsiL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLCIvYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4IiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcyIsIi9vcHQv
+++ export _ModuleTable001_
+++ _ModuleTable002_=Y3JheS9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfSxbInN5c3RlbUJhc2VNUEFUSCJdPSIvYXBwcy9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZTovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4Oi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXM6L29wdC9jcmF5L21vZHVsZWZpbGVzOi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfQ==
+++ export _ModuleTable002_
+++ _ModuleTable_Sz_=2
+++ export _ModuleTable_Sz_
+++ : -s sh
++ eval
+++ which rocotorun
++ ROCOTORUN=/apps/rocoto/1.2.4/bin/rocotorun
+++ which rocotostat
++ ROCOTOSTAT=/apps/rocoto/1.2.4/bin/rocotostat
++ export PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:/apps/rocoto/1.2.4/bin:/home/Dom.Heinzeller/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin
++ PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:/apps/rocoto/1.2.4/bin:/home/Dom.Heinzeller/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin
++ export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
++ PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
++ ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
++ QUEUE=debug
++ PARTITION=
++ dprefix=/scratch4/NCEPDEV
++ DISKNM=/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT
++ STMP=/scratch4/NCEPDEV/stmp4
++ PTMP=/scratch4/NCEPDEV/stmp3
++ SCHEDULER=pbs
++ MPIEXEC=mpirun
++ MPIEXECOPTS=
++ cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
++ mkdir -p /scratch4/NCEPDEV/stmp4/Dom.Heinzeller
++ mkdir -p /scratch4/NCEPDEV/stmp3/Dom.Heinzeller
++ NEW_BASELINE=/scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST
++ RUNDIR_ROOT=/scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_116005
++ mkdir -p /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_116005
++ CREATE_BASELINE=false
++ ROCOTO=false
++ ECFLOW=false
++ TESTS_FILE=rt.conf
++ SET_ID=standard
++ getopts :cfsl:mreh opt
++ case $opt in
++ TESTS_FILE=rt_ccpp.conf
++ SET_ID=' '
++ getopts :cfsl:mreh opt
++ case $opt in
++ RTPWD=/scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST
++ getopts :cfsl:mreh opt
++ RTPWD=/scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST
++ shift 3
++ [[ 0 -gt 1 ]]
++ [[ false == true ]]
++ COMPILE_LOG=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/Compile_theia.log
++ REGRESSIONTEST_LOG=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/RegressionTests_theia.log
++ date
++ echo 'Start Regression test'
++ echo
++ source default_vars.sh
+++ '[' theia = wcoss ']'
+++ '[' theia = wcoss_cray ']'
+++ '[' theia = theia ']'
+++ TASKS_dflt=150
+++ TPN_dflt=24
+++ INPES_dflt=3
+++ JNPES_dflt=8
+++ TASKS_thrd=84
+++ TPN_thrd=12
+++ INPES_thrd=3
+++ JNPES_thrd=4
+++ TASKS_stretch=48
+++ TPN_stretch=12
+++ INPES_stretch=2
+++ JNPES_stretch=4
+++ TASKS_strnest=96
+++ TPN_strnest=12
+++ INPES_strnest=2
+++ JNPES_strnest=4
++ TEST_NR=0
++ COMPILE_NR=0
++ rm -f fail_test
++ LOG_DIR=/scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia
++ rm -rf /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia
++ mkdir /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia
++ rm -f ../fv3.exe
++ [[ false == true ]]
++ [[ false == true ]]
++ new_compile=false
++ in_metatask=false
++ read -r line
++ line='# Compilew with CCPP (uses Intel 18 instead of default Intel 15)'
++ [[ 64 == 0 ]]
++ [[ # Compilew with CCPP (uses Intel 18 instead of default Intel 15) == \#* ]]
++ continue
++ read -r line
++ line='COMPILE | CCPP=Y                              | standard    | theia        |             |'
++ [[ 90 == 0 ]]
++ [[ COMPILE | CCPP=Y                              | standard    | theia        |             | == \#* ]]
++ [[ COMPILE | CCPP=Y                              | standard    | theia        |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' CCPP=Y '|' standard '|' theia '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=CCPP=Y
+++ echo COMPILE '|' CCPP=Y '|' standard '|' theia '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' CCPP=Y '|' standard '|' theia '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=theia
++ [[   != \  ]]
++ [[ theia != \  ]]
++ [[ theia != \t\h\e\i\a ]]
++ COMPILE_NR_DEP=0
++ ((  COMPILE_NR += 1  ))
++ [[ false == true ]]
++ [[ false == true ]]
++ ./compile.sh /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/FV3 theia CCPP=Y 1
++ echo ' bash Compile is done'
+ bash Compile is done
++ continue
++ read -r line
++ line='# Run fv3_control/fv3_gfdlmp tests with CCPP add-on'
++ [[ 51 == 0 ]]
++ [[ # Run fv3_control/fv3_gfdlmp tests with CCPP add-on == \#* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_ccpp                            | standard    | theia        |             |'
++ [[ 90 == 0 ]]
++ [[ RUN     | fv3_ccpp                            | standard    | theia        |             | == \#* ]]
++ [[ RUN     | fv3_ccpp                            | standard    | theia        |             | == COMPILE* ]]
++ [[ RUN     | fv3_ccpp                            | standard    | theia        |             | == APPBUILD* ]]
++ [[ RUN     | fv3_ccpp                            | standard    | theia        |             | == RUN* ]]
+++ echo RUN '|' fv3_ccpp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_ccpp
+++ echo RUN '|' fv3_ccpp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_ccpp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f4
++ MACHINES=' theia '
+++ echo RUN '|' fv3_ccpp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f5
++ CB=' '
+++ echo RUN '|' fv3_ccpp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_ccpp ]]
++ [[   != \  ]]
++ [[  theia  != \  ]]
++ [[  theia  != *theia* ]]
++ [[ false == true ]]
++ [[ false == true ]]
+++ printf %02d 1
++ TEST_NR=01
++ source /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/tests/fv3_ccpp
+++ export 'TEST_DESCR=Compare FV3 CCPP results with previous trunk version'
+++ TEST_DESCR='Compare FV3 CCPP results with previous trunk version'
+++ export CNTL_DIR=fv3_ccpp
+++ CNTL_DIR=fv3_ccpp
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export FV3_RUN=fv3_ccpp_run.IN
+++ FV3_RUN=fv3_ccpp_run.IN
+++ export CCPP_SDF=ccpp/framework/examples/suite_FV3_test.xml
+++ CCPP_SDF=ccpp/framework/examples/suite_FV3_test.xml
+++ export CCPP_LIB_DIR=ccpp/lib
+++ CCPP_LIB_DIR=ccpp/lib
+++ export INPUT_NML=ccpp.nml.IN
+++ INPUT_NML=ccpp.nml.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_116005 fv3_ccpp 01 1
++ continue
++ read -r line
++ line='RUN     | fv3_ccpp_gfdlmp                     | standard    | theia        |             |'
++ [[ 90 == 0 ]]
++ [[ RUN     | fv3_ccpp_gfdlmp                     | standard    | theia        |             | == \#* ]]
++ [[ RUN     | fv3_ccpp_gfdlmp                     | standard    | theia        |             | == COMPILE* ]]
++ [[ RUN     | fv3_ccpp_gfdlmp                     | standard    | theia        |             | == APPBUILD* ]]
++ [[ RUN     | fv3_ccpp_gfdlmp                     | standard    | theia        |             | == RUN* ]]
+++ echo RUN '|' fv3_ccpp_gfdlmp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_ccpp_gfdlmp
+++ echo RUN '|' fv3_ccpp_gfdlmp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_ccpp_gfdlmp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f4
++ MACHINES=' theia '
+++ echo RUN '|' fv3_ccpp_gfdlmp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f5
++ CB=' '
+++ echo RUN '|' fv3_ccpp_gfdlmp '|' standard '|' theia '|' '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_ccpp_gfdlmp ]]
++ [[   != \  ]]
++ [[  theia  != \  ]]
++ [[  theia  != *theia* ]]
++ [[ false == true ]]
++ [[ false == true ]]
+++ printf %02d 2
++ TEST_NR=02
++ source /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/tests/fv3_ccpp_gfdlmp
+++ export 'TEST_DESCR=Compare FV3 CCPP GFDL-MP results with previous trunk version'
+++ TEST_DESCR='Compare FV3 CCPP GFDL-MP results with previous trunk version'
+++ export CNTL_DIR=fv3_ccpp_gfdlmp
+++ CNTL_DIR=fv3_ccpp_gfdlmp
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ DT_ATMOS=1200
+++ export FV3_RUN=ccpp_gfdlmp_run.IN
+++ FV3_RUN=ccpp_gfdlmp_run.IN
+++ export CCPP_SDF=ccpp/framework/examples/suite_FV3_test.xml
+++ CCPP_SDF=ccpp/framework/examples/suite_FV3_test.xml
+++ export CCPP_LIB_DIR=ccpp/lib
+++ CCPP_LIB_DIR=ccpp/lib
+++ export INPUT_NML=ccpp_gfdlmp.nml.IN
+++ INPUT_NML=ccpp_gfdlmp.nml.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_116005 fv3_ccpp_gfdlmp 02 1
++ continue
++ read -r line
++ [[ false == true ]]
++ [[ false == true ]]
++ set +e
++ cat /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia/compile_1.log
++ cat /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia/rt_01_fv3_ccpp.log /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/log_theia/rt_02_fv3_ccpp_gfdlmp.log
++ [[ -e fail_test ]]
++ echo
+
++ echo REGRESSION TEST WAS SUCCESSFUL
+REGRESSION TEST WAS SUCCESSFUL
++ echo
++ echo REGRESSION TEST WAS SUCCESSFUL
++ rm -f 'fv3_*.x' fv3_1.exe modules.fv3_1 run_test.env
++ [[ false == true ]]
++ [[ false == true ]]
++ date
++ exit
++ echo 'rt.sh finished'
+rt.sh finished
++ cleanup
++ rm -rf /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_ccpp-framework_integration-ccpp-test/tests/lock
++ trap 0
++ exit
