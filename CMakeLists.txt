@@ -151,7 +151,7 @@ else (PROJECT MATCHES "CCPP-FV3")
       ./physics/gcycle.f90
       ./physics/GFS_rad_time_vary.scm.f90
       ./physics/GFS_radupdate.f90
-      ./physics/GFS_suite_interstitial.ccpp.f90
+      ./physics/GFS_suite_interstitial.ccpp.F90
       ./physics/get_prs_fv3.f90
       ./physics/sfc_sice.f
       ./physics/dcyc2.f
