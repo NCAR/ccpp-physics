@@ -66,9 +66,8 @@ module module_physics_driver
   use GFS_surface_generic_pre,   only: GFS_surface_generic_pre_run
   use GFS_surface_generic_post,  only: GFS_surface_generic_post_run
 
-! DH*
 !  use GFS_diagtoscreen, only: GFS_diagtoscreen_run
-! *DH
+!  use memcheck, only: memcheck_run
 
   implicit none
 
@@ -2849,10 +2848,11 @@ module module_physics_driver
         deallocate (qrn, qsnw, ncpr, ncps)
       endif
 
-      ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
       !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
-      ! *DH
+      !errmsg = 'end of GFS_physics_driver'
+      !call memcheck_run(Model%sec, Tbd%blkno, errmsg, errflg)
+
       return
 !...................................
       end subroutine GFS_physics_driver
