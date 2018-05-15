@@ -22,7 +22,7 @@
 !! | Statein           | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type |           | in     | F        |
 !! | Tbd               | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type     |           | in     | F        |
 !! | Cldprop           | FV3-GFS_Cldprop_type                                          | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |    0 | GFS_cldprop_type |           | in     | F        |
-!! | Radtend           | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type |           | in     | F        |
+!! | Radtend           | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
 !! | lm                | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | count    |    0 | integer          |           | in     | F        |
 !! | im                | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer          |           | in     | F        |
 !! | lmk               | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |    0 | integer          |           | in     | F        |
@@ -74,7 +74,8 @@
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
-          Tbd, Cldprop, Radtend,                                     & 
+          Tbd, Cldprop,                                              &
+          Radtend,                                                   & ! input/output
           lm, im, lmk, lmp, kd, kt, kb, raddt, plvl, plyr,           & ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
           gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
@@ -123,7 +124,7 @@
       type(GFS_grid_type),                 intent(in)    :: Grid
       type(GFS_sfcprop_type),              intent(in)    :: Sfcprop
       type(GFS_statein_type),              intent(in)    :: Statein
-      type(GFS_radtend_type),              intent(in)    :: Radtend
+      type(GFS_radtend_type),              intent(inout) :: Radtend
       type(GFS_tbd_type),                  intent(in)    :: Tbd
       type(GFS_cldprop_type),              intent(in)    :: Cldprop
 

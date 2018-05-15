@@ -5,7 +5,10 @@ module module_physics_driver
                                    con_rv, con_hvap, con_hfus,       &
                                    con_rerth, con_pi, rhc_max, dxmin,&
                                    dxinv, pa2mb, rlapse
+! Not available in FV3v0-CCPP demo
+#if 0
   use cs_conv,               only: cs_convr
+#endif
   use ozne_def,              only: levozp,  oz_coeff, oz_pres
   use h2o_def,               only: levh2o, h2o_coeff, h2o_pres
   use sasas_deep,            only: sasas_deep_run
@@ -729,6 +732,9 @@ module module_physics_driver
 !      lw:  using surface air skin temperature as scaling factor
 
       if (Model%pre_rad) then
+        write(0,*) "dcyc2t3_pre_rad not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call dcyc2t3_pre_rad                                                &
 !  ---  inputs:
            ( Model%solhr, Model%slag, Model%sdec, Model%cdec, Grid%sinlat,  &
@@ -745,7 +751,7 @@ module module_physics_driver
              adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                    &
              adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd                     &
            )
-
+#endif
       else
 
         call dcyc2t3_run                                                    &
@@ -966,6 +972,9 @@ module module_physics_driver
 
 !  --- ...  surface energy balance over ocean
 
+          write(0,*) "sfc_ocean not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call sfc_ocean                                                &
 !  ---  inputs:
            (size(Grid%xlon,1), Statein%pgr, Statein%ugrs, Statein%vgrs, Statein%tgrs,  &
@@ -973,7 +982,7 @@ module module_physics_driver
             work3, islmsk, Tbd%phy_f2d(1,Model%num_p2d), flag_iter,     &
 !  ---  outputs:
              qss, Diag%cmm, Diag%chh, gflx, evap, hflx, ep1d)
-
+#endif
         endif       ! if ( nstf_name(1) > 0 ) then
 
 !       if (Model%lprnt) write(0,*)' sfalb=',sfalb(ipr),' ipr=',ipr          &
@@ -1049,6 +1058,9 @@ module module_physics_driver
             endif
           enddo
 
+          write(0,*) "sfc_cice not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call sfc_cice                                                 &
 !  ---     inputs:
            (size(Grid%xlon,1), Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs, &
@@ -1057,6 +1069,7 @@ module module_physics_driver
             dtsfc_cice,                                                 &
 !  ---     outputs:
             qss, Diag%cmm, Diag%chh, evap, hflx)
+#endif
         endif
 
 !  --- ...  lu: update flag_iter and flag_guess
@@ -1196,6 +1209,9 @@ module module_physics_driver
 !     write(0,*)' before monin clstp=',clstp,' kdt=',Model%kdt,' lat=',lat
 
       if (Model%do_shoc) then
+        write(0,*) "moninshoc not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call moninshoc(size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%ntrac, Model%ntcw, dvdt, dudt, dtdt, dqdt,  &
                        Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,   &
                        Tbd%phy_f3d(1,1,Model%ntot3d-1), prnum, Model%ntke,       &
@@ -1205,6 +1221,7 @@ module module_physics_driver
                        Statein%prslk, Statein%phii, Statein%phil, Model%dtp, dusfc1,   &
                        dvsfc1, dtsfc1, dqsfc1, dkt, Diag%hpbl, kinver,           &
                        Model%xkzm_m, Model%xkzm_h, Model%xkzm_s, Model%lprnt, ipr, Model%me)
+#endif
       else
         if (Model%hybedmf) then
           call edmf_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt,&
@@ -1220,6 +1237,9 @@ module module_physics_driver
 !     if (Model%lprnt)  write(0,*)' dtdtm=',(dtdt(ipr,k),k=1,15)
 !     if (Model%lprnt)  write(0,*)' dqdtm=',(dqdt(ipr,k,1),k=1,15)
         elseif (.not. Model%old_monin) then
+              write(0,*) "moninq not available in FV3v0-CCPP demo"
+              stop
+#if 0
           call moninq(size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, nvdiff, Model%ntcw, dvdt, dudt, dtdt, dqdt, &
                       Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,   &
                       Radtend%htrsw, Radtend%htrlw, xmu, Statein%prsik(1,1), rb,&
@@ -1229,8 +1249,12 @@ module module_physics_driver
                       Model%dspheat, dusfc1, dvsfc1, dtsfc1, dqsfc1, Diag%hpbl, &
                       gamt, gamq, dkt, kinver, Model%xkzm_m, Model%xkzm_h,      &
                       Model%xkzm_s, Model%lprnt, ipr)
+#endif
         else
           if (Model%mstrat) then
+              write(0,*) "moninp1 not available in FV3v0-CCPP demo"
+              stop
+#if 0
             call moninp1(size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, nvdiff, dvdt, dudt, dtdt, dqdt,          &
                          Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs,&
                          Statein%prsik(1,1), rb, Sfcprop%ffmm, Sfcprop%ffhh,    &
@@ -1239,7 +1263,11 @@ module module_physics_driver
                          Statein%phii, Statein%phil, Model%dtp, dusfc1, dvsfc1,       &
                          dtsfc1, dqsfc1, Diag%hpbl, gamt, gamq, dkt, kinver,    &
                          Model%xkzm_m, Model%xkzm_h)
+#endif
           else
+              write(0,*) "moninp not available in FV3v0-CCPP demo"
+              stop
+#if 0
             call moninp(size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, nvdiff, dvdt, dudt, dtdt, dqdt,            &
                          Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs, &
                          Statein%prsik(1,1), rb, Sfcprop%ffmm, Sfcprop%ffhh,     &
@@ -1247,6 +1275,7 @@ module module_physics_driver
                          Statein%prsi, del, Statein%prsl, Statein%phii,          &
                          Statein%phil, Model%dtp, dusfc1, dvsfc1, dtsfc1, dqsfc1,      &
                          Diag%hpbl, gamt, gamq, dkt, Model%xkzm_m, Model%xkzm_h)
+#endif
           endif
 
         endif   ! end if_hybedmf
@@ -1467,19 +1496,27 @@ module module_physics_driver
 !     if(Model%lprnt) write(0,*)' gq0i=',gq0(ipr,:,ntiw)
 
       if (Model%lsidea) then            ! idea convective adjustment
+        write(0,*) "ideaca_up not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call ideaca_up(Statein%prsi,Stateout%gt0,size(Grid%xlon,1),size(Grid%xlon,1),Model%levs+1)
+#endif
       endif
 
 !  --- ...  ozone physics
 
       if ((Model%ntoz > 0) .and. (Model%ntrac >= Model%ntoz)) then
         if (oz_coeff > 4) then
+          write(0,*) "ozphys_2015 not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call ozphys_2015 (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, levozp, Model%dtp,               &
                             Stateout%gq0(1,1,Model%ntoz),            &
                             Stateout%gq0(1,1,Model%ntoz),            &
                             Stateout%gt0, oz_pres, Statein%prsl,     &
                             Tbd%ozpl, oz_coeff, del, Model%ldiag3d,  &
                             dq3dt_loc(1,1,6), Model%me)
+#endif
           if (Model%ldiag3d) then
             Diag%dq3dt(:,:,6) = dq3dt_loc(:,:,6)
             Diag%dq3dt(:,:,7) = dq3dt_loc(:,:,7)
@@ -1505,10 +1542,14 @@ module module_physics_driver
       endif
 
       if (Model%h2o_phys) then
+        write(0,*) "h2ophys not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call h2ophys (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, levh2o, Model%dtp, Stateout%gq0(1,1,1),  &
                       Stateout%gq0(1,1,1), h2o_pres, Statein%prsl,     &
                       Tbd%h2opl, h2o_coeff, Model%ldiag3d,             &
                       dq3dt_loc(1,1,1), Model%me)
+#endif
       endif
 
 !  --- ...  to side-step the ozone physics
@@ -1672,6 +1713,9 @@ module module_physics_driver
 !     dqdt(1:size(Grid%xlon,1),:,3) = gq0(1:size(Grid%xlon,1),:,Model%ntcw)
 !GFDL lat has no meaning inside of shoc - changed to "1"
 !GFDL          call shoc(size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, Model%dtp, Model%me, lat,
+          write(0,*) "shoc not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call shoc (size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, Model%dtp, Model%me, 1, Statein%prsl(1,1),  &
                      Statein%phii(1,1), Statein%phil(1,1), Stateout%gu0(1,1), &
                      Stateout%gv0(1,1), Statein%vvl(1,1), Stateout%gt0(1,1),  &
@@ -1680,7 +1724,7 @@ module module_physics_driver
                      clw(1,1,ntk), hflx, evap, prnum,                         &
                      Tbd%phy_f3d(1,1,Model%ntot3d-1),                         &
                      Tbd%phy_f3d(1,1,Model%ntot3d), Model%lprnt, ipr, ncpl, ncpi, Model%kdt)
-
+#endif
 !     if (Model%lprnt) write(0,*)' aftshoccld=',phy_f3d(ipr,:,ntot3d-2)*100
 !     if (Model%lprnt) write(0,*)' aftshocice=',clw(ipr,:,1)
 !     if (Model%lprnt) write(0,*)' aftshocwat=',clw(ipr,:,1)
@@ -1723,12 +1767,16 @@ module module_physics_driver
       if (.not. Model%ras .and. .not. Model%cscnv) then
 
         if (Model%imfdeepcnv == 1) then             ! no random cloud top
+          write(0,*) "sascnvn not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call sascnvn (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del,             &
                         Statein%prsl, Statein%pgr, Statein%phil, clw(:,:,1:2),   &
                         Stateout%gq0, Stateout%gt0, Stateout%gu0,       &
                         Stateout%gv0, cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv,   &
                         islmsk, Statein%vvl, Model%ncld, ud_mf, dd_mf,  &
                         dt_mf, cnvw, cnvc)
+#endif
         elseif (Model%imfdeepcnv == 2) then
           call sasas_deep_run (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,     &
                           Statein%pgr, Statein%phil, clw(:,:,1),        &
@@ -1739,12 +1787,16 @@ module module_physics_driver
                           dd_mf, dt_mf, cnvw, cnvc, errmsg, errflg)
 !         if (Model%lprnt) print *,' lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr)
         elseif (Model%imfdeepcnv == 0) then         ! random cloud top
+          write(0,*) "sascnv not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call sascnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del,              &
                        Statein%prsl, Statein%pgr, Statein%phil, clw(:,:,1:2),    &
                        Stateout%gq0, Stateout%gt0, Stateout%gu0,        &
                        Stateout%gv0, cld1d, lwe_thickness_of_deep_convective_precipitation_amount, kbot, ktop, kcnv,    &
                        islmsk, Statein%vvl, Tbd%rann, Model%ncld,       &
                        ud_mf, dd_mf, dt_mf, cnvw, cnvc)
+#endif
 !         if (Model%lprnt) print *,' lwe_thickness_of_deep_convective_precipitation_amount=',lwe_thickness_of_deep_convective_precipitation_amount(ipr),' rann=',rann(ipr,1)
         endif
       else        ! ras or cscnv
@@ -1775,6 +1827,9 @@ module module_physics_driver
 !     if (Model%lprnt) write(0,*)' do_awdd=',do_awdd
 !GFDL  again lat replaced with "1"
 !GFDL     &                  otspt, lat, Model%kdt     ,                     &
+          write(0,*) "cs_convr not available in FV3v0-CCPP demo"
+          stop
+#if 0
           call cs_convr (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, tottracer+3, Model%nctp, otspt, 1, &
                          Model%kdt, Stateout%gt0, Stateout%gq0(1,1,1:1), lwe_thickness_of_deep_convective_precipitation_amount, &
                          clw, Statein%phil, Statein%phii, Statein%prsl,   &
@@ -1785,6 +1840,7 @@ module module_physics_driver
                          Model%do_aw, do_awdd, Model%lprnt, ipr, QLCN, QICN,    &
                          w_upi, cf_upi, CNV_MFD, CNV_PRC3, CNV_DQLDT,     &
                          CLCN, CNV_FICE, CNV_NDROP, CNV_NICE, Model%ncld)
+#endif
 
 !     if (Model%lprnt) write(0,*)' gq0afcs=',gq0(ipr,1:35,1)
 !     if (Model%lprnt) write(0,*)' gq0afcs3=',gq0(ipr,1:35,3)
@@ -2165,12 +2221,16 @@ module module_physics_driver
 !                                               --------------------------------------
           if (Model%imfshalcnv == 1) then      ! opr option now at 2014
                                                !-----------------------
+            write(0,*) "shalcnv not available in FV3v0-CCPP demo"
+            stop
+#if 0
+
            call shalcnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%jcap, Model%dtp, del, Statein%prsl, &
                          Statein%pgr, Statein%phil, clw, Stateout%gq0,     &
                          Stateout%gt0, Stateout%gu0, Stateout%gv0, lwe_thickness_of_shallow_convective_precipitation_amount,  &
                          kbot, ktop, kcnv, islmsk, Statein%vvl, Model%ncld,&
                          Diag%hpbl, hflx, evap, ud_mf, dt_mf, cnvw, cnvc)
-
+#endif
             raincs(:)     = frain * lwe_thickness_of_shallow_convective_precipitation_amount(:)
             Diag%rainc(:) = Diag%rainc(:) + raincs(:)
             if (Model%lssav) then
@@ -2214,14 +2274,22 @@ module module_physics_driver
 !    &,    ' lat=',lat
 
             if (Model%mstrat) then             !  As in CFSv2
+              write(0,*) "shalcv not available in FV3v0-CCPP demo"
+              stop
+#if 0
               call shalcv (size(Grid%xlon,1), size(Grid%xlon,1), levshcm, Model%dtp, del, Statein%prsi,        &
                            Statein%prsl, Statein%prslk,kcnv, Stateout%gq0, &
                            Stateout%gt0, levshc, Statein%phil, kinver,     &
                            ctei_r, ctei_rml, Model%lprnt, ipr)
+#endif
             else
+              write(0,*) "shalcvt3 not available in FV3v0-CCPP demo"
+              stop
+#if 0
               call shalcvt3 (size(Grid%xlon,1), size(Grid%xlon,1), levshcm, Model%dtp, del, Statein%prsi, &
                              Statein%prsl, Statein%prslk, kcnv,       &
                              Stateout%gq0, Stateout%gt0)
+#endif
             endif
 !           if (Model%lprnt) print *,' levshcm=',levshcm,' gt0sha=',gt0(ipr,:)
 
@@ -2297,6 +2365,9 @@ module module_physics_driver
 
 !GFDL  replace lat with "1:
 !       call shoc(size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, dtshoc, Model%me, lat,             &
+        write(0,*) "shoc not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call shoc (size(Grid%xlon,1), size(Grid%xlon,1), 1, Model%levs, Model%levs+1, Model%dtp, Model%me, 1, Statein%prsl(1,1),        &
                    Statein%phii(1,1), Statein%phil(1,1), Stateout%gu0(1,1),       &
                    Stateout%gv0(1,1), Statein%vvl(1,1), Stateout%gt0(1,1),        &
@@ -2305,6 +2376,7 @@ module module_physics_driver
                    Stateout%gq0(1,1,Model%ntke), hflx, evap, prnum,               &
                    Tbd%phy_f3d(1,1,Model%ntot3d-1), Tbd%phy_f3d(1,1,Model%ntot3d),&
                    Model%lprnt, ipr, ncpl, ncpi, Model%kdt)
+#endif
 
         if ((Model%ntlnc > 0) .and. (Model%ntinc > 0) .and. (Model%ncld >= 2)) then
           Stateout%gq0(:,:,Model%ntlnc) = ncpl(:,:)
@@ -2365,9 +2437,13 @@ module module_physics_driver
 !         print *,' gq0b=',gq0(ipr,:,1)
 !       endif
 
+        write(0,*) "mstcnv not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call mstcnv (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Stateout%gt0, Stateout%gq0, &
                      Statein%prsl,del, Statein%prslk, lwe_thickness_of_moist_convective_adj_precipitation_amount,        &
                      Stateout%gq0(1,1,Model%ntcw), rhc, Model%lprnt, ipr)
+#endif
 
 !       if (Model%lprnt) then
 !         print *,' lwe_thickness_of_moist_convective_adj_precipitation_amount=',lwe_thickness_of_moist_convective_adj_precipitation_amount(ipr),' rainc=',Diag%rainc(ipr)
@@ -2411,8 +2487,12 @@ module module_physics_driver
 
       if (Model%ncld == 0) then           ! no cloud microphysics
 
+        write(0,*) "lrgscl not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call lrgscl (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Stateout%gt0, Stateout%gq0, &
                      Statein%prsl, del, Statein%prslk, lwe_thickness_of_stratiform_precipitation_amount, clw)
+#endif
 
       elseif (Model%ncld == 1) then       ! microphysics with single cloud condensate
 
@@ -2429,11 +2509,15 @@ module module_physics_driver
 !           endif
                                               ! ------------------
             if (Model%do_shoc) then
+              write(0,*) "precpd_shoc not available in FV3v0-CCPP demo"
+              stop
+#if 0
               call precpd_shoc (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, del, Statein%prsl,              &
                                 Stateout%gq0(1,1,1), Stateout%gq0(1,1,Model%ntcw), &
                                 Stateout%gt0, lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,          &
                                 psautco_l, prautco_l, Model%evpco, Model%wminco,   &
                                 Tbd%phy_f3d(1,1,Model%ntot3d-2), Model%lprnt, ipr)
+#endif
             else
               call zhaocarr_gscond_run (size(Grid%xlon,1), size(Grid%xlon,1),    &
                            Model%levs, Model%dtp, Model%dtf, Statein%prsl, Statein%pgr, &
@@ -2460,6 +2544,9 @@ module module_physics_driver
 !           endif
           else                                ! with pdf clouds
                                               ! ---------------
+            write(0,*) "gscondp and precpdp not available in FV3v0-CCPP demo"
+            stop
+#if 0
             call gscondp (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%dtp, Model%dtf, Statein%prsl,        &
                           Statein%pgr, Stateout%gq0(1,1,1),            &
                           Stateout%gq0(1,1,Model%ntcw), Stateout%gt0,  &
@@ -2475,6 +2562,7 @@ module module_physics_driver
                           lwe_thickness_of_stratiform_precipitation_amount, Diag%sr, rainp, rhc,                  &
                           Tbd%phy_f3d(1,1,Model%num_p3d+1), psautco_l, &
                           prautco_l, Model%evpco, Model%wminco, Model%lprnt, ipr)
+#endif
           endif   ! end of grid-scale precip/microphysics options
         endif     ! end if_num_p3d
 
@@ -2553,6 +2641,9 @@ module module_physics_driver
 !     if (Model%lprnt) write(0,*)' clw2bef=',clw(ipr,:,2),' kdt=',Model%kdt
 !     if (Model%lprnt) write(0,*)' cloudsb=',phy_f3d(ipr,:,1)*100,' kdt=',Model%kdt
 !       txa(:,:) = gq0(:,:,1)
+        write(0,*) "m_micro_driver not available in FV3v0-CCPP demo"
+        stop
+#if 0
         call m_micro_driver (size(Grid%xlon,1), size(Grid%xlon,1), Model%levs, Model%flipv, Model%dtp,  Statein%prsl,      &
                              Statein%prsi, Statein%prslk, Statein%prsik,         &
                              Statein%vvl, clw(1,1,2), QLCN, clw(1,1,1), QICN,    &
@@ -2568,6 +2659,7 @@ module module_physics_driver
                              qsnw, ncpr, ncps, Tbd%phy_f3d(1,1,1), kbot,         &
                              Model%aero_in, skip_macro, cn_prc, cn_snr, Model%lprnt,   &
                              ipr, Model%kdt, Grid%xlat, Grid%xlon)
+#endif
 
 !     write(1000+Model%me,*)' at latitude = ',lat
 !     tx1 = 1000.0
