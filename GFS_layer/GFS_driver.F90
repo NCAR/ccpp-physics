@@ -105,8 +105,11 @@ module GFS_driver
                              Diag, Interstitial, Init_parm)
 
     use module_microphysics, only: gsmconst
+! Not available in FV3v0-CCPP demo
+#if 0
     use cldwat2m_micro,      only: ini_micro
     use aer_cloud,           only: aer_cloud_init
+#endif
     use module_ras,          only: ras_init
 #ifdef OPENMP
     use omp_lib
@@ -231,8 +234,12 @@ module GFS_driver
 
     !--- initialize Morrison-Gettleman microphysics
     if (Model%ncld == 2) then
+      write(0,*) "Morrison-Gettleman microphysics not available in FV3v0-CCPP demo"
+      stop
+#if 0
       call ini_micro (Model%mg_dcs, Model%mg_qcvar, Model%mg_ts_auto_ice)
       call aer_cloud_init ()
+#endif
     endif
 
     !--- initialize ras

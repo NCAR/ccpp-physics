@@ -1307,7 +1307,7 @@
       ! *DH
       end subroutine GFS_radiation_driver
 #endif
-! End of block commented out for CCXX
+! End of block commented out for CCPP
 
 !
 !> @}
