@@ -26,7 +26,7 @@ VER_PATCH = 0
 
 FFLAGS   += -I../fms -I../fms/include -fPIC
 
-CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
+CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM -DUSE_COND
 
 ifneq (,$(findstring CCPP,$(CPPDEFS)))
     # IPD with full CCPP - not making use of IPD steps
@@ -187,6 +187,8 @@ SRCS_F90 = \
 	   ./physics/rrtmg_lw_pre.F90                                                \
 	   ./physics/rrtmg_lw_post.F90                                               \
 	   ./physics/GFS_debug.F90                                                   \
+           ./physics/gfdl_fv_sat_adj.F90                                             \
+           ./physics/gfdl_qs_init.F90                                                \
 	   $(GFS_PHYSICS_DRIVER)                                                     \
 	   $(GFS_RADIATION_DRIVER)                                                   \
 	   ./GFS_layer/GFS_restart.F90                                               \

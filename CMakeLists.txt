@@ -121,6 +121,8 @@ else (PROJECT MATCHES "CCPP-FV3")
       ./physics/mersenne_twister.f
       ./physics/rascnvv2.f
       ./physics/GFDL_parse_tracers.F90
+      ./physics/gfdl_fv_sat_adj.F90       
+      ./physics/gfdl_qs_init.F90   
       ./physics/wam_f107_kp_mod.f90
       ./physics/num_parthds.F
       ./physics/gocart_tracer_config_stub.f
