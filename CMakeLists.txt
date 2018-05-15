@@ -34,12 +34,12 @@ set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 enable_language(Fortran)
 
 # DH this should be a PROJECT == CCPP-SCM test
-if (NOT PROJECT MATCHES "CCPP-FV3")
+if (NOT PROJECT STREQUAL "CCPP-FV3")
   #------------------------------------------------------------------------------
   # CMake Modules
   # Set the CMake module path
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
-endif (NOT PROJECT MATCHES "CCPP-FV3")
+endif (NOT PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
@@ -97,9 +97,9 @@ ADD_DEFINITIONS(-DNEMS_GSM)
 
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
-if (PROJECT MATCHES "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3")
   include(./CCPP_SCHEMES.cmake)
-else (PROJECT MATCHES "CCPP-FV3")
+else (PROJECT STREQUAL "CCPP-FV3")
   set(SCHEMES
       ./physics/machine.F
       ./physics/physcons.f90
@@ -151,7 +151,7 @@ else (PROJECT MATCHES "CCPP-FV3")
       ./physics/gcycle.f90
       ./physics/GFS_rad_time_vary.scm.f90
       ./physics/GFS_radupdate.f90
-      ./physics/GFS_suite_interstitial.ccpp.f90
+      ./physics/GFS_suite_interstitial.ccpp.F90
       ./physics/get_prs_fv3.f90
       ./physics/sfc_sice.f
       ./physics/dcyc2.f
@@ -186,12 +186,12 @@ else (PROJECT MATCHES "CCPP-FV3")
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
   )
-endif (PROJECT MATCHES "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3")
 
 # Set the sources: physics scheme caps
-if (PROJECT MATCHES "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3")
   include(./CCPP_CAPS.cmake)
-else (PROJECT MATCHES "CCPP-FV3")
+else (PROJECT STREQUAL "CCPP-FV3")
   set(CAPS
     ./physics/cnvc90_cap.F90
     ./physics/lsm_noah_pre_cap.F90
@@ -261,17 +261,17 @@ else (PROJECT MATCHES "CCPP-FV3")
     ./physics/get_phi_fv3_cap.F90
     ./physics/rrtmg_sw_pre_cap.F90
   )
-endif (PROJECT MATCHES "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3")
 
-if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
-elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
-  if (PROJECT MATCHES "CCPP-FV3")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  if (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f
                                 ./physics/rascnvv2.f
                                 ./physics/sflx.f
@@ -285,24 +285,24 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
                                 ./physics/wv_saturation.F
                                 ./physics/cldwat2m_micro.F 
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
-  else (PROJECT MATCHES "CCPP-FV3")
+  else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
-  endif (PROJECT MATCHES "CCPP-FV3")
-elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+  endif (PROJECT STREQUAL "CCPP-FV3")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
-else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
   message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
-endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 #apply general fortran tags to all fortran source files
 if(${CMAKE_VERSION} LESS 3.3)
@@ -312,10 +312,10 @@ else(${CMAKE_VERSION} LESS 3.3)
   add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
 endif (${CMAKE_VERSION} LESS 3.3)
 
-if (PROJECT MATCHES "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)
 # DH this should be a PROJECT == CCPP-SCM and else undefined test (similar in other places)
-else (PROJECT MATCHES "CCPP-FV3")
+else (PROJECT STREQUAL "CCPP-FV3")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
@@ -330,22 +330,22 @@ else (PROJECT MATCHES "CCPP-FV3")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
   
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp-framework/src)
-endif (PROJECT MATCHES "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------
 
 add_library(ccppphys ${SCHEMES} ${CAPS})
-if (PROJECT MATCHES "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
-else (PROJECT MATCHES "CCPP-FV3")
+else (PROJECT STREQUAL "CCPP-FV3")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
-endif (PROJECT MATCHES "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3")
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
 # DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
-if (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 set(CAPOBJS)
 foreach(cap ${CAPS})
     string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
@@ -357,10 +357,10 @@ add_custom_command(TARGET ccppphys
                    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                    COMMENT "Running pgifix_wrapper.py over all scheme caps")
-endif (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
+endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 # *DH end hack for PGI compiler
 
-if (PROJECT MATCHES "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the library
   install(TARGETS ccppphys
           EXPORT ccppphys-targets
@@ -373,4 +373,4 @@ if (PROJECT MATCHES "CCPP-FV3")
           FILE ccppphys-config.cmake
           DESTINATION lib/cmake
   )
-endif (PROJECT MATCHES "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3")

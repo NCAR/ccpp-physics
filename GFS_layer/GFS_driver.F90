@@ -321,6 +321,7 @@ module GFS_driver
                                     Grid, Tbd, Cldprop, Radtend, Diag)
 
     use GFS_stochastics, only: GFS_stochastics_run
+    !use memcheck, only: memcheck_run
 
     implicit none
 
@@ -342,6 +343,9 @@ module GFS_driver
 
     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
                              Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
+
+    !errmsg = 'end of GFS_stochastic_driver'
+    !call memcheck_run(Model%sec, Tbd%blkno, errmsg, errflg)
 
   end subroutine GFS_stochastic_driver
 #endif

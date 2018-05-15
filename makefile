@@ -93,7 +93,7 @@ SRCS_f90 = \
 	   ./physics/GFS_DCNV_generic.f90                                            \
 	   ./physics/GFS_SCNV_generic.f90                                            \
 	   ./physics/GFS_PBL_generic.f90                                             \
-	   ./physics/GFS_suite_interstitial.ipd.f90                                  \
+	   ./physics/GFS_suite_interstitial.ipd.F90                                  \
 	   ./physics/GFS_phys_time_vary.fv3.f90                                      \
 	   ./physics/GFS_stochastics.f90                                             \
 	   ./physics/GFS_surface_generic.f90                                         \
@@ -117,8 +117,10 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
 	   ./GFS_layer/GFS_diagnostics.F90                                           \
 	   ./GFS_layer/GFS_driver.F90                                                \
+	   $(GFS_SUITE_INTERSTITIAL)                                                 \
 	   ./physics/GFS_rrtmg_pre.F90                                               \
 	   ./physics/GFS_rrtmg_post.F90                                              \
+	   ./physics/memcheck.F90                                                    \
 	   ./physics/rrtmg_sw_pre.F90                                                \
 	   ./physics/rrtmg_sw_post.F90                                               \
 	   ./physics/rrtmg_lw_pre.F90                                                \
