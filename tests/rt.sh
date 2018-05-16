@@ -115,9 +115,10 @@ elif [[ $MACHINE_ID = gaea ]]; then
   ECFLOW_START=
   DISKNM=/lustre/f1/pdata/ncep_shared/emc.nemspara/RT
   QUEUE=debug
+  ACCNR=cmp
   PARTITION=c4
-  STMP=/lustre/f1/
-  PTMP=/lustre/f1/
+  STMP=/lustre/f1/ncep/
+  PTMP=/lustre/f1/ncep/
   SCHEDULER=moab
   MPIEXEC=aprun
   MPIEXECOPTS="\"-j 1 -n @[TASKS] -N @[TPN] -d @[THRD]\""
@@ -205,7 +206,7 @@ while getopts ":cfsl:mreh" opt; do
   esac
 done
 
-RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180427}
+RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180507}
 
 shift $((OPTIND-1))
 [[ $# -gt 1 ]] && usage
