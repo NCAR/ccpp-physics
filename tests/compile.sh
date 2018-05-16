@@ -30,7 +30,7 @@ cd $PATHNEMS
 # for CCPP (dynamic loading, ISO_C bindings etc.) and causes segfaults
 # when trying to load the shared library libccpp.so when launching fv3.exe
 if [[ "${MAKE_OPT}" == *"CCPP=Y"* && "${MACHINE_ID}" == "theia" ]]; then
-  src/configure configure.fv3.$MACHINE_ID $MACHINE_ID/fv3.intel-18.1.163
+  src/configure configure.fv3.$MACHINE_ID $MACHINE_ID/fv3.intel-18.0.1.163
 else
   src/configure configure.fv3.$MACHINE_ID $MACHINE_ID/fv3
 fi

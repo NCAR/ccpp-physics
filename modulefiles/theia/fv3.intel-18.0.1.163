@@ -19,7 +19,7 @@ module-whatis "loads NEMS FV3 prerequisites for Theia"
 ## load programming environment
 ## this typically includes compiler, MPI and job scheduler
 ##
-module load intel/18.1.163
+module load intel/18.0.1.163
 module load impi/5.1.2.150
 module load netcdf/4.3.0
 module load pnetcdf/1.5.0-impi
