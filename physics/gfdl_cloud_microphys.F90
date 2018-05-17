@@ -63,7 +63,7 @@ module gfdl_cloud_microphys_pre
       errmsg = ''
       errflg = 0
 
-      if(do_shock) then
+      if(do_shoc) then
           write(errmsg,'(*(a))')                                        &
      &               'SHOC is not currently compatible with GFDL MP -- shutting down'
           errflg = 1
@@ -150,7 +150,7 @@ module gfdl_cloud_microphys_pre
       real(kind=kind_phys), intent(  out)                    :: seconds
       real(kind=kind_phys), intent(  out), dimension(:,:)    :: land, area, rain0, snow0, ice0, graupel0
       real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: qn1, qv1, ql1, qr1, qi1, qs1, qg1, qa1
-      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt, 
+      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt
       real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: pt, w, uin, vin, delp, dz
 
 !  ---  local integer variables
@@ -238,10 +238,10 @@ module gfdl_cloud_microphys_post
 !! | levs       | vertical_dimension                                         | number of vertical levels                              | count        | 0    | integer   |           | in     | F      |
 !! | im         | x_horizontal_index_at_domain_end                           | x end of physics window                                | count        | 0    | integer   |           | in     | F      |
 !! | dtp        | time_step_for_physics                                      | time step for physics                                  | s            | 0    | real      | kind_phys | in     | F      |
-!! | rain0      | column_integrated_rate_of_change_of_rain                   | column integrated rate of change of rain               | mm day-1     | 2    | real      | kind_phys | in     | F      |
-!! | snow0      | column_integrated_rate_of_change_of_snow                   | column integrated rate of change of snow               | mm day-1     | 2    | real      | kind_phys | in     | F      |
-!! | ice0       | column_integrated_rate_of_change_of_ice                    | column integrated rate of change of ice                | mm day-1     | 2    | real      | kind_phys | in     | F      |
-!! | graupel0   | column_integrated_rate_of_change_of_graupel                | column integrated rate of change of graupel            | mm day-1     | 2    | real      | kind_phys | in     | F      |
+!! | rain0      | column_integrated_rate_of_change_of_rain                   | column integrated rate of change of rain               | mm day-1     | 2    | real      | kind_phys | inout  | F      |
+!! | snow0      | column_integrated_rate_of_change_of_snow                   | column integrated rate of change of snow               | mm day-1     | 2    | real      | kind_phys | inout  | F      |
+!! | ice0       | column_integrated_rate_of_change_of_ice                    | column integrated rate of change of ice                | mm day-1     | 2    | real      | kind_phys | inout  | F      |
+!! | graupel0   | column_integrated_rate_of_change_of_graupel                | column integrated rate of change of graupel            | mm day-1     | 2    | real      | kind_phys | inout  | F      |
 !! | qv1   | k_flipped_water_vapor_specific_humidity_updated_by_physics      | water vapor specific humidity updated by physics       | kg kg-1      | 3    | real      | kind_phys | in     | F      |
 !! | ql1   | k_flipped_cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water  spec humid updated by phys | kg kg-1      | 3    | real      | kind_phys | in     | F      |
 !! | qr1   | k_flipped_moist_mixing_ratio_of_rain_water_updated_by_physics   | moist mixing ratio of rain updated by physics          | kg kg-1      | 3    | real      | kind_phys | in     | F      |
@@ -289,9 +289,12 @@ module gfdl_cloud_microphys_post
 !  ---  interface variables (input)
       integer,              intent(in   )                    :: levs, im
       real(kind=kind_phys), intent(in   )                    :: dtp
-      real(kind=kind_phys), intent(in   ), dimension(:,:)    :: rain0, snow0, ice0, graupel0
       real(kind=kind_phys), intent(in   ), dimension(:,:,:)  :: qv1, ql1, qr1, qi1, qs1, qg1, qa1
-      real(kind=kind_phys), intent(in   ), dimension(:,:,:)  :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt, 
+      real(kind=kind_phys), intent(in   ), dimension(:,:,:)  :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt
+
+!
+!  ---  interface variables (inout)
+      real(kind=kind_phys), intent(inout), dimension(:,:)    :: rain0, snow0, ice0, graupel0
 
 !
 !  ---  interface variables (output)
@@ -307,6 +310,7 @@ module gfdl_cloud_microphys_post
 
 !  ---  local variables
       integer :: i, k, kk
+      real(kind=kind_phys)                                   :: tem
       real(kind=kind_phys), dimension(im)                    :: rain1
 
       tem = dtp * con_p001 / con_day
@@ -330,7 +334,7 @@ module gfdl_cloud_microphys_post
       do k = 1, levs
         kk = levs-k+1
         do i=1,im
-            gq0(i,k)         = qv1(:,1,kk) + qv_dt(:,1,kk) * dtp
+            gq0(i,k)         = qv1(i,1,kk) + qv_dt(i,1,kk) * dtp
             gq0_ntcw(i,k)    = ql1(i,1,kk) + ql_dt(i,1,kk) * dtp
             gq0_ntrw(i,k)    = qr1(i,1,kk) + qr_dt(i,1,kk) * dtp
             gq0_ntiw(i,k)    = qi1(i,1,kk) + qi_dt(i,1,kk) * dtp
@@ -961,7 +965,7 @@ subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
     
     ! call mpp_clock_end (gfdl_mp_clock)
     
-end subroutine gfdl_cloud_microphys_driver
+end subroutine gfdl_cloud_microphys_run
 
 ! -----------------------------------------------------------------------
 !>@brief gfdl cloud microphysics, major program
@@ -1003,9 +1007,11 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     
     real, intent (inout), dimension (is:) :: rain, snow, ice, graupel, cond
     
-    real, intent (out), dimension (is:, js:) :: w_var
+!   real, intent (out), dimension (is:, js:) :: w_var
+    real, intent (inout), dimension (is:, js:) :: w_var
     
-    real, intent (out), dimension (is:, js:, ks:) :: vt_r, vt_s, vt_g, vt_i, qn2
+!   real, intent (out), dimension (is:, js:, ks:) :: vt_r, vt_s, vt_g, vt_i, qn2
+    real, intent (inout), dimension (is:, js:, ks:) :: vt_r, vt_s, vt_g, vt_i, qn2
     
     real, intent (out), dimension (is:, ks:) :: m2_rain, m2_sol
     
