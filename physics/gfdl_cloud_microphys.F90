@@ -140,18 +140,18 @@ module gfdl_cloud_microphys_pre
       implicit none
 !
 !  ---  interface variables (input)
-      integer,              intent(in   )                    :: levs, im
-      real(kind=kind_phys), intent(in   )                    :: fhour
-      real(kind=kind_phys), intent(in   ), dimension(:)      :: frland, Garea
-      real(kind=kind_phys), intent(in   ), dimension(:,:)    :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt, gt0
-      real(kind=kind_phys), intent(in   ), dimension(:,:)    :: vvl, prsl, gu0, gv0, phii, del
+      integer,              intent(in   )                 :: levs, im
+      real(kind=kind_phys), intent(in   )                 :: fhour
+      real(kind=kind_phys), intent(in   ), dimension(:)   :: frland, Garea
+      real(kind=kind_phys), intent(in   ), dimension(:,:) :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt, gt0
+      real(kind=kind_phys), intent(in   ), dimension(:,:) :: vvl, prsl, gu0, gv0, phii, del
 !
 !  ---  interface variables (output)
-      real(kind=kind_phys), intent(  out)                    :: seconds
-      real(kind=kind_phys), intent(  out), dimension(:,:)    :: land, area, rain0, snow0, ice0, graupel0
-      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: qn1, qv1, ql1, qr1, qi1, qs1, qg1, qa1
-      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt
-      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: pt, w, uin, vin, delp, dz
+      real(kind=kind_phys), intent(  out)                                 :: seconds
+      real(kind=kind_phys), intent(  out),              dimension(:,:)    :: land, area, rain0, snow0, ice0, graupel0
+      real(kind=kind_phys), intent(  out), allocatable, dimension(:,:,:)  :: delp, dz, uin, vin, pt, qv1, ql1, qr1, qg1, qa1, qn1, qi1,   &
+                                                                             qs1, pt_dt, qa_dt, udt, vdt, w, qv_dt, ql_dt, qr_dt, qi_dt,  &
+                                                                             qs_dt, qg_dt
 
 !  ---  local integer variables
       integer :: i,k
@@ -159,6 +159,12 @@ module gfdl_cloud_microphys_pre
 !  ---  constant parameters    
       real(kind=kind_phys), parameter :: one     = 1.0d0, onebg = one/con_g
 
+!  ---  allocate working space
+      allocate (delp(im,1,levs),  dz(im,1,levs),    uin(im,1,levs),   vin(im,1,levs),                     & 
+                pt(im,1,levs),    qv1(im,1,levs),   ql1(im,1,levs),   qr1(im,1,levs),   qg1(im,1,levs),   &
+                qa1(im,1,levs),   qn1(im,1,levs),   qi1(im,1,levs),   qs1(im,1,levs),   pt_dt(im,1,levs), &
+                qa_dt(im,1,levs), udt(im,1,levs),   vdt(im,1,levs),   w(im,1,levs),     qv_dt(im,1,levs), &
+                ql_dt(im,1,levs), qr_dt(im,1,levs), qi_dt(im,1,levs), qs_dt(im,1,levs), qg_dt(im,1,levs))
 
 !! initialize output variables
       do i = 1, im
@@ -656,7 +662,7 @@ contains
 ! the driver of the gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>@brief The subroutine 'gfdl_cloud_microphys_driver' executes the full GFDL
+!>@brief The subroutine 'gfdl_cloud_microphys_run' executes the full GFDL
 !! cloud microphysics.
 subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
         qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,    &
