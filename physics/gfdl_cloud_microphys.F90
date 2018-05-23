@@ -65,7 +65,7 @@ module gfdl_cloud_microphys_pre
 
       if(do_shoc) then
           write(errmsg,'(*(a))')                                        &
-     &               'SHOC is not currently compatible with GFDL MP -- shutting down'
+     &               'SHOC is not currently compatible with GFDL MP'
           errflg = 1
           return
       endif
@@ -125,7 +125,6 @@ module gfdl_cloud_microphys_pre
 !! | vin       | k_flipped_meridional_wind_updated_by_physics               | k flipped meridional wind updated by physics          | m s-1       | 3   | real      | kind_phys |   out | F |
 !! | delp      | k_flipped_air_pressure_difference_between_midlayer         | k flipped air pressure difference between mid-layer   | Pa          | 3   | real      | kind_phys |   out | F |
 !! | dz        | k_flipped_physical_layer_thickness                         | k flipped physical layer thickness                    | m           | 3   | real      | kind_phys |   out | F |
-!! | seconds   | time_in_seconds                                            | time in seconds                                       | count       | 0   | integer   |           |   out | F |
 !! |-----------|------------------------------------------------------------|-------------------------------------------------------|-------------|-----|-----------|-----------|-------|---|
 !!
       subroutine gfdl_cloud_microphys_pre_run(                                      &         
@@ -135,7 +134,7 @@ module gfdl_cloud_microphys_pre
             land, area, rain0, snow0, ice0, graupel0, qn1,                          &  !! output
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, udt, vdt,       &
             qv1, ql1, qr1, qi1, qs1, qg1, qa1,                                      &
-            pt, w, uin, vin, delp, dz, seconds)
+            pt, w, uin, vin, delp, dz)
 
       implicit none
 !
@@ -147,24 +146,16 @@ module gfdl_cloud_microphys_pre
       real(kind=kind_phys), intent(in   ), dimension(:,:) :: vvl, prsl, gu0, gv0, phii, del
 !
 !  ---  interface variables (output)
-      real(kind=kind_phys), intent(  out)                                 :: seconds
-      real(kind=kind_phys), intent(  out),              dimension(:,:)    :: land, area, rain0, snow0, ice0, graupel0
-      real(kind=kind_phys), intent(  out), allocatable, dimension(:,:,:)  :: delp, dz, uin, vin, pt, qv1, ql1, qr1, qg1, qa1, qn1, qi1,   &
-                                                                             qs1, pt_dt, qa_dt, udt, vdt, w, qv_dt, ql_dt, qr_dt, qi_dt,  &
-                                                                             qs_dt, qg_dt
+      real(kind=kind_phys), intent(  out), dimension(:,:)    :: land, area, rain0, snow0, ice0, graupel0
+      real(kind=kind_phys), intent(  out), dimension(:,:,:)  :: delp, dz, uin, vin, pt, qv1, ql1, qr1, qg1, qa1, qn1, qi1,   &
+                                                                qs1, pt_dt, qa_dt, udt, vdt, w, qv_dt, ql_dt, qr_dt, qi_dt,  &
+                                                                qs_dt, qg_dt
 
 !  ---  local integer variables
       integer :: i,k
 
 !  ---  constant parameters    
       real(kind=kind_phys), parameter :: one     = 1.0d0, onebg = one/con_g
-
-!  ---  allocate working space
-      allocate (delp(im,1,levs),  dz(im,1,levs),    uin(im,1,levs),   vin(im,1,levs),                     & 
-                pt(im,1,levs),    qv1(im,1,levs),   ql1(im,1,levs),   qr1(im,1,levs),   qg1(im,1,levs),   &
-                qa1(im,1,levs),   qn1(im,1,levs),   qi1(im,1,levs),   qs1(im,1,levs),   pt_dt(im,1,levs), &
-                qa_dt(im,1,levs), udt(im,1,levs),   vdt(im,1,levs),   w(im,1,levs),     qv_dt(im,1,levs), &
-                ql_dt(im,1,levs), qr_dt(im,1,levs), qi_dt(im,1,levs), qs_dt(im,1,levs), qg_dt(im,1,levs))
 
 !! initialize output variables
       do i = 1, im
@@ -206,8 +197,6 @@ module gfdl_cloud_microphys_pre
             dz   (i,1,k) = (phii(i,levs-k+1)-phii(i,levs-k+2))*onebg
          enddo
       enddo
-!! convert time from hours to seconds
-      seconds          = mod(nint(fhour*3600),86400)
 
       end subroutine gfdl_cloud_microphys_pre_run
 
@@ -230,7 +219,7 @@ module gfdl_cloud_microphys_post
 
    contains 
 
-!! \section arg_table_gfdl_cloud_microphys_pre_finalize  Argument Table
+!! \section arg_table_gfdl_cloud_microphys_post_init  Argument Table
 !! | local_name  | standard_name                      | long_name                               | units        | rank | type      | kind      | intent | optional |
 !! |-------------|------------------------------------|-----------------------------------------|--------------|------|-----------|-----------|--------|----------|
 !!
@@ -238,7 +227,7 @@ module gfdl_cloud_microphys_post
       end subroutine gfdl_cloud_microphys_post_init
 
 !!
-!! \section arg_table_gfdl_cloud_microphys_pre_run  Argument Table
+!! \section arg_table_gfdl_cloud_microphys_post_run  Argument Table
 !! | local_name | standard_name                                              | long_name                                              | units        | rank | type      | kind      | intent | optional |
 !! |------------|------------------------------------------------------------|--------------------------------------------------------|--------------|------|-----------|-----------|--------|--------|
 !! | levs       | vertical_dimension                                         | number of vertical levels                              | count        | 0    | integer   |           | in     | F      |
@@ -356,7 +345,7 @@ module gfdl_cloud_microphys_post
       end subroutine gfdl_cloud_microphys_post_run
 
 !!
-!! \section arg_table_gfdl_cloud_microphys_pre_finalize  Argument Table
+!! \section arg_table_gfdl_cloud_microphys_post_finalize  Argument Table
 !! | local_name  | standard_name                      | long_name                               | units        | rank | type      | kind      | intent | optional |
 !! |-------------|------------------------------------|-----------------------------------------|--------------|------|-----------|-----------|--------|----------|
 !!
@@ -367,7 +356,7 @@ end module gfdl_cloud_microphys_post
 
 !!=====================================
 
-module gfdl_cloud_microphys_mod
+module gfdl_cloud_microphys
     
     ! use mpp_mod, only: stdlog, mpp_pe, mpp_root_pe, mpp_clock_id, &
     ! mpp_clock_begin, mpp_clock_end, clock_routine, &
@@ -381,12 +370,13 @@ module gfdl_cloud_microphys_mod
     implicit none
     
     private
-    
+
     public gfdl_cloud_microphys_run, gfdl_cloud_microphys_init, gfdl_cloud_microphys_finalize
-    public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
-    public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
-    public setup_con, wet_bulb
-    public cloud_diagnosis
+! ccpp standard requires that only methods be made public 
+!   public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
+!   public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
+!   public setup_con, wet_bulb
+!   public cloud_diagnosis
     
     real :: missing_value = - 1.e10
     
@@ -668,7 +658,7 @@ subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
         qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,    &
         uin, vin, udt, vdt, dz, delp, area, dt_in, land, rain, snow, ice, &
         graupel, hydrostatic, phys_hydrostatic, iis, iie, jjs, jje, kks,  &
-        kke, ktop, kbot, seconds)
+        kke, ktop, kbot)
 !!
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! | local_name | standard_name                                        | long_name                                               | units        | rank | type      | kind      | intent | optional |
@@ -714,7 +704,6 @@ subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
 !! | kke        | vertical_index_at_cloud_top                          | vertical index for top                                  | count        | 0    | integer   |           | in     | F |
 !! | ktop       | vertical_index_at_cloud_top                          | vertical index for cloud top                            | index        | 0    | integer   |           | in     | F |
 !! | kbot       | vertical_index_at_cloud_base                         | vertical index for cloud base                           | index        | 0    | integer   |           | in     | F |
-!! | seconds    | time_in_seconds                                      | time in seconds                                         | count        | 0    | integer   |           | in     | F |
 !! |----------- |------------------------------------------------------|---------------------------------------------------------|--------------|------|-----------|-----------|--------|---|
 !!
     implicit none
@@ -723,7 +712,6 @@ subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
     integer, intent (in) :: iis, iie, jjs, jje !< physics window
     integer, intent (in) :: kks, kke !< vertical dimension
     integer, intent (in) :: ktop, kbot !< vertical compute domain
-    integer, intent (in) :: seconds
     
     real, intent (in) :: dt_in !< physics time step
     
@@ -737,6 +725,7 @@ subroutine gfdl_cloud_microphys_run (qv, ql, qr, qi, qs, qg, qa, qn,      &
     real, intent (inout), dimension (:, :, :) :: pt_dt, qa_dt, udt, vdt, w
     real, intent (inout), dimension (:, :, :) :: qv_dt, ql_dt, qr_dt
     real, intent (inout), dimension (:, :, :) :: qi_dt, qs_dt, qg_dt
+
     
     real, intent (out), dimension (:, :) :: rain, snow, ice, graupel
     
@@ -3796,15 +3785,15 @@ end subroutine setupm
 ! =======================================================================
 
 !! \section arg_table_gfdl_cloud_microphys_init  Argument Table
-!! | local_name     | standard_name                                    | long_name                                        | units  | rank | type      | kind  | intent | optional |
-!! |----------------|--------------------------------------------------|--------------------------------------------------|--------|------|-----------|-------|--------|---|
-!! | me             | mpi_rank                                         | MPI rank of current process                      | flag   | 0    | integer   |       | in     | F |
-!! | master         | mpi_root                                         | MPI rank of master process                       | flag   | 0    | integer   |       | in     | F |
-!! | nlunit         | iounit_namelist                                  | fortran unit number for opening nameliust file   | none   | 0    | integer   |       | in     | F |
-!! | input_nml_file | gfdl_cloud_microphys_internalnamelist            | character string to store full namelist contents | none   | 1    | character | len=* | in     | F |
-!! | logunit        | iounit_log                                       | fortran unit number for writing logfile          | none   | 0    | integer   |       | in     | F |
-!! | fn_nml         | gfdl_cloud_microphys_namelist                    | namelist filename                                | none   | 0    | character |       | in     | F |
-!! |----------------|--------------------------------------------------|--------------------------------------------------|--------|------|-----------|-------|--------|---|
+!! | local_name     | standard_name                                    | long_name                                          | units  | rank | type      | kind  | intent | optional |
+!! |----------------|--------------------------------------------------|----------------------------------------------------|--------|------|-----------|-------|--------|----------|
+!! | me             | mpi_rank                                         | MPI rank of current process                        | flag   | 0    | integer   |       | in     | F        |
+!! | master         | mpi_root                                         | MPI rank of master process                         | flag   | 0    | integer   |       | in     | F        |
+!! | nlunit         | iounit_namelist                                  | fortran unit number for opening nameliust file     | none   | 0    | integer   |       | in     | F        |
+!! | input_nml_file | gfdl_cloud_microphys_internalnamelist            | character string to store full namelist contents   | none   | 1    | character | len=* | in     | F        |
+!! | logunit        | iounit_log                                       | fortran unit number for writing logfile            | none   | 0    | integer   |       | in     | F        |
+!! | fn_nml         | gfdl_cloud_microphys_namelist                    | namelist filename                                  | none   | 0    | character |       | in     | F        |
+!! |----------------|--------------------------------------------------|----------------------------------------------------|--------|------|-----------|-------|--------|----------|
 !!
 subroutine gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, logunit, fn_nml)
     
@@ -3817,7 +3806,9 @@ subroutine gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, loguni
     
     character (len = 64), intent (in) :: fn_nml
     character (len = *),  intent (in) :: input_nml_file(:)
-    
+
+
+!  --- local variables
     integer :: ios
     logical :: exists
     
@@ -5109,4 +5100,4 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
 end subroutine cloud_diagnosis
 !! @}
 !! @}
-end module gfdl_cloud_microphys_mod
+end module gfdl_cloud_microphys
