@@ -170,6 +170,10 @@ set(SOURCES
     ./physics/precpd.f
     ./physics/GFS_calpreciptype.f90
     ./physics/GFS_MP_generic_post.f90
+    ./physics/sfc_drv_ruc.F90
+    ./physics/module_sf_ruclsm.F90
+    ./physics/namelist_soilveg_ruc.F90
+    ./physics/set_soilveg_ruc.F90
 )
 
 set(CAPS
@@ -240,6 +244,7 @@ set(CAPS
     ./physics/GFS_rrtmg_post_cap.F90
     ./physics/get_phi_fv3_cap.F90
     ./physics/rrtmg_sw_pre_cap.F90
+#    ./physics/sfc_drv_ruc_cap.F90
 )
 
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
