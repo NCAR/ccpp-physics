@@ -197,15 +197,15 @@ module GFS_typedefs
 !   prognostic state or tendencies after physical parameterizations
 !------------------------------------------------------------------
 !! \section arg_table_GFS_stateout_type
-!! | local_name                                      | standard_name                                              | long_name                                                  | units         | rank | type    |    kind   | intent | optional |
-!! |-------------------------------------------------|------------------------------------------------------------|------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
-!! | IPD_Data(nb)%Stateout%gu0                       | x_wind_updated_by_physics                                  | zonal wind updated by physics                              | m s-1         |    2 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gv0                       | y_wind_updated_by_physics                                  | meridional wind updated by physics                         | m s-1         |    2 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gt0                       | air_temperature_updated_by_physics                         | temperature updated by physics                             | K             |    2 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gq0                       | tracer_concentration_updated_by_physics                    | tracer concentration updated by physics                    | kg kg-1       |    3 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gq0(:,:,1)                | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity updated by physics           | kg kg-1       |    2 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gq0(:,:,IPD_Control%ntcw) | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity updated by physics | kg kg-1       |    2 | real    | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Stateout%gq0(:,:,IPD_Control%ntoz) | ozone_concentration_updated_by_physics                     | ozone concentration updated by physics                     | kg kg-1       |    2 | real    | kind_phys | none   | F        |
+!! | local_name                                      | standard_name                                              | long_name                                                      | units         | rank | type    |    kind   | intent | optional |
+!! |-------------------------------------------------|------------------------------------------------------------|----------------------------------------------------------------|---------------|------|---------|-----------|--------|----------|
+!! | IPD_Data(nb)%Stateout%gu0                       | x_wind_updated_by_physics                                  | zonal wind updated by physics                                  | m s-1         |    2 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gv0                       | y_wind_updated_by_physics                                  | meridional wind updated by physics                             | m s-1         |    2 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gt0                       | air_temperature_updated_by_physics                         | temperature updated by physics                                 | K             |    2 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gq0                       | tracer_concentration_updated_by_physics                    | tracer concentration updated by physics                        | kg kg-1       |    3 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gq0(:,:,1)                | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity updated by physics               | kg kg-1       |    2 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gq0(:,:,IPD_Control%ntcw) | cloud_condensed_water_mixing_ratio_updated_by_physics      | moist mixing ratio of cloud condensed water updated by physics | kg kg-1       |    2 | real    | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Stateout%gq0(:,:,IPD_Control%ntoz) | ozone_concentration_updated_by_physics                     | ozone concentration updated by physics                         | kg kg-1       |    2 | real    | kind_phys | none   | F        |
 !!
   type GFS_stateout_type
 
@@ -1247,7 +1247,7 @@ module GFS_typedefs
 !! | IPD_Data(nb)%Intdiag%totgrp               |                                                                         | accumulated graupel precipitation                               | kg m-2        |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%u10m                 | x_wind_at_10m                                                           | 10 meter u wind speed                                           | m s-1         |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%v10m                 | y_wind_at_10m                                                           | 10 meter v wind speed                                           | m s-1         |    1 | real        | kind_phys | none   | F        |
-!! | IPD_Data(nb)%Intdiag%zlvl                 | height_above_mean_sea_level_at_lowest_model_layer                       | layer 1 height                                                  | m             |    1 | real        | kind_phys | none   | F        |
+!! | IPD_Data(nb)%Intdiag%zlvl                 | height_above_ground_at_lowest_model_layer                               | layer 1 height                                                  | m             |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%psurf                |                                                                         | surface pressure                                                | Pa            |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%hpbl                 | atmosphere_boundary_layer_thickness                                     | pbl height                                                      | m             |    1 | real        | kind_phys | none   | F        |
 !! | IPD_Data(nb)%Intdiag%pwat                 | column_precipitable_water                                               | precipitable water                                              | kg m-2        |    1 | real        | kind_phys | none   | F        |
