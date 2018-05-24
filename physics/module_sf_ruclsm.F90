@@ -5,11 +5,9 @@ MODULE module_sf_ruclsm
 
 !>\defgroup RUC_LSM RUC LSM Model
 !!\brief This is the entity of RUC LSM model of physics subroutines.
-!! It is a soil/veg/snowpack and ice/snowpackland-surface model to update soil moisture,
-!! soil ice, soil temperature, skin temperature, snowpack water content, snowdepth,
-!! and all terms of the surface energy balance and surface water balance
-!! (excluding input atmospheric forcings of downward radiation and 
-!! precipitation ).
+!! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
+!! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
+!! and all terms of the surface energy balance and surface water balance,
 
    use machine ,   only : kind_phys
    use namelist_soilveg_ruc
@@ -21,39 +19,62 @@ MODULE module_sf_ruclsm
 !  ---  constant parameters:
       real (kind=kind_phys), parameter :: P1000mb = 100000.
       real (kind=kind_phys), parameter :: xls     = 2.85E6
+      real (kind=kind_phys), parameter :: rhowater= 1000.
+      real (kind=kind_phys), parameter :: piconst = 3.1415926535897931
+      real (kind=kind_phys), parameter :: r_v     = 4.6150e+2
 !
-      public :: qsn
+      private :: qsn
+
+! VEGETATION PARAMETERS
+        INTEGER :: LUCATS 
+        integer, PARAMETER :: NLUS=50
+        CHARACTER*8 LUTYPE
+
+! SOIL PARAMETERS
+        INTEGER :: SLCATS
+        INTEGER, PARAMETER :: NSLTYPE=30
+        CHARACTER*8 SLTYPE
+
+! LSM GENERAL PARAMETERS
+        INTEGER :: SLPCATS
+        INTEGER, PARAMETER :: NSLOPE=30
+        REAL ::  SBETA_DATA,FXEXP_DATA,CSOIL_DATA,SALP_DATA,REFDK_DATA, &
+                 REFKDT_DATA,FRZK_DATA,ZBOT_DATA,  SMLOW_DATA,SMHIGH_DATA, &
+                        CZIL_DATA
+
 
 CONTAINS
+
 !-----------------------------------------------------------------
     SUBROUTINE LSMRUC(                                           &
-                   dt,ktau,nsl,zs,                               &
+                   DT,KTAU,NSL,                                  &
+!                   lakemodel,lakemask,                           &
                    graupelncv,snowncv,rainncv,raincv,            &
-                   rainbl,snow,snowh,snowc,frzfrac,frpcpn,       &
-                   rhosnf,precipfr,                              & 
-                   z3d,p8w,t3d,qv3d,qc3d,rho3d,                  & 
-                   glw,gsw,emiss,chs,flqc,flhc,                  &
-                   mavail,canwat,vegfra,alb,znt,                 &
-                   z0,snoalb,albbck,                             &
-                   llanduse,landusef, nlcat,                     &
-                   soilctop, nscat,                              &
-                   qsfc,qsg,qvg,qcg,dew,soilt1,                  &
-                   tbot,ivgtyp,isltyp,xland,                     &
-                   iswater,isice,xice,xice_threshold,            &
-                   CP,ROVCP,RV,G0,PI,LV,STBOLT,RHOWATER,         &
-                   soilmois,sh2o,smavail,smmax,                  &
-                   tso,soilt,hfx,qfx,lh,edir,ec,ett,transp,      &
-                   snflx,budget,runoff1,runoff2,drip,sublim,     &
-                   sfcevp,grdflx,snowfallac,acsnow,snom,snoh,    &
-                   smfr3d,keepfr3dflag,                          &
+                   ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
+                   rhosnf,precipfr,                              &
+                   Z3D,P8W,T3D,QV3D,QC3D,RHO3D,                  &
+                   GLW,GSW,EMISS,CHKLOWQ, CHS,                   & 
+                   FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
+                   Z0,SNOALB,ALBBCK,                             &
+!                   Z0,SNOALB,ALBBCK,LAI,                         &
+                   landusef, nlcat,                              & 
+!                   mosaic_lu, mosaic_soil,                       &
+                   soilctop, nscat,                              & 
+                   QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
+                   TBOT,IVGTYP,ISLTYP,XLAND,                     &
+                   ISWATER,ISICE,XICE,XICE_THRESHOLD,            &
+                   CP,RV,RD,G0,PI,LV,STBOLT,                     &
+                   SOILMOIS,SH2O,SMAVAIL,SMMAX,                  &
+                   TSO,SOILT,HFX,QFX,LH,INFILTR,                 &
+                   RUNOFF1,RUNOFF2,ACRUNOFF,SFCEXC,              &
+                   SFCEVP,GRDFLX,SNOWFALLAC,ACSNOW,SNOM,         &
+                   SMFR3D,KEEPFR3DFLAG,                          &
                    myj,shdmin,shdmax,rdlai2d,                    &
                    ims,ime, jms,jme, kms,kme,                    &
                    its,ite, jts,jte, kts,kte                     )
-
 !-----------------------------------------------------------------
    IMPLICIT NONE
 !-----------------------------------------------------------------
-!
 !
 ! The RUC LSM model is described in:
 !  Smirnova, T.G., J.M. Brown, and S.G. Benjamin, 1997: 
@@ -101,9 +122,8 @@ CONTAINS
 !-- CP          heat capacity at constant pressure for dry air (J/kg/K)
 !-- G0          acceleration due to gravity (m/s^2)
 !-- LV          latent heat of melting (J/kg)
-!    SOILMOIS - soil moisture content (volumetric fraction)
 !-- STBOLT      Stefan-Boltzmann constant (W/m^2/K^4)
-!-- rhowater -  water density
+!    SOILMOIS - soil moisture content (volumetric fraction)
 !         TSO - soil temp (K)
 !-- SOILT       surface temperature (K)
 !-- HFX         upward heat flux at the surface (W/m^2)
@@ -133,138 +153,15 @@ CONTAINS
 !   INTEGER,     PARAMETER            ::     nzss=5
 !   INTEGER,     PARAMETER            ::     nddzs=2*(nzss-2)
 
-!! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!|-------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | dt              | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
-!! | ktau            | number_of_time_steps                                                         | number of time steps                                            | none          |    0 | integer   |           | in     | F        |
-!! | nsl             | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | zs              | depth_of_soil_levels                                                         | depth of soil levels                                            | m             |    1 | real      | kind_phys | in     | F        |
-!! | graupelncv      | graupel_fall_per_timestep                                                    | graupel fall at this time step                                  | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | snowncv         | snow_fall_per_timestep                                                       | snow fall at this time step                                     | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | rainncv         | resolved_rain_per_timestep                                                   | resolved rain at this time step                                 | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | rancv           | convective_rain_per_timestep                                                 | convective rain at this time step                               | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | icecv           | resolved_ice_per_timestep                                                    | convective rain at this time step                               | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | rainbl          | total_precip_per_timestep                                                    | total precipitation amount in each time step                    | kg m-2        |    1 | real      | kind_phys | in     | F        |
-!! | snow            | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | snowh           | snow_thickness_over_land                                                     | accumulated snow depth over land/ice                            | m             |    1 | real      | kind_phys | inout  | F        |
-!! | snowc           | surface_snow_area_fraction                                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | frzfrac         | ratio_of_snowfall_to_total                                                   | snow ratio: ratio of snow to total precipitation                | frac          |    1 | real      | kind_phys | in     | F        |
-!! | frpcpn          | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | logical   |           | in     | F        |
-!! | rhosnf          | density_frozen_precip                                                        | density of frozen preipitation                                  | kg m-3        |    1 | real      | kind_phys | out    | F        | 
-!! | precipfr        | frozen_precip_per_timestep                                                   | frozen precipitation amount in each time step                   | kg m-2        |    1 | real      | kind_phys | out    | F        | 
-!! | z3d             | height_above_ground_level_at_lowest_model_level                              | height above ground at 1st model layer                          | m             |    1 | real      | kind_phys | in     | F        |
-!! | p8w             | air_pressure_at_lowest_model_layer                                           | mean pressure at lowest model layer                             | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | t3d             | air_temperature_at_lowest_model_level                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
-!! | qv3d            | water_vapor_mixing_ratio_at_lowest_model_level                               | water vapor mixing ratio at 1st model layer                     | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | qc3d            | cloud_water_mixing_ratio_at_lowest_model_level                               | cloud water mixing ratio at 1st model layer                     | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | rho3d           | air_density_at_lowest_model_level                                            | air density at 1st model layer                                  | kg m-3        |    1 | real      | kind_phys | in     | F        |
-!! | glw             | surface_downwelling_longwave_flux_on_radiation_time_step                     | total sky sfc downward lw flux                                  | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | gsw             | surface_net_downwelling_shortwave_flux_on_radiation_time_step                | total sky sfc netsw flx into ground                             | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | emiss           | surface_longwave_emissivity                                                  | surface longwave emissivity                                     | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | chs             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | kg m-2 s-1    |    1 | real      | kind_phys | in     | F        |
-!! | flqc            | surface_exchange_coefficient_for_moisture                                    | surface exchange coeff for moisture                             | kg m-2 s-1    |    1 | real      | kind_phys | in     | F        |
-!! | flhc            | surface_exchange_coefficient_for_heat_in_air                                 | surface exchange coeff for heat                                 | W m-2 s-1 K-1 |    1 | real      | kind_phys | in     | F        |
-!! | mavail          | soil_moisture_availability_at_surface                                        | soil moisture availability                                      | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | canwat          | canopy_water_amount                                                          | canopy moisture content                                         | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | vegfra          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | %             |    1 | real      | kind_phys | in     | F        |
-!! | alb             | surface_diffused_shortwave_albedo                                            | mean surface diffused shortwave albedo                          | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | znt             | surface_roughness_length                                                     | surface roughness length                                        | m             |    1 | real      | kind_phys | inout  | F        |
-!! | z0              | surface_roughness_length                                                     | surface roughness length                                        | m             |    1 | real      | kind_phys | inout  | F        |
-!! | snoalb          | upper_bound_on_max_albedo_over_deep_snow                                     | maximum snow albedo                                             | frac          |    1 | real      | kind_phys | in     | F        |
-!! | albbck          | snow_free_surface_diffused_shortwave_albedo                                  | snow-free surface diffused shortwave albedo                     | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | lai             | leaf_area_index                                                              | leaf_area_index                                                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | landusef        | fraction_of_vegetation_category_in_cell                                      | vegetation fraction for lsm                                     | frac          |    1 | real      | kind_phys | in     | F        |
-!! | nlcat           | number_of_vegetation_categories                                              | number of vegetation categories                                 | none          |    1 | integer   |           | in     | F        |
-!! | mosaic_lu       | flag_for_veg_mosaic                                                          | flag for vegetation mosaic in lsm                               | none          |    1 | integer   |           | in     | F        | 
-!! | mosaic_soil     | flag_for_veg_mosaic                                                          | flag for soil mosaic in lsm                                     | none          |    1 | integer   |           | in     | F        | 
-!! | soilctop        | fraction_of_soil_category_in_cell                                            | soil type fraction for lsm                                      | frac          |    1 | real      | kind_phys | in     | F        |
-!! | nscat           | number_of_soil_categories                                                    | number of soil categories                                       | none          |    1 | integer   |           | in     | F        |
-!! | qsfc            | surface_specific_humidity                                                    | surface specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | qsg             | surface_saturation_watervapor_mixing_ratio                                   | surface water vapor mixing ratio at saturation                  | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | qvg             | surface_watervapor_mixing_ratio                                              | surface water vapor mixing ratio                                | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | qcg             | surface_cloudwater_mixing_ratio                                              | surface cloud water mixing ratio                                | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | dew             | surface_condensation_mass                                                    | mass of condensed water at surface                              | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | soilt1          | snow_temperature_bottom_first_layer                                          | snow temperature at the bottom of first snow layer              | K             |    1 | real      | kind_phys | inout  | F        |
-!! | tsnav           | average_temperature_of_snow_pack                                             | average temperature of snow pack on the ground                  | C             |    1 | real      | kind_phys | inout  | F        |
-!! | tbot            | deep_soil_temperature                                                        | bottom soil temperature                                         | K             |    1 | real      | kind_phys | in     | F        |
-!! | ivgtyp          | cell_vegetation_type                                                         | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
-!! | isltyp          | cell_soil_type                                                               | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
-!! | xland           | sea_land_mask_real                                                           | landmask: sea/land=2/1                                          | flag          |    1 | real      | kind_phys | in     | F        |
-!! | iswater         | water_landuse_category                                                       | landuse classification category for water                       | index         |    1 | integer   |           | in     | F        |
-!! | isice           | ice_landuse_category                                                         | landuse classification category for ice                         | index         |    1 | integer   |           | in     | F        |
-!! | xice            | sea_ice_concentration                                                        | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
-!! | xice_threshold  | sea_ice_threshold                                                            | minimum concentration of sea ice                                | frac          |    1 | real      | kind_phys | in     | F        |
-!! | cp              | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rovcp           | ratio_dry_air_gas_constant_over_specific_heat_capacity                       | rovcp=rd/cp                                                     | none          |    0 | real      | kind_phys | in     | F        |
-!! | g0              | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | lv              | latent_heat_evaporation                                                      | latent heat of  evaporation/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | stbolt          | stefan_boltzmann_constant                                                    | stefan-boltzmann constant                                       | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
-!! | soilmois        | volume_fraction_of_soil_moisture                                             | volumetric fraction of soil moisture                            | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | sh2o            | volume_fraction_of_unfrozen_soil_moisture                                    | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | smavail         | integrated_soil_moisture                                                     | available soil moisture in soil domain                          | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | smmax           | integrated_max_soil_moisture                                                 | maximum soil moisture in soil domain                            | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | tso             | soil_temperature                                                             | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
-!! | soilt           | surface_skin_temperature                                                     | surface skin temperature                                        | K             |    1 | real      | kind_phys | inout  | F        |
-!! | hfx             | instantaneous_surface_upward_sensible_heat_flux                              | surface upward sensible heat flux                               | W m-2         |    1 | real      | kind_phys | none   | F        |
-!! | qfx             | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | lh              | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | edir            |                                                                              | surface upward evporation flux from bare soil                   ! kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | ec              |                                                                              | surface upward evporation flux from canopy                      ! kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | ett             |                                                                              | surface upward transpiraion flux                                ! kg m-2 s-1 !|    1 | real      | kind_phys | inout  | F        |
-!! | transp
-!! | snflux
-!! | budget
-!! | runoff1         | surface_runoff_flux                                                          | surface runoff flux                                             | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | runoff2         | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | acrunoff        | total_runoff                                                                 | total water runoff                                              | kg m-2        |    1 | real      | kind_phys | none   | F        |
-!! | sfcexc          | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | sfcevp          | total_kinematic_surface_upward_latent_heat_flux                              | total surface upward evaporation flux                           | kg m-2        |    1 | real      | kind_phys | none   | F        |
-!! | grdflx          | upward_heat_flux_in_soil                                                     | upward soil heat flux                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | snowfallac      | total_frozen_precipitation_accumulation                                      | total frozen precipitation accumulation                         | m             |    1 | real      | kind_phys | inout  | F        |
-!! | acsnow          | total_snow_precipitation                                                     | total snow precipitation                                        | kg m-2        |    1 | real      | kind_phys | none   | F        |
-!! | snom            | total_snow_melt                                                              | total amount of snow melt                                       | kg m-2        |    1 | real      | kind_phys | none   | F        |
-!! | snoh            | total_snow_melt                                                              | total amount of snow melt                                       | kg m-2        |    1 | real      | kind_phys | none   | F        |
-!! | smfr3d          | volume_fraction_of_frozen_soil_moisture                                      | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | keepfr3dflag    | flag_for_frozen_physics                                                      | flag for processes in frozen soil: 0, 1-limit on ice increase   | flag          |    2 | real      | kind_phys | inout  | F        |
-!! | myj             | flag_use_myj_surface_layer                                                   | .true. - use MYJ surface layer scheme                           | flag          |    1 | logical   |           | in     | F        |
-!! | shdmin          | minimum_vegetation_area_fraction                                             | min fractional coverage of green veg                            | %             |    1 | real      | kind_phys | in     | F        |
-!! | shdmax          | maximum_vegetation_area_fraction                                             | max fractional coverage of green vegetation                     | %             |    1 | real      | kind_phys | in     | F        |
-!! | rdlai2d         | flag_for_lai_data                                                            | .true. - use 2-d LAI data                                       | flag          |    1 | logical   |           | in     | F        |
-!! | jms,jme         | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | jts,jte         | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | jds,jde         | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | ims,ime         |                                                                              | ims=ime=1                                                       | count         |    0 | integer   |           | in     | F        |
-!! | its,ite         |                                                                              | its=ite=1                                                       | count         |    0 | integer   |           | in     | F        |
-!! | kms,kme         | vertical_loop_extemnt                                                        | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
-!! | kts,kte         | vertical_loop_extemnt                                                        | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
-!! | kds,kde         | vertical_loop_extemnt                                                        | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
-
-
-!tgs - possible output variables
-!! | ivegsrc        | vegetation_type !| vegetation type data source umd or igbp                         | index !|    0 | integer   |           | in     | F        | 
-!! | trans          | transpiration_flux !| total plant transpiration rate                                  | kg m-2 s-1 !|    1 | real      | kind_phys | inout  | F        |
-!! | evbs           | soil_upward_latent_heat_flux !| soil upward latent heat flux                                    | W m-2 !|    1 | real      | kind_phys | inout  | F        |
-!! | evcw           | canopy_upward_latent_heat_flux !| canopy upward latent heat flux                                  | W m-2 !|    1 | real      | kind_phys | inout  | F        |
-!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux !| latent heat flux from snow depo/subl                            | W m-2 !|    1 | real      | kind_phys | inout  | F        |
-!! | snohf          | snow_freezing_rain_upward_latent_heat_flux !| latent heat flux due to snow and frz rain                       | W m-2 !|    1 | real      | kind_phys | inout  | F        |
-!! | smcwlt2        | !volume_fraction_of_condensed_water_in_soil_at_wilting_point                  | !soil water fraction at wilting point                            | frac !|    1 | real      | kind_phys | inout  | F        |
-!! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil !| soil moisture threshold                                         | frac !|    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message !| error message for error handling in CCPP                        | none !|    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag !| error flag for error handling in CCPP                           | flag !|    0 | integer   |           | out    | F        |
-!!
-
-
-!   real (kind=kind_phys),       INTENT(IN   )    ::     DT
-   real (kind=kind_phys),  intent(in) :: dt 
+   REAL,       INTENT(IN   )    ::     DT
    LOGICAL,    INTENT(IN   )    ::     myj,frpcpn
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT
+!      , mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::     ktau, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme, &
                                        its,ite, jts,jte, kts,kte
 
-   CHARACTER(LEN=*), INTENT(IN   )    ::              llanduse
-
-   real (kind=kind_phys),    DIMENSION( ims:ime, kms:kme, jms:jme ), &
+   REAL,    DIMENSION( ims:ime, kms:kme, jms:jme )            , &
             INTENT(IN   )    ::                           QV3D, &
                                                           QC3D, &
                                                            p8w, &
@@ -272,7 +169,7 @@ CONTAINS
                                                            T3D, &
                                                            z3D
 
-   real (kind=kind_phys),       DIMENSION( ims:ime , jms:jme ),  &
+   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
                INTENT(IN   )    ::                       RAINBL, &
                                                             GLW, &
                                                             GSW, &
@@ -286,22 +183,22 @@ CONTAINS
                                                          VEGFRA, &
                                                            TBOT
 
-   real (kind=kind_phys),       DIMENSION( ims:ime , jms:jme ),  &
+   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
                INTENT(IN   )    ::                   GRAUPELNCV, &
                                                         SNOWNCV, &
                                                          RAINCV, &
                                                         RAINNCV
-!   real (kind=kind_phys),       DIMENSION( ims:ime , jms:jme ),                   &
+!   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
 !               INTENT(IN   )    ::                     lakemask
 !   INTEGER,    INTENT(IN   )    ::                    LakeModel
 
-   real (kind=kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   SHDMAX
-   real (kind=kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   SHDMIN
+   REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   SHDMAX
+   REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   SHDMIN
    LOGICAL, intent(in) :: rdlai2d
 
-   real (kind=kind_phys),       DIMENSION( 1:nsl), INTENT(IN   )      ::      ZS
+   REAL,       DIMENSION( 1:nsl), INTENT(IN   )      ::      ZS
 
-   real (kind=kind_phys),       DIMENSION( ims:ime , jms:jme ),                   &
+   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
                INTENT(INOUT)    ::                               &
                                                            SNOW, &
                                                           SNOWH, &
@@ -311,60 +208,61 @@ CONTAINS
                                                             ALB, &
                                                           EMISS, &
                                                          MAVAIL, & 
+                                                         SFCEXC, &
                                                             Z0 , &
                                                             ZNT
 
-   real (kind=kind_phys),       DIMENSION( ims:ime , jms:jme ),                   &
+   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
                INTENT(IN   )    ::                               &
                                                         FRZFRAC
 
    INTEGER,    DIMENSION( ims:ime , jms:jme ),                   &
-               INTENT(INOUT )    ::                      IVGTYP, &
+               INTENT(IN   )    ::                       IVGTYP, &
                                                          ISLTYP
-   real (kind=kind_phys),     DIMENSION( ims:ime , 1:nlcat, jms:jme ), INTENT(IN):: LANDUSEF
-   real (kind=kind_phys),     DIMENSION( ims:ime , 1:nscat, jms:jme ), INTENT(IN):: SOILCTOP
+   REAL,     DIMENSION( ims:ime , 1:nlcat, jms:jme ), INTENT(IN):: LANDUSEF
+   REAL,     DIMENSION( ims:ime , 1:nscat, jms:jme ), INTENT(IN):: SOILCTOP
 
-   real (kind=kind_phys), INTENT(IN   ) :: CP, ROVCP, RV, G0, PI, LV, STBOLT, rhowater, XICE_threshold
+   REAL, INTENT(IN   )          ::     CP,G0,LV,STBOLT,RV,RD,PI, &
+                                       XICE_threshold
  
-   real (kind=kind_phys),       DIMENSION( ims:ime , 1:nsl, jms:jme )           , &
+   REAL,       DIMENSION( ims:ime , 1:nsl, jms:jme )           , &
                INTENT(INOUT)    ::                 SOILMOIS,SH2O,TSO
 
-   real (kind=kind_phys),       DIMENSION( ims:ime, jms:jme )                   , &
+   REAL,       DIMENSION( ims:ime, jms:jme )                   , &
                INTENT(INOUT)    ::                        SOILT, &
                                                             HFX, &
                                                             QFX, &
                                                              LH, &
+                                                         SFCEVP, &
                                                         RUNOFF1, &
                                                         RUNOFF2, &
-                                                         SFCEVP, &
+                                                       ACRUNOFF, &
                                                          GRDFLX, &
                                                          ACSNOW, &
                                                            SNOM, &
-                                                           SNOH, &
                                                             QVG, &
                                                             QCG, &
                                                             DEW, &
-                                                           DRIP, &
                                                            QSFC, &
                                                             QSG, &
-                                                         SOILT1
+                                                        CHKLOWQ, &
+                                                         SOILT1, &
+                                                          TSNAV
 
-   real (kind=kind_phys),       DIMENSION( ims:ime, jms:jme )                   , & 
+   REAL,       DIMENSION( ims:ime, jms:jme )                   , & 
                INTENT(INOUT)    ::                      SMAVAIL, &
                                                           SMMAX
 
-   real (kind=kind_phys),       DIMENSION( its:ite, jts:jte )    ::               &
+   REAL,       DIMENSION( its:ite, jts:jte )    ::               &
                                                              PC, &
                                                       SFCRUNOFF, &
                                                        UDRUNOFF, &
-                                                       ACRUNOFF, &
-                                                         SFCEXC, &
-                                                        CHKLOWQ, &
-                                                         EMISSL, &
                                                             LAI, &
+                                                         EMISSL, &
                                                            ZNTL, &
                                                         LMAVAIL, &
                                                           SMELT, &
+                                                           SNOH, &
                                                           SNFLX, &
                                                            EDIR, &
                                                              EC, &
@@ -374,11 +272,10 @@ CONTAINS
                                                             smf, &
                                                           EVAPL, &
                                                           PRCPL, &
-                                                          TSNAV, &
                                                          SEAICE, &
                                                         INFILTR
 ! Energy and water budget variables:
-   real (kind=kind_phys),       DIMENSION( its:ite, jts:jte )    ::               &
+   REAL,       DIMENSION( its:ite, jts:jte )    ::               &
                                                          budget, &
                                                        acbudget, &
                                                     waterbudget, &
@@ -388,16 +285,16 @@ CONTAINS
                                                       canwatold
 
 
-   real (kind=kind_phys),       DIMENSION( ims:ime, 1:nsl, jms:jme)               &
+   REAL,       DIMENSION( ims:ime, 1:nsl, jms:jme)               &
                                              ::    KEEPFR3DFLAG, &
                                                          SMFR3D
 
-   real (kind=kind_phys),       DIMENSION( ims:ime, jms:jme ), INTENT(OUT)     :: &
+   REAL,       DIMENSION( ims:ime, jms:jme ), INTENT(OUT)     :: &
                                                          RHOSNF, & !RHO of snowfall
                                                        PRECIPFR, & ! time-step frozen precip
                                                      SNOWFALLAC
 !--- soil/snow properties
-   real (kind=kind_phys)                                                          &
+   REAL                                                          &
                              ::                           RHOCS, &
                                                        RHONEWSN, &
                                                           RHOSN, &
@@ -415,7 +312,7 @@ CONTAINS
                                                           SNHEI, &
                                                            SNWE
 
-   real (kind=kind_phys)                                      ::              CN, &
+   REAL                                      ::              CN, &
                                                          SAT,CW, &
                                                            C1SN, &
                                                            C2SN, &
@@ -424,32 +321,31 @@ CONTAINS
                                                             KWT
 
 
-   real (kind=kind_phys),     DIMENSION(1:NSL)                ::          ZSMAIN, &
+   REAL,     DIMENSION(1:NSL)                ::          ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:2*(nsl-2))          ::           DTDZS
+   REAL,     DIMENSION(1:2*(nsl-2))          ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001)               ::             TBQ
+   REAL,     DIMENSION(1:5001)               ::             TBQ
 
 
-   real (kind=kind_phys),     DIMENSION( 1:nsl )              ::         SOILM1D, & 
+   REAL,     DIMENSION( 1:nsl )              ::         SOILM1D, & 
                                                           TSO1D, &
-                                                         TRANSP, &
                                                         SOILICE, &
                                                         SOILIQW, &
                                                        SMFRKEEP
 
-   real (kind=kind_phys),     DIMENSION( 1:nsl )              ::          KEEPFR
+   REAL,     DIMENSION( 1:nsl )              ::          KEEPFR
                                                 
-   real (kind=kind_phys),     DIMENSION( 1:nlcat )            ::          lufrac
-   real (kind=kind_phys),     DIMENSION( 1:nscat )            ::          soilfrac
+   REAL,     DIMENSION( 1:nlcat )            ::          lufrac
+   REAL,     DIMENSION( 1:nscat )            ::          soilfrac
 
-   real (kind=kind_phys)                           ::                        RSM, &
+   REAL                           ::                        RSM, &
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
 
-   real (kind=kind_phys)                           ::                     PRCPMS, &
+   REAL                           ::                     PRCPMS, &
                                                         NEWSNMS, &
                                                       prcpncliq, &
                                                        prcpncfr, &
@@ -470,10 +366,10 @@ CONTAINS
                                                          icerat, &
                                                           curat, &
                                                        INFILTRP
-   real (kind=kind_phys)      ::  cq,r61,r273,arp,brp,x,evs,eis
-   real (kind=kind_phys)      ::  cropsm
+   REAL      ::  cq,r61,r273,arp,brp,x,evs,eis
+   REAL      ::  cropsm
 
-   real (kind=kind_phys)      ::  meltfactor, ac,as, wb
+   REAL      ::  meltfactor, ac,as, wb,rovcp
    INTEGER   ::  NROOT
    INTEGER   ::  ILAND,ISOIL,IFOREST
  
@@ -485,6 +381,7 @@ CONTAINS
 !   
      debug_print = .false.
 !
+         rovcp = rd/cp
 
          NZS=NSL
          NDDZS=2*(nzs-2)
@@ -509,19 +406,14 @@ CONTAINS
 
         END DO
 
+!--- Initialize soil/vegetation parameters
+!--- This is temporary until SI is added to mass coordinate ---!!!!!
+
      if(ktau.eq.1) then
-
-!> Initialize soil and vegetation parameters
-        call ruclsminit( debug_print, ktau,                         &
-                   sh2o, smfr3d, tso, soilmois, isltyp, ivgtyp,     &
-                   xice, mavail, nzs, iswater, isice, znt,          &
-                   ims,ime, jms,jme, kms,kme,                       &
-                   its,ite, jts,jte, kts,kte                        )
-
      DO J=jts,jte
          DO i=its,ite
             do k=1,nsl
-              keepfr3dflag(i,k,j)=0.
+       keepfr3dflag(i,k,j)=0.
             enddo
 !--- initializing snow fraction, thereshold = 32 mm of snow water 
 !    or ~100 mm of snow height
@@ -789,14 +681,12 @@ CONTAINS
        if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
            print *,'before SOILVEGIN - z0,znt(195,254)',z0(i,j),znt(i,j)
     ENDIF
-
 !--- initializing soil and surface properties
      CALL SOILVEGIN  ( debug_print, &
-                       soilfrac, nscat, shdmin(i,j), shdmax(i,j),                    &
-                       nlcat, iland, isoil, iswater, iforest, lufrac, vegfra(I,J),   &
-                       EMISSL(I,J), PC(I,J), ZNT(I,J), LAI(I,J), RDLAI2D,            &
-                       QWRTZ, RHOCS, BCLH, DQM, KSAT, PSIS, QMIN, REF, WILT,i,j )
-
+                       soilfrac,nscat,shdmin(i,j),shdmax(i,j),&
+                       NLCAT,ILAND,ISOIL,iswater,MYJ,IFOREST,lufrac,VEGFRA(I,J),     &
+                       EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),RDLAI2D,                &
+                       QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j )
     IF (debug_print ) THEN
       if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
          print *,'after SOILVEGIN - z0,znt(375,254),lai(375,254)',z0(i,j),znt(i,j),lai(i,j)
@@ -1003,11 +893,9 @@ CONTAINS
                 wilt,psis,bclh,ksat,                             &
                 sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
 !--- constants
-                cp,rovcp,rv,g0,lv,pi,stbolt,rhowater,            &
-                cw,c1sn,c2sn,                                    &
+                cp,rovcp,g0,lv,stbolt,cw,c1sn,c2sn,              &
                 KQWRTZ,KICE,KWT,                                 &
 !--- output variables
-                drip(i,j),transp,                                &
                 snweprint,snheiprint,rsm,                        &
                 soilm1d,tso1d,smfrkeep,keepfr,                   &
                 soilt(I,J),soilt1(i,j),tsnav(i,j),dew(I,J),      &
@@ -1088,7 +976,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- Convert the water unit into mm
         SFCRUNOFF(I,J) = SFCRUNOFF(I,J)+RUNOFF1(I,J)*DT*1000.0
         UDRUNOFF (I,J) = UDRUNOFF(I,J)+RUNOFF2(I,J)*DT*1000.0
-        ACRUNOFF(I,J)  = ACRUNOFF(I,J)+RUNOFF1(I,J)*DT*1000.0
+        ACRUNOFF(I,J)  = ACRUNOFF(I,J)+(RUNOFF1(I,J)+RUNOFF2(I,J))*DT*1000.0
         SMAVAIL  (I,J) = SMAVAIL(I,J) * 1000.
         SMMAX    (I,J) = SMMAX(I,J) * 1000.
         smtotold (I,J) = smtotold(I,J) * 1000.
@@ -1205,6 +1093,14 @@ endif
                       -runoff1(i,j)*dt*1.e3-runoff2(i,j)*dt*1.e3 &
                       -ac-as - (smavail(i,j)-smtotold(i,j))
 
+
+!       waterbudget(i,j)=rainbl(i,j)-qfx(i,j)*dt-(smavail(i,j)-smtotold(i,j)) &
+
+!tgs27apr17       acwaterbudget(i,j)=acwaterbudget(i,j)+waterbudget(i,j)
+
+!!!!TEST use  LH to check water budget
+!          GRDFLX (I,J) = waterbudget(i,j) 
+
     IF (debug_print ) THEN
   print *,'Smf=',smf(i,j),i,j
   print *,'Budget',budget(i,j),i,j
@@ -1257,11 +1153,9 @@ endif
                 QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    &
                 sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
 !--- constants
-                cp,rovcp,rv,g0,lv,pi,stbolt,rhowater,            &
-                cw,c1sn,c2sn,                                    &
+                cp,rovcp,g0,lv,stbolt,cw,c1sn,c2sn,              &
                 KQWRTZ,KICE,KWT,                                 &
 !--- output variables
-                drip,transp,                                     &
                 snweprint,snheiprint,rsm,                        &
                 soilm1d,ts1d,smfrkeep,keepfr,soilt,soilt1,       &
                 tsnav,dew,qvg,qsg,qcg,                           &
@@ -1269,8 +1163,6 @@ endif
                 edir1,ec1,ett1,eeta,qfx,hfx,s,sublim,            &
                 evapl,prcpl,fltot,runoff1,runoff2,soilice,       &
                 soiliqw,infiltr,smf)
-
-       use namelist_soilveg_ruc
 !-----------------------------------------------------------------
        IMPLICIT NONE
 !-----------------------------------------------------------------
@@ -1280,17 +1172,16 @@ endif
    INTEGER,  INTENT(IN   )   ::  isice,i,j,nroot,ktau,nzs ,      &
                                  nddzs                             !nddzs=2*(nzs-2)
 
-   real (kind=kind_phys),  intent(in) :: delt 
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX,meltfactor
-   real (kind=kind_phys),     INTENT(IN   )   ::  C1SN,C2SN
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX,meltfactor
+   REAL,     INTENT(IN   )   ::  C1SN,C2SN
    LOGICAL,    INTENT(IN   )    ::     myj, debug_print
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                            PATM, &
                                                            TABS, &
                                                           QVATM, &
                                                           QCATM
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                              PC, &
@@ -1304,7 +1195,7 @@ endif
                                                              
    INTEGER,   INTENT(IN   )  ::                          IVGTYP, ISLTYP
 !--- 2-D variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(INOUT)    ::                           EMISS, &
                                                          MAVAIL, &
                                                        SNOWFRAC, &
@@ -1313,7 +1204,7 @@ endif
                                                             CST
 
 !--- soil properties
-   real (kind=kind_phys)                      ::                                  &
+   REAL                      ::                                  &
                                                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -1325,40 +1216,37 @@ endif
                                                             SAT, &
                                                            WILT
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CN, &
+   REAL,     INTENT(IN   )   ::                              CN, &
                                                              CW, &
                                                              CP, &
                                                           ROVCP, &
-                                                             RV, &
                                                              G0, &
                                                              LV, &
-                                                             PI, &
                                                          STBOLT, &
-                                                       RHOWATER, &
                                                          KQWRTZ, &
                                                            KICE, &
                                                             KWT
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2 
 
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION( 1:nzs )                                , &
+   REAL,     DIMENSION( 1:nzs )                                , &
              INTENT(INOUT)   ::                            TS1D, & 
                                                         SOILM1D, &
                                                        SMFRKEEP
-   real (kind=kind_phys),  DIMENSION( 1:nzs )                                   , &
+   REAL,  DIMENSION( 1:nzs )                                   , &
              INTENT(INOUT)   ::                          KEEPFR
 
-   real (kind=kind_phys),  DIMENSION(1:NZS), INTENT(INOUT)  ::          SOILICE, &
+   REAL,  DIMENSION(1:NZS), INTENT(INOUT)  ::          SOILICE, &
                                                        SOILIQW
           
 
@@ -1366,7 +1254,7 @@ endif
    INTEGER                   ::                     ILANDs
 
 !-------- 2-d variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
              INTENT(INOUT)   ::                             DEW, &
                                                           EDIR1, &
                                                             EC1, &
@@ -1406,12 +1294,11 @@ endif
                                                           TSNAV, &
                                                             ZNT
 
-   real (kind=kind_phys),     DIMENSION(1:NZS)              ::                    &
+   REAL,     DIMENSION(1:NZS)              ::                    &
                                                            tice, &
                                                         rhosice, &
                                                          capice, &
                                                        thdifice, &
-                                                         transp, &
                                                           TS1DS, &
                                                        SOILM1DS, &
                                                       SMFRKEEPS, &
@@ -1419,7 +1306,7 @@ endif
                                                        SOILICES, &
                                                         KEEPFRS
 !-------- 1-d variables
-   real (kind=kind_phys) :: &
+   REAL :: &
                                                             DEWS, &
                                                         MAVAILS,  &
                                                           EDIR1s, &
@@ -1444,25 +1331,25 @@ endif
             
                      
 
-   real (kind=kind_phys),  INTENT(INOUT)                     ::              RSM, &  
+   REAL,  INTENT(INOUT)                     ::              RSM, &  
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
 !--- Local variables
 
    INTEGER ::  K,ILNB
 
-   real (kind=kind_phys)    ::  BSN, XSN                                        , &
+   REAL    ::  BSN, XSN                                        , &
                RAINF, SNTH, NEWSN, PRCPMS, NEWSNMS             , &
                T3, UPFLUX, XINET
-   real (kind=kind_phys)    ::  snhei_crit, snhei_crit_newsn, keep_snow_albedo, SNOWFRACnewsn
-   real (kind=kind_phys)    ::  newsnowratio, dd1
+   REAL    ::  snhei_crit, snhei_crit_newsn, keep_snow_albedo, SNOWFRACnewsn
+   REAL    ::  newsnowratio, dd1
 
-   real (kind=kind_phys)    ::  rhonewgr,rhonewice
+   REAL    ::  rhonewgr,rhonewice
 
-   real (kind=kind_phys)    ::  RNET,GSWNEW,GSWIN,EMISSN,ZNTSN,EMISS_snowfree
-   real (kind=kind_phys)    ::  VEGFRAC, snow_mosaic, snfr, vgfr
-   real (kind=kind_phys)   ::  cice, albice, albsn, drip, dripsn, dripliq
-   real (kind=kind_phys)   ::  interw, intersn, infwater, intwratio
+   REAL    ::  RNET,GSWNEW,GSWIN,EMISSN,ZNTSN,EMISS_snowfree
+   REAL    ::  VEGFRAC, snow_mosaic, snfr, vgfr
+   real    ::  cice, albice, albsn, drip, dripsn, dripliq
+   real    ::  interw, intersn, infwater, intwratio
 
 !-----------------------------------------------------------------
         integer,   parameter      ::      ilsnow=99 
@@ -1781,6 +1668,7 @@ endif
            (emissn - emiss_snowfree) * snowfrac), emissn))
      endif
     IF (debug_print ) THEN
+!     if(i.eq.279.and.j.eq.263) then
   print *,'Snow on soil ALBsn,emiss,snow_mosaic',i,j,ALBsn,emiss,snow_mosaic
     ENDIF
 !28mar11  if canopy is covered with snow to 95% of its capacity and snow depth is
@@ -1883,10 +1771,10 @@ endif
             psis,bclh,ksat,sat,cn,                              &
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
 !--- constants
-            lv,CP,rovcp,rv,pi,G0,cw,stbolt,tabs,                &
+            lv,CP,rovcp,G0,cw,stbolt,tabs,                      &
             KQWRTZ,KICE,KWT,                                    &
 !--- output variables for snow-free portion
-            transp,soilm1ds,ts1ds,smfrkeeps,keepfrs,            &
+            soilm1ds,ts1ds,smfrkeeps,keepfrs,                   &
             dews,soilts,qvgs,qsgs,qcgs,edir1s,ec1s,             &
             ett1s,eetas,qfxs,hfxs,ss,evapls,prcpls,fltots,runoff1s, &
             runoff2s,mavails,soilices,soiliqws,                 &
@@ -1922,7 +1810,7 @@ endif
 !--- input variables
             i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   &
             PRCPMS,RAINF,PATM,QVATM,QCATM,GLW,GSWnew,           &
-            0.98d0,RNET,QKMS,TKMS,rho,myj,                      &
+            0.98,RNET,QKMS,TKMS,rho,myj,                        &
 !--- sea ice parameters
             tice,rhosice,capice,thdifice,                       &
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
@@ -2002,7 +1890,7 @@ endif
             lv,CP,rovcp,G0,cw,stbolt,tabs,                      &
             KQWRTZ,KICE,KWT,                                    &
 !--- output variables
-            transp,ilnb,snweprint,snheiprint,rsm,               &
+            ilnb,snweprint,snheiprint,rsm,                      &
             soilm1d,ts1d,smfrkeep,keepfr,                       &
             dew,soilt,soilt1,tsnav,qvg,qsg,qcg,                 &
             SMELT,SNOH,SNFLX,SNOM,edir1,ec1,ett1,eeta,          &
@@ -2028,7 +1916,7 @@ endif
             tice,rhosice,capice,thdifice,                       &    
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &    
 !--- constants
-            lv,CP,rovcp,cw,stbolt,tabs,                         &
+            lv,CP,rovcp,cw,stbolt,tabs,                         &    
 !--- output variables
             ilnb,snweprint,snheiprint,rsm,ts1d,                 &    
             dew,soilt,soilt1,tsnav,qvg,qsg,qcg,                 &    
@@ -2206,10 +2094,10 @@ endif
             psis,bclh,ksat,sat,cn,                              &
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
 !--- constants
-            lv,CP,rovcp,rv,pi,G0,cw,stbolt,tabs,                &
+            lv,CP,rovcp,G0,cw,stbolt,tabs,                      &
             KQWRTZ,KICE,KWT,                                    &
 !--- output variables
-            transp,soilm1d,ts1d,smfrkeep,keepfr,                &
+            soilm1d,ts1d,smfrkeep,keepfr,                       &
             dew,soilt,qvg,qsg,qcg,edir1,ec1,                    &
             ett1,eeta,qfx,hfx,s,evapl,prcpl,fltot,runoff1,      &
             runoff2,mavail,soilice,soiliqw,                     &
@@ -2264,10 +2152,10 @@ endif
 
        FUNCTION QSN(TN,T)
 !****************************************************************
-   real (kind=kind_phys),     DIMENSION(1:5001),  INTENT(IN   )   ::  T
-   real (kind=kind_phys),     INTENT(IN  )   ::  TN
+   REAL,     DIMENSION(1:5001),  INTENT(IN   )   ::  T
+   REAL,     INTENT(IN  )   ::  TN
 
-      real (kind=kind_phys)    QSN, R,R1,R2
+      REAL    QSN, R,R1,R2
       INTEGER I
 
        R=(TN-173.15)/.05+1.
@@ -2300,10 +2188,10 @@ endif
             QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    &
             sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
 !--- constants
-            xlv,CP,rovcp,r_v,piconst,G0_P,cw,stbolt,TABS,    &
+            xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                &
             KQWRTZ,KICE,KWT,                                 &
 !--- output variables
-            transp,soilmois,tso,smfrkeep,keepfr,             &
+            soilmois,tso,smfrkeep,keepfr,                    &
             dew,soilt,qvg,qsg,qcg,                           &
             edir1,ec1,ett1,eeta,qfx,hfx,s,evapl,             &
             prcpl,fltot,runoff1,runoff2,mavail,soilice,      &
@@ -2375,16 +2263,15 @@ endif
    INTEGER,  INTENT(IN   )   ::  nroot,ktau,nzs                , &
                                  nddzs                    !nddzs=2*(nzs-2)
    INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
-   real (kind=kind_phys),  intent(in) :: delt 
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX
    LOGICAL,  INTENT(IN   )   ::  myj
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                           GSWin, &
@@ -2398,7 +2285,7 @@ endif
                                                            TKMS
 
 !--- soil properties
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -2409,7 +2296,7 @@ endif
                                                             REF, &
                                                            WILT
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CN, &
+   REAL,     INTENT(IN   )   ::                              CN, &
                                                              CW, &
                                                          KQWRTZ, &
                                                            KICE, &
@@ -2418,27 +2305,27 @@ endif
                                                             g0_p
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION( 1:nzs )                                , &
+   REAL,     DIMENSION( 1:nzs )                                , &
              INTENT(INOUT)   ::                             TSO, &
                                                        SOILMOIS, &
                                                        SMFRKEEP
 
-   real (kind=kind_phys),     DIMENSION( 1:nzs )                                , &
+   REAL,     DIMENSION( 1:nzs )                                , &
              INTENT(INOUT)   ::                          KEEPFR
 
 !-------- 2-d variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
              INTENT(INOUT)   ::                             DEW, &
                                                             CST, &
                                                            DRIP, &
@@ -2462,27 +2349,27 @@ endif
                                                           SOILT
 
 !-------- 1-d variables
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  ::          SOILICE, &
+   REAL,     DIMENSION(1:NZS), INTENT(OUT)  ::          SOILICE, &
                                                         SOILIQW
 
 !--- Local variables
 
-   real (kind=kind_phys)    ::  INFILTRP, transum                               , &
+   REAL    ::  INFILTRP, transum                               , &
                RAINF,  PRCPMS                                  , &
                TABS, T3, UPFLUX, XINET
-   real (kind=kind_phys)    ::  CP,rovcp,r_v,piconst,G0,LV,STBOLT,xlmelt        , &
-               dzstop,can,epot,fac,fltot,ft,fq,hft             , &
+   REAL    ::  CP,rovcp,G0,LV,STBOLT,xlmelt,dzstop             , &
+               can,epot,fac,fltot,ft,fq,hft                    , &
                q1,ras,rhoice,sph                               , &
                trans,zn,ci,cvw,tln,tavln,pi                    , &
                DD1,CMC2MS,DRYCAN,WETCAN                        , &
                INFMAX,RIW, X
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::  transp,cap,diffu,hydro      , &
+   REAL,     DIMENSION(1:NZS)  ::  transp,cap,diffu,hydro      , &
                                    thdif,tranf,tav,soilmoism   , &
                                    soilicem,soiliqwm,detal     , &
                                    fwsat,lwsat,told,smold
 
-   real (kind=kind_phys)                        ::  soiltold,smf
-   real (kind=kind_phys)    :: soilres, alfa, fex, fex_fc, fc, psit
+   REAL                        ::  soiltold,smf
+   REAL    :: soilres, alfa, fex, fex_fc, fc, psit
 
    INTEGER ::  nzs1,nzs2,k
 
@@ -2674,8 +2561,9 @@ endif
         soilres=0.25*(1.-cos(piconst*fex_fc))**2.
       endif
     IF ( debug_print ) THEN
-     print *,'fex,psit,psis,bclh,r_v,soilt,alfa,mavail,soilmois(1),fc,ref,soilres,fex_fc', &
-              fex,psit,psis,bclh,r_v,soilt,alfa,mavail,soilmois(1),fc,ref,soilres,fex_fc
+!    if (i==421.and.j==280) then
+     print *,'fex,psit,psis,bclh,g0_p,r_v,soilt,alfa,mavail,soilmois(1),fc,ref,soilres,fex_fc', &
+              fex,psit,psis,bclh,g0_p,r_v,soilt,alfa,mavail,soilmois(1),fc,ref,soilres,fex_fc
     endif
 
 !**************************************************************
@@ -2756,8 +2644,8 @@ endif
                delt,nzs,nddzs,DTDZS,DTDZS2,RIW,                &
                zsmain,zshalf,diffu,hydro,                      &
                QSG,QVG,QCG,QCATM,QVATM,-infwater,              &
-               QKMS,TRANSP,DRIP,DEW,0.d0,SOILICE,VEGFRAC,      &
-               0.d0,soilres,                                   &
+               QKMS,TRANSP,DRIP,DEW,0.,SOILICE,VEGFRAC,        &
+               0.,soilres,                                     &
 !-- soil properties
                DQM,QMIN,REF,KSAT,RAS,INFMAX,                   &
 !-- output
@@ -2926,16 +2814,15 @@ endif
    INTEGER,  INTENT(IN   )   ::  nroot,ktau,nzs                , &
                                  nddzs                    !nddzs=2*(nzs-2)
    INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
-   real (kind=kind_phys),  intent(in) :: delt 
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX
    LOGICAL,  INTENT(IN   )   ::  myj, debug_print
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                           EMISS, &
@@ -2943,7 +2830,7 @@ endif
                                                            QKMS, &
                                                            TKMS
 !--- sea ice properties
-   real (kind=kind_phys),    DIMENSION(1:NZS)                                   , &
+   REAL,    DIMENSION(1:NZS)                                   , &
             INTENT(IN   )    ::                                  &
                                                            tice, &
                                                         rhosice, &
@@ -2951,25 +2838,25 @@ endif
                                                        thdifice
 
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                                  &
+   REAL,     INTENT(IN   )   ::                                  &
                                                              CW, &
                                                             XLV
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !----soil temperature
-   real (kind=kind_phys),     DIMENSION( 1:nzs ),  INTENT(INOUT)   ::        TSO
+   REAL,     DIMENSION( 1:nzs ),  INTENT(INOUT)   ::        TSO
 !-------- 2-d variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
              INTENT(INOUT)   ::                             DEW, &
                                                            EETA, &
                                                           EVAPL, &
@@ -2984,21 +2871,21 @@ endif
                                                           SOILT
 
 !--- Local variables
-   real (kind=kind_phys)    ::  x,x1,x2,x4,tn,denom
-   real (kind=kind_phys)    ::  RAINF,  PRCPMS                                  , &
+   REAL    ::  x,x1,x2,x4,tn,denom
+   REAL    ::  RAINF,  PRCPMS                                  , &
                TABS, T3, UPFLUX, XINET
 
-   real (kind=kind_phys)    ::  CP,rovcp,G0,LV,STBOLT,xlmelt,dzstop             , &
+   REAL    ::  CP,rovcp,G0,LV,STBOLT,xlmelt,dzstop             , &
                epot,fltot,ft,fq,hft,ras,cvw                    
 
-   real (kind=kind_phys)    ::  FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11     , &
+   REAL    ::  FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11     , &
                PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2       , &
                TDENOM,QGOLD,SNOH
 
-   real (kind=kind_phys)    ::  AA1,RHCS, icemelt
+   REAL    ::  AA1,RHCS, icemelt
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::   cotso,rhtso
+   REAL,     DIMENSION(1:NZS)  ::   cotso,rhtso
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk
 
@@ -3184,7 +3071,7 @@ endif
              xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                 &
              KQWRTZ,KICE,KWT,                                  &
 !--- output variables
-             transp,ilnb,snweprint,snheiprint,rsm,             &
+             ilnb,snweprint,snheiprint,rsm,                    &
              soilmois,tso,smfrkeep,keepfr,                     &
              dew,soilt,soilt1,tsnav,                           &
              qvg,qsg,qcg,SMELT,SNOH,SNFLX,SNOM,                &
@@ -3268,20 +3155,19 @@ endif
                                  nddzs                         !nddzs=2*(nzs-2)
    INTEGER,  INTENT(IN   )   ::  i,j,isoil
 
-   real (kind=kind_phys),  intent(in) :: delt
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX,PRCPMS            , &
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS            , &
                                  RAINF,NEWSNOW,RHONEWSN,         &
                                  SNHEI_CRIT,meltfactor
 
    LOGICAL,    INTENT(IN   )    ::     myj
 
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                           GSWin, &
@@ -3295,7 +3181,7 @@ endif
 
    INTEGER,  INTENT(IN   )   ::                          IVGTYP
 !--- soil properties
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -3307,7 +3193,7 @@ endif
                                                             SAT, &
                                                            WILT
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CN, &
+   REAL,     INTENT(IN   )   ::                              CN, &
                                                              CW, &
                                                             XLV, &
                                                            G0_P, & 
@@ -3316,23 +3202,23 @@ endif
                                                             KWT 
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION(  1:nzs )                               , &
+   REAL,     DIMENSION(  1:nzs )                               , &
              INTENT(INOUT)   ::                             TSO, &
                                                        SOILMOIS, &
                                                        SMFRKEEP
 
-   real (kind=kind_phys),  DIMENSION( 1:nzs )                                   , &
+   REAL,  DIMENSION( 1:nzs )                                   , &
              INTENT(INOUT)   ::                          KEEPFR
 
 
@@ -3340,7 +3226,7 @@ endif
 
 
 !-------- 2-d variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
              INTENT(INOUT)   ::                             DEW, &
                                                             CST, &
                                                            DRIP, &
@@ -3377,10 +3263,10 @@ endif
    INTEGER, INTENT(INOUT)    ::                            ILNB
 
 !-------- 1-d variables
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  ::          SOILICE, &
+   REAL,     DIMENSION(1:NZS), INTENT(OUT)  ::          SOILICE, &
                                                         SOILIQW
 
-   real (kind=kind_phys),     INTENT(OUT)                    ::              RSM, &
+   REAL,     INTENT(OUT)                    ::              RSM, &
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
 !--- Local variables
@@ -3388,24 +3274,24 @@ endif
 
    INTEGER ::  nzs1,nzs2,k
 
-   real (kind=kind_phys)    ::  INFILTRP, TRANSUM                               , &
+   REAL    ::  INFILTRP, TRANSUM                               , &
                SNTH, NEWSN                                     , &
                TABS, T3, UPFLUX, XINET                         , &
                BETA, SNWEPR,EPDT,PP
-   real (kind=kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt,dzstop        , &
+   REAL    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt,dzstop        , &
                can,epot,fac,fltot,ft,fq,hft                    , &
                q1,ras,rhoice,sph                               , &
                trans,zn,ci,cvw,tln,tavln,pi                    , &
                DD1,CMC2MS,DRYCAN,WETCAN                        , &
                INFMAX,RIW,DELTSN,H,UMVEG
 
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::  transp,cap,diffu,hydro      , &
+   REAL,     DIMENSION(1:NZS)  ::  transp,cap,diffu,hydro      , &
                                    thdif,tranf,tav,soilmoism   , &
                                    soilicem,soiliqwm,detal     , &
                                    fwsat,lwsat,told,smold
-   real (kind=kind_phys)                        ::  soiltold, qgold
+   REAL                        ::  soiltold, qgold
 
-   real (kind=kind_phys)                        ::  RNET, X
+   REAL                        ::  RNET, X
 
 !-----------------------------------------------------------------
 
@@ -3718,9 +3604,9 @@ print *, 'TSO before calling SNOWTEMP: ', tso
                delt,nzs,nddzs,DTDZS,DTDZS2,RIW,                    &
                zsmain,zshalf,diffu,hydro,                          &
                QSG,QVG,QCG,QCATM,QVATM,-INFWATER,                  &
-               QKMS,TRANSP,0.d0,                                   &
-               0.d0,SMELT,soilice,vegfrac,                         &
-               snowfrac,1.d0,                                      &
+               QKMS,TRANSP,0.,                                     &
+               0.,SMELT,soilice,vegfrac,                           &
+               snowfrac,1.,                                        &
 !-- soil properties
                DQM,QMIN,REF,KSAT,RAS,INFMAX,                       &
 !-- output
@@ -3887,20 +3773,19 @@ print *, 'TSO before calling SNOWTEMP: ', tso
                                  nddzs                         !nddzs=2*(nzs-2)
    INTEGER,  INTENT(IN   )   ::  i,j,isoil
 
-   real (kind=kind_phys),  intent(in) :: delt
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX,PRCPMS            , &
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS            , &
                                  RAINF,NEWSNOW,RHONEWSN,         &
                                  meltfactor, snhei_crit
    real                      ::  rhonewcsn
 
    LOGICAL,  INTENT(IN   )   ::  myj
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                             RHO, &
@@ -3908,35 +3793,35 @@ print *, 'TSO before calling SNOWTEMP: ', tso
                                                            TKMS
 
 !--- sea ice properties
-   real (kind=kind_phys),     DIMENSION(1:NZS)                                  , &
+   REAL,     DIMENSION(1:NZS)                                  , &
             INTENT(IN   )    ::                                  &
                                                            tice, &
                                                         rhosice, &
                                                          capice, &
                                                        thdifice
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                                  &
+   REAL,     INTENT(IN   )   ::                                  &
                                                              CW, &
                                                             XLV
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION(  1:nzs )                               , &
+   REAL,     DIMENSION(  1:nzs )                               , &
              INTENT(INOUT)   ::                             TSO
 
    INTEGER,  INTENT(INOUT)    ::                           ILAND
 
 
 !-------- 2-d variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
              INTENT(INOUT)   ::                             DEW, &
                                                            EETA, &
                                                           RHOSN, &
@@ -3964,34 +3849,34 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
    INTEGER, INTENT(INOUT)    ::                            ILNB
 
-   real (kind=kind_phys),     INTENT(OUT)                    ::              RSM, &
+   REAL,     INTENT(OUT)                    ::              RSM, &
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
 !--- Local variables
 
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk
-   real (kind=kind_phys)    ::  x,x1,x2,dzstop,ft,tn,denom
+   REAL    ::  x,x1,x2,dzstop,ft,tn,denom
 
-   real (kind=kind_phys)    ::  SNTH, NEWSN                                     , &
+   REAL    ::  SNTH, NEWSN                                     , &
                TABS, T3, UPFLUX, XINET                         , &
                BETA, SNWEPR,EPDT,PP
-   real (kind=kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt               , &
+   REAL    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt               , &
                epot,fltot,fq,hft,q1,ras,rhoice,ci,cvw          , &
                RIW,DELTSN,H
 
-   real (kind=kind_phys)    ::  rhocsn,thdifsn,                                   &
+   REAL    ::  rhocsn,thdifsn,                                   &
                xsn,ddzsn,x1sn,d1sn,d2sn,d9sn,r22sn
 
-   real (kind=kind_phys)    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
-   real (kind=kind_phys)    ::  fso,fsn,                                          &
+   REAL    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
+   REAL    ::  fso,fsn,                                          &
                FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11,      &
                FKQ,R210,AA,BB,QS1,TS1,TQ2,TX2,                   &
                TDENOM,AA1,RHCS,H1,TSOB, SNPRIM,                  &
                SNODIF,SOH,TNOLD,QGOLD,SNOHGNEW
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::  cotso,rhtso
+   REAL,     DIMENSION(1:NZS)  ::  cotso,rhtso
 
-   real (kind=kind_phys)                   :: RNET,rsmfrac,soiltfrac,hsn,icemelt,rr
+   REAL                   :: RNET,rsmfrac,soiltfrac,hsn,icemelt,rr
    integer                ::      nmelt
 
 
@@ -4382,17 +4267,19 @@ print *, 'TSO before calling SNOWTEMP: ', tso
      print *,'RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac)',           &
               RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac)
     ENDIF
-        SNOH=max(0.,SNOH)
+        SNOH=AMAX1(0.,SNOH)
 !-- SMELT is speed of melting in M/S
         SMELT= SNOH /XLMELT*1.E-3
-        SMELT=min(SMELT,SNWEPR/DELT-BETA*EPOT*RAS)
-        SMELT=max(0.,SMELT)
+        SMELT=AMIN1(SMELT,SNWEPR/DELT-BETA*EPOT*RAS)
+        SMELT=AMAX1(0.,SMELT)
 
     IF (debug_print ) THEN
        print *,'1-SMELT i,j',smelt,i,j
     ENDIF
 !18apr08 - Egglston limit
-       SMELT= min (smelt,delt/60.* 5.6E-8*meltfactor*max(1.,(soilt-273.15))) ! SnowMIP
+       SMELT= amin1 (smelt,delt/60.* 5.6E-8*meltfactor*max(1.,(soilt-273.15))) ! SnowMIP
+!       SMELT= amin1 (smelt,delt/60.* 5.6E-8*meltfactor*min(2.,max(0.001,(tabs-273.15))) ! SnowMIP
+!        SMELT= amin1 (smelt, 5.6E-8*meltfactor*max(1.,(soilt-273.15)))
     IF (debug_print ) THEN
        print *,'2-SMELT i,j',smelt,i,j
     ENDIF
@@ -4404,7 +4291,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
       print *,'3- SMELT i,j,smelt,rr',i,j,smelt,rr
     ENDIF
         SNOHGNEW=SMELT*XLMELT*1.E3
-        SNODIF=max(0.,(SNOH-SNOHGNEW))
+        SNODIF=AMAX1(0.,(SNOH-SNOHGNEW))
 
         SNOH=SNOHGNEW
 
@@ -4423,7 +4310,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         rsm=0.
        endif
 !18apr08 rsm is part of melted water that stays in snow as liquid
-        SMELT=max(0.,SMELT-rsm/delt)
+        SMELT=AMAX1(0.,SMELT-rsm/delt)
     IF (debug_print ) THEN
        print *,'4-SMELT i,j,smelt,rsm,snwepr,rsmfrac', &
                     i,j,smelt,rsm,snwepr,rsmfrac
@@ -4431,7 +4318,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
 !-- update liquid equivalent of snow depth
 !-- for evaporation and snow melt
-        SNWE = max(0.,(SNWEPR-                                      &
+        SNWE = AMAX1(0.,(SNWEPR-                                      &
                     (SMELT+BETA*EPOT*RAS)*DELT                        &
 !                    (SMELT+BETA*EPOT*RAS)*DELT*snowfrac               &
                                          ) )
@@ -4442,7 +4329,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
       ELSE
        if(snhei.ne.0.) then
                EPOT=-QKMS*(QVATM-QSG)
-               SNWE = max(0.,(SNWEPR-                               &
+               SNWE = AMAX1(0.,(SNWEPR-                               &
                     BETA*EPOT*RAS*DELT))
 !                    BETA*EPOT*RAS*DELT*snowfrac))
        endif
@@ -4680,16 +4567,15 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    INTEGER,  INTENT(IN   )   ::  nroot,ktau,nzs                , &
                                  nddzs                         !nddzs=2*(nzs-2)
    INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
-   real (kind=kind_phys),  intent(in) :: delt
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX,PRCPMS, RAINF
-   real (kind=kind_phys),     INTENT(INOUT)   ::  DRYCAN,WETCAN,TRANSUM
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS, RAINF
+   REAL,     INTENT(INOUT)   ::  DRYCAN,WETCAN,TRANSUM
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                                  &
                                                           EMISS, &
                                                             RHO, &
@@ -4702,17 +4588,17 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            TKMS
 
 !--- soil properties
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                                  &
                                                            BCLH, &
                                                             DQM, &
                                                            QMIN
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                                  &
                                                    soilres,alfa
 
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CP, &
+   REAL,     INTENT(IN   )   ::                              CP, &
                                                             CVW, &
                                                             XLV, &
                                                          STBOLT, &
@@ -4720,23 +4606,23 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            G0_P
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                           THDIF, &
                                                             CAP
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION( 1:nzs )                                , &
+   REAL,     DIMENSION( 1:nzs )                                , &
              INTENT(INOUT)   ::                             TSO
 
 !-------- 2-d variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
              INTENT(INOUT)   ::                                  &
                                                          MAVAIL, &
                                                             QVG, &
@@ -4747,16 +4633,16 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
 !--- Local variables
 
-   real (kind=kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph                    , &
+   REAL    ::  x,x1,x2,x4,dzstop,can,ft,sph                    , &
                tn,trans,umveg,denom,fex
 
-   real (kind=kind_phys)    ::  FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11     , &
+   REAL    ::  FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11     , &
                PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2       , &
                TDENOM
 
-   real (kind=kind_phys)    ::  C,CC,AA1,RHCS,H1, QGOLD
+   REAL    ::  C,CC,AA1,RHCS,H1, QGOLD
 
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::                   cotso,rhtso
+   REAL,     DIMENSION(1:NZS)  ::                   cotso,rhtso
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk, iter
 
@@ -5009,20 +4895,19 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                  nddzs                             !nddzs=2*(nzs-2)
 
    INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
-   real (kind=kind_phys),  intent(in) :: delt
-   real (kind=kind_phys),     INTENT(IN   )   ::  CONFLX,PRCPMS            , &
+   REAL,     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS            , &
                                  RAINF,NEWSNOW,DELTSN,SNTH     , &
                                  TABS,TRANSUM,SNWEPR           , &
                                  rhonewsn,meltfactor
    real                      ::  rhonewcsn
 
 !--- 3-D Atmospheric variables
-   real (kind=kind_phys),                                                         &
+   REAL,                                                         &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                             RHO, &
@@ -5032,14 +4917,14 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            TKMS
 
 !--- soil properties
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                                  &
                                                            BCLH, &
                                                             DQM, &
                                                            PSIS, &
                                                            QMIN
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CP, &
+   REAL,     INTENT(IN   )   ::                              CP, &
                                                           ROVCP, &
                                                             CVW, &
                                                          STBOLT, &
@@ -5047,25 +4932,25 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                             G0_P
 
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
                                                          ZSHALF, &
                                                           THDIF, &
                                                             CAP, &
                                                           TRANF 
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   REAL,     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind=kind_phys),     DIMENSION(  1:nzs )                               , &
+   REAL,     DIMENSION(  1:nzs )                               , &
              INTENT(INOUT)   ::                             TSO
 
 
 !-------- 2-d variables
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
              INTENT(INOUT)   ::                             DEW, &
                                                             CST, &
                                                           RHOSN, &
@@ -5085,9 +4970,9 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                          SOILT1, &
                                                           TSNAV
 
-   real (kind=kind_phys),     INTENT(INOUT)                  ::   DRYCAN, WETCAN           
+   REAL,     INTENT(INOUT)                  ::   DRYCAN, WETCAN           
 
-   real (kind=kind_phys),     INTENT(OUT)                    ::              RSM, &
+   REAL,     INTENT(OUT)                    ::              RSM, &
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
    INTEGER,  INTENT(OUT)                    ::             ilnb
@@ -5096,32 +4981,32 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk
 
-   real (kind=kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph,                     &
+   REAL    ::  x,x1,x2,x4,dzstop,can,ft,sph,                     &
                tn,trans,umveg,denom
 
-   real (kind=kind_phys)    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
+   REAL    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
 
-   real (kind=kind_phys)    ::  t3,upflux,xinet,ras,                              &
+   REAL    ::  t3,upflux,xinet,ras,                              &
                xlmelt,rhocsn,thdifsn,                            &
                beta,epot,xsn,ddzsn,x1sn,d1sn,d2sn,d9sn,r22sn
 
-   real (kind=kind_phys)    ::  fso,fsn,                                          &
+   REAL    ::  fso,fsn,                                          &
                FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11,      &
                PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2,        &
                TDENOM,C,CC,AA1,RHCS,H1,                          &
                tsob, snprim, sh1, sh2,                           &
                smeltg,snohg,snodif,soh,                          &
-               CMC2MS,TNOLD,QGOLD,SNOHGNEW
+               CMC2MS,TNOLD,QGOLD,SNOHGNEW                            
 
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::  transp,cotso,rhtso
-   real (kind=kind_phys)                        ::                         edir1, &
+   REAL,     DIMENSION(1:NZS)  ::  transp,cotso,rhtso
+   REAL                        ::                         edir1, &
                                                             ec1, &
                                                            ett1, &
                                                            eeta, &
                                                             qfx, &
                                                             hfx
 
-   real (kind=kind_phys)                        :: RNET,rsmfrac,soiltfrac,hsn,rr
+   REAL                        :: RNET,rsmfrac,soiltfrac,hsn,rr
    integer                     ::      nmelt, iter
 
 !-----------------------------------------------------------------
@@ -5553,20 +5438,22 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         SNOH=RNET-QFX -HFX - SOH - X                                    & 
                   +RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-soiltfrac)  &
                   +RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac) 
-        SNOH=max(0.,SNOH)
+        SNOH=AMAX1(0.,SNOH)
 !-- SMELT is speed of melting in M/S
         SMELT= SNOH /XLMELT*1.E-3
     IF (debug_print ) THEN
       print *,'1- SMELT',i,j,smelt
     ENDIF
-        SMELT=min(SMELT,SNWEPR/DELT-BETA*EPOT*RAS)
+        SMELT=AMIN1(SMELT,SNWEPR/DELT-BETA*EPOT*RAS)
     IF (debug_print ) THEN
       print *,'2- SMELT',i,j,smelt
     ENDIF
-        SMELT=max(0.,SMELT)
+        SMELT=AMAX1(0.,SMELT)
 
 !18apr08 - Egglston limit
-        SMELT= min (smelt, delt/60.*5.6E-8*meltfactor*max(1.,(soilt-273.15))) 
+!        SMELT= amin1 (smelt, 5.6E-7*meltfactor*max(1.,(soilt-273.15)))
+        SMELT= amin1 (smelt, delt/60.*5.6E-8*meltfactor*max(1.,(soilt-273.15))) 
+!        SMELT= amin1 (smelt, delt/60.*5.6E-8*meltfactor*min(2.,max(0.001,(tabs-273.15)))  ! SnowMIP
     IF (debug_print ) THEN
       print *,'3- SMELT',i,j,smelt
     ENDIF
@@ -5578,7 +5465,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
       print *,'4- SMELT i,j,smelt,rr',i,j,smelt,rr
     ENDIF
         SNOHGNEW=SMELT*XLMELT*1.E3
-        SNODIF=max(0.,(SNOH-SNOHGNEW))
+        SNODIF=AMAX1(0.,(SNOH-SNOHGNEW))
 
         SNOH=SNOHGNEW
     IF (debug_print ) THEN
@@ -5602,7 +5489,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 
 !-- update of liquid equivalent of snow depth
 !-- due to evaporation and snow melt
-        SNWE = max(0.,(SNWEPR-                                      &
+        SNWE = AMAX1(0.,(SNWEPR-                                      &
                     (SMELT+BETA*EPOT*RAS)*DELT                        &
 !                    (SMELT+BETA*EPOT*RAS)*DELT*snowfrac               &
 !                    (SMELT+BETA*EPOT*RAS*UMVEG)*DELT                 &
@@ -5612,7 +5499,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
       ELSE
        if(snhei.ne.0.) then
                EPOT=-QKMS*(QVATM-QSG)
-               SNWE = max(0.,(SNWEPR-                               &
+               SNWE = AMAX1(0.,(SNWEPR-                               &
                     BETA*EPOT*RAS*DELT))
 !                    BETA*EPOT*RAS*DELT*snowfrac))
        endif
@@ -5682,18 +5569,18 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 
         SNOHG=(TSO(1)-soiltfrac)*(cap(1)*zshalf(2)+                       &
                RHOCSN*0.5*hsn) / DELT
-        SNOHG=max(0.,SNOHG)
+        SNOHG=AMAX1(0.,SNOHG)
         SNODIF=0.
         SMELTG=SNOHG/XLMELT*1.E-3
 ! Egglston - empirical limit on snow melt from the bottom of snow pack
-        SMELTG=min(SMELTG, 5.8e-9)
+        SMELTG=AMIN1(SMELTG, 5.8e-9)
 
 ! rr - potential melting
         rr=SNWE/delt
-        SMELTG=min(SMELTG, rr)
+        SMELTG=AMIN1(SMELTG, rr)
 
         SNOHGNEW=SMELTG*XLMELT*1.e3
-        SNODIF=max(0.,(SNOHG-SNOHGNEW))
+        SNODIF=AMAX1(0.,(SNOHG-SNOHGNEW))
     IF (debug_print ) THEN
 !   if(i.eq.266.and.j.eq.447) then
        print *,'TSO(1),soiltfrac,smeltg,SNODIF',TSO(1),soiltfrac,smeltg,SNODIF
@@ -5815,12 +5702,12 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !------------------------------------------------------------------
 !--- input variables
    LOGICAL,  INTENT(IN   )   ::  debug_print
-   real (kind=kind_phys),  intent(in) :: delt
+   REAL,     INTENT(IN   )   ::  DELT
    INTEGER,  INTENT(IN   )   ::  NZS,NDDZS
 
 ! input variables
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN   )  ::         ZSMAIN, &
+   REAL,     DIMENSION(1:NZS), INTENT(IN   )  ::         ZSMAIN, &
                                                          ZSHALF, &
                                                           DIFFU, &
                                                           HYDRO, &
@@ -5828,33 +5715,33 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                         SOILICE, &
                                                          DTDZS2
 
-   real (kind=kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   REAL,     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
 
-   real (kind=kind_phys),     INTENT(IN   )   ::    QSG,QVG,QCG,QCATM,QVATM     , &
+   REAL,     INTENT(IN   )   ::    QSG,QVG,QCG,QCATM,QVATM     , &
                                    QKMS,VEGFRAC,DRIP,PRCP      , &
                                    DEW,SMELT,SNOWFRAC          , &
                                    DQM,QMIN,REF,KSAT,RAS,RIW,SOILRES
                          
 ! output
 
-   real (kind=kind_phys),     DIMENSION(  1:nzs )                               , &
+   REAL,     DIMENSION(  1:nzs )                               , &
 
              INTENT(INOUT)   ::                SOILMOIS,SOILIQW
                                                   
-   real (kind=kind_phys),     INTENT(INOUT)   ::  MAVAIL,RUNOFF,RUNOFF2,INFILTRP, &
+   REAL,     INTENT(INOUT)   ::  MAVAIL,RUNOFF,RUNOFF2,INFILTRP, &
                                                         INFMAX
 
 ! local variables
 
-   real (kind=kind_phys),     DIMENSION( 1:nzs )  ::  COSMC,RHSMC
+   REAL,     DIMENSION( 1:nzs )  ::  COSMC,RHSMC
 
-   real (kind=kind_phys)    ::  DZS,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10
-   real (kind=kind_phys)    ::  REFKDT,REFDK,DELT1,F1MAX,F2MAX
-   real (kind=kind_phys)    ::  F1,F2,FD,KDT,VAL,DDT,PX,FK,FKMAX
-   real (kind=kind_phys)    ::  QQ,UMVEG,INFMAX1,TRANS
-   real (kind=kind_phys)    ::  TOTLIQ,FLX,FLXSAT,QTOT
-   real (kind=kind_phys)    ::  DID,X1,X2,X4,DENOM,Q2,Q4
-   real (kind=kind_phys)    ::  dice,fcr,acrt,frzx,sum,cvfrz
+   REAL    ::  DZS,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10
+   REAL    ::  REFKDT,REFDK,DELT1,F1MAX,F2MAX
+   REAL    ::  F1,F2,FD,KDT,VAL,DDT,PX,FK,FKMAX
+   REAL    ::  QQ,UMVEG,INFMAX1,TRANS
+   REAL    ::  TOTLIQ,FLX,FLXSAT,QTOT
+   REAL    ::  DID,X1,X2,X4,DENOM,Q2,Q4
+   REAL    ::  dice,fcr,acrt,frzx,sum,cvfrz
 
    INTEGER ::  NZS1,NZS2,K,KK,K1,KN,ialp1,jj,jk
 
@@ -5971,10 +5858,10 @@ print *,'UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT', &
 
 ! -----------     FROZEN GROUND VERSION    -------------------------
 !   REFERENCE FROZEN GROUND PARAMETER, CVFRZ, IS A SHAPE PARAMETER OF
-!   Areal (kind=kind_phys) DISTRIBUTION FUNCTION OF SOIL ICE CONTENT WHICH EQUALS 1/CV.
+!   AREAL DISTRIBUTION FUNCTION OF SOIL ICE CONTENT WHICH EQUALS 1/CV.
 !   CV IS A COEFFICIENT OF SPATIAL VARIATION OF SOIL ICE CONTENT.
-!   BASED ON FIELD DATA CV DEPENDS ON Areal (kind=kind_phys) MEAN OF FROZEN DEPTH, AND IT
-!   CLOSE TO CONSTANT = 0.6 IF Areal (kind=kind_phys) MEAN FROZEN DEPTH IS ABOVE 20 CM.
+!   BASED ON FIELD DATA CV DEPENDS ON AREAL MEAN OF FROZEN DEPTH, AND IT
+!   CLOSE TO CONSTANT = 0.6 IF AREAL MEAN FROZEN DEPTH IS ABOVE 20 CM.
 !   THAT IS WHY PARAMETER CVFRZ = 3 (INT{1/0.6*0.6})
 !
 !   Current logic doesn't allow CVFRZ be bigger than 3
@@ -6179,7 +6066,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- soil properties
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER, INTENT(IN   )    ::                            NZS
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -6188,12 +6075,12 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                                                           QWRTZ, &  
                                                            QMIN
 
-   real (kind=kind_phys),    DIMENSION(  1:nzs )                                , &
+   REAL,    DIMENSION(  1:nzs )                                , &
             INTENT(IN   )    ::                        SOILMOIS, &
                                                          keepfr
 
 
-   real (kind=kind_phys),     INTENT(IN   )   ::                              CP, &
+   REAL,     INTENT(IN   )   ::                              CP, &
                                                             CVW, &
                                                             RIW, &  
                                                          kqwrtz, &
@@ -6205,7 +6092,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 
 !--- output variables
-   real (kind=kind_phys),     DIMENSION(1:NZS)                                  , &
+   REAL,     DIMENSION(1:NZS)                                  , &
             INTENT(INOUT)  ::      cap,diffu,hydro             , &
                                    thdif,tav                   , &
                                    soilmoism                   , &
@@ -6214,14 +6101,14 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                                    fwsat,lwsat
 
 !--- local variables
-   real (kind=kind_phys),     DIMENSION(1:NZS)  ::  hk,detal,kasat,kjpl
+   REAL,     DIMENSION(1:NZS)  ::  hk,detal,kasat,kjpl
 
-   real (kind=kind_phys)    ::  x,x1,x2,x4,ws,wd,fact,fach,facd,psif,ci
-   real (kind=kind_phys)    ::  tln,tavln,tn,pf,a,am,ame,h
+   REAL    ::  x,x1,x2,x4,ws,wd,fact,fach,facd,psif,ci
+   REAL    ::  tln,tavln,tn,pf,a,am,ame,h
    INTEGER ::  nzs1,k
 
 !-- for Johansen thermal conductivity
-   real (kind=kind_phys)    ::  kzero,gamd,kdry,kas,x5,sr,ke       
+   REAL    ::  kzero,gamd,kdry,kas,x5,sr,ke       
                
 
          nzs1=nzs-1
@@ -6374,9 +6261,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 ! TRANSUM - transpiration function integrated over the rooting zone (m)
 !
 !*******************************************************************
-
-     use namelist_soilveg_ruc
-
         IMPLICIT NONE
 !-------------------------------------------------------------------
 
@@ -6385,31 +6269,31 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER,  INTENT(IN   )   ::  nroot,nzs,iland
 
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                GSWin, TABS, lai
 !--- soil properties
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(IN   )    ::                             DQM, &
                                                            QMIN, &
                                                             REF, &
                                                              PC, &
                                                            WILT
 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::          soiliqw,  &
+   REAL,     DIMENSION(1:NZS), INTENT(IN)  ::          soiliqw,  &
                                                          ZSHALF
 
 !-- output 
-   real (kind=kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  ::            TRANF
-   real (kind=kind_phys),     INTENT(OUT)  ::                            TRANSUM  
+   REAL,     DIMENSION(1:NZS), INTENT(OUT)  ::            TRANF
+   REAL,     INTENT(OUT)  ::                            TRANSUM  
 
 !-- local variables
-   real (kind=kind_phys)    ::  totliq, did
+   REAL    ::  totliq, did
    INTEGER ::  k
 
 !-- for non-linear root distribution
-   real (kind=kind_phys)    ::  gx,sm1,sm2,sm3,sm4,ap0,ap1,ap2,ap3,ap4
-   real (kind=kind_phys)    ::  FTEM, PCtot, fsol, f1, cmin, cmax, totcnd
-   real (kind=kind_phys),     DIMENSION(1:NZS)   ::           PART
+   REAL    ::  gx,sm1,sm2,sm3,sm4,ap0,ap1,ap2,ap3,ap4
+   REAL    ::  FTEM, PCtot, fsol, f1, cmin, cmax, totcnd
+   REAL,     DIMENSION(1:NZS)   ::           PART
 !--------------------------------------------------------------------
 
         do k=1,nzs
@@ -6518,6 +6402,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
       fsol = 1.
      endif
     IF ( debug_print ) THEN
+!    if (i==421.and.j==280) then
      print *,'GSWin,lai,f1,fsol',gswin,lai,f1,fsol
     ENDIF
 !--- total conductance
@@ -6551,13 +6436,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- VILKA finds the solution of energy budget at the surface
 !--- using table T,QS computed from Clausius-Klapeiron
 !--------------------------------------------------------------
-   real (kind=kind_phys),     DIMENSION(1:5001),  INTENT(IN   )   ::  TT
-   real (kind=kind_phys),     INTENT(IN  )   ::  TN,D1,D2,PP
+   REAL,     DIMENSION(1:5001),  INTENT(IN   )   ::  TT
+   REAL,     INTENT(IN  )   ::  TN,D1,D2,PP
    INTEGER,  INTENT(IN  )   ::  NSTEP,ii,j,iland,isoil
 
-   real (kind=kind_phys),     INTENT(OUT  )  ::  QS, TS
+   REAL,     INTENT(OUT  )  ::  QS, TS
 
-   real (kind=kind_phys)    ::  F1,T1,T2,RN
+   REAL    ::  F1,T1,T2,RN
    INTEGER ::  I,I1
      
        I=(TN-1.7315E2)/.05+1
@@ -6576,20 +6461,21 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        TS=T1-.05*RN
        QS=(TT(I)+(TT(I)-TT(I+1))*RN)/PP
        GOTO 20
+!   1   PRINT *,'Crash in surface energy budget - STOP'
    1   PRINT *,'     AVOST IN VILKA     Table index= ',I
+!       PRINT *,TN,D1,D2,PP,NSTEP,I,TT(i),ii,j,iland,isoil
        print *,'I,J=',ii,j,'LU_index = ',iland, 'Psfc[hPa] = ',pp, 'Tsfc = ',tn
+!       CALL wrf_error_fatal ('  Crash in surface energy budget  ' )
    20  CONTINUE
 !-----------------------------------------------------------------------
    END SUBROUTINE VILKA
 !-----------------------------------------------------------------------
 
      SUBROUTINE SOILVEGIN  ( debug_print,                            &
-                             soilfrac, nscat, shdmin, shdmax,        &
-                             nlcat, ivgtyp, isltyp, iswater,         &
-                             iforest,lufrac,vegfrac,                 &
-                             EMISS, PC, ZNT, LAI, RDLAI2D,           &
-                             QWRTZ, RHOCS, BCLH, DQM, KSAT, PSIS,    &
-                             QMIN,REF,WILT,I,J)
+                             soilfrac,nscat,shdmin, shdmax,          &
+                     NLCAT,IVGTYP,ISLTYP,iswater,MYJ,                &
+                     IFOREST,lufrac,vegfrac,EMISS,PC,ZNT,LAI,RDLAI2D,&
+                     QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,I,J)
 
 !************************************************************************
 !  Set-up soil and vegetation Parameters in the case when
@@ -6610,9 +6496,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !               BCLH: Soil diffusivity/conductivity exponent.
 !
 ! ************************************************************************
-
-   use namelist_soilveg_ruc
-
    IMPLICIT NONE
 !---------------------------------------------------------------------------
       integer,   parameter      ::      nsoilclas=19
@@ -6646,7 +6529,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !            19          White Sand
 !
 !----------------------------------------------------------------------
-         real (kind=kind_phys)  LQMA(nsoilclas),LRHC(nsoilclas),                       &
+         REAL  LQMA(nsoilclas),LRHC(nsoilclas),                       &
                LPSI(nsoilclas),LQMI(nsoilclas),                       &
                LBCL(nsoilclas),LKAS(nsoilclas),                       &
                LWIL(nsoilclas),LREF(nsoilclas),                       &
@@ -6783,7 +6666,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 
 !----  Below are the arrays for the vegetation parameters
-         real (kind=kind_phys) LALB(nvegclas),LMOI(nvegclas),LEMI(nvegclas),            &
+         REAL LALB(nvegclas),LMOI(nvegclas),LEMI(nvegclas),            &
               LROU(nvegclas),LTHI(nvegclas),LSIG(nvegclas),            &
               LPC(nvegclas)
 
@@ -6824,22 +6707,25 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    INTEGER      ::                &
                                                          IVGTYP, &
                                                          ISLTYP
-   real (kind=kind_phys),       INTENT(IN )      ::   SHDMAX
-   real (kind=kind_phys),       INTENT(IN )      ::   SHDMIN
-   real (kind=kind_phys),       INTENT(IN )      ::   VEGFRAC
-   real (kind=kind_phys),     DIMENSION( 1:NLCAT ),  INTENT(IN)::         LUFRAC
-   real (kind=kind_phys),     DIMENSION( 1:NSCAT ),  INTENT(IN)::         SOILFRAC
+!   INTEGER,    INTENT(IN   )    ::     mosaic_lu, mosaic_soil
 
-   real (kind=kind_phys)                                                        , &
+   LOGICAL,    INTENT(IN   )    ::     myj
+   REAL,       INTENT(IN )      ::   SHDMAX
+   REAL,       INTENT(IN )      ::   SHDMIN
+   REAL,       INTENT(IN )      ::   VEGFRAC
+   REAL,     DIMENSION( 1:NLCAT ),  INTENT(IN)::         LUFRAC
+   REAL,     DIMENSION( 1:NSCAT ),  INTENT(IN)::         SOILFRAC
+
+   REAL                                                        , &
             INTENT (  OUT)            ::                     pc
 
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT (INOUT   )         ::                  emiss, &
                                                             lai, &
                                                             znt
   LOGICAL, intent(in) :: rdlai2d
 !--- soil properties
-   real (kind=kind_phys)                                                        , &
+   REAL                                                        , &
             INTENT(  OUT)    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -6858,8 +6744,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !   INTEGER, DIMENSION( 1:50 )   ::   if1
    INTEGER   ::   kstart, kfin, lstart, lfin
    INTEGER   ::   k
-   real (kind=kind_phys)      ::   area,  deltalai, factor, znt1, lb
-   real (kind=kind_phys),     DIMENSION( 1:NLCAT ) :: ZNTtoday, LAItoday
+   REAL      ::   area,  deltalai, factor, znt1, lb
+   REAL,     DIMENSION( 1:NLCAT ) :: ZNTtoday, LAItoday
 
 !***********************************************************************
 !        DATA ZS1/0.0,0.05,0.20,0.40,1.6,3.0/   ! o -  levels in soil
@@ -6943,7 +6829,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
       do k = 1,nlcat
         AREA  = AREA + lufrac(k)
         EMISS = EMISS+ LEMITBL(K)*lufrac(k)
-        ZNT   = ZNT  + lufrac(k)/log(LB/ZNTtoday(K))**2.
+        ZNT   = ZNT  + lufrac(k)/ALOG(LB/ZNTtoday(K))**2.
 ! ZNT1 - weighted average in the grid box, not used, computed for comparison
         ZNT1  = ZNT1 + lufrac(k)*ZNTtoday(K)
         if(.not.rdlai2d) LAI = LAI  + LAItoday(K)*lufrac(k)
@@ -7055,57 +6941,104 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         endif
 !   if(j==4485) print *,'rhocs,dqm,qmin,qwrtz',j,rhocs,dqm,qmin,qwrtz
 
+! parameters from the look-up tables
+!          BCLH   = LBCL(ISLTYP)
+!          DQM    = LQMA(ISLTYP)-                               &
+!                   LQMI(ISLTYP)
+!          KSAT   = LKAS(ISLTYP)
+!          PSIS   = - LPSI(ISLTYP)
+!          QMIN   = LQMI(ISLTYP)
+!          REF    = LREF(ISLTYP)
+!          WILT   = LWIL(ISLTYP)
+!          QWRTZ  = DATQTZ(ISLTYP)
+
 !--------------------------------------------------------------------------
    END SUBROUTINE SOILVEGIN
 !--------------------------------------------------------------------------
 
-  SUBROUTINE RUCLSMINIT( debug_print, ktau,                            &
-                     sh2o, smfr3d, tslb, smois, isltyp, ivgtyp,        &
-                     xice, mavail, nzs, iswater, isice, znt,           &
-                     ims,ime, jms,jme, kms,kme,                        &
-                     its,ite, jts,jte, kts,kte                         )
-
-  use namelist_soilveg_ruc
-
+  SUBROUTINE RUCLSMINIT( debug_print,                              &
+                         SH2O,SMFR3D,TSLB,SMOIS,ISLTYP,IVGTYP,     &
+                     mminlu, mminsl, XICE,mavail,nzs, iswater, isice,  &
+                     znt, restart, allowed_to_read ,               &
+                     ids,ide, jds,jde, kds,kde,                    &
+                     ims,ime, jms,jme, kms,kme,                    &
+                     its,ite, jts,jte, kts,kte                     )
 #if ( WRF_CHEM == 1 )
   USE module_data_gocart_dust
 #endif
    IMPLICIT NONE
    LOGICAL,  INTENT(IN   )   ::  debug_print
 
-   INTEGER,  INTENT(IN   )   ::     ims,ime, jms,jme, kms,kme,  &
-                                    its,ite, jts,jte, kts,kte,  &
-                                    nzs, iswater, isice, ktau
 
-   real (kind=kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
+   INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &
+                                    ims,ime, jms,jme, kms,kme,  &
+                                    its,ite, jts,jte, kts,kte,  &
+                                    nzs, iswater, isice
+   CHARACTER(LEN=*), INTENT(IN   )    ::                 MMINLU, MMINSL
+
+   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
             INTENT(IN)    ::                                 TSLB, &
                                                             SMOIS
 
    INTEGER, DIMENSION( ims:ime, jms:jme )                        , &
             INTENT(INOUT)    ::                     ISLTYP,IVGTYP
 
-   real (kind=kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
+   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
             INTENT(INOUT)    ::                            SMFR3D, &
                                                              SH2O
-   real (kind=kind_phys), DIMENSION( ims:ime, jms:jme )                           , &
-            INTENT(IN   )   ::                               XICE
-   real (kind=kind_phys), DIMENSION( ims:ime, jms:jme )                           , &
-            INTENT(INOUT)    ::                            MAVAIL
 
-   real (kind=kind_phys), DIMENSION( ims:ime, jms:jme )                           , &
+   REAL, DIMENSION( ims:ime, jms:jme )                           , &
+            INTENT(INOUT)    ::                       XICE,MAVAIL
+
+   REAL, DIMENSION( ims:ime, jms:jme )                           , &
             INTENT(  OUT)    ::                               znt
 
-   real (kind=kind_phys), DIMENSION ( 1:nzs )  ::                           SOILIQW
+   REAL, DIMENSION ( 1:nzs )  ::                           SOILIQW
+
+   LOGICAL , INTENT(IN) :: restart, allowed_to_read 
 
 !
   INTEGER ::  I,J,L,itf,jtf
-  real (kind=kind_phys)    ::  RIW,XLMELT,TLN,DQM,REF,PSIS,QMIN,BCLH
+  REAL    ::  RIW,XLMELT,TLN,DQM,REF,PSIS,QMIN,BCLH
+
+  character*8 :: MMINLURUC, MMINSLRUC
 
    INTEGER                   :: errflag
+
+!   itf=min0(ite,ide-1)
+!   jtf=min0(jte,jde-1)
 
 
         RIW=900.*1.e-3
         XLMELT=3.35E+5
+
+! initialize three  LSM related tables
+   IF ( allowed_to_read ) THEN
+     print *, 'INITIALIZE THREE LSM RELATED TABLES' 
+!      if(mminlu == 'USGS') then
+!        MMINLURUC='USGS-RUC'
+!      elseif(mminlu == 'MODIS' .OR. &
+!        &    mminlu == 'MODIFIED_IGBP_MODIS_NOAH') then
+        MMINLURUC=MMINLU
+!        MMINLURUC='MODI-RUC'
+!      endif
+        MMINSLRUC=MMINSL
+!        MMINSL='STAS-RUC'
+    print *,'RUCLSMINIT uses MMINLU=',mminluruc, 'soil class. =',MMINSLRUC
+     call RUCLSM_SOILVEGPARM( debug_print,MMINLURUC, MMINSLRUC)   
+   ENDIF
+
+!#if ( WRF_CHEM == 1 )
+!
+! need this parameter for dust parameterization in wrf/chem
+!
+!   do I=1,NSLTYPE
+!      porosity(i)=maxsmc(i)
+!      drypoint(i)=drysmc(i)
+!   enddo
+!#endif
+!
+ IF(.not.restart)THEN
 
 ! for FIM
    itf=ite  !  min0(ite,ide-1)
@@ -7132,6 +7065,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
         ZNT(I,J)   = Z0TBL(IVGTYP(I,J))
 
+!     CALL SOILIN     ( ISLTYP(I,J), DQM, REF, PSIS, QMIN, BCLH )
+
+
 !--- Computation of volumetric content of ice in soil
 !--- and initialize MAVAIL
     if(ISLTYP(I,J) > 0) then
@@ -7143,9 +7079,12 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
           BCLH   = BB       (ISLTYP(I,J))
     endif
 
+
 ! in Zobler classification isltyp=0 for water. Statsgo classification
 ! has isltyp=14 for water
    if (isltyp(i,j) == 0) isltyp(i,j)=14
+
+!!!     IF (.not.restart) THEN
 
     IF(xice(i,j).gt.0.) THEN
 !-- for ice
@@ -7157,6 +7096,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ELSE
        if(isltyp(i,j).ne.14 ) then
 !-- land
+!           mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/dqm))
            mavail(i,j) = max(0.00001,min(1.,smois(i,1,j)/(ref-qmin)))
          DO L=1,NZS
 !-- for land points initialize soil ice
@@ -7191,13 +7131,41 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ENDDO
    ENDDO
 
+ ENDIF
 
   END SUBROUTINE ruclsminit
 !
 !-----------------------------------------------------------------
-!        SUBROUTINE RUCLSM_SOILVEGPARM( debug_print,MMINLURUC, MMINSL)
+!        SUBROUTINE RUCLSM_PARM_INIT
 !-----------------------------------------------------------------
-!
+
+!        character*9 :: MMINLU, MMINSL
+
+!        MMINLU='MODIS-RUC'
+!        MMINLU='USGS-RUC'
+!        MMINSL='STAS-RUC'
+!        call RUCLSM_SOILVEGPARM( MMINLU, MMINSL)
+
+!-----------------------------------------------------------------
+!        END SUBROUTINE RUCLSM_PARM_INIT
+!-----------------------------------------------------------------
+
+!-----------------------------------------------------------------
+        SUBROUTINE RUCLSM_SOILVEGPARM( debug_print,MMINLURUC, MMINSL)
+!-----------------------------------------------------------------
+
+        IMPLICIT NONE
+        LOGICAL,  INTENT(IN   )   ::  debug_print
+
+        integer :: LUMATCH, IINDEX, LC, NUM_SLOPE
+        integer :: ierr
+        INTEGER , PARAMETER :: OPEN_OK = 0
+
+        character*8 :: MMINLURUC, MMINSL
+        character*128 ::  vege_parm_string
+!        logical, external :: wrf_dm_on_monitor
+
+
 !-----SPECIFY VEGETATION RELATED CHARACTERISTICS :
 !             ALBBCK: SFC albedo (in percentage)
 !                 Z0: Roughness length (m)
@@ -7222,9 +7190,292 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !             MAXALB: Upper bound on maximum albedo over deep snow
 !
 !-----READ IN VEGETAION PROPERTIES FROM VEGPARM.TBL 
+!                                                                       
+
+!       IF ( wrf_dm_on_monitor() ) THEN
+
+        OPEN(19, FILE='VEGPARM.TBL',FORM='FORMATTED',STATUS='OLD',IOSTAT=ierr)
+        IF(ierr .NE. OPEN_OK ) THEN
+          print *,&
+          'module_sf_ruclsm.F: soil_veg_gen_parm: failure opening VEGPARM.TBL'
+        END IF
+
+          print *,&
+         'INPUT VEGPARM FOR ',MMINLURUC
+
+        LUMATCH=0
+
+ 2000   FORMAT (A8)
+!sms$serial begin
+        READ (19,'(A)') vege_parm_string
+!sms$serial end
+        outer : DO 
+!sms$serial begin
+           READ (19,2000,END=2002)LUTYPE
+           READ (19,*)LUCATS,IINDEX
+!sms$serial end
+
+            print *,&
+           'VEGPARM FOR ',LUTYPE,' FOUND', LUCATS,' CATEGORIES'
+
+           IF(LUTYPE.NE.MMINLURUC)THEN    ! Skip over the undesired table
+           print *,&
+              'Skipping ', LUTYPE, ' table'
+              DO LC=1,LUCATS
+!sms$serial begin
+                 READ (19,*)
+!sms$serial end
+              ENDDO
+              inner : DO               ! Find the next "Vegetation Parameters"
+!sms$serial begin
+                 READ (19,'(A)',END=2002) vege_parm_string
+!sms$serial end
+                 IF (TRIM(vege_parm_string) .EQ. "Vegetation Parameters") THEN
+                    EXIT inner
+                 END IF
+               ENDDO inner
+           ELSE
+              LUMATCH=1
+              print *,&
+              'Found ', LUTYPE, ' table'
+              EXIT outer                ! Found the table, read the data
+           END IF
+
+        ENDDO outer
+
+        IF (LUMATCH == 1) then
+           print *,&
+           'Reading ',LUTYPE,' table'
+           DO LC=1,LUCATS
+!sms$serial begin
+              READ (19,*)IINDEX,ALBTBL(LC),Z0TBL(LC),LEMITBL(LC),PCTBL(LC), &
+                         SHDTBL(LC),IFORTBL(LC),RSTBL(LC),RGLTBL(LC),         &
+                         HSTBL(LC),SNUPTBL(LC),LAITBL(LC),MAXALB(LC)
+!sms$serial end
+           ENDDO
+!
+!sms$serial begin
+           READ (19,*)
+           READ (19,*)TOPT_DATA
+           READ (19,*)
+           READ (19,*)CMCMAX_DATA
+           READ (19,*)
+           READ (19,*)CFACTR_DATA
+           READ (19,*)
+           READ (19,*)RSMAX_DATA
+           READ (19,*)
+           READ (19,*)BARE
+           READ (19,*)
+           READ (19,*)NATURAL
+           READ (19,*)
+           READ (19,*)CROP
+           READ (19,*)
+           READ (19,*,iostat=ierr)URBAN
+!sms$serial end
+           if ( ierr /= 0 )  print *, "-------- VEGPARM.TBL READ ERROR --------"
+           if ( ierr /= 0 )  print *, "Problem read URBAN from VEGPARM.TBL"
+           if ( ierr /= 0 )  print *, " -- Use updated version of VEGPARM.TBL  "
+           if ( ierr /= 0 )  print *,  "Problem read URBAN from VEGPARM.TBL"
+
+        ENDIF
+
+ 2002   CONTINUE
+        CLOSE (19)
+!-----
+    IF (debug_print ) THEN
+         print *,' LEMITBL, PCTBL, Z0TBL, LAITBL --->', LEMITBL, PCTBL, Z0TBL, LAITBL
+    ENDIF
+
+
+        IF (LUMATCH == 0) then
+!           CALL wrf_error_fatal ("Land Use Dataset '"//MMINLURUC//"' not found in VEGPARM.TBL.")
+        ENDIF
+
+!      END IF
+
+!      CALL wrf_dm_bcast_string  ( LUTYPE  , 8 )
+!      CALL wrf_dm_bcast_integer ( LUCATS  , 1 )
+!      CALL wrf_dm_bcast_integer ( IINDEX  , 1 )
+!      CALL wrf_dm_bcast_integer ( LUMATCH , 1 )
+!      CALL wrf_dm_bcast_real    ( ALBTBL  , NLUS )
+!      CALL wrf_dm_bcast_real    ( Z0TBL   , NLUS )
+!      CALL wrf_dm_bcast_real    ( LEMITBL , NLUS )
+!      CALL wrf_dm_bcast_real    ( PCTBL   , NLUS )
+!      CALL wrf_dm_bcast_real    ( SHDTBL  , NLUS )
+!      CALL wrf_dm_bcast_real    ( IFORTBL , NLUS )
+!      CALL wrf_dm_bcast_real    ( RSTBL   , NLUS )
+!      CALL wrf_dm_bcast_real    ( RGLTBL  , NLUS )
+!      CALL wrf_dm_bcast_real    ( HSTBL   , NLUS )
+!      CALL wrf_dm_bcast_real    ( SNUPTBL , NLUS )
+!      CALL wrf_dm_bcast_real    ( LAITBL  , NLUS )
+!      CALL wrf_dm_bcast_real    ( MAXALB  , NLUS )
+!      CALL wrf_dm_bcast_real    ( TOPT_DATA    , 1 )
+!      CALL wrf_dm_bcast_real    ( CMCMAX_DATA  , 1 )
+!      CALL wrf_dm_bcast_real    ( CFACTR_DATA  , 1 )
+!      CALL wrf_dm_bcast_real    ( RSMAX_DATA  , 1 )
+!      CALL wrf_dm_bcast_integer ( BARE        , 1 )
+!      CALL wrf_dm_bcast_integer ( NATURAL     , 1 )
+!      CALL wrf_dm_bcast_integer ( CROP        , 1 )
+!      CALL wrf_dm_bcast_integer ( URBAN       , 1 )
+
+!                                                                       
+!-----READ IN SOIL PROPERTIES FROM SOILPARM.TBL
+!                                                                       
+!      IF ( wrf_dm_on_monitor() ) THEN
+        OPEN(19, FILE='SOILPARM.TBL',FORM='FORMATTED',STATUS='OLD',IOSTAT=ierr)
+        IF(ierr .NE. OPEN_OK ) THEN
+          print *,&
+          'module_sf_ruclsm.F: soil_veg_gen_parm: failure opening SOILPARM.TBL'
+        END IF
+
+        print *,'INPUT SOIL TEXTURE CLASSIFICATION = ',MMINSL
+
+        LUMATCH=0
+
+!sms$serial begin
+        READ (19,'(A)') vege_parm_string
+!sms$serial end
+        outersl : DO
+!sms$serial begin
+           READ (19,2000,END=2003)SLTYPE
+           READ (19,*)SLCATS,IINDEX
+!sms$serial end
+
+            print *,&
+           'SOILPARM FOR ',SLTYPE,' FOUND', SLCATS,' CATEGORIES'
+
+           IF(SLTYPE.NE.MMINSL)THEN    ! Skip over the undesired table
+           print *,&
+              'Skipping ', SLTYPE, ' table'
+              DO LC=1,SLCATS
+!sms$serial begin
+                 READ (19,*)
+!sms$serial end
+              ENDDO
+              innersl : DO               ! Find the next "Vegetation Parameters"
+!sms$serial begin
+                 READ (19,'(A)',END=2002) vege_parm_string
+!sms$serial end
+                 IF (TRIM(vege_parm_string) .EQ. "Soil Parameters") THEN
+                    EXIT innersl
+                 END IF
+               ENDDO innersl
+           ELSE
+              LUMATCH=1
+              print *,&
+              'Found ', SLTYPE, ' table'
+              EXIT outersl                ! Found the table, read the data
+           END IF
+
+        ENDDO outersl
+
+        IF (LUMATCH == 1) then
+     print *,'SLCATS=',SLCATS
+          DO LC=1,SLCATS
+!sms$serial begin
+              READ (19,*) IINDEX,BB(LC),DRYSMC(LC),HC(LC),MAXSMC(LC),&
+                        REFSMC(LC),SATPSI(LC),SATDK(LC), SATDW(LC),   &
+                        WLTSMC(LC), QTZ(LC)
+ !sms$serial end
+          ENDDO
+         ENDIF
+
+ 2003   CONTINUE
+
+        CLOSE (19)
+!      ENDIF
+
+!      CALL wrf_dm_bcast_integer ( LUMATCH , 1 )
+!      CALL wrf_dm_bcast_string  ( SLTYPE  , 8 )
+!      CALL wrf_dm_bcast_string  ( MMINSL  , 8 )  ! since this is reset above, see oct2 ^
+!      CALL wrf_dm_bcast_integer ( SLCATS  , 1 )
+!      CALL wrf_dm_bcast_integer ( IINDEX  , 1 )
+!      CALL wrf_dm_bcast_real    ( BB      , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( DRYSMC  , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( HC      , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( MAXSMC  , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( REFSMC  , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( SATPSI  , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( SATDK   , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( SATDW   , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( WLTSMC  , NSLTYPE )
+!      CALL wrf_dm_bcast_real    ( QTZ     , NSLTYPE )
+
+      IF(LUMATCH.EQ.0)THEN
+          print *, 'SOIl TEXTURE IN INPUT FILE DOES NOT ' 
+          print *, 'MATCH SOILPARM TABLE'                 
+          print *, 'INCONSISTENT OR MISSING SOILPARM FILE' 
+      ENDIF
+
+!
+!-----READ IN GENERAL PARAMETERS FROM GENPARM.TBL 
+!                                                                       
+!      IF ( wrf_dm_on_monitor() ) THEN
+        OPEN(19, FILE='GENPARM.TBL',FORM='FORMATTED',STATUS='OLD',IOSTAT=ierr)
+        IF(ierr .NE. OPEN_OK ) THEN
+          print *,&
+          'module_sf_ruclsm.F: soil_veg_gen_parm: failure opening GENPARM.TBL'
+        END IF
+
+!sms$serial begin
+        READ (19,*)
+        READ (19,*)
+        READ (19,*) NUM_SLOPE
+!sms$serial end
+
+          SLPCATS=NUM_SLOPE
+
+          DO LC=1,SLPCATS
+!sms$serial begin
+              READ (19,*)SLOPE_DATA(LC)
+!sms$serial end
+          ENDDO
+
+!sms$serial begin
+          READ (19,*)
+          READ (19,*)SBETA_DATA
+          READ (19,*)
+          READ (19,*)FXEXP_DATA
+          READ (19,*)
+          READ (19,*)CSOIL_DATA
+          READ (19,*)
+          READ (19,*)SALP_DATA
+          READ (19,*)
+          READ (19,*)REFDK_DATA
+          READ (19,*)
+          READ (19,*)REFKDT_DATA
+          READ (19,*)
+          READ (19,*)FRZK_DATA
+          READ (19,*)
+          READ (19,*)ZBOT_DATA
+          READ (19,*)
+          READ (19,*)CZIL_DATA
+          READ (19,*)
+          READ (19,*)SMLOW_DATA
+          READ (19,*)
+          READ (19,*)SMHIGH_DATA
+!sms$serial end
+        CLOSE (19)
+!      ENDIF
+
+!      CALL wrf_dm_bcast_integer ( NUM_SLOPE    ,  1 )
+!      CALL wrf_dm_bcast_integer ( SLPCATS      ,  1 )
+!      CALL wrf_dm_bcast_real    ( SLOPE_DATA   ,  NSLOPE )
+!      CALL wrf_dm_bcast_real    ( SBETA_DATA   ,  1 )
+!      CALL wrf_dm_bcast_real    ( FXEXP_DATA   ,  1 )
+!      CALL wrf_dm_bcast_real    ( CSOIL_DATA   ,  1 )
+!      CALL wrf_dm_bcast_real    ( SALP_DATA    ,  1 )
+!      CALL wrf_dm_bcast_real    ( REFDK_DATA   ,  1 )
+!      CALL wrf_dm_bcast_real    ( REFKDT_DATA  ,  1 )
+!      CALL wrf_dm_bcast_real    ( FRZK_DATA    ,  1 )
+!      CALL wrf_dm_bcast_real    ( ZBOT_DATA    ,  1 )
+!      CALL wrf_dm_bcast_real    ( CZIL_DATA    ,  1 )
+!      CALL wrf_dm_bcast_real    ( SMLOW_DATA   ,  1 )
+!      CALL wrf_dm_bcast_real    ( SMHIGH_DATA  ,  1 )
+
 
 !-----------------------------------------------------------------
-!      END SUBROUTINE RUCLSM_SOILVEGPARM
+      END SUBROUTINE RUCLSM_SOILVEGPARM
 !-----------------------------------------------------------------
 
 
@@ -7258,9 +7509,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
          integer,   parameter      ::      nsoilclas=19
 
          integer, intent ( in)  ::                          isltyp
-         real (kind=kind_phys),    intent ( out) ::          dqm,ref,qmin,psis,bclh
+         real,    intent ( out) ::               dqm,ref,qmin,psis,bclh
 
-         real (kind=kind_phys)  LQMA(nsoilclas),LREF(nsoilclas),LBCL(nsoilclas),       &
+         REAL  LQMA(nsoilclas),LREF(nsoilclas),LBCL(nsoilclas),       &
                LPSI(nsoilclas),LQMI(nsoilclas)
 
 !-- LQMA Rawls et al.[1982]

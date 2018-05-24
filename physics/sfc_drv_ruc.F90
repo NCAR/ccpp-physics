@@ -25,14 +25,12 @@
 !! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl       | W m-2      |    1 | real      | kind_phys | out    | F        |
 !! | snowc          | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       |    1 | real      | kind_phys | out    | F        |
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux                  | latent heat flux due to snow and frz rain  | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point | soil water fraction at wilting point       | frac       |    1 | real      | kind_phys | out    | F        |
-!! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil        | soil moisture threshold                    | frac       |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine lsm_ruc_pre_run                                       &
-     &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
-     &   smcref2,errmsg,errflg                                          &
+     &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,          &
+     &   errmsg,errflg                                                 &
      &  )
 
       use machine,           only: kind_phys
@@ -43,7 +41,7 @@
       integer, intent(in) :: im, km
 
       real(kind=kind_phys), dimension(im), intent(inout)  ::            &
-     &    drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,smcref2
+     &    drain,runof,evbs,evcw,trans,sbsno,snowc,snohf
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -60,8 +58,6 @@
       sbsno(:)   = 0.0
       snowc(:)   = 0.0
       snohf(:)   = 0.0
-      smcwlt2(:) = 0.0
-      smcref2(:) = 0.0
 
       end subroutine lsm_ruc_pre_run
 
@@ -123,8 +119,8 @@
       errflg = 0
 
       if(flag_lssav) then
-        runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 0.001
-        srunoff(:) = srunoff(:) + runof(:) * dtf * 0.001
+        runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 1000. ! kg m-2
+        srunoff(:) = srunoff(:) + runof(:) * dtf * 1000.            ! kg m-2
       end if
 
       end subroutine lsm_ruc_post_run
@@ -163,7 +159,7 @@
 !  ---  outputs:                                                        !
 !            sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      !
 !            cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            !
-!            smcwlt2, smcref2, wet1 )                                   !
+!            wet1 )                                   !
 !                                                                       !
 !                                                                       !
 !  subprogram called:  sflx                                             !
@@ -224,21 +220,15 @@
 !     sncovr1  - real, snow cover over land (fractional)           im   !
 !     qsurf    - real, specific humidity at sfc                    im   !
 !     gflux    - real, soil heat flux (w/m**2)                     im   !
-!     drain    - real, subsurface runoff (mm/s)                    im   !
-!     evap     - real, evaperation from latent heat flux           im   !
+!     drain    - real, subsurface runoff (m/s)                     im   !
+!     evap     - real, latent heat flux                            im   !
 !     hflx     - real, sensible heat flux                          im   !
-!     ep       - real, potential evaporation                       im   !
-!     runoff   - real, surface runoff (m/s)                        im   !
-!     cmm      - real,                                             im   !
-!     chh      - real,                                             im   !
+!     runof    - real, surface runoff (m/s)                        im   !
 !     evbs     - real, direct soil evaporation (m/s)               im   !
 !     evcw     - real, canopy water evaporation (m/s)              im   !
 !     sbsno    - real, sublimation/deposit from snopack (m/s)      im   !
 !     snowc    - real, fractional snow cover                       im   !
 !     stm      - real, total soil column moisture content (m)      im   !
-!     snohf    - real, snow/freezing-rain latent heat flux (w/m**2)im   !
-!     smcwlt2  - real, dry soil moisture threshold                 im   !
-!     smcref2  - real, soil moisture threshold                     im   !
 !     zorl     - real, surface roughness                           im   !
 !     wet1     - real, normalized soil wetness                     im   !
 !                                                                       !
@@ -260,12 +250,12 @@
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
 !! | km              | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
 !! | con_cp          | specific_heat_of_dry_air_at_constant_pressure                                | specific heat !of dry air at constant pressure                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | con_fvirt       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | rv/rd - 1 (rv = ideal gas constant for water vapor)             | none          |    0 | real      | kind_phys | in     | F        |
 !! | con_g           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | con_pi          | pi                                                                           | ratio of a circle's circumference to its diameter               | radians       |    0 | real      | kind_phys | in     | F        |
 !! | con_rd          | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_rv          | gas_constant_water_vapor                                                     | ideal gas constant for water vapor                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_hvap        | latent_heat_evaporation                                                      | latent heat of  evaporation/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |      
+!! | con_fvirt       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | rv/rd - 1 (rv = ideal gas constant for water vapor)             | none          |    0 | real      | kind_phys | in     | F        |
 !! | tprcp           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real      | kind_phys | inout  | F        | 
 !! | rain            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep                   | total rain at this time step                                    | m             |    1 | real      | kind_phys | in     | F        |
 !! | rainc           | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep        | convective rain at this time step                               | m             |    1 | real      | kind_phys | in     | F        |
@@ -330,7 +320,7 @@
       subroutine lsm_ruc_run                                            &
      &     ( kdt, im, km, u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf, &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
-     &       prsl1, prslki, zf, islimsk, ddvel,               &
+     &       prsl1, prslki, zf, islimsk, ddvel,                         &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
      &       isot, ivegsrc, fice,                                       & !  ---  inputs from here and above
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,&
@@ -339,33 +329,23 @@
      &       canopy, trans, tsurf, tsnow, zorl,                         & ! --- in/outs from here and above
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1, errmsg, errflg                     & ! -- outputs from here and above
+     &       wet1, errmsg, errflg                                       & ! -- outputs from here and above
      &     )
 
       use machine , only : kind_phys
       use funcphys, only : fpvs
 
-      use physcons, only : cp   => con_cp, rvrdm1 => con_fvirt,         &
-     &                     hvap   => con_hvap, rd   => con_rd,          &
-     &                     eps    => con_eps, epsm1 => con_epsm1,       &
-     &                     stbolt => con_sbc
-
       implicit none
 
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: cpinv   = 1.0/cp
-      real(kind=kind_phys), parameter :: hvapi   = 1.0/hvap
-      real(kind=kind_phys), parameter :: elocp   = hvap/cp
-      real(kind=kind_phys), parameter :: rovcp   = rd / cp
-      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
-      real(kind=kind_phys), parameter :: a2      = 17.2693882
-      real(kind=kind_phys), parameter :: a3      = 273.16
-      real(kind=kind_phys), parameter :: a4      = 35.86
-      real(kind=kind_phys), parameter :: a23m4   = a2*(a3-a4)
+!      real(kind=kind_phys), parameter :: cpinv   = 1.0/con_cp
+!      real(kind=kind_phys), parameter :: hvapi   = 1.0/con_hvap
+!      real(kind=kind_phys), parameter :: elocp   = con_hvap/con_cp
+!      real(kind=kind_phys), parameter :: rovcp   = con_rd / con_cp
 
-! -- dimensions for the LSMRUC arguments
-      integer, parameter  :: ime = 1
-      integer, parameter  :: jme = 1
+      real(kind=kind_phys), parameter :: stbolt  = 5.670400e-8
+      integer, parameter :: ime = 1
+      integer, parameter :: jme = 1
 
       real(kind=kind_phys), save         :: zsoil_ruc(9)
       data zsoil_ruc / 0., 0.05, 0.1, 0.2, 0.4, 0.6, 1.0, 1.6, 3.0 /   ! in [m]
@@ -383,7 +363,7 @@
       integer, dimension(im), intent(in) :: islimsk
       real (kind=kind_phys),  intent(in) :: delt
       real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g, con_pi,       &
-                                            con_hvap, con_fvirt, con_rd
+                                            con_hvap, con_rd, con_fvirt
 
       logical, dimension(im), intent(in) :: flag_iter, flag_guess
 
@@ -398,8 +378,7 @@
 !  ---  output:
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
-     &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
-     &       wet1
+     &       evbs, evcw, sbsno, snowc, stm, snohf, wet1
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -420,19 +399,19 @@
       real (kind=kind_phys),dimension (1:ime,1:jme) ::                  &
      &     alb, albedo, beta, chx, cmx,                                 &
      &     chs, flhc, flqc, wet, smmax, cmc,                            &
-     &     dew, drip,  ec, edir, ett, eta, esnow, etp, qfx,      &
-     &     acceta, flx1, flx2, flx3, ffrozp, lwdn, pc, prcp, ptu, q2,   &
+     &     dew, drip,  ec, edir, ett, eta, esnow, etp, qfx,             &
+     &     acceta, ffrozp, lwdn, prcp, q2,                              &
      &     graupelncv, snowncv, rainncv, raincv,                        &
-     &     qcatm, q2sat, solnet, rc, rcs, rct, rcq, rcsoil, rsmin,      &
-     &     runoff1, runoff2, runoff3, sfcspd, sfcprs, sfctmp,           &
-     &     sfcems, sheat, shdfac, shdmin1d, shdmax1d, smcwlt,           &
-     &     smcdry, smcref, smcmax, sneqv, snoalb1d, snowh, snoh,        &
+     &     qcatm, q2sat, solnet, sfcexc,                                &
+     &     runoff1, runoff2, acrunoff,sfcprs, sfctmp,                   &
+     &     sfcems, sheat, shdfac, shdmin1d, shdmax1d,                   &
+     &     sneqv, snoalb1d, snowh, snoh, tsnav,                         &
      &     snomlt, sncovr, soilw, soilm, ssoil, soilt, th2, tbot,       &
-     &     xlai, swdn, tem, z0, znt, rho2, rhosnf,                      &
+     &     xlai, swdn, tem, z0, znt, rho2, rhosnf, infiltr,             &
      &     precipfr, snowfallac, acsnow, xland, xice,                   &
-     &     snflux, budget, qsfc, qsg, qvg, qcg, conflx2, soilt1
+     &     snflux, qsfc, qsg, qvg, qcg, conflx2, soilt1, chklowq
 
-      real (kind=kind_phys) :: xice_threshold
+      real (kind=kind_phys) :: xice_threshold, eps, epsm1, rhoh2o
 
       character(len=256) :: llanduse  ! Land-use dataset.  Valid values are :
                                       ! "USGS" (USGS 24/27 category dataset) and
@@ -457,6 +436,10 @@
 
 !> - Set flag for land points.
 
+           chklowq = 1.
+           eps   = con_rd/con_rv
+           epsm1 = con_rd/con_rv-1.
+          
           if(isot == 1) then
             nscat = 19 ! stasgo
           else
@@ -519,7 +502,7 @@
           q0(i)   = max(q1(i)/(1.-q1(i)), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
           theta1(i) = t1(i) * prslki(i) !* adiabatic temp at level 1 (k)
 
-          rho(i) = prsl1(i) / (rd*t1(i)*(1.0+rvrdm1*q0(i)))
+          rho(i) = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0(i)))
           qs1(i) = fpvs( t1(i) )        !* qs1=sat. humidity at level 1 (kg/kg)
           qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), 1.e-8)
           q0 (i) = min(qs1(i), q0(i))
@@ -535,7 +518,7 @@
       enddo
 
       do i1 = 1,ime
-      do j = 1,jme
+      do j  = 1,jme
 
       do i = 1, im
         if (flag_iter(i)) then
@@ -618,7 +601,6 @@
 !!\n  \a sfcspd  - wind speed (\f$m s^{-1}\f$) at height zlvl above ground
 !!\n  \a q2sat   - sat mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
 
-          sfcspd(i1,j) = wind(i)
           q2sat(i1,j) =  qs1(i)
 
 !>  -   4. canopy/soil characteristics (s):
@@ -678,7 +660,6 @@
           shdmax1d(i1,j) = shdmax(i)*100.
           snoalb1d(i1,j) = snoalb(i)
 
-          ptu  = 0.0
           alb(i1,j)  = sfalb(i)
           tbot(i1,j) = tg3(i)
 
@@ -716,7 +697,7 @@
             keepfrsoil(i1,k,j) = keepfr(i,k)
           enddo
 
-          wet(i1,j) = smsoil(i1,1,j) / smcmax(i1,j)
+          wet(i1,j) = wet1(i)
 
           snowh(i1,j) = snwdph(i) * 0.001         ! convert from mm to m
           sneqv(i1,j) = weasd(i)                  ! [mm]
@@ -751,7 +732,7 @@
 
           chx(i1,j)    = ch(i)  * wind(i)          ! compute conductance
           chs(i1,j)    = ch(i)  
-          flhc(i1,j)   = ch(i) * rho(i) * cp * (1. + 0.84*q2(i1,j))
+          flhc(i1,j)   = ch(i) * rho(i) * con_cp * (1. + 0.84*q2(i1,j))
           flqc(i1,j)   = ch(i) * rho(i) * wet(i1,j)
           cmx(i1,j)    = cm(i)  * wind(i)
           chh(i) = chx(i1,j) * rho(i) 
@@ -763,56 +744,41 @@
 
 !> - Call RUC LSM lsmruc(). 
 
-      call lsmruc( delt, kdt, nsoil, sldpth,                            &
+      call lsmruc( delt, kdt, nsoil,                             &
      &          graupelncv, snowncv, rainncv, raincv,                   &
-     &          prcp, sneqv, snowh, sncovr, ffrozp, frpcpn,             &
+     &          sldpth, prcp, sneqv, snowh, sncovr, ffrozp, frpcpn,             &
      &          rhosnf, precipfr,                                       &
 !  ---  inputs:
      &          conflx2, sfcprs, sfctmp, q2, qcatm, rho2,               &
-     &          lwdn, solnet, sfcems, chs, flqc, flhc,                  &
+     &          lwdn, solnet, sfcems, chklowq, chs, flqc, flhc,                  &
 !  ---  input/outputs:
      &          wet, cmc, shdfac, albedo, znt,                      &
      &          z0, snoalb1d, alb,                                      &
 !     &          z0, snoalb1d, alb, xlai,                                &
-     &          llanduse, landusef, nlcat,                              &
+     &          landusef, nlcat,                              &
 !  --- mosaic_lu and mosaic_soil are moved to the namelist
 !     &          mosaic_lu, mosaic_soil,                                 &
      &          soilctop, nscat,                                        &
      &          qsfc, qsg, qvg, qcg, dew, soilt1,                       &
-     &          tbot, vtype, stype, xland,                              &
+     &          tsnav, tbot, vtype, stype, xland,                              &
      &          iswater, isice, xice, xice_threshold,                   &
 !  ---  constants
-     &          con_cp, rovcp, con_rv, con_g, con_pi, con_hvap, stbolt, rhoh2o, &
+     &          con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, stbolt,&
 !  ---  input/outputs:
      &          smsoil, slsoil, soilm, smmax,                           &
-     &          stsoil, soilt, sheat, qfx, eta,                         &
-     &          edir, ec, ett, et, snflux, budget,                      &
-     &          runoff1, runoff2, drip, esnow,                          &
-     &          acceta, ssoil, snowfallac, acsnow, snomlt, snoh,        &
+     &          stsoil, soilt, sheat, qfx, eta, infiltr,                        &
+     &          runoff1, runoff2, acrunoff, sfcexc,                     &
+     &          acceta, ssoil, snowfallac, acsnow, snomlt,        &
      &          smfrsoil,keepfrsoil, .false.,                           &
      &          shdmin1d, shdmax1d, rdlai2d,                            &
      &          1,1, 1,1, 1,1, 1,1, 1,1, 1,1 )
 
-!     &     ( nsoil, couple, ice, ffrozp, delt, zlvl, sldpth,            &
-!     &       swdn, solnet, lwdn, sfcems, sfcprs, sfctmp,                &
-!     &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
-!     &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
-!     &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &
-!     &       z0,                                                        &
-!!  ---  outputs:
-!     &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              &
-!     &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
-!     &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
-!     &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-!     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
-!
 
 !> - RUC LSM: prepare variables for return to parent model and unit conversion.
 !>  -   6. output (o):
 !!\n  ------------------------------
 !!\n \a eta     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
 !!\n \a sheat   - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!!\n \a beta    - ratio of actual/potential evap (dimensionless)
 !!\n \a etp     - potential evaporation (\f$W m^{-2}\f$)
 !!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
 !!\n \a runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
@@ -832,10 +798,6 @@
           stm(i)   = soilm(i1,j)
           snohf(i) = snoh(i1,j)
 
-          smcwlt2(i) = smcwlt(i1,j)
-          smcref2(i) = smcref(i1,j)
-
-!          ep(i)      = etp(i1,j)
           tsurf(i)   = soilt(i1,j)
 
           do k = 1, km
@@ -845,11 +807,11 @@
             keepfr(i,k) = keepfrsoil(i1,k,j)
           enddo
 
-          wet1(i) = smsoil(i1,1,j) / smcmax(i1,j) !Sarah Lu added 09/09/2010 (for GOCART)
+          wet1(i) = wet(i1,j) !Sarah Lu added 09/09/2010 (for GOCART)
 
-!  --- ...  unit conversion (from m s-1 to mm s-1)
-          runoff(i)  = runoff1(i1,j) * delt * 1000.0
-          drain (i)  = runoff2(i1,j) * delt * 1000.0
+!  --- ...  units m/s = g m-2 s-1
+          runoff (i)  = runoff1(i1,j) 
+          drain (i)  = runoff2(i1,j)
 
 !  --- ...  unit conversion (from m to mm)
           snwdph(i)  = snowh(i1,j) * 1000.0
@@ -870,27 +832,18 @@
 !    drip    - through-fall of precip and/or dew in excess of canopy
 !              water-holding capacity (m)
 !    dew     - dewfall (or frostfall for t<273.15) (m)
-!    beta    - ratio of actual/potential evap (dimensionless)
 !    flx1    - precip-snow sfc (w m-2)
 !    flx2    - freezing rain latent heat flux (w m-2)
 !    flx3    - phase-change heat flux from snowmelt (w m-2)
 !    snomlt  - snow melt (m) (water equivalent)
 !    sncovr  - fractional snow cover (unitless fraction, 0-1)
-!    runoff3 - numerical trunctation in excess of porosity (smcmax)
 !              for a given soil layer at the end of a time step
-!    rc      - canopy resistance (s m-1)
 !    pc      - plant coefficient (unitless fraction, 0-1) where pc*etp
 !              = actual transp
 !    xlai    - leaf area index (dimensionless)
-!    rsmin   - minimum canopy resistance (s m-1)
-!    rcs     - incoming solar rc factor (dimensionless)
-!    rct     - air temperature rc factor (dimensionless)
-!    rcq     - atmos vapor pressure deficit rc factor (dimensionless)
-!    rcsoil  - soil moisture rc factor (dimensionless)
 !    soilw   - available soil moisture in root zone (unitless fraction
 !              between smcwlt and smcmax)
 !    soilm   - total soil column moisture content (frozen+unfrozen) (m)
-!    smcwlt  - wilting point (volumetric)
 !    smcdry  - dry soil moisture threshold where direct evap frm top
 !              layer ends (volumetric)
 !    smcref  - soil moisture threshold where transpiration begins to
