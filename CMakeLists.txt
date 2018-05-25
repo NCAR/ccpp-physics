@@ -185,6 +185,10 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/precpd.f
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
+      ./physics/sfc_drv_ruc.F90
+      ./physics/module_sf_ruclsm.F90
+      ./physics/namelist_soilveg_ruc.F90
+      ./physics/set_soilveg_ruc.F90
   )
 endif (PROJECT STREQUAL "CCPP-FV3")
 
@@ -260,7 +264,8 @@ else (PROJECT STREQUAL "CCPP-FV3")
     ./physics/GFS_rrtmg_post_cap.F90
     ./physics/get_phi_fv3_cap.F90
     ./physics/rrtmg_sw_pre_cap.F90
-  )
+#    ./physics/sfc_drv_ruc_cap.F90
+)
 endif (PROJECT STREQUAL "CCPP-FV3")
 
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
@@ -291,6 +296,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
+    SET_SOURCE_FILES_PROPERTIES(./physics/module_sf_ruclsm.F90 PROPERTIES COMPILE_FLAGS "-r8")
   endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
