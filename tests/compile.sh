@@ -32,7 +32,7 @@ cd $PATHNEMS
 # Current Intel 15 compiler is incompatible with latest features needed
 # for CCPP (dynamic loading, ISO_C bindings etc.) and causes segfaults
 # when trying to load the shared library libccpp.so when launching fv3.exe
-if [[ "${MAKE_OPT}" == *"CCPP=Y"* && "${MACHINE_ID}" == "theia" ]]; then
+if [[ "${MAKE_OPT}" == *"CCPP=Y"* && "${BUILD_TARGET}" == "theia.intel" ]]; then
   src/configure configure.fv3.$BUILD_TARGET $BUILD_TARGET/fv3.intel-18.0.1.163
 else
   src/configure configure.fv3.$BUILD_TARGET $BUILD_TARGET/fv3
@@ -58,7 +58,7 @@ if [[ "${MAKE_OPT}" == *"CCPP=Y"* ]]; then
   fi
   # Build CCPP framework and physics
   cd ${PATH_CCPP}
-  ./build_ccpp.sh ${MACHINE_ID} ${PATH_CCPP} "${MAKE_OPT}" ${clean_before} ${clean_after}
+  ./build_ccpp.sh ${BUILD_TARGET} ${PATH_CCPP} "${MAKE_OPT}" ${clean_before} ${clean_after}
 fi
 
 # Copy configuration to FV3:
