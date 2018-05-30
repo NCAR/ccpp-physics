@@ -1,9 +1,9 @@
-Sat May 19 20:58:55 UTC 2018
+Tue May 29 20:11:35 UTC 2018
 Start Regression test
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_control
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_control
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_control
 Checking test 01 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -71,7 +71,7 @@ Test 01 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_control
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_decomp
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_decomp
 Checking test 02 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -139,7 +139,7 @@ Test 02 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_control
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_2threads
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_2threads
 Checking test 03 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -207,7 +207,7 @@ Test 03 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_restart
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_restart
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_restart
 Checking test 04 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -275,7 +275,7 @@ Test 04 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_read_inc
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_read_inc
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_read_inc
 Checking test 05 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -343,7 +343,7 @@ Test 05 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_wsm6
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_wsm6
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_wsm6
 Checking test 06 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -411,7 +411,7 @@ Test 06 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_wrtGauss_netcdf
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_wrtGauss_netcdf_esmf
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_wrtGauss_netcdf_esmf
 Checking test 07 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -459,7 +459,7 @@ Test 07 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_wrtGauss_netcdf
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_wrtGauss_netcdf
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_wrtGauss_netcdf
 Checking test 08 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -507,7 +507,7 @@ Test 08 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_wrtGauss_nemsio
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_wrtGauss_nemsio
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_wrtGauss_nemsio
 Checking test 09 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -555,7 +555,7 @@ Test 09 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_control
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_appbuild
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_appbuild
 Checking test 10 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -623,7 +623,7 @@ Test 10 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_control_32bit
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_control_32bit
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_control_32bit
 Checking test 11 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -691,7 +691,7 @@ Test 11 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_stretched
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_stretched
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_stretched
 Checking test 12 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -747,7 +747,7 @@ Test 12 PASS
 
 
 baseline dir = /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_PGI/fv3_stretched_nest
-working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_123429/fv3_stretched_nest
+working dir  = /scratch4/NCEPDEV/stmp3/Dom.Heinzeller/FV3_RT/rt_97413/fv3_stretched_nest
 Checking test 13 results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK
@@ -814,4 +814,4 @@ Test 13 PASS
 
 
 REGRESSION TEST WAS SUCCESSFUL
-Sat May 19 22:57:35 UTC 2018
+Tue May 29 22:38:51 UTC 2018
