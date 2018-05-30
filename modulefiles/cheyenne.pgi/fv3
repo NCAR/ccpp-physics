@@ -48,6 +48,7 @@ setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
 ##
 ## Set compiler environment variables for CCPP
 ##
+setenv CPP "mpicc -E"
 setenv CC  mpicc
 setenv CXX mpicxx
 setenv FC  mpif90

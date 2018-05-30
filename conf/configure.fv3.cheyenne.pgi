@@ -35,6 +35,7 @@ endif
 ############
 # commands #
 ############
+CPP             =       mpicc -E
 SFC             =       pgfortran
 SCC             =       pgcc
 CCOMP           =       pgcc
