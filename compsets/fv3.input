@@ -50,6 +50,12 @@ embed bash compile.sh(MAKE_OPTS=' ',BUILD_NR='',fv3,modules,md5) [[[
                 ./compile.sh "@[plat%HOMEnems]/FV3" \
                 $( echo @[plat%MACHINE_ID] | sed 's,\.,_,g' ) \
                 @[MAKE_OPTS] @[BUILD_NR]
+        elif [[ @[plat%PLATFORM_NAME] == theia.* || @[plat%PLATFORM_NAME] == cheyenne.* ]] ; then
+            # Don't substitute the . with a _ on Theia/Cheyenne
+            echo "DON'T SUBSTITUTE _ for . on @[plat%PLATFORM_NAME]"
+            ./compile.sh "@[plat%HOMEnems]/FV3" \
+                @[plat%MACHINE_ID] \
+                @[MAKE_OPTS] @[BUILD_NR]
         else
             ./compile.sh "@[plat%HOMEnems]/FV3" \
                 $( echo @[plat%MACHINE_ID] | sed 's,\.,_,g' ) \
@@ -1263,6 +1269,7 @@ test fv3_wrtGauss_nemsio_c768: fv3.exe {
 
     TASKS='1728'
     TPN='12'
+    PPN="@[plat%C768_PPN]"
     INPES='16'
     JNPES='16'
     NPX='769'
@@ -1369,7 +1376,10 @@ test fv3_wrtGauss_nemsio_c768: fv3.exe {
       # This is to ensure the executable did not change during the
       # test suite.
         "@[build%target]" .md5cmp. "@[fv3.exe%md5sum]"
+    }
 
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", ppn="@[PPN]" }
     }
 }
 
