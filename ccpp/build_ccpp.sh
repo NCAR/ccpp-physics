@@ -4,8 +4,7 @@ set +x
 set -eu
 
 # List of valid/tested machines
-VALID_MACHINES=( theia )
-#VALID_MACHINES=( theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi macosx.gnu )
+VALID_MACHINES=( theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi macosx.gnu )
 
 ###################################################################################################
 
