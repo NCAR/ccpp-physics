@@ -1,3 +1,6 @@
+!> \file gmtb_scm_sfc_flux_spec.f90
+!!  Contains code to calculate parameters needed by the rest of the GFS physics suite given specified surface fluxes.
+
 module gmtb_scm_sfc_flux_spec
 
   implicit none
@@ -18,7 +21,10 @@ module gmtb_scm_sfc_flux_spec
   subroutine gmtb_scm_sfc_flux_spec_finalize()
   end subroutine gmtb_scm_sfc_flux_spec_finalize
 
-!> \section arg_table_gmtb_scm_sfc_flux_spec_run Argument Table
+!> \brief This routine calculates surface-related parameters given specified sensible and latent heat fluxes and a roughness length. Most of the calculation
+!! is "backing out" parameters that are calculated in sfc_dff.f from the known surface heat fluxes and roughness length.
+!!
+!! \section arg_table_gmtb_scm_sfc_flux_spec_run Argument Table
 !! | local_name       | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | u1               | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
@@ -42,8 +48,8 @@ module gmtb_scm_sfc_flux_spec
 !! | lh_flux          | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
 !! | u_star           | surface_friction_velocity                                                    | boundary layer parameter                                        | m s-1         |    1 | real      | kind_phys | out    | F        |
 !! | sfc_stress       | surface_wind_stress                                                          | surface wind stress                                             | m2 s-2        |    1 | real      | kind_phys | out    | F        |
-!! | cm               | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | thermal exchange coefficient                                    | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
-!! | ch               | surface_drag_wind_speed_for_momentum_in_air                                  | momentum exchange coefficient                                   | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | cm               | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                             | none          |    1 | real      | kind_phys | out    | F        |
+!! | ch               | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | none          |    1 | real      | kind_phys | out    | F        |
 !! | fm               | Monin-Obukhov_similarity_function_for_momentum                               | Monin-Obukhov similarity function for momentum                  | none          |    1 | real      | kind_phys | out    | F        |
 !! | fh               | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity function for heat                      | none          |    1 | real      | kind_phys | out    | F        |
 !! | rb               | bulk_richardson_number_at_lowest_model_level                                 | bulk Richardson number at the surface                           | none          |    1 | real      | kind_phys | out    | F        |
@@ -56,6 +62,16 @@ module gmtb_scm_sfc_flux_spec
 !! | errmsg           | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg           | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
+!! \section general_sfc_flux_spec General Algorithm
+!!  -# Compute friction velocity from the wind speed at the lowest model layer, the height about the ground, and the roughness length.
+!!  -# Compute the surface stress from the friction velocity.
+!!  -# Calculate the surface drag coefficient for momentum given the surface stress and wind on the lowest model layer.
+!!  -# Calculate the Monin-Obukhov similarity funciton for momentum from the surface drag coefficient.
+!!  -# Calculate the Obukhov length from the friction velocity, surface virtual potential temperature, and surface vertical virtual potential temperature flux.
+!!  -# Calculate the bulk Richardson number at the lowest model layer.
+!!  -# Calculate the Monin-Obukhov similarity function for heat and moisture from the bulk Richardson number and diagnosed similarity function for momentum.
+!!  -# Calculate the surface drag coefficient for heat and moisture.
+!!  -# Calculate the u and v wind at 10m.
   subroutine gmtb_scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
     exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, u_star, sfc_stress, cm, ch, &
     fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
