@@ -144,23 +144,23 @@
       integer, parameter :: NBDSW  = NBANDS
 
 ! \name The actual number of g-point for bands 16-29
-      integer  :: NG16, NG17, NG18, NG19, NG20, NG21, NG22,
+      integer  :: NG16, NG17, NG18, NG19, NG20, NG21, NG22,             &
      &            NG23, NG24, NG25, NG26, NG27, NG28, NG29
-      parameter ( NG16=06, NG17=12, NG18=08, NG19=08, NG20=10,
-     &            NG21=10, NG22=02, NG23=10, NG24=08, NG25=06,
+      parameter ( NG16=06, NG17=12, NG18=08, NG19=08, NG20=10,          &
+     &            NG21=10, NG22=02, NG23=10, NG24=08, NG25=06,          &
      &            NG26=06, NG27=08, NG28=06, NG29=12)
 
       integer, dimension(NBLOW:NBHGH) :: NG
-      data  NG / NG16, NG17, NG18, NG19, NG20, NG21, NG22,
+      data  NG / NG16, NG17, NG18, NG19, NG20, NG21, NG22,              &
      &           NG23, NG24, NG25, NG26, NG27, NG28, NG29  /
 
 ! \name Accumulative starting index for bands 16-29
-      integer  :: NS16, NS17, NS18, NS19, NS20, NS21, NS22,
+      integer  :: NS16, NS17, NS18, NS19, NS20, NS21, NS22,             &
      &            NS23, NS24, NS25, NS26, NS27, NS28, NS29
-      parameter ( NS16=00,         NS17=NS16+NG16,  NS18=NS17+NG17,
-     &            NS19=NS18+NG18,  NS20=NS19+NG19,  NS21=NS20+NG20,
-     &            NS22=NS21+NG21,  NS23=NS22+NG22,  NS24=NS23+NG23,
-     &            NS25=NS24+NG24,  NS26=NS25+NG25,  NS27=NS26+NG26,
+      parameter ( NS16=00,         NS17=NS16+NG16,  NS18=NS17+NG17,     &
+     &            NS19=NS18+NG18,  NS20=NS19+NG19,  NS21=NS20+NG20,     &
+     &            NS22=NS21+NG21,  NS23=NS22+NG22,  NS24=NS23+NG23,     &
+     &            NS25=NS24+NG24,  NS26=NS25+NG25,  NS27=NS26+NG26,     &
      &            NS28=NS27+NG27,  NS29=NS28+NG28  )
 
 ! array contains values of NS16-NS29

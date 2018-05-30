@@ -348,10 +348,10 @@
                                            GFS_cldprop_type,             &
                                            GFS_radtend_type,             &
                                            GFS_diag_type
-!
-! DH*
+
 !      use GFS_diagtoscreen, only: GFS_diagtoscreen_run
-! *DH
+!      use memcheck, only: memcheck_run
+
       implicit   none
 !
       private
@@ -1301,13 +1301,14 @@
           Coupling, scmpsw, im, lm, LTP, kt, kb, kd, raddt, aerodp,    &
           cldsa, mtopa, mbota, clouds(:,:,1), errmsg, errflg)
 
-      ! DH*
       !call GFS_diagtoscreen_run(Model, Statein, Stateout, Sfcprop, Coupling, &
       !                          Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
-      ! *DH
+      !errmsg = 'end of GFS_radiation_driver'
+      !call memcheck_run(Model%sec, Tbd%blkno, errmsg, errflg)
+
       end subroutine GFS_radiation_driver
 #endif
-! End of block commented out for CCXX
+! End of block commented out for CCPP
 
 !
 !> @}
