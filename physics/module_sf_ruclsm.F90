@@ -6957,12 +6957,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--------------------------------------------------------------------------
 
   SUBROUTINE RUCLSMINIT( debug_print,                              &
-                         SH2O,SMFR3D,TSLB,SMOIS,ISLTYP,IVGTYP,     &
-                     mminlu, mminsl, XICE,mavail,nzs, iswater, isice,  &
-                     znt, restart, allowed_to_read ,               &
-                     ids,ide, jds,jde, kds,kde,                    &
+                     nzs, isltyp, ivgtyp, xice, mavail,            &
+                     sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte                     )
+
+  use namelist_soilveg_ruc
+
 #if ( WRF_CHEM == 1 )
   USE module_data_gocart_dust
 #endif
@@ -6970,11 +6971,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    LOGICAL,  INTENT(IN   )   ::  debug_print
 
 
-   INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &
+   INTEGER,  INTENT(IN   )   ::     &
                                     ims,ime, jms,jme, kms,kme,  &
                                     its,ite, jts,jte, kts,kte,  &
-                                    nzs, iswater, isice
-   CHARACTER(LEN=*), INTENT(IN   )    ::                 MMINLU, MMINSL
+                                    nzs
 
    REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
             INTENT(IN)    ::                                 TSLB, &
@@ -6990,55 +6990,16 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    REAL, DIMENSION( ims:ime, jms:jme )                           , &
             INTENT(INOUT)    ::                       XICE,MAVAIL
 
-   REAL, DIMENSION( ims:ime, jms:jme )                           , &
-            INTENT(  OUT)    ::                               znt
-
    REAL, DIMENSION ( 1:nzs )  ::                           SOILIQW
-
-   LOGICAL , INTENT(IN) :: restart, allowed_to_read 
 
 !
   INTEGER ::  I,J,L,itf,jtf
   REAL    ::  RIW,XLMELT,TLN,DQM,REF,PSIS,QMIN,BCLH
 
-  character*8 :: MMINLURUC, MMINSLRUC
-
    INTEGER                   :: errflag
-
-!   itf=min0(ite,ide-1)
-!   jtf=min0(jte,jde-1)
-
 
         RIW=900.*1.e-3
         XLMELT=3.35E+5
-
-! initialize three  LSM related tables
-   IF ( allowed_to_read ) THEN
-     print *, 'INITIALIZE THREE LSM RELATED TABLES' 
-!      if(mminlu == 'USGS') then
-!        MMINLURUC='USGS-RUC'
-!      elseif(mminlu == 'MODIS' .OR. &
-!        &    mminlu == 'MODIFIED_IGBP_MODIS_NOAH') then
-        MMINLURUC=MMINLU
-!        MMINLURUC='MODI-RUC'
-!      endif
-        MMINSLRUC=MMINSL
-!        MMINSL='STAS-RUC'
-    print *,'RUCLSMINIT uses MMINLU=',mminluruc, 'soil class. =',MMINSLRUC
-     call RUCLSM_SOILVEGPARM( debug_print,MMINLURUC, MMINSLRUC)   
-   ENDIF
-
-!#if ( WRF_CHEM == 1 )
-!
-! need this parameter for dust parameterization in wrf/chem
-!
-!   do I=1,NSLTYPE
-!      porosity(i)=maxsmc(i)
-!      drypoint(i)=drysmc(i)
-!   enddo
-!#endif
-!
- IF(.not.restart)THEN
 
 ! for FIM
    itf=ite  !  min0(ite,ide-1)
@@ -7063,11 +7024,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    DO J=jts,jtf
        DO I=its,itf
 
-        ZNT(I,J)   = Z0TBL(IVGTYP(I,J))
-
-!     CALL SOILIN     ( ISLTYP(I,J), DQM, REF, PSIS, QMIN, BCLH )
-
-
 !--- Computation of volumetric content of ice in soil
 !--- and initialize MAVAIL
     if(ISLTYP(I,J) > 0) then
@@ -7084,8 +7040,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 ! has isltyp=14 for water
    if (isltyp(i,j) == 0) isltyp(i,j)=14
 
-!!!     IF (.not.restart) THEN
-
     IF(xice(i,j).gt.0.) THEN
 !-- for ice
          DO L=1,NZS
@@ -7096,7 +7050,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ELSE
        if(isltyp(i,j).ne.14 ) then
 !-- land
-!           mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/dqm))
            mavail(i,j) = max(0.00001,min(1.,smois(i,1,j)/(ref-qmin)))
          DO L=1,NZS
 !-- for land points initialize soil ice
@@ -7131,7 +7084,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ENDDO
    ENDDO
 
- ENDIF
 
   END SUBROUTINE ruclsminit
 !
