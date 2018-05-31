@@ -283,7 +283,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_nst_water_prop.f90
                                 ./physics/aer_cloud.F
                                 ./physics/wv_saturation.F
-                                ./physics/cldwat2m_micro.F 
+                                ./physics/cldwat2m_micro.F
+                                ./physics/module_mp_thompson_hrrr_radar.F90
+                                ./physics/module_mp_thompson_hrrr.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
