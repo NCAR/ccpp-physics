@@ -1,141 +1,15 @@
 !>  \file sfc_drv_ruc.f
-!!  This file contains the Noah land surface scheme driver.
+!!  This file contains the RUC land surface scheme driver.
 
       module lsm_ruc_pre
+        use module_soil_pre
+        use module_sf_ruclsm,  only: ruclsminit
+        use machine,           only: kind_phys
       contains
 
-      subroutine lsm_ruc_pre_init
-      end subroutine lsm_ruc_pre_init
 
-      subroutine lsm_ruc_pre_finalize
-      end subroutine lsm_ruc_pre_finalize
-
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_ruc_pre_run Argument Table
-!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                      | horizontal loop extent =1                  | count      |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
-!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
-!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
-!! | evbs           | soil_upward_latent_heat_flux                                | soil upward latent heat flux               | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | evcw           | canopy_upward_latent_heat_flux                              | canopy upward latent heat flux             | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | trans          | transpiration_flux                                          | total plant transpiration rate             | kg m-2 s-1 |    1 | real      | kind_phys | out    | F        |
-!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl       | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | snowc          | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
-!!
-      subroutine lsm_ruc_pre_run                                       &
-     &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,          &
-     &   errmsg,errflg                                                 &
-     &  )
-
-      use machine,           only: kind_phys
-
-      implicit none
-
-!  ---  interface variables
-      integer, intent(in) :: im, km
-
-      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
-     &    drain,runof,evbs,evcw,trans,sbsno,snowc,snohf
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      drain(:)   = 0.0
-      runof(:)   = 0.0
-      evbs(:)    = 0.0
-      evcw(:)    = 0.0
-      trans(:)   = 0.0
-      sbsno(:)   = 0.0
-      snowc(:)   = 0.0
-
-      end subroutine lsm_ruc_pre_run
-
-      end module lsm_ruc_pre
-
-
-      module lsm_ruc_post
-      contains
-
-      subroutine lsm_ruc_post_init
-      end subroutine lsm_ruc_post_init
-
-      subroutine lsm_ruc_post_finalize
-      end subroutine lsm_ruc_post_finalize
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_ruc_post_run Argument Table
-!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
-!! | flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real      | kind_phys | in     | F        |
-!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
-!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
-!! | runoff         | total_runoff                                                | total runoff                               | kg m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
-!!
-!!  \section lsm_post_general General Algorithm
-!!  \section lsm_post_detailed Detailed Algorithm
-!!  @{
-
-      subroutine lsm_ruc_post_run                                      &
-     &  (im,km, flag_lssav,dtf,drain,runof,runoff,srunoff,errmsg,errflg &
-     &  )
-      use machine,           only: kind_phys
-      implicit none
-
-!  ---  interface variables
-      integer, intent(in) :: im, km
-
-      logical, intent(in) :: flag_lssav
-      real(kind=kind_phys), intent (in)   :: dtf
-
-      real(kind=kind_phys), dimension(im), intent(in   )  ::            &
-     &    drain, runof
-
-      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
-     &    runoff, srunoff
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      if(flag_lssav) then
-        runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 1000. ! kg m-2
-        srunoff(:) = srunoff(:) + runof(:) * dtf * 1000.            ! kg m-2
-      end if
-
-      end subroutine lsm_ruc_post_run
-
-!! @}
-      end module lsm_ruc_post
-!! @}
-
-      module lsm_ruc
-
-      use machine,           only: kind_phys
-      use module_sf_ruclsm
-      use module_soil_pre
-
-      contains
 #if 0
-!! \section arg_table_lsm_ruc_init Argument Table
+!! \section arg_table_lsm_ruc_pre_init Argument Table
 !! | local_name      | standard_name                                 | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !|-------------------|-----------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im              | horizontal_loop_extent                        | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
@@ -156,9 +30,11 @@
 !! | sh2o            | ruc_volume_fraction_of_unfrozen_soil_moisture | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | tslb            | ruc_soil_temperature                          | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
 !! | wet1            | normalized_soil_wetness                       | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        | 
+!! | errmsg          | error_message                                 | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
+!! | errflg          | error_flag                                    | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!!
 #endif
-
-      subroutine lsm_ruc_init (im, km, nlev, soiltyp, vegtype, fice,  & ! in
+      subroutine lsm_ruc_pre_init (im, km, nlev, soiltyp, vegtype, fice,  & ! in
                                islimsk, tsurf, tg3,                   & ! in
                                smc, slc, stc,                         & ! in
                                zs, sh2o, tslb, smois, wet1,           & ! out
@@ -357,6 +233,139 @@
 
           if (errflg /= 0) return
 
+      end subroutine lsm_ruc_pre_init
+
+!! \brief Brief description of the subroutine
+!!
+#if 0
+!! \section arg_table_lsm_ruc_pre_run Argument Table
+!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                      | horizontal loop extent =1                  | count      |    0 | integer   |           | in     | F        |
+!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
+!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
+!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
+!! | evbs           | soil_upward_latent_heat_flux                                | soil upward latent heat flux               | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | evcw           | canopy_upward_latent_heat_flux                              | canopy upward latent heat flux             | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | trans          | transpiration_flux                                          | total plant transpiration rate             | kg m-2 s-1 |    1 | real      | kind_phys | out    | F        |
+!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl       | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | snowc          | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!!
+#endif
+      subroutine lsm_ruc_pre_run                                       &
+     &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,          &
+     &   errmsg,errflg                                                 &
+     &  )
+
+      implicit none
+
+!  ---  interface variables
+      integer, intent(in) :: im, km
+
+      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+     &    drain,runof,evbs,evcw,trans,sbsno,snowc,snohf
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      drain(:)   = 0.0
+      runof(:)   = 0.0
+      evbs(:)    = 0.0
+      evcw(:)    = 0.0
+      trans(:)   = 0.0
+      sbsno(:)   = 0.0
+      snowc(:)   = 0.0
+
+      end subroutine lsm_ruc_pre_run
+
+      subroutine lsm_ruc_pre_finalize
+      end subroutine lsm_ruc_pre_finalize
+
+      end module lsm_ruc_pre
+
+
+      module lsm_ruc_post
+        use machine,           only: kind_phys
+      contains
+
+      subroutine lsm_ruc_post_init
+      end subroutine lsm_ruc_post_init
+
+      subroutine lsm_ruc_post_finalize
+      end subroutine lsm_ruc_post_finalize
+
+!> \brief Brief description of the subroutine
+!!
+#if 0
+!! \section arg_table_lsm_ruc_post_run Argument Table
+!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
+!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
+!! | flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical   |           | in     | F        |
+!! | dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real      | kind_phys | in     | F        |
+!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
+!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
+!! | runoff         | total_runoff                                                | total runoff                               | kg m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!!
+#endif
+!!  \section lsm_post_general General Algorithm
+!!  \section lsm_post_detailed Detailed Algorithm
+!!  @{
+
+      subroutine lsm_ruc_post_run                                      &
+     &  (im,km, flag_lssav,dtf,drain,runof,runoff,srunoff,errmsg,errflg &
+     &  )
+      implicit none
+
+!  ---  interface variables
+      integer, intent(in) :: im, km
+
+      logical, intent(in) :: flag_lssav
+      real(kind=kind_phys), intent (in)   :: dtf
+
+      real(kind=kind_phys), dimension(im), intent(in   )  ::            &
+     &    drain, runof
+
+      real(kind=kind_phys), dimension(im), intent(inout)  ::            &
+     &    runoff, srunoff
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if(flag_lssav) then
+        runoff(:)  = runoff(:)  + (drain(:)+runof(:)) * dtf * 1000. ! kg m-2
+        srunoff(:) = srunoff(:) + runof(:) * dtf * 1000.            ! kg m-2
+      end if
+
+      end subroutine lsm_ruc_post_run
+
+!! @}
+      end module lsm_ruc_post
+!! @}
+
+      module lsm_ruc
+
+      use machine,           only: kind_phys
+      use module_sf_ruclsm
+      use funcphys, only : fpvs
+
+      contains
+
+      subroutine lsm_ruc_init
       end subroutine lsm_ruc_init
 
       subroutine lsm_ruc_finalize
@@ -463,8 +472,8 @@
 !! preparing variables to run RUC LSM lsmruc(), calling lsmruc() and post-processing
 !! variables for return to the parent model suite including unit conversion, as well 
 !! as diagnotics calculation. 
+#if 0
 !! \section arg_table_lsm_ruc_run Argument Table
-
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !|-------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
@@ -534,6 +543,7 @@
 !! | errmsg          | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
+#endif
 !!  \section general_ruc_drv RUC Driver General Algorithm
 !!  @{
 !  \section detailed_ruc RUC Driver Detailed Algorithm
@@ -558,9 +568,6 @@
      &       runoff, evbs, evcw, sbsno, snowc, stm, wet1,               &
      &       errmsg, errflg                                             &
      &     )
-
-      use machine , only : kind_phys
-      use funcphys, only : fpvs
 
       implicit none
 
