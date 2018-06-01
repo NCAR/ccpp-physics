@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 GFDL-MP test
+#  FV3 CCPP GFDL-MP test
 #
 ###############################################################################
 
 export TEST_DESCR="Compare FV3 CCPP GFDL-MP results with previous trunk version"
 
-export CNTL_DIR=fv3_ccpp_gfdlmp
+export CNTL_DIR=fv3_gfdlmp
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
