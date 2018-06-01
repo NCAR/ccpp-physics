@@ -436,7 +436,7 @@
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, errmsg, errflg                                       &
+     &       cld_od, errmsg, errflg                                     &
      &     )
 
 

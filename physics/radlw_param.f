@@ -123,17 +123,17 @@
       integer, parameter :: NBDLW  = NBANDS
 
 ! \name Number of g-point in each band
-      integer  :: NG01, NG02, NG03, NG04, NG05, NG06, NG07, NG08,   
+      integer  :: NG01, NG02, NG03, NG04, NG05, NG06, NG07, NG08,       &
      &            NG09, NG10, NG11, NG12, NG13, NG14, NG15, NG16
-      parameter (NG01=10, NG02=12, NG03=16, NG04=14, NG05=16, NG06=08,
-     &           NG07=12, NG08=08, NG09=12, NG10=06, NG11=08, NG12=08,
+      parameter (NG01=10, NG02=12, NG03=16, NG04=14, NG05=16, NG06=08,  &
+     &           NG07=12, NG08=08, NG09=12, NG10=06, NG11=08, NG12=08,  &
      &           NG13=04, NG14=02, NG15=02, NG16=02)
 
 ! \name Begining index of each band
-      integer  :: NS01, NS02, NS03, NS04, NS05, NS06, NS07, NS08,      
+      integer  :: NS01, NS02, NS03, NS04, NS05, NS06, NS07, NS08,       &
      &            NS09, NS10, NS11, NS12, NS13, NS14, NS15, NS16
-      parameter (NS01=00, NS02=10, NS03=22, NS04=38, NS05=52, NS06=68, 
-     &           NS07=76, NS08=88, NS09=96, NS10=108, NS11=114,        
+      parameter (NS01=00, NS02=10, NS03=22, NS04=38, NS05=52, NS06=68,  &
+     &           NS07=76, NS08=88, NS09=96, NS10=108, NS11=114,         &
      &           NS12=122, NS13=130, NS14=134, NS15=136, NS16=138)
 
 ! band indices for each g-point
