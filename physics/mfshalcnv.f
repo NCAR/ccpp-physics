@@ -10,7 +10,7 @@
 !! | frain          | dynamics_to_physics_timestep_ratio                       | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
 !! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
 !! | cnvc           | convective_cloud_cover                                   | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                 | convective cloud water specific humidity                             | kg kg-1 |    2 | real             | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                      | moist convective cloud water mixing ratio                            | kg kg-1 |    2 | real             | kind_phys | in     | F        |
 !! | Model          | FV3-GFS_Control_type                                     | Fortran DDT containing FV3-GFS model control parameters              | DDT     |    0 | GFS_control_type |           | in     | F        |
 !! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type    |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type    |           | inout  | F        |
@@ -107,8 +107,8 @@
 !! | prslp          | air_pressure                                              | mean layer pressure                                    | Pa      |    2 | real      | kind_phys | in     | F        |
 !! | psp            | surface_air_pressure                                      | surface pressure                                       | Pa      |    1 | real      | kind_phys | in     | F        |
 !! | phil           | geopotential                                              | layer geopotential                                     | m2 s-2  |    2 | real      | kind_phys | in     | F        |
-!! | ql1            | cloud_ice_specific_humidity                               | cloud ice specific humidity                            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ql2            | cloud_liquid_water_specific_humidity                      | cloud water specific humidity                          | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | ql1            | cloud_ice_mixing_ratio                                    | moist cloud ice mixing ratio                           | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | ql2            | cloud_liquid_water_mixing_ratio                           | moist cloud water mixing ratio                         | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | q1             | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                        | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | t1             | air_temperature_updated_by_physics                        | updated temperature                                    | K       |    2 | real      | kind_phys | inout  | F        |
 !! | u1             | x_wind_updated_by_physics                                 | updated x-direction wind                               | m s-1   |    2 | real      | kind_phys | inout  | F        |
@@ -124,7 +124,7 @@
 !! | hpbl           | atmosphere_boundary_layer_thickness                       | PBL top height                                         | m       |    1 | real      | kind_phys | in     | F        |
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                             | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                         | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity               | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio              | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                             | error message for error handling in CCPP               | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                | error flag for error handling in CCPP                  | flag    |    0 | integer   |           | out    | F        |

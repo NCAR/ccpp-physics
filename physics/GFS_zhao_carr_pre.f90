@@ -19,8 +19,8 @@
 !! | im             | horizontal_loop_extent                                     | horizontal loop extent                                  | count       |    0 | integer   |           | in     | F        |
 !! | ix             | horizontal_dimension                                       | horizontal dimension                                    | count       |    0 | integer   |           | in     | F        |
 !! | levs           | vertical_dimension                                         | vertical layer dimension                                | count       |    0 | integer   |           | in     | F        |
-!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | cloud condensed water mixing ratio                      | kg kg-1     |    2 | real      | kind_phys | in     | F        |
-!! | clw1           | cloud_ice_specific_humidity                                | cloud ice specific humidity                             | kg kg-1     |    2 | real      | kind_phys | out    | F        |
+!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | moist cloud condensed water mixing ratio                | kg kg-1     |    2 | real      | kind_phys | in     | F        |
+!! | clw1           | cloud_ice_mixing_ratio                                     | moist cloud ice mixing ratio                            | kg kg-1     |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                              | error message for error handling in CCPP                | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                 | error flag for error handling in CCPP                   | flag        |    0 | integer   |           | out    | F        |
 !!

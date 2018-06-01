@@ -36,9 +36,9 @@
 !! | prsl           | air_pressure                                               | layer mean air pressure                                  | Pa      |    2 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                       | surface pressure                                         | Pa      |    1 | real      | kind_phys | in     | F        |
 !! | q              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | clw1           | cloud_ice_specific_humidity                                | cloud ice specific humidity                              | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw2           | cloud_liquid_water_specific_humidity                       | cloud water specific humidity                            | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | cloud condensed water mixing ratio                       | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | clw1           | cloud_ice_mixing_ratio                                     | moist cloud ice mixing ratio                             | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | clw2           | cloud_liquid_water_mixing_ratio                            | moist cloud water mixing ratio                           | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | moist cloud condensed water mixing ratio                 | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | t              | air_temperature_updated_by_physics                         | layer mean air temperature                               | K       |    2 | real      | kind_phys | inout  | F        |
 !! | tp             | air_temperature_two_time_steps_back                        | air temperature two time steps back                      | K       |    2 | real      | kind_phys | inout  | F        |
 !! | qp             | water_vapor_specific_humidity_two_time_steps_back          | water vapor specific humidity two time steps back        | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
