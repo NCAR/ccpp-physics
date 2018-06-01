@@ -99,21 +99,11 @@ FFLAGS += -i4 -r8 -Mfprelaxed=div -Mfprelaxed=sqrt
 endif
 
 ifeq ($(AVX2),Y)
-ifeq ($(32BIT),Y)
 FFLAGS += -tp=haswell
 CFLAGS += -tp=haswell
 else
-FFLAGS += -tp=haswell-64
-CFLAGS += -tp=haswell-64
-endif
-else
-ifeq ($(32BIT),Y)
-FFLAGS += -tp=ivybridge
-CFLAGS += -tp=ivybridge
-else
-FFLAGS += -tp=ivybridge-64
-CFLAGS += -tp=ivybridge-64
-endif
+FFLAGS += -tp=x64
+CFLAGS += -tp=x64
 endif
 
 FFLAGS_OPT = -O1

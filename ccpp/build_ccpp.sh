@@ -15,7 +15,7 @@ function usage   {
   echo "           CCPP_DIR     [required] is the target installation directory for CCPP"
   echo "           MAKE_OPT     [optional] can be any of the NEMSfv3gfs MAKE_OPT options; used:"
   echo "                                   DEBUG=Y/N  (default N)"
-  echo "                                   OPENMP=Y/N (default N)"
+  echo "                                   OPENMP=Y/N (default Y)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
   echo "           clean_after  [optional] can be 'YES' (default) or 'NO'"
   exit 1
@@ -76,10 +76,10 @@ if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Release"
 fi
-if [[ "${MAKE_OPT}" == *"OPENMP=Y"* ]]; then
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=ON"
-else
+if [[ "${MAKE_OPT}" == *"OPENMP=N"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=OFF"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=ON"
 fi
 CCPP_CMAKE_FLAGS=$(trim "${CCPP_CMAKE_FLAGS}")
 CCPP_MAKE_FLAGS=$(trim "${CCPP_MAKE_FLAGS}")
