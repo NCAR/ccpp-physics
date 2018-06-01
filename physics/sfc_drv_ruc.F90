@@ -10,28 +10,28 @@
 
 #if 0
 !! \section arg_table_lsm_ruc_pre_init Argument Table
-!! | local_name      | standard_name                                 | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!|-------------------|-----------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im              | horizontal_loop_extent                        | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                            | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
-!! | km              | soil_vertical_dimension                       | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | con_hvap        | latent_heat_of_vaporization_of_water_at_0C    | latent heat of vaporization/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |      
-!! | vegtype         | cell_vegetation_type                          | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
-!! | soiltyp         | cell_soil_type                                | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
-!! | fice            | sea_ice_concentration                         | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
-!! | islimsk         | sea_land_ice_mask                             | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | integer   |           | in     | F        |
-!! | tsk             | surface_skin_temperature                      | surface skin temperature                                        | K             |    1 | real      | kind_phys | in     | F        |
-!! | tg3             | deep_soil_temperature                         | bottom soil temperature                                         | K             |    1 | real      | kind_phys | in     | F        |
-!! | smc             | volume_fraction_of_soil_moisture              | volumetric fraction of soil moisture                            | frac          |    2 | real      | kind_phys | in     | F        |
-!! | slc             | volume_fraction_of_unfrozen_soil_moisture     | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | in     | F        |
-!! | stc             | soil_temperature                              | soil temperature                                                | K             |    2 | real      | kind_phys | in     | F        |
-!! | zs              | depth_of_soil_levels                          | depth of soil levels                                            | count         |    0 | real      | kind_phys | inout  | F        |
-!! | smois           | ruc_volume_fraction_of_soil_moisture          | volumetric fraction of soil moisture                            | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | sh2o            | ruc_volume_fraction_of_unfrozen_soil_moisture | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | tslb            | ruc_soil_temperature                          | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
-!! | wet1            | normalized_soil_wetness                       | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        | 
-!! | errmsg          | error_message                                 | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg          | error_flag                                    | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                    | long_name                                               | units         | rank | type      |    kind   | intent | optional |
+!|------------------|------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                           | horizontal loop extent                                  | count         |    0 | integer   |           | in     | F        |
+!! | nlev           | vertical_dimension                                               | number of vertical levels                               | count         |    0 | integer   |           | in     | F        |
+!! | km             | soil_vertical_dimension                                          | soil vertical layer dimension                           | count         |    0 | integer   |           | in     | F        |
+!! | con_hvap       | latent_heat_of_vaporization_of_water_at_0C                       | latent heat of vaporization/sublimation (hvap)          | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | vegtype        | cell_vegetation_type                                             | vegetation type at each grid cell                       | index         |    1 | integer   |           | in     | F        |
+!! | soiltyp        | cell_soil_type                                                   | soil type at each grid cell                             | index         |    1 | integer   |           | in     | F        |
+!! | fice           | sea_ice_concentration                                            | ice fraction over open water                            | frac          |    1 | real      | kind_phys | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                | landmask: sea/land/ice=0/1/2                            | flag          |    1 | integer   |           | in     | F        |
+!! | tsk            | surface_skin_temperature                                         | surface skin temperature                                | K             |    1 | real      | kind_phys | in     | F        |
+!! | tg3            | deep_soil_temperature                                            | bottom soil temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
+!! | smc            | volume_fraction_of_soil_moisture                                 | volumetric fraction of soil moisture                    | frac          |    2 | real      | kind_phys | in     | F        |
+!! | slc            | volume_fraction_of_unfrozen_soil_moisture                        | volume fraction of unfrozen soil moisture               | frac          |    2 | real      | kind_phys | in     | F        |
+!! | stc            | soil_temperature                                                 | soil temperature                                        | K             |    2 | real      | kind_phys | in     | F        |
+!! | zs             | depth_of_soil_levels_for_land_surface_model                      | depth of soil levels for lsm                            | count         |    0 | real      | kind_phys | inout  | F        |
+!! | smois          | volume_fraction_of_soil_moisture_for_land_surface_model          | volumetric fraction of soil moisture for lsm            | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | sh2o           | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model | volume fraction of unfrozen soil moisture for lsm       | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | tslb           | soil_temperature_for_land_surface_model                          | soil temperature for land surface model                 | K             |    2 | real      | kind_phys | inout  | F        |
+!! | wet1           | normalized_soil_wetness                                          | normalized soil wetness                                 | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | error_message                                                    | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                       | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
       subroutine lsm_ruc_pre_init (im, km, nlev, soiltyp, vegtype, fice,  & ! in
@@ -480,7 +480,7 @@
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
 !! | im              | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
 !! | km              | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | zs              | depth_of_soil_levels                                                         | depth of soil levels                                            | count         |    0 | real      | kind_phys | in     | F        |
+!! | zs              | depth_of_soil_levels_for_land_surface_model                                  | depth of soil levels for lsm                                    | count         |    0 | real      | kind_phys | inout  | F        |
 !! | con_cp          | specific_heat_of_dry_air_at_constant_pressure                                | specific heat !of dry air at constant pressure                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_g           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | con_pi          | pi                                                                           | ratio of a circle's circumference to its diameter               | radians       |    0 | real      | kind_phys | in     | F        |
@@ -504,7 +504,7 @@
 !! | prsl1           | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        | 
 !! | t1              | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        | 
 !! | q1              | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        | 
-!! | qc1             | cloud_condensed_water_concentration_at_lowest_model_layer                    | concentration of cloud water at lowest model layer              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | qc              | cloud_condensed_water_concentration_at_lowest_model_layer                    | concentration of cloud water at lowest model layer              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx          | surface_downwelling_longwave_flux_on_radiation_time_step                     | total sky sfc downward lw flux                                  | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | dswsfc          | surface_downwelling_shortwave_flux                                           | total sky surface downward shortwave flux                       | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | snet            | surface_net_downwelling_shortwave_flux                                       | total sky surface net shortwave flux                            | W m-2         |    1 | real      | kind_phys | in     | F        |
@@ -518,17 +518,17 @@
 !! | zorl            | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | inout  | F        | 
 !! | snoalb          | upper_bound_on_max_albedo_over_deep_snow                                     | maximum snow albedo                                             | frac          |    1 | real      | kind_phys | in     | F        |
 !! | qsurf           | surface_specific_humidity                                                    | surface specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | qsg             | saturation_cloud_condensed_water_concentration_at_surface                    | saturation cloud water concentration at surface                 | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | qcg             | cloud_condensed_water_concentration_at_surface                               | cloud water concentration at surface                            | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | dew             | surface_condensation_mass                                                    | mass of condensed water at surface                              | kg m-2        |    1 | real      | kind_phys | out    | F        |
+!! | sfcqs           | saturation_water_vapor_concentration_at_surface                              | saturation water vapor concentration at surface                 | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | sfcqc           | cloud_condensed_water_concentration_at_surface                               | cloud water concentration at surface                            | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | sfcdew          | surface_condensation_mass                                                    | mass of condensed water at surface                              | kg m-2        |    1 | real      | kind_phys | out    | F        |
 !! | tg3             | deep_soil_temperature                                                        | bottom soil temperature                                         | K             |    1 | real      | kind_phys | in     | F        |
 !! | vegtype         | cell_vegetation_type                                                         | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
 !! | soiltyp         | cell_soil_type                                                               | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
 !! | fice            | sea_ice_concentration                                                        | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
 !! | keepfr          | flag_for_frozen_soil_physics                                                 | flag for processes in frozen soil: 0, 1-limit on ice increase   | flag          |    2 | real      | kind_phys | inout  | F        |
-!! | smc             | ruc_volume_fraction_of_soil_moisture                                         | volumetric fraction of soil moisture                            | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | slc             | ruc_volume_fraction_of_unfrozen_soil_moisture                                | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | stc             | ruc_soil_temperature                                                         | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
+!! | smc             | volume_fraction_of_soil_moisture_for_land_surface_model                      | volumetric fraction of soil moisture for lsm                    | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | slc             | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model             | volume fraction of unfrozen soil moisture for lsm               | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | stc             | soil_temperature_for_land_surface_model                                      | soil temperature for land surface model                         | K             |    2 | real      | kind_phys | inout  | F        |
 !! | tsurf           | surface_skin_temperature                                                     | surface skin temperature                                        | K             |    1 | real      | kind_phys | inout  | F        |
 !! | tsnow           | snow_temperature_bottom_first_layer                                          | snow temperature at the bottom of first snow layer              | K             |    1 | real      | kind_phys | inout  | F        |
 !! | dqsfc1          | instantaneous_surface_upward_latent_heat_flux                                | surface upward latent heat flux                                 | W m-2         |    1 | real      | kind_phys | out    | F        |
@@ -563,7 +563,8 @@
      &       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
      &       graupel, srflag, sr, smc, stc, slc, keepfr,                &
      &       canopy, trans, tsurf, tsnow, zorl,                         &
-! --- ourputs
+     &       sfcqs, sfcqc, sfcdew,                                      &
+! --- outputs
      &       sncovr1, qsurf, gflux, drain, dtsfc1, evap, dqsfc1, ep,    &
      &       runoff, evbs, evcw, sbsno, snowc, stm, wet1,               &
      &       errmsg, errflg                                             &
@@ -588,7 +589,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,&
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
      &       ch, prsl1, prslki, shdmin, shdmax,                  &
-     &       snoalb, sfalb, zf, fice, qc 
+     &       snoalb, sfalb, zf, fice, qc, q1 
 
       integer, dimension(im), intent(in) :: islimsk
       real (kind=kind_phys),  intent(in) :: delt
@@ -601,7 +602,8 @@
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
-             srflag, sr, canopy, trans, tsurf, zorl, tsnow, q1
+             srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
+             sfcqs, sfcqc, sfcdew
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc, keepfr
@@ -1010,6 +1012,10 @@
 !          trans(i) = ett(i1,j)
 !          sbsno(i) = esnow(i1,j)
 !          snohf(i) = snoh(i1,j)
+
+          sfcqs(i)  = qsg(i1,j)
+          sfcqc(i)  = qcg(i1,j)
+          sfcdew(i) = dew(i1,j)
 
           snowc(i) = sncovr(i1,j)
           stm(i)   = soilm(i1,j)

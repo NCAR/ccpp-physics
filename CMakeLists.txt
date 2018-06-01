@@ -185,15 +185,12 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/precpd.f
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
-<<<<<<< HEAD
       ./physics/sfc_drv_ruc.F90
       ./physics/module_sf_ruclsm.F90
       ./physics/namelist_soilveg_ruc.F90
       ./physics/set_soilveg_ruc.F90
       ./physics/module_soil_pre.F90
-=======
       ./physics/gmtb_scm_sfc_flux_spec.f90
->>>>>>> 317597fbd7e68074905a4f7a123de95473366d2e
   )
 endif (PROJECT STREQUAL "CCPP-FV3")
 
@@ -202,7 +199,6 @@ if (PROJECT STREQUAL "CCPP-FV3")
   include(./CCPP_CAPS.cmake)
 else (PROJECT STREQUAL "CCPP-FV3")
   set(CAPS
-<<<<<<< HEAD
     ./physics/cnvc90_cap.F90
     ./physics/lsm_noah_pre_cap.F90
     ./physics/GFS_DCNV_generic_post_cap.F90
@@ -272,7 +268,6 @@ else (PROJECT STREQUAL "CCPP-FV3")
     ./physics/rrtmg_sw_pre_cap.F90
 #    ./physics/sfc_drv_ruc_cap.F90
 )
-=======
   ./physics/rrtmg_sw_pre_cap.F90
   ./physics/ozphys_post_cap.F90
   ./physics/GFS_DCNV_generic_post_cap.F90
@@ -342,7 +337,6 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/get_phi_fv3_cap.F90
   ./physics/rayleigh_damp_cap.F90
   )
->>>>>>> 317597fbd7e68074905a4f7a123de95473366d2e
 endif (PROJECT STREQUAL "CCPP-FV3")
 
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
