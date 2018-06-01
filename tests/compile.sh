@@ -63,9 +63,9 @@ if [[ "${MAKE_OPT}" == *"CCPP=Y"* ]]; then
   # Run ccpp_prebuild.py from the top-level directory before building the CCPP framework and physics
   cd ${PATHTR}/..
   if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
-    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3v1 --debug
+    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3 --debug
   else
-    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3v1
+    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3
   fi
   # Build CCPP framework and physics
   cd ${PATH_CCPP}
