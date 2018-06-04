@@ -26,7 +26,7 @@ VER_PATCH = 0
 
 FFLAGS   += -I../fms -I../fms/include -fPIC
 
-CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM
+CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM -DUSE_COND
 
 ifneq (,$(findstring CCPP,$(CPPDEFS)))
 include ./CCPP_SCHEMES.mk
@@ -126,6 +126,8 @@ SRCS_F90 = \
 	   ./physics/rrtmg_lw_pre.F90                                                \
 	   ./physics/rrtmg_lw_post.F90                                               \
 	   ./physics/GFS_debug.F90                                                   \
+           ./physics/gfdl_fv_sat_adj.F90                                             \
+           ./physics/gfdl_qs_init.F90                                                \
 	   ./GFS_layer/GFS_physics_driver.F90                                        \
 	   ./GFS_layer/GFS_radiation_driver.F90                                      \
 	   ./GFS_layer/GFS_restart.F90                                               \
