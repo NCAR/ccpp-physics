@@ -27,7 +27,7 @@
 !! | del            | air_pressure_difference_between_midlayers                     | pressure level thickness                                          | Pa          |    2 | real      | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                                  | layer mean pressure                                               | Pa          |    2 | real      | kind_phys | in     | F        |
 !! | q              | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity                                     | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | cwm            | cloud_condensed_water_specific_humidity_updated_by_physics    | cloud condensed water specific humidity                           | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics         | moist cloud condensed water mixing ratio                          | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
 !! | t              | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K           |    2 | real      | kind_phys | inout  | F        |
 !! | rn             | lwe_thickness_of_stratiform_precipitation_amount              | stratiform rainfall amount on physics timestep                    | m           |    1 | real      | kind_phys | out    | F        |
 !! | sr             | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac        |    1 | real      | kind_phys | out    | F        |

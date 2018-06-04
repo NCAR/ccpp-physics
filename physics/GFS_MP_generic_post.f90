@@ -31,7 +31,7 @@
 !! | frain          | dynamics_to_physics_timestep_ratio                         | dtf/dtp, dynamics to physics timestep ratio                    | none        |    0 | real      | kind_phys | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                          | cloud condensate index in tracer array(3)                      | index       |    0 | integer   |           | in     | F        |
 !! | ncld           | number_of_hydrometeors                                     | number_of_hydrometeors(1 for Z-C)                              | count       |    0 | integer   |           | in     | F        |
-!! | cwm            | cloud_condensed_water_specific_humidity_updated_by_physics | cloud condensed water specific humidity                        | kg kg-1     |    2 | real      | kind_phys | in     | F        |
+!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | moist cloud condensed water mixing ratio                       | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | t              | air_temperature_updated_by_physics                         | layer mean air temperature                                     | K           |    2 | real      | kind_phys | in     | F        |
 !! | q              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity                                  | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | save_t         | air_temperature_save                                       | air temperature before entering a physics scheme               | K           |    2 | real      | kind_phys | in     | F        |

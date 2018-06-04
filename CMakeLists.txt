@@ -185,6 +185,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/precpd.f
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
+      ./physics/gmtb_scm_sfc_flux_spec.f90
       ./physics/sfc_drv_ruc.F90
       ./physics/module_sf_ruclsm.F90
       ./physics/namelist_soilveg_ruc.F90
@@ -285,12 +286,12 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/sfc_diff.f
                                 ./physics/sfc_diag.f
                                 ./physics/module_nst_model.f90
-                                ./physics/GFS_calpreciptype.f90
+                                ./physics/GFS_calpreciptype.f90 
                                 ./physics/mersenne_twister.f
                                 ./physics/module_nst_water_prop.f90
                                 ./physics/aer_cloud.F
                                 ./physics/wv_saturation.F
-                                ./physics/cldwat2m_micro.F
+                                ./physics/cldwat2m_micro.F 
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
@@ -337,7 +338,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/w3nco)
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/sp)
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
-
+  
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp-framework/src)
 endif (PROJECT STREQUAL "CCPP-FV3")
 

@@ -30,6 +30,8 @@
 !! | sh2o           | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model | volume fraction of unfrozen soil moisture for lsm       | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | tslb           | soil_temperature_for_land_surface_model                          | soil temperature for land surface model                 | K             |    2 | real      | kind_phys | inout  | F        |
 !! | wet1           | normalized_soil_wetness                                          | normalized soil wetness                                 | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | lsm_ruc        | flag_for_ruc_land_surface_scheme                                 | flag for RUC land surface model                         | flag          |    0 | integer   |           | none   | F        |
+!! | lsm            | flag_for_land_surface_scheme                                     | flag for land surface model                             | flag          |    0 | integer   |           | none   | F        |
 !! | errmsg         | error_message                                                    | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                       | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -90,6 +92,12 @@
        ! Initialize the CCPP error handling variables
          errmsg = ''
          errflg = 0
+
+      if (lsm/=lsm_ruc) then
+        write(errmsg,’(a,i0,a,i0)’) ‘ERROR in lsm_ruc_pre_init: namelist variable lsm=‘, lsm, ’ incompatible with RUC LSM, please set to ’, lsm_ruc
+        errflg = 1
+        return
+      endif
 
        debug_print = .false.
 
