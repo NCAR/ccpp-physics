@@ -14,7 +14,7 @@
 !|------------------|------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                           | horizontal loop extent                                  | count         |    0 | integer   |           | in     | F        |
 !! | nlev           | vertical_dimension                                               | number of vertical levels                               | count         |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                          | soil vertical layer dimension                           | count         |    0 | integer   |           | in     | F        |
+!! | lsoil_lsm      | soil_vertical_dimension_for_land_surface_model                   | number of soil layers internal to land surface model    | count         |    0 | integer   |           | none   | F        |
 !! | con_hvap       | latent_heat_of_vaporization_of_water_at_0C                       | latent heat of vaporization/sublimation (hvap)          | J kg-1        |    0 | real      | kind_phys | in     | F        |
 !! | vegtype        | cell_vegetation_type                                             | vegetation type at each grid cell                       | index         |    1 | integer   |           | in     | F        |
 !! | soiltyp        | cell_soil_type                                                   | soil type at each grid cell                             | index         |    1 | integer   |           | in     | F        |
@@ -25,7 +25,7 @@
 !! | smc            | volume_fraction_of_soil_moisture                                 | volumetric fraction of soil moisture                    | frac          |    2 | real      | kind_phys | in     | F        |
 !! | slc            | volume_fraction_of_unfrozen_soil_moisture                        | volume fraction of unfrozen soil moisture               | frac          |    2 | real      | kind_phys | in     | F        |
 !! | stc            | soil_temperature                                                 | soil temperature                                        | K             |    2 | real      | kind_phys | in     | F        |
-!! | zs             | depth_of_soil_levels_for_land_surface_model                      | depth of soil levels for lsm                            | count         |    0 | real      | kind_phys | inout  | F        |
+!! | zs             | depth_of_soil_levels_for_land_surface_model                      | depth of soil levels for land surface model             | m             |    1 | real      | kind_phys | inout  | F        |
 !! | smois          | volume_fraction_of_soil_moisture_for_land_surface_model          | volumetric fraction of soil moisture for lsm            | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | sh2o           | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model | volume fraction of unfrozen soil moisture for lsm       | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | tslb           | soil_temperature_for_land_surface_model                          | soil temperature for land surface model                 | K             |    2 | real      | kind_phys | inout  | F        |
@@ -36,17 +36,21 @@
 !! | errflg         | error_flag                                                       | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine lsm_ruc_pre_init (im, km, nlev, soiltyp, vegtype, fice,  & ! in
+      subroutine lsm_ruc_pre_init (im, lsoil_lsm, nlev,               & ! in
+                               soiltyp, vegtype, fice,                & ! in
                                islimsk, tsurf, tg3,                   & ! in
                                smc, slc, stc,                         & ! in
+                               lsm_ruc, lsm,                          & ! in
                                zs, sh2o, tslb, smois, wet1,           & ! out
                                errmsg, errflg)
 
       implicit none
 
 
+      integer,                                 intent(in   ) :: lsm
+      integer,                                 intent(in   ) :: lsm_ruc
       integer,                                 intent(in   ) :: im, nlev   
-      integer,                                 intent(in   ) :: km   
+      integer,                                 intent(in   ) :: lsoil_lsm   
       integer,               dimension(im),    intent(in   ) :: islimsk
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
@@ -58,11 +62,11 @@
       integer,               dimension(im),    intent(inout) :: vegtype
       real (kind=kind_phys), dimension(im),    intent(inout) :: wet1
       real (kind=kind_phys), dimension(im),    intent(inout) :: fice
-      real (kind=kind_phys), dimension(1,km,im), intent(inout) :: smois! ruc
-      real (kind=kind_phys), dimension(1,km,im), intent(inout) :: tslb ! ruc
-      real (kind=kind_phys), dimension(1,km,im), intent(inout) :: sh2o ! ruc
+      real (kind=kind_phys), dimension(1,lsoil_lsm,im), intent(inout) :: smois! ruc
+      real (kind=kind_phys), dimension(1,lsoil_lsm,im), intent(inout) :: tslb ! ruc
+      real (kind=kind_phys), dimension(1,lsoil_lsm,im), intent(inout) :: sh2o ! ruc
 
-      real (kind=kind_phys), dimension(1:km), intent (out)  :: zs
+      real (kind=kind_phys), dimension(1:lsoil_lsm), intent (out)  :: zs
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -71,33 +75,40 @@
       logical :: debug_print
 
       integer :: flag_soil_layers, flag_soil_levels, flag_sst
-      real (kind=kind_phys),    dimension(1:km) :: factorsm
+      real (kind=kind_phys),    dimension(1:lsoil_lsm) :: factorsm
 
-      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: sst, landmask, tsk
-      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: smtotn,smtotr
-      real (kind=kind_phys),    dimension( 1:1 , 1:km, 1:im ) :: dumsm , dumt
-      real (kind=kind_phys),    dimension( 1:1 , 1:km, 1:im ) :: smfr
+      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: sst
+      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: landmask
+      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: tsk
+      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: smtotn
+      real (kind=kind_phys),    dimension( 1:1 , 1:im )       :: smtotr
+      real (kind=kind_phys),    dimension( 1:1 , 1:lsoil_lsm, 1:im ) :: dumsm 
+      real (kind=kind_phys),    dimension( 1:1 , 1:lsoil_lsm, 1:im ) :: dumt
+      real (kind=kind_phys),    dimension( 1:1 , 1:lsoil_lsm, 1:im ) :: smfr
 
-      real (kind=kind_phys) :: st_input(1:1,1:km*3,1:im)        
-      real (kind=kind_phys) :: sm_input(1:1,1:km*3,1:im)       
+      real (kind=kind_phys) :: st_input(1:1,1:lsoil_lsm*3,1:im)        
+      real (kind=kind_phys) :: sm_input(1:1,1:lsoil_lsm*3,1:im)       
 
       integer               :: ids,ide, jds,jde, kds,kde, &
                                ims,ime, jms,jme, kms,kme, &
                                its,ite, jts,jte, kts,kte, &
                                i, j, k, l, num_soil_layers
 
-      real(kind=kind_phys), dimension(1:km) :: zs2, dzs 
-      integer,              dimension(1:4)  :: st_levels_input, sm_levels_input ! 4 - for Noah lsm
+      real(kind=kind_phys), dimension(1:lsoil_lsm) :: zs2, dzs 
+      integer,              dimension(1:4)  :: st_levels_input ! 4 - for Noah lsm
+      integer,              dimension(1:4)  :: sm_levels_input ! 4 - for Noah lsm
 
        ! Initialize the CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-      if (lsm/=lsm_ruc) then
-        write(errmsg,’(a,i0,a,i0)’) ‘ERROR in lsm_ruc_pre_init: namelist variable lsm=‘, lsm, ’ incompatible with RUC LSM, please set to ’, lsm_ruc
-        errflg = 1
-        return
-      endif
+        if (lsm/=lsm_ruc) then
+          write(errmsg,'(a,i0,a,i0)')                                &
+                'ERROR in lsm_ruc_pre_init: namelist variable lsm=', &
+                lsm, ' incompatible with RUC LSM, please set to ', lsm_ruc
+          errflg = 1
+          return
+        endif
 
        debug_print = .false.
 
@@ -126,7 +137,7 @@
 
          num_soil_layers =  4 ! for Noah lsm
 
-         CALL init_soil_depth_3 ( zs , dzs , km )
+         CALL init_soil_depth_3 ( zs , dzs , lsoil_lsm )
 
          flag_soil_layers = 1  ! 1 - for input from the Noah LSM
          flag_soil_levels = 0  ! 1 - for input from RUC LSM
@@ -147,7 +158,7 @@
             st_input(i,k+1,j)=stc(j,k)
             sm_input(i,k+1,j)=smc(j,k)
          enddo
-         do k=6,km * 3
+         do k=6,lsoil_lsm * 3
             st_input(i,k,j)=0.
             sm_input(i,k,j)=0.
          enddo
@@ -160,8 +171,10 @@
                                  st_input , sm_input , landmask , sst , &
                                  zs , dzs ,                             &
                                  st_levels_input, sm_levels_input,      &
-                                 km , num_soil_layers, num_soil_layers, &
-                                 km * 3 , km * 3 , flag_sst,            &
+                                 lsoil_lsm , num_soil_layers,           &
+                                 num_soil_layers,                       &
+                                 lsoil_lsm * 3 , lsoil_lsm * 3 ,        &
+                                 flag_sst,                              &
                                  flag_soil_layers , flag_soil_levels ,  &
                                  ids , ide , jds , jde , kds , kde ,    &
                                  ims , ime , jms , jme , kms , kme ,    &
@@ -170,12 +183,12 @@
       do i=its,ite
       do j=jts,jte
 
-         do k=1,km
+         do k=1,lsoil_lsm
           smois(i,k,j)= dumsm(i,k,j)
           tslb(i,k,j) = dumt(i,k,j)
          enddo
       if(debug_print) then
-         do k=1,km
+         do k=1,lsoil_lsm
            print *,'tslb(1,k,j)',j,k,tslb(1,k,j)
            print *,'smois(1,k,j)',j,k,smois(1,k,j)
          enddo
@@ -187,23 +200,24 @@
 
       IF ( islimsk(i) == 1 ) then  ! Land
 ! initialize factor
-        do k=1,km
+        do k=1,lsoil_lsm
            factorsm(k)=1.
         enddo
 
 ! RUC soil moisture bucket
            smtotr(i,j)=0.
-        do k=1,km -1
+        do k=1,lsoil_lsm -1
           smtotr(i,j)=smtotr(i,j) + smois(i,k,j) *dzs(k)
         enddo
 
         if(debug_print) then
-          print *,'from Noah to RUC: RUC bucket and Noah bucket at',i,j,smtotr(i,j),smtotn(i,j)
+          print *,'from Noah to RUC: RUC bucket and Noah bucket at',    &
+                   i,j,smtotr(i,j),smtotn(i,j)
           print *,'before smois=',i,j,smois(i,:,j)
         endif
 
 ! RUC soil moisture correction to match Noah soil moisture bucket
-        do k=1,km-1
+        do k=1,lsoil_lsm-1
            smois(i,k,j) = max(0.02,smois(i,k,j)*smtotn(i,j)/(0.9*smtotr(i,j)))
         enddo
 
@@ -215,18 +229,19 @@
           factorsm(4) = 0.9
           factorsm(5) = 0.95
         endif
-        do k=1,km
+        do k=1,lsoil_lsm
            smois(i,k,j) = factorsm(k) * smois(i,k,j)
         enddo
         if(debug_print) then
            print *,'after smois=',i,j,smois(i,:,j)
         endif
            smtotr(i,j) = 0.
-        do k=1,km - 1
+        do k=1,lsoil_lsm - 1
            smtotr(i,j)=smtotr(i,j) + smois(i,k,j) *dzs(k)
         enddo
         if(debug_print) then
-            print *,'after correction: RUC bucket and Noah bucket at',i,j,smtotr(i,j),smtotn(i,j)
+            print *,'after correction: RUC bucket and Noah bucket at',  &
+                     i,j,smtotr(i,j),smtotn(i,j)
         endif
       ENDIF ! land
        enddo
@@ -234,7 +249,7 @@
 
 !> Initialize soil and vegetation parameters
         call ruclsminit( debug_print,                                   &
-                   km, soiltyp, vegtype, fice, wet1,                    &
+                   lsoil_lsm, soiltyp, vegtype, fice, wet1,             &
                    sh2o, smfr, tslb, smois,                             &
                    ims,ime, jms,jme, kms,kme,                           &
                    its,ite, jts,jte, kts,kte                            )
@@ -247,19 +262,19 @@
 !!
 #if 0
 !! \section arg_table_lsm_ruc_pre_run Argument Table
-!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                      | horizontal loop extent =1                  | count      |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
-!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
-!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
-!! | evbs           | soil_upward_latent_heat_flux                                | soil upward latent heat flux               | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | evcw           | canopy_upward_latent_heat_flux                              | canopy upward latent heat flux             | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | trans          | transpiration_flux                                          | total plant transpiration rate             | kg m-2 s-1 |    1 | real      | kind_phys | out    | F        |
-!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl       | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | snowc          | surface_snow_area_fraction                                  | surface snow area fraction                 | frac       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                      | horizontal loop extent =1                               | count      |    0 | integer   |           | in     | F        |
+!! | km             | soil_vertical_dimension_for_land_surface_model              | number of soil layers internal to land surface model    | count      |    0 | integer   |           | none   | F        |
+!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                                  | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
+!! | runof          | surface_runoff_flux                                         | surface runoff flux                                     | g m-2 s-1  |    1 | real      | kind_phys | out    | F        |
+!! | evbs           | soil_upward_latent_heat_flux                                | soil upward latent heat flux                            | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | evcw           | canopy_upward_latent_heat_flux                              | canopy upward latent heat flux                          | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | trans          | transpiration_flux                                          | total plant transpiration rate                          | kg m-2 s-1 |    1 | real      | kind_phys | out    | F        |
+!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux         | latent heat flux from snow depo/subl                    | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | snowc          | surface_snow_area_fraction                                  | surface snow area fraction                              | frac       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | error_message                                               | error message for error handling in CCPP                | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                  | error flag for error handling in CCPP                   | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
       subroutine lsm_ruc_pre_run                                       &
@@ -312,18 +327,18 @@
 !!
 #if 0
 !! \section arg_table_lsm_ruc_post_run Argument Table
-!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                     | soil vertical layer dimension              | count      |    0 | integer   |           | in     | F        |
-!! | flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields     | flag       |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                      | dynamics time step                         | s          |    0 | real      | kind_phys | in     | F        |
-!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                     | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
-!! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
-!! | runoff         | total_runoff                                                | total runoff                               | kg m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                      | horizontal loop extent                                  | count      |    0 | integer   |           | in     | F        |
+!! | km             | soil_vertical_dimension_for_land_surface_model              | number of soil layers internal to land surface model    | count      |    0 | integer   |           | none   | F        |
+!! | flag_lssav     | flag_diagnostics                                            | flag for calculating diagnostic fields                  | flag       |    0 | logical   |           | in     | F        |
+!! | dtf            | time_step_for_dynamics                                      | dynamics time step                                      | s          |    0 | real      | kind_phys | in     | F        |
+!! | drain          | subsurface_runoff_flux                                      | subsurface runoff flux                                  | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
+!! | runof          | surface_runoff_flux                                         | surface runoff flux                                     | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
+!! | runoff         | total_runoff                                                | total runoff                                            | kg m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | srunoff        | surface_runoff                                              | surface runoff                                          | kg m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | error_message                                               | error message for error handling in CCPP                | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | error_flag                                                  | error flag for error handling in CCPP                   | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
 !!  \section lsm_post_general General Algorithm
@@ -487,14 +502,14 @@
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
 !! | im              | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | km              | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | zs              | depth_of_soil_levels_for_land_surface_model                                  | depth of soil levels for lsm                                    | count         |    0 | real      | kind_phys | inout  | F        |
+!! | km              | soil_vertical_dimension_for_land_surface_model                               | number of soil layers internal to land surface model            | count         |    0 | integer   |           | none   | F        |
+!! | zs              | depth_of_soil_levels_for_land_surface_model                                  | depth of soil levels for land surface model                     | m             |    1 | real      | kind_phys | inout  | F        |
 !! | con_cp          | specific_heat_of_dry_air_at_constant_pressure                                | specific heat !of dry air at constant pressure                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_g           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | con_pi          | pi                                                                           | ratio of a circle's circumference to its diameter               | radians       |    0 | real      | kind_phys | in     | F        |
 !! | con_rd          | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_rv          | gas_constant_water_vapor                                                     | ideal gas constant for water vapor                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | con_hvap        | latent_heat_of_vaporization_of_water_at_0C    | latent heat of vaporization/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |      
+!! | con_hvap        | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of vaporization/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |      
 !! | con_fvirt       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | rv/rd - 1 (rv = ideal gas constant for water vapor)             | none          |    0 | real      | kind_phys | in     | F        |
 !! | tprcp           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real      | kind_phys | inout  | F        | 
 !! | rain            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep                   | total rain at this time step                                    | m             |    1 | real      | kind_phys | in     | F        |
@@ -512,7 +527,7 @@
 !! | prsl1           | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        | 
 !! | t1              | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        | 
 !! | q1              | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        | 
-!! | qc              | cloud_condensed_water_concentration_at_lowest_model_layer                    | concentration of cloud water at lowest model layer              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | qc              | cloud_condensed_water_mixing_ratio_at_lowest_model_layer | moist (dry+vapor, no condensates) mixing ratio of cloud water at lowest model layer | kg kg-1       |    1 | real      | kind_phys | none   | F        |
 !! | dlwflx          | surface_downwelling_longwave_flux_on_radiation_time_step                     | total sky sfc downward lw flux                                  | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | dswsfc          | surface_downwelling_shortwave_flux                                           | total sky surface downward shortwave flux                       | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | snet            | surface_net_downwelling_shortwave_flux                                       | total sky surface net shortwave flux                            | W m-2         |    1 | real      | kind_phys | in     | F        |
@@ -526,14 +541,13 @@
 !! | zorl            | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | inout  | F        | 
 !! | snoalb          | upper_bound_on_max_albedo_over_deep_snow                                     | maximum snow albedo                                             | frac          |    1 | real      | kind_phys | in     | F        |
 !! | qsurf           | surface_specific_humidity                                                    | surface specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | sfcqs           | saturation_water_vapor_concentration_at_surface                              | saturation water vapor concentration at surface                 | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | sfcqc           | cloud_condensed_water_concentration_at_surface                               | cloud water concentration at surface                            | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | sfcqc           |  cloud_condensed_water_mixing_ratio_at_surface                               | moist cloud water mixing ratio at surface                       | kg kg-1       |    1 | real      | kind_phys | out    | F        |
 !! | sfcdew          | surface_condensation_mass                                                    | mass of condensed water at surface                              | kg m-2        |    1 | real      | kind_phys | out    | F        |
 !! | tg3             | deep_soil_temperature                                                        | bottom soil temperature                                         | K             |    1 | real      | kind_phys | in     | F        |
 !! | vegtype         | cell_vegetation_type                                                         | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
 !! | soiltyp         | cell_soil_type                                                               | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
 !! | fice            | sea_ice_concentration                                                        | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
-!! | keepfr          | flag_for_frozen_soil_physics                                                 | flag for processes in frozen soil: 0, 1-limit on ice increase   | flag          |    2 | real      | kind_phys | inout  | F        |
+!! | keepfr          | flag_for_frozen_soil_physics                                                 | flag for frozen soil physics (RUC)                              | flag          |    2 | real      | kind_phys | inout  | F        |
 !! | smc             | volume_fraction_of_soil_moisture_for_land_surface_model                      | volumetric fraction of soil moisture for lsm                    | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | slc             | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model             | volume fraction of unfrozen soil moisture for lsm               | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | stc             | soil_temperature_for_land_surface_model                                      | soil temperature for land surface model                         | K             |    2 | real      | kind_phys | inout  | F        |
@@ -571,7 +585,7 @@
      &       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
      &       graupel, srflag, sr, smc, stc, slc, keepfr,                &
      &       canopy, trans, tsurf, tsnow, zorl,                         &
-     &       sfcqs, sfcqc, sfcdew,                                      &
+     &       sfcqc, sfcdew,                                             &
 ! --- outputs
      &       sncovr1, qsurf, gflux, drain, dtsfc1, evap, dqsfc1, ep,    &
      &       runoff, evbs, evcw, sbsno, snowc, stm, wet1,               &
@@ -611,7 +625,7 @@
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
              srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
-             sfcqs, sfcqc, sfcdew
+             sfcqc, sfcdew
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc, keepfr
@@ -1021,7 +1035,6 @@
 !          sbsno(i) = esnow(i1,j)
 !          snohf(i) = snoh(i1,j)
 
-          sfcqs(i)  = qsg(i1,j)
           sfcqc(i)  = qcg(i1,j)
           sfcdew(i) = dew(i1,j)
 
