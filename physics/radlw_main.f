@@ -230,7 +230,9 @@
 !       apr 2012,  b. ferrier and y. hou -- added conversion factor to fu's!
 !                    cloud-snow optical property scheme.                   !
 !       nov 2012,  yu-tai hou        -- modified control parameters thru   !
-!                     module 'physparam'.                                  !
+!                     module 'physparam'.                                  !  
+!       FEB 2017    A.Cheng   - add odpth output, effective radius input   !
+!                                                                          !
 !                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
@@ -420,6 +422,8 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                           | mean effective radius for rain drop                       | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_weighted | cloud_optical_depth_weighted                                                                  | cloud optical depth, weighted                             | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_layer    | cloud_optical_depth_678                                                                       | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
 !! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                    | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
@@ -436,6 +440,7 @@
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
+     &       cld_od_weighted, cld_od_layer,                             &
      &       cld_od, errmsg, errflg                                     &
      &     )
 
@@ -630,6 +635,7 @@
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
+     &       cld_od_weighted, cld_od_layer                              &
      &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
@@ -720,12 +726,14 @@
         if ( .not.present(cld_lwp) .or. .not.present(cld_ref_liq) .or.  &
      &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
      &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
-     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow)) then
+     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow) .or. &
+     &       .not.present(cld_od_weighted) .or. .not.present(cld_od_layer)) then
           write(errmsg,'(*(a))')                                        &
      &               'Logic error: ilwcliq>0 requires the following',   &
      &               ' optional arguments to be present:',              &
      &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
-     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'
+     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'    &
+     &               ' cld_od_weighted, cld_od_layer'                    
           errflg = 1
           return
         end if
@@ -1064,6 +1072,10 @@
           cldfmc = f_zero
           taucld = f_zero
         endif
+        do k = 1, nlay
+          cld_od_layer(iplon,k) = taucld(6,k)                              &
+     &                       + taucld(7,k) + taucld(8,k)
+        end do
 
 !     if (lprnt) then
 !      print *,' after cldprop'
@@ -4720,18 +4732,12 @@
         jplp  = jpl  + 1
         jmo3p = jmo3 + 1
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
-          p0 = fs - f_one
-          p40 = p0**4
+        if (specparm < 0.125) then
+          p0   = fs - f_one
+          p40  = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -4739,25 +4745,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
-          p0 = -fs
-          p40 = p0**4
+        elseif (specparm > 0.875) then
+          p0   = -fs
+          p40  = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -4765,21 +4758,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -4787,13 +4769,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -4802,6 +4777,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1   = fs1 - f_one
+          p41  = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1   = -fs1
+          p41  = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -5086,18 +5100,12 @@
           adjcolco2 = colamt(k,2)
         endif
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5105,25 +5113,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -5131,21 +5126,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5153,13 +5137,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -5168,6 +5145,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -5472,18 +5488,12 @@
           adjcoln2o = colamt(k,4)
         endif
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5491,26 +5501,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -5518,21 +5514,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5540,13 +5525,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -5555,6 +5533,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -5862,18 +5879,12 @@
         indfp = indf + 1
         jplp  = jpl  + 1
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5881,25 +5892,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -5907,21 +5905,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -5929,13 +5916,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -5944,6 +5924,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -6092,18 +6111,12 @@
           adjcolco2 = colamt(k,2)
         endif
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6111,25 +6124,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -6137,21 +6137,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6159,13 +6148,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -6174,6 +6156,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -6385,19 +6406,12 @@
         jplp  = jpl  + 1
         jmn2p = jmn2 + 1
 
-
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6405,25 +6419,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -6431,21 +6432,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6453,13 +6443,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -6468,6 +6451,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
@@ -6577,18 +6599,12 @@
         indfp = indf + 1
         jplp  = jpl  + 1
 
-        if (specparm < 0.125 .and. specparm1 < 0.125) then
+        if (specparm < 0.125) then
           p0 = fs - f_one
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = fs1 - f_one
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6596,25 +6612,12 @@
           id110 = ind0 +10
           id200 = ind0 + 2
           id210 = ind0 +11
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1 + 2
-          id211 = ind1 +11
-        elseif (specparm > 0.875 .and. specparm1 > 0.875) then
+        elseif (specparm > 0.875) then
           p0 = -fs
           p40 = p0**4
           fk00 = p40
           fk10 = f_one - p0 - 2.0*p40
           fk20 = p0 + p40
-
-          p1 = -fs1
-          p41 = p1**4
-          fk01 = p41
-          fk11 = f_one - p1 - 2.0*p41
-          fk21 = p1 + p41
 
           id000 = ind0 + 1
           id010 = ind0 +10
@@ -6622,21 +6625,10 @@
           id110 = ind0 + 9
           id200 = ind0 - 1
           id210 = ind0 + 8
-
-          id001 = ind1 + 1
-          id011 = ind1 +10
-          id101 = ind1
-          id111 = ind1 + 9
-          id201 = ind1 - 1
-          id211 = ind1 + 8
         else
           fk00 = f_one - fs
           fk10 = fs
           fk20 = f_zero
-
-          fk01 = f_one - fs1
-          fk11 = fs1
-          fk21 = f_zero
 
           id000 = ind0
           id010 = ind0 + 9
@@ -6644,13 +6636,6 @@
           id110 = ind0 +10
           id200 = ind0
           id210 = ind0
-
-          id001 = ind1
-          id011 = ind1 + 9
-          id101 = ind1 + 1
-          id111 = ind1 +10
-          id201 = ind1
-          id211 = ind1
         endif
 
         fac000 = fk00 * fac00(k)
@@ -6659,6 +6644,45 @@
         fac010 = fk00 * fac10(k)
         fac110 = fk10 * fac10(k)
         fac210 = fk20 * fac10(k)
+
+        if (specparm1 < 0.125) then
+          p1 = fs1 - f_one
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1 + 2
+          id211 = ind1 +11
+        elseif (specparm1 > 0.875) then
+          p1 = -fs1
+          p41 = p1**4
+          fk01 = p41
+          fk11 = f_one - p1 - 2.0*p41
+          fk21 = p1 + p41
+
+          id001 = ind1 + 1
+          id011 = ind1 +10
+          id101 = ind1
+          id111 = ind1 + 9
+          id201 = ind1 - 1
+          id211 = ind1 + 8
+        else
+          fk01 = f_one - fs1
+          fk11 = fs1
+          fk21 = f_zero
+
+          id001 = ind1
+          id011 = ind1 + 9
+          id101 = ind1 + 1
+          id111 = ind1 +10
+          id201 = ind1
+          id211 = ind1
+        endif
 
         fac001 = fk01 * fac01(k)
         fac101 = fk11 * fac01(k)
