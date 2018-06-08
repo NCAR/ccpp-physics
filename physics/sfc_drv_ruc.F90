@@ -515,7 +515,7 @@
 !! | rain            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep                   | total rain at this time step                                    | m             |    1 | real      | kind_phys | in     | F        |
 !! | rainc           | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep        | convective rain at this time step                               | m             |    1 | real      | kind_phys | in     | F        |
 !! | graupel         | lwe_thickness_of_graupel_amount_on_dynamics_timestep                         | graupel fall at this time step                                  | m             |    1 | real      | kind_phys | in     | F        |
-!! | snow            | lwe_thickness_of_graupel_amount_on_dynamics_timestep                         | graupel fall at this time step                                  | m             |    1 | real      | kind_phys | in     | F        |
+!! | snow            | lwe_thickness_of_snow_amount_on_dynamics_timestep                            | snow fall at this time step                                     | m             |    1 | real      | kind_phys | in     | F        |
 !! | sncovr1         | surface_snow_area_fraction_for_diagnostics                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        | 
 !! | weasd           | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | mm            |    1 | real      | kind_phys | inout  | F        |
 !! | snwdph          | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth over land                           | mm            |    1 | real      | kind_phys | inout  | F        | 
@@ -558,7 +558,6 @@
 !! | evap            | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                                 | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
 !! | runof           | surface_runoff_flux                                                          | surface runoff flux                                             | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
 !! | drain           | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
-!! | runoff          | total_runoff                                                                 | total water runoff                                              | kg m-2        |    1 | real      | kind_phys | none   | F        |
 !! | gflux           | upward_heat_flux_in_soil                                                     | upward soil heat flux                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | shdmin          | minimum_vegetation_area_fraction                                             | min fractional coverage of green veg                            | frac          |    1 | real      | kind_phys | in     | F        |
 !! | shdmax          | maximum_vegetation_area_fraction                                             | max fractional coverage of green vegetation                     | frac          |    1 | real      | kind_phys | in     | F        |
@@ -588,7 +587,7 @@
      &       sfcqc, sfcdew,                                             &
 ! --- outputs
      &       sncovr1, qsurf, gflux, drain, dtsfc1, evap, dqsfc1, ep,    &
-     &       runoff, evbs, evcw, sbsno, snowc, stm, wet1,               &
+     &       runof, evbs, evcw, sbsno, snowc, stm, wet1,                &
      &       errmsg, errflg                                             &
      &     )
 
@@ -632,7 +631,7 @@
 
 !  ---  output:
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
-     &       qsurf, gflux, dtsfc1, evap, dqsfc1, ep, runoff, drain,     &
+     &       qsurf, gflux, dtsfc1, evap, dqsfc1, ep, runof , drain,     &
      &       evbs, evcw, sbsno, snowc, stm, wet1
 
       character(len=*), intent(out) :: errmsg
@@ -1053,7 +1052,7 @@
           wet1(i) = wet(i1,j) 
 
 !  --- ...  units [m/s] = [g m-2 s-1] 
-          runoff (i)  = runoff1(i1,j) 
+          runof (i)  = runoff1(i1,j) 
           drain (i)  = runoff2(i1,j)
 
 !  --- ...  unit conversion (from m to mm)

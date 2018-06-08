@@ -267,7 +267,9 @@ else (PROJECT STREQUAL "CCPP-FV3")
     ./physics/GFS_rrtmg_post_cap.F90
     ./physics/get_phi_fv3_cap.F90
     ./physics/rrtmg_sw_pre_cap.F90
-#    ./physics/sfc_drv_ruc_cap.F90
+    ./physics/lsm_ruc_pre_cap.F90
+    ./physics/lsm_ruc_cap.F90
+    ./physics/lsm_ruc_post_cap.F90
 )
 endif (PROJECT STREQUAL "CCPP-FV3")
 
