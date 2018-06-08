@@ -140,6 +140,7 @@ elif [[ $MACHINE_ID = theia.* ]]; then
   export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
   ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
   QUEUE=debug
+#  ACCNR=fv3-cpu
   PARTITION=
   dprefix=/scratch4/NCEPDEV
   DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
@@ -233,7 +234,7 @@ while getopts ":cfsl:mreh" opt; do
   esac
 done
 
-RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180524}
+RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180605}
 
 shift $((OPTIND-1))
 [[ $# -gt 1 ]] && usage
