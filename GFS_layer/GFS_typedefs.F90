@@ -220,10 +220,16 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: qrain  (:)   => null()  !< nst_fld%qrain   sensible heat flux due to rainfall (watts)
 
     ! Soil properties for land-surface model (if number of levels different from NOAH 4-layer model)
-    real (kind=kind_phys), pointer :: sh2o(:,:)    => null()  !< volume fraction of unfrozen soil moisture for lsm
-    real (kind=kind_phys), pointer :: smois(:,:)   => null()  !< volumetric fraction of soil moisture for lsm
-    real (kind=kind_phys), pointer :: tslb(:,:)    => null()  !< soil temperature for land surface model
-    real (kind=kind_phys), pointer :: zs(:)        => null()  !< depth of soil levels for land surface model
+    real (kind=kind_phys), pointer :: sh2o(:,:)        => null()  !< volume fraction of unfrozen soil moisture for lsm
+    real (kind=kind_phys), pointer :: smois(:,:)       => null()  !< volumetric fraction of soil moisture for lsm
+    real (kind=kind_phys), pointer :: tslb(:,:)        => null()  !< soil temperature for land surface model
+    real (kind=kind_phys), pointer :: zs(:)            => null()  !< depth of soil levels for land surface model
+    !
+    real (kind=kind_phys), pointer :: clw_surf(:)      => null()  !< RUC LSM: moist cloud water mixing ratio at surface
+    real (kind=kind_phys), pointer :: cndm_surf(:)     => null()  !< RUC LSM: surface condensation mass
+    real (kind=kind_phys), pointer :: flag_frsoil(:,:) => null()  !< RUC LSM: flag for frozen soil physics
+    real (kind=kind_phys), pointer :: rhofr(:)         => null()  !< RUC LSM: density of frozen precipitation
+    real (kind=kind_phys), pointer :: tsnow(:)         => null()  !< RUC LSM: snow temperature at the bottom of the first soil layer
 
     contains
       procedure :: create  => sfcprop_create  !<   allocate array data
@@ -441,6 +447,7 @@ module GFS_typedefs
 
     !--- land/surface model parameters
     integer              :: lsm             !< flag for land surface model lsm=1 for noah lsm
+    integer              :: lsm_ruc=2       !< flag for RUC land surface model
     integer              :: lsoil           !< number of soil layers
     integer              :: lsoil_lsm       !< number of soil layers internal to land surface model
     integer              :: ivegsrc         !< ivegsrc = 0   => USGS,
@@ -1257,15 +1264,28 @@ module GFS_typedefs
       Sfcprop%qrain   = zero
     endif
 
+    if (Model%lsm == Model%lsm_ruc) then
     ! For land surface models with different numbers of levels than the four NOAH levels
-    allocate (Sfcprop%sh2o  (IM,Model%lsoil_lsm))
-    allocate (Sfcprop%smois (IM,Model%lsoil_lsm))
-    allocate (Sfcprop%tslb  (IM,Model%lsoil_lsm))
-    allocate (Sfcprop%zs    (Model%lsoil_lsm))
-    Sfcprop%sh2o  = clear_val
-    Sfcprop%smois = clear_val
-    Sfcprop%tslb  = clear_val
-    Sfcprop%zs    = clear_val
+       allocate (Sfcprop%sh2o        (IM,Model%lsoil_lsm))
+       allocate (Sfcprop%smois       (IM,Model%lsoil_lsm))
+       allocate (Sfcprop%tslb        (IM,Model%lsoil_lsm))
+       allocate (Sfcprop%zs          (Model%lsoil_lsm))
+       allocate (Sfcprop%clw_surf    (IM))
+       allocate (Sfcprop%cndm_surf   (IM))
+       allocate (Sfcprop%flag_frsoil (IM,Model%lsoil_lsm))
+       allocate (Sfcprop%rhofr       (IM))
+       allocate (Sfcprop%tsnow       (IM))
+       !
+       Sfcprop%sh2o        = clear_val
+       Sfcprop%smois       = clear_val
+       Sfcprop%tslb        = clear_val
+       Sfcprop%zs          = clear_val
+       Sfcprop%clw_surf    = clear_val
+       Sfcprop%cndm_surf   = clear_val
+       Sfcprop%flag_frsoil = clear_val
+       Sfcprop%rhofr       = clear_val
+       Sfcprop%tsnow       = clear_val
+    end if
 
   end subroutine sfcprop_create
 
@@ -2016,6 +2036,8 @@ module GFS_typedefs
     if (Model%me == Model%master) then
       if (Model%lsm == 1) then
         print *,' NOAH Land Surface Model used'
+      elseif (Model%lsm == Model%lsm_ruc) then
+        print *,' RUC Land Surface Model used'
       elseif (Model%lsm == 0) then
         print *,' OSU no longer supported - job aborted'
         stop
@@ -2843,9 +2865,7 @@ module GFS_typedefs
     allocate (Interstitial%cld1d      (IM))
     allocate (Interstitial%clouds     (IM,Model%levr+LTP,NF_CLDS))
     allocate (Interstitial%clw        (IM,Model%levs,Interstitial%tracers_total+2))
-    allocate (Interstitial%clw_surf   (IM))
     allocate (Interstitial%clx        (IM,4))
-    allocate (Interstitial%cndm_surf  (IM))
     allocate (Interstitial%cnvc       (IM,Model%levs))
     allocate (Interstitial%cnvw       (IM,Model%levs))
     allocate (Interstitial%cumabs     (IM))
@@ -2883,7 +2903,6 @@ module GFS_typedefs
     allocate (Interstitial%fh2        (IM))
     allocate (Interstitial%flag_guess (IM))
     allocate (Interstitial%flag_iter  (IM))
-    allocate (Interstitial%flag_frsoil(IM))
     allocate (Interstitial%fm10       (IM))
     allocate (Interstitial%gabsbdlw   (IM))
     allocate (Interstitial%gamma      (IM))
@@ -2920,7 +2939,6 @@ module GFS_typedefs
     allocate (Interstitial%rb         (IM))
     allocate (Interstitial%rhc        (IM,Model%levs))
     allocate (Interstitial%runoff     (IM))
-    allocate (Interstitial%rhofr      (IM))
     allocate (Interstitial%save_qcw   (IM,Model%levs))
     allocate (Interstitial%save_qv    (IM,Model%levs))
     allocate (Interstitial%save_t     (IM,Model%levs))
@@ -2945,7 +2963,6 @@ module GFS_typedefs
     allocate (Interstitial%tseal      (IM))
     allocate (Interstitial%tsfa       (IM))
     allocate (Interstitial%tsfg       (IM))
-    allocate (Interstitial%tsnow      (IM))
     allocate (Interstitial%tsurf      (IM))
     allocate (Interstitial%ud_mf      (IM,Model%levs))
     allocate (Interstitial%vegtype    (IM))
@@ -3078,9 +3095,7 @@ module GFS_typedefs
     Interstitial%cld1d        = clear_val
     Interstitial%cldf         = clear_val
     Interstitial%clw          = clear_val
-    Interstitial%clw_surf     = clear_val
     Interstitial%clx          = clear_val
-    Interstitial%cndm_surf    = clear_val
     Interstitial%cnvc         = clear_val
     Interstitial%cnvw         = clear_val
     Interstitial%cumabs       = clear_val
@@ -3118,7 +3133,6 @@ module GFS_typedefs
     Interstitial%fh2          = clear_val
     Interstitial%flag_guess   = .false.
     Interstitial%flag_iter    = .false.
-    Interstitial%flag_frsoil  = clear_val
     Interstitial%fm10         = clear_val
     Interstitial%frain        = clear_val
     Interstitial%gabsbdlw     = clear_val
@@ -3151,7 +3165,6 @@ module GFS_typedefs
     Interstitial%rhcpbl       = clear_val
     Interstitial%rhctop       = clear_val
     Interstitial%runoff       = clear_val
-    Interstitial%rhofr        = clear_val
     Interstitial%save_qcw     = clear_val
     Interstitial%save_qv      = clear_val
     Interstitial%save_t       = clear_val
@@ -3170,7 +3183,6 @@ module GFS_typedefs
     Interstitial%tice         = clear_val
     Interstitial%trans        = clear_val
     Interstitial%tseal        = clear_val
-    Interstitial%tsnow        = clear_val
     Interstitial%tsurf        = clear_val
     Interstitial%ud_mf        = clear_val
     Interstitial%vegtype      = 0
@@ -3229,9 +3241,7 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%cldsa       ) = ', sum(Interstitial%cldsa       )
     write (0,*) 'sum(Interstitial%cld1d       ) = ', sum(Interstitial%cld1d       )
     write (0,*) 'sum(Interstitial%clw         ) = ', sum(Interstitial%clw         )
-    write (0,*) 'sum(Interstitial%clw_surf    ) = ', sum(Interstitial%clw_surf    )
     write (0,*) 'sum(Interstitial%clx         ) = ', sum(Interstitial%clx         )
-    write (0,*) 'sum(Interstitial%cndm_surf   ) = ', sum(Interstitial%cndm_surf   )
     write (0,*) 'sum(Interstitial%clouds      ) = ', sum(Interstitial%clouds      )
     write (0,*) 'sum(Interstitial%cnvc        ) = ', sum(Interstitial%cnvc        )
     write (0,*) 'sum(Interstitial%cnvw        ) = ', sum(Interstitial%cnvw        )
@@ -3272,7 +3282,6 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%fh2         ) = ', sum(Interstitial%fh2         )
     write (0,*) 'Interstitial%flag_guess(1)     = ', Interstitial%flag_guess(1)
     write (0,*) 'Interstitial%flag_iter(1)      = ', Interstitial%flag_iter(1)
-    write (0,*) 'sum(Interstitial%flag_frsoil ) = ', sum(Interstitial%flag_frsoil )
     write (0,*) 'sum(Interstitial%fm10        ) = ', sum(Interstitial%fm10        )
     write (0,*) 'Interstitial%frain             = ', Interstitial%frain
     write (0,*) 'sum(Interstitial%gabsbdlw    ) = ', sum(Interstitial%gabsbdlw    )
@@ -3318,7 +3327,6 @@ module GFS_typedefs
     write (0,*) 'Interstitial%rhcpbl            = ', Interstitial%rhcpbl
     write (0,*) 'Interstitial%rhctop            = ', Interstitial%rhctop
     write (0,*) 'sum(Interstitial%runoff      ) = ', sum(Interstitial%runoff      )
-    write (0,*) 'sum(Interstitial%rhofr       ) = ', sum(Interstitial%rhofr       )
     write (0,*) 'sum(Interstitial%save_qcw    ) = ', sum(Interstitial%save_qcw    )
     write (0,*) 'sum(Interstitial%save_qv     ) = ', sum(Interstitial%save_qv     )
     write (0,*) 'sum(Interstitial%save_t      ) = ', sum(Interstitial%save_t      )
@@ -3348,7 +3356,6 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%tseal       ) = ', sum(Interstitial%tseal       )
     write (0,*) 'sum(Interstitial%tsfa        ) = ', sum(Interstitial%tsfa        )
     write (0,*) 'sum(Interstitial%tsfg        ) = ', sum(Interstitial%tsfg        )
-    write (0,*) 'sum(Interstitial%tsnow       ) = ', sum(Interstitial%tsnow       )
     write (0,*) 'sum(Interstitial%tsurf       ) = ', sum(Interstitial%tsurf       )
     write (0,*) 'sum(Interstitial%ud_mf       ) = ', sum(Interstitial%ud_mf       )
     write (0,*) 'sum(Interstitial%vegtype     ) = ', sum(Interstitial%vegtype     )
