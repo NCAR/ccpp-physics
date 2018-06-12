@@ -9,8 +9,8 @@ echo "Setting environment variables for NEMSfv3gfs on MACOSX with clang/gfortran
 ##
 ## load programming environment: compiler, flags, paths
 ##
-export CC=/usr/local/bin/mpicc
-export CXX=/usr/local/bin/mpicxx
+export CC="mpicc -cc=/usr/local/opt/llvm/bin/clang"
+export CXX="mpicxx -cxx=/usr/local/opt/llvm/bin/clang++"
 export F77=/usr/local/bin/mpif77
 export F90=/usr/local/bin/mpif90
 export FC=/usr/local/bin/mpif90
@@ -29,6 +29,14 @@ export DYLD_LIBRARY_PATH="/usr/local/opt/zlib/lib:/usr/local/opt/llvm/lib:${DYLD
 ## use homebrew NetCDF library
 ##
 export NETCDF=/usr/local
+
+##
+## use SIONlib library if installed and environment variable is set
+##
+SIONLIB=${SIONLIB:-}
+if [ ! "x$SIONLIB" == "x" ]; then
+  echo "Use SIONlib installation in ${SIONLIB}"
+fi
 
 ##
 ## use pre-compiled EMSF library for above compiler / MPI combination

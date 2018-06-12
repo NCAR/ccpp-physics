@@ -36,10 +36,10 @@ endif
 # commands #
 ############
 SFC             =       gfortran
-SCC             =       clang
-CCOMP           =       clang
+SCC             =       /usr/local/opt/llvm/bin/clang
+CCOMP           =       /usr/local/opt/llvm/bin/clang
 DM_FC           =       mpif90
-DM_CC           =       mpicc -DMPI2_SUPPORT
+DM_CC           =       mpicc -cc=/usr/local/opt/llvm/bin/clang -DMPI2_SUPPORT
 FC              =       $(DM_FC)
 CC              =       $(DM_CC) -DFSEEKO64_OK
 LD              =       $(FC)
@@ -55,6 +55,7 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
+SION = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -172,6 +173,13 @@ CPPDEFS += -DCCPP
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
+
+ifeq ($(SION),Y)
+CPPDEFS += -DSION
+CFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
+FFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
+LDFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --libs --f90`
 endif
 
 LDFLAGS += $(LIBS)
