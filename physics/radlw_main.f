@@ -422,8 +422,8 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                           | mean effective radius for rain drop                       | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_weighted | cloud_optical_depth_weighted                                                                  | cloud optical depth, weighted                             | none    |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_layer    | cloud_optical_depth_678                                                                       | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_total    | cloud_optical_depth_total                                                                     | cloud optical depth, total                                | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_layer    | cloud_optical_depth_layers_678                                                                | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
 !! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                    | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
@@ -440,7 +440,7 @@
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od_weighted, cld_od_layer,                             &
+     &       cld_od_total, cld_od_layer,                                &
      &       cld_od, errmsg, errflg                                     &
      &     )
 
@@ -635,7 +635,7 @@
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
-     &       cld_od_weighted, cld_od_layer                              &
+     &       cld_od_total, cld_od_layer                                 &
      &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
@@ -727,13 +727,13 @@
      &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
      &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
      &       .not.present(cld_swp) .or. .not.present(cld_ref_snow) .or. &
-     &       .not.present(cld_od_weighted) .or. .not.present(cld_od_layer)) then
+     &       .not.present(cld_od_total) .or. .not.present(cld_od_layer)) then
           write(errmsg,'(*(a))')                                        &
      &               'Logic error: ilwcliq>0 requires the following',   &
      &               ' optional arguments to be present:',              &
      &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
      &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'    &
-     &               ' cld_od_weighted, cld_od_layer'                    
+     &               ' cld_od_total, cld_od_layer'                    
           errflg = 1
           return
         end if
