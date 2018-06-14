@@ -554,7 +554,7 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                            | mean effective radius for rain drop                                      | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                          | cloud snow water path                                                    | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                           | mean effective radius for snow flake                                     | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_total    | cloud_optical_depth_total                                                                      | cloud optical depth, weighted                                            | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_total    | cloud_optical_depth_total                                                                      | cloud optical depth, weighted                                            | none    |    2 | real        | kind_phys | out    | T        |
 !! | cld_od_layer    | cloud_optical_depth_layers_678                                                                        | cloud optical depth, from bands 6,7,8                                    | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                                                                            | cloud optical depth                                                      | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_ssa         | cloud_single_scattering_albedo                                                                 | cloud single scattering albedo                                           | frac    |    2 | real        | kind_phys | in     | T        |
@@ -789,8 +789,10 @@
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
-     &       cld_od_total, cld_od_layer,                                &
+     &       cld_od_layer,                                              &
      &       cld_od, cld_ssa, cld_asy
+      real (kind=kind_phys), dimension(npts,nlay),intent(out),optional::&
+     &       cld_od_total
 
       real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
       real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
@@ -904,7 +906,8 @@
      &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
      &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
      &       .not.present(cld_swp) .or. .not.present(cld_ref_snow) .or. &
-     &       .not.present(cld_od_total) .or. .not.present(cld_od_layer)) then
+     &       .not.present(cld_od_total) .or.                            &
+     &       .not.present(cld_od_layer)) then
           write(errmsg,'(*(a))')                                        &
      &               'Logic error: ilwcliq>0 requires the following',   &
      &               ' optional arguments to be present:',              &
@@ -1214,7 +1217,7 @@
           enddo
         endif   ! end if_zcf1_block
         do k = 1, nlay
-          clouds(j1,k,10) = taucw(k,10)
+          cld_od_total(j1,k) = taucw(k,10)
         end do 
 !> -# Call setcoef() to compute various coefficients needed in
 !!    radiative transfer calculations.
