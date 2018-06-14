@@ -1256,6 +1256,7 @@
           cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
           cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
           cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          cld_od_total=clouds(:,:,10), cld_od_layer=clouds(:,:,11),  &
           errmsg=errmsg, errflg=errflg)
 
       ! DH*
@@ -1290,6 +1291,7 @@
           cld_iwp=clouds(:,:,4), cld_ref_ice=clouds(:,:,5),            &
           cld_rwp=clouds(:,:,6), cld_ref_rain=clouds(:,:,7),           &
           cld_swp=clouds(:,:,8), cld_ref_snow=clouds(:,:,9),           &
+          cld_od_total=clouds(:,:,10), cld_od_layer=clouds(:,:,11),  &
           errmsg=errmsg, errflg=errflg)
 
 !CCPP: L1718-1747
