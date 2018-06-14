@@ -14,6 +14,7 @@ function usage   {
   echo "    Where: MACHINE      [required] can be : ${VALID_MACHINES[@]}"
   echo "           CCPP_DIR     [required] is the target installation directory for CCPP"
   echo "           MAKE_OPT     [optional] can be any of the NEMSfv3gfs MAKE_OPT options; used:"
+  echo "                                   SION=Y/N   (default N)"
   echo "                                   DEBUG=Y/N  (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
@@ -70,6 +71,9 @@ checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
 CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
+if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSIONLIB=${SIONLIB}"
+fi
 if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Debug"
   CCPP_MAKE_FLAGS="${CCPP_MAKE_FLAGS} VERBOSE=1"

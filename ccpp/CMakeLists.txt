@@ -125,6 +125,39 @@ else (OPENMP)
 endif (OPENMP)
 
 #------------------------------------------------------------------------------
+# Set SIONlib flags for Fortran compiler, preprocessor and linker
+if (SIONLIB)
+  execute_process(COMMAND ${SIONLIB}/bin/sionconfig --mpi --cflags --f90
+                  RESULT_VARIABLE exit_code
+                  OUTPUT_VARIABLE SIONlib_Fortran_FLAGS
+                  ERROR_VARIABLE stderr
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  ERROR_STRIP_TRAILING_WHITESPACE)
+  if (NOT exit_code EQUAL "0")
+     message (FATAL_ERROR "Execution of '${SIONLIB}/bin/sionconfig --mpi --cflags --f90' failed")
+  endif (NOT exit_code EQUAL "0")
+  execute_process(COMMAND ${SIONLIB}/bin/sionconfig --mpi --libs --f90
+                  RESULT_VARIABLE exit_code
+                  OUTPUT_VARIABLE SIONlib_Fortran_LIBS
+                  ERROR_VARIABLE stderr
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  ERROR_STRIP_TRAILING_WHITESPACE)
+  if (NOT exit_code EQUAL "0")
+     message (FATAL_ERROR "Execution of '${SIONLIB}/bin/sionconfig --mpi --libs --f90' failed")
+  endif (NOT exit_code EQUAL "0")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${SIONlib_Fortran_FLAGS} ${SIONlib_Fortran_LIBS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SIONlib_Fortran_LIBS}")
+  set (CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS} ${SIONlib_Fortran_LIBS}")
+  ADD_DEFINITIONS(-DSION)
+  message (STATUS "Enable SIONlib support for Fortran compiler")
+  message (STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
+  message (STATUS "CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS}")
+  message (STATUS "CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS ${CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS}")
+else (SIONLIB)
+  message (STATUS "Disable SIONlib support for Fortran compiler")
+endif (SIONLIB)
+
+#------------------------------------------------------------------------------
 # Build CCPP framework and physics
 
 SET(CCPP_FRAMEWORK_SRC ${CMAKE_SOURCE_DIR}/framework)
