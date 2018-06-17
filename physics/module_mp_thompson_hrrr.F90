@@ -1033,22 +1033,34 @@ MODULE module_mp_thompson_hrrr
 !$OMP section
 !..Rain collecting graupel & graupel collecting rain.
       WRITE (*,*) '  creating rain collecting graupel table'
+      call cpu_time(stime)
       call qr_acr_qg
+      call cpu_time(etime)
+      if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
 !$OMP section
 !..Rain collecting snow & snow collecting rain.
       WRITE (*,*) '  creating rain collecting snow table'
+      call cpu_time(stime)
       call qr_acr_qs
+      call cpu_time(etime)
+      if (mpirank==mpiroot) print '("Computing rain collecting snow table took ",f10.3," seconds.")', etime-stime
 
 !$OMP section
 !..Cloud water and rain freezing (Bigg, 1953).
       WRITE (*,*)  '  creating freezing of water drops table'
+      call cpu_time(stime)
       call freezeH2O
+      call cpu_time(etime)
+      if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
 !$OMP section
 !..Conversion of some ice mass into snow category.
       WRITE (*,*) '  creating ice converting to snow table'
+      call cpu_time(stime)
       call qi_aut_qs
+      call cpu_time(etime)
+      if (mpirank==mpiroot) print '("Computing ice converting to snow table took ",f10.3," seconds.")', etime-stime
 
 !$OMP end sections
 
@@ -1542,6 +1554,53 @@ MODULE module_mp_thompson_hrrr
 #endif
 
       END SUBROUTINE mp_gt_driver
+
+      SUBROUTINE thompson_finalize()
+
+      IMPLICIT NONE
+
+      if (ALLOCATED(tcg_racg)) DEALLOCATE(tcg_racg)
+      if (ALLOCATED(tmr_racg)) DEALLOCATE(tmr_racg)
+      if (ALLOCATED(tcr_gacr)) DEALLOCATE(tcr_gacr)
+      if (ALLOCATED(tmg_gacr)) DEALLOCATE(tmg_gacr)
+      if (ALLOCATED(tnr_racg)) DEALLOCATE(tnr_racg)
+      if (ALLOCATED(tnr_gacr)) DEALLOCATE(tnr_gacr)
+
+      if (ALLOCATED(tcs_racs1)) DEALLOCATE(tcs_racs1)
+      if (ALLOCATED(tmr_racs1)) DEALLOCATE(tmr_racs1)
+      if (ALLOCATED(tcs_racs2)) DEALLOCATE(tcs_racs2)
+      if (ALLOCATED(tmr_racs2)) DEALLOCATE(tmr_racs2)
+      if (ALLOCATED(tcr_sacr1)) DEALLOCATE(tcr_sacr1)
+      if (ALLOCATED(tms_sacr1)) DEALLOCATE(tms_sacr1)
+      if (ALLOCATED(tcr_sacr2)) DEALLOCATE(tcr_sacr2)
+      if (ALLOCATED(tms_sacr2)) DEALLOCATE(tms_sacr2)
+      if (ALLOCATED(tnr_racs1)) DEALLOCATE(tnr_racs1)
+      if (ALLOCATED(tnr_racs2)) DEALLOCATE(tnr_racs2)
+      if (ALLOCATED(tnr_sacr1)) DEALLOCATE(tnr_sacr1)
+      if (ALLOCATED(tnr_sacr2)) DEALLOCATE(tnr_sacr2)
+
+      if (ALLOCATED(tpi_qcfz)) DEALLOCATE(tpi_qcfz)
+      if (ALLOCATED(tni_qcfz)) DEALLOCATE(tni_qcfz)
+
+      if (ALLOCATED(tpi_qrfz)) DEALLOCATE(tpi_qrfz)
+      if (ALLOCATED(tpg_qrfz)) DEALLOCATE(tpg_qrfz)
+      if (ALLOCATED(tni_qrfz)) DEALLOCATE(tni_qrfz)
+      if (ALLOCATED(tnr_qrfz)) DEALLOCATE(tnr_qrfz)
+
+      if (ALLOCATED(tps_iaus)) DEALLOCATE(tps_iaus)
+      if (ALLOCATED(tni_iaus)) DEALLOCATE(tni_iaus)
+      if (ALLOCATED(tpi_ide))  DEALLOCATE(tpi_ide)
+
+      if (ALLOCATED(t_Efrw)) DEALLOCATE(t_Efrw)
+      if (ALLOCATED(t_Efsw)) DEALLOCATE(t_Efsw)
+
+      if (ALLOCATED(tnr_rev)) DEALLOCATE(tnr_rev)
+      if (ALLOCATED(tpc_wev)) DEALLOCATE(tpc_wev)
+      if (ALLOCATED(tnc_wev)) DEALLOCATE(tnc_wev)
+
+      if (ALLOCATED(tnccn_act)) DEALLOCATE(tnccn_act)
+
+      END SUBROUTINE thompson_finalize
 
 !+---+-----------------------------------------------------------------+
 !ctrlL
@@ -5923,7 +5982,8 @@ MODULE module_mp_thompson_hrrr
             ierr = 0
             ! Test if checksum matches, this fails if wrong endianness (checksum=-1, see above)
             if (trim(mode)=="read" .and. checksum/=calculate_checksum()) then
-               write(0,'(2(a,e20.9))') "Checksum mismatch, expected", calculate_checksum(), "but got", checksum
+               write(0,'(2(a,e20.9))') "Checksum mismatch, expected", calculate_checksum(), " but got", checksum
+               call system('rm -f ' // trim(filename))
                ierr = 1
             end if
 
