@@ -12,7 +12,7 @@ cc
       integer             k,n,l,i
       real(kind=kind_phys) fk
 cc
-      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n), &
+      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n),&
      &          au(l,n-1),a1(l,n),a2(l,n)
 c----------------------------------------------------------------------
       do i=1,l
@@ -45,10 +45,10 @@ c-----------------------------------------------------------------------
       end
 
 c-----------------------------------------------------------------------
-!>\ingroup GFS_edmf_main
+!>  \ingroup GFS_edmf_main
 !!  \brief Routine to solve the tridiagonal system to calculate u- and
-!! v-momentum at \f$ t + \Delta t \f$; part of two-part process to
-!! calculate time tendencies due to vertical diffusion.
+!!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
+!!  calculate time tendencies due to vertical diffusion.
       subroutine tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys
