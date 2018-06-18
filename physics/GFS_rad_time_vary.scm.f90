@@ -97,6 +97,19 @@
           endif
         endif
 
+        if (Model%num_p3d == 6) then ! hli 05/25/2018
+          if (Model%kdt == 1) then
+            Tbd%phy_f3d(:,:,1) = Statein%tgrs
+            Tbd%phy_f3d(:,:,2) = max(qmin,Statein%qgrs(:,:,1))
+            Tbd%phy_f3d(:,:,3) = Statein%tgrs
+            Tbd%phy_f3d(:,:,4) = max(qmin,Statein%qgrs(:,:,1))
+            Tbd%phy_f3d(:,:,5) = Statein%tgrs                   ! for GF
+            Tbd%phy_f3d(:,:,6) = max(qmin,Statein%qgrs(:,:,1))  ! for GF
+            Tbd%phy_f2d(:,1)   = Statein%prsi(:,1)
+            Tbd%phy_f2d(:,2)   = Statein%prsi(:,1)
+          endif
+        endif
+
       endif
 
   end subroutine GFS_rad_time_vary_run

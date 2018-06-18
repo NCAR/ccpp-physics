@@ -182,6 +182,11 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/GFS_MP_generic_pre.f90
       ./physics/gscond.f
       ./physics/precpd.f
+      ./physics/cu_gf_driver_pre.F90
+      ./physics/cu_gf_driver_post.F90
+      ./physics/cu_gf_driver.F90
+      ./physics/cu_gf_deep.F90
+      ./physics/cu_gf_sh.F90
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
       ./physics/gmtb_scm_sfc_flux_spec.f90
@@ -260,6 +265,9 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/rayleigh_damp_cap.F90
   ./physics/get_phi_fv3_cap.F90
   ./physics/zhaocarr_precpd_cap.F90
+  ./physics/cu_gf_driver_pre_cap.F90
+  ./physics/cu_gf_driver_cap.F90
+  ./physics/cu_gf_driver_post_cap.F90
   )
 endif (PROJECT STREQUAL "CCPP-FV3")
 

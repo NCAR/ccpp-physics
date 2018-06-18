@@ -669,6 +669,10 @@ module GFS_typedefs
 
     integer                        :: blkno                       !< for explicit data blocking: block number of this block
 
+    !--- dynamical forcing variables for Grell-Freitas convection
+    real (kind=kind_phys), pointer :: forcet (:,:)     => null()  !<
+    real (kind=kind_phys), pointer :: forceq (:,:)     => null()  !<
+
     !--- radiation variables that need to be carried over from radiation to physics
     real (kind=kind_phys), pointer :: htlwc(:,:)       => null()  !<
     real (kind=kind_phys), pointer :: htlw0(:,:)       => null()  !<
@@ -2064,7 +2068,9 @@ module GFS_typedefs
           elseif(Model%imfdeepcnv == 1) then
             print *,' July 2010 version of SAS conv scheme used'
           elseif(Model%imfdeepcnv == 2) then
-          print *,' scale & aerosol-aware mass-flux deep conv scheme'
+            print *,' scale & aerosol-aware mass-flux deep conv scheme'
+          elseif(Model%imfdeepcnv == 3) then
+            print *,' scale & aerosol-aware Grell-Fraitus deep conv scheme'
           endif
         endif
       else
@@ -2087,6 +2093,8 @@ module GFS_typedefs
           print *,' July 2010 version of mass-flux shallow conv scheme used'
         elseif (Model%imfshalcnv == 2) then
           print *,' scale- & aerosol-aware mass-flux shallow conv scheme (2017)'
+        elseif (Model%imfshalcnv == 3) then
+          print *,'Grell-Freitas scale- & aerosol-aware mass-flux shallow conv scheme (2014)'
         else
           print *,' unknown mass-flux scheme in use - defaulting to no shallow convection'
           Model%imfshalcnv = -1
@@ -2123,7 +2131,11 @@ module GFS_typedefs
     Model%npdf3d = 0
     if (Model%ncld <= 1) then
       if (Model%zhao_mic) then        ! default setup for Zhao Microphysics
-        Model%num_p3d = 4
+        if (Model%imfdeepcnv == 3) then
+         Model%num_p3d = 6  ! hli mod 09/06/2017
+        else
+         Model%num_p3d = 4
+        endif
         Model%num_p2d = 3
         if (Model%pdfcld) then
           Model%npdf3d = 3
@@ -2181,7 +2193,7 @@ module GFS_typedefs
     !--- BEGIN CODE FROM GLOOPR
     !--- set up parameters for Xu & Randell's cloudiness computation (Radiation)
     Model%lmfshal  = (Model%shal_cnv .and. (Model%imfshalcnv > 0))
-    Model%lmfdeep2 = (Model%imfdeepcnv == 2)
+    Model%lmfdeep2 = (Model%imfdeepcnv == 2 .or. Model%imfdeepcnv == 3) ! hli mod 09/06/2017
     !--- END CODE FROM GLOOPR
 
     !--- BEGIN CODE FROM GLOOPB
@@ -2526,6 +2538,11 @@ module GFS_typedefs
     Tbd%phy_f3d  = clear_val
 
     Tbd%blkno = BLKNO
+
+    allocate(Tbd%forcet(IM, Model%levs))
+    allocate(Tbd%forceq(IM, Model%levs))
+    Tbd%forcet = clear_val
+    Tbd%forceq = clear_val
 
     allocate (Tbd%htlwc (IM,Model%levr+LTP))
     allocate (Tbd%htlw0 (IM,Model%levr+LTP))
