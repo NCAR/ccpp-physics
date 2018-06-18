@@ -5,11 +5,12 @@ module IPD_driver
                                         IPD_diag_type,     IPD_restart_type, &
                                         IPD_interstitial_type
 #ifdef CCPP
-  use physics_abstraction_layer,  only: initialize,        time_vary_step
+  use physics_abstraction_layer,  only: initialize,        time_vary_step,   &
+                                        finalize
 #else
   use physics_abstraction_layer,  only: initialize,        time_vary_step,   &
                                         radiation_step1,   physics_step1,    &
-                                        physics_step2
+                                        physics_step2,     finalize
 #endif
 
   use physics_diag_layer,         only: diag_populate
@@ -38,13 +39,14 @@ module IPD_driver
   public IPD_physics_step1
   public IPD_physics_step2
 #endif
+  public IPD_finalize
 
   CONTAINS
 !*******************************************************************************************
 
 
 !----------------
-!  IPD Initialize 
+!  IPD initialize 
 !----------------
   subroutine IPD_initialize (IPD_control, IPD_Data, IPD_Diag, IPD_Restart, IPD_Interstitial, IPD_init_parm)
     type(IPD_control_type), intent(inout)      :: IPD_Control
@@ -146,5 +148,13 @@ module IPD_driver
 
   end subroutine IPD_physics_step2
 #endif
+
+!----------------
+!  IPD finalize
+!----------------
+  subroutine IPD_finalize ()
+    !--- finalize the physics suite
+    call finalize ()
+  end subroutine IPD_finalize
 
 end module IPD_driver

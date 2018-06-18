@@ -392,7 +392,7 @@
 
 ! smallest mixing ratio considered in microphysics
 
-       qsmall = 1.e-18_r8
+       qsmall  = 1.e-18_r8
        qvsmall = 1.e-6_r8
 
 ! immersion freezing parameters, bigg 1953
@@ -501,7 +501,7 @@
      & npccnin, rndst,nacon, rhdfda, rhu00, fice, tlat, qvlat, qctend,
      & qitend, nctend, nitend, effc, effc_fn, effi, prect, preci,
      & nevapr, evapsnow, prain, prodsnow, cmeout, deffi, pgamrad,
-     & lamcrad,qsout2,qrout2, drout2, qcsevap,qisevap,qvres,
+     & lamcrad,qsout2,dsout2,qrout2, drout2, qcsevap,qisevap,qvres,
      & cmeiout, vtrmc,vtrmi,qcsedten,qisedten, prao,
      & prco,mnuccco,mnuccto,
      & msacwio,psacwso, bergso,bergo,melto,homoo,qcreso,prcio,praio,
@@ -510,7 +510,7 @@
      & nsout2, nrout2, ncnst, ninst, nimm, miu_disp, nsoot, rnsoot,
      & ui_scale, dcrit, nnuccdo, nnuccco, nsacwio, nsubio, nprcio,
      & npraio, npccno, npsacwso, nsubco, nprao, nprc1o, tlataux,
-     & nbincontactdust, lprint,xlat,xlon)
+     & nbincontactdust, lprint, xlat, xlon, rhc)
 !    & nbincontactdust, ts_auto_ice,xlat,xlon)
 
 
@@ -569,6 +569,7 @@
        real(r8), intent(in)    :: rpdel(pcols,pver)
        real(r8), intent(in)    :: zm(pcols,pver)
 !      real(r8), intent(in)    :: omega(pcols,pver)
+       real(r8), intent(in)    :: rhc(pcols,pver)
 
        real(r8), intent(out)   :: rate1ord_cw2pr_st(pcols,pver)
 
@@ -892,8 +893,7 @@
        real(r8) :: freqs(pcols,pver)
        real(r8) :: freqr(pcols,pver)
        real(r8) :: dumfice
-       real(r8), intent(out) :: drout2(pcols,pver)
-       real(r8)              :: dsout2(pcols,pver)
+       real(r8), intent(out), dimension(pcols,pver) :: drout2, dsout2
 
 !ice nucleation, droplet activation
        real(r8) :: dum2i(pcols,pver)
@@ -1177,14 +1177,14 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !Get humidity and saturation vapor pressures  big loop1
 
-       do k=1,pver
+       do k=1,pver  ! big loop1 - k loop
 
 ! find wet bulk temperature and saturation value for provisional t and q without
 ! condensation
 
 !        call vqsatd_water(t(1,k),p(1,k),es,qs,gammas,ncol)
 
-         do i=1,ncol
+         do i=1,ncol  ! big i loop1
 
 #ifdef NEMS_GSM
            esl(i,k) = min(fpvsl(t(i,k)), p(i,k))
@@ -1313,7 +1313,7 @@
 
                  lami(k) = (cons1*ci*niic(i,k)/qiic(i,k))**oneodi
 
-!      miu_ice=mui_hemp_l(lami(k))
+!                miu_ice    = mui_hemp_l(lami(k))
                  miu_ice(k) = max(min(0.008_r8*(lami(k)*0.01)**0.87_r8,
      &                                      10.0_r8), 0.1_r8) 
                  tx1        = one + miu_ice(k)
@@ -1542,7 +1542,7 @@
              dum2i(i,k) = zero
            end if
 
-         end do ! end big i loop
+         end do ! end big i loop1
        end do   !end big loop1 - k loop
 
 !!
@@ -1578,7 +1578,7 @@
 ! assign number of sub-steps to iter
 ! use 2 sub-steps, following tests described in MG2008
 ! Anning Cheng 9/17/2016
-       if(fprcp==1) then
+       if (fprcp == 1) then
          iter = 1
        else
          iter  = 2
@@ -1830,7 +1830,7 @@
 
                  lami(k) = (cons1*ci*niic(i,k)/qiic(i,k))**oneodi
 
-!      miu_ice(k)=mui_hemp_l(lami(k))
+!                miu_ice(k) = mui_hemp_l(lami(k))
                  miu_ice(k) = max(min(0.008_r8*(lami(k)*0.01)**0.87_r8,
      &                                10.0_r8), 0.1_r8)
                  tx1        = one + miu_ice(k)
@@ -2009,41 +2009,42 @@
 
 ! 0.45 m/s is fallspeed of new rain drop (80 micron diameter)
 
-             if(fprcp==1) then
-               qric(i,k) = min(qrn(i,k)/lcldm(i,k), 5.e-3_r8)
-               nric(i,k) = max(nrn(i,k)/lcldm(i,k), zero)
-             else
-               dum  = 0.45_r8
-               dum1 = 0.45_r8
-
-               if (k == 1) then
-                 tx1 = lcldm(i,k)*dz(i,k)/(cldmax(i,k)*dum)
-                 qric(i,k) = prc(k)  * tx1
-                 nric(i,k) = nprc(k) * tx1
+               if (fprcp == 1) then
+                 tx1 = one / lcldm(i,k)
+                 qric(i,k) = min(qrn(i,k)*tx1, 10.e-3_r8)
+                 nric(i,k) = max(nrn(i,k)*tx1, zero)
                else
-                 if (qric(i,km) >= qsmall) then
+                 dum  = 0.45_r8
+                 dum1 = 0.45_r8
+
+                 if (k == 1) then
+                   tx1 = lcldm(i,k)*dz(i,k)/(cldmax(i,k)*dum)
+                   qric(i,k) = prc(k)  * tx1
+                   nric(i,k) = nprc(k) * tx1
+                 else
+                   if (qric(i,km) >= qsmall) then
 !      dum=umr(k-1)
 !      dum1=unr(k-1)
 !      Anning Cheng find a possible untable case here
-                   dum  = max(umr(km),dum)
-                   dum1 = max(unr(km),dum1)
-                 endif
+                     dum  = max(umr(km),dum)
+                     dum1 = max(unr(km),dum1)
+                   endif
 
 ! no autoconversion of rain number if rain/snow falling from above
 ! this assumes that new drizzle drops formed by autoconversion are rapidly collected
 ! by the existing rain/snow particles from above
 
-                 if (qric(i,km)  >= 1.e-9_r8 .or.
-     &               qniic(i,km) >= 1.e-9_r8) then
-                   nprc(k) = zero
-                 endif
+                   if (qric(i,km)  >= 1.e-9_r8 .or.
+     &                 qniic(i,km) >= 1.e-9_r8) then
+                     nprc(k) = zero
+                   endif
 
-                 tx1 = rho(i,km) * cldmax(i,km)
-                 tx3 = rho(i,k)  * cldmax(i,k)
-                 qric(i,k) = (tx1*umr(km)*qric(i,km)
-     &                  + (rdz*((pra(km)+prc(k))*lcldm(i,k)
-     &                  + (pre(km)-pracs(km)-mnuccr(km))*cldmax(i,k))))
-     &                  / (dum*tx3)
+                   tx1 = rho(i,km) * cldmax(i,km)
+                   tx3 = rho(i,k)  * cldmax(i,k)
+                   qric(i,k) = (tx1*umr(km)*qric(i,km)
+     &                   + (rdz*((pra(km)+prc(k))*lcldm(i,k)
+     &                   + (pre(km)-pracs(km)-mnuccr(km))*cldmax(i,k))))
+     &                   / (dum*tx3)
 
 
 !      nric(i,k) = (rho(i,k-1)*unr(k-1)*nric(i,k-1)*cldmax(i,k-1)+
@@ -2052,13 +2053,13 @@
 !    &k))
 
 !      Anning nsubr never given a value before
-                 nric(i,k) = (tx1*unr(km)*nric(i,km)
+                   nric(i,k) = (tx1*unr(km)*nric(i,km)
      &                + (rdz*(nprc(k)*lcldm(i,k)
      &                +(-npracs(km)-nnuccr(km)+nragg(km))*cldmax(i,k))))
      &                / (dum1*tx3)
 
-               endif
-            endif !fprcp
+                 endif
+               endif !fprcp
 
 !.......................................................................
 ! Autoconversion of cloud ice to snow (Ice_aut)
@@ -2070,28 +2071,28 @@
 !vaux = 180.0_r8*10.0_r8
 
                  if (.false.) then
-                   vaux = ts_auto_ice * 10.0_r8
+                    vaux = ts_auto_ice * 10.0_r8
   
-                   nprci(k) = (niic(i, k)/vaux)*exp(-lami(k)*dcs)
-                   tx1 = one / lami(k)
-                   tx2 = tx1 * tx1
-                   prci(k)  = pi*irho(i,k)*niic(i,k)*lami(k)
-     &                      / (6._r8*vaux)
-     &                      * (cons23*tx1+three*cons24*tx2
-     &                      + 6._r8*dcs*tx1*tx2+6._r8*tx2*tx2)
-     &                      * exp(-lami(k)*dcs)
+                    nprci(k) = (niic(i, k)/vaux)*exp(-lami(k)*dcs)
+                    tx1 = one / lami(k)
+                    tx2 = tx1 * tx1
+                    prci(k)  = pi*irho(i,k)*niic(i,k)*lami(k)
+     &                       / (6._r8*vaux)
+     &                       * (cons23*tx1+three*cons24*tx2
+     &                       + 6._r8*dcs*tx1*tx2+6._r8*tx2*tx2)
+     &                       * exp(-lami(k)*dcs)
 
                  else
 
-!                  miu_ice(k) = mui_hemp_l(lami(k))
-                   miu_ice(k) =max(min(0.008_r8*(lami(k)*0.01)**0.87_r8,
-     &                                10.0_r8), 0.1_r8)
-                   tx1      = lami(k)*dcs
-                   nprci(k) = (niic(i,k)/ts_auto_ice)
-     &                      * (one - gamma_incomp(miu_ice(k), tx1))
+!                   miu_ice(k) = mui_hemp_l(lami(k))
+                    miu_ice(k) =max(min(0.008_r8*(lami(k)*0.01)**0.87_r8
+     &,                                 10.0_r8), 0.1_r8)
+                    tx1      = lami(k)*dcs
+                    nprci(k) = (niic(i,k)/ts_auto_ice)
+     &                       * (one - gamma_incomp(miu_ice(k), tx1))
 
-                   prci(k) = (qiic(i,k)/ts_auto_ice)
-     &                     * (one - gamma_incomp(miu_ice(k)+three, tx1))
+                    prci(k) = (qiic(i,k)/ts_auto_ice)
+     &                    * (one - gamma_incomp(miu_ice(k)+three, tx1))
 
                  end if
                else
@@ -2103,48 +2104,49 @@
 ! add autoconversion to flux from level above to get provisional snow mixing ratio
 ! and number concentration (qniic and nsic)
 ! Anning Cheng 9/16/2016 forecasting rain and snow, corresponding to MG2
-             if(fprcp==1) then
-               qniic(i,k) = min(qsnw(i,k)/icldm(i,k), 5.e-3_r8)
-               nsic(i,k) = max(nsnw(i,k)/icldm(i,k), 0._r8)
-             else
-
-               dum  = (asn(i,k)*cons25)
-               dum1 = (asn(i,k)*cons25)
-
-               if (k == 1) then
-                 tx1 = icldm(i,k)*dz(i,k)/(cldmax(i,k)*dum)
-                 qniic(i,k) = prci(k)  * tx1
-                 nsic(i,k)  = nprci(k) * tx1
+               if (fprcp == 1) then
+                 tx1 = one / icldm(i,k)
+                 qniic(i,k) = min(qsnw(i,k)*tx1, 10.e-3_r8)
+                 nsic(i,k)  = max(nsnw(i,k)*tx1, 0._r8)
                else
-                 if (qniic(i,km) >= qsmall) then
-                   dum  = ums(km)
-                   dum1 = uns(km)
-                 end if
 
-                 tx1 = rho(i,km) * cldmax(i,km)
-                 tx3 = rho(i,k)  * cldmax(i,k)
-                 qniic(i,k) = (tx1*ums(km)*qniic(i,km) + (rdz*
-     &            ((prci(k)+prai(km)+psacws(km)+bergs(km))*icldm(i,k)
-     &            +(prds(km)+pracs(km)+mnuccr(km))*cldmax(i,k))))
-     &            / (dum*tx3)
+                 dum  = (asn(i,k)*cons25)
+                 dum1 = (asn(i,k)*cons25)
+
+                 if (k == 1) then
+                   tx1 = icldm(i,k)*dz(i,k)/(cldmax(i,k)*dum)
+                   qniic(i,k) = prci(k)  * tx1
+                   nsic(i,k)  = nprci(k) * tx1
+                 else
+                   if (qniic(i,km) >= qsmall) then
+                     dum  = ums(km)
+                     dum1 = uns(km)
+                   end if
+
+                   tx1 = rho(i,km) * cldmax(i,km)
+                   tx3 = rho(i,k)  * cldmax(i,k)
+                   qniic(i,k) = (tx1*ums(km)*qniic(i,km) + (rdz*
+     &              ((prci(k)+prai(km)+psacws(km)+bergs(km))*icldm(i,k)
+     &              +(prds(km)+pracs(km)+mnuccr(km))*cldmax(i,k))))
+     &              / (dum*tx3)
 
 !      nsic(i,k) = (rho(i,k-1)*uns(k-1)*nsic(i,k-1)*cldmax(i,k-1)+
 !    & (rho(i,k)*dz(i,k)*(nprci(k)*icldm(i,k)+(nsubs(k-1)+nsagg(k-1)+
 !    &nnuccr(k-1))*cldmax(i,k)))) /(dum1*rho(i,k)*cldmax(i,k))
 
 !      nsubs never given a value before
-                 nsic(i,k) = (tx1*uns(km)*nsic(i,km)
-     &                     + (rdz*(nprci(k)*icldm(i,k)+(nsagg(km)
-     &                     + nnuccr(km))*cldmax(i,k)))) /(dum1*tx3)
+                   nsic(i,k) = (tx1*uns(km)*nsic(i,km)
+     &                       + (rdz*(nprci(k)*icldm(i,k)+(nsagg(km)
+     &                       + nnuccr(km))*cldmax(i,k)))) /(dum1*tx3)
 
-               end if
-             end if !fprcp
+                 end if
+               end if !fprcp
 
 ! if precip mix ratio is zero so should number concentration
 
                if (qniic(i,k) < qsmall) then
-                qniic(i,k) = zero
-                nsic(i,k)  = zero
+                 qniic(i,k) = zero
+                 nsic(i,k)  = zero
                end if
 
                if (qric(i,k) < qsmall) then
@@ -2213,7 +2215,7 @@
                  else if (lams(k) > lammaxs) then
                    lams(k)   = lammaxs
                    n0s(k)    = lams(k)**(ds+one)*qniic(i,k)/(cs*cons6)
-                   nsic(i,k) = n0s(k)/lams(k)
+                 nsic(i,k) = n0s(k)/lams(k)
                  end if
 
 ! provisional snow number and mass weighted mean fallspeed (m/s)
@@ -2265,7 +2267,7 @@ checked up to here moorthi
                  viscosity = 1.8e-5_r8*(t(i,k)/298.0_r8)**0.85_r8
                  mfp       = two*viscosity
      &                     / (p(i,k) *sqrt(8.0_r8*28.96e-3_r8/(pi*
-     &                                     8.314409_r8*t(i,k))))
+     &                                   8.314409_r8*t(i,k))))
                  taux      = t(i,k) - three
                  taux      = max(taux-273.15, -40.0)
 
@@ -2481,7 +2483,7 @@ checked up to here moorthi
 ! from Beheng(1994)
   
                if (qric(i,k) >= qsmall) then
-               nragg(k) = -8._r8*nric(i,k)*qric(i,k)*rho(i,k)
+                 nragg(k) = -8._r8*nric(i,k)*qric(i,k)*rho(i,k)
                else
                  nragg(k) = zero
                end if
@@ -2519,13 +2521,13 @@ checked up to here moorthi
 ! evaporation of rain
 ! only calculate if there is some precip fraction > cloud fraction
 
-               if (qcic(i,k)+qiic(i,k) < 1.e-6_r8 .or.
+               if (qcic(i,k)+qiic(i,k) < 1.e-7_r8 .or.
      &             cldmax(i,k) > lcldm(i,k)) then
 
 ! set temporary cloud fraction to zero if cloud water + ice is very small
 ! this will ensure that evaporation/sublimation of precip occurs over
 ! entire grid cell, since min cloud fraction is specified otherwise
-                 if (qcic(i,k)+qiic(i,k) < 1.e-6_r8) then
+                 if (qcic(i,k)+qiic(i,k) < 1.e-7_r8) then
                    dum = zero
                  else
                    dum = lcldm(i,k)
@@ -2967,56 +2969,56 @@ checked up to here moorthi
 ! get final values for precipitation q and N, based on
 ! flux of precip from above, source/sink term, and terminal fallspeed
 ! see eq. 15-16 in MG2008
-            if(fprcp==0) then
+               if (fprcp == 0) then
 ! rain
 
-               if (qric(i,k) >= qsmall) then
-                 if (k == 1) then
-                   qric(i,k) = qrtend(i,k)*dz(i,k)/(cldmax(i,k)*umr(k))
-                   nric(i,k) = nrtend(i,k)*dz(i,k)/(cldmax(i,k)*unr(k))
+                 if (qric(i,k) >= qsmall) then
+                   if (k == 1) then
+                    qric(i,k) = qrtend(i,k)*dz(i,k)/(cldmax(i,k)*umr(k))
+                    nric(i,k) = nrtend(i,k)*dz(i,k)/(cldmax(i,k)*unr(k))
+                   else
+                    tx1       = rho(i,km) * cldmax(i,km)
+                    tx3       = rho(i,k)  * cldmax(i,k)
+
+                    qric(i,k) = (tx1*umr(km)*qric(i,km)
+     &                        +  rdz*qrtend(i,k)) / (umr(k)*tx3)
+
+                    nric(i,k) = (tx1*unr(km)*nric(i,km)
+     &                        +  rdz*nrtend(i,k)) / (unr(k)*tx3)
+
+                   end if
                  else
-                   tx1       = rho(i,km) * cldmax(i,km)
-                   tx3       = rho(i,k)  * cldmax(i,k)
-
-                   qric(i,k) = (tx1*umr(km)*qric(i,km)
-     &                       +  rdz*qrtend(i,k)) / (umr(k)*tx3)
-
-                   nric(i,k) = (tx1*unr(km)*nric(i,km)
-     &                       +  rdz*nrtend(i,k)) / (unr(k)*tx3)
-
+                   qric(i,k) = zero
+                   nric(i,k) = zero
                  end if
-               else
-                 qric(i,k) = zero
-                 nric(i,k) = zero
-               end if
 
 ! snow
 
-               if (qniic(i,k) >= qsmall) then
-                 if (k == 1) then
-                   tx1        = dz(i,k)/cldmax(i,k)
-                   qniic(i,k) = qnitend(i,k)*tx1/ums(k)
-                   nsic(i,k)  = nstend(i,k)*tx1/uns(k)
-                 else
-                   tx1        = rho(i,km) * cldmax(i,km)
-                   tx3        = rho(i,k)  * cldmax(i,k)
+                 if (qniic(i,k) >= qsmall) then
+                   if (k == 1) then
+                     tx1        = dz(i,k)/cldmax(i,k)
+                     qniic(i,k) = qnitend(i,k)*tx1/ums(k)
+                     nsic(i,k)  = nstend(i,k)*tx1/uns(k)
+                   else
+                     tx1        = rho(i,km) * cldmax(i,km)
+                     tx3        = rho(i,k)  * cldmax(i,k)
 
-                   qniic(i,k) = (tx1*ums(km)*qniic(i,km)
-     &                        +  rdz*qnitend(i,k)) / (ums(k)*tx3)
-                   nsic(i,k)  = (tx1*uns(km)*nsic(i,km)
-     &                        +  rdz*nstend(i,k))  / (uns(k)*tx3)
+                     qniic(i,k) = (tx1*ums(km)*qniic(i,km)
+     &                          +  rdz*qnitend(i,k)) / (ums(k)*tx3)
+                     nsic(i,k)  = (tx1*uns(km)*nsic(i,km)
+     &                          +  rdz*nstend(i,k))  / (uns(k)*tx3)
+                   end if
+                 else
+                   qniic(i,k) = zero
+                   nsic(i,k)  = zero
                  end if
-               else
-                 qniic(i,k) = zero
-                 nsic(i,k)  = zero
-               end if
 
 ! calculate precipitation flux at surface
 ! divide by density of water to get units of m/s
 
-               tx1      = rdz/rhow
-               prect(i) = prect(i) + (qrtend(i,k)+ qnitend(i,k))*tx1
-               preci(i) = preci(i) +  qnitend(i,k)*tx1
+                 tx1      = rdz/rhow
+                 prect(i) = prect(i) + (qrtend(i,k)+ qnitend(i,k))*tx1
+                 preci(i) = preci(i) +  qnitend(i,k)*tx1
 
 !     if (lprint) write(0,*)' prect=',prect(i),' preci=',preci(i)
 !    &,' qrtend=',qrtend(i,k),' qnitend=',qnitend(i,k),' rdz=',rdz
@@ -3024,100 +3026,100 @@ checked up to here moorthi
 
 
 
-               rainrt(i,k) = qric(i,k)*rho(i,k)*umr(k)
-     &                     / rhow*3600._r8*1000._r8
+                 rainrt(i,k) = qric(i,k)*rho(i,k)*umr(k)
+     &                       / rhow*3600._r8*1000._r8
 
 ! vertically-integrated precip source/sink terms (note: grid-averaged)
 
-               qrtot = max(qrtot + qrtend(i,k)*rdz,  zero)
-               qstot = max(qstot + qnitend(i,k)*rdz, zero)
-               nrtot = max(nrtot + nrtend(i,k)*rdz,  zero)
-               nstot = max(nstot + nstend(i,k)*rdz,  zero)
+                 qrtot = max(qrtot + qrtend(i,k)*rdz,  zero)
+                 qstot = max(qstot + qnitend(i,k)*rdz, zero)
+                 nrtot = max(nrtot + nrtend(i,k)*rdz,  zero)
+                 nstot = max(nstot + nstend(i,k)*rdz,  zero)
 
 !!!! done up to here - Moorthi
 ! calculate melting and freezing of precip
 ! melt snow at +2 C
-               taux = 1.0
+                 taux = 1.0
 
-               if (.true.) then
+                 if (.true.) then
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                 tx1 = t(i,k) + tlat(i,k)*onebcp*deltat
-                 if (tx1 > 275.15_r8) then
+                   tx1 = t(i,k) + tlat(i,k)*onebcp*deltat
+                   if (tx1 > 275.15_r8) then
 
-                   if (qstot > zero) then
+                     if (qstot > zero) then
 
 ! make sure melting snow doesn't reduce temperature below threshold
-                     dum = xlfocp*qstot*rdzi
-                     if (tx1-dum*deltat < 273.15_r8) then
-                       tx2 = (tx1-275.15_r8) * dti
-                       dum = min(one,max(zero,tx2/dum))
-                     else
-                       dum = one
-                     end if
+                       dum = xlfocp*qstot*rdzi
+                       if (tx1-dum*deltat < 273.15_r8) then
+                         tx2 = (tx1-275.15_r8) * dti
+                         dum = min(one,max(zero,tx2/dum))
+                       else
+                         dum = one
+                       end if
 
-                     qric(i,k)  = qric(i,k) + dum*qniic(i,k)
-                     nric(i,k)  = nric(i,k) + dum*nsic(i,k)
-                     qniic(i,k) = (one-dum)*qniic(i,k)
-                     nsic(i,k)  = (one-dum)*nsic(i,k)
+                       qric(i,k)  = qric(i,k) + dum*qniic(i,k)
+                       nric(i,k)  = nric(i,k) + dum*nsic(i,k)
+                       qniic(i,k) = (one-dum)*qniic(i,k)
+                       nsic(i,k)  = (one-dum)*nsic(i,k)
 ! heating tendency
-                     tmp = -xlf*dum*qstot*rdzi
-                     meltsdt(i,k) = meltsdt(i,k) + tmp
+                       tmp = -xlf*dum*qstot*rdzi
+                       meltsdt(i,k) = meltsdt(i,k) + tmp
 
-                     tlat(i,k) = tlat(i,k) + tmp
+                       tlat(i,k) = tlat(i,k) + tmp
 
 !      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346        
 !    & .and.xlat<1.347.and.k==38)                        
 !    & write(*,*)"anning_m1",tmp
 
-                     qrtot    = qrtot + dum*qstot
-                     nrtot    = nrtot + dum*nstot
-                     qstot    = (one-dum)*qstot
-                     nstot    = (one-dum)*nstot
-                     preci(i) = (one-dum)*preci(i)
+                       qrtot    = qrtot + dum*qstot
+                       nrtot    = nrtot + dum*nstot
+                       qstot    = (one-dum)*qstot
+                       nstot    = (one-dum)*nstot
+                       preci(i) = (one-dum)*preci(i)
+                     endif
                    endif
-                 endif
 
-               end if
-               tlataux(i, k) = tlat(i, k)
+                  end if
+                  tlataux(i, k) = tlat(i, k)
 
 ! freeze all rain at -5C for Arctic
-               if(.true.) then
+                  if(.true.) then
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                 tx1 = t(i,k) + tlat(i,k)*onebcp*deltat
-                 if (tx1 < tmelt-five) then
+                    tx1 = t(i,k) + tlat(i,k)*onebcp*deltat
+                    if (tx1 < tmelt-five) then
 
-                   if (qrtot > zero) then
+                      if (qrtot > zero) then
 
 ! make sure freezing rain doesn't increase temperature above threshold
-                     dum = xlfocp*qrtot*rdzi
-                     if (tx1+dum*deltat > tmelt-five) then
-                       tx2 = -(tx1 - (tmelt-five)) * dti
-                       dum = min(one,max(zero,tx2/dum))
-                     else
-                       dum = one
-                     endif
-                     qniic(i,k)  = qniic(i,k) + dum*qric(i,k)
-                     nsic(i,k)   = nsic(i,k)  + dum*nric(i,k)
-                     qric(i,k)   = (one-dum)*qric(i,k)
-                     nric(i,k)   = (one-dum)*nric(i,k)
+                        dum = xlfocp*qrtot*rdzi
+                        if (tx1+dum*deltat > tmelt-five) then
+                          tx2 = -(tx1 - (tmelt-five)) * dti
+                          dum = min(one,max(zero,tx2/dum))
+                        else
+                          dum = one
+                        endif
+                        qniic(i,k)  = qniic(i,k) + dum*qric(i,k)
+                        nsic(i,k)   = nsic(i,k)  + dum*nric(i,k)
+                        qric(i,k)   = (one-dum)*qric(i,k)
+                        nric(i,k)   = (one-dum)*nric(i,k)
 ! heating tendency
-                     tmp         = xlf*dum*qrtot*rdzi
-                     frzrdt(i,k) = frzrdt(i,k) + tmp
+                        tmp         = xlf*dum*qrtot*rdzi
+                        frzrdt(i,k) = frzrdt(i,k) + tmp
 
-                     tlat(i,k)   = tlat(i,k) + tmp
+                        tlat(i,k)   = tlat(i,k) + tmp
 
 !      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346        
 !    & .and.xlat<1.347.and.k==38)                        
 !    & write(*,*)"anning_m2",tmp
   
-                     qstot    = qstot + dum*qrtot
-                     qrtot    = (one-dum)*qrtot
-                     nstot    = nstot + dum*nrtot
-                     nrtot    = (one-dum)*nrtot
-                     preci(i) = preci(i) + dum*(prect(i)-preci(i))
-                   end if
+                        qstot    = qstot + dum*qrtot
+                        qrtot    = (one-dum)*qrtot
+                        nstot    = nstot + dum*nrtot
+                        nrtot    = (one-dum)*nrtot
+                        preci(i) = preci(i) + dum*(prect(i)-preci(i))
+                      end if
+                    end if
                  end if
-               end if
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -3127,117 +3129,117 @@ checked up to here moorthi
 
 ! if rain/snow mix ratio is zero so should number concentration
 
-               if (qniic(i,k) < qsmall) then
-                 qniic(i,k) = zero 
-                 nsic(i,k)  = zero
-               end if
+                 if (qniic(i,k) < qsmall) then
+                   qniic(i,k) = zero 
+                   nsic(i,k)  = zero
+                 end if
 
-               if (qric(i,k) < qsmall) then
-                 qric(i,k) =  zero
-                 nric(i,k) =  zero
-               end if
+                 if (qric(i,k) < qsmall) then
+                   qric(i,k) =  zero
+                   nric(i,k) =  zero
+                 end if
 
 ! make sure number concentration is a positive number to avoid
 ! taking root of negative
 
-               nric(i,k) = max(nric(i,k), zero)
-               nsic(i,k) = max(nsic(i,k), zero)
+                 nric(i,k) = max(nric(i,k), zero)
+                 nsic(i,k) = max(nsic(i,k), zero)
 
 !.......................................................................
 ! get size distribution parameters for fallspeed calculations
 !......................................................................
 ! rain
 
-               if (qric(i,k) >= qsmall) then
-                 lamr(k) = (pirhow*nric(i,k)/qric(i,k))**oneb3
-                 n0r(k)  = nric(i,k)*lamr(k)
+                 if (qric(i,k) >= qsmall) then
+                   lamr(k) = (pirhow*nric(i,k)/qric(i,k))**oneb3
+                   n0r(k)  = nric(i,k)*lamr(k)
 
 ! check for slope
 ! change lammax and lammin for rain and snow
 ! adjust vars
 
-                 if (lamr(k) < lamminr) then
-                   lamr(k)   = lamminr
-                   tx1       = lamr(k) * lamr(k)
-                   n0r(k)    = tx1*tx1*qric(i,k)/pirhow
-                   nric(i,k) = n0r(k)/lamr(k)
-                 else if (lamr(k) > lammaxr) then
-                   lamr(k)   = lammaxr
-                   tx1       = lamr(k) * lamr(k)
-                   n0r(k)    = tx1*tx1*qric(i,k)/pirhow
-                   nric(i,k) = n0r(k)/lamr(k)
-                 end if
+                   if (lamr(k) < lamminr) then
+                     lamr(k)   = lamminr
+                     tx1       = lamr(k) * lamr(k)
+                     n0r(k)    = tx1*tx1*qric(i,k)/pirhow
+                     nric(i,k) = n0r(k)/lamr(k)
+                   else if (lamr(k) > lammaxr) then
+                     lamr(k)   = lammaxr
+                     tx1       = lamr(k) * lamr(k)
+                     n0r(k)    = tx1*tx1*qric(i,k)/pirhow
+                     nric(i,k) = n0r(k)/lamr(k)
+                   end if
 
 
 ! 'final' values of number and mass weighted mean fallspeed for rain (m/s)
 
-                 tx1    = arn(i,k) / lamr(k)**br
-                 tx2    = 9.1_r8*rhof(i,k)
-                 unr(k) = min(tx1*cons4, tx2)
-                 umr(k) = min(tx1*(cons5/6._r8),tx2)
+                   tx1    = arn(i,k) / lamr(k)**br
+                   tx2    = 9.1_r8*rhof(i,k)
+                   unr(k) = min(tx1*cons4, tx2)
+                   umr(k) = min(tx1*(cons5/6._r8),tx2)
   
-               else
-                 lamr(k) = zero
-                 n0r(k)  = zero
-                 umr(k)  = zero
-                 unr(k)  = zero
-               end if
+                 else
+                   lamr(k) = zero
+                   n0r(k)  = zero
+                   umr(k)  = zero
+                   unr(k)  = zero
+                 end if
 
 !calculate mean size of combined rain and snow
 
-               if (lamr(k) > zero) then
-                 Artmp = n0r(k) * (0.5*pi) / (lamr(k)*lamr(k)*lamr(k))
-               else
-                 Artmp = zero
-               endif
+                 if (lamr(k) > zero) then
+                   Artmp = n0r(k) * (0.5*pi) / (lamr(k)*lamr(k)*lamr(k))
+                 else
+                   Artmp = zero
+                 endif
 
-               if (lamc(k) > zero) then
-                 Actmp = cdist1(k) * pi * gamma(pgam(k)+three)
-     &                 / (four * lamc(k)*lamc(k))
-               else
-                 Actmp = zero
-               endif
+                 if (lamc(k) > zero) then
+                   Actmp = cdist1(k) * pi * gamma(pgam(k)+three)
+     &                   / (four * lamc(k)*lamc(k))
+                 else
+                    Actmp = zero
+                 endif
 
-               if (Actmp > zero .or.Artmp > zero) then
-                 rercld(i,k) = rercld(i,k) + three*(qric(i,k)+qcic(i,k))
-     &                                     /(four*rhow*(Actmp+Artmp))
-                 arcld(i,k)  = arcld(i,k) + one
-               endif
+                 if (Actmp > zero .or.Artmp > zero) then
+                   rercld(i,k) = rercld(i,k)+three*(qric(i,k)+qcic(i,k))
+     &                                      /(four*rhow*(Actmp+Artmp))
+                   arcld(i,k)  = arcld(i,k) + one
+                 endif
 
 !......................................................................
 ! snow
 
-               if (qniic(i,k) >= qsmall) then
-                 lams(k) = (cons6*cs*nsic(i,k) / qniic(i,k))**(one/ds)
-                 n0s(k)  = nsic(i,k)*lams(k)
+                 if (qniic(i,k) >= qsmall) then
+                   lams(k) = (cons6*cs*nsic(i,k) / qniic(i,k))**(one/ds)
+                   n0s(k)  = nsic(i,k)*lams(k)
 
 ! check for slope
 ! adjust vars
 
-                 if (lams(k) < lammins) then
-                   lams(k)   = lammins
-                   n0s(k)    = lams(k)**(ds+one)*qniic(i,k)/(cs*cons6)
-                   nsic(i,k) = n0s(k)/lams(k)
+                   if (lams(k) < lammins) then
+                     lams(k)   = lammins
+                     n0s(k)    = lams(k)**(ds+one)*qniic(i,k)/(cs*cons6)
+                     nsic(i,k) = n0s(k)/lams(k)
 
-                 else if (lams(k) > lammaxs) then
-                   lams(k)   = lammaxs
-                   n0s(k)    = lams(k)**(ds+one)*qniic(i,k)/(cs*cons6)
-                   nsic(i,k) = n0s(k)/lams(k)
-                 end if
+                   else if (lams(k) > lammaxs) then
+                     lams(k)   = lammaxs
+                     n0s(k)    = lams(k)**(ds+one)*qniic(i,k)/(cs*cons6)
+                     nsic(i,k) = n0s(k)/lams(k)
+                   end if
 
 ! 'final' values of number and mass weighted mean fallspeed for snow (m/s)
 
-                 tx1    = asn(i,k) / lams(k)**bs
-                 tx2    = 1.2_r8*rhof(i,k)
-                 ums(k) = min(tx1*(cons8/6._r8), tx2)
-                 uns(k) = min(tx1*cons7, tx2)
+                   tx1    = asn(i,k) / lams(k)**bs
+                   tx2    = 1.2_r8*rhof(i,k)
+                   ums(k) = min(tx1*(cons8/6._r8), tx2)
+                   uns(k) = min(tx1*cons7, tx2)
 
-               else
-                 lams(k) = zero
-                 n0s(k)  = zero
-                 ums(k)  = zero
-                 uns(k)  = zero
-               end if
+                 else
+                   lams(k) = zero
+                   n0s(k)  = zero
+                   ums(k)  = zero
+                   uns(k)  = zero
+                 end if
 
 !c........................................................................
 ! sum over sub-step for average process rates
@@ -3245,47 +3247,47 @@ checked up to here moorthi
 ! convert rain/snow q and N for output to history, note,
 ! output is for gridbox average
 
-               qrout(i,k) = qrout(i,k) + qric(i,k)*cldmax(i,k)
-               qsout(i,k) = qsout(i,k) + qniic(i,k)*cldmax(i,k)
-               tx1        = rho(i,k)*cldmax(i,k)
-               nrout(i,k) = nrout(i,k) + nric(i,k)*tx1
-               nsout(i,k) = nsout(i,k) + nsic(i,k)*tx1
+                 qrout(i,k) = qrout(i,k) + qric(i,k)*cldmax(i,k)
+                 qsout(i,k) = qsout(i,k) + qniic(i,k)*cldmax(i,k)
+                 tx1        = rho(i,k)*cldmax(i,k)
+                 nrout(i,k) = nrout(i,k) + nric(i,k)*tx1
+                 nsout(i,k) = nsout(i,k) + nsic(i,k)*tx1
 
-             end if !fprcp Anning Cheng 9/16/2016
-               tlat1(i,k)     = tlat1(i,k)     + tlat(i,k)
-               tlat1_aux(i,k) = tlat1_aux(i,k) + tlataux(i,k)
+               end if !fprcp Anning Cheng 9/16/2016
+                tlat1(i,k)     = tlat1(i,k)     + tlat(i,k)
+                tlat1_aux(i,k) = tlat1_aux(i,k) + tlataux(i,k)
 
-               qvlat1(i,k)  = qvlat1(i,k)  + qvlat(i,k)
-               qctend1(i,k) = qctend1(i,k) + qctend(i,k)
-               qitend1(i,k) = qitend1(i,k) + qitend(i,k)
-               nctend1(i,k) = nctend1(i,k) + nctend(i,k)
-               nitend1(i,k) = nitend1(i,k) + nitend(i,k)
+                qvlat1(i,k)  = qvlat1(i,k)  + qvlat(i,k)
+                qctend1(i,k) = qctend1(i,k) + qctend(i,k)
+                qitend1(i,k) = qitend1(i,k) + qitend(i,k)
+                nctend1(i,k) = nctend1(i,k) + nctend(i,k)
+                nitend1(i,k) = nitend1(i,k) + nitend(i,k)
 
-               t(i,k)  = t(i,k)  + tlat(i,k)*deltat/cpp
-               q(i,k)  = q(i,k)  + qvlat(i,k)*deltat
-               qc(i,k) = qc(i,k) + qctend(i,k)*deltat
-               qi(i,k) = qi(i,k) + qitend(i,k)*deltat
-               nc(i,k) = nc(i,k) + nctend(i,k)*deltat
-               ni(i,k) = ni(i,k) + nitend(i,k)*deltat
+                t(i,k)  = t(i,k)  + tlat(i,k)   * deltat/cpp
+                q(i,k)  = q(i,k)  + qvlat(i,k)  * deltat
+                qc(i,k) = qc(i,k) + qctend(i,k) * deltat
+                qi(i,k) = qi(i,k) + qitend(i,k) * deltat
+                nc(i,k) = nc(i,k) + nctend(i,k) * deltat
+                ni(i,k) = ni(i,k) + nitend(i,k) * deltat
 
-               rainrt1(i,k) = rainrt1(i,k) + rainrt(i,k)
+                rainrt1(i,k) = rainrt1(i,k) + rainrt(i,k)
 
 !divide rain radius over substeps for average
-               if (arcld(i,k) > zero) then
-                 rercld(i,k) = rercld(i,k) / arcld(i,k)
-               end if
+                if (arcld(i,k) > zero) then
+                  rercld(i,k) = rercld(i,k) / arcld(i,k)
+                end if
 !calculate precip fluxes and adding them to summing sub-stepping variables
 
-               rflx(i,1) = zero
-               sflx(i,1) = zero
+                rflx(i,1) = zero
+                sflx(i,1) = zero
 
 
-               rflx(i,k+1) = qrout(i,k)*rho(i,k)*umr(k)
-               sflx(i,k+1) = qsout(i,k)*rho(i,k)*ums(k)
+                rflx(i,k+1) = qrout(i,k)*rho(i,k)*umr(k)
+                sflx(i,k+1) = qsout(i,k)*rho(i,k)*ums(k)
 
 
-               rflx1(i,k+1) = rflx1(i,k+1) + rflx(i,k+1)
-               sflx1(i,k+1) = sflx1(i,k+1) + sflx(i,k+1)
+                rflx1(i,k+1) = rflx1(i,k+1) + rflx(i,k+1)
+                sflx1(i,k+1) = sflx1(i,k+1) + sflx(i,k+1)
 
 !c........................................................................
 
@@ -3460,7 +3462,7 @@ checked up to here moorthi
                dumni(i,k) = min(dumni(i,k),dumi(i,k)*1.e20_r8)
                lami(k)    = (cons1*ci* dumni(i,k)/dumi(i,k))**oneodi
 
-!      miu_ice(k)=mui_hemp_l(lami(k)) Anning changed here
+!              miu_ice(k) = mui_hemp_l(lami(k)) Anning changed here
                miu_ice(k) = max(min(0.008_r8*(lami(k)*0.01)**0.87_r8,
      &                                             10.0_r8), 0.1_r8)
                tx1        = one + miu_ice(k)
@@ -3703,112 +3705,116 @@ checked up to here moorthi
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ! initialize nstep for sedimentation sub-steps
 ! reuse dumc, dumi, dumnc, and dumni
-         if(fprcp==1) then
+         if (fprcp == 1) then
            nstep = 1
 
            do k=1,pver
 
-!            tx1 = one / lcldm(i,k)
-!            tx2 = one / icldm(i,k)
-             dumc(i,k)  = max((qrn(i,k)+qrtend(i,k)*deltat),zero)
-             dumi(i,k)  = max((qsnw(i,k)+qnitend(i,k)*deltat),zero)
-             dumnc(i,k) = max((nrn(i,k)+nrtend(i,k)*deltat),zero)
-             dumni(i,k) = max((nsnw(i,k)+nstend(i,k)*deltat),zero)
+!            tx1 = deltat / lcldm(i,k)
+!            tx2 = deltat / icldm(i,k)
+!            dumc(i,k)  = max(qrn(i,k)+qrtend(i,k)*tx1,  zero)
+!            dumi(i,k)  = max(qsnw(i,k)+qnitend(i,k)*tx2,zero)
+!            dumnc(i,k) = max(nrn(i,k)+nrtend(i,k)*tx1,  zero)
+!            dumni(i,k) = max(nsnw(i,k)+nstend(i,k)*tx2, zero)
+
+             dumc(i,k)  = max(qrn(i,k)+qrtend(i,k)*deltat,  zero)
+             dumi(i,k)  = max(qsnw(i,k)+qnitend(i,k)*deltat,zero)
+             dumnc(i,k) = max(nrn(i,k)+nrtend(i,k)*deltat,  zero)
+             dumni(i,k) = max(nsnw(i,k)+nstend(i,k)*deltat, zero)
 
 ! if rain/snow mix ratio is zero so should number concentration
 
-               if (dumi(i,k) < qsmall) then
-                 dumi(i,k)  = zero
-                 dumni(i,k)  = zero
-               endif
+             if (dumi(i,k) < qsmall) then
+               dumi(i,k)  = zero
+               dumni(i,k)  = zero
+             endif
 
-               if (dumc(i,k) < qsmall) then
-                 dumc(i,k)  = zero
-                 dumnc(i,k) = zero
-               endif
+             if (dumc(i,k) < qsmall) then
+               dumc(i,k)  = zero
+               dumnc(i,k) = zero
+             endif
 
 ! make sure number concentration is a positive number to avoid
 ! taking root of negative
 
-               dumnc(i,k) = max(dumnc(i,k),zero)
-               dumni(i,k) = max(dumni(i,k),zero)
+             dumnc(i,k) = max(dumnc(i,k),zero)
+             dumni(i,k) = max(dumni(i,k),zero)
 
 !.......................................................................
 ! get size distribution parameters for fallspeed calculations
 !......................................................................
 ! rain
 
-               if (dumc(i,k) >= qsmall) then
-                 lamr(k) = (pi*rhow*dumnc(i,k)/dumc(i,k))**oneb3
-                 n0r(k)  = dumnc(i,k)*lamr(k)
+             if (dumc(i,k) >= qsmall) then
+               lamr(k) = (pi*rhow*dumnc(i,k)/dumc(i,k))**oneb3
+               n0r(k)  = dumnc(i,k)*lamr(k)
 
 ! check for slope
 ! change lammax and lammin for rain and snow
 ! adjust vars
 
-                 if (lamr(k) < lamminr) then
+               if (lamr(k) < lamminr) then
 
-                   lamr(k)   = lamminr
+                 lamr(k)   = lamminr
 
-                   n0r(k)    = lamr(k)**4*dumc(i,k)/(pi*rhow)
-                   dumnc(i,k) = n0r(k)/lamr(k)
-                 else if (lamr(k) > lammaxr) then
-                   lamr(k)   = lammaxr
-                   n0r(k)    = lamr(k)**4*dumc(i,k)/(pi*rhow)
-                   dumnc(i,k) = n0r(k)/lamr(k)
-                 end if
+                 n0r(k)    = lamr(k)**4*dumc(i,k)/(pi*rhow)
+                 dumnc(i,k) = n0r(k)/lamr(k)
+               else if (lamr(k) > lammaxr) then
+                 lamr(k)   = lammaxr
+                 n0r(k)    = lamr(k)**4*dumc(i,k)/(pi*rhow)
+                 dumnc(i,k) = n0r(k)/lamr(k)
+               end if
 
 
 ! 'final' values of number and mass weighted mean fallspeed for rain (m/s)
 
-                 tx1    = arn(i,k) / lamr(k)**br
-                 tx2    = 9.1_r8*rhof(i,k)
-                 unr(k) = min(tx1*cons4, tx2)
-                 umr(k) = min(tx1*(cons5/6._r8),tx2)
+               tx1    = arn(i,k) / lamr(k)**br
+               tx2    = 9.1_r8*rhof(i,k)
+               unr(k) = min(tx1*cons4, tx2)
+               umr(k) = min(tx1*(cons5/6._r8),tx2)
 
-               else
-                 lamr(k) = zero
-                 n0r(k)  = zero
-                 umr(k)  = zero
-                 unr(k)  = zero
-               end if
+             else
+               lamr(k) = zero
+               n0r(k)  = zero
+               umr(k)  = zero
+               unr(k)  = zero
+             end if
 
 !......................................................................
 ! snow
 
-               if (dumi(i,k) >= qsmall) then
-                 lams(k) = (cons6*cs*dumni(i,k)/ dumi(i,k))**(one/ds)
-                 n0s(k)  = dumni(i,k)*lams(k)
+             if (dumi(i,k) >= qsmall) then
+               lams(k) = (cons6*cs*dumni(i,k)/ dumi(i,k))**(one/ds)
+               n0s(k)  = dumni(i,k)*lams(k)
 
 ! check for slope
 ! adjust vars
 
-                 if (lams(k) < lammins) then
-                   lams(k)   = lammins
-                   n0s(k)    = lams(k)**(ds+one)*dumi(i,k)/(cs*cons6)
-                   dumni(i,k) = n0s(k)/lams(k)
-
-                 else if (lams(k) > lammaxs) then
-                   lams(k)   = lammaxs
-                   n0s(k)    = lams(k)**(ds+one)*dumi(i,k)/(cs*cons6)
-                   dumni(i,k) = n0s(k)/lams(k)
-                 end if
+               if (lams(k) < lammins) then
+                 lams(k)    = lammins
+                 n0s(k)     = lams(k)**(ds+one)*dumi(i,k)/(cs*cons6)
+                 dumni(i,k) = n0s(k)/lams(k)
+               else if (lams(k) > lammaxs) then
+                 lams(k)    = lammaxs
+                 n0s(k)     = lams(k)**(ds+one)*dumi(i,k)/(cs*cons6)
+                 dumni(i,k) = n0s(k)/lams(k)
+               end if
 
 ! 'final' values of number and mass weighted mean fallspeed for snow (m/s)
 
-                 tx1    = asn(i,k) / lams(k)**bs
-                 tx2    = 1.2_r8*rhof(i,k)
-                 ums(k) = min(tx1*(cons8/6._r8), tx2)
-                 uns(k) = min(tx1*cons7, tx2)
+               tx1    = asn(i,k) / lams(k)**bs
+               tx2    = 1.2_r8*rhof(i,k)
+               ums(k) = min(tx1*(cons8/6._r8), tx2)
+               uns(k) = min(tx1*cons7, tx2)
 
-               else
-                 lams(k) = zero
-                 n0s(k)  = zero
-                 ums(k)  = zero
-                 uns(k)  = zero
-               end if
+             else
+               lams(k) = zero
+               n0s(k)  = zero
+               ums(k)  = zero
+               uns(k)  = zero
+             end if
 
-             tx1   = g*rho(i,k)
+             tx1    = g*rho(i,k)
              fi(k)  = tx1*ums(k)
              fni(k) = tx1*uns(k)
              fc(k)  = tx1*umr(k)
@@ -3817,7 +3823,7 @@ checked up to here moorthi
 ! calculate number of split time steps to ensure courant stability criteria
 ! for sedimentation calculations
 
-             rgvm = max(fi(k),fc(k),fni(k),fnc(k))
+             rgvm  = max(fi(k),fc(k),fni(k),fnc(k))
              nstep = max(int(rgvm*deltat/pdel(i,k)+one),nstep)
 
 ! redefine dummy variables - sedimentation is calculated over grid-scale
@@ -3838,10 +3844,10 @@ checked up to here moorthi
            do n = 1,nstep
 
              do k = 1,pver
-               falouti(k)  = max(fi(k)  * qsnw(i,k),zero)
-               faloutni(k) = max(fni(k) * nsnw(i,k),zero)
-               faloutc(k)  = max(fc(k)  * qrn(i,k),zero)
-               faloutnc(k) = max(fnc(k) * nrn(i,k),zero)
+               falouti(k)  = max(fi(k)  * qsnw(i,k), zero)
+               faloutni(k) = max(fni(k) * nsnw(i,k), zero)
+               faloutc(k)  = max(fc(k)  * qrn(i,k), zero)
+               faloutnc(k) = max(fnc(k) * nrn(i,k), zero)
              end do 
 
 ! top of model
@@ -3862,10 +3868,10 @@ checked up to here moorthi
 
 ! sedimentation tendencies for output
 
-             qsnw(i,k)  = qsnw(i,k)  - faltndi *tx3
-             nsnw(i,k) = nsnw(i,k) - faltndni*tx3
-             qrn(i,k)  = qrn(i,k)  - faltndc *tx3
-             nrn(i,k) = nrn(i,k) - faltndnc*tx3
+             qsnw(i,k) = qsnw(i,k) - faltndi  * tx3
+             nsnw(i,k) = nsnw(i,k) - faltndni * tx3
+             qrn(i,k)  = qrn(i,k)  - faltndc  * tx3
+             nrn(i,k)  = nrn(i,k)  - faltndnc * tx3
 
              do k = 2,pver
 
@@ -3874,16 +3880,16 @@ checked up to here moorthi
 !              dum  = min(one, lcldm(i,k)/lcldm(i,k-1))
 !              dum1 = min(one, icldm(i,k)/icldm(i,k-1))
 
-               faltndc   = (faloutc(k)- faloutc(k-1)) * tx1
-               faltndnc  = (faloutnc(k)- faloutnc(k-1)) * tx1
+               faltndc   = (faloutc(k)  - faloutc(k-1))  * tx1
+               faltndnc  = (faloutnc(k) - faloutnc(k-1)) * tx1
    
-               faltndi   = (falouti(k) - falouti(k-1)) * tx1
+               faltndi   = (falouti(k)  - falouti(k-1))  * tx1
                faltndni  = (faloutni(k) - faloutni(k-1)) * tx1
 
-               qsnw(i,k)  = qsnw(i,k)  - faltndi  * tx3
+               qsnw(i,k) = qsnw(i,k) - faltndi  * tx3
                nsnw(i,k) = nsnw(i,k) - faltndni * tx3
                qrn(i,k)  = qrn(i,k)  - faltndc  * tx3
-               nrn(i,k) = nrn(i,k) - faltndnc * tx3
+               nrn(i,k)  = nrn(i,k)  - faltndnc * tx3
 
              end do
 
@@ -3901,7 +3907,7 @@ checked up to here moorthi
 
 ! DONE UP TO HERE
            do k=1,pver
-             if (fprcp==1) then
+             if (fprcp == 1) then
 ! calculate melting and freezing of precip
 ! melt snow at +2 C
 
@@ -3949,7 +3955,7 @@ checked up to here moorthi
                      dum = one
                    end if
 
-                   qsnw(i,k) = qsnw(i,k) + dum*qrn(i,k)
+                   qsnw(i,k) = qsnw(i,k)  + dum*qrn(i,k)
                    nsnw(i,k) = nsnw(i,k)  + dum*nrn(i,k)
                    qrn(i,k)  = (one-dum)*qrn(i,k)
                    nrn(i,k)  = (one-dum)*nrn(i,k)
@@ -3978,6 +3984,10 @@ checked up to here moorthi
                nrn(i,k)  = max(nrn(i,k),zero)
                nsnw(i,k) = max(nsnw(i,k),zero)
 
+               qrout(i,k) = qrout(i,k) + qrn(i,k)
+               qsout(i,k) = qsout(i,k) + qsnw(i,k)
+               nrout(i,k) = nrout(i,k) + nrn(i,k)*rho(i,k)
+               nsout(i,k) = nsout(i,k) + nsnw(i,k)*rho(i,k)
 !.......................................................................
              end if !fprcp ==1
 
@@ -4277,11 +4287,11 @@ checked up to here moorthi
 
 ! convert dt from sub-step back to full time step
 
-       deltat = deltat*real(iter)
-       dti    = one / deltat
+         deltat = deltat*real(iter)
+         dti    = one / deltat
 
 
-       do k=1,pver
+         do k=1,pver
 ! if updated q (after microphysics) is zero, then ensure updated n is also zero
 
            if (qc(i,k)+qctend(i,k)*deltat < qsmall)

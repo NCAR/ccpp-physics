@@ -91,21 +91,25 @@ module GFS_driver
   public  GFS_physics_driver          !< physics_driver (was gbphys)
   public  GFS_stochastic_driver       !< stochastic physics
 #endif
+  public  GFS_finalize
 
   CONTAINS
 !*******************************************************************************************
 
 
-!--------------
-! GFS initialze
-!--------------
+!---------------
+! GFS initialize
+!---------------
   subroutine GFS_initialize (Model, Statein, Stateout, Sfcprop,     &
                              Coupling, Grid, Tbd, Cldprop, Radtend, &
                              Diag, Interstitial, Init_parm)
 
     use module_microphysics, only: gsmconst
+! Not available in FV3v0-CCPP demo
+#if 0
     use cldwat2m_micro,      only: ini_micro
     use aer_cloud,           only: aer_cloud_init
+#endif
     use module_ras,          only: ras_init
 #ifdef OPENMP
     use omp_lib
@@ -230,8 +234,12 @@ module GFS_driver
 
     !--- initialize Morrison-Gettleman microphysics
     if (Model%ncld == 2) then
+      write(0,*) "Morrison-Gettleman microphysics not available in FV3v0-CCPP demo"
+      stop
+#if 0
       call ini_micro (Model%mg_dcs, Model%mg_qcvar, Model%mg_ts_auto_ice)
       call aer_cloud_init ()
+#endif
     endif
 
     !--- initialize ras
@@ -313,6 +321,7 @@ module GFS_driver
                                     Grid, Tbd, Cldprop, Radtend, Diag)
 
     use GFS_stochastics, only: GFS_stochastics_run
+    !use memcheck, only: memcheck_run
 
     implicit none
 
@@ -334,6 +343,9 @@ module GFS_driver
 
     call GFS_stochastics_run(Model, Statein, Stateout, Sfcprop, Coupling, &
                              Grid, Tbd, Cldprop, Radtend, Diag, errmsg, errflg)
+
+    !errmsg = 'end of GFS_stochastic_driver'
+    !call memcheck_run(Model%sec, Tbd%blkno, errmsg, errflg)
 
   end subroutine GFS_stochastic_driver
 #endif
@@ -377,5 +389,12 @@ module GFS_driver
     enddo
 
   end subroutine GFS_grid_populate
+
+
+!-------------
+! GFS finalize
+!-------------
+  subroutine GFS_finalize ()
+  end subroutine GFS_finalize
 
 end module GFS_driver

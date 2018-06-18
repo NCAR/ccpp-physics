@@ -19,12 +19,10 @@ module IPD_driver_cap
 
     use, intrinsic :: iso_c_binding,                                   &
                       only: c_f_pointer, c_ptr, c_int32_t
-    use            :: ccpp_types,                                      &
-                      only: ccpp_t
-    use            :: ccpp_fields,                                     &
-                      only: ccpp_field_get
-    use            :: ccpp_errors,                                     &
-                      only: ccpp_error
+    use            :: ccpp_api,                                        &
+                      only: ccpp_t,                                    &
+                            ccpp_field_get,                            &
+                            ccpp_error
     use            :: IPD_typedefs,                                    &
                       only: IPD_init_type,                             &
                             IPD_control_type,                          &
@@ -34,7 +32,8 @@ module IPD_driver_cap
                             IPD_interstitial_type
     use            :: IPD_driver,                                      &
                       only: IPD_initialize,                            &
-                            IPD_setup_step
+                            IPD_setup_step,                            &
+                            IPD_finalize
     use            :: machine,                                         &
                       only: kind_phys
     use            :: namelist_soilveg,                                &
@@ -43,12 +42,28 @@ module IPD_driver_cap
 
     private
 
-    public :: ipd_initialize_cap,     &
-              ipd_setup_step_cap
+    public :: ipd_initialize_init_cap,     &
+              ipd_initialize_run_cap,      &
+              ipd_initialize_finalize_cap, &
+              ipd_setup_step_init_cap,     &
+              ipd_setup_step_run_cap,      &
+              ipd_setup_step_finalize_cap, &
+              ipd_finalize_init_cap,       &
+              ipd_finalize_run_cap,        &
+              ipd_finalize_finalize_cap
 
     contains
 
-    function ipd_initialize_cap(ptr) bind(c) result(ierr)
+    function ipd_initialize_init_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_initialize_init_cap
+
+    function ipd_initialize_run_cap(ptr) bind(c) result(ierr)
 
         integer(c_int32_t)         :: ierr
         type(c_ptr), intent(inout) :: ptr
@@ -121,9 +136,27 @@ module IPD_driver_cap
         l_snupx = snupx
         l_salp_data = salp_data
 
-    end function ipd_initialize_cap
+    end function ipd_initialize_run_cap
 
-    function ipd_setup_step_cap(ptr) bind(c) result(ierr)
+    function ipd_initialize_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_initialize_finalize_cap
+
+    function ipd_setup_step_init_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_setup_step_init_cap
+
+    function ipd_setup_step_run_cap(ptr) bind(c) result(ierr)
 
         integer(c_int32_t)         :: ierr
         type(c_ptr), intent(inout) :: ptr
@@ -171,6 +204,44 @@ module IPD_driver_cap
                             IPD_Diag=IPD_Diag,       &
                             IPD_Restart=IPD_Restart)
 
-    end function IPD_setup_step_cap
+    end function IPD_setup_step_run_cap
+
+    function ipd_setup_step_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_setup_step_finalize_cap
+
+    function ipd_finalize_init_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_finalize_init_cap
+
+    function ipd_finalize_run_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+        call IPD_finalize()
+
+    end function ipd_finalize_run_cap
+
+    function ipd_finalize_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        ierr = 0
+
+    end function ipd_finalize_finalize_cap
 
 end module IPD_driver_cap
