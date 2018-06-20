@@ -227,11 +227,11 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/sasas_deep_cap.F90
   ./physics/gwdc_pre_cap.F90
   ./physics/sfc_sice_cap.F90
-  ./physics/sfc_nst_post_cap.F90
+  ./physics/zhaocarr_precpd_cap.F90
   ./physics/GFS_surface_generic_post_cap.F90
   ./physics/cnvc90_cap.F90
   ./physics/GFS_phys_time_vary_2_cap.F90
-  ./physics/edmf_cap.F90
+  ./physics/sfc_nst_cap.F90
   ./physics/GFS_surface_loop_control_part2_cap.F90
   ./physics/GFS_surface_loop_control_part1_cap.F90
   ./physics/GFS_surface_loop_control_part0_cap.F90
@@ -251,7 +251,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/lsm_noah_cap.F90
   ./physics/GFS_MP_generic_pre_cap.F90
   ./physics/sfc_sice_post_cap.F90
-  ./physics/sfc_nst_cap.F90
+  ./physics/sfc_nst_post_cap.F90
   ./physics/gwdps_cap.F90
   ./physics/get_prs_fv3_cap.F90
   ./physics/dcyc2t3_pre_cap.F90
@@ -259,7 +259,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/GFS_calpreciptype_cap.F90
   ./physics/rayleigh_damp_cap.F90
   ./physics/get_phi_fv3_cap.F90
-  ./physics/zhaocarr_precpd_cap.F90
+  ./physics/hedmf_cap.F90
   )
 endif (PROJECT STREQUAL "CCPP-FV3")
 
