@@ -140,7 +140,7 @@
       subroutine hedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,          &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
-     &   tsea,qss,heat,evap,stress,spd1,kpbl,                           &
+     &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
@@ -172,13 +172,13 @@
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
-     &                     tsea(im),      qss(im),                      &
+     &                     tsea(im),                                    &
      &                     heat(im),      evap(im),                     &
      &                     stress(im),    spd1(im)
       real(kind=kind_phys), intent(in) ::                               &
      &                     prsi(ix,km+1), del(ix,km),                   &
      &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km),                  &
+     &                     phii(ix,km+1), phil(ix,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
