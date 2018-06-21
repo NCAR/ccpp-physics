@@ -165,13 +165,20 @@
 
 ! integer, parameter :: max_lon=16000, max_lat=8000, min_lon=192, min_lat=94
 ! integer, parameter :: max_lon=5000,  max_lat=2500, min_lon=192, min_lat=94 ! current opr
-  integer, parameter :: max_lon=5000,  max_lat=2000, min_lon=192, min_lat=94 ! current opr
+! integer, parameter :: max_lon=5000,  max_lat=2000, min_lon=192, min_lat=94 ! current opr
+! integer, parameter :: max_lon=8000,  max_lat=4000, min_lon=192, min_lat=94 ! current opr
 ! real(kind=kind_phys), parameter:: rlapse  = 0.65e-2, rhc_max = 0.9999      ! current opr
-  real(kind=kind_phys), parameter:: rlapse  = 0.65e-2, rhc_max = 0.9999999   ! new
+! real(kind=kind_phys), parameter:: rlapse  = 0.65e-2, rhc_max = 0.9999999   ! new
 ! real(kind=kind_phys), parameter:: rlapse  = 0.65e-2, rhc_max = 0.9900
-  real(kind=kind_phys), parameter:: cb2mb   = 10.0, pa2mb   = 0.01
 
-  real(kind=kind_phys) :: dxmax, dxmin, dxinv
+  real(kind=kind_phys), parameter:: rlapse  = 0.65e-2
+  real(kind=kind_phys), parameter:: cb2mb   = 10.0, pa2mb   = 0.01
+! for wsm6
+  real(kind=kind_phys),parameter:: rhowater   = 1000.         ! density of water (kg/m^3)
+  real(kind=kind_phys),parameter:: rhosnow    = 100.          ! density of snow (kg/m^3)
+  real(kind=kind_phys),parameter:: rhoair     = 1.28          ! density of air near surface (kg/m^3)
+
+  real(kind=kind_phys) :: dxmax, dxmin, dxinv, rhc_max
 
 !........................................!
       end module physcons                !
