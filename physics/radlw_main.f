@@ -422,7 +422,7 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                           | mean effective radius for rain drop                       | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_total    | cloud_optical_depth_total                                                                     | cloud optical depth, total                                | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_total    | cloud_optical_depth_weighted                                                                  | cloud optical depth, weighted                             | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od_layer    | cloud_optical_depth_layers_678                                                                | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | out    | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
 !! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
@@ -443,7 +443,6 @@
      &       cld_od_total, cld_od_layer,                                &
      &       cld_od, errmsg, errflg                                     &
      &     )
-
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -635,10 +634,11 @@
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
-     &       cld_od_total
-      real (kind=kind_phys), dimension(npts,nlay),intent(out),optional:: &
-     &       cld_od_layer,                                              &
-     &       cld_od
+     &       cld_od_total, cld_od
+      ! Note: as of 06/18/2018, cld_od_total is not used in radlw_main.f
+      ! thus set intent to intent(in).
+      real (kind=kind_phys), dimension(npts,nlay),intent(out),optional::&
+     &       cld_od_layer
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp
@@ -1075,10 +1075,12 @@
           cldfmc = f_zero
           taucld = f_zero
         endif
-        do k = 1, nlay
-          cld_od_layer(iplon,k) = taucld(6,k)                              &
-     &                       + taucld(7,k) + taucld(8,k)
-        end do
+        if (ilwcliq > 0) then
+          do k = 1, nlay
+            cld_od_layer(iplon,k) = taucld(6,k)                         &
+     &                            + taucld(7,k) + taucld(8,k)
+          enddo
+        endif
 
 !     if (lprnt) then
 !      print *,' after cldprop'
