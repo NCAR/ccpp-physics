@@ -2,10 +2,11 @@
       subroutine rad_initialize                                         &
 !...................................
 !  ---  inputs:
-     &     ( si,levr,ictm,isol,ico2,iaer,ialb,iems,ntcw,                &
+     &     ( si,levr,ictm,isol,ico2,iaer,ialb,iems,ntcw, num_p2d,       &
      &       num_p3d,npdf3d,ntoz,iovr_sw,iovr_lw,isubc_sw,isubc_lw,     &
-     &       crick_proof,ccnorm,norad_precip,                           &
-     &       idate,iflip,me )
+     &       crick_proof,ccnorm,                                        &
+     &       imp_physics,                                               &
+     &       norad_precip,idate,iflip,me )
 !  ---  outputs: ( none )
 
 ! =================   subprogram documentation block   ================ !
@@ -104,7 +105,7 @@
 !  ===================================================================  !
 !
       use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
-     &             iaermdl, laswflg, lalwflg, lavoflg, icldflg, icmphys,&
+     &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
      &             iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
      &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
      &             kind_phys
@@ -114,11 +115,12 @@
       implicit   none
 
 !  ---  input:
-      integer,  intent(in) :: levr, ictm, isol, ico2, iaer,             &
+      integer,  intent(in) :: levr, ictm, isol, ico2, iaer, num_p2d,    &
      &       ntcw, ialb, iems, num_p3d, npdf3d, ntoz, iovr_sw, iovr_lw, &
      &       isubc_sw, isubc_lw, iflip, me, idate(4)
 
       real (kind=kind_phys), intent(in) :: si(levr+1)
+      integer, intent(in) :: imp_physics
 
       logical, intent(in) :: crick_proof, ccnorm, norad_precip
 
@@ -156,18 +158,7 @@
       else
         icldflg = 0                     ! diagnostic cloud optical prop scheme
       endif
-      icmphys = 1                       ! default
-      if ( num_p3d == 4 ) then
-        if (npdf3d /= 3) then
-          icmphys = 1                   ! zhao/moorthi's prognostic cloud scheme
-        else
-          icmphys = 3                   ! zhao+ pdf cloud & cnvc and cnvw
-        endif
-      elseif ( num_p3d == 3 ) then
-        icmphys = 2                     ! ferrier's microphysics
-      endif
-!     if (ncld == 2) icmphys = 1        ! MG 2m Morrison scheme
-!
+
       iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
       iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
 
@@ -202,7 +193,7 @@
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, me )
+     &     ( si, levr, imp_physics,  me )
 !  ---  outputs:
 !          ( none )
 
