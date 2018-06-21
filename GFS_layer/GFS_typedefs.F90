@@ -445,6 +445,8 @@ module GFS_typedefs
     real(kind=kind_phys) :: mg_qcvar
     real(kind=kind_phys) :: mg_ts_auto_ice  !< ice auto conversion time scale
 
+    integer              :: ncnd            !< number of cloud condensate types
+
     !--- land/surface model parameters
     integer              :: lsm             !< flag for land surface model lsm=1 for noah lsm
     integer              :: lsm_ruc=2       !< flag for RUC land surface model
@@ -592,6 +594,7 @@ module GFS_typedefs
     integer              :: jdat(1:8)       !< current forecast date and time
                                             !< (yr, mon, day, t-zone, hr, min, sec, mil-sec)
     real(kind=kind_phys) :: sec             !< seconds since model initialization
+    real(kind=kind_phys), pointer :: si(:)  !< vertical sigma coordinate for model initialization
 
     contains
       procedure :: init  => control_initialize
@@ -868,6 +871,7 @@ module GFS_typedefs
     real (kind=kind_phys), pointer      :: adjvisdfu(:)     => null()  !<
     real (kind=kind_phys), pointer      :: adjvisdfd(:)     => null()  !<
     real (kind=kind_phys), pointer      :: aerodp(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: alb1d(:)         => null()  !<
     real (kind=kind_phys), pointer      :: cd(:)            => null()  !<
     real (kind=kind_phys), pointer      :: cdq(:)           => null()  !<
     real (kind=kind_phys), pointer      :: cice(:)          => null()  !<
@@ -1846,6 +1850,14 @@ module GFS_typedefs
     Model%ccnorm           = ccnorm
     Model%lwhtr            = lwhtr
     Model%swhtr            = swhtr
+    ! The CCPP versions of the RRTMG lw/sw schemes are configured
+    ! such that lw and sw heating rate are output, i.e. they rely
+    ! on the corresponding arrays to be allocated.
+    if (.not.lwhtr .or. .not.swhtr) then
+      write(0,*) "Logic error, the CCPP version of RRTMG lwrad/swrad require the output" // &
+             " of the lw/sw heating rates to be turned on (namelist options lwhtr and swhtr)"
+      stop
+    end if
 
     !--- microphysical switch
     Model%ncld             = ncld
@@ -1980,6 +1992,14 @@ module GFS_typedefs
     Model%kdt              = 0
     Model%jdat(1:8)        = jdat(1:8)
     Model%sec              = 0
+    allocate(Model%si(Model%levr+1))
+    ! DH*
+    !Currently set in GFS_driver -> GFS_initialize
+    Model%si               = clear_val
+    write(0,*) "DH DEBUG: HOW TO SET Model%si for SCM?"
+    call sleep(5)
+    stop
+    ! *DH
 
     !--- stored in wam_f107_kp module
     f107_kp_size      = 56
@@ -2130,6 +2150,7 @@ module GFS_typedefs
         else
           Model%shcnvcw = .false.
         endif
+        Model%ncnd    = 1
         if (Model%me == Model%master) print *,' Using Zhao/Carr/Sundqvist Microphysics'
       else
         print *,' Ferrier Microphysics scheme has been deprecated - job aborted'
@@ -2140,6 +2161,7 @@ module GFS_typedefs
       Model%num_p2d = 1
       Model%pdfcld  = .false.
       Model%shcnvcw = .false.
+      Model%ncnd    = 2
       if (Model%me == Model%master) print *,' Using Morrison-Gettelman double moment', &
                                             ' microphysics',' aero_in=',Model%aero_in, &
                                             ' mg_dcs=',Model%mg_dcs,' mg_qcvar=',Model%mg_qcvar, &
@@ -2857,6 +2879,7 @@ module GFS_typedefs
     allocate (Interstitial%adjvisdfu  (IM))
     allocate (Interstitial%adjvisdfd  (IM))
     allocate (Interstitial%aerodp     (IM,NSPC1))
+    allocate (Interstitial%alb1d      (IM))
     allocate (Interstitial%cd         (IM))
     allocate (Interstitial%cdq        (IM))
     allocate (Interstitial%cice       (IM))
@@ -3038,6 +3061,7 @@ module GFS_typedefs
     class(GFS_interstitial_type) :: Interstitial
     !
     Interstitial%aerodp       = clear_val
+    Interstitial%alb1d        = clear_val
     Interstitial%cldsa        = clear_val
     Interstitial%clouds       = clear_val
     Interstitial%errmsg       = ''
@@ -3234,6 +3258,7 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%adjvisdfu   ) = ', sum(Interstitial%adjvisdfu   )
     write (0,*) 'sum(Interstitial%adjvisdfd   ) = ', sum(Interstitial%adjvisdfd   )
     write (0,*) 'sum(Interstitial%aerodp      ) = ', sum(Interstitial%aerodp      )
+    write (0,*) 'sum(Interstitial%alb1d       ) = ', sum(Interstitial%alb1d       )
     write (0,*) 'sum(Interstitial%cd          ) = ', sum(Interstitial%cd          )
     write (0,*) 'sum(Interstitial%cdq         ) = ', sum(Interstitial%cdq         )
     write (0,*) 'sum(Interstitial%cice        ) = ', sum(Interstitial%cice        )
