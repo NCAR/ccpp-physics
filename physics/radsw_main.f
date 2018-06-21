@@ -260,118 +260,6 @@
 !!!!!  ==============================================================  !!!!!
 
 
-!========================================!
-      module rrtmg_sw                    !
-!........................................!
-!
-      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
-     &                             iswmode, kind_phys
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
-
-      use module_radsw_parameters
-      use mersenne_twister, only : random_setseed, random_number,       &
-     &                             random_stat
-      use module_radsw_ref, only : preflog, tref
-      use module_radsw_sflux
-!
-      implicit none
-!
-      private
-!
-!  ---  version tag and last revision date
-      character(40), parameter ::                                       &
-     &   VTAGSW='NCEP SW v5.1  Nov 2012 -RRTMG-SW v3.8   '
-!    &   VTAGSW='NCEP SW v5.0  Aug 2012 -RRTMG-SW v3.8   '
-!    &   VTAGSW='RRTMG-SW v3.8   Nov 2009'
-!    &   VTAGSW='RRTMG-SW v3.7   Nov 2009'
-!    &   VTAGSW='RRTMG-SW v3.61  Oct 2008'
-!    &   VTAGSW='RRTMG-SW v3.5   Oct 2008'
-!    &   VTAGSW='RRTM-SW 112v2.3 Apr 2007'
-!    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
-!    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
-
-! \name constant values
-
-      real (kind=kind_phys), parameter :: eps     = 1.0e-6
-      real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
-! pade approx constant
-      real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
-      real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
-      real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
-      real (kind=kind_phys), parameter :: flimit  = 1.0e-20
-! internal solar constant
-      real (kind=kind_phys), parameter :: s0      = 1368.22
-
-      real (kind=kind_phys), parameter :: f_zero  = 0.0
-      real (kind=kind_phys), parameter :: f_one   = 1.0
-
-! \name atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
-
-! \name band indices
-      integer, dimension(nblow:nbhgh) :: nspa, nspb
-! band index for sfc flux
-      integer, dimension(nblow:nbhgh) :: idxsfc
-! band index for cld prop
-      integer, dimension(nblow:nbhgh) :: idxebc
-
-      data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
-      data nspb(:) /  1, 5, 1, 1, 1, 5, 1, 0, 1, 0, 0, 1, 5, 1 /
-
-!     data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1 /  ! band index for sfc flux
-      data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1 /  ! band index for sfc flux
-      data idxebc(:) / 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 5 /  ! band index for cld prop
-
-!  ---  band wavenumber intervals
-!     real (kind=kind_phys), dimension(nblow:nbhgh):: wavenum1,wavenum2
-!     data wavenum1(:)  /                                               &
-!    &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
-!    &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
-!     data wavenum2(:)  /                                               &
-!              3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
-!    &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /
-!     real (kind=kind_phys), dimension(nblow:nbhgh) :: delwave
-!     data delwave(:)   /                                               &
-!    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
-!    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
-
-! uv-b band index
-      integer, parameter :: nuvb = 27
-
-!\name logical flags for optional output fields
-      logical :: lhswb  = .false.
-      logical :: lhsw0  = .false.
-      logical :: lflxprf= .false.
-      logical :: lfdncmp= .false.
-
-
-! those data will be set up only once by "rswinit"
-      real (kind=kind_phys) :: exp_tbl(0:NTBMX)
-
-
-! the factor for heating rates (in k/day, or k/sec set by subroutine
-!!  'rswinit')
-      real (kind=kind_phys) :: heatfac
-
-
-! initial permutation seed used for sub-column cloud scheme
-      integer, parameter :: ipsdsw0 = 1
-
-!  ---  public accessable subprograms
-
-      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
-
-
-! =================
-      contains
-! =================
-
-      subroutine rrtmg_sw_init ()
-      end subroutine rrtmg_sw_init
-
 !> \ingroup RRTMG
 !! \defgroup module_radsw_main GFS radsw Main
 !! This module includes NCEP's modifications of the RRTMG-SW radiation
@@ -503,6 +391,118 @@
 !!  not sold and this copyright notice is reproduced on each copy made.
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
+!========================================!
+      module rrtmg_sw                    !
+!........................................!
+!
+      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
+     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
+     &                             iswmode, kind_phys
+      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
+     &                             con_amw, con_amo3
+
+      use module_radsw_parameters
+      use mersenne_twister, only : random_setseed, random_number,       &
+     &                             random_stat
+      use module_radsw_ref, only : preflog, tref
+      use module_radsw_sflux
+!
+      implicit none
+!
+      private
+!
+!  ---  version tag and last revision date
+      character(40), parameter ::                                       &
+     &   VTAGSW='NCEP SW v5.1  Nov 2012 -RRTMG-SW v3.8   '
+!    &   VTAGSW='NCEP SW v5.0  Aug 2012 -RRTMG-SW v3.8   '
+!    &   VTAGSW='RRTMG-SW v3.8   Nov 2009'
+!    &   VTAGSW='RRTMG-SW v3.7   Nov 2009'
+!    &   VTAGSW='RRTMG-SW v3.61  Oct 2008'
+!    &   VTAGSW='RRTMG-SW v3.5   Oct 2008'
+!    &   VTAGSW='RRTM-SW 112v2.3 Apr 2007'
+!    &   VTAGSW='RRTM-SW 112v2.3 Mar 2005'
+!    &   VTAGSW='RRTM-SW 112v2.0 Jul 2004'
+
+! \name constant values
+
+      real (kind=kind_phys), parameter :: eps     = 1.0e-6
+      real (kind=kind_phys), parameter :: oneminus= 1.0 - eps
+! pade approx constant
+      real (kind=kind_phys), parameter :: bpade   = 1.0/0.278
+      real (kind=kind_phys), parameter :: stpfac  = 296.0/1013.0
+      real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
+      real (kind=kind_phys), parameter :: flimit  = 1.0e-20
+! internal solar constant
+      real (kind=kind_phys), parameter :: s0      = 1368.22
+
+      real (kind=kind_phys), parameter :: f_zero  = 0.0
+      real (kind=kind_phys), parameter :: f_one   = 1.0
+
+! \name atomic weights for conversion from mass to volume mixing ratios
+      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
+      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
+
+! \name band indices
+      integer, dimension(nblow:nbhgh) :: nspa, nspb
+! band index for sfc flux
+      integer, dimension(nblow:nbhgh) :: idxsfc
+! band index for cld prop
+      integer, dimension(nblow:nbhgh) :: idxebc
+
+      data nspa(:) /  9, 9, 9, 9, 1, 9, 9, 1, 9, 1, 0, 1, 9, 1 /
+      data nspb(:) /  1, 5, 1, 1, 1, 5, 1, 0, 1, 0, 0, 1, 5, 1 /
+
+!     data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1 /  ! band index for sfc flux
+      data idxsfc(:) / 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1 /  ! band index for sfc flux
+      data idxebc(:) / 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 5 /  ! band index for cld prop
+
+!  ---  band wavenumber intervals
+!     real (kind=kind_phys), dimension(nblow:nbhgh):: wavenum1,wavenum2
+!     data wavenum1(:)  /                                               &
+!    &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
+!    &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
+!     data wavenum2(:)  /                                               &
+!              3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
+!    &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /
+!     real (kind=kind_phys), dimension(nblow:nbhgh) :: delwave
+!     data delwave(:)   /                                               &
+!    &          650.0,  750.0,  650.0,  500.0, 1000.0, 1550.0,  350.0,  &
+!    &         4800.0, 3150.0, 6650.0, 6350.0, 9000.0,12000.0, 1780.0 /
+
+! uv-b band index
+      integer, parameter :: nuvb = 27
+
+!\name logical flags for optional output fields
+      logical :: lhswb  = .false.
+      logical :: lhsw0  = .false.
+      logical :: lflxprf= .false.
+      logical :: lfdncmp= .false.
+
+
+! those data will be set up only once by "rswinit"
+      real (kind=kind_phys) :: exp_tbl(0:NTBMX)
+
+
+! the factor for heating rates (in k/day, or k/sec set by subroutine
+!!  'rswinit')
+      real (kind=kind_phys) :: heatfac
+
+
+! initial permutation seed used for sub-column cloud scheme
+      integer, parameter :: ipsdsw0 = 1
+
+!  ---  public accessable subprograms
+
+      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
+
+
+! =================
+      contains
+! =================
+
+      subroutine rrtmg_sw_init ()
+      end subroutine rrtmg_sw_init
+
 !! \section arg_table_rrtmg_sw_run Argument Table
 !! | local_name      | standard_name                                                                                  | long_name                                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
@@ -554,8 +554,8 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                            | mean effective radius for rain drop                                      | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                          | cloud snow water path                                                    | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                           | mean effective radius for snow flake                                     | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_total    | cloud_optical_depth_total                                                                      | cloud optical depth, weighted                                            | none    |    2 | real        | kind_phys | out    | T        |
-!! | cld_od_layer    | cloud_optical_depth_layers_678                                                                        | cloud optical depth, from bands 6,7,8                                    | none    |    2 | real        | kind_phys | in     | T        |
+!! | cld_od_total    | cloud_optical_depth_weighted                                                                   | cloud optical depth, weighted                                            | none    |    2 | real        | kind_phys | out    | T        |
+!! | cld_od_layer    | cloud_optical_depth_layers_678                                                                 | cloud optical depth, from bands 6,7,8                                    | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                                                                            | cloud optical depth                                                      | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_ssa         | cloud_single_scattering_albedo                                                                 | cloud single scattering albedo                                           | frac    |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymmetry_parameter                                                                      | cloud asymmetry parameter                                                | none    |    2 | real        | kind_phys | in     | T        |
@@ -615,6 +615,8 @@
 !       clouds(:,:,7)  -   mean eff radius for rain drop   (micron)     !
 !       clouds(:,:,8)  -   layer snow flake water path     (g/m**2)     !
 !       clouds(:,:,9)  -   mean eff radius for snow flake  (micron)     !
+!       clouds(:,:,10) -   cloud optical depth, total, weighted (1)     !
+!       clouds(:,:,11) -   cloud optical depth from bands 6,7,8 (1)     !
 !                ---  for  iswcliq = 0  ---                             !
 !       clouds(:,:,1)  -   layer total cloud fraction                   !
 !       clouds(:,:,2)  -   layer cloud optical depth                    !
@@ -770,10 +772,10 @@
       real (kind=kind_phys), dimension(npts,nlay), intent(in) ::        &
      &       plyr, tlyr, qlyr, olyr
 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir &
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif &
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir&
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif&
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir 
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif 
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir
+      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif
 
       real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
       real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
@@ -791,6 +793,8 @@
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od_layer,                                              &
      &       cld_od, cld_ssa, cld_asy
+      ! Note: as of 06/18/2018, cld_od_layer is not used in radsw_main.f
+      ! thus set intent to intent(in).
       real (kind=kind_phys), dimension(npts,nlay),intent(out),optional::&
      &       cld_od_total
 
@@ -909,7 +913,7 @@
      &       .not.present(cld_od_total) .or.                            &
      &       .not.present(cld_od_layer)) then
           write(errmsg,'(*(a))')                                        &
-     &               'Logic error: ilwcliq>0 requires the following',   &
+     &               'Logic error: iswcliq>0 requires the following',   &
      &               ' optional arguments to be present:',              &
      &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
      &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow',   &
@@ -995,8 +999,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,kk,1))   ! co2
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,kk))   ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,kk)) ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
           enddo
@@ -1007,11 +1010,8 @@
           if (iswrgas > 0) then
             do k = 1, nlay
               kk = nlp1 - k
-              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,kk,2))  ! n2o
-             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,kk))  ! n2o
-             ! colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,kk,3))  ! ch4
-             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,kk))  ! ch4
-             ! colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,kk,4))  ! o2
+             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,kk)) ! n2o
+             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,kk)) ! ch4
              colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,kk))  ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,kk,5))  ! co - notused
             enddo
@@ -1029,9 +1029,6 @@
           do k = 1, nlay
             kk = nlp1 - k
             do ib = 1, nbdsw
-              !tauae(k,ib) = aerosols(j1,kk,ib,1)
-              !ssaae(k,ib) = aerosols(j1,kk,ib,2)
-              !asyae(k,ib) = aerosols(j1,kk,ib,3)
               tauae(k,ib) = aeraod(j1,kk,ib)
               ssaae(k,ib) = aerssa(j1,kk,ib)
               asyae(k,ib) = aerasy(j1,kk,ib)
@@ -1055,8 +1052,8 @@
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
-              cfrac(k) = cld_cf(j1,kk)      ! cloud fraction
-              cdat1(k) = cld_od(j1,kk)      ! cloud optical depth
+              cfrac(k) = cld_cf(j1,kk)       ! cloud fraction
+              cdat1(k) = cld_od(j1,kk)       ! cloud optical depth
               cdat2(k) = cld_ssa(j1,kk)      ! cloud single scattering albedo
               cdat3(k) = cld_asy(j1,kk)      ! cloud asymmetry factor
             enddo
@@ -1086,7 +1083,6 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))         ! h2o
-            !colamt(k,2) = max(temcol(k), coldry(k)*gasvmr(j1,k,1))    ! co2
             colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(j1,k))  ! co2
             colamt(k,3) = max(f_zero,    coldry(k)*o3vmr(k))          ! o3
             colmol(k)   = coldry(k) + colamt(k,1)
@@ -1108,12 +1104,9 @@
 
           if (iswrgas > 0) then
             do k = 1, nlay
-              !colamt(k,4) = max(temcol(k), coldry(k)*gasvmr(j1,k,2))  ! n2o
             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,k))  ! n2o
-              !colamt(k,5) = max(temcol(k), coldry(k)*gasvmr(j1,k,3))  ! ch4
             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,k))  ! ch4
-              !colamt(k,6) = max(temcol(k), coldry(k)*gasvmr(j1,k,4))  ! o2
-            colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,k))  ! o2
+            colamt(k,6) = max(temcol(k), coldry(k)*gasvmr_o2(j1,k))   ! o2
 !             colamt(k,7) = max(temcol(k), coldry(k)*gasvmr(j1,k,5))  ! co - notused
             enddo
           else
@@ -1129,9 +1122,6 @@
 
           do ib = 1, nbdsw
             do k = 1, nlay
-              !tauae(k,ib) = aerosols(j1,k,ib,1)
-              !ssaae(k,ib) = aerosols(j1,k,ib,2)
-              !asyae(k,ib) = aerosols(j1,k,ib,3)
               tauae(k,ib) = aeraod(j1,k,ib)
               ssaae(k,ib) = aerssa(j1,k,ib)
               asyae(k,ib) = aerasy(j1,k,ib)
@@ -1140,7 +1130,7 @@
 
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
-              cfrac(k) = cld_cf(j1,k)       ! cloud fraction
+              cfrac(k) = cld_cf(j1,k)        ! cloud fraction
               cliqp(k) = cld_lwp(j1,k)       ! cloud liq path
               reliq(k) = cld_ref_liq(j1,k)   ! liq partical effctive radius
               cicep(k) = cld_iwp(j1,k)       ! cloud ice path
@@ -1152,10 +1142,10 @@
             enddo
           else                     ! use diagnostic cloud method
             do k = 1, nlay
-              cfrac(k) = cld_cf(j1,k)     ! cloud fraction
-              cdat1(k) = cld_od(j1,k)     ! cloud optical depth
-              cdat2(k) = cld_ssa(j1,k)    ! cloud single scattering albedo
-              cdat3(k) = cld_asy(j1,k)    ! cloud asymmetry factor
+              cfrac(k) = cld_cf(j1,k)        ! cloud fraction
+              cdat1(k) = cld_od(j1,k)        ! cloud optical depth
+              cdat2(k) = cld_ssa(j1,k)       ! cloud single scattering albedo
+              cdat3(k) = cld_asy(j1,k)       ! cloud asymmetry factor
             enddo
           endif                    ! end if_iswcliq
 
@@ -1216,9 +1206,11 @@
             enddo
           enddo
         endif   ! end if_zcf1_block
-        do k = 1, nlay
-          cld_od_total(j1,k) = taucw(k,10)
-        end do 
+        if (iswcliq > 0) then
+          do k = 1, nlay
+            cld_od_total(j1,k) = taucw(k,10)
+          end do
+        endif
 !> -# Call setcoef() to compute various coefficients needed in
 !!    radiative transfer calculations.
         call setcoef                                                    &
