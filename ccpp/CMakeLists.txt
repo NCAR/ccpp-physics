@@ -65,7 +65,7 @@ if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -cpp")
   if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans")
-    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check")
+    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -ffpe-trap=invalid,zero,overflow -fcheck=bounds -fbacktrace -fno-range-check")
   endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -Mcray=pointer -Kieee -byteswapio -i4 -r8 -Mfprelaxed=div -Mfprelaxed=sqrt")
@@ -103,6 +103,10 @@ endif()
 #------------------------------------------------------------------------------
 # CMake Modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/framework/cmake")
+
+#------------------------------------------------------------------------------
+# Add -DCCPP preprocessor flag (needed to preprocess GFS_typedefs.F90 from FV3)
+ADD_DEFINITIONS(-DCCPP)
 
 #------------------------------------------------------------------------------
 # Set MPI flags for C/C++/Fortran preprocessor
