@@ -1844,7 +1844,7 @@
 !         clouds(i,k,6) = 0.0
           clouds(i,k,7) = rer(i,k)
 !         clouds(i,k,8) = 0.0
-          clouds(i,k,9) = rei(i,k)
+          clouds(i,k,9) = res(i,k)
         enddo
       enddo
 
