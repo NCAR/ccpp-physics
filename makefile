@@ -47,7 +47,6 @@ SRCS_f   =  \
 	   ./physics/h2o_def.f                                                       \
 	   ./physics/iounitdef.f                                                     \
 	   ./physics/mersenne_twister.f                                              \
-	   ./physics/mfdeepcnv.f                                                     \
 	   ./physics/mfpbl.f                                                         \
 	   ./physics/mfshalcnv.f                                                     \
 	   ./physics/module_bfmicrophysics.f                                         \
@@ -71,7 +70,8 @@ SRCS_f   =  \
 	   ./physics/radsw_param.f                                                   \
 	   ./physics/rascnvv2.f                                                      \
 	   ./physics/rayleigh_damp.f                                                 \
-	   ./physics/set_soilveg.f                                                   \
+		 ./physics/samfdeepcnv.f
+		 ./physics/set_soilveg.f                                                   \
 	   ./physics/GFS_surface_loop_control.f                                      \
 	   ./physics/sfc_diag.f                                                      \
 	   ./physics/sfc_diff.f                                                      \
@@ -139,7 +139,7 @@ SRCS_c   =
 ifneq (,$(findstring CCPP,$(CPPDEFS)))
 include ./CCPP_CAPS.mk
 else
-CAPS_F90 = 
+CAPS_F90 =
 endif
 
 DEPEND_FILES = $(SRCS_f) $(SRCS_f90) $(SRCS_F) $(SRCS_F90) $(CAPS_F90)
