@@ -174,7 +174,7 @@
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,
      &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,
-     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac)
+     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -202,6 +202,8 @@
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,
      &                     betal,   betas,   asolfac,
      &                     evfact,  evfactl, pgcon
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 !
 !------local variables
       integer              i, indx, jmn, k, kk, km1, n
@@ -346,6 +348,10 @@ c     data acritt/.203,.515,.521,.566,.625,.665,.659,.688,
 c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
