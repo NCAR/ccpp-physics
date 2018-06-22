@@ -516,6 +516,24 @@ module GFS_typedefs
     real(kind=kind_phys) :: prslrd0         !< pressure level from which Rayleigh Damping is applied
     real(kind=kind_phys) :: ral_ts          !< time scale for Rayleigh damping in days
 
+    !--- mass flux deep convection
+    real(kind=kind_phys) :: clam_deep       !< c_e for deep convection (Han and Pan, 2011, eq(6))
+    real(kind=kind_phys) :: c0s_deep        !< convective rain conversion parameter
+    real(kind=kind_phys) :: c1_deep         !< conversion parameter of detrainment from liquid water into grid-scale cloud water
+    real(kind=kind_phys) :: betal_deep      !< fraction factor of downdraft air mass reaching ground surface over land
+    real(kind=kind_phys) :: betas_deep      !< fraction factor of downdraft air mass reaching ground surface over sea
+    real(kind=kind_phys) :: evfact_deep     !< evaporation factor from convective rain
+    real(kind=kind_phys) :: evfactl_deep    !< evaporation factor from convective rain over land
+    real(kind=kind_phys) :: pgcon_deep      !< reduction factor in momentum transport due to convection induced pressure gradient force
+                                            !< 0.7 : Gregory et al. (1997, QJRMS)
+                                            !< 0.55: Zhang & Wu (2003, JAS)
+    real(kind=kind_phys) :: asolfac_deep    !< aerosol-aware parameter based on Lim (2011)
+                                            !< asolfac= cx / c0s(=.002)
+                                            !< cx = min([-0.7 ln(Nccn) + 24]*1.e-4, c0s)
+                                            !< Nccn: CCN number concentration in cm^(-3)
+                                            !< Until a realistic Nccn is provided, Nccns are assumed
+                                            !< as Nccn=100 for sea and Nccn=1000 for land
+
     !--- near surface temperature model
     logical              :: nst_anl         !< flag for NSSTM analysis in gcycle/sfcsub
     integer              :: lsea
@@ -954,6 +972,7 @@ module GFS_typedefs
     integer,               pointer      :: mbota(:,:)       => null()  !<
     integer,               pointer      :: mtopa(:,:)       => null()  !<
     integer                             :: nday                        !<
+    integer                             :: nsamftrac                   !<
     integer                             :: ntk                         !<
     integer                             :: nvdiff                      !<
     real (kind=kind_phys), pointer      :: oa4(:,:)         => null()  !<
@@ -1683,6 +1702,24 @@ module GFS_typedefs
     real(kind=kind_phys) :: prslrd0        = 0.0d0           !< pressure level from which Rayleigh Damping is applied
     real(kind=kind_phys) :: ral_ts         = 0.0d0           !< time scale for Rayleigh damping in days
 
+    !--- mass flux deep convection
+    real(kind=kind_phys) :: clam_deep      = 0.1             !< c_e for deep convection (Han and Pan, 2011, eq(6))
+    real(kind=kind_phys) :: c0s_deep       = 0.002           !< convective rain conversion parameter
+    real(kind=kind_phys) :: c1_deep        = 0.002           !< conversion parameter of detrainment from liquid water into grid-scale cloud water
+    real(kind=kind_phys) :: betal_deep     = 0.05            !< fraction factor of downdraft air mass reaching ground surface over land
+    real(kind=kind_phys) :: betas_deep     = 0.05            !< fraction factor of downdraft air mass reaching ground surface over sea
+    real(kind=kind_phys) :: evfact_deep    = 0.3             !< evaporation factor from convective rain
+    real(kind=kind_phys) :: evfactl_deep   = 0.3             !< evaporation factor from convective rain over land
+    real(kind=kind_phys) :: pgcon_deep     = 0.55            !< reduction factor in momentum transport due to convection induced pressure gradient force
+                                                             !< 0.7 : Gregory et al. (1997, QJRMS)
+                                                             !< 0.55: Zhang & Wu (2003, JAS)
+    real(kind=kind_phys) :: asolfac_deep   = 0.958           !< aerosol-aware parameter based on Lim (2011)
+                                                             !< asolfac= cx / c0s(=.002)
+                                                             !< cx = min([-0.7 ln(Nccn) + 24]*1.e-4, c0s)
+                                                             !< Nccn: CCN number concentration in cm^(-3)
+                                                             !< Until a realistic Nccn is provided, Nccns are assumed
+                                                             !< as Nccn=100 for sea and Nccn=1000 for land
+
     !--- near surface temperature model
     logical              :: nst_anl        = .false.         !< flag for NSSTM analysis in gcycle/sfcsub
     integer              :: lsea           = 0
@@ -1734,6 +1771,10 @@ module GFS_typedefs
                                dlqf,                                                        &
                           !--- Rayleigh friction
                                prslrd0, ral_ts,                                             &
+                          !--- mass flux deep convection
+                               clam_deep, c0s_deep, c1_deep, betal_deep,                    &
+                               betas_deep, evfact_deep, evfactl_deep, pgcon_deep,           &
+                               asolfac_deep,                                                &
                           !--- near surface temperature model
                                nst_anl, lsea, xkzm_m, xkzm_h, xkzm_s, nstf_name,            &
                           !--- stochastic physics
@@ -1915,6 +1956,17 @@ module GFS_typedefs
     !--- Rayleigh friction
     Model%prslrd0          = prslrd0
     Model%ral_ts           = ral_ts
+
+    !--- mass flux deep convection
+    Model%clam_deep        = clam_deep
+    Model%c0s_deep         = c0s_deep
+    Model%c1_deep          = c1_deep
+    Model%betal_deep       = betal_deep
+    Model%betas_deep       = betas_deep
+    Model%evfact_deep      = evfact_deep
+    Model%evfactl_deep     = evfactl_deep
+    Model%pgcon_deep       = pgcon_deep
+    Model%asolfac_deep     = asolfac_deep
 
     !--- near surface temperature model
     Model%nst_anl          = nst_anl
@@ -2350,6 +2402,19 @@ module GFS_typedefs
       print *, ' prslrd0           : ', Model%prslrd0
       print *, ' ral_ts            : ', Model%ral_ts
       print *, ' '
+      if (Model%imfdeepcnv >= 0) then
+        print *, 'mass flux deep convection'
+        print *, ' clam_deep         : ', Model%clam_deep
+        print *, ' c0s_deep          : ', Model%c0s_deep
+        print *, ' c1_deep           : ', Model%c1_deep
+        print *, ' betal_deep        : ', Model%betal_deep
+        print *, ' betas_deep        : ', Model%betas_deep
+        print *, ' evfact_deep       : ', Model%evfact_deep
+        print *, ' evfactl_deep      : ', Model%evfactl_deep
+        print *, ' pgcon_deep        : ', Model%pgcon_deep
+        print *, ' asolfac_deep      : ', Model%asolfac_deep
+        print *, ' '
+      endif
       print *, 'near surface temperature model'
       print *, ' nst_anl           : ', Model%nst_anl
       print *, ' lsea              : ', Model%lsea
@@ -3151,6 +3216,7 @@ module GFS_typedefs
     Interstitial%kinver       = 0
     Interstitial%kpbl         = 0
     Interstitial%ktop         = 0
+    Interstitial%nsamftrac    = 0
     Interstitial%oa4          = clear_val
     Interstitial%oc           = clear_val
     Interstitial%qss          = clear_val
@@ -3215,6 +3281,7 @@ module GFS_typedefs
     write (0,*) 'Interstitial%lm           = ', Interstitial%lm
     write (0,*) 'Interstitial%lmk          = ', Interstitial%lmk
     write (0,*) 'Interstitial%lmp          = ', Interstitial%lmp
+    write (0,*) 'Interstitial%nsamftrac    = ', Interstitial%nsamftrac
     write (0,*) 'Interstitial%nvdiff       = ', Interstitial%nvdiff
     write (0,*) 'Interstitial%oz_coeff     = ', Interstitial%oz_coeff
     write (0,*) 'Interstitial%oz_pres      = ', Interstitial%oz_pres

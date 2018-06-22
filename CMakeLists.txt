@@ -174,7 +174,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/ozphys.f
       ./physics/GFS_DCNV_generic.f90
       ./physics/GFS_zhao_carr_pre.f90
-      ./physics/mfdeepcnv.f
+      ./physics/samfdeepcnv.f
       ./physics/gwdc.f
       ./physics/GFS_SCNV_generic.f90
       ./physics/mfshalcnv.f
@@ -213,7 +213,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/GFS_suite_interstitial_1_cap.F90
   ./physics/GFS_rrtmg_post_cap.F90
   ./physics/GFS_suite_interstitial_2_cap.F90
-  ./physics/GFS_surface_generic_pre_cap.F90
+  ./physics/samfdeepcnv_cap.F90
   ./physics/rrtmg_lw_pre_cap.F90
   ./physics/GFS_rad_time_vary_cap.F90
   ./physics/sasas_shal_post_cap.F90
@@ -224,7 +224,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/sfc_ex_coef_cap.F90
   ./physics/gwdc_post_cap.F90
   ./physics/GFS_suite_update_stateout_cap.F90
-  ./physics/sasas_deep_cap.F90
+  ./physics/GFS_phys_time_vary_1_cap.F90
   ./physics/gwdc_pre_cap.F90
   ./physics/sfc_sice_cap.F90
   ./physics/sfc_nst_post_cap.F90
@@ -243,7 +243,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/sfc_nst_pre_cap.F90
   ./physics/GFS_SCNV_generic_post_cap.F90
   ./physics/GFS_suite_setup_scm_cap.F90
-  ./physics/GFS_phys_time_vary_1_cap.F90
+  ./physics/dcyc2t3_pre_cap.F90
   ./physics/dcyc2t3_cap.F90
   ./physics/GFS_DCNV_generic_pre_cap.F90
   ./physics/zhaocarr_gscond_cap.F90
@@ -254,7 +254,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
   ./physics/sfc_nst_cap.F90
   ./physics/gwdps_cap.F90
   ./physics/get_prs_fv3_cap.F90
-  ./physics/dcyc2t3_pre_cap.F90
+  ./physics/GFS_surface_generic_pre_cap.F90
   ./physics/ozphys_cap.F90
   ./physics/GFS_calpreciptype_cap.F90
   ./physics/rayleigh_damp_cap.F90
