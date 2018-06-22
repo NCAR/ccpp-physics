@@ -70,8 +70,8 @@ SRCS_f   =  \
 	   ./physics/radsw_param.f                                                   \
 	   ./physics/rascnvv2.f                                                      \
 	   ./physics/rayleigh_damp.f                                                 \
-		 ./physics/samfdeepcnv.f
-		 ./physics/set_soilveg.f                                                   \
+	   ./physics/samfdeepcnv.f                                                 \
+	   ./physics/set_soilveg.f                                                 \
 	   ./physics/GFS_surface_loop_control.f                                      \
 	   ./physics/sfc_diag.f                                                      \
 	   ./physics/sfc_diff.f                                                      \
