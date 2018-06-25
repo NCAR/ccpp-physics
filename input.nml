@@ -124,7 +124,7 @@
 
 &gfs_physics_nml
        fhzero         = 6.
-       ldiag3d        = .false.
+       ldiag3d        = .true.
        fhcyc          = 0.
        nst_anl        = .true.
        use_ufo        = .true.
@@ -160,7 +160,9 @@
        isot           = 1
        debug          = .true.
        nstf_name      = 2,0,1,0,5
-
+       xkzminv        = 0.3
+       xkzm_m         = 1.0
+       xkzm_h         = 1.0
        jcap = 574
 
 /

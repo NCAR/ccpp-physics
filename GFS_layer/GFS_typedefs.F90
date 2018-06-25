@@ -529,6 +529,8 @@ module GFS_typedefs
                                             !< nstf_name(3) : 1 = NSST analysis on, 0 = NSSTM analysis off
                                             !< nstf_name(4) : zsea1 in mm
                                             !< nstf_name(5) : zsea2 in mm
+    real(kind=kind_phys) :: xkzminv         !< diffusivity in inversion layers
+    real(kind=kind_phys) :: moninq_fac      !< turbulence diffusion coefficient factor
 
     !--- stochastic physics control parameters
     logical              :: do_sppt
@@ -1697,6 +1699,8 @@ module GFS_typedefs
                                                              !< nstf_name(3) : 1 = NSSTM analysis on, 0 = NSSTM analysis off
                                                              !< nstf_name(4) : zsea1 in mm
                                                              !< nstf_name(5) : zsea2 in mm
+    real(kind=kind_phys) :: xkzminv        = 0.3             !< diffusivity in inversion layers
+    real(kind=kind_phys) :: moninq_fac     = 1.0             !< turbulence diffusion coefficient factor
 
     !--- stochastic physics options
     real(kind=kind_phys) :: sppt(5)        = -999.           !< stochastic physics tendency amplitude
@@ -1736,6 +1740,7 @@ module GFS_typedefs
                                prslrd0, ral_ts,                                             &
                           !--- near surface temperature model
                                nst_anl, lsea, xkzm_m, xkzm_h, xkzm_s, nstf_name,            &
+                               xkzminv, moninq_fac,                                         &
                           !--- stochastic physics
                                sppt, shum, skeb, vcamp, vc,                                 &
                           !--- debug options
@@ -1923,6 +1928,8 @@ module GFS_typedefs
     Model%xkzm_h           = xkzm_h
     Model%xkzm_s           = xkzm_s
     Model%nstf_name        = nstf_name
+    Model%xkzminv          = xkzminv
+    Model%moninq_fac       = moninq_fac
 
     !--- stochastic physics options
     Model%sppt             = sppt
@@ -2356,6 +2363,8 @@ module GFS_typedefs
       print *, ' xkzm_m            : ', Model%xkzm_m
       print *, ' xkzm_h            : ', Model%xkzm_h
       print *, ' xkzm_s            : ', Model%xkzm_s
+      print *, ' xkzminv           : ', Model%xkzminv
+      print *, ' moninq_fac        : ', Model%moninq_fac
       print *, ' nstf_name         : ', Model%nstf_name
       print *, ' '
       print *, 'stochastic physics'
