@@ -6,6 +6,7 @@
  
       public GFS_diagtoscreen_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
 
+#define PRINT_SUM
       interface print_var
         module procedure print_int_0d
         module procedure print_real_0d
@@ -45,7 +46,7 @@
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
+      subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                        errmsg, errflg)
 
@@ -82,23 +83,25 @@
 
          !--- local variables
          integer :: impi, iomp, ierr
-         integer :: mpirank,mpisize
-         integer :: omprank,ompsize
+         integer :: mpirank, mpisize, mpicomm
+         integer :: omprank, ompsize
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
 #ifdef MPI
-         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
-         call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+         mpicomm = Model%communicator
+         mpirank = Model%me
+         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
 #else
          mpirank = 0
          mpisize = 1
+         mpicomm = 0
 #endif
 #ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
-         ompsize = OMP_GET_NUM_THREADS()
+         ompsize = Model%threads
 #else
          omprank = 0
          ompsize = 1
@@ -108,7 +111,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -131,7 +134,9 @@
                      call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%stc',          Sfcprop%stc)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%t2m',          Sfcprop%t2m)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%q2m',          Sfcprop%q2m)
-                     call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%tref',         Sfcprop%tref)
+                     if (Model%nstf_name(1)>0) then
+                        call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%tref',         Sfcprop%tref)
+                     end if
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htlwc',            Tbd%htlwc)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htlw0',            Tbd%htlw0)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htswc',            Tbd%htswc)
@@ -143,7 +148,7 @@
 #endif
              end do
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+             call MPI_BARRIER(mpicomm,ierr)
 #endif
          end do
 
@@ -151,7 +156,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
       end subroutine GFS_diagtoscreen_run
@@ -194,9 +199,13 @@
 
           integer :: i
 
+#ifdef PRINT_SUM
+          write(0,'(2a,3i4,e14.6)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var)
+#else
           do i=ISTART,min(IEND,size(var(:)))
               write(0,'(2a,3i4,i6,e14.6)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
           end do
+#endif
 
       end subroutine print_real_1d
 
@@ -212,11 +221,15 @@
           
           integer :: k, i
 
+#ifdef PRINT_SUM
+          write(0,'(2a,3i4,e14.6)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var)
+#else
           do i=ISTART,min(IEND,size(var(:,1)))
               do k=KSTART,min(KEND,size(var(1,:)))
                   write(0,'(2a,3i4,2i6,e14.6)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, var(i,k)
               end do
           end do
+#endif
 
       end subroutine print_real_2d
 
@@ -232,6 +245,9 @@
 
           integer :: k, i, l
 
+#ifdef PRINT_SUM
+          write(0,'(2a,3i4,e14.6)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var)
+#else
           do i=ISTART,min(IEND,size(var(:,1,1)))
               do k=KSTART,min(KEND,size(var(1,:,1)))
                   do l=1,size(var(1,1,:))
@@ -239,6 +255,7 @@
                   end do
               end do
           end do
+#endif
 
       end subroutine print_real_3d
 
@@ -313,23 +330,25 @@
 
          !--- local variables
          integer :: impi, iomp, ierr
-         integer :: mpirank,mpisize
-         integer :: omprank,ompsize
+         integer :: mpirank, mpisize, mpicomm
+         integer :: omprank, ompsize
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
 #ifdef MPI
-         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
-         call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
+         mpicomm = Model%communicator
+         mpirank = Model%me
+         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
 #else
          mpirank = 0
          mpisize = 1
+         mpicomm = 0
 #endif
 #ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
-         ompsize = OMP_GET_NUM_THREADS()
+         ompsize = Model%threads
 #else
          omprank = 0
          ompsize = 1
@@ -339,7 +358,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -352,7 +371,7 @@
 #endif
              end do
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+             call MPI_BARRIER(mpicomm,ierr)
 #endif
          end do
 
@@ -360,166 +379,9 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
       end subroutine GFS_interstitialtoscreen_run
 
     end module GFS_interstitialtoscreen
-
-
-    module GFS_barrier
-
-      private
- 
-      public GFS_barrier_init, GFS_barrier_run, GFS_barrier_finalize
-
-  contains
-
-      subroutine GFS_barrier_init ()
-      end subroutine GFS_barrier_init
-
-      subroutine GFS_barrier_finalize ()
-      end subroutine GFS_barrier_finalize
-
-!> \section arg_table_GFS_barrier_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
-!!
-      subroutine GFS_barrier_run (Model, errmsg, errflg)
-
-#ifdef MPI
-         use mpi
-#endif
-#ifdef OPENMP
-         use omp_lib
-#endif
-         use machine,               only: kind_phys
-         use GFS_typedefs,          only: GFS_control_type
-
-         implicit none
-
-         !--- interface variables
-         type(GFS_control_type),   intent(in)  :: Model
-         character(len=*),         intent(out) :: errmsg
-         integer,                  intent(out) :: errflg
-
-         !--- local variables
-         integer :: impi, iomp, ierr
-         integer :: mpirank,mpisize
-         integer :: omprank,ompsize
-
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
-
-#ifdef MPI
-         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
-         call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
-#ifdef OPENMP
-         omprank = OMP_GET_THREAD_NUM()
-         ompsize = OMP_GET_NUM_THREADS()
-#else
-         omprank = 0
-         ompsize = 1
-#endif
-
-#ifdef OPENMP
-!$OMP BARRIER
-#endif
-#ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-#endif
-         ! Keep this for flushing output to disk
-         call sleep(1)
-#ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-#endif
-
-      end subroutine GFS_barrier_run
-
-    end module GFS_barrier
-
-    module GFS_abort
-
-      private
- 
-      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
-
-  contains
-
-      subroutine GFS_abort_init ()
-      end subroutine GFS_abort_init
-
-      subroutine GFS_abort_finalize ()
-      end subroutine GFS_abort_finalize
-
-!> \section arg_table_GFS_abort_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
-!!
-      subroutine GFS_abort_run (Model, errmsg, errflg)
-
-#ifdef MPI
-         use mpi
-#endif
-#ifdef OPENMP
-         use omp_lib
-#endif
-         use machine,               only: kind_phys
-         use GFS_typedefs,          only: GFS_control_type
-
-         implicit none
-
-         !--- interface variables
-         type(GFS_control_type),   intent(in)  :: Model
-         character(len=*),         intent(out) :: errmsg
-         integer,                  intent(out) :: errflg
-
-         !--- local variables
-         integer :: impi, iomp, ierr
-         integer :: mpirank,mpisize
-         integer :: omprank,ompsize
-
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
-
-#ifdef MPI
-         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
-         call MPI_COMM_SIZE(MPI_COMM_WORLD, mpisize, ierr)
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
-#ifdef OPENMP
-         omprank = OMP_GET_THREAD_NUM()
-         ompsize = OMP_GET_NUM_THREADS()
-#else
-         omprank = 0
-         ompsize = 1
-#endif
-
-         errflg = 1
-         errmsg = 'Abort requested by user in GFS_abort_run'
-
-#ifdef OPENMP
-!$OMP BARRIER
-#endif
-#ifdef MPI
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-#endif
-
-      end subroutine GFS_abort_run
-
-    end module GFS_abort
