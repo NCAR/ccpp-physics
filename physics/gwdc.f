@@ -1,6 +1,6 @@
 !> \file gwdc.f This file is the original code for parameterization of
-!! stationary convection forced gravity wave drag based on 
-!! \cite chun_and_baik_1998 .
+!! stationary convection forced gravity wave drag based on
+!! \cite chun_and_baik_1998.
 
       module gwdc_pre
       contains
@@ -101,8 +101,6 @@
 
       end module gwdc_pre
 
-
-
       module gwdc
 
       contains
@@ -196,7 +194,7 @@
 !        2013   S. Moorthi - Updated and optimized code for T1534 GFS implementation
 ! ??? ?? 2015   J. Alpert  - reducing the magnitude of tauctmax to fix blow up in L64 GFS
 !               S. Kar & M. Young
-! aug 15 2016 - S. Moorthi - Fix for exessive dissipation which led to blow up in 
+! aug 15 2016 - S. Moorthi - Fix for exessive dissipation which led to blow up in
 !                            128 level runs with NEMS/GSM
 !***********************************************************************
 
@@ -216,7 +214,7 @@
 !  dpmid    : midpoint delta p ( pi(k)-pi(k-1) )
 !  lat      : latitude index
 !  qmax     : deep convective heating
-!  kcldtop  : Vertical level index for cloud top    ( mid level ) 
+!  kcldtop  : Vertical level index for cloud top    ( mid level )
 !  kcldbot  : Vertical level index for cloud bottom ( mid level )
 !  kcnv     : (0,1) dependent on whether convection occur or not
 !
@@ -257,19 +255,19 @@
 !             parallel to the wind vector at the cloud top ( mid level )
 !  tauctx   : Wave stress at the cloud top projected in the east
 !  taucty   : Wave stress at the cloud top projected in the north
-!  qmax     : Maximum deep convective heating rate ( K s-1 ) in a  
+!  qmax     : Maximum deep convective heating rate ( K s-1 ) in a
 !             horizontal grid point calculated from cumulus para-
 !             meterization. ( mid level )
 !  wtgwc    : Wind tendency in direction to the wind vector at the cloud top level
 !             due to convectively generated gravity waves ( mid level )
-!  utgwcl   : Zonal wind tendency due to convectively generated 
+!  utgwcl   : Zonal wind tendency due to convectively generated
 !             gravity waves ( mid level )
 !  vtgwcl   : Meridional wind tendency due to convectively generated
 !             gravity waves ( mid level )
 !  taugwci  : Profile of wave stress calculated using basic-wind
-!             parallel to the wind vector at the cloud top 
+!             parallel to the wind vector at the cloud top
 !  taugwcxi : Profile of zonal component of gravity wave stress
-!  taugwcyi : Profile of meridional component of gravity wave stress 
+!  taugwcyi : Profile of meridional component of gravity wave stress
 !
 !  taugwci, taugwcxi, and taugwcyi are defined at the interface level
 !
@@ -279,7 +277,7 @@
 !  rhom     : Air density ( mid level )
 !  ti       : Temperature ( interface level )
 !  basicum  : Basic-wind profile. Basic-wind is parallel to the wind
-!             vector at the cloud top level. (mid level) 
+!             vector at the cloud top level. (mid level)
 !  basicui  : Basic-wind profile. Basic-wind is parallel to the wind
 !             vector at the cloud top level. ( interface level )
 !  riloc    : Local Richardson number ( interface level )
@@ -289,7 +287,7 @@
 !  break    : Horizontal location where wave breaking is occurred.
 !  critic   : Horizontal location where critical level filtering is
 !             occurred.
-!  dogwdc   : Logical flag whether the GWDC parameterization is           
+!  dogwdc   : Logical flag whether the GWDC parameterization is
 !             calculated at a grid point or not.
 !  
 !  dogwdc is used in order to lessen CPU time for GWDC calculation.
@@ -342,7 +340,7 @@
 !  ucltop    : Zonal wind at the cloud top ( mid level )
 !  vcltop    : Meridional wind at the cloud top ( mid level )
 !  windcltop : Wind speed at the cloud top ( mid level )
-!  shear     : Vertical shear of basic wind 
+!  shear     : Vertical shear of basic wind
 !  cosphi    : Cosine of angle of wind vector at the cloud top
 !  sinphi    : Sine   of angle of wind vector at the cloud top
 !  c1        : Tunable parameter
@@ -645,7 +643,7 @@
           qtem       = spfh(i,k-1) * tem1 + spfh(i,k) * tem2
           rhoi(i,k)  = pint(i,k) / ( rd * ti(i,k)*(1.0+fv*qtem) )
           dtdp       = (t(i,k)-t(i,k-1)) / (pmid(i,k)-pmid(i,k-1))
-          n2         = gsqr / ti(i,k) * ( 1./cp - rhoi(i,k)*dtdp ) 
+          n2         = gsqr / ti(i,k) * ( 1./cp - rhoi(i,k)*dtdp )
           bruni(i,k) = sqrt (max (n2min, n2))
         enddo
       enddo
@@ -741,7 +739,7 @@
 !-----------------------------------------------------------------------
 !
 !> - Calculate the basic state wind profiles projected in the direction of the
-!!  cloud top wind at mid level and interface level. 
+!!  cloud top wind at mid level and interface level.
 ! \n  U : Basic-wind speed profile. Basic-wind is parallel to the wind
 !             vector at the cloud top level. (mid level)
 ! \n  UI: Basic-wind speed profile. Basic-wind is parallel to the wind
@@ -804,7 +802,7 @@
 !           18 -------- U(18)
 !           19 ========       UI(19)           rhoi(19) bruni(19) riloc(19)
 !
-!-----------------------------------------------------------------------     
+!-----------------------------------------------------------------------
 
       do k=2,km
         do i=1,npt
@@ -860,33 +858,33 @@
 !      it can be thought that there is deep convective cloud. However,
 !      deep convective heating between kcldbot and kcldtop is sometimes
 !      zero in spite of kcldtop less than kcldbot. In this case,
-!      maximum deep convective heating is assumed to be 1.e-30. 
+!      maximum deep convective heating is assumed to be 1.e-30.
 !
 !  B : kk is the vertical index for interface level cloud top
 !
 !  C : Total convective fractional cover (cldf) is used as the
-!      convective cloud cover for GWDC calculation instead of   
+!      convective cloud cover for GWDC calculation instead of
 !      convective cloud cover in each layer (concld).
 !                       a1 = cldf*dlength
 !      You can see the difference between cldf(i) and concld(i)
-!      in (4.a.2) in Description of the NCAR Community Climate    
+!      in (4.a.2) in Description of the NCAR Community Climate
 !      Model (CCM3).
 !      In NCAR CCM3, cloud fractional cover in each layer in a deep
 !      cumulus convection is determined assuming total convective
-!      cloud cover is randomly overlapped in each layer in the 
+!      cloud cover is randomly overlapped in each layer in the
 !      cumulus convection.
 !
 !  D : Wave stress at cloud top is calculated when the atmosphere
 !      is dynamically stable at the cloud top
 !
-!  E : Cloud top wave stress and nonlinear parameter are calculated 
+!  E : Cloud top wave stress and nonlinear parameter are calculated
 !      using density, temperature, and wind that are defined at mid
 !      level just below the interface level in which cloud top wave
 !      stress is defined.
 !      Nonlinct is defined at the interface level.
 !  
 !  F : If the atmosphere is dynamically unstable at the cloud top,
-!      GWDC calculation in current horizontal grid is skipped.  
+!      GWDC calculation in current horizontal grid is skipped.
 !
 !  G : If mean wind at the cloud top is less than zero, GWDC
 !      calculation in current horizontal grid is skipped.
@@ -906,11 +904,11 @@
 !!  \mu=\frac{gQ_{0}a_{1}}{c_{p}T_{0}NU^{2}}
 !! \f]
 !! where \f$Q_{0}\f$ is the maximum deep convective heating rate in a
-!! horizontal grid point calculated from cumulus parameterization. 
+!! horizontal grid point calculated from cumulus parameterization.
 !! \f$a_{1}\f$ is the half-width of
-!! the forcing function.\f$g\f$ is gravity. \f$c_{p}\f$ is specific 
-!! heat at constant pressure. \f$T_{0}\f$ is the layer mean 
-!! temperature (T1). As eqs.(18) and (19) \cite chun_and_baik_1998, 
+!! the forcing function.\f$g\f$ is gravity. \f$c_{p}\f$ is specific
+!! heat at constant pressure. \f$T_{0}\f$ is the layer mean
+!! temperature (T1). As eqs.(18) and (19) \cite chun_and_baik_1998,
 !! the zonal momentum flux is given by
 !! \f[
 !! \tau_{x}=-[\rho U^{3}/(N\triangle x)]G(\mu)
@@ -920,11 +918,11 @@
 !! G(\mu)=c_{1}c_2^2 \mu^{2}
 !! \f]
 !! wher \f$\rho\f$ is the local density.
-!! The tunable parameter \f$c_1\f$ is related to the horizontal 
-!! structure of thermal forcing. The tunable parameter \f$c_2\f$ is 
-!! related to the basic-state wind and stability and the bottom and 
+!! The tunable parameter \f$c_1\f$ is related to the horizontal
+!! structure of thermal forcing. The tunable parameter \f$c_2\f$ is
+!! related to the basic-state wind and stability and the bottom and
 !! top heights of thermal forcing. If the atmosphere is dynamically
-!! unstable at the cloud top, the convective GWD calculation is 
+!! unstable at the cloud top, the convective GWD calculation is
 !! skipped at that grid point.
 !!
 !  - If mean wind at the cloud top is less than zero, GWDC
@@ -993,11 +991,11 @@
 !
 !  Minimum RI is calculated for the following two cases
 !
-!  (1)   RIloc < 1.e+20  
+!  (1)   RIloc < 1.e+20
 !  (2)   Riloc = 1.e+20  ----> Vertically uniform basic-state wind
 !
 !  RIloc cannot be smaller than zero because N^2 becomes 1.E-32 in the
-!  case of N^2 < 0.. Thus the sign of RINUM is determined by 
+!  case of N^2 < 0.. Thus the sign of RINUM is determined by
 !  1 - nonlin*|c2|.
 !
 !-----------------------------------------------------------------------
@@ -1068,20 +1066,20 @@
 !            2 ========       - 0.001         -1.e20
 !            2 --------                               0.000
 !            3 ========       - 0.001         -1.e20
-!            3 --------                               -.xxx 
+!            3 --------                               -.xxx
 !            4 ========       - 0.001  2.600  2.000
 !            4 --------                               0.000
 !            5 ========       - 0.001  2.500  2.000
 !            5 --------                               0.000
 !            6 ========       - 0.001  1.500  0.110
-!            6 --------                               +.xxx 
+!            6 --------                               +.xxx
 !            7 ========       - 0.005  2.000  3.000
 !            7 --------                               0.000
 !            8 ========       - 0.005  1.000  0.222
 !            8 --------                               +.xxx
 !            9 ========       - 0.010  1.000  2.000
 !            9 --------                               0.000
-! kcldtopi  10 ========  $$$  - 0.010 
+! kcldtopi  10 ========  $$$  - 0.010
 ! kcldtop   10 --------  $$$                          yyyyy
 !           11 ========  $$$  0
 !           11 --------  $$$
@@ -1128,22 +1126,22 @@
                     taugwci(i,k) = taugwci(i,k+1)
                   elseif (rimin(i,k) > riminp) then
                     tem = 2.0 + 1.0 / sqrt(riloc(i,k))
-                    nonlins = (1.0/abs(c2)) * (2.*sqrt(tem) - tem) 
+                    nonlins = (1.0/abs(c2)) * (2.*sqrt(tem) - tem)
                     tem1 = basicui(i,k)
                     tem2 = c2*nonlins*tem1
                     taugwci(i,k) = - rhoi(i,k) * c1 * tem1 * tem2 * tem2
      &                           /  (bruni(i,k)*dlen(i))
                   elseif (rimin(i,k) > riminm) then
-                    taugwci(i,k) = zero 
+                    taugwci(i,k) = zero
 !                   taugwci(i,k) = taugwci(i,k+1) 
                   end if                                              ! RImin
                 else
 
-!>  - If the minimum \f$R_{i}\f$ at interface cloud top is less than 
+!>  - If the minimum \f$R_{i}\f$ at interface cloud top is less than
 !! or equal to 1/4, the convective GWD calculation is skipped at that
 !! grid point.
 
-                  taugwci(i,k) = zero    
+                  taugwci(i,k) = zero
                 end if                                                ! RIloc
               else
                  taugwci(i,k) = zero
@@ -1189,7 +1187,7 @@
               taugw(i,k) = (taugwci(i,k+1) - taugwci(i,k)) / dpmid(i,k)
               if (taugw(i,k) /= 0.0) then
                 tem  = deltim * taugw(i,k)
-                dtfac(i) = min(dtfac(i), abs(velco(i,k)/tem)) 
+                dtfac(i) = min(dtfac(i), abs(velco(i,k)/tem))
               endif
             else
               taugw(i,k) = 0.0
@@ -1200,8 +1198,7 @@
         enddo
       enddo
 
-!!!!!! Vertical differentiation
-!!!!!!
+!!!!!! Vertical differentiation!!!!!!
 !> - Calculate wind tendency in direction to the wind vector,zonal
 !! wind tendency and meridional wind tendency above the cloud top
 !! level due to convectively generated gravity waves.
@@ -1294,22 +1291,19 @@
 
 !-----------------------------------------------------------------------
 !
-!  The GWDC should accelerate the zonal and meridional wind in the   
-!  opposite direction of the previous zonal and meridional wind, 
+!  The GWDC should accelerate the zonal and meridional wind in the
+!  opposite direction of the previous zonal and meridional wind,
 !  respectively
 !
 !-----------------------------------------------------------------------
 
 !     do k=1,kcldtop(i)-1
-
 !      if (utgwcl(i,k)*u(i,k) .gt. 0.0) then
-
 !-------------------- x-component-------------------
-
-!       write(6,'(a)')   
+!       write(6,'(a)')
 !    +  '(GWDC) WARNING: The GWDC should accelerate the zonal wind '
-!       write(6,'(a,a,i3,a,i3)')   
-!    +  'in the opposite direction of the previous zonal wind', 
+!       write(6,'(a,a,i3,a,i3)')
+!    +  'in the opposite direction of the previous zonal wind',
 !    +  ' at I = ',i,' and J = ',lat
 !       write(6,'(4(1x,e17.10))') u(i,kk),v(i,kk),u(i,k),v(i,k)
 !       write(6,'(a,1x,e17.10))') 'Vcld . V =',
@@ -1319,7 +1313,7 @@
 !       do k1=1,km
 !         write(6,'(i2,36x,2(1x,e17.10))')
 !    +             k1,taugwcxi(i,k1),taugwci(i,k1)
-!         write(6,'(i2,2(1x,e17.10))') k1,utgwcl(i,k1),u(i,k1) 
+!         write(6,'(i2,2(1x,e17.10))') k1,utgwcl(i,k1),u(i,k1)
 !       end do
 !       write(6,'(i2,36x,1x,e17.10)') (km+1),taugwcxi(i,km+1)
 !       end if
@@ -1329,7 +1323,7 @@
 !       do k1=1,km
 !         write(6,'(i2,36x,2(1x,e17.10))')
 !    +             k1,taugwci(i,k1)
-!         write(6,'(i2,2(1x,e17.10))') k1,wtgwc(i,k1),basicum(i,k1) 
+!         write(6,'(i2,2(1x,e17.10))') k1,wtgwc(i,k1),basicum(i,k1)
 !       end do
 !       write(6,'(i2,36x,1x,e17.10)') (km+1),taugwci(i,km+1)
 
@@ -1349,7 +1343,7 @@
 !       do k1=1,km
 !         write(6,'(i2,36x,2(1x,e17.10))')
 !    +                        k1,taugwcyi(i,k1),taugwci(i,k1)
-!         write(6,'(i2,2(1x,e17.10))') k1,vtgwc(i,k1),v(i,k1) 
+!         write(6,'(i2,2(1x,e17.10))') k1,vtgwc(i,k1),v(i,k1)
 !       end do
 !       write(6,'(i2,36x,1x,e17.10)') (km+1),taugwcyi(i,km+1)
 !       end if
@@ -1379,7 +1373,7 @@
 
 !-----------------------------------------------------------------------
 !
-!  For GWDC performance analysis        
+!  For GWDC performance analysis
 !
 !-----------------------------------------------------------------------
 
@@ -1395,7 +1389,7 @@
 !        if ( abs(taugwci(i,k)-taugwci(i,kk)) > taumin ) then
 !         break(i) = 1.0
 !         go to 2000
-!        endif 
+!        endif
 !       enddo
 !2000   continue
 
@@ -1489,8 +1483,6 @@
       end subroutine gwdc_finalize
 
       end module gwdc
-
-
 
       module gwdc_post
 

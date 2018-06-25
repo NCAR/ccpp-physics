@@ -361,7 +361,7 @@
 !-----         ALSO INCLUDED IS RI  SMOOTH OVER A THICK LOWER LAYER
 !-----         ALSO INCLUDED IS DECREASE IN DE-ACC AT TOP BY 1/2
 !-----     THE NMC GWD INCORPORATING BOTH GLAS(P&S) AND GFDL(MIGWD)
-!-----        MOUNTAIN INDUCED GRAVITY WAVE DRAG 
+!-----        MOUNTAIN INDUCED GRAVITY WAVE DRAG
 !-----    CODE FROM .FR30(V3MONNX) FOR MONIN3
 !-----        THIS VERSION (06 MAR 1987)
 !-----        THIS VERSION (26 APR 1987)    3.G
@@ -437,8 +437,7 @@
 !                OTHER INPUT VARIABLES UNMODIFIED.
 !  revision log:
 !    May 2013  J. Wang change cleff back to opn setting
-!    Jan 2014  J. Wang merge Henry and Fangin's dissipation heat in gfs to nems 
-!     
+!    Jan 2014  J. Wang merge Henry and Fangin's dissipation heat in gfs to nems
 !
 !   ********************************************************************
       USE MACHINE , ONLY : kind_phys
@@ -497,8 +496,8 @@
       parameter (FRC=1.0, CE=0.8, CEOFRC=CE/FRC, frmax=100., CG=0.5)
       parameter (GMAX=1.0, VELEPS=1.0, FACTOP=0.5)
 !      parameter (GMAX=1.0, CRITAC=5.0E-4, VELEPS=1.0, FACTOP=0.5)
-      parameter (RLOLEV=50000.0) 
-!     parameter (RLOLEV=500.0) 
+      parameter (RLOLEV=50000.0)
+!     parameter (RLOLEV=500.0)
 !     parameter (RLOLEV=0.5)
 !
        real(kind=kind_phys) dpmin,hminmt,hncrit,minwnd,sigfac
@@ -592,13 +591,13 @@
       LCAPP1 = LCAP + 1
 !
 !
-      IF ( NMTVR .eq. 14) then 
+      IF ( NMTVR .eq. 14) then
 ! ----  for lm and gwd calculation points
-        RDXZB(:) = 0.          ! CCPP: it is a bug
+        RDXZB(:) = 0.          ! CCPP: it was a bug
         ipt = 0
         npt = 0
         DO I = 1,IM
-          IF ( (elvmax(i) .GT. HMINMT) 
+          IF ( (elvmax(i) .GT. HMINMT)
      &       .and. (hprime(i) .GT. hpmin) )  then
              npt      = npt + 1
              ipt(npt) = i
@@ -616,7 +615,7 @@
 !
         do i=1,npt
           iwklm(i)  = 2
-          IDXZB(i)  = 0 
+          IDXZB(i)  = 0
           kreflm(i) = 0
         enddo
 !       if (lprnt)
@@ -632,7 +631,7 @@
 !      then do not need hncrit -- test with large hncrit first.
 !       KMLL  = km / 2 ! maximum mtnlm height : # of vertical levels / 2
         KMLL = kmm1
-! --- No mtn should be as high as KMLL (so we do not have to start at 
+! --- No mtn should be as high as KMLL (so we do not have to start at
 ! --- the top of the model but could do calc for all levels).
 !
           DO I = 1, npt
@@ -648,12 +647,12 @@
             pkp1log =  phil(j,k+1) / G
             pklog =  phil(j,k)   / G
 !!!-------     ELVMAX(J) = min (ELVMAX(J) + sigfac * hprime(j), hncrit)
-            if ( ( ELVMAX(j) .le.  pkp1log ) .and. 
+            if ( ( ELVMAX(j) .le.  pkp1log ) .and.
      &           ( ELVMAX(j) .ge.   pklog  ) ) THEN
 !     print *,' in gwdps_lm.f 1  =',k,ELVMAX(j),pklog,pkp1log,me
-! ---        wk for diags but can be saved and reused.  
+! ---        wk for diags but can be saved and reused.
                wk(i)  = G * ELVMAX(j) / ( phil(j,k+1) - phil(j,k) )
-               iwklm(I)  =  MAX(iwklm(I), k+1 ) 
+               iwklm(I)  =  MAX(iwklm(I), k+1 )
 !     print *,' in gwdps_lm.f 2 npt=',npt,i,j,wk(i),iwklm(i),me
             endif
 !
@@ -671,16 +670,15 @@
 !         jhit = 0
 !        do i = 1, npt
 !        j=ipt(i)
-!          if ( iwklm(i) .gt. ihit ) then 
+!          if ( iwklm(i) .gt. ihit ) then
 !            ihit = iwklm(i)
 !            jhit = j
 !          endif
 !        enddo
 !     print *, ' mb: kdt,max(iwklm),jhit,phil,me=',
 !    &          kdt,ihit,jhit,phil(jhit,ihit),me
-         
         klevm1 = KMLL - 1
-        DO K = 1, klevm1  
+        DO K = 1, klevm1
           DO I = 1, npt
            j   = ipt(i)
             RDZ  = g   / ( phil(j,k+1) - phil(j,k) )
@@ -705,7 +703,7 @@
           BNV2bar(I) = (PRSL(J,1)-PRSL(J,2)) * DELKS1(I) * BNV2LM(I,1)
         ENDDO
 
-! --- find the dividing stream line height 
+! --- find the dividing stream line height
 ! --- starting from the level above the max mtn downward
 ! --- iwklm(i) is the k-index of mtn elvmax elevation
 !> - Find the dividing streamline height starting from the level above
@@ -723,14 +721,13 @@
 ! ---  make averages, guess dividing stream (DS) line layer.
 ! ---  This is not used in the first cut except for testing and
 ! --- is the vert ave of quantities from the surface to mtn top.
-!   
         DO I = 1, npt
           DO K = 1, Kreflm(I)
             J        = ipt(i)
             RDELKS     = DEL(J,K) * DELKS(I)
-            UBAR(I)    = UBAR(I)  + RDELKS * U1(J,K) ! trial Mean U below 
-            VBAR(I)    = VBAR(I)  + RDELKS * V1(J,K) ! trial Mean V below 
-            ROLL(I)    = ROLL(I)  + RDELKS * RO(I,K) ! trial Mean RO below 
+            UBAR(I)    = UBAR(I)  + RDELKS * U1(J,K) ! trial Mean U below
+            VBAR(I)    = VBAR(I)  + RDELKS * V1(J,K) ! trial Mean V below
+            ROLL(I)    = ROLL(I)  + RDELKS * RO(I,K) ! trial Mean RO below
             RDELKS     = (PRSL(J,K)-PRSL(J,K+1)) * DELKS1(I)
             BNV2bar(I) = BNV2bar(I) + BNV2lm(I,K) * RDELKS
 ! --- these vert ave are for diags, testing and GWD to follow (*j*).
@@ -739,7 +736,7 @@
 !     print *,' in gwdps_lm.f 5  =',i,kreflm(npt),BNV2bar(npt),me
 !
 ! --- integrate to get PE in the trial layer.
-! --- Need the first layer where PE>EK - as soon as 
+! --- Need the first layer where PE>EK - as soon as
 ! --- IDXZB is not 0 we have a hit and Zb is found.
 !
         DO I = 1, npt
@@ -755,21 +752,21 @@
 !!\f[
 !!    UDS=\max(\sqrt{U1^2+V1^2},minwnd)
 !!\f]
-!! where \f$ minwnd=0.1 \f$, \f$U1\f$ and \f$V1\f$ are zonal and 
+!! where \f$ minwnd=0.1 \f$, \f$U1\f$ and \f$V1\f$ are zonal and
 !! meridional wind components of model layer wind.
-            UDS(I,K) = 
+            UDS(I,K) =
      &          MAX(SQRT(U1(J,K)*U1(J,K) + V1(J,K)*V1(J,K)), minwnd)
 ! --- Test to see if we found Zb previously
             IF (IDXZB(I) .eq. 0 ) then
-              PE(I) = PE(I) + BNV2lm(I,K) * 
-     &           ( G * ELVMAX(J) - phil(J,K) ) * 
+              PE(I) = PE(I) + BNV2lm(I,K) *
+     &           ( G * ELVMAX(J) - phil(J,K) ) *
      &           ( PHII(J,K+1) - PHII(J,K) ) / (G*G)
 ! --- KE
 ! --- Wind projected on the line perpendicular to mtn range, U(Zb(K)).
 ! --- kenetic energy is at the layer Zb
 ! --- THETA ranges from -+90deg |_ to the mtn "largest topo variations"
               UP(I)  =  UDS(I,K) * cos(ANG(I,K))
-              EK(I)  = 0.5 *  UP(I) * UP(I) 
+              EK(I)  = 0.5 *  UP(I) * UP(I)
 
 ! --- Dividing Stream lime  is found when PE =exceeds EK.
               IF ( PE(I) .ge.  EK(I) ) THEN
@@ -777,14 +774,13 @@
                  RDXZB(J) = real(K,kind=kind_phys)
               ENDIF
 ! --- Then mtn blocked flow is between Zb=k(IDXZB(I)) and surface
-!
-!> - The dividing streamline height (idxzb), of a subgrid scale 
-!! obstable, is found by comparing the potential (PE) and kinetic 
+!> - The dividing streamline height (idxzb), of a subgrid scale
+!! obstable, is found by comparing the potential (PE) and kinetic
 !! energies (EK) of the upstream large scale wind and subgrid scale air
 !! parcel movements. the dividing streamline is found when
-!! \f$PE\geq EK\f$. Mountain-blocked flow is defined to exist between 
-!! the surface and the dividing streamline height (\f$h_d\f$), which 
-!! can be found by solving an integral equation for \f$h_d\f$: 
+!! \f$PE\geq EK\f$. Mountain-blocked flow is defined to exist between
+!! the surface and the dividing streamline height (\f$h_d\f$), which
+!! can be found by solving an integral equation for \f$h_d\f$:
 !!\f[
 !! \frac{U^{2}(h_{d})}{2}=\int_{h_{d}}^{H} N^{2}(z)(H-z)dz
 !!\f]
@@ -823,7 +819,7 @@
           J = ipt(i)
           ZLEN = 0.
 !      print *,' in gwdps_lm.f 9  =',i,j,IDXZB(i),me
-          IF ( IDXZB(I) .gt. 0 ) then 
+          IF ( IDXZB(I) .gt. 0 ) then
             DO K = IDXZB(I), 1, -1
               IF ( PHIL(J,IDXZB(I)) .gt.  PHIL(J,K) ) then
 
@@ -832,31 +828,31 @@
 !!\f[
 !!    ZLEN=\sqrt{[\frac{h_{d}-z}{z+h'}]}
 !!\f]
-!! where \f$z\f$ is the height, \f$h'\f$ is the orographic standard 
+!! where \f$z\f$ is the height, \f$h'\f$ is the orographic standard
 !! deviation (HPRIME).
-                ZLEN = SQRT( ( PHIL(J,IDXZB(I)) - PHIL(J,K) ) / 
+                ZLEN = SQRT( ( PHIL(J,IDXZB(I)) - PHIL(J,K) ) /
      &                       ( PHIL(J,K ) + G * hprime(J) ) )
 ! --- lm eq 14:
 !> - Calculate the drag coefficient to vary with the aspect ratio of
-!! the obstable as seen by the incident flow (see eq.14 in 
+!! the obstable as seen by the incident flow (see eq.14 in
 !! \cite lott_and_miller_1997)
 !!\f[
 !! R=\frac{\cos^{2}\psi+\gamma\sin^{2}\psi}{\gamma\cos^{2}\psi+\sin^{2}\psi}
 !!\f]
-!! where \f$\psi\f$, which is derived from THETA, is the angle between 
-!! the incident flow direction and the normal ridge direcion. 
+!! where \f$\psi\f$, which is derived from THETA, is the angle between
+!! the incident flow direction and the normal ridge direcion.
 !! \f$\gamma\f$ is the orographic anisotropy (GAMMA).
-                R = (cos(ANG(I,K))**2 + GAMMA(J) * sin(ANG(I,K))**2) / 
+                R = (cos(ANG(I,K))**2 + GAMMA(J) * sin(ANG(I,K))**2) /
      &              (gamma(J) * cos(ANG(I,K))**2 + sin(ANG(I,K))**2)
 ! --- (negitive of DB -- see sign at tendency)
-!> - In each model layer below the dividing streamlines, a drag from 
+!> - In each model layer below the dividing streamlines, a drag from
 !! the blocked flow is exerted by the obstacle on the large scale flow.
 !! The drag per unit area and per unit height is written (eq.15 in
 !! \cite lott_and_miller_1997):
 !!\f[
 !! D_{b}(z)=-C_{d}\max(2-\frac{1}{R},0)\rho\frac{\sigma}{2h'}ZLEN\max(\cos\psi,\gamma\sin\psi)\frac{UDS}{2}
 !!\f]
-!! where \f$C_{d}\f$ is a specified constant, \f$\sigma\f$ is the 
+!! where \f$C_{d}\f$ is a specified constant, \f$\sigma\f$ is the
 !! orographic slope. 
 
                 DBTMP = 0.25 *  CDmb *
@@ -881,8 +877,8 @@
 !.............................
 ! end  mtn blocking section
 !
-      ELSEIF ( NMTVR .ne. 14) then 
-! ----  for mb not present and  gwd (nmtvr .ne .14) 
+      ELSEIF ( NMTVR .ne. 14) then
+! ----  for mb not present and  gwd (nmtvr .ne .14)
         ipt     = 0
         npt     = 0
         DO I = 1,IM
@@ -982,13 +978,13 @@
         enddo
       enddo
 !
-!> - Calculate the reference level index: kref=max(2,KPBL+1). where 
+!> - Calculate the reference level index: kref=max(2,KPBL+1). where
 !! KPBL is the index for the PBL top layer.
       KBPS = 1
       KMPS = KM
       DO I=1,npt
         J         = ipt(i)
-        kref(I)   = MAX(IWK(I), KPBL(J)+1 ) ! reference level 
+        kref(I)   = MAX(IWK(I), KPBL(J)+1 ) ! reference level
         DELKS(I)  = 1.0 / (PRSI(J,1) - PRSI(J,kref(I)))
         DELKS1(I) = 1.0 / (PRSL(J,1) - PRSL(J,kref(I)))
         UBAR (I)  = 0.0
@@ -1024,7 +1020,7 @@
 !              WD  W   S  SW  NW   E   N  NE  SE
 !
 !> - Calculate low-level horizontal wind direction, the derived 
-!! orographic asymmetry parameter (OA), and the derived Lx (CLX). 
+!! orographic asymmetry parameter (OA), and the derived Lx (CLX).
       DO I = 1,npt
         J      = ipt(i)
         wdir   = atan2(UBAR(I),VBAR(I)) + pi
@@ -1135,7 +1131,7 @@
 !!\f[
 !! a^{2}=C_{G}OC^{-1}
 !!\f]
-!! where \f$F_{r_{c}}(=1)\f$ is the critical Froude number, 
+!! where \f$F_{r_{c}}(=1)\f$ is the critical Froude number,
 !! \f$F_{r_{0}}\f$ is the Froude number. \f$C_{E}\f$,\f$C_{m}\f$,
 !! \f$C_{G}\f$ are constants.
 
@@ -1144,7 +1140,7 @@
 !!\f[
 !! \tau_0=E\frac{m'}{\triangle x}\frac{\rho_{0}U_0^3}{N_{0}}G'
 !!\f]
-!! where \f$E\f$,\f$m'\f$, and \f$G'\f$ are the enhancement factor, 
+!! where \f$E\f$,\f$m'\f$, and \f$G'\f$ are the enhancement factor,
 !! "the number of mountains", and the flux function defined above, 
 !! respectively.
 
@@ -1228,7 +1224,7 @@
 !! layer can be expressed using the drag for the layer immediately 
 !! below. Thus, assuming \f$\tau_i=\tau_{i+1}\f$, we can get:
 !!\f[
-!! h_{d_i}^2=\frac{\triangle x}{m'}\frac{\tau_{i+1}}{\rho_{i}N_{i}U_{i}}    
+!! h_{d_i}^2=\frac{\triangle x}{m'}\frac{\tau_{i+1}}{\rho_{i}N_{i}U_{i}}
 !!\f]
 
               BRVF = SQRT(BNV2(I,K))        ! Brunt-Vaisala Frequency
@@ -1240,9 +1236,9 @@
 !
 !    RIM is the  MINIMUM-RICHARDSON NUMBER BY SHUTTS (1985)
 !
-!> - The minimum Richardson number (\f$Ri_{m}\f$) or local 
+!> - The minimum Richardson number (\f$Ri_{m}\f$) or local
 !! wave-modified Richardson number, which determines the onset of wave
-!! breaking, is expressed in terms of \f$R_{i}\f$ and 
+!! breaking, is expressed in terms of \f$R_{i}\f$ and
 !! \f$F_{r_{d}}=Nh_{d}/U\f$:
 !!\f[
 !! Ri_{m}=\frac{Ri(1-Fr_{d})}{(1+\sqrt{Ri}\cdot Fr_{d})^{2}}
@@ -1259,17 +1255,17 @@
 !>  - Check stability to employ the 'saturation hypothesis' of 
 !! \cite lindzen_1981 except at tropospheric downstream regions.
 !! \n Wave breaking occurs when \f$Ri_{m}<Ri_{c}=0.25\f$. Then
-!! Lindzen's wave saturation hypothesis resets the displacement 
-!! amplitude \f$h_{d}\f$ to that corresponding to \f$Ri_{m}=0.25\f$, 
-!! we obtain the critical \f$h_{d}\f$(or \f$h_{c}\f$) expressed in 
+!! Lindzen's wave saturation hypothesis resets the displacement
+!! amplitude \f$h_{d}\f$ to that corresponding to \f$Ri_{m}=0.25\f$,
+!! we obtain the critical \f$h_{d}\f$(or \f$h_{c}\f$) expressed in
 !! terms of the mean values of \f$U\f$, \f$N\f$, and \f$Ri\f$ (
 !! eq.(4.7) in \cite kim_and_arakawa_1995):
 !!\f[
 !! h_{c}=\frac{U}{N}\left\{2(2+\frac{1}{\sqrt{Ri}})^{1/2}-(2+\frac{1}{\sqrt{Ri}})\right\}
 !!\f]
-!! if \f$Ri_{m}\leq Ri_{c}\f$, obtain \f$\tau\f$ from the drag above 
-!! the reference level by using \f$h_{c}\f$ computed above; otherwise 
-!! \f$\tau\f$ is unchanged (note: scaled by the ratio of the Scorer 
+!! if \f$Ri_{m}\leq Ri_{c}\f$, obtain \f$\tau\f$ from the drag above
+!! the reference level by using \f$h_{c}\f$ computed above; otherwise
+!! \f$\tau\f$ is unchanged (note: scaled by the ratio of the Scorer
 !! paramter).
 !                                       ----------------------
               IF (RIM .LE. RIC .AND.
@@ -1278,7 +1274,7 @@
                  TEMC = 2.0 + 1.0 / TEM2
                  HD   = VELCO(I,K) * (2.*SQRT(TEMC)-TEMC) / BRVF
                  TAUP(I,KP1) = TEM1 * HD * HD
-              ELSE 
+              ELSE
                  TAUP(I,KP1) = TAUP(I,K) * RSCOR
               ENDIF
               taup(i,kp1) = min(taup(i,kp1), taup(i,k))
