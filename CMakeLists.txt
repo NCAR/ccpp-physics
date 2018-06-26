@@ -128,12 +128,11 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/cldwat2m_micro.F
       ./physics/wv_saturation.F
       ./physics/aer_cloud.F
-      ./physics/rad_initialize.f
-      ./GFS_layer/GFS_radiation_driver.F90
       ./physics/radcons.f90
       ./physics/radiation_astronomy.f
       ./physics/radsw_main.f
       ./physics/radsw_datatb.f
+      ./physics/GFS_rrtmg_setup.F90
       ./physics/GFS_rrtmg_pre.F90
       ./physics/GFS_rrtmg_post.F90
       ./physics/rrtmg_sw_pre.F90
@@ -150,7 +149,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/gcycle.f90
       ./physics/GFS_rad_time_vary.scm.f90
       ./physics/GFS_radupdate.f90
-      ./physics/GFS_suite_interstitial.ccpp.F90
+      ./physics/GFS_suite_interstitial.F90
       ./physics/get_prs_fv3.f90
       ./physics/sfc_sice.f
       ./physics/dcyc2.f
@@ -185,6 +184,7 @@ else (PROJECT STREQUAL "CCPP-FV3")
       ./physics/GFS_calpreciptype.f90
       ./physics/GFS_MP_generic_post.f90
       ./physics/gmtb_scm_sfc_flux_spec.f90
+      ./physics/surface_perturbation.F90
   )
 endif (PROJECT STREQUAL "CCPP-FV3")
 
@@ -269,7 +269,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
-  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   if (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f
@@ -284,20 +284,31 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/aer_cloud.F
                                 ./physics/wv_saturation.F
                                 ./physics/cldwat2m_micro.F
+                                ./physics/surface_perturbation.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
+    # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
+    set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
+    string(REPLACE "xHost" "xCORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT
+           "${CMAKE_Fortran_FLAGS_LOPT}")
+    string(REPLACE "xCORE-AVX2" "xCORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT
+           "${CMAKE_Fortran_FLAGS_LOPT}")
+    SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
+                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
-    SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
+    SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
   endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
-  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F PROPERTIES COMPILE_FLAGS "-r8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
 else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
