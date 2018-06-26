@@ -45,10 +45,10 @@ c-----------------------------------------------------------------------
       end
 
 c-----------------------------------------------------------------------
-!>\ingroup GFS_edmf_main
+!>  \ingroup GFS_edmf_main
 !!  \brief Routine to solve the tridiagonal system to calculate u- and
-!! v-momentum at \f$ t + \Delta t \f$; part of two-part process to
-!! calculate time tendencies due to vertical diffusion.
+!!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
+!!  calculate time tendencies due to vertical diffusion.
       subroutine tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
 cc
       use machine     , only : kind_phys

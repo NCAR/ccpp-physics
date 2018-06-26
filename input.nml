@@ -160,7 +160,9 @@
        isot           = 1
        debug          = .true.
        nstf_name      = 2,0,1,0,5
-
+       xkzminv        = 0.3
+       xkzm_m         = 1.0
+       xkzm_h         = 1.0
        jcap = 574
 
 /
