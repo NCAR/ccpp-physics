@@ -88,7 +88,6 @@ SRCS_f90 = \
 	   ./physics/GFS_rad_time_vary.fv3.f90                                       \
 	   ./physics/GFS_radupdate.f90                                               \
 	   ./physics/funcphys.f90                                                    \
-	   ./physics/gcycle.f90                                                      \
 	   ./physics/get_prs_fv3.f90                                                 \
 	   ./physics/GFS_DCNV_generic.f90                                            \
 	   ./physics/GFS_SCNV_generic.f90                                            \
@@ -113,6 +112,7 @@ SRCS_F   = \
 	   ./physics/num_parthds.F                                                   \
 	   ./physics/wv_saturation.F
 SRCS_F90 = \
+	   ./physics/gcycle.F90                                                      \
 	   ./physics/GFDL_parse_tracers.F90                                          \
 	   ./GFS_layer/GFS_abstraction_layer.F90                                     \
 	   ./GFS_layer/GFS_diagnostics.F90                                           \
