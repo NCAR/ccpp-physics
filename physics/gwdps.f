@@ -785,7 +785,7 @@
 !! \frac{U^{2}(h_{d})}{2}=\int_{h_{d}}^{H} N^{2}(z)(H-z)dz
 !!\f]
 !! where \f$H\f$ is the maximum subgrid scale elevation within the grid
-!! box of actual orography, \f$h\f$, obtained from the GTOPO30 dataset 
+!! box of actual orography, \f$h\f$, obtained from the GTOPO30 dataset
 !! from the U.S. Geological Survey.
             ENDIF
           ENDDO
@@ -858,10 +858,10 @@
                 DBTMP = 0.25 *  CDmb *
      &                  MAX( 2. - 1. / R, 0. ) * sigma(J) *
      &                  MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K))) *
-     &                  ZLEN / hprime(J) 
-                DB(I,K) =  DBTMP * UDS(I,K)    
+     &                  ZLEN / hprime(J)
+                DB(I,K) =  DBTMP * UDS(I,K)
 !
-!               if(lprnt .and. i .eq. npr) then 
+!               if(lprnt .and. i .eq. npr) then
 !                 print *,' in gwdps_lmi.f 10 npt=',npt,i,j,idxzb(i)
 !    &,           DBTMP,R' ang=',ang(i,k),' gamma=',gamma(j),' K=',K
 !                 print *,' in gwdps_lmi.f 11   K=',k,ZLEN,cos(ANG(I,K))
@@ -1019,7 +1019,7 @@
 !             NWD  1   2   3   4   5   6   7   8
 !              WD  W   S  SW  NW   E   N  NE  SE
 !
-!> - Calculate low-level horizontal wind direction, the derived 
+!> - Calculate low-level horizontal wind direction, the derived
 !! orographic asymmetry parameter (OA), and the derived Lx (CLX).
       DO I = 1,npt
         J      = ipt(i)
@@ -1108,7 +1108,7 @@
 !
 !> - Calculate enhancement factor (E),number of mountans (m') and 
 !! aspect ratio constant.
-!!\n As in eq.(4.9),(4.10),(4.11) in 
+!!\n As in eq.(4.9),(4.10),(4.11) in
 !! \cite kim_and_arakawa_1995, we define m' and E in such a way that they
 !! depend on the geometry and location of the subgrid-scale orography
 !! through OA and the nonlinearity of flow above the orography through
@@ -1141,7 +1141,7 @@
 !! \tau_0=E\frac{m'}{\triangle x}\frac{\rho_{0}U_0^3}{N_{0}}G'
 !!\f]
 !! where \f$E\f$,\f$m'\f$, and \f$G'\f$ are the enhancement factor,
-!! "the number of mountains", and the flux function defined above, 
+!! "the number of mountains", and the flux function defined above,
 !! respectively.
 
         EFACT    = (OA(I) + 2.) ** (CEOFRC*FR)
@@ -1220,8 +1220,8 @@
 !! \tau=\frac{m'}{\triangle x}\rho NUh_d^2
 !!\f]
 !! where \f$h_{d}\f$ is the displacement wave amplitude. In the absence
-!! of wave breaking, the displacement amplitude for the \f$i^{th}\f$ 
-!! layer can be expressed using the drag for the layer immediately 
+!! of wave breaking, the displacement amplitude for the \f$i^{th}\f$
+!! layer can be expressed using the drag for the layer immediately
 !! below. Thus, assuming \f$\tau_i=\tau_{i+1}\f$, we can get:
 !!\f[
 !! h_{d_i}^2=\frac{\triangle x}{m'}\frac{\tau_{i+1}}{\rho_{i}N_{i}U_{i}}
@@ -1252,7 +1252,7 @@
 !    CHECK STABILITY TO EMPLOY THE 'SATURATION HYPOTHESIS'
 !    OF LINDZEN (1981) EXCEPT AT TROPOSPHERIC DOWNSTREAM REGIONS
 !
-!>  - Check stability to employ the 'saturation hypothesis' of 
+!>  - Check stability to employ the 'saturation hypothesis' of
 !! \cite lindzen_1981 except at tropospheric downstream regions.
 !! \n Wave breaking occurs when \f$Ri_{m}<Ri_{c}=0.25\f$. Then
 !! Lindzen's wave saturation hypothesis resets the displacement
