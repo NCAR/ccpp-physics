@@ -80,7 +80,7 @@
 !! emissivity for lw radiation.
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
 !!
-!! In the module, the externally callabe subroutines are : 
+!! In the module, the externally callable subroutines are : 
 !! + sfc_init(): initialization radiation surface data     
 !! + setalb(): set up four-component surface albedoes    
 !! + setemis(): set up surface emissivity for lw radiation
@@ -92,6 +92,7 @@
      &                              kind_phys
       use physcons,          only : con_t0c, con_ttp, con_pi, con_tice
       use module_iounitdef,  only : NIRADSF
+      use surface_perturbation, only : ppfbet
 !
       implicit   none
 !
@@ -304,6 +305,7 @@
      &     ( slmsk,snowf,sncovr,snoalb,zorlf,coszf,tsknf,tairf,hprif,   & !  ---  inputs:
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       IMAX,                                                      &
+     &       albPpert, pertalb,                                         & ! sfc-perts, mgehne
      &       sfcalb                                                     & !  ---  outputs:
      &     )
 
@@ -372,7 +374,8 @@
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
-     &       sncovr, snoalb
+     &       sncovr, snoalb, albPpert                                     ! sfc-perts, mgehne
+      real (kind=kind_phys), dimension(5), intent(in) :: pertalb          ! sfc-perts, mgehne
 
 !  ---  outputs
       real (kind=kind_phys), dimension(IMAX,NF_ALBD), intent(out) ::    &
@@ -383,11 +386,11 @@
       real (kind=kind_phys) :: asnvb, asnnb, asnvd, asnnd, asevb        &
      &,     asenb, asevd, asend, fsno,  fsea,  rfcs,  rfcw,  flnd       &
      &,     asnow, argh,  hrgh,  fsno0, fsno1, flnd0, fsea0, csnow      &
-     &,     a1, a2, b1, b2, b3, ab1bm, ab2bm
+     &,     a1, a2, b1, b2, b3, ab1bm, ab2bm, m, s, alpha, beta, albtmp
 
       real (kind=kind_phys) ffw, dtgd
 
-      integer :: i, k
+      integer :: i, k, kk, iflag
 
 !
 !===> ...  begin here
@@ -609,6 +612,28 @@
 
       endif   ! end if_ialbflg
 !
+
+! sfc-perts, mgehne ***
+! perturb all 4 kinds of surface albedo, sfcalb(:,1:4)
+      if (pertalb(1)>0.0) then
+        do i = 1, imax
+          do kk=1, 4
+            ! compute beta distribution parameters for all 4 albedos
+            m = sfcalb(i,kk)
+            s = pertalb(1)*m*(1.-m)
+            alpha = m*m*(1.-m)/(s*s)-m
+            beta  = alpha*(1.-m)/m
+            ! compute beta distribution value corresponding
+            ! to the given percentile albPpert to use as new albedo
+            call ppfbet(albPpert(i),alpha,beta,iflag,albtmp)
+            sfcalb(i,kk) = albtmp
+          enddo
+        enddo     ! end_do_i_loop
+      endif
+
+! *** sfc-perts, mgehne
+
+
       return
 !...................................
       end subroutine setalb
@@ -803,6 +828,7 @@
 !! @}
 !-----------------------------------
 
+!> @}
 !
 !.........................................!
       end module module_radiation_surface !

@@ -1,8 +1,8 @@
       module module_ras
       USE MACHINE , ONLY : kind_phys
-      use physcons, grav => con_g, cp => con_cp, alhl => con_hvap       &
-     &,             alhf => con_hfus, rgas => con_rd, rkap => con_rocp  &
-     &,             nu => con_FVirt,  pi   => con_pi
+      use physcons, grav => con_g,      cp   => con_cp, alhl => con_hvap&
+     &,             alhf => con_hfus,   rgas => con_rd, rkap => con_rocp&
+     &,             nu   => con_FVirt,  pi   => con_pi
       implicit none
       SAVE
 !
@@ -64,7 +64,7 @@
 !
 !     PARAMETER (ALMIN1=0.00E-6, ALMIN2=2.50E-5, ALMAX=1.0E-2)
       PARAMETER (ALMIN1=0.00E-6, ALMIN2=0.00E-5, ALMAX=1.0E-2)
-!     PARAMETER (ALMIN1=0.00E-6, ALMIN2=4.00E-5, ALMAX=1.0E-2)
+!     PARAMETER (ALMIN1=1.00E-5, ALMIN2=2.00E-5, ALMAX=1.0E-2)
 !cnt  PARAMETER (ALMIN1=0.00E-6, ALMIN2=2.50E-5, ALMAX=5.0E-3)
 !
 !     real(kind=kind_phys), parameter :: BLDMAX = 200.0
@@ -240,7 +240,8 @@
      &,                 nrcm,  rhc,    ud_mf,  dd_mf, det_mf, dlqfac    &
      &,                 lprnt, ipr,    kdt,    revap                    &
      &,                 QLCN, QICN, w_upi, cf_upi, CNV_MFD, CNV_PRC3    &
-     &,                 CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,ncld)
+     &,                 CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,     &
+     &                  mp_phys)
 !    &,                 lprnt, ipr, kdt, fscav, ctei_r, ctei_rm)
 !
 !*********************************************************************
@@ -268,7 +269,7 @@
 !
 !      input
 !
-      Integer IM, IX, k, ncrnd, me, trac, ipr, nrcm, ncld, kdt
+      Integer IM, IX, k, ncrnd, me, trac, ipr, nrcm, mp_phys, kdt
       integer, dimension(im) :: kbot, ktop, kcnv, kpbl, lmh
 !
       real(kind=kind_phys), dimension(ix,k)   :: tin, qin,  uin, vin    &
@@ -335,7 +336,7 @@
       endif
 
       if (lprnt) write(0,*)' in RAS fscav=',fscav_,' ccwfac=',
-     &                      ccwfac(ipr),' ncld=',ncld
+     &                      ccwfac(ipr),' mp_phys=',mp_phys
 !
       km1     = k - 1
       kp1     = k + 1
@@ -362,7 +363,7 @@
       endif
 !
 !!!!! initialization for microphysics ACheng
-      if(ncld == 2) then
+      if(mp_phys == 10) then
         do l=1,K
           do i=1,im
             QLCN(i,l)      = 0.0
@@ -838,12 +839,12 @@
           det_mf(ipt,ll) = det_mf(ipt,ll) + flx(ib)
 
 !         Anning Cheng for microphysics 11/14/2015
-          if (ncld == 2) then
-      if (lprint) write(0,*)' ib=',ib,' flx=',flx(ib),' ll=',ll
-     &,' ud_mf=',ud_mf(ipt,:)
+          if (mp_phys == 10) then
+!     if (lprint) write(0,*)' ib=',ib,' flx=',flx(ib),' ll=',ll
+!    &,' ud_mf=',ud_mf(ipt,:)
             CNV_MFD(ipt,ll)   = CNV_MFD(ipt,ll)   + flx(ib)/dt
-      if (lprint) write(0,*)' ib=',ib,' CNV_MFD=',CNV_MFD(ipt,ll)
-     &,' ll=',ll,' kp1=',kp1
+!     if (lprint) write(0,*)' ib=',ib,' CNV_MFD=',CNV_MFD(ipt,ll)
+!    &,' ll=',ll,' kp1=',kp1
 !           CNV_DQLDT(ipt,ll) = CNV_DQLDT(ipt,ll)
 !    &                        + max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
             CNV_DQLDT(ipt,ll) = CNV_DQLDT(ipt,ll) + flx(ib)*
@@ -888,7 +889,7 @@
           vin(ipt,ll)    = uvi(l,trac+2)            ! V momentum
 
 !!        for 2M microphysics, always output these variables
-          if (ncld == 2) then
+          if (mp_phys == 10) then
             qli(l)           = max(qli(l),0.)
             qii(l)           = max(qii(l),0.)
             if (advcld) then
@@ -1696,47 +1697,47 @@
       QOS    = QOL(KD)
       QIS    = CIL(KD)
       QLS    = CLL(KD)
+
       cnvflg = HBL > HSU .and. abs(tx1) > 1.0e-4
 
 !     if (lprnt) print *,' ii=',ii,' cnvflg=',cnvflg,' hsu=',hsu
 !    &,' hbl=',hbl,' tx1=',tx1,' hsd=',hsd
 
-
 !***********************************************************************
 
+      ST1 = HALF*(HSU + HSD)
 
-       ST1  = HALF*(HSU + HSD)
-       IF (cnvflg) THEN
+      IF (cnvflg) THEN
 !
 !  STANDARD CASE:
 !   CLOUD CAN BE NEUTRALLY BOUYANT AT MIDDLE OF LEVEL KD W/ +VE LAMBDA.
 !   EPP < .25 IS REQUIRED TO HAVE REAL ROOTS.
 !
-       clp = 1.0
-       st2 = hbl - hsu
+        clp = 1.0
+        st2 = hbl - hsu
 
-!     if(lprnt) print *,' tx2=',tx2,' tx1=',tx1,' st2=',st2
+!       if(lprnt) print *,' tx2=',tx2,' tx1=',tx1,' st2=',st2
 !
-       if (tx2 == 0.0) then
-         alm = - st2 / tx1
-         if (alm > almax) alm = -100.0
-       else
-         x00 = tx2 + tx2
-         epp = tx1 * tx1 - (x00+x00)*st2
-         if (epp > 0.0) then
-           x00  = 1.0 / x00
-           tem  = sqrt(epp)
-           tem1 = (-tx1-tem)*x00
-           tem2 = (-tx1+tem)*x00
-           if (tem1 > almax) tem1 = -100.0
-           if (tem2 > almax) tem2 = -100.0
-           alm  = max(tem1,tem2)
+        if (tx2 == 0.0) then
+          alm = - st2 / tx1
+          if (alm > almax) alm = -100.0
+        else
+          x00 = tx2 + tx2
+          epp = tx1 * tx1 - (x00+x00)*st2
+          if (epp > 0.0) then
+            x00  = 1.0 / x00
+            tem  = sqrt(epp)
+            tem1 = (-tx1-tem)*x00
+            tem2 = (-tx1+tem)*x00
+            if (tem1 > almax) tem1 = -100.0
+            if (tem2 > almax) tem2 = -100.0
+            alm  = max(tem1,tem2)
 
 !     if (lprnt) print *,' tem1=',tem1,' tem2=',tem2,' alm=',alm
 !    &,' tx1=',tx1,' tem=',tem,' epp=',epp,' x00=',x00,' st2=',st2
 
-         endif
-       endif
+          endif
+        endif
 
 !     if (lprnt) print *,' almF=',alm,' ii=',ii,' qw00=',qw00
 !    &,' qi00=',qi00
@@ -1745,11 +1746,11 @@
 !   NON-ENTRAINIG CLOUD DETRAINS IN LOWER HALF OF TOP LAYER.
 !   NO CLOUDS ARE ALLOWED TO DETRAIN BELOW THE TOP LAYER.
 !
-       ELSEIF ( (HBL <= HSU) .AND.                                      &
-     &          (HBL > ST1   )     ) THEN
-         ALM = ZERO
-!        CLP = (HBL-ST1) / (HSU-ST1)    ! commented on Jan 16, 2010
-       ENDIF
+      ELSEIF ( (HBL <= HSU) .AND.                                       &
+     &         (HBL > ST1   )     ) THEN
+        ALM = ZERO
+!       CLP = (HBL-ST1) / (HSU-ST1)    ! commented on Jan 16, 2010
+      ENDIF
 !
       cnvflg = .TRUE.
       IF (ALMIN1 > 0.0) THEN
@@ -1757,7 +1758,7 @@
       ELSE
         LOWEST   = KD == KB1
         IF ( (ALM > ZERO) .OR.                                          &
-     &      (.NOT. LOWEST .AND. ALM == ZERO) ) cnvflg = .FALSE.
+     &       (.NOT. LOWEST .AND. ALM == ZERO) ) cnvflg = .FALSE.
       ENDIF
 !
 !===>  IF NO SOUNDING MEETS SECOND CONDITION, RETURN
@@ -1996,16 +1997,16 @@
 !     ST1 = 0.5 * (HST(KD)  - LTL(KD)*NU*(QST(KD)-QOS)
 !    &          +  HST(KD1) - LTL(KD1)*NU*(QST(KD1)-QOL(KD1)))
 !
-      ST1 = HST(KD)  - LTL(KD)*NU*(QST(KD)-QOS)
-      ST2 = LTL(KD)  * VTF(KD)
+      ST1  = HST(KD) - LTL(KD)*NU*(QST(KD)-QOS)
+      ST2  = LTL(KD) * VTF(KD)
       TEM5 = (QLS + QIS) * eta(kd1)
       ST1  = HALF * (TX1-ETA(KD1)*ST1-ST2*(DET-TEM5))*DLB(KD)
 !
 !     if (lprnt) print *,' st1=',st1,' st2=',st2,' ltl=',ltl(kd)
 !    *,ltl(kd1),' qos=',qos,qol(kd1)
 
-      WFN = WFN + ST1
-      AKM = AKM - min(ST1,ZERO)   ! Commented on 08/26/02 - does not include top
+      WFN  = WFN + ST1
+      AKM  = AKM - min(ST1,ZERO)   ! Commented on 08/26/02 - does not include top
 !
 
       BUY(KD) = ST1 / (ETA(KD1)*qrb(kd))
@@ -2546,7 +2547,7 @@
 
 !        if (lprnt) print *,' clfr0=',clf(tem),' tem=',tem,' tem1=',tem1
 
-!        clfrac = max(ZERO, min(ONE, rknob*clf(tem)*tem1))
+!        clfrac = max(ZERO, min(ONE,  rknob*clf(tem)*tem1))
 !        clfrac = max(ZERO, min(0.25, rknob*clf(tem)*tem1))
          clfrac = max(ZERO, min(half, rknob*clf(tem)*tem1))
 

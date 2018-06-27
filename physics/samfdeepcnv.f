@@ -3,13 +3,14 @@
 !! deep convection scheme.
 
       module samfdeepcnv
+
       contains
 
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_samfdeepcnv_init Argument Table
 !!
-      subroutine samfdeepcnv_init
+      subroutine samfdeepcnv_init()
       end subroutine samfdeepcnv_init
 
 
@@ -17,7 +18,7 @@
 !!
 !! \section arg_table_samfdeepcnv_finalize Argument Table
 !!
-      subroutine samfdeepcnv_finalize
+      subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
 !> \defgroup SAMF Scale-Aware Mass-Flux Deep Convection
@@ -133,7 +134,7 @@
 !! | rn             | lwe_thickness_of_deep_convective_precipitation_amount          | deep convective rainfall amount on physics timestep                                       | m       |    1 | real      | kind_phys | out    | F        |
 !! | kbot           | vertical_index_at_cloud_base                                   | index for cloud base                                                                      | index   |    1 | integer   |           | out    | F        |
 !! | ktop           | vertical_index_at_cloud_top                                    | index for cloud top                                                                       | index   |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                           | deep convection: 0=no, 1=yes                                                              | flag    |    1 | integer   |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                           | deep convection: 0=no, 1=yes                                                              | flag    |    1 | integer   |           | inout  | F        |
 !! | islimsk        | sea_land_ice_mask                                              | landmask: sea/land/ice=0/1/2                                                              | flag    |    1 | integer   |           | in     | F        |
 !! | garea          | cell_area                                                      | grid cell area                                                                            | m2      |    1 | real      | kind_phys | in     | F        |
 !! | dot            | omega                                                          | layer mean vertical velocity                                                              | Pa s-1  |    2 | real      | kind_phys | in     | F        |
@@ -179,10 +180,12 @@
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
+      ! DH* TODO these must come in via the argument list!
       use physcons, grav => con_g, cp => con_cp, hvap => con_hvap
      &,             rv => con_rv, fv => con_fvirt, t0c => con_t0c
      &,             rd => con_rd, cvap => con_cvap, cliq => con_cliq
      &,             eps => con_eps, epsm1 => con_epsm1
+      ! *DH
       implicit none
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
