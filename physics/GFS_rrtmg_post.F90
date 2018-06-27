@@ -32,12 +32,15 @@
 !! | mtopa          | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer           |           | in     | F        |
 !! | mbota          | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer           |           | in     | F        |
 !! | clouds1        | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |    2 | real              | kind_phys | in     | F        |
+!! | clouds10       | cloud_optical_depth_weighted                                  | cloud optical depth, weighted                                                 | none     |    2 | real              | kind_phys | in     | F        |
+!! | clouds11       | cloud_optical_depth_layers_678                                | cloud optical depth from bands 6,7,8                                          | none     |    2 | real              | kind_phys | in     | F        |
 !! | errmsg         | error_message                                                 | error message for error handling in CCPP                                      | none     |    0 | character         | len=*     | out    | F        |
 !! | errflg         | error_flag                                                    | error flag for error handling in CCPP                                         | flag     |    0 | integer           |           | out    | F        |
 !!
       subroutine GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein, &
               Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &
-              cldsa, mtopa, mbota, clouds1, errmsg, errflg)
+              cldsa, mtopa, mbota, clouds1, clouds10, clouds11,           &
+              errmsg, errflg)
 
       use machine,                             only: kind_phys
       use GFS_typedefs,                        only: GFS_statein_type,   &
@@ -69,13 +72,15 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5),              intent(in) :: cldsa
       integer,              dimension(size(Grid%xlon,1),3),              intent(in) :: mbota, mtopa
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds1
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds10
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds11
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
       ! Local variables
       integer :: i, j, k, k1, itop, ibtc
-      real(kind=kind_phys) :: tem0d
+      real(kind=kind_phys) :: tem0d, tem1, tem2
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -91,87 +96,103 @@
 
       if (Model%lssav) then
         if (Model%lsswr) then
-          Diag%fluxr(:,34) = Diag%fluxr(:,34) + Model%fhswr*aerodp(:,1)  ! total aod at 550nm
-          Diag%fluxr(:,35) = Diag%fluxr(:,35) + Model%fhswr*aerodp(:,2)  ! DU aod at 550nm
-          Diag%fluxr(:,36) = Diag%fluxr(:,36) + Model%fhswr*aerodp(:,3)  ! BC aod at 550nm
-          Diag%fluxr(:,37) = Diag%fluxr(:,37) + Model%fhswr*aerodp(:,4)  ! OC aod at 550nm
-          Diag%fluxr(:,38) = Diag%fluxr(:,38) + Model%fhswr*aerodp(:,5)  ! SU aod at 550nm
-          Diag%fluxr(:,39) = Diag%fluxr(:,39) + Model%fhswr*aerodp(:,6)  ! SS aod at 550nm
+          do i=1,im
+            Diag%fluxr(i,34) = Diag%fluxr(i,34) + Model%fhswr*aerodp(i,1)  ! total aod at 550nm
+            Diag%fluxr(i,35) = Diag%fluxr(i,35) + Model%fhswr*aerodp(i,2)  ! DU aod at 550nm
+            Diag%fluxr(i,36) = Diag%fluxr(i,36) + Model%fhswr*aerodp(i,3)  ! BC aod at 550nm
+            Diag%fluxr(i,37) = Diag%fluxr(i,37) + Model%fhswr*aerodp(i,4)  ! OC aod at 550nm
+            Diag%fluxr(i,38) = Diag%fluxr(i,38) + Model%fhswr*aerodp(i,5)  ! SU aod at 550nm
+            Diag%fluxr(i,39) = Diag%fluxr(i,39) + Model%fhswr*aerodp(i,6)  ! SS aod at 550nm
+          enddo
         endif
 
 !  ---  save lw toa and sfc fluxes
         if (Model%lslwr) then
+          do i=1,im
 !  ---  lw total-sky fluxes
-          Diag%fluxr(:,1 ) = Diag%fluxr(:,1 ) + Model%fhlwr *Diag%topflw(:)%upfxc   ! total sky top lw up
-          Diag%fluxr(:,19) = Diag%fluxr(:,19) + Model%fhlwr *Radtend%sfcflw(:)%dnfxc   ! total sky sfc lw dn
-          Diag%fluxr(:,20) = Diag%fluxr(:,20) + Model%fhlwr *Radtend%sfcflw(:)%upfxc   ! total sky sfc lw up
+            Diag%fluxr(i,1 ) = Diag%fluxr(i,1 ) + Model%fhlwr *    Diag%topflw(i)%upfxc   ! total sky top lw up
+            Diag%fluxr(i,19) = Diag%fluxr(i,19) + Model%fhlwr * Radtend%sfcflw(i)%dnfxc   ! total sky sfc lw dn
+            Diag%fluxr(i,20) = Diag%fluxr(i,20) + Model%fhlwr * Radtend%sfcflw(i)%upfxc   ! total sky sfc lw up
 !  ---  lw clear-sky fluxes
-          Diag%fluxr(:,28) = Diag%fluxr(:,28) + Model%fhlwr *Diag%topflw(:)%upfx0   ! clear sky top lw up
-          Diag%fluxr(:,30) = Diag%fluxr(:,30) + Model%fhlwr *Radtend%sfcflw(:)%dnfx0   ! clear sky sfc lw dn
-          Diag%fluxr(:,33) = Diag%fluxr(:,33) + Model%fhlwr *Radtend%sfcflw(:)%upfx0   ! clear sky sfc lw up
+            Diag%fluxr(i,28) = Diag%fluxr(i,28) + Model%fhlwr *    Diag%topflw(i)%upfx0   ! clear sky top lw up
+            Diag%fluxr(i,30) = Diag%fluxr(i,30) + Model%fhlwr * Radtend%sfcflw(i)%dnfx0   ! clear sky sfc lw dn
+            Diag%fluxr(i,33) = Diag%fluxr(i,33) + Model%fhlwr * Radtend%sfcflw(i)%upfx0   ! clear sky sfc lw up
+          enddo
         endif
 
 !  ---  save sw toa and sfc fluxes with proper diurnal sw wgt. coszen=mean cosz over daylight
 !       part of sw calling interval, while coszdg= mean cosz over entire interval
         if (Model%lsswr) then
           do i = 1, IM
-            if (Radtend%coszen(i) > 0.) then    
+            if (Radtend%coszen(i) > 0.) then
 !  ---                                  sw total-sky fluxes
 !                                       -------------------
-               tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
-               Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
-               Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
-               Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
+              tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
+              Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
+              Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
+              Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
 !  ---                                  sw uv-b fluxes
 !                                       --------------
-               Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
-               Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
+              Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
+              Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
 !  ---                                  sw toa incoming fluxes
 !                                       ----------------------
-               Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
+              Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
 !  ---                                  sw sfc flux components
 !                                       ----------------------
-               Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
-               Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
-               Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
-
-               Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
+              Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
+              Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
+              Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
+              Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
 !  ---                                  sw clear-sky fluxes
 !                                       -------------------
-               Diag%fluxr(i,29) = Diag%fluxr(i,29) + Diag%topfsw(i)%upfx0 * tem0d  ! clear sky top sw up
-               Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
-               Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
-             endif
-           enddo
-         endif
- 
+              Diag%fluxr(i,29) = Diag%fluxr(i,29) + Diag%topfsw(i)%upfx0 * tem0d  ! clear sky top sw up
+              Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
+              Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
+            endif
+          enddo
+        endif
+
 !  ---  save total and boundary layer clouds
- 
-         if (Model%lsswr .or. Model%lslwr) then
-           Diag%fluxr(:,17) = Diag%fluxr(:,17) + raddt * cldsa(:,4)
-           Diag%fluxr(:,18) = Diag%fluxr(:,18) + raddt * cldsa(:,5)
- 
+
+        if (Model%lsswr .or. Model%lslwr) then
+          do i=1,im
+            Diag%fluxr(i,17) = Diag%fluxr(i,17) + raddt * cldsa(i,4)
+            Diag%fluxr(i,18) = Diag%fluxr(i,18) + raddt * cldsa(i,5)
+          enddo
+
 !  ---  save cld frac,toplyr,botlyr and top temp, note that the order
 !       of h,m,l cloud is reversed for the fluxr output.
 !  ---  save interface pressure (pa) of top/bot
 
           do j = 1, 3
             do i = 1, IM
-               tem0d = raddt * cldsa(i,j)
-               itop  = mtopa(i,j) - kd
-               ibtc  = mbota(i,j) - kd
-               Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
-               Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
-               Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
-               Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+              tem0d = raddt * cldsa(i,j)
+              itop  = mtopa(i,j) - kd
+              ibtc  = mbota(i,j) - kd
+              Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
+              Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
+              Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
+              Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+
+!       Anning adds optical depth and emissivity output
+              tem1 = 0.
+              tem2 = 0.
+              do k=ibtc+kb,itop+kt
+                 tem1 = tem1 + clouds10(i,k)
+                 tem2 = tem2 + clouds11(i,k)
+              end do
+              Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
+              Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
             enddo
           enddo
         endif
 
-        if (.not. Model%uni_cld) then
+!       if (.not. Model%uni_cld) then
+        if (Model%lgocart .or. Model%ldiag3d) then
           do k = 1, LM
             k1 = k + kd
-            Coupling%cldcovi(:,k) = clouds1(:,k1)
+            Coupling%cldcovi(1:im,k) = clouds1(1:im,k1)
           enddo
         endif
       endif                                ! end_if_lssav

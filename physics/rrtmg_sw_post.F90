@@ -19,6 +19,7 @@
 !! | Diag           | FV3-GFS_Diag_type                                                                              | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type         |           | inout  | F        |
 !! | Radtend        | FV3-GFS_Radtend_type                                                                           | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
 !! | Coupling       | FV3-GFS_Coupling_type                                                                          | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout  | F        |
+!! | im             | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer               |           | in     | F        |
 !! | ltp            | extra_top_layer                                                                                | extra top layers                                                             | none     |    0 | integer               |           | in     | F        |
 !! | nday           | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer               |           | in     | F        |
 !! | lm             | vertical_layer_dimension_for_radiation                                                         | number of vertical layers for radiation calculation                          | count    |    0 | integer               |           | in     | F        |
@@ -34,8 +35,8 @@
 !! | errflg         | error_flag                                                                                     | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out    | F        |
 !!
 #endif
-      subroutine rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling, &
-                 ltp, nday, lm, kd, htswc, htsw0,                         &
+      subroutine rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
+                 im, ltp, nday, lm, kd, htswc, htsw0,                      &
                  sfcalb1, sfcalb2, sfcalb3, sfcalb4, scmpsw, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -53,14 +54,14 @@
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_diag_type),            intent(inout) :: Diag
-      integer, intent(in)                           ::  lm, kd, nday, ltp
+      integer, intent(in)                           :: im, lm, kd, nday, ltp
       type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
       real(kind=kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htswc, htsw0
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables
-      integer ::  k1, k
+      integer :: i, k1, k
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -78,62 +79,68 @@
               Radtend%htrsw (:,k) = Radtend%htrsw (:,LM)
             enddo
           endif
- 
+
           if (Model%swhtr) then
             do k = 1, lm
                k1 = k + kd
-               Radtend%swhc(:,k) = htsw0(:,k1)
+               Radtend%swhc(1:im,k) = htsw0(1:im,k1)
              enddo
              ! --- repopulate the points above levr
              if (Model%levr < Model%levs) then
                do k = LM,Model%levs
-                 Radtend%swhc(:,k) = Radtend%swhc(:,LM)
+                 Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM) 
                enddo
              endif
           endif
- 
+
 !  --- surface down and up spectral component fluxes
 !>  - Save two spectral bands' surface downward and upward fluxes for
 !!    output.
 
-          Coupling%nirbmdi(:) = scmpsw(:)%nirbm
-          Coupling%nirdfdi(:) = scmpsw(:)%nirdf
-          Coupling%visbmdi(:) = scmpsw(:)%visbm
-          Coupling%visdfdi(:) = scmpsw(:)%visdf
- 
-          Coupling%nirbmui(:) = scmpsw(:)%nirbm * sfcalb1(:)
-          Coupling%nirdfui(:) = scmpsw(:)%nirdf * sfcalb2(:)
-          Coupling%visbmui(:) = scmpsw(:)%visbm * sfcalb3(:)
-          Coupling%visdfui(:) = scmpsw(:)%visdf * sfcalb4(:)
- 
+          do i=1,im
+            Coupling%nirbmdi(i) = scmpsw(i)%nirbm
+            Coupling%nirdfdi(i) = scmpsw(i)%nirdf
+            Coupling%visbmdi(i) = scmpsw(i)%visbm
+            Coupling%visdfdi(i) = scmpsw(i)%visdf
+
+            Coupling%nirbmui(i) = scmpsw(i)%nirbm * sfcalb1(i)
+            Coupling%nirdfui(i) = scmpsw(i)%nirdf * sfcalb2(i)
+            Coupling%visbmui(i) = scmpsw(i)%visbm * sfcalb3(i)
+            Coupling%visdfui(i) = scmpsw(i)%visdf * sfcalb4(i)
+          enddo
+
         else                   ! if_nday_block
- 
+
           Radtend%htrsw(:,:) = 0.0
- 
+
           Radtend%sfcfsw = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
           Diag%topfsw    = topfsw_type( 0.0, 0.0, 0.0 )
           scmpsw         = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
- 
-          Coupling%nirbmdi(:) = 0.0
-          Coupling%nirdfdi(:) = 0.0
-          Coupling%visbmdi(:) = 0.0
-          Coupling%visdfdi(:) = 0.0
- 
-          Coupling%nirbmui(:) = 0.0
-          Coupling%nirdfui(:) = 0.0
-          Coupling%visbmui(:) = 0.0
-          Coupling%visdfui(:) = 0.0
- 
+
+          do i=1,im
+            Coupling%nirbmdi(i) = 0.0
+            Coupling%nirdfdi(i) = 0.0
+            Coupling%visbmdi(i) = 0.0
+            Coupling%visdfdi(i) = 0.0
+
+            Coupling%nirbmui(i) = 0.0
+            Coupling%nirdfui(i) = 0.0
+            Coupling%visbmui(i) = 0.0
+            Coupling%visdfui(i) = 0.0
+          enddo
+
           if (Model%swhtr) then
             Radtend%swhc(:,:) = 0
           endif
- 
+
         endif                  ! end_if_nday
- 
+
 ! --- radiation fluxes for other physics processes
-        Coupling%sfcnsw(:) = Radtend%sfcfsw(:)%dnfxc - Radtend%sfcfsw(:)%upfxc
-        Coupling%sfcdsw(:) = Radtend%sfcfsw(:)%dnfxc
- 
+        do i=1,im
+          Coupling%sfcnsw(i) = Radtend%sfcfsw(i)%dnfxc - Radtend%sfcfsw(i)%upfxc
+          Coupling%sfcdsw(i) = Radtend%sfcfsw(i)%dnfxc
+        enddo
+
       endif                                ! end_if_lsswr
 
       end subroutine rrtmg_sw_post_run

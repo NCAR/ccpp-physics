@@ -2,64 +2,67 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
-      module edmf
+      module hedmf
 
       contains
 
 
-      subroutine edmf_init ()
-      end subroutine edmf_init
+      subroutine hedmf_init ()
+      end subroutine hedmf_init
 
-      subroutine edmf_finalize ()
-      end subroutine edmf_finalize
+      subroutine hedmf_finalize ()
+      end subroutine hedmf_finalize
 
-!>\defgroup GFS_edmf_main GFS moninedmf Main
-!!  \brief The Hybrid EDMF scheme is a first-order turbulent transport 
-!! scheme used for subgrid-scale vertical turbulent mixing in the PBL 
-!! and above. It blends the traditional first-order approach that has 
-!! been used and improved over the last several years with a more recent
-!!  scheme that uses a mass-flux approach to calculate the countergradient 
-!! diffusion terms.
+
+!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux Scheme
+!! @{
+!!  \brief The Hybrid EDMF scheme is a first-order turbulent transport
+!!  scheme used for subgrid-scale vertical turbulent mixing in the PBL
+!!  and above. It blends the traditional first-order approach that has
+!!  been used and improved over the last several years with a more recent
+!!  scheme that uses a mass-flux approach to calculate the countergradient
+!!  diffusion terms.
 !!
-!! The PBL scheme's main task is to calculate tendencies of temperature, 
-!! moisture, and momentum due to vertical diffusion throughout the column 
-!! (not just the PBL). The scheme is an amalgamation of decades of work, 
-!! starting from the initial first-order PBL scheme of \cite troen_and_mahrt_1986, 
-!! implemented according to \cite hong_and_pan_1996 and modified by 
-!! \cite han_and_pan_2011 and \cite han_et_al_2015 
-!! to include top-down mixing due to stratocumulus layers from 
-!! \cite lock_et_al_2000 and replacement of counter-gradient 
-!! terms with a mass flux scheme according to \cite siebesma_et_al_2007 and \cite soares_et_al_2004. 
-!! Recently, heating due to TKE dissipation was also added according to 
-!! \cite han_et_al_2015.
+!!  The PBL scheme's main task is to calculate tendencies of temperature,
+!!  moisture, and momentum due to vertical diffusion throughout the column
+!!  (not just the PBL). The scheme is an amalgamation of decades of work,
+!!  starting from the initial first-order PBL scheme of Troen and Mahrt (1986)
+!!  \cite troen_and_mahrt_1986, implemented according to Hong and Pan (1996)
+!!  \cite hong_and_pan_1996 and modified by Han and Pan (2011)
+!!  \cite han_and_pan_2011 and Han et al. (2015) \cite han_et_al_2015 to
+!!  include top-down mixing due to stratocumulus layers from Lock et al. (2000)
+!!  \cite lock_et_al_2000 and replacement of counter-gradient terms with a mass
+!!  flux scheme according to Siebesma et al. (2007) \cite siebesma_et_al_2007
+!!  and Soares et al. (2004) \cite soares_et_al_2004. Recently, heating due to
+!!  TKE dissipation was also added according to Han et al. (2015)
+!!  \cite han_et_al_2015.
 !!
-!!  This subroutine contains all of logic for the Hybrid EDMF 
-!! PBL scheme except for the calculation of the updraft properties and 
-!! mass flux. The scheme works on a basic level by calculating background diffusion
-!!  coefficients and updating them according to which processes are 
-!! occurring in the column. The most important difference in diffusion 
-!! coefficients occurs between those levels in the PBL and those above 
-!! the PBL, so the PBL height calculation is of utmost importance. 
-!! An initial estimate is calculated in a "predictor" step in order to 
-!! calculate Monin-Obukhov similarity values and a corrector step 
-!! recalculates the PBL height based on updated surface thermal 
-!! characteristics. Using the PBL height and the similarity parameters,
-!! the diffusion coefficients are updated below the PBL top based on 
-!! \cite hong_and_pan_1996 (including counter-gradient 
-!! terms). Diffusion coefficients in the free troposphere (above the PBL 
-!! top) are calculated according to \cite louis_1979 with
-!! updated Richardson number-dependent functions. If it is diagnosed 
-!! that PBL top-down mixing is occurring according to \cite lock_et_al_2000, 
-!! then then diffusion coefficients are updated 
-!! accordingly. Finally, for convective boundary layers (defined as when
-!! the Obukhov length exceeds a threshold), the counter-gradient terms 
-!! are replaced using the mass flux scheme of \cite siebesma_et_al_2007.
-!! In order to return time tendencies, a 
-!! fully implicit solution is found using tridiagonal matrices, and time 
-!! tendencies are "backed out." Before returning, the time tendency of 
-!! temperature is updated to reflect heating due to TKE dissipation 
-!! following \cite han_et_al_2015 .
-!! \section arg_table_edmf_run Argument Table
+!!  This subroutine contains all of logic for the Hybrid EDMF PBL scheme except
+!!  for the calculation of the updraft properties and mass flux. The scheme
+!!  works on a basic level by calculating background diffusion coefficients
+!!  and updating them according to which processes are occurring in the column.
+!!  The most important difference in diffusion coefficients occurs between
+!!  those levels in the PBL and those above the PBL, so the PBL height
+!!  calculation is of utmost importance. An initial estimate is calculated in a
+!!  "predictor" step in order to calculate Monin-Obukhov similarity values and
+!!  a corrector step recalculates the PBL height based on updated surface
+!!  thermal characteristics. Using the PBL height and the similarity parameters,
+!!  the diffusion coefficients are updated below the PBL top based on Hong and
+!!  Pan (1996) \cite hong_and_pan_1996 (including counter-gradient terms).
+!!  Diffusion coefficients in the free troposphere (above the PBL top) are
+!!  calculated according to Louis (1979) \cite louis_1979 with updated
+!!  Richardson number-dependent functions. If it is diagnosed that PBL top-down
+!!  mixing is occurring according to Lock et al. (2000) \cite lock_et_al_2000 ,
+!!  then then diffusion coefficients are updated accordingly. Finally, for
+!!  convective boundary layers (defined as when the Obukhov length exceeds a
+!!  threshold), the counter-gradient terms are replaced using the mass flux
+!!  scheme of Siebesma et al. (2007) \cite siebesma_et_al_2007 . In order to
+!!  return time tendencies, a fully implicit solution is found using tridiagonal
+!!  matrices, and time tendencies are "backed out." Before returning, the time
+!!  tendency of temperature is updated to reflect heating due to TKE
+!!  dissipation following Han et al. (2015) \cite han_et_al_2015 .
+!!
+!! \section arg_table_hedmf_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
@@ -113,10 +116,12 @@
 !! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                                                  | flag for printing diagnostics to output               | flag          |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                    | index         |    0 | integer   |           | in     | F        |
+!! | xkzminv        | atmosphere_heat_diffusivity_background_maximum                              | maximum background value of heat diffusivity          | m2 s-1        |    0 | real      | kind_phys | in     | F        |
+!! | moninq_fac     | atmosphere_diffusivity_coefficient_factor                                   | multiplicative constant for atmospheric diffusivities | none          |    0 | real      | kind_phys | in     | F        |
 !! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_edmf GFS moninedmf PBL Scheme General Algorithm
+!!  \section general_edmf Hybrid EDMF General Algorithm
 !!  -# Compute preliminary variables from input arguments.
 !!  -# Calculate the first estimate of the PBL height ("Predictor step").
 !!  -# Calculate Monin-Obukhov similarity parameters.
@@ -130,15 +135,16 @@
 !!  -# Solve for the temperature and moisture tendencies due to vertical mixing.
 !!  -# Calculate heating due to TKE dissipation and add to the tendency for temperature.
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
-!!  \section detailed_edmf GFS moninedmf PBL Scheme Detailed Algorithm
+!!  \section detailed Detailed Algorithm
 !!  @{
-      subroutine edmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,           &
+      subroutine hedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,          &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
-     &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,errmsg,errflg)
+     &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
+     &   xkzminv,moninq_fac,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -148,10 +154,16 @@
 !
 !     arguments
 !
-      integer, intent(in) :: ix, im, km, ntrac, ntcw
-      real(kind=kind_phys), intent(inout) ::                            &
-     &                     dv(im,km),     du(im,km),                    &
-     &                     tau(im,km),    rtg(im,km,ntrac)              &
+      logical, intent(in) :: lprnt
+      integer, intent(in) :: ipr
+      integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im)
+      integer, intent(out) :: kpbl(im)
+
+!
+      real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
+      real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac
+      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
+     &                     tau(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(ix,km),     v1(ix,km),                    &
      &                     t1(ix,km),     q1(ix,km,ntrac),              &
@@ -160,58 +172,48 @@
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
-     &                     tsea(im),      heat(im),                     &
-     &                     evap(im),      stress(im),                   &
-     &                     spd1(im)
-      integer, intent(out) :: kpbl(im)
+     &                     tsea(im),                                    &
+     &                     heat(im),      evap(im),                     &
+     &                     stress(im),    spd1(im)
       real(kind=kind_phys), intent(in) ::                               &
      &                     prsi(ix,km+1), del(ix,km),                   &
      &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km),                  &
-     &                     delt
-      logical, intent(in) :: dspheat
-!          flag for tke dissipative heating
+     &                     phii(ix,km+1), phil(ix,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
      &                     hpbl(im),      dkt(im,km-1)
-! DH* even though these two variables are effectively intent(out), since
-! they are not used anywhere else than in this routine, declaring them
-! as intent(out) and initializing them (see comment DH* further down)
-! correctly changes the results on Theia with the Intel compiler. This
-! seems to be one of those Intel optimization issues we encountered
-! earlier for sfc_sice.f, see PR #47 for ccpp-physics *DH
       real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
-      integer, intent(in) :: kinver(im)
-      real(kind=kind_phys), intent(in) :: xkzm_m, xkzm_h, xkzm_s
-      logical, intent(in) :: lprnt
-      integer, intent(in) :: ipr
+!
+      logical, intent(in) :: dspheat
+!          flag for tke dissipative heating
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-!          error handling variables for CCPP
+
 !
 !    locals
-!
+
       integer i,iprt,is,iun,k,kk,km1,kmpbl,latd,lond
       integer lcld(im),icld(im),kcld(im),krad(im)
       integer kx1(im), kpblx(im)
 !
 !     real(kind=kind_phys) betaq(im), betat(im),   betaw(im),
-      real(kind=kind_phys) phih(im),  phim(im),    rbdn(im),            &
-     &                     hpblx(im), rbup(im),    beta(im),            &
-     &                     sflux(im),                                   &
+      real(kind=kind_phys) phih(im), phim(im),  hpblx(im),              &
+     &                     rbdn(im),    rbup(im),                       &
+     &                     beta(im),    sflux(im),                      &
      &                     z0(im),    crb(im),     wstar(im),           &
      &                     zol(im),   ustmin(im),  ustar(im),           &
      &                     thermal(im),wscale(im), wscaleu(im)
 !
-      real(kind=kind_phys) theta(im,km),  thvx(im,km),   thlvx(im,km),  &
-     &                     qlx(im,km),    thetae(im,km), thlvx1(im),    &
-     &                     qtx(im,km),    bf(im,km-1),   diss(im,km),   &
-     &                     radx(im,km-1), govrth(im),    hrad(im),      &
-!    &                     hradm(im),     radmin(im),    vrad(im),      &
-     &                     radmin(im),    vrad(im),      zd(im),        &
-     &                     zdd(im)
+      real(kind=kind_phys) theta(im,km),thvx(im,km),  thlvx(im,km),     &
+     &                     qlx(im,km),  thetae(im,km),                  &
+     &                     qtx(im,km),  bf(im,km-1),  diss(im,km),      &
+     &                     radx(im,km-1),                               &
+     &                     govrth(im),  hrad(im),                       &
+!    &                     hradm(im),   radmin(im),   vrad(im),         &
+     &                     radmin(im),  vrad(im),                       &
+     &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
      &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
@@ -254,7 +256,7 @@
      &                     vtend,   zfac,   vpert,  cteit,
      &                     rentf1,  rentf2, radfac,
      &                     zfmin,   zk,     tem,    tem1,  tem2,
-     &                     xkzm,    xkzmu,  xkzminv,
+     &                     xkzm,    xkzmu,
      &                     ptem,    ptem1,  ptem2, tx1(im), tx2(im)
 !
       real(kind=kind_phys) zstblmax,h1,     h2,     qlcr,  actei,
@@ -274,7 +276,8 @@ cc
       parameter(qmin=1.e-8,         zfmin=1.e-8,aphi5=5.,aphi16=16.)
       parameter(tdzmin=1.e-3,qlmin=1.e-12,f0=1.e-4)
       parameter(h1=0.33333333,h2=0.66666667)
-      parameter(cldtime=500.,xkzminv=0.3)
+!     parameter(cldtime=500.,xkzminv=0.3)
+      parameter(cldtime=500.)
 !     parameter(cldtime=500.,xkzmu=3.0,xkzminv=0.3)
 !     parameter(gamcrt=3.,gamcrq=2.e-3,rlamun=150.0)
       parameter(gamcrt=3.,gamcrq=0.,rlamun=150.0)
@@ -306,10 +309,6 @@ c
  609      format(1x,' k pr dkt dku ',i5,3f8.2)
  610      format(1x,' k pr dkt dku ',i5,3f8.2,' l2 ri t2',
      1         ' sr2  ',2f8.2,2e10.2)
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !>  ## Compute preliminary variables from input arguments
 
@@ -494,7 +493,7 @@ c
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
 !>  ## Calculate the first estimate of the PBL height (``Predictor step")
-!!  The calculation of the boundary layer height follows \cite troen_and_mahrt_1986 section 3. The approach is to find the level in the column where a modified bulk Richardson number exceeds a critical value.
+!!  The calculation of the boundary layer height follows Troen and Mahrt (1986) \cite troen_and_mahrt_1986 section 3. The approach is to find the level in the column where a modified bulk Richardson number exceeds a critical value.
 !!
 !!  The temperature of the thermal is of primary importance. For the initial estimate of the PBL height, the thermal is assumed to have one of two temperatures. If the boundary layer is stable, the thermal is assumed to have a temperature equal to the surface virtual temperature. Otherwise, the thermal is assumed to have the same virtual potential temperature as the lowest model level. For the stable case, the critical bulk Richardson number becomes a function of the wind speed and roughness length, otherwise it is set to a tunable constant.
 !  compute the pbl height
@@ -516,7 +515,7 @@ c
            crb(i) = max(min(crb(i), crbmax), crbmin)
          endif
       enddo
-!>  Given the thermal's properties and the critical Richardson number, a loop is executed to find the first level above the surface where the modified Richardson number is greater than the critical Richardson number, using equation 10a from \cite troen_and_mahrt_1986 (also equation 8 from \cite hong_and_pan_1996):
+!>  Given the thermal's properties and the critical Richardson number, a loop is executed to find the first level above the surface where the modified Richardson number is greater than the critical Richardson number, using equation 10a from Troen and Mahrt (1986) \cite troen_and_mahrt_1986 (also equation 8 from Hong and Pan (1996) \cite hong_and_pan_1996):
 !!  \f[
 !!  h = Ri\frac{T_0\left|\vec{v}(h)\right|^2}{g\left(\theta_v(h) - \theta_s\right)}
 !!  \f]
@@ -561,15 +560,15 @@ c
 !>  ## Calculate Monin-Obukhov similarity parameters
 !!  Using the initial guess for the PBL height, Monin-Obukhov similarity parameters are calculated. They are needed to refine the PBL height calculation and for calculating diffusion coefficients.
 !!
-!!  First, calculate the Monin-Obukhov nondimensional stability parameter, commonly referred to as \f$\zeta\f$ using the following equation from \cite businger_et_al_1971 (equation 28):
+!!  First, calculate the Monin-Obukhov nondimensional stability parameter, commonly referred to as \f$\zeta\f$ using the following equation from Businger et al. (1971) \cite businger_et_al_1971 (equation 28):
 !!  \f[
 !!  \zeta = Ri_{sfc}\frac{F_m^2}{F_h} = \frac{z}{L}
 !!  \f]
-!!  where \f$F_m\f$ and \f$F_h\f$ are surface Monin-Obukhov stability functions calculated in sfc_diff.f and \f$L\f$ is the Obukhov length. Then, the nondimensional gradients of momentum and temperature (phim and phih) are calculated using equations 5 and 6 from \cite hong_and_pan_1996 depending on the surface layer stability. Then, the velocity scale valid for the surface layer (\f$w_s\f$, wscale) is calculated using equation 3 from \cite hong_and_pan_1996. For the neutral and unstable PBL above the surface layer, the convective velocity scale, \f$w_*\f$, is calculated according to:
+!!  where \f$F_m\f$ and \f$F_h\f$ are surface Monin-Obukhov stability functions calculated in sfc_diff.f and \f$L\f$ is the Obukhov length. Then, the nondimensional gradients of momentum and temperature (phim and phih) are calculated using equations 5 and 6 from Hong and Pan (1996) \cite hong_and_pan_1996 depending on the surface layer stability. Then, the velocity scale valid for the surface layer (\f$w_s\f$, wscale) is calculated using equation 3 from Hong and Pan (1996) \cite hong_and_pan_1996. For the neutral and unstable PBL above the surface layer, the convective velocity scale, \f$w_*\f$, is calculated according to:
 !!  \f[
 !!  w_* = \left(\frac{g}{\theta_0}h\overline{w'\theta_0'}\right)^{1/3}
 !!  \f]
-!!  and the mixed layer velocity scale is then calculated with equation 6 from \cite troen_and_mahrt_1986
+!!  and the mixed layer velocity scale is then calculated with equation 6 from Troen and Mahrt (1986) \cite troen_and_mahrt_1986
 !!  \f[
 !!  w_s = (u_*^3 + 7\epsilon k w_*^3)^{1/3}
 !!  \f]
@@ -612,7 +611,7 @@ c
 !
 ! compute counter-gradient mixing term for heat and moisture
 !>  ## Update thermal properties of surface parcel and recompute PBL height ("Corrector step").
-!!  Next, the counter-gradient terms for temperature and humidity are calculated using equation 4 of \cite hong_and_pan_1996 and are used to calculate the "scaled virtual temperature excess near the surface" (equation 9 in \cite hong_and_pan_1996) so that the properties of the thermal are updated to recalculate the PBL height.
+!!  Next, the counter-gradient terms for temperature and humidity are calculated using equation 4 of Hong and Pan (1996) \cite hong_and_pan_1996 and are used to calculate the "scaled virtual temperature excess near the surface" (equation 9 in Hong and Pan (1996) \cite hong_and_pan_1996) so that the properties of the thermal are updated to recalculate the PBL height.
       do i = 1,im
          if(ublflg(i)) then
            hgamt(i)  = min(cfac*heat(i)/wscaleu(i),gamcrt)
@@ -622,11 +621,6 @@ c
            thermal(i)= thermal(i)+max(vpert,0.)
            hgamt(i)  = max(hgamt(i),0.0)
            hgamq(i)  = max(hgamq(i),0.0)
-         ! DH* see my comment above for issues on Theia/Intel
-         ! with making hgamt and hgamq intent(out) variables *DH
-         !else
-         !  hgamt(i)  = 0.0
-         !  hgamq(i)  = 0.0
          endif
       enddo
 !
@@ -785,7 +779,7 @@ c
 !
 !     compute inverse prandtl number
 !>  ## Calculate the inverse Prandtl number
-!!  For an unstable PBL, the Prandtl number is calculated according to \cite hong_and_pan_1996, equation 10, whereas for a stable boundary layer, the Prandtl number is simply \f$Pr = \frac{\phi_h}{\phi_m}\f$.
+!!  For an unstable PBL, the Prandtl number is calculated according to Hong and Pan (1996) \cite hong_and_pan_1996, equation 10, whereas for a stable boundary layer, the Prandtl number is simply \f$Pr = \frac{\phi_h}{\phi_m}\f$.
       do i = 1, im
         if(ublflg(i)) then
           tem = phih(i)/phim(i)+cfac*vk*sfcfrac
@@ -804,14 +798,14 @@ c
 !
 !     compute diffusion coefficients below pbl
 !>  ## Compute diffusion coefficients below the PBL top
-!!  Below the PBL top, the diffusion coefficients (\f$K_m\f$ and \f$K_h\f$) are calculated according to equation 2 in \cite hong_and_pan_1996 where a different value for \f$w_s\f$ (PBL vertical velocity scale) is used depending on the PBL stability. \f$K_h\f$ is calculated from \f$K_m\f$ using the Prandtl number. The calculated diffusion coefficients are checked so that they are bounded by maximum values and the local background diffusion coefficients.
+!!  Below the PBL top, the diffusion coefficients (\f$K_m\f$ and \f$K_h\f$) are calculated according to equation 2 in Hong and Pan (1996) \cite hong_and_pan_1996 where a different value for \f$w_s\f$ (PBL vertical velocity scale) is used depending on the PBL stability. \f$K_h\f$ is calculated from \f$K_m\f$ using the Prandtl number. The calculated diffusion coefficients are checked so that they are bounded by maximum values and the local background diffusion coefficients.
       do k = 1, kmpbl
       do i=1,im
          if(k < kpbl(i)) then
 !           zfac = max((1.-(zi(i,k+1)-zl(i,1))/
 !    1             (hpbl(i)-zl(i,1))), zfmin)
             zfac = max((1.-zi(i,k+1)/hpbl(i)), zfmin)
-            tem = zi(i,k+1) * (zfac**pfac)
+            tem = zi(i,k+1) * (zfac**pfac) * moninq_fac ! lmh suggested by kg
             if(pblflg(i)) then
               tem1 = vk * wscaleu(i) * tem
 !             dku(i,k) = xkzmo(i,k) + tem1
@@ -836,7 +830,7 @@ c
 !
 ! compute diffusion coefficients based on local scheme above pbl
 !>  ## Compute diffusion coefficients above the PBL top
-!!  Diffusion coefficients above the PBL top are computed as a function of local stability (gradient Richardson number), shear, and a length scale from \cite louis_1979 :
+!!  Diffusion coefficients above the PBL top are computed as a function of local stability (gradient Richardson number), shear, and a length scale from Louis (1979) \cite louis_1979 :
 !!  \f[
 !!  K_{m,h}=l^2f_{m,h}(Ri_g)\left|\frac{\partial U}{\partial z}\right|
 !!  \f]
@@ -858,7 +852,7 @@ c
 !!  \f[
 !!  Pr = \frac{K_h}{K_m} = 1 + 2.1Ri_g
 !!  \f]
-!!  The source for the formulas used for the Richardson number-dependent functions is unclear. They are different than those used in \cite hong_and_pan_1996 as the previous documentation suggests. They follow equation 14 of \cite louis_1979 for the unstable case, but it is unclear where the values of the coefficients \f$b\f$ and \f$c\f$ from that equation used in this scheme originate. Finally, the length scale, \f$l\f$ is calculated according to the following formula from \cite hong_and_pan_1996
+!!  The source for the formulas used for the Richardson number-dependent functions is unclear. They are different than those used in Hong and Pan (1996) \cite hong_and_pan_1996 as the previous documentation suggests. They follow equation 14 of Louis (1979) \cite louis_1979 for the unstable case, but it is unclear where the values of the coefficients \f$b\f$ and \f$c\f$ from that equation used in this scheme originate. Finally, the length scale, \f$l\f$ is calculated according to the following formula from Hong and Pan (1996) \cite hong_and_pan_1996
 !!  \f[
 !!  \frac{1}{l} = \frac{1}{kz} + \frac{1}{l_0}\\
 !!  \f]
@@ -948,13 +942,13 @@ c
 !>  ## Compute enhanced diffusion coefficients related to stratocumulus-topped PBLs
 !!  If a stratocumulus layer has been identified in the PBL, the diffusion coefficients in the PBL are modified in the following way.
 !!
-!!  -# First, the criteria for CTEI is checked, using the threshold from equation 13 of \cite macvean_and_mason_1990. If the criteria is met, the cloud top diffusion is increased:
+!!  -# First, the criteria for CTEI is checked, using the threshold from equation 13 of Macvean and Mason (1990) \cite macvean_and_mason_1990. If the criteria is met, the cloud top diffusion is increased:
 !!  \f[
 !!  K_h^{Sc} = -c\frac{\Delta F_R}{\rho c_p}\frac{1}{\frac{\partial \theta_v}{\partial z}}
 !!  \f]
 !!  where the constant \f$c\f$ is set to 0.2 if the CTEI criterion is not met and 1.0 if it is.
 !!
-!!  -# Calculate the diffusion coefficients due to stratocumulus mixing according to equation 5 in \cite lock_et_al_2000 for every level below the stratocumulus top using the characteristic stratocumulus velocity scale previously calculated. The diffusion coefficient for momentum is calculated assuming a constant inverse Prandtl number of 0.75.
+!!  -# Calculate the diffusion coefficients due to stratocumulus mixing according to equation 5 in Lock et al. (2000) \cite lock_et_al_2000 for every level below the stratocumulus top using the characteristic stratocumulus velocity scale previously calculated. The diffusion coefficient for momentum is calculated assuming a constant inverse Prandtl number of 0.75.
       do i = 1, im
         if(scuflg(i)) then
            k = krad(i)
@@ -997,7 +991,7 @@ c
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!>  After \f$K_h^{Sc}\f$ has been determined from the surface to the top of the stratocumulus layer, it is added to the value for the diffusion coefficient calculated previously using surface-based mixing [see equation 6 of \cite lock_et_al_2000 ].
+!>  After \f$K_h^{Sc}\f$ has been determined from the surface to the top of the stratocumulus layer, it is added to the value for the diffusion coefficient calculated previously using surface-based mixing [see equation 6 of Lock et al. (2000) \cite lock_et_al_2000 ].
       do k = 1, kmpbl
         do i=1,im
           if(scuflg(i)) then
@@ -1104,7 +1098,7 @@ c
 !
 !     solve tridiagonal problem for heat and moisture
 !
-!>  The tridiagonal system is solved by calling tridin() subroutine.
+!>  The tridiagonal system is solved by calling the internal ::tridin subroutine.
       call tridin(im,km,ntrac,al,ad,au,a1,a2,au,a1,a2)
 
 !
@@ -1136,7 +1130,7 @@ c
 !   compute tke dissipation rate
 !
 !>  ## Calculate heating due to TKE dissipation and add to the tendency for temperature
-!!  Following \cite han_et_al_2015 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of \cite han_et_al_2015 for the PBL and equation 16 for the surface layer.
+!!  Following Han et al. (2015) \cite han_et_al_2015 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of Han et al. (2015) \cite han_et_al_2015 for the PBL and equation 16 for the surface layer.
       if(dspheat) then
 !
       do k = 1,km1
@@ -1254,113 +1248,8 @@ c
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
-      end subroutine edmf_run
-!!  @}
+      end subroutine hedmf_run
+!> @}
 !> @}
 
-c-----------------------------------------------------------------------
-C      subroutine edmf_tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
-c
-C      use machine     , only : kind_phys
-C      implicit none
-C      integer             k,n,l,i
-C      real(kind=kind_phys) fk
-c
-C      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n),        &
-C     &          au(l,n-1),a1(l,n),a2(l,n)
-C-----------------------------------------------------------------------
-C      do i=1,l
-C        fk      = 1./cm(i,1)
-C        au(i,1) = fk*cu(i,1)
-C        a1(i,1) = fk*r1(i,1)
-C        a2(i,1) = fk*r2(i,1)
-C      enddo
-C      do k=2,n-1
-C        do i=1,l
-C          fk      = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
-C          au(i,k) = fk*cu(i,k)
-C          a1(i,k) = fk*(r1(i,k)-cl(i,k)*a1(i,k-1))
-C          a2(i,k) = fk*(r2(i,k)-cl(i,k)*a2(i,k-1))
-C        enddo
-C      enddo
-C      do i=1,l
-C        fk      = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
-C        a1(i,n) = fk*(r1(i,n)-cl(i,n)*a1(i,n-1))
-C        a2(i,n) = fk*(r2(i,n)-cl(i,n)*a2(i,n-1))
-C      enddo
-C      do k=n-1,1,-1
-C        do i=1,l
-C          a1(i,k) = a1(i,k)-au(i,k)*a1(i,k+1)
-C          a2(i,k) = a2(i,k)-au(i,k)*a2(i,k+1)
-C        enddo
-C      enddo
-C-----------------------------------------------------------------------
-C      return
-C      end
-C
-C-----------------------------------------------------------------------
-C      subroutine edmf_tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
-c
-C      use machine     , only : kind_phys
-C      implicit none
-C      integer             is,k,kk,n,nt,l,i
-C      real(kind=kind_phys) fk(l)
-c
-C      real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
-C     &                     r1(l,n),   r2(l,n*nt),                       &
-C     &                     au(l,n-1), a1(l,n), a2(l,n*nt),              &
-C     &                     fkk(l,2:n-1)
-C-----------------------------------------------------------------------
-C      do i=1,l
-C        fk(i)   = 1./cm(i,1)
-C        au(i,1) = fk(i)*cu(i,1)
-C        a1(i,1) = fk(i)*r1(i,1)
-C      enddo
-C      do k = 1, nt
-C        is = (k-1) * n
-C        do i = 1, l
-C          a2(i,1+is) = fk(i) * r2(i,1+is)
-C        enddo
-C      enddo
-C      do k=2,n-1
-C        do i=1,l
-C          fkk(i,k) = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
-C          au(i,k)  = fkk(i,k)*cu(i,k)
-C          a1(i,k)  = fkk(i,k)*(r1(i,k)-cl(i,k)*a1(i,k-1))
-C        enddo
-C      enddo
-C      do kk = 1, nt
-C        is = (kk-1) * n
-C        do k=2,n-1
-C          do i=1,l
-C            a2(i,k+is) = fkk(i,k)*(r2(i,k+is)-cl(i,k)*a2(i,k+is-1))
-C          enddo
-C        enddo
-C      enddo
-C      do i=1,l
-C        fk(i)   = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
-C        a1(i,n) = fk(i)*(r1(i,n)-cl(i,n)*a1(i,n-1))
-C      enddo
-C      do k = 1, nt
-C        is = (k-1) * n
-C        do i = 1, l
-C          a2(i,n+is) = fk(i)*(r2(i,n+is)-cl(i,n)*a2(i,n+is-1))
-C        enddo
-C      enddo
-C      do k=n-1,1,-1
-C        do i=1,l
-C          a1(i,k) = a1(i,k) - au(i,k)*a1(i,k+1)
-C        enddo
-C      enddo
-C      do kk = 1, nt
-C        is = (kk-1) * n
-C        do k=n-1,1,-1
-C          do i=1,l
-C            a2(i,k+is) = a2(i,k+is) - au(i,k)*a2(i,k+is+1)
-C          enddo
-C        enddo
-C      enddo
-C-----------------------------------------------------------------------
-C      return
-C      end
-      end module edmf
+      end module hedmf

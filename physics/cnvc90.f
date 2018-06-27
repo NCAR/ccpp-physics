@@ -8,7 +8,6 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-
 !! \section arg_table_cnvc90_run Argument Table
 !! | local_name     | standard_name                                                         | long_name                                               | units | rank | type      | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------------|---------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
@@ -29,7 +28,7 @@
 !! | errmsg         | error_message                                                         | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                            | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
-      SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,
+      SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 
       USE MACHINE, ONLY :kind_phys
@@ -99,7 +98,7 @@
           IF(ACV(I).GT.0.) THEN
 !           CVB(I) = ACVB(I)
 !           CVT(I) = ACVT(I)
-c....   convert cvt and cvb to pressures
+!       convert cvt and cvb to pressures
             ITOP   = NINT(ACVT(I))
             CVT(I) = PRSI(i,ITOP+1)
             IBOT   = NINT(ACVB(I))

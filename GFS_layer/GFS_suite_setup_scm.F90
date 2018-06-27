@@ -1,4 +1,4 @@
-module GFS_initialize_scm
+module GFS_suite_setup_scm
 
   implicit none
 
@@ -7,7 +7,7 @@ module GFS_initialize_scm
 !----------------
 ! Public entities
 !----------------
-  public  GFS_initialize_scm_init, GFS_initialize_scm_run, GFS_initialize_scm_finalize
+  public  GFS_suite_setup_scm_init, GFS_suite_setup_scm_run, GFS_suite_setup_scm_finalize
 
   CONTAINS
 !*******************************************************************************************
@@ -16,13 +16,7 @@ module GFS_initialize_scm
 ! GFS initialze
 !--------------
 
-  subroutine GFS_initialize_scm_init()
-  end subroutine GFS_initialize_scm_init
-
-  subroutine GFS_initialize_scm_finalize()
-  end subroutine GFS_initialize_scm_finalize
-
-!> \section arg_table_GFS_initialize_scm_run Argument Table
+!> \section arg_table_GFS_suite_setup_scm_init Argument Table
 !! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Model                | FV3-GFS_Control_type                                        | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
@@ -48,7 +42,7 @@ module GFS_initialize_scm
 !! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
 !! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
-  subroutine GFS_initialize_scm_run (Model, Statein, Stateout, Sfcprop,           &
+  subroutine GFS_suite_setup_scm_init (Model, Statein, Stateout, Sfcprop,           &
                              Coupling, Grid, Tbd, Cldprop, Radtend, Diag,         &
                              Interstitial, Init_parm, n_ozone_lats,               &
                              n_ozone_layers, n_ozone_times, n_ozone_coefficients, &
@@ -69,6 +63,7 @@ module GFS_initialize_scm
     use aer_cloud,           only: aer_cloud_init
     use module_ras,          only: ras_init
     use ozne_def,            only: latsozp, levozp, timeoz, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
+    use GFS_rrtmg_setup,     only: GFS_rrtmg_setup_init
 
     !--- interface variables
     type(GFS_control_type),      intent(inout) :: Model
@@ -160,12 +155,21 @@ module GFS_initialize_scm
     allocate(si(Model%levr+1))
     si = (Init_parm%ak + Init_parm%bk * p_ref - Init_parm%ak(Model%levr+1)) &
              / (p_ref - Init_parm%ak(Model%levr+1))
-    call rad_initialize (si, Model%levr, Model%ictm, Model%isol, &
-           Model%ico2, Model%iaer, Model%ialb, Model%iems,       &
-           Model%ntcw, Model%num_p3d, Model%npdf3d, Model%ntoz,  &
-           Model%iovr_sw, Model%iovr_lw, Model%isubc_sw,         &
-           Model%isubc_lw, Model%crick_proof, Model%ccnorm,      &
-           Model%norad_precip, Model%idate,Model%iflip, Model%me)
+    Interstitial%errmsg = ''
+    Interstitial%errflg = 0
+    call GFS_rrtmg_setup_init (si, Model%levr, Model%ictm, Model%isol,     &
+                 Model%ico2, Model%iaer, Model%ialb, Model%iems,           &
+                 Model%ntcw,  Model%num_p2d, Model%num_p3d, Model%npdf3d,  &
+                 Model%ntoz, Model%iovr_sw, Model%iovr_lw, Model%isubc_sw, &
+                 Model%isubc_lw, Model%crick_proof, Model%ccnorm,          &
+                 Model%imp_physics, Model%norad_precip, Model%idate,       &
+                 Model%iflip, Interstitial%im, Interstitial%faerlw,        &
+                 Interstitial%faersw, Interstitial%aerodp,                 &
+                 Model%me, Interstitial%errmsg, Interstitial%errflg)
+    if (Interstitial%errflg/=0) then
+       print *, "An error occured in GFS_rrtmg_setup_init: " // trim(Interstitial%errmsg)
+       stop
+    endif
     deallocate (si)
 !
 !     !--- initialize Morrison-Gettleman microphysics
@@ -192,7 +196,39 @@ module GFS_initialize_scm
 !     !--- this not is placed here to alert users to the need to study
 !     !--- the FV3GFS_io.F90 module
 
-  end subroutine GFS_initialize_scm_run
+  end subroutine GFS_suite_setup_scm_init
+
+!> \section arg_table_GFS_suite_setup_scm_run Argument Table
+!! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!!
+  subroutine GFS_suite_setup_scm_run (errmsg, errflg)
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
+  end subroutine GFS_suite_setup_scm_run
+
+!> \section arg_table_GFS_suite_setup_scm_finalize Argument Table
+!! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
+!! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
+!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!!
+  subroutine GFS_suite_setup_scm_finalize (errmsg, errflg)
+
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
+
+  end subroutine GFS_suite_setup_scm_finalize
 
    !------------------
    ! GFS_grid_populate
@@ -226,4 +262,4 @@ module GFS_initialize_scm
 
   end subroutine GFS_grid_populate
 
-end module GFS_initialize_scm
+end module GFS_suite_setup_scm

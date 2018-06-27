@@ -12,18 +12,18 @@
       end subroutine GFS_DCNV_generic_pre_finalize
 
 !> \section arg_table_GFS_DCNV_generic_pre_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                                | units         | rank | type              |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|--------------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                  | DDT           |    0 | GFS_control_type  |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore      | DDT           |    0 | GFS_stateout_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data       | DDT           |    0 | GFS_grid_type     |           | in     | F        |
-!! | save_u         | x_wind_save                                            | x-wind before entering a physics scheme                                  | m s-1         |    2 | real              | kind_phys | inout  | F        |
-!! | save_v         | y_wind_save                                            | y-wind before entering a physics scheme                                  | m s-1         |    2 | real              | kind_phys | inout  | F        |
-!! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                         | K             |    2 | real              | kind_phys | inout  | F        |
-!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme           | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
-!! | save_qcw       | cloud_condensed_water_specific_humidity_save           | cloud condensed water specific humidity before entering a physics scheme | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                                 | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                    | flag          |    0 | integer           |           | out    | F        |
+!! | local_name     | standard_name                                          | long_name                                                                 | units         | rank | type              |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                   | DDT           |    0 | GFS_control_type  |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                  | Fortran DDT containing FV3-GFS prognostic state to return to dycore       | DDT           |    0 | GFS_stateout_type |           | in     | F        |
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data        | DDT           |    0 | GFS_grid_type     |           | in     | F        |
+!! | save_u         | x_wind_save                                            | x-wind before entering a physics scheme                                   | m s-1         |    2 | real              | kind_phys | inout  | F        |
+!! | save_v         | y_wind_save                                            | y-wind before entering a physics scheme                                   | m s-1         |    2 | real              | kind_phys | inout  | F        |
+!! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K             |    2 | real              | kind_phys | inout  | F        |
+!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
+!! | save_qcw       | cloud_condensed_water_mixing_ratio_save                | moist cloud condensed water mixing ratio before entering a physics scheme | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
+!! | errmsg         | error_message                                          | error message for error handling in CCPP                                  | none          |    0 | character         | len=*     | out    | F        |
+!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                     | flag          |    0 | integer           |           | out    | F        |
 !!
     subroutine GFS_DCNV_generic_pre_run (Model, Stateout, Grid, save_u, save_v, save_t, save_qv, save_qcw, errmsg, errflg)
 
@@ -90,7 +90,7 @@
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                                               | kg m-2        |    2 | real              | kind_phys | in     | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                                             | kg m-2        |    2 | real              | kind_phys | in     | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                           | kg m-2        |    2 | real              | kind_phys | in     | F        |
-!! | cnvw           | convective_cloud_water_specific_humidity                  | convective cloud water specific humidity                                 | kg kg-1       |    2 | real              | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio                                | kg kg-1       |    2 | real              | kind_phys | in     | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                                   | frac          |    2 | real              | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                         | Fortran DDT containing FV3-GFS fields targeted for diagnostic output     | DDT           |    0 | GFS_diag_type     |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                          | Fortran DDT containing FV3-GFS miscellaneous data                        | DDT           |    0 | GFS_tbd_type      |           | inout  | F        |
