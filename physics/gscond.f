@@ -389,7 +389,7 @@
 !   if no cloud exists then evaporate any existing cloud condensate
 !----------------evaporation of cloud water-----------------------------
           e0 = d00
-          if (ccrik <= cclimit.and. cwmik > climit)  then 
+          if (ccrik <= cclimit.and. cwmik > climit)  then
 !
 !   first iteration - increment halved
 !

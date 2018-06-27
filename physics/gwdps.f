@@ -814,7 +814,7 @@
 !     endif
 !
 ! --- The drag for mtn blocked flow
-! 
+!
         DO I = 1, npt
           J = ipt(i)
           ZLEN = 0.
@@ -853,7 +853,7 @@
 !! D_{b}(z)=-C_{d}\max(2-\frac{1}{R},0)\rho\frac{\sigma}{2h'}ZLEN\max(\cos\psi,\gamma\sin\psi)\frac{UDS}{2}
 !!\f]
 !! where \f$C_{d}\f$ is a specified constant, \f$\sigma\f$ is the
-!! orographic slope. 
+!! orographic slope.
 
                 DBTMP = 0.25 *  CDmb *
      &                  MAX( 2. - 1. / R, 0. ) * sigma(J) *
@@ -872,7 +872,6 @@
 !         if(lprnt) print *,' @K=1,ZLEN,DBTMP=',K,ZLEN,DBTMP
           endif
         ENDDO
-! 
 !.............................
 !.............................
 ! end  mtn blocking section
@@ -1049,7 +1048,6 @@
         ULOW (I)  = 0.0
         DTFAC(I)  = 1.0
         ICRILV(I) = .FALSE. ! INITIALIZE CRITICAL LEVEL CONTROL VECTOR
-        
 !
 !----COMPUTE THE "LOW LEVEL" WIND MAGNITUDE (M/S)
 !
@@ -1068,7 +1066,6 @@
 !         ENDIF
         ENDDO
       ENDDO
-!      
 !
 !   find the interface level of the projected wind where
 !   low levels & upper levels meet above pbl
@@ -1106,7 +1103,7 @@
 !     RATIO CONST. USE SIMPLIFIED RELATIONSHIP BETWEEN STANDARD
 !     DEVIATION & CRITICAL HGT
 !
-!> - Calculate enhancement factor (E),number of mountans (m') and 
+!> - Calculate enhancement factor (E),number of mountans (m') and
 !! aspect ratio constant.
 !!\n As in eq.(4.9),(4.10),(4.11) in
 !! \cite kim_and_arakawa_1995, we define m' and E in such a way that they
@@ -1165,7 +1162,6 @@
         SCOR(I)  = BNV2(I,K) / TEM  ! Scorer parameter below ref level
       ENDDO
 !     if(lprnt) print *,' taub=',taub
-!                                                                       
 !----SET UP BOTTOM VALUES OF STRESS
 !
       DO K = 1, KBPS
@@ -1211,7 +1207,7 @@
                 SCORK   = BNV2(I,K) * TEMV * TEMV
                 RSCOR   = MIN(1.0, SCORK / SCOR(I))
                 SCOR(I) = SCORK
-              ELSE 
+              ELSE
                 RSCOR   = 1.
               ENDIF
 !
@@ -1334,8 +1330,8 @@
 !     endif
 
 !> - Calculate outputs: A, B, DUSFC, DVSFC (see parameter description).
-!!  - Below the dividing streamline height (k < idxzb), mountain 
-!!    blocking(\f$D_{b}\f$) is applied. 
+!!  - Below the dividing streamline height (k < idxzb), mountain
+!!    blocking(\f$D_{b}\f$) is applied.
 !!  - Otherwise (k>= idxzb), orographic GWD (\f$\tau\f$) is applied.
       DO K = 1,KM
         DO I = 1,npt
@@ -1350,7 +1346,7 @@
             A(J,K)  = - DBIM * V1(J,K) + A(J,K)
             B(J,K)  = - DBIM * U1(J,K) + B(J,K)
             ENG1    = ENG0*(1.0-DBIM*DELTIM)*(1.0-DBIM*DELTIM)
-!          if ( ABS(DBIM * U1(J,K)) .gt. .01 ) 
+!          if ( ABS(DBIM * U1(J,K)) .gt. .01 )
 !    & print *,' in gwdps_lmi.f KDT=',KDT,I,K,DB(I,K),
 !    &                      dbim,idxzb(I),U1(J,K),V1(J,K),me
             DUSFC(J)   = DUSFC(J) - DBIM * U1(J,K) * DEL(J,K)

@@ -289,7 +289,7 @@
 !             occurred.
 !  dogwdc   : Logical flag whether the GWDC parameterization is
 !             calculated at a grid point or not.
-!  
+!
 !  dogwdc is used in order to lessen CPU time for GWDC calculation.
 !
 !-----------------------------------------------------------------------
@@ -325,7 +325,7 @@
      &                                     ti(:,:),       riloc(:,:),
      &                                     rimin(:,:),    pint(:,:)
 !     real(kind=kind_phys), allocatable :: ugwdc(:,:),    vgwdc(:,:),
-      real(kind=kind_phys), allocatable :: 
+      real(kind=kind_phys), allocatable ::
 !    &                                     plnmid(:,:),   wtgwc(:,:),
      &                                     plnmid(:,:),   taugw(:,:),
      &                                     utgwcl(:,:),   vtgwcl(:,:),
@@ -390,7 +390,7 @@
           vtgwc(i,k) = 0.0
 !         brunm(i,k) = 0.0
 !         rhom(i,k)  = 0.0
-          enddo
+        enddo
       enddo
       do i=1,im
         tauctx(i) = 0.0
@@ -466,7 +466,7 @@
      &          rimin(npt,km+1),    pint(npt,km+1))
 
 !     allocate (ugwdc(npt,km),   vgwdc(npt,km),
-      allocate 
+      allocate
 !    &         (plnmid(npt,km),  wtgwc(npt,km),
      &         (plnmid(npt,km),  velco(npt,km),
      &          utgwcl(npt,km),  vtgwcl(npt,km),
@@ -578,7 +578,7 @@
 !            4 ======== pint(4)           dpint(4)
 !            4 --------          pmid(4)            dpmid(4)
 !              ........
-!           17 ======== pint(17)          dpint(17) 
+!           17 ======== pint(17)          dpint(17)
 !           17 --------          pmid(17)           dpmid(17)
 !           18 ======== pint(18)          dpint(18)
 !           18 --------          pmid(18)           dpmid(18)
@@ -658,7 +658,7 @@
       do k = 1, km
         do i = 1, npt
           dtdp       = (ti(i,k+1)-ti(i,k)) / (pint(i,k+1)-pint(i,k))
-          n2         = gsqr / t(i,k) * ( 1./cp - rhom(i,k)*dtdp ) 
+          n2         = gsqr / t(i,k) * ( 1./cp - rhom(i,k)*dtdp )
           brunm(i,k) = sqrt (max (n2min, n2))
         enddo
       enddo
@@ -814,10 +814,10 @@
             tem = bruni(i,k) / shear
             riloc(i,k)  = tem * tem
             if (riloc(i,k) >= rimax ) riloc(i,k) = rilarge
-          end if 
+          end if
         enddo
       enddo
- 
+
       do i=1,npt
         riloc(i,1)    = riloc(i,2)
         riloc(i,km+1) = riloc(i,km)
@@ -882,7 +882,7 @@
 !      level just below the interface level in which cloud top wave
 !      stress is defined.
 !      Nonlinct is defined at the interface level.
-!  
+!
 !  F : If the atmosphere is dynamically unstable at the cloud top,
 !      GWDC calculation in current horizontal grid is skipped.
 !
@@ -964,7 +964,7 @@
           tauctxl(i) = zero
           tauctyl(i) = zero
           do_gwc(i) = .false.
-        end if 
+        end if
 !H
       enddo
 
@@ -1094,16 +1094,16 @@
 !           16 ========  $$$  0
 ! kcldbot   16 --------  $$$
 !           17 ========       0
-!           17 -------- 
+!           17 --------
 !           18 ========       0
-!           18 -------- 
+!           18 --------
 !           19 ========       0
 !
 !-----------------------------------------------------------------------
 !
 !   Even though the cloud top level obtained in deep convective para-
 !   meterization is defined in mid-level, the cloud top level for
-!   the GWDC calculation is assumed to be the interface level just 
+!   the GWDC calculation is assumed to be the interface level just
 !   above the mid-level cloud top vertical level index.
 !
 !-----------------------------------------------------------------------
@@ -1133,7 +1133,7 @@
      &                           /  (bruni(i,k)*dlen(i))
                   elseif (rimin(i,k) > riminm) then
                     taugwci(i,k) = zero
-!                   taugwci(i,k) = taugwci(i,k+1) 
+!                   taugwci(i,k) = taugwci(i,k+1)
                   end if                                              ! RImin
                 else
 
