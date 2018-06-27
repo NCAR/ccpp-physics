@@ -24,7 +24,7 @@
 !! | ldiag3d        | flag_diagnostics_3D                                    | logical flag for 3D diagnostics                                           | flag        |    0 | logical   |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                      | cloud condensate index in tracer array(3)                                 | index       |    0 | integer   |           | in     | F        |
 !! | ncld           | number_of_hydrometeors                                 | number of hydrometeors(1 for Z-C)                                         | count       |    0 | integer   |           | in     | F        |
-!! | num_p3d        | array_dimension_of_microphysics                        | number of 3D arrays needed for microphysics                               | count       |    0 | integer   |           | in     | F        |
+!! | num_p3d        | array_dimension_of_3d_arrays_for_microphysics          | number of 3D arrays needed for microphysics                               | count       |    0 | integer   |           | in     | F        |
 !! | t              | air_temperature_updated_by_physics                     | layer mean air temperature                                                | K           |    2 | real      | kind_phys | in     | F        |
 !! | q              | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity                                             | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | out    | F        |

@@ -27,12 +27,13 @@
 !! | sfcalb2        | surface_albedo_due_to_near_IR_diffused    | surface albedo due to near IR diffused beam                        | frac     |    1 | real             | kind_phys | out    | F        |
 !! | sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct   | surface albedo due to UV+VIS direct beam                           | frac     |    1 | real             | kind_phys | out    | F        |
 !! | sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused | surface albedo due to UV+VIS diffused beam                         | frac     |    1 | real             | kind_phys | out    | F        |
+!! | alb1d          | surface_albedo_perturbation               | surface albedo perturbation                                        | frac     |    1 | real             | kind_phys | in     | F        |
 !! | errmsg         | error_message                             | error message for error handling in CCPP                           | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg         | error_flag                                | error flag for error handling in CCPP                              | flag     |    0 | integer          |           | out    | F        |
 !!
       subroutine rrtmg_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
         nday, idxday, tsfg, tsfa, sfcalb1, sfcalb2, sfcalb3, sfcalb4, &
-        errmsg, errflg)
+        alb1d, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -43,6 +44,7 @@
       use module_radiation_surface,  only: NF_ALBD, setalb
 
       implicit none
+
       type(GFS_control_type),         intent(in)    :: Model
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
@@ -50,8 +52,9 @@
       integer,                        intent(in)    :: im
       integer,                        intent(out)   :: nday
       integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  ::  tsfa, tsfg
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: alb1d
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables
@@ -80,13 +83,14 @@
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
-        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&       !  ---  inputs:
+        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
                      Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
                      tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
                      Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
                      Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
                      Sfcprop%tisfc, IM,                           &
-                     sfcalb)                                              !  ---  outputs
+                     alb1d, Model%pertalb,                        &    !  mg, sfc-perts
+                     sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

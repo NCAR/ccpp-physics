@@ -8,7 +8,6 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-#if 0
 !! \section arg_table_cnvc90_run Argument Table
 !! | local_name     | standard_name                                                         | long_name                                               | units | rank | type      | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------------|---------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
@@ -29,7 +28,6 @@
 !! | errmsg         | error_message                                                         | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                            | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
-#endif
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 
