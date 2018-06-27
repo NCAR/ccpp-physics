@@ -6,9 +6,15 @@ module mp_thompson_hrrr
 
       use machine, only : kind_phys
 
-      use module_mp_thompson_hrrr, only : thompson_init, mp_gt_driver
+      use module_mp_thompson_hrrr, only : thompson_init, mp_gt_driver, thompson_finalize
 
       implicit none
+
+      public :: mp_thompson_hrrr_init, mp_thompson_hrrr_run, mp_thompson_hrrr_finalize
+
+      private
+
+      logical :: is_initialized = .False.
 
    contains
 
@@ -81,6 +87,8 @@ module mp_thompson_hrrr
          errmsg = ''
          errflg = 0
 
+         if (is_initialized) return
+
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
 
@@ -107,11 +115,11 @@ module mp_thompson_hrrr
          if (is_aerosol_aware .and. present(nwfa2d) .and. present(nwfa) .and. present(nifa)) then
 #ifdef DEBUG_AEROSOLS
             if (mpirank==mpiroot) then
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init before: nwfa2d min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nwfa2d min/mean/max =", &
                                     & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init before: nwfa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nwfa min/mean/max =", &
                                     & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init before: nifa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nifa min/mean/max =", &
                                     & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
             end if
 #endif
@@ -129,11 +137,11 @@ module mp_thompson_hrrr
             if (errflg /= 0) return
 #ifdef DEBUG_AEROSOLS
             if (mpirank==mpiroot) then
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init after: nwfa2d min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nwfa2d min/mean/max =", &
                                     & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init after: nwfa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nwfa min/mean/max =", &
                                     & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson init after: nifa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nifa min/mean/max =", &
                                     & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
             end if
 #endif
@@ -152,6 +160,8 @@ module mp_thompson_hrrr
                                threads=threads)
             if (errflg /= 0) return
          end if
+
+         is_initialized = .true.
 
       end subroutine mp_thompson_hrrr_init
 
@@ -308,6 +318,13 @@ module mp_thompson_hrrr
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
 
+         ! Check initialization state
+         if (.not.is_initialized) then
+            write(errmsg, fmt='((a))') 'mp_thompson_hrrr_run called before mp_thompson_hrrr_init'
+            errflg = 1
+            return
+         end if
+
          ! Initialize the CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -401,46 +418,46 @@ module mp_thompson_hrrr
 
 #ifdef DEBUG_AEROSOLS
          if (mpirank==mpiroot) then
-             write(0,*) "DH DEBUG: called mp_thompson_hrrr_run, is_aerosol_aware=",  is_aerosol_aware, &
+             write(0,*) "AEROSOL DEBUG: called mp_thompson_hrrr_run, is_aerosol_aware=",  is_aerosol_aware, &
                       & ", do_effective_radii=", do_effective_radii, ", do_radar_ref=", do_radar_ref, &
                       & ", diagflag=", diagflag, ", do_radar_ref_mp=", do_radar_ref_mp
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: prsl min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: prsl min/mean/max =", &
                               & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: tgrs min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: tgrs min/mean/max =", &
                               & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: rho min/mean/max =", &
-                                 & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: rho min/mean/max =", &
+                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
              if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: nwfa2d min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa2d min/mean/max =", &
                                     & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: nwfa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa min/mean/max =", &
                                     & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: nifa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nifa min/mean/max =", &
                                     & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: nc min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nc min/mean/max =", &
                                     & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
              end if
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: ni min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: ni min/mean/max =", &
                                  & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: nr min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nr min/mean/max =", &
                                  & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: omega min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: omega min/mean/max =", &
                                  & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: w min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: w min/mean/max =", &
                                  & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: re_cloud_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_cloud_mp min/mean/max =", &
                                  & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: re_ice_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_ice_mp min/mean/max =", &
                                  & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: re_snow_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_snow_mp min/mean/max =", &
                                  & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: delta_rain_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_rain_mp min/mean/max =", &
                                  & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: delta_snow_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_snow_mp min/mean/max =", &
                                  & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: delta_ice_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_ice_mp min/mean/max =", &
                                  & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run before: delta_graupel_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_graupel_mp min/mean/max =", &
                                  & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
          end if
 #endif
@@ -493,43 +510,43 @@ module mp_thompson_hrrr
 
 #ifdef DEBUG_AEROSOLS
          if (mpirank==mpiroot) then
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: prsl min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: prsl min/mean/max =", &
                               & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: tgrs min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: tgrs min/mean/max =", &
                               & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: rho min/mean/max =", &
-                                 & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: rho min/mean/max =", &
+                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
              if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: nwfa2d min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa2d min/mean/max =", &
                                     & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: nwfa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa min/mean/max =", &
                                     & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: nifa min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nifa min/mean/max =", &
                                     & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: nc min/mean/max =", &
+                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nc min/mean/max =", &
                                     & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
              end if
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: ni min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: ni min/mean/max =", &
                                  & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: nr min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nr min/mean/max =", &
                                  & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: omega min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: omega min/mean/max =", &
                                  & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: w min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: w min/mean/max =", &
                                  & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: re_cloud_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_cloud_mp min/mean/max =", &
                                  & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: re_ice_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_ice_mp min/mean/max =", &
                                  & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: re_snow_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_snow_mp min/mean/max =", &
                                  & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: delta_rain_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_rain_mp min/mean/max =", &
                                  & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: delta_snow_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_snow_mp min/mean/max =", &
                                  & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: delta_ice_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_ice_mp min/mean/max =", &
                                  & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "DH DEBUG mp thompson run after: delta_graupel_mp min/mean/max =", &
+             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_graupel_mp min/mean/max =", &
                                  & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
          end if
 #endif
@@ -550,8 +567,31 @@ module mp_thompson_hrrr
 
       end subroutine mp_thompson_hrrr_run
 
-      ! DH* do we need to deallocate stuff? which function to call in module_mp_thompson_hrrr.F90?
-      subroutine mp_thompson_hrrr_finalize()
+#if 0
+!! \section arg_table_mp_thompson_hrrr_finalize Argument Table
+!! | local_name      | standard_name                                                 | long_name                                              | units      | rank | type      |    kind   | intent | optional |
+!! |-----------------|---------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | errmsg          | error_message                                                 | error message for error handling in CCPP               | none       |    0 | character | len=*     | out    | F        |
+!! | errflg          | error_flag                                                    | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out    | F        |
+!!
+#endif
+      subroutine mp_thompson_hrrr_finalize(errmsg, errflg)
+
+         implicit none
+
+         character(len=*),          intent(  out) :: errmsg
+         integer,                   intent(  out) :: errflg
+
+         ! Initialize the CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (.not.is_initialized) return
+
+         call thompson_finalize()
+
+         is_initialized = .false.
+
       end subroutine mp_thompson_hrrr_finalize
 
 end module mp_thompson_hrrr
