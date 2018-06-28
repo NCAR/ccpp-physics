@@ -243,7 +243,7 @@
 !!\n =1:modified Zhao/Carr/Sundqvist scheme (Moorthi, 2001)
 !!\n =2:Ferrier microphysics scheme (Ferrier et al. 2002)
 !!\n =3:as in 1 but with pdf method defined cloud cover
-      integer, save :: icmphys = 1
+!      integer, save :: icmphys = 1
 !> cloud overlapping control flag for SW
 !!\n =0:use random cloud overlapping method
 !!\n =1:use maximum-random cloud overlapping method

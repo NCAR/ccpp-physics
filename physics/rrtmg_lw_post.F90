@@ -19,6 +19,7 @@
 !! | Grid            | FV3-GFS_Grid_type                                                                             | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type         |           | in        | F        |
 !! | Radtend         | FV3-GFS_Radtend_type                                                                          | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout     | F        |
 !! | Coupling        | FV3-GFS_Coupling_type                                                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout     | F        |
+!! | im              | horizontal_loop_extent                                                                        | horizontal loop extent                                                       | count    |    0 | integer               |           | in        | F        |
 !! | ltp             | extra_top_layer                                                                               | extra top layers                                                             | none     |    0 | integer               |           | in        | F        |
 !! | lm              | vertical_layer_dimension_for_radiation                                                        | number of vertical layers for radiation calculation                          | count    |    0 | integer               |           | in        | F        |
 !! | kd              | vertical_index_difference_between_inout_and_local                                             | vertical index difference between in/out and local                           | index    |    0 | integer               |           | in        | F        |
@@ -30,7 +31,7 @@
 !!
 #endif
       subroutine rrtmg_lw_post_run (Model, Grid, Radtend, Coupling,   &
-                 ltp, lm, kd, tsfa, htlwc, htlw0, errmsg, errflg)
+                 im, ltp, lm, kd, tsfa, htlwc, htlw0, errmsg, errflg)
     
       use machine,                   only: kind_phys
       use GFS_typedefs,              only: GFS_coupling_type,          &
@@ -42,7 +43,7 @@
       type(GFS_coupling_type),        intent(inout) :: Coupling
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_radtend_type),         intent(inout) :: Radtend
-      integer,                        intent(in)    :: ltp, LM, kd
+      integer,                        intent(in)    :: im, ltp, LM, kd
       real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlwc
       real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlw0
       real(kind=kind_phys), dimension(size(Grid%xlon,1)),                 intent(in) ::  tsfa
@@ -63,27 +64,27 @@
 
         do k = 1, LM
           k1 = k + kd
-            Radtend%htrlw(:,k) = htlwc(:,k1)
+            Radtend%htrlw(1:im,k) = htlwc(1:im,k1)
         enddo
         ! --- repopulate the points above levr
         if (Model%levr < Model%levs) then
           do k = LM,Model%levs
-            Radtend%htrlw (:,k) = Radtend%htrlw (:,LM)
+            Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
           enddo
         endif
 
         if (Model%lwhtr) then
           do k = 1, lm
             k1 = k + kd
-            Radtend%lwhc(:,k) = htlw0(:,k1)
+            Radtend%lwhc(1:im,k) = htlw0(1:im,k1)
           enddo
           ! --- repopulate the points above levr
           if (Model%levr < Model%levs) then
             do k = LM,Model%levs
-              Radtend%lwhc(:,k) = Radtend%lwhc(:,LM)
+              Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
             enddo
-           endif
-         endif
+          endif
+        endif
 
 ! --- radiation fluxes for other physics processes
         Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
