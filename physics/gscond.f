@@ -1,6 +1,6 @@
 !> \file gscond.f
 !! This file contains the subroutine that calculates grid-scale
-!! condensation and evaporation for use in 
+!! condensation and evaporation for use in
 !! \cite zhao_and_carr_1997 scheme.
 
       module zhaocarr_gscond
@@ -57,7 +57,7 @@
 !! cloud water and cloud ice (table2 of \cite zhao_and_carr_1997).
 !! -# Calculate the changes in \f$t\f$, \f$q\f$ and \f$p\f$ due to all the processes except microphysics.
 !! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of \cite zhao_and_carr_1997)
-!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of \cite zhao_and_carr_1997) 
+!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of \cite zhao_and_carr_1997)
 !! -# update t,q,cwm due to cloud evaporation and condensation process
 !> \section Zhao-Carr_cond_detailed GFS gscond Scheme Detailed Algorithm
 !> @{
@@ -212,7 +212,7 @@
 !> -# Compute ice-water identification number IW.
 !!\n  The distinction between cloud water and cloud ice is made by the
 !! cloud identification number IW, which is zero for cloud water and
-!! unity for cloud ice (Table 2 in 
+!! unity for cloud ice (Table 2 in
 !! \cite zhao_and_carr_1997):
 !!  - All clouds are defined to consist of liquid water below the
 !! freezing level (\f$T\geq 0^oC\f$) and of ice particles above the
@@ -347,7 +347,7 @@
 !!   M=A_{q}-\frac{f\epsilon Lq_{s}}{RT^{2}}A_{t}+\frac{fq_{s}}{p}A_{p}
 !!\f]
 !! To close the system, an equation for the relative humidity tendency
-!! \f$f_{t}\f$ was derived by 
+!! \f$f_{t}\f$ was derived by
 !! \cite sundqvist_et_al_1989 using the hypothesis that the quantity
 !! \f$M+E_{c}\f$ is divided into one part,\f$bM\f$,which condenses
 !! in the already cloudy portion of a grid square, and another part,
@@ -480,7 +480,6 @@
 !> -# End of the condensation/evaporation loop (end of i-loop,k-loop).
 !*********************************************************************
 !
-
 !> -# Store \f$t\f$, \f$q\f$, \f$ps\f$ for next time step.
 
       if (dt > dtf+0.001) then     ! three time level
@@ -519,8 +518,5 @@
       end subroutine zhaocarr_gscond_run
 !> @}
 ! @}
-
-
 ! @}
-
       end module zhaocarr_gscond

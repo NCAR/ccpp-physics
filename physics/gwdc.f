@@ -1,6 +1,6 @@
 !> \file gwdc.f This file is the original code for parameterization of
-!! stationary convection forced gravity wave drag based on 
-!! \cite chun_and_baik_1998 .
+!! stationary convection forced gravity wave drag based on
+!! \cite chun_and_baik_1998.
 
       module gwdc_pre
       contains
@@ -100,8 +100,6 @@
       end subroutine gwdc_pre_finalize
 
       end module gwdc_pre
-
-
 
       module gwdc
 
@@ -649,7 +647,7 @@
           bruni(i,k) = sqrt (max (n2min, n2))
         enddo
       enddo
-
+ 
       deallocate (spfh)
 !-----------------------------------------------------------------------
 !
@@ -741,7 +739,7 @@
 !-----------------------------------------------------------------------
 !
 !> - Calculate the basic state wind profiles projected in the direction of the
-!!  cloud top wind at mid level and interface level. 
+!!  cloud top wind at mid level and interface level.
 ! \n  U : Basic-wind speed profile. Basic-wind is parallel to the wind
 !             vector at the cloud top level. (mid level)
 ! \n  UI: Basic-wind speed profile. Basic-wind is parallel to the wind
@@ -894,12 +892,9 @@
 !-----------------------------------------------------------------------
 !D
 !>  - Wave stress at cloud top is calculated when the atmosphere
-!!    is dynamically stable at the cloud top.
-      do i=1,npt
-        kk = kcldtop(i)
-        if ( abs(basicui(i,kk)) > zero .and. riloc(i,kk) > ricrit) then
-!E
-!>   - The cloud top wave stress and nonlinear parameter are calculated
+!!    is dynamically stable at the cloud top
+!!
+!>  - The cloud top wave stress and nonlinear parameter are calculated
 !!      using density, temperature, and wind that are defined at mid
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
@@ -929,7 +924,20 @@
 !! top heights of thermal forcing. If the atmosphere is dynamically
 !! unstable at the cloud top, the convective GWD calculation is
 !! skipped at that grid point.
+!!
+!  - If mean wind at the cloud top is less than zero, GWDC
+!      calculation in current horizontal grid is skipped.
+!
 
+!>  - The stress is capped at tauctmax =  - 5\f$n/m^2\f$
+!!      in order to prevent numerical instability.
+!
+!-----------------------------------------------------------------------
+!D
+      do i=1,npt
+        kk = kcldtop(i)
+        if ( abs(basicui(i,kk)) > zero .and. riloc(i,kk) > ricrit) then
+!E
           tem       = basicum(i,kk)
           tem1      = tem * tem
           nonlinct  = gqmcldlen(i) / (bruni(i,kk)*t(i,kk)*tem1)    ! Mu
@@ -1190,8 +1198,7 @@
         enddo
       enddo
 
-!!!!!! Vertical differentiation
-!!!!!!
+!!!!!! Vertical differentiation!!!!!!
 !> - Calculate wind tendency in direction to the wind vector,zonal
 !! wind tendency and meridional wind tendency above the cloud top
 !! level due to convectively generated gravity waves.
@@ -1291,11 +1298,8 @@
 !-----------------------------------------------------------------------
 
 !     do k=1,kcldtop(i)-1
-
 !      if (utgwcl(i,k)*u(i,k) .gt. 0.0) then
-
 !-------------------- x-component-------------------
-
 !       write(6,'(a)')
 !    +  '(GWDC) WARNING: The GWDC should accelerate the zonal wind '
 !       write(6,'(a,a,i3,a,i3)')
@@ -1479,8 +1483,6 @@
       end subroutine gwdc_finalize
 
       end module gwdc
-
-
 
       module gwdc_post
 
