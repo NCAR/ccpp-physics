@@ -120,7 +120,7 @@
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,
      &     rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,
-     &     clam,c0s,c1,pgcon,asolfac)
+     &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
