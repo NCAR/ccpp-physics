@@ -1,6 +1,22 @@
 !>  \file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
+!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
+!! @{
+!!  \brief Brief description of the parameterization
+!!  \section diagram Calling Hierarchy Diagram
+!!  \section intraphysics Intraphysics Communication
+
+!> \brief Brief description of the subroutine
+!!
+!! \section arg_table_NSST_run Arguments
+!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
+!!
+!!  \section general General Algorithm
+!!  \section detailed Detailed Algorithm
+!!  @{
       module sfc_nst
 
       contains
@@ -39,7 +55,7 @@
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag          |    1 | integer   |           | in     | F        |
 !! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
-!! | sinlat         | sine_of_latitude                                                             | sin of latitude                                             | none          |    1 | real      | kind_phys | in     | F        |
+!! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                                          | wind stress                                                 | m2 s-2        |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         |    1 | real      | kind_phys | in     | F        |
