@@ -45,7 +45,7 @@
 !!
 !> \section general_precpd GFS precpd Scheme General Algorithm
 !! The following two equations can be used to calculate the
-!! precipitation rates of rain and snow at each module level:
+!! precipitation rates of rain and snow at each model level:
 !!\f[
 !! P_{r}(\eta)=\frac{p_{s}-p_{t}}{g\eta_{s}}\int_{\eta}^{\eta_{t}}(P_{raut}+P_{racw}+P_{sacw}+P_{sm1}+P_{sm2}-E_{rr})d\eta
 !! \f]

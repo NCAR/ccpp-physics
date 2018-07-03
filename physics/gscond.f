@@ -53,12 +53,12 @@
 !! | errflg         | error_flag                                                 | error flag for error handling in CCPP                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !> \section general_gscond GFS gscond Scheme General Algorithm
-!! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction betwee
+!! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction between
 !! cloud water and cloud ice (table2 of \cite zhao_and_carr_1997).
 !! -# Calculate the changes in \f$t\f$, \f$q\f$ and \f$p\f$ due to all the processes except microphysics.
-!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of \cite zhao_and_carr_1997)
-!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of \cite zhao_and_carr_1997)
-!! -# update t,q,cwm due to cloud evaporation and condensation process
+!! -# Calculate cloud evaporation rate (\f$E_c\f$, eq. 19 of \cite zhao_and_carr_1997).
+!! -# Calculate cloud condensation rate (\f$C_g\f$, eq.8 of \cite zhao_and_carr_1997).
+!! -# Update \f$t\f$, \f$q\f$, \f$cwm\f$ due to cloud evaporation and condensation processes.
 !> \section Zhao-Carr_cond_detailed GFS gscond Scheme Detailed Algorithm
 !> @{
         subroutine zhaocarr_gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1  &

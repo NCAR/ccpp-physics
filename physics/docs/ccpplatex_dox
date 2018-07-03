@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Scientific Documentation"
-PROJECT_NUMBER         = "Version 1.0"
+PROJECT_NUMBER         = "Version 2.0"
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -112,6 +112,7 @@ INPUT                  =  pdftxt/mainpage.txt \
                           pdftxt/GFS_GWDC.txt    \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFS_ZHAOC.txt   \
+                          pdftxt/GFDL_cloud.txt \
 ### Radiation
                         ../radlw_main.f \
                         ../radsw_main.f \
@@ -140,14 +141,16 @@ INPUT                  =  pdftxt/mainpage.txt \
 ### Prognostic Ozone
                         ../ozphys.f \
 ### Deep Convection
-                        ../mfdeepcnv.f \
+                        ../samfdeepcnv.f \
 ### Convective Gravity Wave
                         ../gwdc.f \
 ### Shallow Convection
-                        ../mfshalcnv.f \
+                        ../samfshalcnv.f \
 ### Microphysics
                         ../gscond.f \
                         ../precpd.f \
+### GFDL cloud MP 
+                        ../gfdl_cloud_microphys.F90 \
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
