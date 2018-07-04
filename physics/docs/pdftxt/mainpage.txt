@@ -3,7 +3,7 @@
 
 \anchor mainpage-top
 
-Welcome to the GMTB Common Community Physics Package (CCPP) V1.0 scientific documentation. This version contains all parameterizations of \b the \b 2017 \b Operational \b GFS \b physics \b suite. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
+Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b 2017 \b Operational \b GFS \b physics \b suite. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
 
 \author  Global Model Test Bed (GMTB) at NCAR and NOAA/GSD
 
@@ -19,7 +19,7 @@ Documentation for the individual physics scheme can be accessed through the foll
  + @ref GFS_SAMFdeep
  + @ref GFS_GWDC
  + @ref GFS_SAMFshal
- + @ref GFS_ZHAOC
+ + @ref GFDL_cloud 
 
  You can find more information about 
 <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.

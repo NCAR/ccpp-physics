@@ -22,11 +22,12 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!>@brief The module 'gfdl_cloud_microphys' contains the full GFDL cloud
-!! microphysics \cite chen2013seasonal.
+!> \defgroup gfdlcloud GFDL cloud microphysics
+!>@brief The module "gfdl_cloud_microphys" contains the full GFDL cloud
+!! microphysics \cite chen_and_lin_2013.
 !>@details The module is paired with 'fv_cmp', which performs the "fast"
-!! processes
-!>author Shian-Jiann Lin, Linjiong Zhou
+!! processes.
+!>\author Shian-Jiann Lin, Linjiong Zhou
 
 ! =======================================================================
 ! cloud micro - physics package for gfdl global cloud resolving model
@@ -332,7 +333,8 @@ contains
 ! the driver of the gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>@brief The subroutine 'gfdl_cloud_microphys_driver' executes the full GFDL
+!>\ingroup gfdlcloud
+!> The subroutine "gfdl_cloud_microphys_driver" executes the full GFDL
 !! cloud microphysics.
 subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
         qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,    &
@@ -597,6 +599,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
 end subroutine gfdl_cloud_microphys_driver
 
 ! -----------------------------------------------------------------------
+!>\ingroup gfdlcloud
 !>@brief gfdl cloud microphysics, major program
 !>@details lin et al., 1983, jam, 1065 - 1092, and
 !! rutledge and hobbs, 1984, jas, 2949 - 2972
@@ -991,6 +994,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
 end subroutine mpdrv
 
 ! -----------------------------------------------------------------------
+!>\ingroup gfdlcloud
 !> sedimentation of heat
 ! -----------------------------------------------------------------------
 
@@ -1046,6 +1050,7 @@ subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
 end subroutine sedi_heat
 
 ! -----------------------------------------------------------------------
+!>\ingroup gfdlcloud
 !> warm rain cloud microphysics
 ! -----------------------------------------------------------------------
 
@@ -1261,6 +1266,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
 end subroutine warm_rain
 
 ! -----------------------------------------------------------------------
+!>\ingroup gfdlcloud
 !> evaporation of rain
 ! -----------------------------------------------------------------------
 
@@ -1361,6 +1367,7 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
 end subroutine revap_racc
 
 ! -----------------------------------------------------------------------
+!>\ingroup gfdlcloud
 !> definition of vertical subgrid variability
 !! used for cloud ice and cloud water autoconversion
 !! qi -- > ql & ql -- > qr
@@ -1421,6 +1428,7 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
 end subroutine linear_prof
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !> ice cloud microphysics processes
 !! bulk cloud micro - physics; processes splitting
 !! with some un - split sub - grouping
@@ -1909,6 +1917,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
 end subroutine icloud
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>temperature sentive high vertical resolution processes
 ! =======================================================================
 
@@ -2330,6 +2339,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
 end subroutine subgrid_z_proc
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !> rain evaporation
 ! =======================================================================
 
@@ -2423,6 +2433,7 @@ subroutine revap_rac1 (hydrostatic, is, ie, dt, tz, qv, ql, qr, qi, qs, qg, den,
 end subroutine revap_rac1
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'terminal_fall' computes terminal fall speed.
 !>@details It considers cloud ice, snow, and graupel's melting during fall.
 ! =======================================================================
@@ -2736,6 +2747,7 @@ subroutine terminal_fall (dtm, ktop, kbot, tz, qv, ql, qr, qg, qs, qi, dz, dp, &
 end subroutine terminal_fall
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'check_column' checks
 !!       if the water species is large enough to fall.
 ! =======================================================================
@@ -2764,6 +2776,7 @@ subroutine check_column (ktop, kbot, q, no_fall)
 end subroutine check_column
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'implicit_fall' computes the time-implicit monotonic 
 !! scheme.
 !>@author Shian-Jiann Lin, 2016
@@ -2835,6 +2848,7 @@ subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 end subroutine implicit_fall
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !> lagrangian scheme
 !  developed by sj lin, ????
 ! =======================================================================
@@ -2938,6 +2952,7 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
     
 end subroutine lagrangian_fall_ppm
 
+!>\ingroup gfdlcloud
 subroutine cs_profile (a4, del, km, do_mono)
     
     implicit none
@@ -3115,6 +3130,7 @@ subroutine cs_profile (a4, del, km, do_mono)
     
 end subroutine cs_profile
 
+!>\ingroup gfdlcloud
 subroutine cs_limiters (km, a4)
     
     implicit none
@@ -3152,6 +3168,7 @@ subroutine cs_limiters (km, a4)
 end subroutine cs_limiters
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'fall_speed' calculates vertical fall speed.
 ! =======================================================================
 
@@ -3262,6 +3279,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
 end subroutine fall_speed
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'setup'm' sets up
 !! gfdl cloud microphysics parameters.
 ! =======================================================================
@@ -3412,6 +3430,7 @@ end subroutine setupm
 
 ! =======================================================================
 ! initialization of gfdl cloud microphysics
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
 ! =======================================================================
@@ -3533,6 +3552,7 @@ end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
 ! end of gfdl cloud microphysics
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
 !! cloud microphysics.
 ! =======================================================================
@@ -3556,6 +3576,7 @@ end subroutine gfdl_cloud_microphys_end
 
 ! =======================================================================
 ! qsmith table initialization
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'setup_con' sets up constants and calls 'qsmith_init'.
 ! =======================================================================
 
@@ -3642,6 +3663,7 @@ end function gmlt
 ! initialization
 ! prepare saturation water vapor pressure tables
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'qsmith_init' initializes lookup tables for saturation
 !! water vapor pressure for the following utility routines that are designed
 !! to return qs consistent with the assumptions in FV3.
@@ -3702,6 +3724,7 @@ end subroutine qsmith_init
 
 ! =======================================================================
 ! compute the saturated specific humidity for table ii
+!>\ingroup gfdlcloud
 !>@brief The function 'wqs1' returns the saturation vapor pressure over pure
 !! liquid water for a given temperature and air density.
 ! =======================================================================
@@ -4031,6 +4054,7 @@ real function es2_table (ta)
 end function es2_table
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'esw_table1d' computes the saturated water vapor
 !! pressure for table ii.
 ! =======================================================================
@@ -4061,6 +4085,7 @@ subroutine esw_table1d (ta, es, n)
 end subroutine esw_table1d
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iii.
 ! =======================================================================
@@ -4091,6 +4116,7 @@ subroutine es2_table1d (ta, es, n)
 end subroutine es2_table1d
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iv.
 ! =======================================================================
@@ -4121,6 +4147,7 @@ subroutine es3_table1d (ta, es, n)
 end subroutine es3_table1d
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief saturation water vapor pressure table ii
 ! 1 - phase table
 ! =======================================================================
@@ -4153,6 +4180,7 @@ subroutine qs_tablew (n)
 end subroutine qs_tablew
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief saturation water vapor pressure table iii
 ! 2 - phase table
 ! =======================================================================
@@ -4203,6 +4231,7 @@ subroutine qs_table2 (n)
 end subroutine qs_table2
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief saturation water vapor pressure table iv
 ! 2 - phase table with " - 2 c" as the transition point
 ! =======================================================================
@@ -4267,6 +4296,7 @@ end subroutine qs_table3
 ! =======================================================================
 ! compute the saturated specific humidity for table
 ! note: this routine is based on "moist" mixing ratio
+!>\ingroup gfdlcloud
 !>@brief The function 'qs_blend' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature.
 ! =======================================================================
@@ -4291,6 +4321,7 @@ real function qs_blend (t, p, q)
 end function qs_blend
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief saturation water vapor pressure table i
 ! 3 - phase table
 ! =======================================================================
@@ -4355,6 +4386,7 @@ end subroutine qs_table
 ! =======================================================================
 ! compute the saturated specific humidity and the gradient of saturated specific humidity
 ! input t in deg k, p in pa; p = rho rdry tv, moist pressure
+!>\ingroup gfdlcloud
 !>@brief The function 'qsmith' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature in 3D.
 !@details It als oincludes the option for computing des/dT.
@@ -4409,6 +4441,7 @@ subroutine qsmith (im, km, ks, t, p, q, qs, dqdt)
 end subroutine qsmith
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'neg_adj' fixes negative water species.
 !>@details This is designed for 6-class micro-physics schemes.
 ! =======================================================================
@@ -4550,6 +4583,7 @@ end subroutine neg_adj
 !end function g_sum
 
 ! ==========================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'interpolate_z' interpolates to a prescribed height.
 ! ==========================================================================
 
@@ -4596,6 +4630,7 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 end subroutine interpolate_z
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud 
 !! species.
 ! =======================================================================
