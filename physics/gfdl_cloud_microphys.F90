@@ -21,11 +21,10 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-
-!> \defgroup gfdlcloud GFDL cloud microphysics
+!> \defgroup gfdlcloud GFDL Cloud MP Main 
 !>@brief The module "gfdl_cloud_microphys" contains the full GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
-!>@details The module is paired with 'fv_cmp', which performs the "fast"
+!>@details The module is paired with "fv_cmp", which performs the "fast"
 !! processes.
 !>\author Shian-Jiann Lin, Linjiong Zhou
 
@@ -332,10 +331,10 @@ contains
 ! -----------------------------------------------------------------------
 ! the driver of the gfdl cloud microphysics
 ! -----------------------------------------------------------------------
-
 !>\ingroup gfdlcloud
 !> The subroutine "gfdl_cloud_microphys_driver" executes the full GFDL
 !! cloud microphysics.
+!>\section gen_gfdlcloud_driver GFDL Cloud Microphysics Driver General Algorithm
 subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
         qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,    &
         uin, vin, udt, vdt, dz, delp, area, dt_in, land, rain, snow, ice, &
@@ -392,7 +391,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     ! call mpp_clock_begin (gfdl_mp_clock)
     
     ! -----------------------------------------------------------------------
-    ! define heat capacity of dry air and water vapor based on hydrostatical property
+    !> - Define heat capacity of dry air and water vapor based on hydrostatical property
     ! -----------------------------------------------------------------------
     
     if (phys_hydrostatic .or. hydrostatic) then
@@ -410,7 +409,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     if (hydrostatic) do_sedi_w = .false.
     
     ! -----------------------------------------------------------------------
-    ! define latent heat coefficient used in wet bulb and bigg mechanism
+    !> - Define latent heat coefficient used in wet bulb and bigg mechanism
     ! -----------------------------------------------------------------------
     
     latv = hlv
@@ -425,7 +424,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     ! tendency zero out for am moist processes should be done outside the driver
     
     ! -----------------------------------------------------------------------
-    ! define cloud microphysics sub time step
+    !> - Define cloud microphysics sub time step
     ! -----------------------------------------------------------------------
     
     mpdt   = min (dt_in, mp_time)
@@ -438,7 +437,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     ! call get_time (time, seconds, days)
     
     ! -----------------------------------------------------------------------
-    ! initialize precipitation
+    !> - Initialize precipitation
     ! -----------------------------------------------------------------------
     
     do j = js, je
@@ -452,7 +451,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     enddo
     
     ! -----------------------------------------------------------------------
-    ! major cloud microphysics
+    !> - Call mpdrv(), major cloud microphysics
     ! -----------------------------------------------------------------------
     
     do j = js, je
@@ -465,7 +464,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     enddo
     
     ! -----------------------------------------------------------------------
-    ! no clouds allowed above ktop
+    !> - No clouds allowed above ktop
     ! -----------------------------------------------------------------------
     
     if (ks < ktop) then
@@ -488,7 +487,7 @@ subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
     endif
     
     ! -----------------------------------------------------------------------
-    ! diagnostic output
+    !> - Diagnostic output
     ! -----------------------------------------------------------------------
     
     ! if (id_vtr > 0) then
@@ -600,18 +599,63 @@ end subroutine gfdl_cloud_microphys_driver
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!>@brief gfdl cloud microphysics, major program
-!>@details lin et al., 1983, jam, 1065 - 1092, and
-!! rutledge and hobbs, 1984, jas, 2949 - 2972
-!! terminal fall is handled lagrangianly by conservative fv algorithm
-!>@param pt: temperature (k)
-!>@param 6 water species:
-!>@param 1) qv: water vapor (kg / kg)
-!>@param 2) ql: cloud water (kg / kg)
-!>@param 3) qr: rain (kg / kg)
-!>@param 4) qi: cloud ice (kg / kg)
-!>@param 5) qs: snow (kg / kg)
-!>@param 6) qg: graupel (kg / kg)
+!>@brief GFDL cloud microphysics, major program.
+!>@details Lin et al., 1983 \cite lin_et_al_1983 and
+!! Rutledge and Hobbs, 1984 \cite rutledge_and_hobbs_1984.
+!! Terminal fall is handled lagrangianly by conservative fv algorithm.
+!!
+!>\param[in] hydrostatic 
+!>\param[in] uin
+!>\param[in] vin
+!>\param[inout] w
+!>\param[in] delp
+!>\param[in] pt  temperature (k)
+!>\param[in] qv  water vapor (kg / kg)
+!>\param[in] ql  cloud water (kg / kg)
+!>\param[in] qr  rain (kg / kg)
+!>\param[inout] qi  cloud ice (kg / kg)
+!>\param[inout] qs  snow (kg / kg)
+!>\param[in] qg  graupel (kg / kg)
+!>\param[in] qa  cloud fraction
+!>\param[in] qn
+!>\param[in] dz
+!>\param[in] is
+!>\param[in] ie
+!>\param[in] js
+!>\param[in] je
+!>\param[in] ks
+!>\param[in] ke
+!>\param[in] ktop
+!>\param[in] kbot
+!>\param[in] j
+!>\param[in] dt_in
+!>\param[in] ntimes
+!>\param[inout] rain
+!>\param[inout] snow
+!>\param[inout] groupel
+!>\param[inout] ice
+!>\param[out] m2_rain
+!>\param[out] m2_sol
+!>\param[inout] cond
+!>\param[in] area1
+!>\param[in] land
+!>\param[inout] u_dt
+!>\param[inout] v_dt
+!>\param[inout] pt_dt
+!>\param[inout] qv_dt
+!>\param[inout] ql_dt
+!>\param[inout] qr_dt
+!>\param[inout] qi_dt
+!>\param[inout] qs_dt
+!>\param[inout] qg_dt
+!>\param[inout] qa_dt
+!>\param[out] w_var
+!>\param[out] vt_r
+!>\param[out] vt_s
+!>\param[out] vt_g
+!>\param[out] vt_i
+!>\param[out] qn2
+!>\section det_mpdrv GFDL Cloud mpdrv Detailed Algorithm
 ! -----------------------------------------------------------------------
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
@@ -678,7 +722,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         enddo
         
         ! -----------------------------------------------------------------------
-        ! this is to prevent excessive build - up of cloud ice from external sources
+        !> - Prevent excessive build-up of cloud ice from external sources.
         ! -----------------------------------------------------------------------
         
         if (de_ice) then
@@ -705,7 +749,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             dp0 (k) = dp1 (k) ! moist air mass * grav
             
             ! -----------------------------------------------------------------------
-            ! convert moist mixing ratios to dry mixing ratios
+            !> - Convert moist mixing ratios to dry mixing ratios.
             ! -----------------------------------------------------------------------
             
             qvz (k) = qv (i, j, k)
@@ -762,8 +806,8 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         endif
         
         ! -----------------------------------------------------------------------
-        ! calculate cloud condensation nuclei (ccn)
-        ! the following is based on klein eq. 15
+        !> - Calculate cloud condensation nuclei (ccn)
+        !! the following is based on klein eq. 15
         ! -----------------------------------------------------------------------
         
         cpaut = c_paut * 0.104 * grav / 1.717e-5
@@ -791,7 +835,20 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         endif
         
         ! -----------------------------------------------------------------------
-        ! calculate horizontal subgrid variability
+        !> - Calculate horizontal subgrid variability, which is used in cloud 
+        !! fraction, relative humidity calculation, evaporation and condensation 
+        !! processes.
+        !!
+        !! Horizontal sub-grid variability is a function of cell area:
+        !!\n Over land:
+        !!\f[
+        !! h_{var}=min\left\{0.2,max\left[0.01,D_{land}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+        !!\f]
+        !!\n Over ocean:
+        !!\f[
+        !! h_{var}=min\left\{0.2,max\left[0.01,D_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+        !!\f]
+        !! where \f$A_{r}\f$ is cell area. \
         ! total water subgrid deviation in horizontal direction
         ! default area dependent form: use dx ~ 100 km as the base
         ! -----------------------------------------------------------------------

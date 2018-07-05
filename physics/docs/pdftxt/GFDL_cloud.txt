@@ -5,10 +5,10 @@ Unique attributes of GFDL microphysics:
 1. \b Fast \b physics (phase changes only, for now) between "Lagrangian-to-Eulerian" remapping in FV3
 2. \b Time-split between warm-rain (faster) and ice-phase (slower) processes
 3. \b Time \b implicit monotonic scheme for terminal fall of condensates
-4. Thermodynamic consistency between the dynamics and cloud microphysics:
-   - exact local moist energy conservation between phase changes
-   - condensates carry heat & 3D momentum
-5. "\b Scale-awareness" achieved by an assumed horizontal subgrid variability and a 2nd
+4. \b Thermodynamic \b consistency between the dynamics and cloud microphysics:
+  - exact local moist energy conservation between phase changes
+  - condensates carry heat & 3D momentum
+5. \b Scale-awareness achieved by an assumed horizontal subgrid variability and a 2nd
 order FV-type vertical reconstruction (\cite lin_et_al_1994) for autoconversions (ice->snow)
 
 \image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance" width=10cm
