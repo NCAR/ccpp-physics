@@ -21,7 +21,7 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-!> \defgroup gfdlcloud GFDL Cloud MP Main 
+!> \defgroup gfdlcloud GFDL cloud MP Main 
 !>@brief The module "gfdl_cloud_microphys" contains the full GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
 !>@details The module is paired with "fv_cmp", which performs the "fast"
@@ -638,7 +638,7 @@ end subroutine gfdl_cloud_microphys_driver
 !>\param[out] m2_sol
 !>\param[inout] cond
 !>\param[in] area1
-!>\param[in] land
+!>\param[in] land   land fraction
 !>\param[inout] u_dt
 !>\param[inout] v_dt
 !>\param[inout] pt_dt
@@ -648,7 +648,7 @@ end subroutine gfdl_cloud_microphys_driver
 !>\param[inout] qi_dt
 !>\param[inout] qs_dt
 !>\param[inout] qg_dt
-!>\param[inout] qa_dt
+!>\param[inout] qa_dt   cloud fraction tendency
 !>\param[out] w_var
 !>\param[out] vt_r
 !>\param[out] vt_s
@@ -837,18 +837,25 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         ! -----------------------------------------------------------------------
         !> - Calculate horizontal subgrid variability, which is used in cloud 
         !! fraction, relative humidity calculation, evaporation and condensation 
-        !! processes.
-        !!
-        !! Horizontal sub-grid variability is a function of cell area:
+        !! processes. Horizontal sub-grid variability is a function of cell area 
+        !! and land/sea mask:
         !!\n Over land:
         !!\f[
-        !! h_{var}=min\left\{0.2,max\left[0.01,D_{land}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+        !! t_{land}=dw_{land}(\frac{A_{r}}{10^{10}})^{0.25}
         !!\f]
         !!\n Over ocean:
         !!\f[
-        !! h_{var}=min\left\{0.2,max\left[0.01,D_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+        !! t_{ocean}=dw_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}
         !!\f]
-        !! where \f$A_{r}\f$ is cell area. \
+        !! where \f$A_{r}\f$ is cell area. \f$dw_{land}=0.20\f$ and \f$dw_{ocean}=0.10\f$ 
+        !! are base value for sub-grid variability over land and ocean.
+        !! The total horizontal sub-grid variability is:
+        !!\f[
+        !! h_{var}=t_{land}\times fr_{land}+t_{ocean}\times (1-fr_{land})
+        !!\f] 
+        !!\f[
+        !! h_{var}=min[0.2,max(0.01,h_{var})]
+        !!\f]
         ! total water subgrid deviation in horizontal direction
         ! default area dependent form: use dx ~ 100 km as the base
         ! -----------------------------------------------------------------------
@@ -861,14 +868,14 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         ! if (id_var > 0) w_var (i, j) = h_var
         
         ! -----------------------------------------------------------------------
-        ! relative humidity increment
+        !> - Calculate relative humidity increment.
         ! -----------------------------------------------------------------------
         
         rh_adj = 1. - h_var - rh_inc
         rh_rain = max (0.35, rh_adj - rh_inr) ! rh_inr = 0.25
         
         ! -----------------------------------------------------------------------
-        ! fix all negative water species
+        !> - If requested, call neg_adj() and fix all negative water species.
         ! -----------------------------------------------------------------------
         
         if (fix_negative) &
@@ -877,10 +884,11 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         m2_rain (:, :) = 0.
         m2_sol (:, :) = 0.
         
+        !> - Do loop on cloud microphysics sub time step.
         do n = 1, ntimes
             
             ! -----------------------------------------------------------------------
-            ! define air density based on hydrostatical property
+            !>  - Define air density based on hydrostatical property.
             ! -----------------------------------------------------------------------
             
             if (p_nonhydro) then
@@ -898,7 +906,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             endif
             
             ! -----------------------------------------------------------------------
-            ! time - split warm rain processes: 1st pass
+            !>  - Call warm_rain() - time-split warm rain processes: 1st pass
             ! -----------------------------------------------------------------------
             
             call warm_rain (dt_rain, ktop, kbot, dp1, dz1, tz, qvz, qlz, qrz, qiz, qsz, &
@@ -912,11 +920,14 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             enddo
             
             ! -----------------------------------------------------------------------
-            ! sedimentation of cloud ice, snow, and graupel
+            !>  - Sedimentation of cloud ice, snow, and graupel.
             ! -----------------------------------------------------------------------
             
+            !>   - Call fall_speed() to calculate the fall velocity of cloud ice, snow
+            !!     and graupel.
             call fall_speed (ktop, kbot, den, qsz, qiz, qgz, qlz, tz, vtsz, vtiz, vtgz)
             
+            !>   - Call terminal_fall() to calculate the terminal fall speed.
             call terminal_fall (dts, ktop, kbot, tz, qvz, qlz, qrz, qgz, qsz, qiz, &
                 dz1, dp1, den, vtgz, vtsz, vtiz, r1, g1, s1, i1, m1_sol, w1)
             
@@ -926,7 +937,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             ice (i) = ice (i) + i1
             
             ! -----------------------------------------------------------------------
-            ! heat transportation during sedimentation
+            !>  - Call sedi_heat() to calculate heat transportation during sedimentation.
             ! -----------------------------------------------------------------------
             
             if (do_sedi_heat) &
@@ -934,7 +945,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
                     qsz, qgz, c_ice)
             
             ! -----------------------------------------------------------------------
-            ! time - split warm rain processes: 2nd pass
+            !>  - Call warm_rain() to - time-split warm rain processes: 2nd pass
             ! -----------------------------------------------------------------------
             
             call warm_rain (dt_rain, ktop, kbot, dp1, dz1, tz, qvz, qlz, qrz, qiz, qsz, &
@@ -949,7 +960,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             enddo
             
             ! -----------------------------------------------------------------------
-            ! ice - phase microphysics
+            !>  - Call icloud(): ice-phase microphysics
             ! -----------------------------------------------------------------------
             
             call icloud (ktop, kbot, tz, p1, qvz, qlz, qrz, qiz, qsz, qgz, dp1, den, &
@@ -958,7 +969,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         enddo
         
         ! -----------------------------------------------------------------------
-        ! momentum transportation during sedimentation
+        !> - Calculate momentum transportation during sedimentation.
         ! note: dp1 is dry mass; dp0 is the old moist (total) mass
         ! -----------------------------------------------------------------------
         
@@ -978,7 +989,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update moist air mass (actually hydrostatic pressure)
+        !> - Update moist air mass (actually hydrostatic pressure).
         ! convert to dry mixing ratios
         ! -----------------------------------------------------------------------
         
@@ -995,7 +1006,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         enddo
         
         ! -----------------------------------------------------------------------
-        ! update cloud fraction tendency
+        !> - Update cloud fraction tendency.
         ! -----------------------------------------------------------------------
         
         do k = ktop, kbot
@@ -1108,7 +1119,8 @@ end subroutine sedi_heat
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> warm rain cloud microphysics
+!> This subroutine includes warm rain cloud microphysics
+!>\section warm_gen_al warm_rain Detailed Algorithm
 ! -----------------------------------------------------------------------
 
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
@@ -1118,7 +1130,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     
     integer, intent (in) :: ktop, kbot
     
-    real, intent (in) :: dt !< time step (s)
+    real, intent (in) :: dt ! time step (s)
     real, intent (in) :: rh_rain, h_var
     
     real, intent (in), dimension (ktop:kbot) :: dp, dz, den
@@ -1153,7 +1165,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     dt5 = 0.5 * dt
     
     ! -----------------------------------------------------------------------
-    ! terminal speed of rain
+    !> - Call check_column() to check the terminal speed of rain.
     ! -----------------------------------------------------------------------
     
     m1_rain (:) = 0.
@@ -1166,7 +1178,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     else
         
         ! -----------------------------------------------------------------------
-        ! fall speed of rain
+        !>  - Calculate fall speed of rain.
         ! -----------------------------------------------------------------------
         
         if (const_vr) then
@@ -1190,7 +1202,8 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         enddo
         
         ! -----------------------------------------------------------------------
-        ! evaporation and accretion of rain for the first 1 / 2 time step
+        !>  - Call revap_racc(), to calculate evaporation and accretion 
+        !! of rain for the first 1/2 time step.
         ! -----------------------------------------------------------------------
         
         ! if (.not. fast_sat_adj) &
@@ -1203,7 +1216,8 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! mass flux induced by falling rain
+        !>  - Calculate mass flux induced by falling rain. 
+        !! (lagrangian_fall_ppm() or implicit_fall())
         ! -----------------------------------------------------------------------
         
         if (use_ppm) then
@@ -1222,7 +1236,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! vertical velocity transportation during sedimentation
+        !>  - Calculate vertical velocity transportation during sedimentation.
         ! -----------------------------------------------------------------------
         
         if (do_sedi_w) then
@@ -1234,14 +1248,15 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! heat transportation during sedimentation
+        !>  - Call sedi_heat() to calculate heat transportation during sedimentation.
         ! -----------------------------------------------------------------------
         
         if (do_sedi_heat) &
             call sedi_heat (ktop, kbot, dp, m1_rain, dz, tz, qv, ql, qr, qi, qs, qg, c_liq)
         
         ! -----------------------------------------------------------------------
-        ! evaporation and accretion of rain for the remaing 1 / 2 time step
+        !>  - Call revap_racc() to calculate evaporation and accretion 
+        !! of rain for the remaing 1 / 2 time step.
         ! -----------------------------------------------------------------------
         
         call revap_racc (ktop, kbot, dt5, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
@@ -1249,9 +1264,9 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
     
     ! -----------------------------------------------------------------------
-    ! auto - conversion
-    ! assuming linear subgrid vertical distribution of cloud water
-    ! following lin et al. 1994, mwr
+    !> - Auto - conversion
+    !! (assuming linear subgrid vertical distribution of cloud water
+    !! following lin et al. 1994 \cite lin_et_al_1994.)
     ! -----------------------------------------------------------------------
     
     if (irain_f /= 0) then
@@ -1324,7 +1339,7 @@ end subroutine warm_rain
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> evaporation of rain
+!> This subroutine calculates evaporation of rain.
 ! -----------------------------------------------------------------------
 
 subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
@@ -1352,7 +1367,7 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
         if (tz (k) > t_wfr .and. qr (k) > qrmin) then
             
             ! -----------------------------------------------------------------------
-            ! define heat capacity and latent heat coefficient
+            !> - Define heat capacity and latent heat coefficient.
             ! -----------------------------------------------------------------------
             
             lhl (k) = lv00 + d0_vap * tz (k)
@@ -1371,12 +1386,12 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
             q_plus = qpz + dqh
             
             ! -----------------------------------------------------------------------
-            ! qsat must be > q_minus to activate evaporation
-            ! qsat must be < q_plus to activate accretion
+            !> - qsat must be > q_minus to activate evaporation;
+            !! qsat must be < q_plus to activate accretion
             ! -----------------------------------------------------------------------
             
             ! -----------------------------------------------------------------------
-            ! rain evaporation
+            !> - rain evaporation (\f$evap\f$)
             ! -----------------------------------------------------------------------
             
             if (dqv > qvmin .and. qsat > q_minus) then
@@ -1407,7 +1422,7 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
             endif
             
             ! -----------------------------------------------------------------------
-            ! accretion: pracc
+            !> - accretion: \f$P_{racc}\f$
             ! -----------------------------------------------------------------------
             
             ! if (qr (k) > qrmin .and. ql (k) > 1.e-7 .and. qsat < q_plus) then
@@ -1486,11 +1501,16 @@ end subroutine linear_prof
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!> ice cloud microphysics processes
-!! bulk cloud micro - physics; processes splitting
-!! with some un - split sub - grouping
-!! time implicit (when possible) accretion and autoconversion
-!>@author: Shian-Jiann lin, gfdl
+!> This subrroutine includes ice cloud microphysics processes
+!! - bulk cloud microphysics; 
+!! - processes splitting with some un-split sub-grouping
+!! - time implicit (when possible) accretion and autoconversion
+!!
+!! The following processes are included in this subroutine:
+!! - \f$P_{imlt}\f$: Melting of cloud ice to form cloud water
+!! - \f$P_{ihom}\f$: Homogeneous freezing of cloud water to form cloud ice
+!>@author Shian-Jiann Lin, GFDL
+!>\section det_icloud GFDL icloud Detailed Algorithm
 ! =======================================================================
 
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
@@ -1525,7 +1545,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
     rdts = 1. / dts
     
     ! -----------------------------------------------------------------------
-    ! define conversion scalar / factor
+    !> - Define conversion scalar / factor.
     ! -----------------------------------------------------------------------
     
     fac_i2s = 1. - exp (- dts / tau_i2s)
@@ -1535,7 +1555,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
     fac_imlt = 1. - exp (- dt5 / tau_imlt)
     
     ! -----------------------------------------------------------------------
-    ! define heat capacity and latend heat coefficient
+    !> - Define heat capacity and latend heat coefficient.
     ! -----------------------------------------------------------------------
     
     do k = ktop, kbot
@@ -1557,7 +1577,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         if (tzk (k) > tice .and. qik (k) > qcmin) then
             
             ! -----------------------------------------------------------------------
-            ! pimlt: instant melting of cloud ice
+            !> - Calculate \f$P_{imlt}\f$: instant melting of cloud ice.
             ! -----------------------------------------------------------------------
             
             melt = min (qik (k), fac_imlt * (tzk (k) - tice) / icpk (k))
@@ -1573,8 +1593,8 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         elseif (tzk (k) < t_wfr .and. qlk (k) > qcmin) then
             
             ! -----------------------------------------------------------------------
-            ! pihom: homogeneous freezing of cloud water into cloud ice
-            ! this is the 1st occurance of liquid water freezing in the split mp process
+            !> - Calculate \f$P_{ihom}\f$: homogeneous freezing of cloud water into cloud ice.
+            !! This is the 1st occurance of liquid water freezing in the split mp process.
             ! -----------------------------------------------------------------------
             
             dtmp = t_wfr - tzk (k)
@@ -1594,13 +1614,13 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
     enddo
     
     ! -----------------------------------------------------------------------
-    ! vertical subgrid variability
+    !> - Call linear_prof() to calculate vertical subgrid variability of cloud ice.
     ! -----------------------------------------------------------------------
     
     call linear_prof (kbot - ktop + 1, qik (ktop), di (ktop), z_slope_ice, h_var)
     
     ! -----------------------------------------------------------------------
-    ! update capacity heat and latend heat coefficient
+    !> - Update capacity heat and latend heat coefficient.
     ! -----------------------------------------------------------------------
     
     do k = ktop, kbot
@@ -1634,7 +1654,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         if (tc .ge. 0.) then
             
             ! -----------------------------------------------------------------------
-            ! melting of snow
+            !> - Melting of snow
             ! -----------------------------------------------------------------------
             
             dqs0 = ces0 / p1 (k) - qv
@@ -1642,7 +1662,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             if (qs > qcmin) then
                 
                 ! -----------------------------------------------------------------------
-                ! psacw: accretion of cloud water by snow
+                !>  - \f$P_{sacw}\f$: accretion of cloud water by snow
                 ! only rate is used (for snow melt) since tc > 0.
                 ! -----------------------------------------------------------------------
                 
@@ -1654,8 +1674,8 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! psacr: accretion of rain by melted snow
-                ! pracs: accretion of snow by rain
+                !>  - \f$P_{sacr}\f$: accretion of rain by melted snow
+                !>  - \f$P_{racs}\f$: accretion of snow by rain
                 ! -----------------------------------------------------------------------
                 
                 if (qr > qrmin) then
@@ -1668,8 +1688,8 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! total snow sink:
-                ! psmlt: snow melt (due to rain accretion)
+                !>  - Total snow sink:
+                !! \f$P_{smlt}\f$: snow melt (due to rain accretion)
                 ! -----------------------------------------------------------------------
                 
                 psmlt = max (0., smlt (tc, dqs0, qs * den (k), psacw, psacr, csmlt, &
@@ -1691,20 +1711,20 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             endif
             
             ! -----------------------------------------------------------------------
-            ! update capacity heat and latend heat coefficient
+            !> - Update capacity heat and latend heat coefficient.
             ! -----------------------------------------------------------------------
             
             lhi (k) = li00 + dc_ice * tz
             icpk (k) = lhi (k) / cvm (k)
             
             ! -----------------------------------------------------------------------
-            ! melting of graupel
+            !> - Melting of graupel
             ! -----------------------------------------------------------------------
             
             if (qg > qcmin .and. tc > 0.) then
                 
                 ! -----------------------------------------------------------------------
-                ! pgacr: accretion of rain by graupel
+                !>  - \f$P_{gacr}\f$: accretion of rain by graupel
                 ! -----------------------------------------------------------------------
                 
                 if (qr > qrmin) &
@@ -1712,7 +1732,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                         den (k)), rdts * qr)
                 
                 ! -----------------------------------------------------------------------
-                ! pgacw: accretion of cloud water by graupel
+                !>  - \f$P_{gacw}\f$: accretion of cloud water by graupel
                 ! -----------------------------------------------------------------------
                 
                 qden = qg * den (k)
@@ -1722,7 +1742,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! pgmlt: graupel melt
+                !>  - \f$P_{gmlt}\f$: graupel melt
                 ! -----------------------------------------------------------------------
                 
                 pgmlt = dts * gmlt (tc, dqs0, qden, pgacw, pgacr, cgmlt, den (k))
@@ -1739,11 +1759,11 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         else
             
             ! -----------------------------------------------------------------------
-            ! cloud ice proc:
+            !> - Cloud ice processes:
             ! -----------------------------------------------------------------------
             
             ! -----------------------------------------------------------------------
-            ! psaci: accretion of cloud ice by snow
+            !>  - \f$P_{saci}\f$: accretion of cloud ice by snow
             ! -----------------------------------------------------------------------
             
             if (qi > 3.e-7) then ! cloud ice sink terms
@@ -1760,12 +1780,10 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! pasut: autoconversion: cloud ice -- > snow
-                ! -----------------------------------------------------------------------
-                
-                ! -----------------------------------------------------------------------
-                ! similar to lfo 1983: eq. 21 solved implicitly
-                ! threshold from wsm6 scheme, hong et al 2004, eq (13) : qi0_crt ~0.8e-4
+                !>  - \f$P_{saut}\f$: autoconversion: cloud ice \f$\rightarrow\f$ snow.
+                !!\n similar to Lin et al.(1983) \cite lin_et_al_1983: eq. 21 solved implicitly;
+                !! threshold from wsm6 scheme, Hong et al. (2004) \cite hong_et_al_2004, 
+                !! eq (13) : qi0_crt ~0.8e-4.
                 ! -----------------------------------------------------------------------
                 
                 qim = qi0_crt / den (k)
@@ -1801,7 +1819,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 qs = qs + sink
                 
                 ! -----------------------------------------------------------------------
-                ! pgaci: accretion of cloud ice by graupel
+                !>  - \f$P_{gaci}\f$: accretion of cloud ice by graupel
                 ! -----------------------------------------------------------------------
                 
                 if (qg > 1.e-6) then
@@ -1818,7 +1836,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             endif
             
             ! -----------------------------------------------------------------------
-            ! cold - rain proc:
+            !> - Cold-rain processes:
             ! -----------------------------------------------------------------------
             
             ! -----------------------------------------------------------------------
@@ -1836,7 +1854,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 ! -----------------------------------------------------------------------
                 
                 ! -----------------------------------------------------------------------
-                ! psacr accretion of rain by snow
+                !>  - \f$P_{sacr}\f$: accretion of rain by snow
                 ! -----------------------------------------------------------------------
                 
                 if (qs > 1.e-7) then ! if snow exists
@@ -1846,14 +1864,17 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! pgfr: rain freezing -- > graupel
+                !>  - \f$P_{gfr}\f$: rain freezing \f$\rightarrow\f$ graupel
                 ! -----------------------------------------------------------------------
                 
                 pgfr = dts * cgfr (1) / den (k) * (exp (- cgfr (2) * tc) - 1.) * &
                     exp (1.75 * log (qr * den (k)))
                 
                 ! -----------------------------------------------------------------------
-                ! total sink to qr
+                !>  - Calculate total sink to \f$q_r\f$. 
+                !!\n  Sink terms to \f$q_r\f$:  \f$P_{sacr}+P_{gfr}\f$
+                !!\n  source term to \f$q_s\f$: \f$P_{sacr}\f$
+                !!\n  source term to \f$q_g\f$: \f$P_{gfr}\f$
                 ! -----------------------------------------------------------------------
                 
                 sink = psacr + pgfr
@@ -1874,20 +1895,20 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             endif
             
             ! -----------------------------------------------------------------------
-            ! update capacity heat and latend heat coefficient
+            !> - Update capacity heat and latend heat coefficient.
             ! -----------------------------------------------------------------------
             
             lhi (k) = li00 + dc_ice * tz
             icpk (k) = lhi (k) / cvm (k)
             
             ! -----------------------------------------------------------------------
-            ! graupel production terms:
+            !> - Graupel production terms:
             ! -----------------------------------------------------------------------
             
             if (qs > 1.e-7) then
                 
                 ! -----------------------------------------------------------------------
-                ! accretion: snow -- > graupel
+                !>  - accretion: snow \f$\rightarrow\f$ graupel
                 ! -----------------------------------------------------------------------
                 
                 if (qg > qrmin) then
@@ -1897,7 +1918,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! autoconversion snow -- > graupel
+                !>  - autoconversion: snow \f$\rightarrow\f$ graupel
                 ! -----------------------------------------------------------------------
                 
                 qsm = qs0_crt / den (k)
@@ -1914,7 +1935,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             if (qg > 1.e-7 .and. tz < tice0) then
                 
                 ! -----------------------------------------------------------------------
-                ! pgacw: accretion of cloud water by graupel
+                !>  - \f$P_{gacw}\f$: accretion of cloud water by graupel
                 ! -----------------------------------------------------------------------
                 
                 if (ql > 1.e-6) then
@@ -1926,7 +1947,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
                 
                 ! -----------------------------------------------------------------------
-                ! pgacr: accretion of rain by graupel
+                !>  - \f$P_{gacr}\f$: accretion of rain by graupel
                 ! -----------------------------------------------------------------------
                 
                 if (qr > 1.e-6) then
@@ -1965,7 +1986,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
     enddo
     
     ! -----------------------------------------------------------------------
-    ! subgrid cloud microphysics
+    !> - Call subgrid_z_proc() for subgrid cloud microphysics.
     ! -----------------------------------------------------------------------
     
     call subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tzk, qvk, &
@@ -1975,7 +1996,8 @@ end subroutine icloud
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>temperature sentive high vertical resolution processes
+!> temperature sentive high vertical resolution processes
+!>\section det_subz subgrid_z_proc Detailed Algorithm
 ! =======================================================================
 
 subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
@@ -2018,7 +2040,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
     endif
     
     ! -----------------------------------------------------------------------
-    ! define conversion scalar / factor
+    !> - Define conversion scalar/factor.
     ! -----------------------------------------------------------------------
     
     fac_v2l = 1. - exp (- dt_evap / tau_v2l)
@@ -2028,7 +2050,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
     fac_v2g = 1. - exp (- dts / tau_v2g)
     
     ! -----------------------------------------------------------------------
-    ! define heat capacity and latend heat coefficient
+    !> - Define heat capacity and latend heat coefficient.
     ! -----------------------------------------------------------------------
     
     do k = ktop, kbot
@@ -2048,7 +2070,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         if (p1 (k) < p_min) cycle
         
         ! -----------------------------------------------------------------------
-        ! instant deposit all water vapor to cloud ice when temperature is super low
+        !> - Instant deposit all water vapor to cloud ice when temperature is super low.
         ! -----------------------------------------------------------------------
         
         if (tz (k) < t_min) then
@@ -2063,7 +2085,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update heat capacity and latend heat coefficient
+        !> - Update heat capacity and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
@@ -2074,7 +2096,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         tcp3 (k) = lcpk (k) + icpk (k) * min (1., dim (tice, tz (k)) / (tice - t_wfr))
         
         ! -----------------------------------------------------------------------
-        ! instant evaporation / sublimation of all clouds if rh < rh_adj -- > cloud free
+        !> - Instant evaporation/sublimation of all clouds if rh < rh_adj \f$\rightarrow\f$ cloud free.
         ! -----------------------------------------------------------------------
         
         qpz = qv (k) + ql (k) + qi (k)
@@ -2092,7 +2114,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! cloud water < -- > vapor adjustment:
+        !> - cloud water \f$\Leftrightarrow\f$ vapor adjustment:
         ! -----------------------------------------------------------------------
         
         qsw = wqs2 (tz (k), den (k), dwsdt)
@@ -2118,14 +2140,14 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         tz (k) = tz (k) - evap * lhl (k) / cvm (k)
         
         ! -----------------------------------------------------------------------
-        ! update heat capacity and latend heat coefficient
+        !> - Update heat capacity and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhi (k) = li00 + dc_ice * tz (k)
         icpk (k) = lhi (k) / cvm (k)
         
         ! -----------------------------------------------------------------------
-        ! enforce complete freezing below - 48 c
+        !> - Enforce complete freezing below \f$-48^oC\f$.
         ! -----------------------------------------------------------------------
         
         dtmp = t_wfr - tz (k) ! [ - 40, - 48]
@@ -2140,14 +2162,14 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update heat capacity and latend heat coefficient
+        !> - Update heat capacity and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhi (k) = li00 + dc_ice * tz (k)
         icpk (k) = lhi (k) / cvm (k)
         
         ! -----------------------------------------------------------------------
-        ! bigg mechanism
+        !> - Apply bigg mechanism.
         ! -----------------------------------------------------------------------
         
         if (fast_sat_adj) then
@@ -2168,7 +2190,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update capacity heat and latend heat coefficient
+        !> - Update capacity heat and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
@@ -2178,7 +2200,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         tcpk (k) = lcpk (k) + icpk (k)
         
         ! -----------------------------------------------------------------------
-        ! sublimation / deposition of ice
+        !> - Sublimation/deposition of ice.
         ! -----------------------------------------------------------------------
         
         if (tz (k) < tice) then
@@ -2211,7 +2233,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update capacity heat and latend heat coefficient
+        !> - Update capacity heat and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
@@ -2221,7 +2243,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         tcpk (k) = lcpk (k) + icpk (k)
         
         ! -----------------------------------------------------------------------
-        ! sublimation / deposition of snow
+        !> - Sublimation/deposition of snow.
         ! this process happens for all temp rage
         ! -----------------------------------------------------------------------
         
@@ -2251,7 +2273,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! update capacity heat and latend heat coefficient
+        !> - Update capacity heat and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
@@ -2261,7 +2283,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         tcpk (k) = lcpk (k) + icpk (k)
         
         ! -----------------------------------------------------------------------
-        ! simplified 2 - way grapuel sublimation - deposition mechanism
+        !> - Simplified 2-way grapuel sublimation-deposition mechanism.
         ! -----------------------------------------------------------------------
         
         if (qg (k) > qrmin) then
@@ -2287,14 +2309,14 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         
 #ifdef USE_MIN_EVAP
         ! -----------------------------------------------------------------------
-        ! update capacity heat and latend heat coefficient
+        !> - Update capacity heat and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
         lcpk (k) = lhl (k) / cvm (k)
         
         ! -----------------------------------------------------------------------
-        ! * minimum evap of rain in dry environmental air
+        !> - Minimum evap of rain in dry environmental air.
         ! -----------------------------------------------------------------------
         
         if (qr (k) > qcmin) then
@@ -2309,7 +2331,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
 #endif
         
         ! -----------------------------------------------------------------------
-        ! update capacity heat and latend heat coefficient
+        !> - Update capacity heat and latend heat coefficient.
         ! -----------------------------------------------------------------------
         
         lhl (k) = lv00 + d0_vap * tz (k)
@@ -2321,7 +2343,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         ! -----------------------------------------------------------------------
         
         ! -----------------------------------------------------------------------
-        ! combine water species
+        !> - Combine water species.
         ! -----------------------------------------------------------------------
         
         if (do_qa) cycle
@@ -2341,7 +2363,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         qpz = qv (k) + q_cond (k) ! qpz is conserved
         
         ! -----------------------------------------------------------------------
-        ! use the "liquid - frozen water temperature" (tin) to compute saturated specific humidity
+        !> - Use the "liquid-frozen water temperature" (tin) to compute saturated specific humidity.
         ! -----------------------------------------------------------------------
         
         tin = tz (k) - (lcpk (k) * q_cond (k) + icpk (k) * q_sol (k)) ! minimum temperature
@@ -2374,8 +2396,8 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
         
         ! -----------------------------------------------------------------------
-        ! assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
-        ! binary cloud scheme
+        !> - Assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
+        !! binary cloud scheme.
         ! -----------------------------------------------------------------------
         
         if (qpz > qrmin) then
@@ -3226,7 +3248,7 @@ end subroutine cs_limiters
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief The subroutine 'fall_speed' calculates vertical fall speed.
+!> The subroutine calculates vertical fall speed of snow/ice/graupel.
 ! =======================================================================
 
 subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
@@ -3244,6 +3266,9 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
     real, parameter :: thg = 1.0e-8
     real, parameter :: ths = 1.0e-8
     
+    ! coefficient for the parameterization of mass weighted fall velocity
+    ! as a function of temperature and IWC.
+    ! Table 1 in Deng and Mace (2008) \cite deng_and_mace_2008.
     real, parameter :: aa = - 4.14122e-5
     real, parameter :: bb = - 0.00538922
     real, parameter :: cc = - 0.0516344
@@ -3277,7 +3302,8 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
     enddo
     
     ! -----------------------------------------------------------------------
-    ! ice:
+    !> - ice: use Deng and Mace (2008) \cite deng_and_mace_2008, which gives smaler
+    !! fall speed than Heymsfield and Donner (1990) \cite heymsfield_and_donner_1990.
     ! -----------------------------------------------------------------------
     
     if (const_vi) then
@@ -3300,7 +3326,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
     endif
     
     ! -----------------------------------------------------------------------
-    ! snow:
+    !> - snow:
     ! -----------------------------------------------------------------------
     
     if (const_vs) then
@@ -3317,7 +3343,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
     endif
     
     ! -----------------------------------------------------------------------
-    ! graupel:
+    !> - graupel:
     ! -----------------------------------------------------------------------
     
     if (const_vg) then
@@ -3610,7 +3636,7 @@ end subroutine gfdl_cloud_microphys_init
 ! =======================================================================
 ! end of gfdl cloud microphysics
 !>\ingroup gfdlcloud
-!>@brief The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
+!>@brief This subroutine terminates the GFDL
 !! cloud microphysics.
 ! =======================================================================
 
