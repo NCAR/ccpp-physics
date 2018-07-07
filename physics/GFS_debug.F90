@@ -43,12 +43,13 @@
 !! | Radtend        | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
+!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                       errmsg, errflg)
+                                       nthreads, errmsg, errflg)
 
 #ifdef MPI
          use mpi
@@ -78,6 +79,7 @@
          type(GFS_radtend_type),   intent(in   ) :: Radtend
          type(GFS_diag_type),      intent(in   ) :: Diag
          type(GFS_interstitial_type), intent(in) :: Interstitial
+         integer,                  intent(in   ) :: nthreads
          character(len=*),           intent(out) :: errmsg
          integer,                    intent(out) :: errflg
 
@@ -101,7 +103,7 @@
 #endif
 #ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
-         ompsize = Model%threads
+         ompsize = nthreads
 #else
          omprank = 0
          ompsize = 1
@@ -290,12 +292,13 @@
 !! | Radtend        | FV3-GFS_Radtend_type                                   | derived type GFS_radtend_type in FV3                    | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
+!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                           errmsg, errflg)
+                                           nthreads, errmsg, errflg)
 
 #ifdef MPI
          use mpi
@@ -325,6 +328,7 @@
          type(GFS_radtend_type),   intent(in   ) :: Radtend
          type(GFS_diag_type),      intent(in   ) :: Diag
          type(GFS_interstitial_type), intent(in) :: Interstitial
+         integer,                  intent(in   ) :: nthreads
          character(len=*),           intent(out) :: errmsg
          integer,                    intent(out) :: errflg
 
@@ -348,7 +352,7 @@
 #endif
 #ifdef OPENMP
          omprank = OMP_GET_THREAD_NUM()
-         ompsize = Model%threads
+         ompsize = nthreads
 #else
          omprank = 0
          ompsize = 1
