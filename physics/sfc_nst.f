@@ -1,22 +1,6 @@
 !>  \file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
-!> \defgroup GFS_NSST GFS Near Sea Surface Temperature
-!! @{
-!!  \brief Brief description of the parameterization
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_NSST_run Arguments
-!! | local var name | longname                                              | description                        | units   | rank | type    |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|------------------------------------|---------|------|---------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent, start at 1 | index   |    0 | integer |           | in     | F        |
-!!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
       module sfc_nst
 
       contains
