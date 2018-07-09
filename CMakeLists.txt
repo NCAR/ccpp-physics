@@ -33,13 +33,12 @@ set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 # Enable Fortran
 enable_language(Fortran)
 
-# DH this should be a PROJECT == CCPP-SCM test
-if (NOT PROJECT STREQUAL "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-SCM")
   #------------------------------------------------------------------------------
   # CMake Modules
   # Set the CMake module path
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
-endif (NOT PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
@@ -50,7 +49,7 @@ if (OPENMP)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
   message(STATUS "Enable OpenMP support for C/C++/Fortran compiler")
-else(OPENMP)
+else (OPENMP)
   message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
 endif()
 
@@ -93,177 +92,16 @@ link_directories(${CCPP_LIB_DIRS})
 list(APPEND LIBS "ccpp")
 
 # Add the required preprocessor flags so that cmake can sort out the dependencies
+# DH* this should go into the calling CMakeLists.txt of the host model *DH
 ADD_DEFINITIONS(-DNEMS_GSM)
 
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
-if (PROJECT STREQUAL "CCPP-FV3")
-  include(./CCPP_SCHEMES.cmake)
-else (PROJECT STREQUAL "CCPP-FV3")
-  set(SCHEMES
-      ./physics/machine.F
-      ./physics/physcons.f90
-      ./physics/funcphys.f90
-      ./GFS_layer/GFS_typedefs.F90
-      ./physics/radlw_param.f
-      ./physics/physparam.f
-      ./physics/radsw_param.f
-      ./physics/radiation_aerosols.f
-      ./physics/iounitdef.f
-      ./physics/gfs_phy_tracer_config.f
-      ./physics/radiation_clouds.f
-      ./physics/module_bfmicrophysics.f
-      ./physics/radiation_gases.f
-      ./physics/ozne_def.f
-      ./physics/radiation_surface.f
-      ./physics//h2o_def.f
-      ./physics/sfcsub.F
-      ./physics/mersenne_twister.f
-      ./physics/rascnvv2.f
-      ./physics/GFDL_parse_tracers.F90
-      ./physics/gfdl_fv_sat_adj.F90
-      ./physics/wam_f107_kp_mod.f90
-      ./physics/num_parthds.F
-      ./physics/gocart_tracer_config_stub.f
-      ./GFS_layer/GFS_suite_setup_scm.F90
-      ./physics/cldwat2m_micro.F
-      ./physics/wv_saturation.F
-      ./physics/aer_cloud.F
-      ./physics/radcons.f90
-      ./physics/radiation_astronomy.f
-      ./physics/radsw_main.f
-      ./physics/radsw_datatb.f
-      ./physics/GFS_rrtmg_setup.F90
-      ./physics/GFS_rrtmg_pre.F90
-      ./physics/GFS_rrtmg_post.F90
-      ./physics/rrtmg_sw_pre.F90
-      ./physics/rrtmg_sw_post.F90
-      ./physics/rrtmg_lw_pre.F90
-      ./physics/rrtmg_lw_post.F90
-      ./physics/radlw_main.f
-      ./physics/radlw_datatb.f
-      ./physics/set_soilveg.f
-      ./physics/namelist_soilveg.f
-      ./physics/GFS_phys_time_vary.scm.f90
-      ./physics/ozinterp.f90
-      ./physics/h2ointerp.f90
-      ./physics/gcycle.f90
-      ./physics/GFS_rad_time_vary.scm.f90
-      ./physics/GFS_radupdate.f90
-      ./physics/GFS_suite_interstitial.F90
-      ./physics/get_prs_fv3.f90
-      ./physics/sfc_sice.f
-      ./physics/dcyc2.f
-      ./physics/GFS_surface_generic.f90
-      ./physics/GFS_PBL_generic.f90
-      ./physics/sfc_drv.f
-      ./physics/sflx.f
-      ./physics/sfc_diff.f
-      ./physics/GFS_surface_loop_control.f
-      ./physics/sfc_nst.f
-      ./physics/date_def.f
-      ./physics/module_nst_water_prop.f90
-      ./physics/module_nst_parameters.f90
-      ./physics/module_nst_model.f90
-      ./physics/sfc_diag.f
-      ./physics/moninedmf.f
-      ./physics/mfpbl.f
-      ./physics/tridi.f
-      ./physics/gwdps.f
-      ./physics/rayleigh_damp.f
-      ./physics/ozphys.f
-      ./physics/GFS_DCNV_generic.f90
-      ./physics/GFS_zhao_carr_pre.f90
-      ./physics/samfdeepcnv.f
-      ./physics/gwdc.f
-      ./physics/GFS_SCNV_generic.f90
-      ./physics/mfshalcnv.f
-      ./physics/cnvc90.f
-      ./physics/GFS_MP_generic_pre.f90
-      ./physics/gscond.f
-      ./physics/precpd.f
-      ./physics/GFS_calpreciptype.f90
-      ./physics/GFS_MP_generic_post.f90
-      ./physics/gmtb_scm_sfc_flux_spec.f90
-      ./physics/surface_perturbation.F90
-  )
-endif (PROJECT STREQUAL "CCPP-FV3")
-
+include(./CCPP_SCHEMES.cmake)
 # Set the sources: physics scheme caps
-if (PROJECT STREQUAL "CCPP-FV3")
-  include(./CCPP_CAPS.cmake)
-else (PROJECT STREQUAL "CCPP-FV3")
-  set(CAPS
-  ./physics/rrtmg_sw_pre_cap.F90
-  ./physics/ozphys_post_cap.F90
-  ./physics/GFS_DCNV_generic_post_cap.F90
-  ./physics/ozphys_pre_cap.F90
-  ./physics/gwdps_pre_cap.F90
-  ./physics/gwdc_cap.F90
-  ./physics/GFS_suite_interstitial_rad_reset_cap.F90
-  ./physics/GFS_MP_generic_post_cap.F90
-  ./physics/rrtmg_sw_cap.F90
-  ./physics/lsm_noah_pre_cap.F90
-  ./physics/sfc_sice_pre_cap.F90
-  ./physics/dcyc2t3_post_cap.F90
-  ./physics/rrtmg_sw_post_cap.F90
-  ./physics/rrtmg_lw_cap.F90
-  ./physics/GFS_PBL_generic_pre_cap.F90
-  ./physics/gwdps_post_cap.F90
-  ./physics/gmtb_scm_sfc_flux_spec_cap.F90
-  ./physics/GFS_suite_interstitial_1_cap.F90
-  ./physics/GFS_rrtmg_post_cap.F90
-  ./physics/GFS_suite_interstitial_2_cap.F90
-  ./physics/samfdeepcnv_cap.F90
-  ./physics/rrtmg_lw_pre_cap.F90
-  ./physics/GFS_rad_time_vary_cap.F90
-  ./physics/sasas_shal_post_cap.F90
-  ./physics/sfc_diag_cap.F90
-  ./physics/GFS_SCNV_generic_pre_cap.F90
-  ./physics/GFS_PBL_generic_post_cap.F90
-  ./physics/sasas_shal_cap.F90
-  ./physics/sfc_ex_coef_cap.F90
-  ./physics/gwdc_post_cap.F90
-  ./physics/GFS_suite_update_stateout_cap.F90
-  ./physics/GFS_phys_time_vary_1_cap.F90
-  ./physics/gwdc_pre_cap.F90
-  ./physics/sfc_sice_cap.F90
-  ./physics/zhaocarr_precpd_cap.F90
-  ./physics/GFS_surface_generic_post_cap.F90
-  ./physics/cnvc90_cap.F90
-  ./physics/GFS_phys_time_vary_2_cap.F90
-  ./physics/sfc_nst_cap.F90
-  ./physics/GFS_surface_loop_control_part2_cap.F90
-  ./physics/GFS_surface_loop_control_part1_cap.F90
-  ./physics/GFS_surface_loop_control_part0_cap.F90
-  ./physics/rrtmg_lw_post_cap.F90
-  ./physics/GFS_zhao_carr_pre_cap.F90
-  ./physics/lsm_noah_post_cap.F90
-  ./physics/GFS_rrtmg_pre_cap.F90
-  ./physics/GFS_suite_interstitial_phys_reset_cap.F90
-  ./physics/sfc_nst_pre_cap.F90
-  ./physics/GFS_SCNV_generic_post_cap.F90
-  ./physics/GFS_suite_setup_scm_cap.F90
-  ./physics/dcyc2t3_pre_cap.F90
-  ./physics/dcyc2t3_cap.F90
-  ./physics/GFS_DCNV_generic_pre_cap.F90
-  ./physics/zhaocarr_gscond_cap.F90
-  ./physics/GFS_suite_interstitial_3_cap.F90
-  ./physics/lsm_noah_cap.F90
-  ./physics/GFS_MP_generic_pre_cap.F90
-  ./physics/sfc_sice_post_cap.F90
-  ./physics/sfc_nst_post_cap.F90
-  ./physics/gwdps_cap.F90
-  ./physics/get_prs_fv3_cap.F90
-  ./physics/GFS_surface_generic_pre_cap.F90
-  ./physics/ozphys_cap.F90
-  ./physics/GFS_calpreciptype_cap.F90
-  ./physics/rayleigh_damp_cap.F90
-  ./physics/get_phi_fv3_cap.F90
-  ./physics/hedmf_cap.F90
-  )
-endif (PROJECT STREQUAL "CCPP-FV3")
+include(./CCPP_CAPS.cmake)
 
+#------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
@@ -272,6 +110,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f
                                 ./physics/rascnvv2.f
@@ -326,8 +165,7 @@ endif (${CMAKE_VERSION} LESS 3.3)
 
 if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)
-# DH this should be a PROJECT == CCPP-SCM and else undefined test (similar in other places)
-else (PROJECT STREQUAL "CCPP-FV3")
+elseif (PROJECT STREQUAL "CCPP-SCM")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
@@ -349,13 +187,14 @@ endif (PROJECT STREQUAL "CCPP-FV3")
 add_library(ccppphys ${SCHEMES} ${CAPS})
 if (PROJECT STREQUAL "CCPP-FV3")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
-else (PROJECT STREQUAL "CCPP-FV3")
+elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
 endif (PROJECT STREQUAL "CCPP-FV3")
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
+
 # DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 set(CAPOBJS)
