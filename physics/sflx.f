@@ -55,6 +55,8 @@
 !!\param[in] shdmin    real, min areal coverage of green veg (fraction)  
 !!\param[in] alb       real, background snow-free sfc albedo (fraction) 
 !!\param[in] snoalb    real, max albedo over deep snow (fraction)  
+!!\param[in] bexpp     real, perturbation of soil type "b" parameter (perturbation) 
+!!\param[in] xlaip     real, perturbation of leave area index (perturbation) 
 !!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)  
 !!\param[in,out] cmc      real, canopy moisture content (\f$m\f$)
 !!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$) 
@@ -111,9 +113,10 @@
      &     ( nsoil, couple, icein, ffrozp, dt, zlvl, sldpth,            &
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
-     &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            & !  ---  input/outputs:
-     &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           & !  ---  outputs:
-     &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              &
+     &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            &
+     &       bexpp, xlaip,                                              &
+     &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           & !  ---  input/outputs:
+     &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              & !  ---  outputs:
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
@@ -301,7 +304,8 @@
 
       real (kind=kind_phys), intent(in) :: ffrozp, dt, zlvl, lwdn,      &
      &       sldpth(nsoil), swdn, swnet, sfcems, sfcprs, sfctmp,        &
-     &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb
+     &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
+     &       bexpp, xlaip  
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -420,6 +424,17 @@
 !            snup, salp, bexp, dksat, dwsat, smcmax, smcwlt,               !
 !            smcref, smcdry, f1, quartz, fxexp, rtdis, nroot,              !
 !            z0, czil, xlai, csoil )                                       !
+
+!  --- ...  bexp sfc-perts, mgehne
+      if( bexpp < 0.) then
+         bexp = bexp * max(1.+bexpp, 0.)
+      endif
+      if( bexpp >= 0.) then
+         bexp = bexp * min(1.+bexpp, 2.)
+      endif
+!  --- ...  lai sfc-perts, mgehne
+      xlai = xlai * (1.+xlaip)
+      xlai = amax1(xlai, .75)
 
 !  --- ...  initialize precipitation logicals.
 
@@ -3333,7 +3348,7 @@
       t1 = ctfil1*t1 + ctfil2*oldt1
 
       do i = 1, nsoil
-        stc(i) = ctfil1*stc(i) + ctfil2*stsoil(i)
+        stc(i) = ctfil1*stc(i) + ctfil2*stsoil(i)  ! LX question mark
       enddo
 
 !  --- ...  calculate surface soil heat flux
@@ -5666,8 +5681,10 @@ c ----------------------------------------------------------------------
 !
 !  --- ...  calc the ratio of the actual to the max psbl soil h2o content
 
-      factr1 = 0.2 / smcmax
-      factr2 = smc / smcmax
+!      factr1 = 0.2 / smcmax
+!      factr2 = smc / smcmax
+      factr1 = min(1.0, max(0.0, 0.2/smcmax))
+      factr2 = min(1.0, max(0.0, smc/smcmax))
 
 !  --- ...  prep an expntl coef and calc the soil water diffusivity
 
