@@ -3678,7 +3678,9 @@ subroutine setup_con
 end subroutine setup_con
 
 ! =======================================================================
+!>\ingroup gfdlcloud
 !>@brief The function 'acr3d' is an accretion function (lin et al. 1983)
+!! \cite lin_et_al_1983
 ! =======================================================================
 
 real function acr3d (v1, v2, q1, q2, c, cac, rho)
@@ -3711,8 +3713,9 @@ real function acr3d (v1, v2, q1, q2, c, cac, rho)
 end function acr3d
 
 ! =======================================================================
-!> melting of snow function (lin et al. 1983)
-!  note: psacw and psacr must be calc before smlt is called
+!>\ingroup gfdlcloud
+!>@brief Melting of snow function (lin et al. 1983 \cite lin_at_al_1983)
+!!  note: psacw and psacr must be calc before smlt is called
 ! =======================================================================
 
 real function smlt (tc, dqs, qsrho, psacw, psacr, c, rho, rhofac)
@@ -3727,8 +3730,8 @@ real function smlt (tc, dqs, qsrho, psacw, psacr, c, rho, rhofac)
 end function smlt
 
 ! =======================================================================
-!> melting of graupel function (lin et al. 1983)
-!  note: pgacw and pgacr must be calc before gmlt is called
+!>@brief Melting of graupel function (lin et al. 1983 \cite lin_et_al_1993)
+!!  note: pgacw and pgacr must be calc before gmlt is called
 ! =======================================================================
 
 real function gmlt (tc, dqs, qgrho, pgacw, pgacr, c, rho)

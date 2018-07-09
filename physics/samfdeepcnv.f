@@ -21,7 +21,7 @@
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
-!> \defgroup SAMF Scale-Aware Mass-Flux Deep Convection
+!> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection
 !! @{
 !! \brief The scale-aware mass-flux (SAMF) deep convection scheme is an updated
 !! version of the previous Simplified Arakawa-Schubert (SAS) scheme with scale
@@ -156,7 +156,7 @@
 !! | errmsg         | error_message                                                  | error message for error handling in CCPP                                                  | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                     | error flag for error handling in CCPP                                                     | flag    |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section general_samfdeep GFS samfdeepcnv General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# Perform calculations related to the downdraft of the entraining/detraining cloud model ("static control").
@@ -169,7 +169,7 @@
 !!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1−sigma) 2  .
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
-!!  \section detailed Detailed Algorithm
+!!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
       subroutine samfdeepcnv_run (im,ix,km,delt,ntk,ntr,delp,
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,

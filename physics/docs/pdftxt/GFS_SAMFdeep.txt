@@ -50,9 +50,9 @@
  to more strongly suppress convection in a drier environment.
 
 \section intra_deep  Intraphysics Communication
-\ref arg_table_sasas_deep_run
+\ref arg_table_samfdeepcnv_run
 
 \section gen_al_deep General Algorithm
-\ref general_mfdeep
+\ref general_samfdeep
 
 */
