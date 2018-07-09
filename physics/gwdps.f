@@ -131,7 +131,7 @@
 !! \brief This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!
-!! The time tendencies of zonal and meridional wind are altered to
+!> The time tendencies of zonal and meridional wind are altered to
 !! include the effect of mountain induced gravity wave drag from
 !! subgrid scale orography including convective breaking, shear
 !! breaking and the presence of critical levels.
@@ -178,12 +178,169 @@
 !! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      |    0 | integer   |           | in     | F        |
 !! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
+!! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | error_message                                                                 | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                    | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
 !!
 !> \section gen_gwdps GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
 !! -# Calculate orographic wave drag
+!! 
+!! The NWP model gravity wave drag (GWD) scheme in the GFS has two
+!! main components: how the surface stress is computed, and then how
+!! that stress is distributed over a vertical column where it may
+!! interact with the models momentum.  Each of these depends on the
+!! large scale environmental atmospheric state and assumptions about
+!! the sub-grid scale processes.  In Alpert GWD (1987) based on linear,
+!! two-dimensional non-rotating, stably stratified flow over a mountain ridge,
+!! sub-grid scale gravity wave motions are assumed which propagate away
+!! from the mountain.  Described in Alpert (1987), the flux measured over
+!! a "low level" vertically averaged layer, in the atmosphere defines a base
+!! level flux.  "Low level" was taken to be the first 1/3 of the troposphere
+!! in the 1987 implementation.  This choice was meant to encompass a thick
+!! low layer for vertical averages of the environmental (large scale) flow
+!! quantities.  The vertical momentum flux or gravity wave stress in a
+!! grid box due to a single mountain is given as in Pierrehumbert, (1987) (PH):
+!!
+!! \f$ \tau =  \frac {\rho \: U^{3}\: G(F_{r})} {\Delta X \; N } \f$
+!!
+!! emetic \f$ \Delta X \f$ is a grid increment, N is the Brunt Viasala frequency
+!!
+!!
+!! \f$ N(\sigma) = \frac{-g \: \sigma \:
+!!  \frac{\partial\Theta}{\partial\sigma}}{\Theta \:R \:T} \f$
+!!
+!! The environmental variables are calculated from a mass weighted vertical
+!! average over a base layer.  G(Fr) is a monotonically increasing
+!! function of Froude number,
+!!
+!! \f$ F_{r} = \frac{N h^{'}}{U} \f$
+!!
+!! where U is the wind speed calculated as a mass weighted vertical average in
+!! the base layer, and  h', is the vertical displacement caused by the orography
+!! variance.  An effective mountain length for the gravity wave processes,
+!!
+!! \f$ l^{*} =  \frac{\Delta X}{m} \f$
+!!
+!! where m is the number of mountains in a grid box, can then
+!! be defined to obtain the form of the base level stress
+!!
+!!
+!! \f$ \tau =  \frac {\rho \: U^{3} \: G(F_{r})} {N \;l^{*}} \f$
+!!
+!! giving the stress induced from the surface in a model grid box.
+!!   PH gives the form for the function G(Fr) as
+!!
+!!
+!! \f$ G(F_{r}) = \bar{G}\frac{F^{2}_{r}}{F^{2}_{r}\: + \:a^{2}} \f$
+!!
+!! Where \f$ \bar{G}  \f$  is an order unity non-dimensional saturation
+!! flux set to 1  and 'a' is a function of the mountain aspect ratio also
+!!set to 1 in the 1987 implementation of the GFS GWD.  Typical values of
+!! U=10m/s, N=0.01 1/s, l*=100km, and a=1, gives a flux of 1 Pascal and
+!! if this flux is made to go to zero linearly with height then the
+!! decelerations would be about 10/m/s/day which is consistent with
+!! observations in PH.
+!!
+!!
+!! In Kim, Moorthi, Alpert's (1998, 2001) GWD currently in GFS operations,
+!! the GWD scheme has the same physical basis as in Alpert (1987) with the addition
+!! of enhancement factors for the amplitude, G, and mountain shape details
+!! in G(Fr) to account for effects from the mountain blocking.  A factor,
+!! E m’, is an enhancement factor on the stress in the Alpert '87 scheme.
+!!  The E ranges from no enhancement to an upper limit of 3, E=E(OA)[1-3],
+!!  and is a function of OA, the Orographic Asymmetry defined in KA (1995) as
+!!
+!! Orographic Asymmetry (OA) = \f$  \frac{ \bar{x} \; - \;
+!!  \sum\limits_{j=1}^{N_{b}} x_{j} \; n_{j} }{\sigma_{x}} \f$
+!!
+!! where Nb is the total number of bottom blocks in the mountain barrier,
+!! \f$ \sigma_{x} \f$ is the standard deviation of the horizontal distance defined by
+!!
+!! \f$ \sigma_{x} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{b}}
+!! \; (x_{j} \; - \; \bar{x} )^2}{N_{x}} } \f$
+!!
+!!
+!! where Nx is the number of grid intervals for the large scale domain being
+!! considered. So the term, E(OA)m’/  \f$ \Delta X \f$ in Kim's scheme represents
+!! a multiplier on G shown in Alpert's eq (1), where m’ is the number of mountains
+!! in a sub-grid scale box. Kim increased the complexity of m’ making it a
+!! function of the fractional area of the sub-grid mountain and the asymmetry
+!! and convexity statistics which are found from running a gravity wave
+!!  model for a large number of cases:
+!!
+!! \f$ m^{'} = C_{m} \Delta X \left[  \frac{1 \; + \;
+!!  \sum\limits_{x} L_{h} }{\Delta X}  \right]^{OA+1}   \f$
+!!
+!! Where, according to Kim,  \f$ \sum \frac{L_{h}}{\Delta X} \f$  is
+!! the fractional area covered by the subgrid-scale orography higher than
+!! a critical height  \f$ h_{c} = Fr_{c} U_{0}/N_{0} \f$ , over the
+!! "low level" vertically averaged layer, for a grid box with the interval
+!! \f$ \Delta X \f$.  Each \f$ L_{n}\f$  is the width of a segment of
+!! orography intersection at the critical height:
+!!
+!! \f$  Fr_{0} = \frac{N_{0} \; h^{'}}{U_{0}}  \f$
+!!
+!! \f$ G^{'}(OC,Fr_{0}) = \frac{Fr_{0}^{2}}{Fr_{0}^{2} \; + \; a^{2}}  \f$
+!!
+!! \f$  a^{2} = \frac{C_{G}}{OC}  \f$
+!!
+!! \f$  E(OA, Fr_{0}) = (OA \; + \; 2)^{\delta} \f$ and \f$  \delta
+!! \; = \; \frac{C_{E} \; Fr_{0}}{Fr_{c}}  \f$  where \f$ Fr_{c} \f$
+!! is as in Alpert.
+!!
+!!
+!! This represents a closed scheme, somewhat empirical adjustments
+!! to the original scheme to calculate the surface stress.
+!!
+!! Momentum is deposited by the sub-grid scale gravity waves break due
+!! to the presence of convective mixing assumed to occur when the
+!! minimum Richardson number:
+!!
+!! Orographic Convexity (OC) = \f$  \frac{ \sum\limits_{j=1}^{N_{x}}
+!!  \; (h_{j} \; - \; \bar{h})^4 }{N_{x} \;\sigma_{h}^4} \f$  ,
+!!   and where  \f$ \sigma_{h} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{x}}
+!!  \; (h_{j} \; - \; \bar{h} )^2}{N_{x}} } \f$
+!!
+!! This represents a closed scheme, somewhat empirical adjustments
+!! to the original scheme to calculate the surface stress.
+!!
+!! Momentum is deposited by the sub-grid scale gravity waves break due
+!!  to the presence of convective mixing assumed to occur when
+!!  the minimum Richardson number:
+!!
+!! \f$ Ri_{m} = \frac{Ri(1 \; - \; Fr)}{(1 \; + \; \sqrt{Ri}Fr)^2} \f$
+!!
+!! Is less than 1/4  Or if critical layers are encountered in a layer
+!! the the momentum flux will vanish.  The critical layer is defined
+!! when the base layer wind becomes perpendicular to the environmental
+!!  wind.  Otherwise, wave breaking occurs at a level where the amplification
+!!  of the wave causes the local Froude number or similarly a truncated
+!!  (first term of the) Scorer parameter, to be reduced below a critical
+!!  value by the saturation hypothesis (Lindzen,).  This is done through
+!!  eq 1 which can be written as
+!!
+!! \f$ \tau = \rho U N k h^{'2} \f$
+!!
+!! For small Froude number this is discretized in the vertical so at each
+!!  level the stress is reduced by ratio of the Froude or truncated Scorer
+!!  parameter, \f$ \frac{U^{2}}{N^{2}} = \frac{N \tau_{l-1}}{\rho U^{3} k} \f$ ,
+!!  where the stress is from the layer below beginning with that found near
+!!  the surface.   The respective change in momentum is applied in
+!! that layer building up from below.
+!!
+!! An amplitude factor is part of the calibration of this scheme which is
+!! a function of the model resolution and the vertical diffusion.  This
+!! is because the vertical diffusion and the GWD account encompass
+!! similar physical processes. Thus, one needs to run the model over
+!! and over for various amplitude factors for GWD and vertical diffusion.
+!!
+!! In addition, there is also mountain blocking from lift and frictional
+!!  forces.  Improved integration between how the GWD is calculated and
+!! the mountain blocking of wind flow around sub-grid scale orography
+!! is underway at NCEP.  The GFS already has convectively forced GWD
+!!  an independent process.  The next step is to test
+!!
 !> \section det_gwdps GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdps_run(                                             &
@@ -191,7 +348,7 @@
      &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
      &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
      &           DUSFC,DVSFC,G, CP, RD, RV, IMX,                        &
-     &           nmtvr, cdmbgwd, me, lprnt, ipr, errmsg, errflg)
+     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -282,7 +439,6 @@
 !    May 2013  J. Wang change cleff back to opn setting
 !    Jan 2014  J. Wang merge Henry and Fangin's dissipation heat in gfs to nems
 !
-!
 !   ********************************************************************
       USE MACHINE , ONLY : kind_phys
       implicit none
@@ -308,7 +464,8 @@
       real(kind=kind_phys), intent(inout) :: ELVMAX(IM)
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(IM), SIGMA(IM), GAMMA(IM)
-      real(kind=kind_phys), intent(out) :: DUSFC(IM), DVSFC(IM)
+      real(kind=kind_phys), intent(out) :: DUSFC(IM), DVSFC(IM),        &
+     &                     RDXZB(IX)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
       character(len=*), intent(out) :: errmsg
@@ -345,19 +502,19 @@
 !
        real(kind=kind_phys) dpmin,hminmt,hncrit,minwnd,sigfac
 ! --- for lm mtn blocking
-!     parameter (cdmb = 1.0)     ! non-dim sub grid mtn drag Amp (*j*)
-      parameter (hncrit=8000.)   ! Max value in meters for ELVMAX (*j*)
+!     parameter (cdmb = 1.0)     !< non-dim sub grid mtn drag Amp (*j*)
+      parameter (hncrit=8000.)   !< Max value in meters for ELVMAX (*j*)
 !  hncrit set to 8000m and sigfac added to enhance elvmax mtn hgt
-      parameter (sigfac=4.0)     ! MB3a expt test for ELVMAX factor (*j*)
-      parameter (hminmt=50.)     ! min mtn height (*j*)
-      parameter (minwnd=0.1)     ! min wind component (*j*)
+      parameter (sigfac=4.0)     !< MB3a expt test for ELVMAX factor (*j*)
+      parameter (hminmt=50.)     !< min mtn height (*j*)
+      parameter (minwnd=0.1)     !< min wind component (*j*)
 
-!     parameter (dpmin=00.0)     ! Minimum thickness of the reference layer
-!!    parameter (dpmin=05.0)     ! Minimum thickness of the reference layer
-!     parameter (dpmin=20.0)     ! Minimum thickness of the reference layer
-                                 ! in centibars
-      parameter (dpmin=5000.0)   ! Minimum thickness of the reference layer
-                                 ! in Pa
+!     parameter (dpmin=00.0)     !< Minimum thickness of the reference layer
+!!    parameter (dpmin=05.0)     !< Minimum thickness of the reference layer
+!     parameter (dpmin=20.0)     !< Minimum thickness of the reference layer
+                                 !< in centibars
+      parameter (dpmin=5000.0)   !< Minimum thickness of the reference layer
+                                 !< in Pa
 !
       real(kind=kind_phys) FDIR
       integer mdir
@@ -372,8 +529,8 @@
 !
       real(kind=kind_phys) TAUB(IM),  XN(IM),     YN(IM),    UBAR(IM)     &
      &,                    VBAR(IM),  ULOW(IM),   OA(IM),    CLX(IM)      &
-     &,                    ROLL(IM),  ULOI(IM),   DTFAC(IM), XLINV(IM)    &
-     &,                    DELKS(IM), DELKS1(IM)
+     &,                    ROLL(IM),  ULOI(IM)                            &
+     &,                    DTFAC(IM), XLINV(IM),  DELKS(IM), DELKS1(IM)
 !
       real(kind=kind_phys) BNV2(IM,KM),  TAUP(IM,KM+1), ri_n(IM,KM)       &
      &,                    TAUD(IM,KM),  RO(IM,KM),     VTK(IM,KM)        &
@@ -436,6 +593,7 @@
 !
       IF ( NMTVR .eq. 14) then
 ! ----  for lm and gwd calculation points
+        RDXZB(:) = 0.          ! CCPP: it was a bug
         ipt = 0
         npt = 0
         DO I = 1,IM
@@ -519,7 +677,6 @@
 !        enddo
 !     print *, ' mb: kdt,max(iwklm),jhit,phil,me=',
 !    &          kdt,ihit,jhit,phil(jhit,ihit),me
-
         klevm1 = KMLL - 1
         DO K = 1, klevm1
           DO I = 1, npt
@@ -564,7 +721,6 @@
 ! ---  make averages, guess dividing stream (DS) line layer.
 ! ---  This is not used in the first cut except for testing and
 ! --- is the vert ave of quantities from the surface to mtn top.
-!
         DO I = 1, npt
           DO K = 1, Kreflm(I)
             J        = ipt(i)
@@ -613,9 +769,11 @@
               EK(I)  = 0.5 *  UP(I) * UP(I)
 
 ! --- Dividing Stream lime  is found when PE =exceeds EK.
-              IF ( PE(I) .ge.  EK(I) ) IDXZB(I) = K
+              IF ( PE(I) .ge.  EK(I) ) THEN
+                 IDXZB(I) = K
+                 RDXZB(J) = real(K,kind=kind_phys)
+              ENDIF
 ! --- Then mtn blocked flow is between Zb=k(IDXZB(I)) and surface
-!
 !> - The dividing streamline height (idxzb), of a subgrid scale
 !! obstable, is found by comparing the potential (PE) and kinetic
 !! energies (EK) of the upstream large scale wind and subgrid scale air
@@ -676,7 +834,7 @@
      &                       ( PHIL(J,K ) + G * hprime(J) ) )
 ! --- lm eq 14:
 !> - Calculate the drag coefficient to vary with the aspect ratio of
-!! the obstable as seen by the incident flow (see eq.14 in 
+!! the obstable as seen by the incident flow (see eq.14 in
 !! \cite lott_and_miller_1997)
 !!\f[
 !! R=\frac{\cos^{2}\psi+\gamma\sin^{2}\psi}{\gamma\cos^{2}\psi+\sin^{2}\psi}
@@ -714,7 +872,6 @@
 !         if(lprnt) print *,' @K=1,ZLEN,DBTMP=',K,ZLEN,DBTMP
           endif
         ENDDO
-!
 !.............................
 !.............................
 ! end  mtn blocking section
@@ -737,6 +894,7 @@
 !
         do i=1,npt
           IDXZB(i) = 0
+          RDXZB(i) = 0.
         enddo
       ENDIF
 !
@@ -890,7 +1048,6 @@
         ULOW (I)  = 0.0
         DTFAC(I)  = 1.0
         ICRILV(I) = .FALSE. ! INITIALIZE CRITICAL LEVEL CONTROL VECTOR
-
 !
 !----COMPUTE THE "LOW LEVEL" WIND MAGNITUDE (M/S)
 !
@@ -909,7 +1066,6 @@
 !         ENDIF
         ENDDO
       ENDDO
-!
 !
 !   find the interface level of the projected wind where
 !   low levels & upper levels meet above pbl
@@ -949,7 +1105,7 @@
 !
 !> - Calculate enhancement factor (E),number of mountans (m') and
 !! aspect ratio constant.
-!!\n As in eq.(4.9),(4.10),(4.11) in 
+!!\n As in eq.(4.9),(4.10),(4.11) in
 !! \cite kim_and_arakawa_1995, we define m' and E in such a way that they
 !! depend on the geometry and location of the subgrid-scale orography
 !! through OA and the nonlinearity of flow above the orography through
@@ -1006,7 +1162,6 @@
         SCOR(I)  = BNV2(I,K) / TEM  ! Scorer parameter below ref level
       ENDDO
 !     if(lprnt) print *,' taub=',taub
-!
 !----SET UP BOTTOM VALUES OF STRESS
 !
       DO K = 1, KBPS
@@ -1093,7 +1248,7 @@
 !    CHECK STABILITY TO EMPLOY THE 'SATURATION HYPOTHESIS'
 !    OF LINDZEN (1981) EXCEPT AT TROPOSPHERIC DOWNSTREAM REGIONS
 !
-!>  - Check stability to employ the 'saturation hypothesis' of 
+!>  - Check stability to employ the 'saturation hypothesis' of
 !! \cite lindzen_1981 except at tropospheric downstream regions.
 !! \n Wave breaking occurs when \f$Ri_{m}<Ri_{c}=0.25\f$. Then
 !! Lindzen's wave saturation hypothesis resets the displacement
@@ -1194,8 +1349,8 @@
 !          if ( ABS(DBIM * U1(J,K)) .gt. .01 )
 !    & print *,' in gwdps_lmi.f KDT=',KDT,I,K,DB(I,K),
 !    &                      dbim,idxzb(I),U1(J,K),V1(J,K),me
-            DUSFC(J)   = DUSFC(J) - DBIM * V1(J,K) * DEL(J,K)
-            DVSFC(J)   = DVSFC(J) - DBIM * U1(J,K) * DEL(J,K)
+            DUSFC(J)   = DUSFC(J) - DBIM * U1(J,K) * DEL(J,K)
+            DVSFC(J)   = DVSFC(J) - DBIM * V1(J,K) * DEL(J,K)
           else
 !
             A(J,K)     = DTAUY     + A(J,K)
@@ -1221,7 +1376,7 @@
         DUSFC(J) = TEM * DUSFC(J)
         DVSFC(J) = TEM * DVSFC(J)
       ENDDO
-!
+!                                                                       
 !    MONITOR FOR EXCESSIVE GRAVITY WAVE DRAG TENDENCIES IF NCNT>0
 !
 !     IF(NCNT.GT.0) THEN
