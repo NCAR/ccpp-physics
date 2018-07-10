@@ -1,6 +1,5 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the full GFDL cloud microphysics \cite chen_and_lin_2013.
-
+!! This file contains the column GFDL cloud microphysics \cite chen_and_lin_2013.
 !***********************************************************************
 !*                   GNU Lesser General Public License                 
 !*
@@ -22,12 +21,11 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 !> \defgroup gfdlcloud GFDL cloud MP Main 
-!>@brief The module "gfdl_cloud_microphys" contains the full GFDL cloud
+!>@brief The module "gfdl_cloud_microphys" contains the column GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
-!>@details The module is paired with "fv_cmp", which performs the "fast"
+!>@details The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
 !>\author Shian-Jiann Lin, Linjiong Zhou
-
 ! =======================================================================
 ! cloud micro - physics package for gfdl global cloud resolving model
 ! the algorithms are originally derived from lin et al 1983. most of the
@@ -52,6 +50,7 @@ module gfdl_cloud_microphys_mod
     
     private
     
+#if 0
     public gfdl_cloud_microphys_driver, gfdl_cloud_microphys_init, gfdl_cloud_microphys_end
     public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
     public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
@@ -137,6 +136,7 @@ module gfdl_cloud_microphys_mod
     
     real :: d0_vap !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
     real :: lv00 !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
+#endif
     
     ! cloud microphysics switchers
     
@@ -156,6 +156,7 @@ module gfdl_cloud_microphys_mod
     logical :: do_setup = .true. !< setup constants and parameters
     logical :: p_nonhydro = .false. !< perform hydrosatic adjustment on air density
     
+#if 0
     real, allocatable :: table (:), table2 (:), table3 (:), tablew (:)
     real, allocatable :: des (:), des2 (:), des3 (:), desw (:)
     
@@ -178,6 +179,7 @@ module gfdl_cloud_microphys_mod
     ! qs0_crt = 0.6e-3
     ! c_psaci = 0.1
     ! c_pgacs = 0.1
+#endif
     
     ! -----------------------------------------------------------------------
     !> namelist parameters
@@ -326,6 +328,7 @@ module gfdl_cloud_microphys_mod
         rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
         do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print
     
+#if 0
 contains
 
 ! -----------------------------------------------------------------------
@@ -1063,7 +1066,7 @@ end subroutine mpdrv
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> sedimentation of heat
+!>\brief This subroutine calculates sedimentation of heat.
 ! -----------------------------------------------------------------------
 
 subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
@@ -1119,8 +1122,8 @@ end subroutine sedi_heat
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> This subroutine includes warm rain cloud microphysics
-!>\section warm_gen_al warm_rain Detailed Algorithm
+!> This subroutine includes warm rain cloud microphysics.
+!>\section warm_gen_al GFDL cloud MP warm_rain Detailed Algorithm
 ! -----------------------------------------------------------------------
 
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
@@ -1130,7 +1133,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     
     integer, intent (in) :: ktop, kbot
     
-    real, intent (in) :: dt ! time step (s)
+    real, intent (in) :: dt !< time step (s)
     real, intent (in) :: rh_rain, h_var
     
     real, intent (in), dimension (ktop:kbot) :: dp, dz, den
@@ -1501,16 +1504,18 @@ end subroutine linear_prof
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!> This subrroutine includes ice cloud microphysics processes
+!> This subrroutine includes cloud ice microphysics processes,which is featured with:
 !! - bulk cloud microphysics; 
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
-!!
 !! The following processes are included in this subroutine:
 !! - \f$P_{imlt}\f$: Melting of cloud ice to form cloud water
 !! - \f$P_{ihom}\f$: Homogeneous freezing of cloud water to form cloud ice
+!>\todo list process in icloud
 !>@author Shian-Jiann Lin, GFDL
 !>\section det_icloud GFDL icloud Detailed Algorithm
+!>\param[in] ktop
+! 
 ! =======================================================================
 
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
@@ -1996,7 +2001,7 @@ end subroutine icloud
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!> temperature sentive high vertical resolution processes
+!> This subroutine calculates temperature sentive high vertical resolution processes.
 !>\section det_subz subgrid_z_proc Detailed Algorithm
 ! =======================================================================
 
@@ -2419,7 +2424,7 @@ end subroutine subgrid_z_proc
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!> rain evaporation
+!> This subroutine calculates rain evaporation.
 ! =======================================================================
 
 subroutine revap_rac1 (hydrostatic, is, ie, dt, tz, qv, ql, qr, qi, qs, qg, den, hvar)
@@ -4838,5 +4843,7 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
     enddo
     
 end subroutine cloud_diagnosis
+
+#endif
 
 end module gfdl_cloud_microphys_mod

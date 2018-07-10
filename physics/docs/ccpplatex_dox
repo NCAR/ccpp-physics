@@ -1,6 +1,6 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "GMTB Common Community Physics Package (CCPP) Scientific Documentation"
+PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
 PROJECT_NUMBER         = "Version 2.0"
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
@@ -21,7 +21,7 @@ JAVADOC_AUTOBRIEF      = NO
 QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = NO
 INHERIT_DOCS           = YES
-SEPARATE_MEMBER_PAGES  = NO
+SEPARATE_MEMBER_PAGES  = YES
 TAB_SIZE               = 4
 ALIASES                =
 TCL_SUBST              =
@@ -30,7 +30,7 @@ OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
 EXTENSION_MAPPING      = .f=FortranFixed \
-                         .f90=FortranFree  \
+                         .F90=FortranFree  \
                          .f=FortranFree
 MARKDOWN_SUPPORT       = YES
 AUTOLINK_SUPPORT       = YES
@@ -48,15 +48,15 @@ LOOKUP_CACHE_SIZE      = 0
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = YES
 EXTRACT_PACKAGE        = NO
-EXTRACT_STATIC         = NO
-EXTRACT_LOCAL_CLASSES  = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
 EXTRACT_ANON_NSPACES   = NO
 HIDE_UNDOC_MEMBERS     = NO
 HIDE_UNDOC_CLASSES     = NO
 HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = NO
-INTERNAL_DOCS          = NO
+INTERNAL_DOCS          = YES
 
 CASE_SENSE_NAMES       = NO
 
@@ -70,9 +70,9 @@ SHOW_GROUPED_MEMB_INC  = NO
 
 FORCE_LOCAL_INCLUDES   = NO
 
-INLINE_INFO            = NO
+INLINE_INFO            = YES
 
-SORT_MEMBER_DOCS       = YES
+SORT_MEMBER_DOCS       = NO
 
 SORT_BRIEF_DOCS        = NO
 SORT_MEMBERS_CTORS_1ST = NO
@@ -151,9 +151,10 @@ INPUT                  =  pdftxt/mainpage.txt \
                         ../precpd.f \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
-
+                        ../gfdl_fv_sat_adj.F90 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
+                         *.F90 \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =
@@ -180,7 +181,7 @@ USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 #CLANG_ASSISTED_PARSING = NO
 #CLANG_OPTIONS          =
-ALPHABETICAL_INDEX     = YES
+ALPHABETICAL_INDEX     = NO
 COLS_IN_ALPHA_INDEX    = 5
 IGNORE_PREFIX          =
 GENERATE_HTML          = YES
@@ -327,7 +328,7 @@ MSCFILE_DIRS           =
 DIAFILE_DIRS           =
 PLANTUML_JAR_PATH      =
 PLANTUML_INCLUDE_PATH  =
-DOT_GRAPH_MAX_NODES    = 50
+DOT_GRAPH_MAX_NODES    = 80
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_TRANSPARENT        = NO
 DOT_MULTI_TARGETS      = NO

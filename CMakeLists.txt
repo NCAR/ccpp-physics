@@ -92,6 +92,7 @@ link_directories(${CCPP_LIB_DIRS})
 list(APPEND LIBS "ccpp")
 
 # Add the required preprocessor flags so that cmake can sort out the dependencies
+# DH* this should go into the calling CMakeLists.txt of the host model *DH
 ADD_DEFINITIONS(-DNEMS_GSM)
 
 #------------------------------------------------------------------------------
@@ -100,6 +101,7 @@ include(./CCPP_SCHEMES.cmake)
 # Set the sources: physics scheme caps
 include(./CCPP_CAPS.cmake)
 
+#------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)

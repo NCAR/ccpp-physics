@@ -47,6 +47,8 @@
 !! | vegtype        | cell_vegetation_type                                                         | vegetation type at each grid cell                           | index      |    1 | integer   |           | in     | F        |
 !! | shdmax         | maximum_vegetation_area_fraction                                             | max fractnl cover of green veg                              | frac       |    1 | real      | kind_phys | in     | F        |
 !! | ivegsrc        | vegetation_type                                                              | vegetation type data source umd or igbp                     | index      |    0 | integer   |           | in     | F        |
+!! | z0pert         | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                   | frac       |    1 | real      | kind_phys | in     | F        |
+!! | ztpert         | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio     | frac       |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                    | K          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag       |    1 | logical   |           | in     | F        |
 !! | redrag         | flag_for_reduced_drag_coefficient_over_sea                                   | flag for reduced drag coefficient over sea                  | flag       |    0 | logical   |           | in     | F        |
@@ -86,6 +88,7 @@
      &                    stress,fm,fh,                                 &
      &                    ustar,wind,ddvel,fm10,fh2,                    &
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &
+     &                    z0pert,ztpert,                                &
      &                    tsurf,flag_iter,redrag,errmsg,errflg          &
      &                   )
 !
@@ -116,6 +119,8 @@
      &                                       fm10, fh2
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &                                       sigmaf, shdmax, tsurf
+      real(kind=kind_phys), dimension(im), intent(in) ::                &
+     &                                       z0pert,ztpert
       integer, dimension(im), intent(in) ::  vegtype, islimsk
 !
       logical, intent(in) :: flag_iter(im)
@@ -252,6 +257,11 @@
 
             endif
 ! - Calculate the roughness length for heat (see eq.(1) of \cite zheng_et_al_2012 ) .
+! mg, sfc-perts: add surface perturbations to z0max over land
+            if ( islimsk(i) == 1 .and. z0pert(i) /= 0.0 ) then
+              z0max = z0max * (10.**z0pert(i))
+            endif
+
             z0max = max(z0max,1.0e-6)
 !
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
@@ -260,6 +270,11 @@
             tem1 = 1.0 - sigmaf(i)
             ztmax = z0max*exp( - tem1*tem1
      &                         * czilc*ca*sqrt(ustar(i)*(0.01/1.5e-05)))
+
+! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
+            if ( islimsk(i) == 1  .and. ztpert(i) /= 0.0) then
+              ztmax = ztmax * (10.**ztpert(i))
+            endif
 
           endif       ! end of if(islimsk(i) == 0) then
 
