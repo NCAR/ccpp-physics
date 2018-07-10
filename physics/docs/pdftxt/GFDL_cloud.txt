@@ -1,5 +1,5 @@
 /**
-\page GFDL_cloud GFDL Cloud Microphysics 
+\page GFDL_cloud GFDL Cloud Microphysics Scheme 
 \section des_GFDL_cloud Description
 Unique attributes of GFDL microphysics:
 1. \b Fast \b physics (phase changes only, for now) between "Lagrangian-to-Eulerian" remapping in FV3

@@ -56,8 +56,8 @@
 !! convective overshooting.
 !!
 !! The SAMF scheme updates the SAS scheme with scale- and aerosol-aware
-!! parameterizations from \cite han_et_al_2017 based on the studies by \cite
-!! arakawa_and_wu_2013 and \cite grell_and_freitus_2014 for scale awareness and
+!! parameterizations from \cite han_et_al_2017 based on the studies by 
+!! \cite arakawa_and_wu_2013 and \cite grell_and_freitus_2014 for scale awareness and
 !! by \cite lim_2011 for aerosol awareness. The ratio of advective time to
 !! convective turnover time is also taken into account for the scale-aware
 !! parameterization. Along with the scale- and aerosol-aware parameterizations,
@@ -85,9 +85,9 @@
 !! rain conversion rate, entrainment and detrainment rates, overshooting layers,
 !! and maximum allowable cloudbase mass flux (as of June 2018).
 !!
-!!  \section diagram Calling Hierarchy Diagram
-!!  \image html SAMF_Flowchart.png "Diagram depicting how the SAMF deep
-!!  convection scheme is called from the FV3GFS physics time loop" height=2cm
+!  \section diagram Calling Hierarchy Diagram
+!  \image html SAMF_Flowchart.png "Diagram depicting how the SAMF deep
+!  convection scheme is called from the FV3GFS physics time loop" height=2cm
 
 !>  \brief This subroutine contains the entirety of the SAMF deep convection
 !! scheme.

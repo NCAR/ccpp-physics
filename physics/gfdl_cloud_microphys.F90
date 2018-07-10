@@ -334,7 +334,7 @@ contains
 !>\ingroup gfdlcloud
 !> The subroutine "gfdl_cloud_microphys_driver" executes the full GFDL
 !! cloud microphysics.
-!>\section gen_gfdlcloud_driver GFDL Cloud Microphysics Driver General Algorithm
+!>\section gen_gfdlcloud GFDL Cloud Microphysics Driver General Algorithm
 subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
         qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,    &
         uin, vin, udt, vdt, dz, delp, area, dt_in, land, rain, snow, ice, &
@@ -806,8 +806,8 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         endif
         
         ! -----------------------------------------------------------------------
-        !> - Calculate cloud condensation nuclei (ccn)
-        !! the following is based on klein eq. 15
+        !> - Calculate cloud condensation nuclei (ccn),
+        !! following klein eq. 15
         ! -----------------------------------------------------------------------
         
         cpaut = c_paut * 0.104 * grav / 1.717e-5
@@ -906,7 +906,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             endif
             
             ! -----------------------------------------------------------------------
-            !>  - Call warm_rain() - time-split warm rain processes: 1st pass
+            !>  - Call warm_rain() - time-split warm rain processes: 1st pass.
             ! -----------------------------------------------------------------------
             
             call warm_rain (dt_rain, ktop, kbot, dp1, dz1, tz, qvz, qlz, qrz, qiz, qsz, &
@@ -1781,7 +1781,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 
                 ! -----------------------------------------------------------------------
                 !>  - \f$P_{saut}\f$: autoconversion: cloud ice \f$\rightarrow\f$ snow.
-                !!\n similar to Lin et al.(1983) \cite lin_et_al_1983: eq. 21 solved implicitly;
+                !!\n similar to Lin et al.(1983) \cite lin_et_al_1983 eq. 21 solved implicitly;
                 !! threshold from wsm6 scheme, Hong et al. (2004) \cite hong_et_al_2004, 
                 !! eq (13) : qi0_crt ~0.8e-4.
                 ! -----------------------------------------------------------------------
@@ -3714,7 +3714,7 @@ end function acr3d
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief Melting of snow function (lin et al. 1983 \cite lin_at_al_1983)
+!>@brief Melting of snow function (lin et al. 1983 \cite lin_et_al_1983)
 !!  note: psacw and psacr must be calc before smlt is called
 ! =======================================================================
 
@@ -3730,8 +3730,8 @@ real function smlt (tc, dqs, qsrho, psacw, psacr, c, rho, rhofac)
 end function smlt
 
 ! =======================================================================
-!>@brief Melting of graupel function (lin et al. 1983 \cite lin_et_al_1993)
-!!  note: pgacw and pgacr must be calc before gmlt is called
+!>@brief Melting of graupel function (Eq.(47) in lin et al. 1983 \cite lin_et_al_1983)
+!!\n  note: \f$P_{gacw}\f$ and \f$P_{gacr}\f$ must be calculated before gmlt is called.
 ! =======================================================================
 
 real function gmlt (tc, dqs, qgrho, pgacw, pgacr, c, rho)

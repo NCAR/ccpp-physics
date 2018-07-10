@@ -2,11 +2,10 @@
 \page GFS_SAMFshal GFS Scale-Aware Mass-Flux Shallow Convection Scheme
 
 \section des_shal Description
- The scale-aware mass-flux shallow  convection
- scheme (\ref SAMF_shal_main) is an updated version of the previous mass-flux shallow
+ \ref SAMF_shal is an updated version of the previous mass-flux shallow
  convection scheme with scale and aerosol awareness and
  parameterizes the effect of shallow convection on the environment.
- \ref SAMF_shal_main is similar to \ref GFS_mfdeep
+ \ref SAMF_shal is similar to \ref GFS_mfdeep
  but with a few key differences. First, no quasi-equilibrium assumption
  is used for any grid size and the shallow cloud base mass flux is
  parameterized using a mean updraft velocity. Further, there are no
@@ -27,10 +26,10 @@
  are described in \cite han_et_al_2017 .
 
 \section intr_shal Intraphysics Communication
-\ref arg_table_sasas_shal_run
+\ref arg_table_samfshalcnv_run
 
 \section gen_shal General Algorithm
-\ref general_mfshal
+\ref gen_samfshalcnv
 
 
 */

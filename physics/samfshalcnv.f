@@ -21,7 +21,7 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal Scale-Aware Mass-Flux Shallow Convection
+!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !! @{
 !!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection scheme is an
 !!  updated version of the previous mass-flux shallow convection scheme with
@@ -108,13 +108,13 @@
 !! | errmsg         | error_message                                              | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                 | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section gen_samfshalcnv GFS samfshalcnv General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# The cloud base mass flux is obtained using the cumulus updraft velocity averaged ove the whole cloud depth.
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
-!!  \section detailed Detailed Algorithm
+!!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
       subroutine samfshalcnv_run(im,ix,km,delt,ntk,ntr,delp,
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,
