@@ -97,12 +97,17 @@ else
 FFLAGS += -i4 -real-size 64 -no-prec-div -no-prec-sqrt
 endif
 
+ifeq ($(REPRO),Y)
+FFLAGS += -qno-opt-dynamic-align
+CFLAGS += -qno-opt-dynamic-align
+else
 ifeq ($(AVX2),Y)
 FFLAGS += -xCORE-AVX2 -qno-opt-dynamic-align
 CFLAGS += -xCORE-AVX2 -qno-opt-dynamic-align
 else
 FFLAGS += -xHOST -qno-opt-dynamic-align
 CFLAGS += -xHOST -qno-opt-dynamic-align
+endif
 endif
 
 FFLAGS_OPT = -O2 -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3
