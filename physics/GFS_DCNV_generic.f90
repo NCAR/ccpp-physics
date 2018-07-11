@@ -18,7 +18,7 @@
 !! | im              | horizontal_loop_extent                                 | horizontal loop extent                                                    | count   |    0 | integer   |           | in     | F        |
 !! | levs            | vertical_dimension                                     | vertical layer dimension                                                  | count   |    0 | integer   |           | in     | F        |
 !! | ldiag3d         | flag_diagnostics_3D                                    | flag for 3d diagnostic fields                                             | flag    |    0 | logical   |           | in     | F        |
-!! | cnvgwd          | flag_convecitve_gravity_wave_drag                      | flag for conv gravity wave drag                                           | flag    |    0 | logical   |           | in     | F        |
+!! | cnvgwd          | flag_convective_gravity_wave_drag                      | flag for conv gravity wave drag                                           | flag    |    0 | logical   |           | in     | F        |
 !! | lgocart         | flag_gocart                                            | flag for 3d diagnostic fields for gocart 1                                | flag    |    0 | logical   |           | in     | F        |
 !! | gu0             | x_wind_updated_by_physics                              | zonal wind updated by physics                                             | m s-1   |    2 | real      | kind_phys | in     | F        |
 !! | gv0             | y_wind_updated_by_physics                              | meridional wind updated by physics                                        | m s-1   |    2 | real      | kind_phys | in     | F        |
