@@ -66,7 +66,7 @@
           enddo
         enddo
       elseif (cnvgwd) then
-        savet(1:im,:) = gt0(1:im,:)
+        save_t(1:im,:) = gt0(1:im,:)
       endif   ! end if_ldiag3d/cnvgwd
 
       if (ldiag3d .or. lgocart) then
@@ -155,7 +155,7 @@
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t, save_qv
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gqo_water_vapor
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: ud_mf, dd_mf, dt_mf
       real(kind=kind_phys), intent(in) :: con_g
       real(kind=kind_phys), dimension(im,levs), intent(in) :: clw_ice, clw_liquid
