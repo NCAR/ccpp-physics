@@ -100,6 +100,7 @@
 !! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                     | frac          |    0 | real             | kind_phys | out    | F        |
 !! | frain          | dynamics_to_physics_timestep_ratio                                       | ratio of dynamics timestep to physics timestep                          | none          |    0 | real             | kind_phys | out    | F        |
 !! | islmsk         | sea_land_ice_mask                                                        | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer          |           | out    | F        |
+!! | frland         | land_area_fraction                                                       | land area fraction                                                      | frac          |    1 | real             | kind_phys | out    | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real             | kind_phys | out    | F        |
 !! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                     | none          |    1 | real             | kind_phys | out    | F        |
 !! | dudt           | tendency_of_x_wind_due_to_model_physics                                  | updated tendency of the x wind                                          | m s-2         |    2 | real             | kind_phys | out    | F        |
@@ -111,7 +112,7 @@
 !! | errflg         | error_flag                                                               | error flag for error handling in CCPP                                   | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_1_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
-                                             work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+                                             frland, work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
       use physcons,              only: dxmin, dxinv
@@ -128,6 +129,7 @@
 
       real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop, frain
       integer, dimension(size(Grid%xlon,1)), intent(out) :: islmsk
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: frland
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out)  :: work1, work2
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
@@ -149,6 +151,11 @@
 
       do i = 1, size(Grid%xlon,1)
         islmsk(i)   = nint(Sfcprop%slmsk(i))
+        if (islmsk(i) == 1) then
+          frland(i) = 1.0
+        else
+          frland(i) = 0.0
+        endif
         work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
         work1(i)   = max(0.0, min(1.0,work1(i)))
         work2(i)   = 1.0 - work1(i)
