@@ -1,3 +1,5 @@
+!>\file module_bfmicrophysics.f This file contains some subroutines used
+!! in microphysics.
       MODULE module_microphysics
 !
       USE MACHINE , ONLY : kind_phys
@@ -2896,6 +2898,11 @@
 
 
 !-----------------------------------
+!> This program is a modified version of Ferrier's original "rshipath"
+!! subprogram. It computes layer's cloud liquid, ice, rain, and snow
+!! water condensate path and the partical effective radius for liquid
+!! droplet, rain drop, and snow flake.
+!>\section gen_rsipath2 rsipath2 General Algorithm
       subroutine rsipath2                                               &
 !...................................
 

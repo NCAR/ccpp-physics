@@ -508,7 +508,7 @@
 
           hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
      &           + rch(i)*(tice(i) - theta1(i))
-!> - Calculate heat flux derivative at surface \a hfd. 
+!> - Calculate heat flux derivative at surface \a hfd.
           hfd(i) = 4.0*sfcemis(i)*sbc*tice(i)*t12                       &
      &           + (1.0 + elocp*eps*hvap*qs1/(rd*t12)) * rch(i)
 

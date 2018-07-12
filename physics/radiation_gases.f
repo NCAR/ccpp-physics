@@ -896,15 +896,14 @@
 !!\n                    (:,:,8)           - cfc22
 !!\n                    (:,:,9)           - ccl4
 !!\n                    (:,:,10)          - cfc113
-!>\section getgases_gen getgases General Algorithm
-!! @{
+!>\section gen_getgases getgases General Algorithm
+!!@{
 !-----------------------------------
       subroutine getgases                                               &
      &     ( plvl, xlon, xlat,                                          & ! ---  inputs
      &       IMAX, LMAX,                                                &
      &       gasdat                                                     & ! ---  outputs
      &      )
-
 !  ===================================================================  !
 !                                                                       !
 !  getgases set up global distribution of radiation absorbing  gases    !
@@ -933,19 +932,19 @@
 !               (:,:,9)           - ccl4                                !
 !               (:,:,10)          - cfc113                              !
 !                                                                       !
-!  external module variables:  (in physparam)                           !
-!     ico2flg    - co2 data source control flag                         !
-!                   =0: use prescribed co2 global mean value            !
-!                   =1: use input global mean co2 value (co2_glb)       !
-!                   =2: use input 2-d monthly co2 value (co2vmr_sav)    !
-!     ivflip     - vertical profile indexing flag                       !
-!                                                                       !
-!  internal module variables used:                                      !
-!     co2vmr_sav - saved monthly co2 concentration from sub gas_update  !
-!     co2_glb    - saved global annual mean co2 value from  gas_update  !
-!     gco2cyc    - saved global seasonal variation of co2 climatology   !
-!                  in 12-month form                                     !
-!  ** note: for lower atmos co2vmr_sav may have clim monthly deviations !
+!> - External module variables:  (in physparam)
+!!\n     ico2flg    - co2 data source control flag
+!!\n                   =0: use prescribed co2 global mean value
+!!\n                   =1: use input global mean co2 value (co2_glb)
+!!\n                   =2: use input 2-d monthly co2 value (co2vmr_sav)
+!!\n     ivflip     - vertical profile indexing flag
+!!
+!> - Internal module variables :
+!!\n     co2vmr_sav - saved monthly co2 concentration from sub gas_update
+!!\n     co2_glb    - saved global annual mean co2 value from  gas_update
+!!\n     gco2cyc    - saved global seasonal variation of co2 climatology
+!!                  in 12-month form
+!note: for lower atmos co2vmr_sav may have clim monthly deviations !
 !           superimposed on init-cond co2 value, while co2_glb only     !
 !           contains the global mean value, thus needs to add the       !
 !           monthly dglobal mean deviation gco2cyc at upper atmos. for  !

@@ -14,7 +14,7 @@
       end subroutine hedmf_finalize
 
 
-!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF GFS Hybrid Eddy-diffusivity Mass-flux Scheme
 !! @{
 !!  \brief The Hybrid EDMF scheme is a first-order turbulent transport
 !!  scheme used for subgrid-scale vertical turbulent mixing in the PBL

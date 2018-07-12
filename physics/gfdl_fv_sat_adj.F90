@@ -23,7 +23,7 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!>\defgroup fast_sat_adj GFDL cloud Fast Saturation Adjustment
+!>\defgroup fast_sat_adj GFDL Cloud Fast Saturation Adjustment
 !>@brief The module 'fv_sat_adj' implements the fast procesesses in the GFDL
 !! microphysics
 !!>@author Shian-Jiann Lin, Linjiong Zhou

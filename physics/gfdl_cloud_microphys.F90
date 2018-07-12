@@ -20,7 +20,7 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-!> \defgroup gfdlcloud GFDL cloud MP Main 
+!> \defgroup gfdlcloud GFDL Cloud Column Microphysics Main 
 !>@brief The module "gfdl_cloud_microphys" contains the column GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
 !>@details The module is paired with \ref fast_sat_adj, which performs the "fast"
@@ -607,17 +607,17 @@ end subroutine gfdl_cloud_microphys_driver
 !! Rutledge and Hobbs, 1984 \cite rutledge_and_hobbs_1984.
 !! Terminal fall is handled lagrangianly by conservative fv algorithm.
 !!
-!>\param[in] hydrostatic 
-!>\param[in] uin
-!>\param[in] vin
-!>\param[inout] w
-!>\param[in] delp
-!>\param[in] pt  temperature (k)
-!>\param[in] qv  water vapor (kg / kg)
+!>\param[in] hydrostatic   .false. 
+!>\param[in] uin   zonal wind updated by physics (m/s)
+!>\param[in] vin   meridional wind updated by physics (m/s)
+!>\param[inout] w  vertical velocity (m/s?)
+!>\param[in] delp air pressure difference between midlayers (Pa)
+!>\param[in] pt  air temperature updated by physics (K)
+!>\param[in] qv  water vapor (kg / kg) \todo compare with ccpp, if it is update
 !>\param[in] ql  cloud water (kg / kg)
 !>\param[in] qr  rain (kg / kg)
-!>\param[inout] qi  cloud ice (kg / kg)
-!>\param[inout] qs  snow (kg / kg)
+!>\param[in] qi  cloud ice (kg / kg)
+!>\param[in] qs  snow (kg / kg)
 !>\param[in] qg  graupel (kg / kg)
 !>\param[in] qa  cloud fraction
 !>\param[in] qn
@@ -680,7 +680,9 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     real, intent (in), dimension (is:, js:, ks:) :: uin, vin, delp, pt, dz
     real, intent (in), dimension (is:, js:, ks:) :: qv, ql, qr, qg, qa, qn
     
-    real, intent (inout), dimension (is:, js:, ks:) :: qi, qs
+! ccpp: intent is not correct here
+!    real, intent (inout), dimension (is:, js:, ks:) :: qi, qs
+    real, intent (in), dimension (is:, js:, ks:) :: qi, qs
     real, intent (inout), dimension (is:, js:, ks:) :: u_dt, v_dt, w, pt_dt, qa_dt
     real, intent (inout), dimension (is:, js:, ks:) :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt
     

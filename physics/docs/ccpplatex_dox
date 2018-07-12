@@ -29,30 +29,30 @@ OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
-EXTENSION_MAPPING      = .f=FortranFixed \
+EXTENSION_MAPPING      = .f=FortranFree \
                          .F90=FortranFree  \
-                         .f=FortranFree
+                         .f90=FortranFree
 MARKDOWN_SUPPORT       = YES
 AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
 SIP_SUPPORT            = NO
 IDL_PROPERTY_SUPPORT   = YES
-DISTRIBUTE_GROUP_DOC   = NO
+DISTRIBUTE_GROUP_DOC   = YES
 GROUP_NESTED_COMPOUNDS = NO
 SUBGROUPING            = YES
 INLINE_GROUPED_CLASSES = NO
 INLINE_SIMPLE_STRUCTS  = NO
 TYPEDEF_HIDES_STRUCT   = NO
 LOOKUP_CACHE_SIZE      = 0
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
-EXTRACT_PACKAGE        = NO
+EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
-EXTRACT_LOCAL_METHODS  = NO
+EXTRACT_LOCAL_METHODS  = YES
 EXTRACT_ANON_NSPACES   = NO
-HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_MEMBERS     = YES
 HIDE_UNDOC_CLASSES     = NO
 HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = NO
@@ -87,7 +87,7 @@ ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = NO 
 SHOW_FILES             = NO
-SHOW_NAMESPACES        = NO
+SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            = ccpp_dox_layout.xml
 CITE_BIB_FILES         = library.bib
@@ -149,6 +149,7 @@ INPUT                  =  pdftxt/mainpage.txt \
 ### Microphysics
                         ../gscond.f \
                         ../precpd.f \
+                        ../module_bfmicrophysics.f \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90 
@@ -302,7 +303,7 @@ PERL_PATH              = /usr/bin/perl
 CLASS_DIAGRAMS         = YES
 MSCGEN_PATH            =
 DIA_PATH               =
-HIDE_UNDOC_RELATIONS   = YES
+HIDE_UNDOC_RELATIONS   = NO 
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Helvetica
@@ -320,7 +321,7 @@ CALL_GRAPH             = YES
 CALLER_GRAPH           = NO
 GRAPHICAL_HIERARCHY    = NO
 DIRECTORY_GRAPH        = YES
-DOT_IMAGE_FORMAT       = png
+DOT_IMAGE_FORMAT       = svg
 INTERACTIVE_SVG        = NO
 DOT_PATH               =
 DOTFILE_DIRS           =

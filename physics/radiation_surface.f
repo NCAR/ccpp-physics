@@ -80,10 +80,10 @@
 !! emissivity for lw radiation.
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
 !!
-!! In the module, the externally callable subroutines are : 
-!! + sfc_init(): initialization radiation surface data     
-!! + setalb(): set up four-component surface albedoes    
-!! + setemis(): set up surface emissivity for lw radiation
+!! In the module, the externally callable subroutines are :
+!! - sfc_init(): initialization radiation surface data
+!! - setalb(): set up four-component surface albedoes
+!! - setemis(): set up surface emissivity for lw radiation
 !========================================!
       module module_radiation_surface    !
 !........................................!

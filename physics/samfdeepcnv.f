@@ -57,7 +57,7 @@
 !!
 !! The SAMF scheme updates the SAS scheme with scale- and aerosol-aware
 !! parameterizations from \cite han_et_al_2017 based on the studies by 
-!! \cite arakawa_and_wu_2013 and \cite grell_and_freitus_2014 for scale awareness and
+!! \cite arakawa_and_wu_2013 and \cite grell_and_freitas_2014 for scale awareness and
 !! by \cite lim_2011 for aerosol awareness. The ratio of advective time to
 !! convective turnover time is also taken into account for the scale-aware
 !! parameterization. Along with the scale- and aerosol-aware parameterizations,
@@ -2436,7 +2436,7 @@ c
       if(totflg) return
 !!
 !
-!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitus_2014.
+!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 7.e-5), 3.e-4)

@@ -5,6 +5,13 @@
 
 Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b 2017 \b Operational \b GFS \b physics \b suite. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
 
+A major upgrade to the parameterization of GFDL cloud microphysics was implemented in the fv3gfs, which is slate to be operational at NCEP in 2019. It is the most significant change to the GFS physics suite since the Zhao-Carr microphysics scheme was implemented in the NCEP Global Forecasting System(GFS) as a simple scheme and predicted only total cloud condensate. Six prognostic cloud spieces variables have been introduced to enable a more physically based representation of water vapor, mixed-phase (liquid/ice) cloud and precipitating rain/snow/graupel.
+To avoid the seperation of dynamic/physics process, a fast process of GFDL cloud physics has been implemented in the E-to-L remapping loop of the FV3 dynamic solver.  
+
+\image  Schematic of the GFS microphysics scheme: (a) the Zhao-Carr scheme with three moisture related prognostic variables operational since 1997 and (b) the GFDL cloud scheme with six moisture related prognostic variables. Blue boxes indicate prognostic variables.
+
+Another updates is the cloud property calculation in \ref module_radiation_clouds
+
 \author  Global Model Test Bed (GMTB) at NCAR and NOAA/GSD
 
 Documentation for the individual physics scheme can be accessed through the following links:
@@ -21,8 +28,6 @@ Documentation for the individual physics scheme can be accessed through the foll
  + @ref GFS_SAMFshal
  + @ref GFDL_cloud 
 
- You can find more information about 
-<a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.
-
+ You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
 
 */

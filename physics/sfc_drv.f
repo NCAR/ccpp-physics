@@ -381,7 +381,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
      &       ch, prsl1, prslki, ddvel, shdmin, shdmax,                  &
-     &       snoalb, sfalb, zf,
+     &       snoalb, sfalb, zf,                                         &
      &       bexppert, xlaipert, vegfpert
 
       integer, dimension(im), intent(in) :: islimsk
@@ -653,8 +653,7 @@
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
           xlaip  = xlaipert(i)                   ! sfc perts, mgehne
 
-!> - Call Noah LSM gfssflx(). 
-
+!> - Call Noah LSM gfssflx().
 !          call sflx                                                     &
           call gfssflx                                                  & ! ccppdox: these is sflx in mpbl
 !  ---  inputs:
