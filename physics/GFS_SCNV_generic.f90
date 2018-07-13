@@ -25,7 +25,7 @@
 !! | errmsg          | error_message                                          | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg          | error_flag                                             | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, lgocart, gt0, gq0_water_vapor
+      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, lgocart, gt0, gq0_water_vapor, &
         save_t, save_qv, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -95,8 +95,8 @@
 !! | errmsg          | error_message                                                                               | error message for error handling in CCPP                             | none          |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                  | error flag for error handling in CCPP                                | flag          |    0 | integer     |           | out    | F        |
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor,
-     &  save_t, save_qv, dqdti, dt3dt, dq3dt, clw_liquid, errmsg, errflg)
+      subroutine GFS_SCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor, &
+        save_t, save_qv, dqdti, dt3dt, dq3dt, clw_liquid, errmsg, errflg)
 
       use machine,               only: kind_phys
 
