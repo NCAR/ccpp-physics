@@ -96,17 +96,19 @@
 !! | Sfcprop        | FV3-GFS_Sfcprop_type_all_blocks                        | Fortran DDT containing FV3-GFS surface fields                           | DDT      |    1 | GFS_sfcprop_type      |           | inout  | F        |
 !! | Cldprop        | FV3-GFS_Cldprop_type_all_blocks                        | Fortran DDT containing FV3-GFS cloud fields                             | DDT      |    1 | GFS_cldprop_type      |           | inout  | F        |
 !! | Diag           | FV3-GFS_Diag_type_all_blocks                           | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT      |    1 | GFS_diag_type         |           | inout  | F        |
+!! | Coupling       | FV3-GFS_Coupling_type_all_blocks                       | Fortran DDT containing FV3-GFS fields for coupling                      | DDT      |    1 | GFS_coupling_type     |           | inout  | F        |
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
+      subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, Coupling, errmsg, errflg)
 
         use mersenne_twister, only: random_setseed, random_number
         use machine,               only: kind_phys
         use physcons,              only: dxmin, dxinv
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
                                          GFS_tbd_type, GFS_sfcprop_type,  &
-                                         GFS_cldprop_type, GFS_diag_type
+                                         GFS_cldprop_type, GFS_diag_type, &
+                                         GFS_coupling_type
 
         implicit none
 
@@ -116,6 +118,7 @@
         type(GFS_sfcprop_type),           intent(inout) :: Sfcprop(:)
         type(GFS_cldprop_type),           intent(inout) :: Cldprop(:)
         type(GFS_diag_type),              intent(inout) :: Diag(:)
+        type(GFS_coupling_type),          intent(inout) :: Coupling(:)
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -218,6 +221,31 @@
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           enddo
         endif
+
+    call run_stochastic_physics(nblks,Model,Grid(:),Coupling(:))
+! kludge for output
+    if (Model%do_skeb) then
+       do nb = 1,nblks
+          do k=1,Model%levs
+             Diag(nb)%skebu_wts(:,k)=Coupling(nb)%skebu_wts(:,Model%levs-k+1)
+             Diag(nb)%skebv_wts(:,k)=Coupling(nb)%skebv_wts(:,Model%levs-k+1)
+          enddo
+       enddo
+    endif
+    !if (Model%do_sppt) then
+    !   do nb = 1,nblks
+    !      do k=1,Model%levs
+    !         Diag(nb)%sppt_wts(:,k)=Coupling(nb)%sppt_wts(:,Model%levs-k+1)
+    !      enddo
+    !   enddo
+    !endif
+    if (Model%do_shum) then
+       do nb = 1,nblks
+          do k=1,Model%levs
+             Diag(nb)%shum_wts(:,k)=Coupling(nb)%shum_wts(:,Model%levs-k+1)
+          enddo
+       enddo
+    endif
 
       end subroutine GFS_phys_time_vary_2_run
 
