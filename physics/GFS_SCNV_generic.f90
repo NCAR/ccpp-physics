@@ -124,7 +124,7 @@
 
       if (lssav) then
 !          update dqdt_v to include moisture tendency due to shallow convection
-        if (gocart) then
+        if (lgocart) then
           do k=1,levs
             do i=1,im
               tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
