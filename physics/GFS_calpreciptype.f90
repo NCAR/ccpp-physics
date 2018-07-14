@@ -40,7 +40,7 @@
 !! | prsi           | air_pressure_at_interface                                              | pressure at layer interface                                | Pa      |    2 | real      | kind_phys | in     | F        |
 !! | rainc          | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep  | convective rainfall amount on dynamics timestep            | m       |    1 | real      | kind_phys | in     | F        |
 !! | frain          | dynamics_to_physics_timestep_ratio                                     | dtf/dtp, dynamics to physics timestep ratio                | none    |    0 | real      | kind_phys | in     | F        |
-!! | rain1          | lwe_thickness_of_stratiform_precipitation_amount                       | stratiform rainfall amount on physics timestep             | m       |    1 | real      | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_stratiform_precipitation_amount_on_dynamics_timestep  | stratiform rainfall amount on physics timestep             | m       |    1 | real      | kind_phys | in     | F        |
 !! | phii           | geopotential_at_interface                                              | geopotential at model layer interfaces                     | m2 s-2  |    2 | real      | kind_phys | in     | F        |
 !! | n3dfercld      | array_dimension_of_3d_arrays_for_microphysics                          | number of 3D arrays needed for microphysics                | count   |    0 | integer   |           | in     | F        |
 !! | tskin          | surface_skin_temperature                                               | surface skin temperature                                   | K       |    1 | real      | kind_phys | in     | F        |
