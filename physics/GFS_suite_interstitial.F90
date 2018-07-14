@@ -53,24 +53,26 @@
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
 !! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
-    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, errmsg, errflg)
+    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use GFS_typedefs, only: GFS_interstitial_type
+      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
+      type(GFS_control_type),      intent(in)    :: Model
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
       errmsg = ''
       errflg = 0
 
-      call Interstitial%phys_reset()
+      call Interstitial%phys_reset(Model)
 
     end subroutine GFS_suite_interstitial_phys_reset_run
 
@@ -130,7 +132,7 @@
       real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop, frain
       integer, dimension(size(Grid%xlon,1)), intent(out) :: islmsk
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: frland
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out)  :: work1, work2
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: work1, work2
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
       character(len=*), intent(out) :: errmsg
@@ -156,16 +158,16 @@
         else
           frland(i) = 0.0
         endif
-        work1(i)   = (log(Grid%area(i)) - dxmin) * dxinv
-        work1(i)   = max(0.0, min(1.0,work1(i)))
-        work2(i)   = 1.0 - work1(i)
-        Diag%psurf(i)   = Statein%pgr(i)
+        work1(i) = (log(Grid%area(i)) - dxmin) * dxinv
+        work1(i) = max(0.0, min(1.0,work1(i)))
+        work2(i) = 1.0 - work1(i)
+        Diag%psurf(i) = Statein%pgr(i)
       end do
 
-      dudt(:,:)  = 0.
-      dvdt(:,:)  = 0.
-      dtdt(:,:)  = 0.
-      dtdtc(:,:) = 0.
+      dudt(:,:)   = 0.
+      dvdt(:,:)   = 0.
+      dtdt(:,:)   = 0.
+      dtdtc(:,:)  = 0.
       dqdt(:,:,:) = 0.
 
     end subroutine GFS_suite_interstitial_1_run

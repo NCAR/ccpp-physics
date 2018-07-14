@@ -368,7 +368,7 @@
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
-                     call Interstitial%mprint(mpirank,omprank,Tbd%blkno)
+                     call Interstitial%mprint(Model,mpirank,omprank,Tbd%blkno)
                  end if
 #ifdef OPENMP
 !$OMP BARRIER
