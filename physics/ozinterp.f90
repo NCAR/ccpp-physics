@@ -29,7 +29,7 @@
         return
       endif
 
-      open(unit=kozpl,file='INPUT/global_o3prdlos.f77', form='unformatted', convert='big_endian')
+      open(unit=kozpl,file='global_o3prdlos.f77', form='unformatted', convert='big_endian')
 
 !--- read in indices
 !---
@@ -127,8 +127,7 @@
 !
  
       integer  JINDX1(npts), JINDX2(npts)
-      integer  me,idate(4)
-      integer  IDAT(8),JDAT(8)
+      integer  me, idate(4), IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts)
       real(kind=kind_phys) ozplout(npts,levozp,oz_coeff)
@@ -157,26 +156,25 @@
       jday = 0
       call w3doxdat(jdat,jdow,jdoy,jday)
       rjday = jdoy + jdat(5) / 24.
-      IF (RJDAY .LT. oz_time(1)) RJDAY = RJDAY+365.
+      IF (RJDAY < oz_time(1)) RJDAY = RJDAY + 365.
 !
       n2 = timeoz + 1
-      do j=1,timeoz
-        if (rjday .lt. oz_time(j)) then
+      do j=2,timeoz
+        if (rjday < oz_time(j)) then
           n2 = j
           exit
         endif
       enddo
       n1 = n2 - 1
-      if (n1 <= 0)     n1 = n1 + timeoz
-      if (n2 > timeoz) n2 = n2 - timeoz
-
 !
-!     if (me .eq. 0) print *,' n1=',n1,' n2=',n2,' rjday=',rjday
+!     if (me == 0) print *,' n1=',n1,' n2=',n2,' rjday=',rjday
 !    &,'oz_time=',oz_time(n1),oz_time(n2)
 !
 
       tx1 = (oz_time(n2) - rjday) / (oz_time(n2) - oz_time(n1))
       tx2 = 1.0 - tx1
+
+      if (n2 > timeoz) n2 = n2 - timeoz
 !
       do nc=1,oz_coeff
         DO L=1,levozp

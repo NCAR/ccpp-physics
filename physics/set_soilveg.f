@@ -235,10 +235,15 @@ c-----------------------------
      &            0.00,  0.00,  0.00, 0.00,  0.00,  0.00/)
 ! !!!!!!!!!!!!!! The following values in the table are NOT used
 ! !!!!!!!!!!!!!! and are just given for reference
-      DRYSMC=(/0.023, 0.028, 0.047, 0.084, 0.084, 0.066,
-     &            0.069, 0.120, 0.103, 0.100, 0.126, 0.135,
-     &            0.069, 0.028, 0.012, 0.028, 0.135, 0.012,
-     &            0.023, 0.000, 0.000, 0.000, 0.000, 0.000,
+!     DRYSMC=(/0.023, 0.028, 0.047, 0.084, 0.084, 0.066,
+!    &            0.069, 0.120, 0.103, 0.100, 0.126, 0.135,
+!    &            0.069, 0.028, 0.012, 0.028, 0.135, 0.012,
+!    &            0.023, 0.000, 0.000, 0.000, 0.000, 0.000,
+!    &            0.000, 0.000, 0.000, 0.000, 0.000, 0.000/)
+      DRYSMC=(/0.010, 0.025, 0.010, 0.010, 0.010, 0.010,
+     &            0.010, 0.010, 0.010, 0.010, 0.010, 0.010,
+     &            0.010, 0.010, 0.010, 0.010, 0.010, 0.010,
+     &            0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
      &            0.000, 0.000, 0.000, 0.000, 0.000, 0.000/)
 ! !!!!!!!!!!!!!! The following values in the table are NOT used
 ! !!!!!!!!!!!!!! and are just given for reference
@@ -383,7 +388,7 @@ c-----------------------------
          DO I = 1,DEFINED_SOIL
            if (satdk(i) /= 0.0 .and. bb(i) > 0.0) then
            SATDW(I)  = BB(I)*SATDK(I)*(SATPSI(I)/MAXSMC(I))
-           F11(I)    = ALOG10(SATPSI(I)) + BB(I)*ALOG10(MAXSMC(I)) + 2.0
+             F11(I)    = LOG10(SATPSI(I)) + BB(I)*LOG10(MAXSMC(I)) + 2.0
            REFSMC1   = MAXSMC(I)*(5.79E-9/SATDK(I))
      &                  **(1.0/(2.0*BB(I)+3.0))
            REFSMC(I) = REFSMC1 + (MAXSMC(I)-REFSMC1) / SMHIGH
@@ -394,7 +399,7 @@ c-----------------------------
 !     CURRENT VERSION DRYSMC VALUES THAT EQUATE TO WLTSMC.
 !     FUTURE VERSION COULD LET DRYSMC BE INDEPENDENTLY SET VIA NAMELIST.
 !     ----------------------------------------------------------------------
-           DRYSMC(I) = WLTSMC(I)
+!          DRYSMC(I) = WLTSMC(I)
            endif
          END DO
          

@@ -313,8 +313,8 @@
 !     qsurf    - real, specific humidity at sfc                    im   !
 !     snowmt   - real, snow melt (m)                               im   !
 !     gflux    - real, soil heat flux (w/m**2)                     im   !
-!     cmm      - real,                                             im   !
-!     chh      - real,                                             im   !
+!     cmm      - real, surface exchange coeff for momentum (m/s)   im   !
+!     chh      - real, surface exchange coeff heat&moisture (m/s)  im   !
 !     evap     - real, evaperation from latent heat flux           im   !
 !     hflx     - real, sensible heat flux                          im   !
 !                                                                       !
