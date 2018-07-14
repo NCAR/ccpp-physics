@@ -98,7 +98,11 @@ ifeq ($(32BIT),Y)
 CPPDEFS += -DOVERLOAD_R4 -DOVERLOAD_R8
 FFLAGS += -i4 -real-size 32
 else
+ifeq ($(REPRO),Y)
+FFLAGS += -i4 -real-size 64
+else
 FFLAGS += -i4 -real-size 64 -no-prec-div -no-prec-sqrt
+endif
 endif
 
 ifeq ($(REPRO),Y)
