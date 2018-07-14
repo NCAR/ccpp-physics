@@ -14,6 +14,7 @@ order FV-type vertical reconstruction (\cite lin_et_al_1994) for autoconversions
 \image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance" width=10cm
 \image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance" width=10cm
 
+\subsection column_phys Column Physics Processes
 Table 1. Physics processes in GFDL cloud microphysics
 |Symbol         |        Meaning                                               |
 |---------------|--------------------------------------------------------------|
@@ -22,6 +23,10 @@ Table 1. Physics processes in GFDL cloud microphysics
 |\f$P_{sacw}\f$ | Accretion of cloud water by snow                             |
 |\f$P_{sacr}\f$ | Accretion of rain by melted snow                             |
 |\f$P_{racs}\f$ | Accretion of snow by rain                                    |
+
+\subsection sat_adj_phys Saturation Adjustment Processes
+In current fv3gfs, phase-changes is called after the "Lagrangian-to-Eulerian" remapping in FV3
+dynamic solver.
 
 \subsection hor_sub_var Horizontal Sub-grid Variability
 \subsection cld_fra_cal Cloud Fraction Calculation

@@ -10,8 +10,6 @@
       subroutine lsm_noah_pre_finalize
       end subroutine lsm_noah_pre_finalize
 
-!! \brief Brief description of the subroutine
-!!
 !! \section arg_table_lsm_noah_pre_run Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -248,10 +246,9 @@
 !  ====================    end of description    =====================  !
 
 !-----------------------------------
-!      subroutine sfc_drv                                                &
-! \defgroup Noah_Main GFS Noah Land Surface Model 
-!> \defgroup Noah_drv GFS Noah LSM Driver
-!!  \brief This is Noah LSM driver module, with the functionality of 
+
+!>\defgroup Noah_LSM GFS Noah LSM Model
+!! \brief This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well 
 !! as diagnotics calculation. 
@@ -328,10 +325,8 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_noah_drv GFS Noah Driver General Algorithm
+!!  \section general_noah_drv GFS sfc_drv General Algorithm
 !!  @{
-!  \section detailed_noah GFS Noah Driver Detailed Algorithm
-!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &

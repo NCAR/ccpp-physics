@@ -4563,29 +4563,20 @@
 !--------------------------------
 !
 !>\ingroup module_radiation_aerosols
-!> This subroutine:
-!! - 1. read in aerosol dry mass and surface pressure from GEOS3-GOCART
+!!
+!! This subroutine:
+!! - Read in aerosol dry mass and surface pressure from GEOS3-GOCART
 !! C3.1 2000 monthly dataset or aerosol mixing ratio and surface
 !! pressure from GEOS4-GOCART 2000-2007 averaged monthly data set.
-!! - 2. compute goes lat/lon array (for horizontal mapping)
-!>\section rd_gocart_clim_gen rd_gocart_clim General Algorithm
-!! @{
+!! - Compute goes lat/lon array (for horizontal mapping)
+!\section rd_gocart_clim_gen rd_gocart_clim General Algorithm
+! @{
 !-----------------------------------
       subroutine rd_gocart_clim
 !...................................
 !  ---  inputs:  (in scope variables)
 !  ---  outputs: (in scope variables)
-
-!  ==================================================================  !
-!                                                                      !
-! subprogram: rd_gocart_clim                                           !
-!                                                                      !
-!   1. read in aerosol dry mass and surface pressure from GEOS3-GOCART !
-!      C3.1 2000 monthly data set                                      !
-!      or aerosol mixing ratio and surface pressure from GEOS4-GOCART  !
-!      2000-2007 averaged monthly data set                             !
-!   2. compute goes lat/lon array (for horizontal mapping)             !
-!                                                                      !
+!
 !  ====================  defination of variables  ===================  !
 !                                                                      !
 ! inputs arguments:                                                    !
@@ -4884,7 +4875,7 @@
       return
 !...................................
       end subroutine rd_gocart_clim
-!! @}
+! @}
 !-----------------------------------
 !
 !...................................

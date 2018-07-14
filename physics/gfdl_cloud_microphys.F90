@@ -20,7 +20,7 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-!> \defgroup gfdlcloud GFDL Cloud Column Microphysics Main 
+!> \defgroup gfdlcloud GFDL Cloud Microphysics Main 
 !>@brief The module "gfdl_cloud_microphys" contains the column GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
 !>@details The module is paired with \ref fast_sat_adj, which performs the "fast"

@@ -816,7 +816,7 @@
           c1    = dili * tfi * dt2i * hice(i)
 
 !>  - Calculate the new upper ice temperature following \a eq.(21)
-!! in \cite winton_2000. 
+!! in \cite winton_2000.
           stsice(i,1) = -(sqrt(b1*b1 - 4.0*a1*c1) + b1)/(a1+a1)
           tice(i) = (k12*stsice(i,1) - ai) / (k12 + bi)
 

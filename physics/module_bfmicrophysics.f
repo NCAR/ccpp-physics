@@ -2898,6 +2898,7 @@
 
 
 !-----------------------------------
+!>\ingroup module_radiation_clouds
 !> This program is a modified version of Ferrier's original "rshipath"
 !! subprogram. It computes layer's cloud liquid, ice, rain, and snow
 !! water condensate path and the partical effective radius for liquid
