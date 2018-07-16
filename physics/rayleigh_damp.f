@@ -11,7 +11,8 @@
 
 !>\defgroup rayleigh_main GFS Rayleigh Damping Main
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
-!!\detail Role of Rayleigh friction, it attempts to resolve two issues:
+!!
+!! Role of Rayleigh friction, it attempts to resolve two issues:
 !! - The top lid model effects, sponge layer to suppress resolved wave reflections and extra-heating
 !! - The winter-summer zonal wind drag in the strato-mesosphere
 !!

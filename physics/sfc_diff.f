@@ -12,6 +12,7 @@
       end subroutine sfc_ex_coef_finalize
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
+!! @{
 !> \brief This subroutine calculates surface roughness length.
 !!
 !! This subroutine includes the surface roughness length formulation
@@ -58,7 +59,7 @@
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
 !! @{
 !! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
-!!  in \cite zeng_et_al_1998). 
+!!  in Zeng et al. (1998) \cite zeng_et_al_1998). 
 !! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
 !! -# Calculate the new vegetation-dependent formulation of thermal roughness length (\cite zheng_et_al_2009).
 !! \cite zheng_et_al_2009 proposed a new formulation on
@@ -426,5 +427,6 @@
 
       return
       end subroutine sfc_ex_coef_run
+!! @}
 !! @}
       end module sfc_ex_coef

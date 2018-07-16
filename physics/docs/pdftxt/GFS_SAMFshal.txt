@@ -5,7 +5,7 @@
  \ref SAMF_shal is an updated version of the previous mass-flux shallow
  convection scheme with scale and aerosol awareness and
  parameterizes the effect of shallow convection on the environment.
- \ref SAMF_shal is similar to \ref GFS_mfdeep
+ \ref SAMF_shal is similar to \ref SAMFdeep
  but with a few key differences. First, no quasi-equilibrium assumption
  is used for any grid size and the shallow cloud base mass flux is
  parameterized using a mean updraft velocity. Further, there are no

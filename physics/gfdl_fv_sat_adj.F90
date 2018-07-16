@@ -164,7 +164,7 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
 
 end subroutine fv_sat_adj_init
 
-!>\ingroup fast_sat_adj
+!\ingroup fast_sat_adj
 !>@brief The subroutine 'fv_sat_adj_finalize' deallocates lookup tables for the saturation mixing ratio.
 !! \section arg_table_fv_sat_adj_finalize Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |

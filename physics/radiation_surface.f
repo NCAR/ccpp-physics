@@ -293,6 +293,8 @@
 !!\param fice       (IMAX), sea-ice fraction
 !!\param tisfc      (IMAX), sea-ice surface temperature
 !!\param IMAX       array horizontal dimension
+!!\param albppert   (IMAX), a probability value in the interval [0,1]
+!!\param pertalb    (5), magnitude of perturbation of surface albedo
 !!\param sfcalb     (IMAX,NF_ALBD), mean sfc albedo
 !!\n                    ( :, 1) -     near ir direct beam albedo
 !!\n                    ( :, 2) -     near ir diffused albedo

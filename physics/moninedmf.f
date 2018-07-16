@@ -62,7 +62,7 @@
 !!  tendency of temperature is updated to reflect heating due to TKE
 !!  dissipation following Han et al. (2015) \cite han_et_al_2015 .
 !!
-!! \section arg_table_hedmf_run Argument Table
+!> \section arg_table_hedmf_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |

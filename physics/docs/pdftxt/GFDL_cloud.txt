@@ -36,7 +36,7 @@ dynamic solver.
 \section intro_GFDL_cloud Intraphysics Communication
 
 \section Gen_GFDL_cloud  General Algorithm
- + \ref general_GFDL_cloud
+ + \ref gen_gfdlcloud
 
 
 */

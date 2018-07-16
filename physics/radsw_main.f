@@ -503,7 +503,7 @@
       subroutine rrtmg_sw_init ()
       end subroutine rrtmg_sw_init
 
-!! \section arg_table_rrtmg_sw_run Argument Table
+!> \section arg_table_rrtmg_sw_run Argument Table
 !! | local_name      | standard_name                                                                                  | long_name                                                                | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                     | air pressure layer                                                       | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -1986,7 +1986,7 @@
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param lcloudy     sub-colum cloud profile flag array
-!!\section mcica_subcol_gen mcica_subcol General Algorithm
+!!\section mcica_sw_gen mcica_subcol General Algorithm
 !! @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &

@@ -54,14 +54,14 @@
 !!  detrainment rates, overshooting layers, and maximum allowable cloudbase mass
 !!  flux (as of June 2018).
 !!
-!!  \image html SAMF_shal_Flowchart.png "Diagram depicting how the SAMF shallow
-!!  convection scheme is called from the FV3GFS physics time loop" height=2cm
+!  \image html SAMF_shal_Flowchart.png "Diagram depicting how the SAMF shallow
+!  convection scheme is called from the FV3GFS physics time loop" height=2cm
 
 
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
 !!
-!!  This routine follows the \ref SAMF deep scheme quite closely, although it
+!!  This routine follows the \ref SAMFdeep quite closely, although it
 !!  can be interpreted as only having the "static" and "feedback" control
 !!  portions, since the "dynamic" control is not necessary to find the cloud
 !!  base mass flux. The algorithm is simplified from SAMF deep convection by
@@ -1524,7 +1524,7 @@ c
         endif
       enddo
 !
-!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitus_2014.
+!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 2.e-4), 6.e-4)
