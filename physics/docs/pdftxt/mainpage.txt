@@ -31,6 +31,19 @@ Documentation for the individual physics scheme can be accessed through the foll
  + @ref GFS_SAMFshal
  + @ref GFDL_cloud 
 
+This version also include improved documentation on
+-radiation: more detailed doc on rad paramters
+-surface-perterubation: new subroutine added
+-cloud-property radiation: new subrtouine for GFDL cloud microphysics
+-rayleigh dampling
+-GFDL cloud physics
+ -warm_rain
+ -icloud
+ -fall
+  ...
+-fast processes
+  -cloud fraction
+
  You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
 
 */

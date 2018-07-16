@@ -7,7 +7,7 @@
 !! ice, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance
 !! (excluding input atmospheric forcings of downward radiation and 
-!! precipitation ).
+!! precipitation).
 !!
 !! The land-surface model component was substantially upgraded from the Oregon
 !! State University (OSU) land surface model to EMC's new Noah Land Surface Model
@@ -282,8 +282,8 @@
       real (kind=kind_phys), parameter :: gs1     = 9.8         !< con_g in sfcdif
       real (kind=kind_phys), parameter :: gs2     = 9.81        !< con_g in snowpack, frh2o
       real (kind=kind_phys), parameter :: tfreez  = con_t0c     !< con_t0c =275.15
-      real (kind=kind_phys), parameter :: lsubc   = 2.501e+6    ! con_hvap=2.5000e+6
-      real (kind=kind_phys), parameter :: lsubf   = 3.335e5     ! con_hfus=3.3358e+5
+      real (kind=kind_phys), parameter :: lsubc   = 2.501e+6    !< con_hvap=2.5000e+6
+      real (kind=kind_phys), parameter :: lsubf   = 3.335e5     !< con_hfus=3.3358e+5
       real (kind=kind_phys), parameter :: lsubs   = 2.83e+6     ! ? in sflx, snopac
       real (kind=kind_phys), parameter :: elcp    = 2.4888e+3   ! ? in penman
 !     real (kind=kind_phys), parameter :: rd      = con_rd      ! con_rd  =287.05
@@ -354,8 +354,8 @@
 !             if vegtype=15 (glacial-ice), re-set ice flag = -1 (glacial-ice)
 !    note - for open-sea, sflx should *not* have been called. set green
 !           vegetation fraction (shdfac) = 0.
-!> - For open-sea, sea-ice and glacial-ice cases, sflx() should not have
-!! been called (set green vegetation fraction (shdfac) =0).
+
+!> - Set ice = -1 and green vegetation fraction (shdfac) = 0 for glacial-ice land.
       ice = icein
 
       if(ivegsrc == 2) then
@@ -372,13 +372,13 @@
        endif
       endif
 
-!> - Calculate soil layer depth below ground (sigin of \a zsoil is negative).
+!> - Calculate soil layer depth below ground.
       if (ice == 1) then
 
         shdfac = 0.0
 
-!  --- ...  set green vegetation fraction (shdfac) = 0.
-!           set sea-ice layers of equal thickness and sum to 3 meters
+!>  - For ice, set green vegetation fraction (shdfac) = 0.
+!! and set sea-ice layers of equal thickness and sum to 3 meters
 
         do kz = 1, nsoil
           zsoil(kz) = -3.0 * float(kz) / float(nsoil)
@@ -386,8 +386,8 @@
 
       else
 
-!  --- ...  calculate depth (negative) below ground from top skin sfc to 
-!           bottom of each soil layer.
+!>  - Otherwise, calculate depth (negative) below ground from top skin sfc to 
+!! bottom of each soil layer.
 !    note - sign of zsoil is negative (denoting below ground)
 
         zsoil(1) = -sldpth(1)
@@ -427,6 +427,7 @@
 !            z0, czil, xlai, csoil )                                       !
 
 !  --- ...  bexp sfc-perts, mgehne
+!> - Calculate perturbated soil type "b" parameter.
       if( bexpp < 0.) then
          bexp = bexp * max(1.+bexpp, 0.)
       endif
@@ -434,10 +435,11 @@
          bexp = bexp * min(1.+bexpp, 2.)
       endif
 !  --- ...  lai sfc-perts, mgehne
+!> - Calculate perturbated leaf area index.
       xlai = xlai * (1.+xlaip)
       xlai = amax1(xlai, .75)
 
-!  --- ...  initialize precipitation logicals.
+!> - Initialize precipitation logicals.
 
       snowng = .false.
       frzgra = .false.
@@ -552,7 +554,7 @@
       endif   ! end if_snowng_block
 
 !> - Determine snowcover fraction and albedo fraction over sea-ice, 
-!! glacial-ice, and land. For nonzero snow depth over land case:
+!! glacial-ice, and land.
 
       if (ice /= 0) then
 
@@ -924,7 +926,6 @@
 !-----------------------------------
 !>\ingroup Noah_LSM
 !> This subroutine calculates albedo including snow effect (0 -> 1).
-!!\ingroup Noah_LSM
       subroutine alcalc
 !...................................
 !  ---  inputs:

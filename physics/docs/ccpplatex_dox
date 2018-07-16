@@ -99,20 +99,21 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  pdftxt/mainpage.txt \
-                          pdftxt/GFS_RRTMG.txt \
-                          pdftxt/GFS_SFCLYR.txt  \
-                          pdftxt/GFS_NSST.txt    \
-                          pdftxt/GFS_NOAH.txt    \
-                          pdftxt/GFS_SFCSICE.txt \
-                          pdftxt/GFS_HEDMF.txt \
-                          pdftxt/GFS_GWDPS.txt   \
-                          pdftxt/GFS_OZPHYS.txt  \
+INPUT                  =  pdftxt/mainpage.txt     \
+                          pdftxt/GFS_RRTMG.txt    \
+                          pdftxt/GFS_SFCLYR.txt   \
+                          pdftxt/GFS_NSST.txt     \
+                          pdftxt/GFS_NOAH.txt     \
+                          pdftxt/GFS_SFCSICE.txt  \
+                          pdftxt/GFS_HEDMF.txt    \
+                          pdftxt/GFS_GWDPS.txt    \
+                          pdftxt/GFS_OZPHYS.txt   \
+                          pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMFdeep.txt \
-                          pdftxt/GFS_GWDC.txt    \
+                          pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
-                          pdftxt/GFS_ZHAOC.txt   \
-                          pdftxt/GFDL_cloud.txt \
+                          pdftxt/GFS_ZHAOC.txt    \
+                          pdftxt/GFDL_cloud.txt   \
 ### Radiation
                         ../radlw_main.f \
                         ../radsw_main.f \
@@ -130,6 +131,7 @@ INPUT                  =  pdftxt/mainpage.txt \
                         ../sfc_nst.f \
                         ../sfc_drv.f \
                         ../sflx.f    \
+                        ../surface_perturbation.F90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -142,6 +144,8 @@ INPUT                  =  pdftxt/mainpage.txt \
                         ../ozphys.f \
 ### Deep Convection
                         ../samfdeepcnv.f \
+### Rayleigh Dampling
+                        ../rayleigh_damp.f  \
 ### Convective Gravity Wave
                         ../gwdc.f \
 ### Shallow Convection
@@ -311,11 +315,11 @@ DOT_FONTSIZE           = 10
 DOT_FONTPATH           =
 CLASS_GRAPH            = NO
 COLLABORATION_GRAPH    = NO
-GROUP_GRAPHS           = NO
+GROUP_GRAPHS           = YES
 UML_LOOK               = NO
 UML_LIMIT_NUM_FIELDS   = 10
 TEMPLATE_RELATIONS     = NO
-INCLUDE_GRAPH          = NO
+INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = NO
 CALL_GRAPH             = YES
 CALLER_GRAPH           = NO

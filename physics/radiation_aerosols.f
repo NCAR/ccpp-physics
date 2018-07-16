@@ -163,11 +163,11 @@
 
 ! --- general use parameter constants:
 ! num of output fields for SW rad
-      integer, parameter, public :: NF_AESW = 3
+      integer, parameter, public :: NF_AESW = 3       !< number of output fields for SW rad
 ! num of output fields for LW rad
-      integer, parameter, public :: NF_AELW = 3
+      integer, parameter, public :: NF_AELW = 3       !< number of output fields for LW rad
 ! starting band number in ir region
-      integer, parameter, public :: NLWSTR  = 1
+      integer, parameter, public :: NLWSTR  = 1       !< starting band number in IR region
 ! num of species for output aod (opnl)
       integer, parameter, public :: NSPC    = 5
 ! total+species
@@ -589,48 +589,35 @@
 !     dimension for extrhi_grt, ssarhi_grt, and asyrhi_grt) is
 !     not needed ===> hardwired to 8-bin dust
 
-!   - index for gocart aerosol species to be included in the
-!     calculations of aerosol optical properties (ext, ssa, asy)
-      type  gocart_index_type
-! dust
-         integer :: dust1, dust2, dust3, dust4, dust5
-! sea salt
-         integer :: ssam,  sscm
-! sulfate
-         integer :: suso
-! oc
-         integer :: waso_phobic, waso_philic
-! bc
-         integer :: soot_phobic, soot_philic
+      type  gocart_index_type         !< index for gocart aerosol species to be included in the
+                                      !! calculations of aerosol optical properties (ext, ssa, asy)
+         integer :: dust1, dust2, dust3, dust4, dust5   !< dust
+         integer :: ssam,  sscm                         !< sea salt
+         integer :: suso                                !< sulfate
+         integer :: waso_phobic, waso_philic            !< oc
+         integer :: soot_phobic, soot_philic            !< bc
       endtype
-      type (gocart_index_type), save :: dm_indx
+      type (gocart_index_type), save :: dm_indx         !< index for aer spec to be included in 
+                                                        !!aeropt calculations
 
-!  index for gocart aerosols from prognostic tracer fields
-      type  tracer_index_type
-! dust
-         integer :: du001, du002, du003, du004, du005
-! sea salt
-         integer :: ss001, ss002, ss003, ss004, ss005
-! sulfate
-         integer :: so4
-! oc
-         integer :: ocphobic, ocphilic
-! bc
-         integer :: bcphobic, bcphilic
+      type  tracer_index_type         !< index for gocart aerosols from prognostic tracer fields
+         integer :: du001, du002, du003, du004, du005   !< dust
+         integer :: ss001, ss002, ss003, ss004, ss005   !< sea salt
+         integer :: so4                                 !< sulfate
+         integer :: ocphobic, ocphilic                  !< oc
+         integer :: bcphobic, bcphilic                  !< bc
       endtype
-      type (tracer_index_type), save :: dmfcs_indx
+      type (tracer_index_type), save :: dmfcs_indx      !< index for prognostic aerosol fields
 
 !   - grid components to be included in the aeropt calculations
-! number of aerosol grid components
-      integer, save                  :: num_gridcomp = 0
-! aerosol grid components
-      character, allocatable , save  :: gridcomp(:)*2
+      integer, save                  :: num_gridcomp = 0    !< number of aerosol grid components
+      character, allocatable , save  :: gridcomp(:)*2       !< aerosol grid components
 
 ! default full-package setting
-      integer, parameter          :: max_num_gridcomp = 5
+      integer, parameter          :: max_num_gridcomp = 5   !< default full-package setting
 ! data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
       character*2                 :: max_gridcomp(max_num_gridcomp)
-      data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
+      data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/    
 
 ! GOCART code modification end here (Sarah Lu)
 ! ------------------------!
@@ -644,17 +631,15 @@
 !      idxspc (NCM)         - index conversion array
 !      lspcaod              - logical flag for aod from individual species
 !
-! index conversion array:data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
-      integer, dimension(NCM) :: idxspc
+      integer, dimension(NCM) :: idxspc       !< index conversion array
       data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
 !
 !   - wvn550 is the wavenumber (1/cm) of wavelenth 550nm for diagnostic aod output
 !     nv_aod is the sw spectral band covering wvn550 (comp in aer_init)
 !
-! the wavenumber (\f$cm^-1\f$) of wavelength 550nm for diagnostic aod output
-      real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55
-! the sw spectral band covering wvn550 (comp in aer_init)
-      integer, save      :: nv_aod = 1
+      real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55  !< the wavenumber (\f$cm^-1\f$) of 
+                                                               !! wavelength 550nm for diagnostic aod output
+      integer, save      :: nv_aod = 1     !< the SW spectral band covering wvn550 (comp in aer_init)
 
 !  ---  public interfaces
 

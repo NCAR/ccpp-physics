@@ -20,8 +20,8 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-!> \defgroup gfdlcloud GFDL Cloud Microphysics Main 
-!>@brief The module "gfdl_cloud_microphys" contains the column GFDL cloud
+!> \defgroup gfdlcloud GFDL Cloud Microphysics Main
+!>@brief The module "gfdl_cloud_microphys" contains the GFDL cloud
 !! microphysics \cite chen_and_lin_2013.
 !>@details The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
@@ -64,19 +64,19 @@ module gfdl_cloud_microphys_mod
     
     character (len = 17) :: mod_name = 'gfdl_cloud_microphys'
     
-    real, parameter :: grav = 9.80665 !< gfs: acceleration due to gravity
-    real, parameter :: rdgas = 287.05 !< gfs: gas constant for dry air
-    real, parameter :: rvgas = 461.50 !< gfs: gas constant for water vapor
-    real, parameter :: cp_air = 1004.6 !< gfs: heat capacity of dry air at constant pressure
-    real, parameter :: hlv = 2.5e6 !< gfs: latent heat of evaporation
-    real, parameter :: hlf = 3.3358e5 !< gfs: latent heat of fusion
+    real, parameter :: grav = 9.80665      !< gfs: acceleration due to gravity
+    real, parameter :: rdgas = 287.05      !< gfs: gas constant for dry air
+    real, parameter :: rvgas = 461.50      !< gfs: gas constant for water vapor
+    real, parameter :: cp_air = 1004.6     !< gfs: heat capacity of dry air at constant pressure
+    real, parameter :: hlv = 2.5e6         !< gfs: latent heat of evaporation
+    real, parameter :: hlf = 3.3358e5      !< gfs: latent heat of fusion
     real, parameter :: pi = 3.1415926535897931 !< gfs: ratio of circle circumference to diameter
     
-    ! real, parameter :: rdgas = 287.04 ! gfdl: gas constant for dry air
+    ! real, parameter :: rdgas = 287.04    ! gfdl: gas constant for dry air
     
     ! real, parameter :: cp_air = rdgas * 7. / 2. ! 1004.675, heat capacity of dry air at constant pressure
     real, parameter :: cp_vap = 4.0 * rvgas !< 1846.0, heat capacity of water vapore at constnat pressure
-    ! real, parameter :: cv_air = 717.56 ! satoh value
+    ! real, parameter :: cv_air = 717.56   ! satoh value
     real, parameter :: cv_air = cp_air - rdgas !< 717.55, heat capacity of dry air at constant volume
     ! real, parameter :: cv_vap = 1410.0 ! emanuel value
     real, parameter :: cv_vap = 3.0 * rvgas !< 1384.5, heat capacity of water vapor at constant volume
@@ -85,17 +85,17 @@ module gfdl_cloud_microphys_mod
     ! real, parameter :: c_ice = 2106.0 ! heat capacity of ice at 0 deg c: c = c_ice + 7.3 * (t - tice)
     ! real, parameter :: c_liq = 4190.0 ! heat capacity of water at 0 deg c
     
-    real, parameter :: c_ice = 1972.0 !< gfdl: heat capacity of ice at - 15 deg c
-    real, parameter :: c_liq = 4185.5 !< gfdl: heat capacity of water at 15 deg c
-    ! real, parameter :: c_liq = 4218.0 ! ifs: heat capacity of liquid at 0 deg c
+    real, parameter :: c_ice = 1972.0      !< gfdl: heat capacity of ice at - 15 deg c
+    real, parameter :: c_liq = 4185.5      !< gfdl: heat capacity of water at 15 deg c
+    ! real, parameter :: c_liq = 4218.0    ! ifs: heat capacity of liquid at 0 deg c
     
-    real, parameter :: eps = rdgas / rvgas ! 0.6219934995
+    real, parameter :: eps = rdgas / rvgas !< 0.6219934995
     real, parameter :: zvir = rvgas / rdgas - 1. !< 0.6077338443
     
-    real, parameter :: t_ice = 273.16 !< freezing temperature
-    real, parameter :: table_ice = 273.16 !< freezing point for qs table
+    real, parameter :: t_ice = 273.16      !< freezing temperature
+    real, parameter :: table_ice = 273.16  !< freezing point for qs table
     
-    ! real, parameter :: e00 = 610.71 ! gfdl: saturation vapor pressure at 0 deg c
+    ! real, parameter :: e00 = 610.71      ! gfdl: saturation vapor pressure at 0 deg c
     real, parameter :: e00 = 611.21 !< ifs: saturation vapor pressure at 0 deg c
     
     real, parameter :: dc_vap = cp_vap - c_liq !< - 2339.5, isobaric heating / cooling
@@ -335,7 +335,7 @@ contains
 ! the driver of the gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> The subroutine "gfdl_cloud_microphys_driver" executes the full GFDL
+!> The subroutine is the driver of the GFDL
 !! cloud microphysics.
 !>\section gen_gfdlcloud GFDL Cloud Microphysics Driver General Algorithm
 subroutine gfdl_cloud_microphys_driver (qv, ql, qr, qi, qs, qg, qa, qn,   &
@@ -1269,7 +1269,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
     
     ! -----------------------------------------------------------------------
-    !> - Auto - conversion
+    !> - Auto-conversion
     !! (assuming linear subgrid vertical distribution of cloud water
     !! following lin et al. 1994 \cite lin_et_al_1994.)
     ! -----------------------------------------------------------------------
@@ -1344,7 +1344,7 @@ end subroutine warm_rain
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!> This subroutine calculates evaporation of rain.
+!> This subroutine calculates evaporation of rain and accretion of rain.
 ! -----------------------------------------------------------------------
 
 subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
@@ -3519,10 +3519,8 @@ subroutine setupm
 end subroutine setupm
 
 ! =======================================================================
-! initialization of gfdl cloud microphysics
-!>\ingroup gfdlcloud
-!>@brief The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
-!! cloud microphysics.
+! \ingroup gfdlcloud
+!>@brief The subroutine initializes the GFDL cloud microphysics.
 ! =======================================================================
 
 subroutine gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, logunit, fn_nml)
@@ -3641,8 +3639,7 @@ subroutine gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, loguni
 end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
-! end of gfdl cloud microphysics
-!>\ingroup gfdlcloud
+! \ingroup gfdlcloud
 !>@brief This subroutine terminates the GFDL
 !! cloud microphysics.
 ! =======================================================================

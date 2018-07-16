@@ -396,12 +396,12 @@
 !===> ...  begin here
 !
 
-!> -# If use climatological albedo scheme:
+!> - If use climatological albedo scheme:
       if ( ialbflg == 0 ) then   ! use climatological albedo scheme
 
         do i = 1, IMAX
 
-!>    - Modified snow albedo scheme - units convert to m (originally
+!>  - Modified snow albedo scheme - units convert to m (originally
 !!      snowf in mm; zorlf in cm)
 
          asnow = 0.02*snowf(i)
@@ -416,7 +416,7 @@
          fsea  = fsea0 * fsno1
          flnd  = flnd0 * fsno1
 
-!>    - Calculate diffused sea surface albedo
+!>  - Calculate diffused sea surface albedo
 
          if (tsknf(i) >= 271.5) then
             asevd = 0.06
@@ -430,7 +430,7 @@
             asend = 0.65 - 3.6875*a1
          endif
 
-!>    - Calculate diffused snow albedo.
+!>  - Calculate diffused snow albedo.
 
          if (nint(slmsk(i)) == 2) then
             ffw   = f_one - fice(i)
@@ -451,7 +451,7 @@
             asnnd = 0.75
          endif
 
-!>    - Calculate direct snow albedo.
+!>  - Calculate direct snow albedo.
 
          if (coszf(i) < 0.5) then
             csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
@@ -462,7 +462,7 @@
             asnnb = asnnd
          endif
 
-!>    - Calculate direct sea surface albedo.
+!>  - Calculate direct sea surface albedo.
 
          if (coszf(i) > 0.0001) then
 !           rfcs = 1.4 / (f_one + 0.8*coszf(i))
@@ -499,12 +499,12 @@
 
         enddo    ! end_do_i_loop
 
-!> -# If use modis based albedo for land area:
+!> - If use modis based albedo for land area:
       else
 
         do i = 1, IMAX
 
-!>    - Calculate snow cover input directly for land model, no
+!>  - Calculate snow cover input directly for land model, no
 !!      conversion needed.
 
          fsno0 = sncovr(i)
@@ -525,7 +525,7 @@
          fsea  = fsea0 * fsno1
          flnd  = flnd0 * fsno1
 
-!>    - Calculate diffused sea surface albedo.
+!>  - Calculate diffused sea surface albedo.
 
          if (tsknf(i) >= 271.5) then
             asevd = 0.06
@@ -539,7 +539,7 @@
             asend = 0.65 - 3.6875*a1
          endif
 
-!>    - Calculate diffused snow albedo, land area use input max snow
+!>  - Calculate diffused snow albedo, land area use input max snow
 !!      albedo.
 
          if (nint(slmsk(i)) == 2) then
@@ -561,7 +561,7 @@
             asnnd = snoalb(i)
          endif
 
-!>    - Calculate direct snow albedo.
+!>  - Calculate direct snow albedo.
 
          if (nint(slmsk(i)) == 2) then
            if (coszf(i) < 0.5) then
@@ -577,7 +577,7 @@
            asnnb = snoalb(i)
          endif
 
-!>    - Calculate direct sea surface albedo, use fanglin's zenith angle
+!>  - Calculate direct sea surface albedo, use fanglin's zenith angle
 !!      treatment.
 
          if (coszf(i) > 0.0001) then
@@ -614,7 +614,7 @@
 !
 
 ! sfc-perts, mgehne ***
-! perturb all 4 kinds of surface albedo, sfcalb(:,1:4)
+!> - Call ppebet () to perturb all 4 elements of surface albedo sfcalb(:,1:4).
       if (pertalb(1)>0.0) then
         do i = 1, imax
           do kk=1, 4

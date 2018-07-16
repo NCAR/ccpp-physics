@@ -1,3 +1,8 @@
+!>\file surface_perturbation.F90
+!! This file includes routines used in the percentile matching algorithm for the
+!! albedo and vegentation fraction perturbations.
+
+!>\ingroup Noah_LSM
 module surface_perturbation
 
       implicit none
@@ -12,6 +17,9 @@ module surface_perturbation
 
 ! the routines below are used in the percentile matching algorithm for the
 ! albedo and vegetation fraction perturbations 
+
+!> This subrtouine calculates the CDF of the standard normal distribution
+!! evaluated at z.
       subroutine cdfnor(z,cdfz)
       use machine
 
@@ -165,9 +173,8 @@ module surface_perturbation
       return
       end subroutine dgamln
 
-! --- subroutines for computing the beta distribution value that ---
-! --- matches the percentile from the random pattern             ---
-
+!> This subroutine computes the beta distribution value that
+!! matches the percentile from the random pattern.
       subroutine ppfbet(pr,p,q,iflag,x)
       use machine
         implicit none
@@ -282,6 +289,8 @@ module surface_perturbation
         return
       end subroutine ppfbet
 
+!> This subroutine computes the value of the cumulative beta distribution
+!! at a single point x, given the distribution parameters p,q.
       subroutine cdfbet(x,p,q,eps,iflag,cdfx)
       use machine
 
@@ -366,6 +375,8 @@ module surface_perturbation
 
       end subroutine cdfbet
 
+!> This subroutine computes the natural logarithm of the gamma distribution.
+!! Users can set the absolute accuracy and corresponding xmin.
       subroutine gmln(x,y)
       use machine
       ! Computes the natural logarithm of the gamma distribution. Users
