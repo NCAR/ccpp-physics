@@ -84,7 +84,7 @@ contains
 !! | ice0             | lwe_thickness_of_ice_amount_per_day                                   | ice fall over 24h period                               | mm         |    1 | real      | kind_phys | in    | F        |
 !! | snow0            | lwe_thickness_of_snow_amount_per_day                                  | snow fall over 24h period                              | mm         |    1 | real      | kind_phys | in    | F        |
 !! | graupel0         | lwe_thickness_of_graupel_amount_per_day                               | graupel fall over 24h period                           | mm         |    1 | real      | kind_phys | in    | F        |
-!! | rain1            | lwe_thickness_of_stratiform_precipitation_amount_on_dynamics_timestep | stratiform rainfall amount on physics timestep         | m          |    1 | real      | kind_phys | out   | F        |
+!! | rain1            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep            | rainfall at this timestep                              | m          |    1 | real      | kind_phys | out   | F        |
 !! | ice1             | lwe_thickness_of_ice_amount_on_dynamics_timestep                      | ice fall at this time step                             | m          |    1 | real      | kind_phys | out   | F        |
 !! | snow1            | lwe_thickness_of_snow_amount_on_dynamics_timestep                     | snow fall at this time step                            | m          |    1 | real      | kind_phys | out   | F        |
 !! | graupel1         | lwe_thickness_of_graupel_amount_on_dynamics_timestep                  | graupel fall at this time step                         | m          |    1 | real      | kind_phys | out   | F        |
