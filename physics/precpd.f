@@ -57,7 +57,7 @@
 !! pressure at the top of model domain, respectively, and \f$g\f$ is
 !! gravity. The implementation of the precipitation scheme also
 !! includes a simplified procedure of computing \f$P_{r}\f$
-!! and \f$P_{s}\f$ (\cite zhao_and_carr_1997).
+!! and \f$P_{s}\f$ (Zhao and Carr (1997) \cite zhao_and_carr_1997).
 !!
 !! The calculation is as follows:
 !! -# Calculate precipitation production by auto conversion and accretion (\f$P_{saut}\f$, \f$P_{saci}\f$, \f$P_{raut}\f$).
@@ -420,7 +420,7 @@
 !
 !> -# Precipitation production by auto conversion and accretion
 !!  - The autoconversion of cloud ice to snow (\f$P_{saut}\f$) is simulated
-!! using the equation from \cite lin_et_al_1983
+!! using the equation from Lin et al.(1983)\cite lin_et_al_1983
 !!\f[
 !!   P_{saut}=a_{1}(cwm-wmini)
 !!\f]
@@ -441,7 +441,7 @@
 !! coefficient \f$C_{s}\f$ is a function of temperature since the open
 !! structures of ice crystals at relative warm temperatures are more
 !! likely to stick, given a collision, than crystals of other shapes
-!! (\cite rogers_1979). Above the freezing level,
+!! (Rogers (1979) \cite rogers_1979). Above the freezing level,
 !! \f$C_{s}\f$ is expressed by
 !!\f[
 !!   C_{s}=c_{1}exp\left[ 0.025\left(T-273.15\right)\right]
@@ -470,7 +470,7 @@
                precsl(n) = precsl(n) + (wws - ww(n)) * condt(n)
             else                                    !  liquid water
 !
-!>  - Following \cite sundqvist_et_al_1989,
+!>  - Following Sundqvist et al. (1989)\cite sundqvist_et_al_1989,
 !! the autoconversion of cloud water to rain (\f$P_{raut}\f$) can be
 !! parameterized from the cloud water mixing ratio \f$m\f$ and cloud
 !! coverage \f$b\f$, that is,
@@ -527,7 +527,7 @@
 !! the layers below cloud base. Through this process, some of the
 !! precipitating water is evaporated back to the atmosphere and the
 !! precipitation efficiency is reduced.
-!!  - Evaporation of rain is calculated using the equation (\cite sundqvist_1988):
+!!  - Evaporation of rain is calculated using the equation (Sundqvist(1988)\cite sundqvist_1988):
 !!\f[
 !!   E_{rr}= evpco \times (u-f)(P_{r})^{\beta}
 !!\f]

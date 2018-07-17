@@ -1,5 +1,6 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the column GFDL cloud microphysics \cite chen_and_lin_2013.
+!! This file contains the column GFDL cloud microphysics Chen and Lin (2013) 
+!! \cite chen_and_lin_2013.
 !***********************************************************************
 !*                   GNU Lesser General Public License
 !*
@@ -22,7 +23,7 @@
 !***********************************************************************
 !> \defgroup gfdlcloud GFDL Cloud Microphysics Main
 !>@brief The module "gfdl_cloud_microphys" contains the GFDL cloud
-!! microphysics \cite chen_and_lin_2013.
+!! microphysics Chen and Lin (2013) \cite chen_and_lin_2013.
 !>@details The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
 !>\author Shian-Jiann Lin, Linjiong Zhou
@@ -511,7 +512,7 @@ contains
       real(kind_phys),      intent(inout), dimension(1:im)   :: ice0
       real(kind_phys),      intent(inout), dimension(1:im)   :: graupel0
 
-      real(kind_phys),      intent(in) :: dtp !< physics time step
+      real(kind_phys),      intent(in) :: dtp ! physics time step
       logical, intent (in) :: hydrostatic, phys_hydrostatic
 
       character(len=*), intent(out) :: errmsg
@@ -626,14 +627,14 @@ subroutine gfdl_cloud_microphys_work (iis, iie, jjs, jje, kks, kke, ktop, kbot, 
    implicit none
 
    ! Interface variables
-   integer, intent (in) :: iis, iie, jjs, jje !< physics window
-   integer, intent (in) :: kks, kke !< vertical dimension
-   integer, intent (in) :: ktop, kbot !< vertical compute domain
+   integer, intent (in) :: iis, iie, jjs, jje ! physics window
+   integer, intent (in) :: kks, kke ! vertical dimension
+   integer, intent (in) :: ktop, kbot ! vertical compute domain
 
-   real, intent (in) :: dt_in !< physics time step
+   real, intent (in) :: dt_in ! physics time step
 
-   real, intent (in), dimension (iis:iie, jjs:jje) :: area !< cell area
-   real, intent (in), dimension (iis:iie, jjs:jje) :: land !< land fraction
+   real, intent (in), dimension (iis:iie, jjs:jje) :: area ! cell area
+   real, intent (in), dimension (iis:iie, jjs:jje) :: land ! land fraction
 
    real, intent (in), dimension (iis:iie, jjs:jje, kks:kke) :: delp, dz, uin, vin
    real, intent (in), dimension (iis:iie, jjs:jje, kks:kke) :: pt, qv, ql, qr, qg, qa, qn
@@ -651,8 +652,8 @@ subroutine gfdl_cloud_microphys_work (iis, iie, jjs, jje, kks, kke, ktop, kbot, 
    real :: mpdt, rdt, dts, convt, tot_prec
 
    integer :: i, j, k
-   integer :: is, ie, js, je !< physics window
-   integer :: ks, ke !< vertical dimension
+   integer :: is, ie, js, je ! physics window
+   integer :: ks, ke ! vertical dimension
    integer :: days, ntimes
 
    real, dimension (iie-iis+1, jje-jjs+1) :: prec_mp, prec1, cond, w_var, rh0
@@ -884,60 +885,10 @@ end subroutine gfdl_cloud_microphys_work
 !>@brief GFDL cloud microphysics, major program.
 !>@details Lin et al., 1983 \cite lin_et_al_1983 and
 !! Rutledge and Hobbs, 1984 \cite rutledge_and_hobbs_1984.
-!! Terminal fall is handled lagrangianly by conservative fv algorithm.
+! Terminal fall is handled lagrangianly by conservative fv algorithm.
 !!
-!>\param[in] hydrostatic   .false. 
-!>\param[in] uin   zonal wind updated by physics (m/s)
-!>\param[in] vin   meridional wind updated by physics (m/s)
-!>\param[inout] w  vertical velocity (m/s?)
-!>\param[in] delp air pressure difference between midlayers (Pa)
-!>\param[in] pt  air temperature updated by physics (K)
-!>\param[in] qv  water vapor (kg / kg) \todo compare with ccpp, if it is update
-!>\param[in] ql  cloud water (kg / kg)
-!>\param[in] qr  rain (kg / kg)
-!>\param[in] qi  cloud ice (kg / kg)
-!>\param[in] qs  snow (kg / kg)
-!>\param[in] qg  graupel (kg / kg)
-!>\param[in] qa  cloud fraction
-!>\param[in] qn
-!>\param[in] dz
-!>\param[in] is
-!>\param[in] ie
-!>\param[in] js
-!>\param[in] je
-!>\param[in] ks
-!>\param[in] ke
-!>\param[in] ktop
-!>\param[in] kbot
-!>\param[in] j
-!>\param[in] dt_in
-!>\param[in] ntimes
-!>\param[inout] rain
-!>\param[inout] snow
-!>\param[inout] groupel
-!>\param[inout] ice
-!>\param[out] m2_rain
-!>\param[out] m2_sol
-!>\param[inout] cond
-!>\param[in] area1
-!>\param[in] land   land fraction
-!>\param[inout] u_dt
-!>\param[inout] v_dt
-!>\param[inout] pt_dt
-!>\param[inout] qv_dt
-!>\param[inout] ql_dt
-!>\param[inout] qr_dt
-!>\param[inout] qi_dt
-!>\param[inout] qs_dt
-!>\param[inout] qg_dt
-!>\param[inout] qa_dt   cloud fraction tendency
-!>\param[out] w_var
-!>\param[out] vt_r
-!>\param[out] vt_s
-!>\param[out] vt_g
-!>\param[out] vt_i
-!>\param[out] qn2
-!>\section det_mpdrv GFDL Cloud mpdrv Detailed Algorithm
+!>\section detmpdrv GFDL Cloud mpdrv Detailed Algorithm
+!! @{
 ! -----------------------------------------------------------------------
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
@@ -1344,6 +1295,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     enddo
 
 end subroutine mpdrv
+!! @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
@@ -1405,6 +1357,7 @@ end subroutine sedi_heat
 !>\ingroup gfdlcloud
 !> This subroutine includes warm rain cloud microphysics.
 !>\section warm_det GFDL cloud MP warm_rain Detailed Algorithm
+!! @ {
 ! -----------------------------------------------------------------------
 
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
@@ -1414,7 +1367,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
 
     integer, intent (in) :: ktop, kbot
 
-    real, intent (in) :: dt !< time step (s)
+    real, intent (in) :: dt ! time step (s)
     real, intent (in) :: rh_rain, h_var
 
     real, intent (in), dimension (ktop:kbot) :: dp, dz, den
@@ -1501,7 +1454,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
 
         ! -----------------------------------------------------------------------
         !>  - Calculate mass flux induced by falling rain. 
-        !! (lagrangian_fall_ppm() or implicit_fall())
+        !! (if use_ppm =.false, call implicit_fall())
         ! -----------------------------------------------------------------------
 
         if (use_ppm) then
@@ -1550,7 +1503,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     ! -----------------------------------------------------------------------
     !> - Auto-conversion
     !! (assuming linear subgrid vertical distribution of cloud water
-    !! following lin et al. 1994 \cite lin_et_al_1994.)
+    !! following Lin et al. 1994 \cite lin_et_al_1994.)
     ! -----------------------------------------------------------------------
 
     if (irain_f /= 0) then
@@ -1620,6 +1573,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
 
 end subroutine warm_rain
+!! @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
@@ -3213,8 +3167,8 @@ subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 end subroutine implicit_fall
 
 ! =======================================================================
-!>\ingroup gfdlcloud
-!> lagrangian scheme
+!\ingroup gfdlcloud
+! lagrangian scheme
 !  developed by sj lin, ????
 ! =======================================================================
 
@@ -3833,7 +3787,7 @@ end function acr3d
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief Melting of snow function (lin et al. 1983 \cite lin_et_al_1983)
+!>@brief Melting of snow function (Lin et al. 1983 \cite lin_et_al_1983)
 !!  note: psacw and psacr must be calc before smlt is called
 ! =======================================================================
 
@@ -3849,7 +3803,7 @@ real function smlt (tc, dqs, qsrho, psacw, psacr, c, rho, rhofac)
 end function smlt
 
 ! =======================================================================
-!>@brief Melting of graupel function (Eq.(47) in lin et al. 1983 \cite lin_et_al_1983)
+!>@brief Melting of graupel function (Eq.(47) in Lin et al. 1983 \cite lin_et_al_1983)
 !!\n  note: \f$P_{gacw}\f$ and \f$P_{gacr}\f$ must be calculated before gmlt is called.
 ! =======================================================================
 

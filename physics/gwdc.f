@@ -1,6 +1,6 @@
 !> \file gwdc.f This file is the original code for parameterization of
 !! stationary convection forced gravity wave drag based on
-!! \cite chun_and_baik_1998.
+!! Chun and Baik (1998) \cite chun_and_baik_1998.
 
       module gwdc_pre
       contains
@@ -115,7 +115,7 @@
 ! \defgroup GFS_cgwd GFS Convective Gravity Wave Drag
 !> \defgroup GFS_gwdc_run GFS gwdc Main
 !! \brief This subroutine is the parameterization of convective gravity wave
-!! drag based on the theory given by 
+!! drag based on the theory given by Chun and Baik (1998)
 !! \cite chun_and_baik_1998 modified for implementation into the
 !! GFS/CFS by Ake Johansson(Aug 2005).
 !!
@@ -899,7 +899,8 @@
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
 !! The parameter \f$\mu\f$ is the nonlinearity factor of thermally
-!! induced internal gravity waves defined by eq.(17) in \cite chun_and_baik_1998 :
+!! induced internal gravity waves defined by eq.(17) in Chun and Baik (1998) 
+!! \cite chun_and_baik_1998 :
 !! \f[
 !!  \mu=\frac{gQ_{0}a_{1}}{c_{p}T_{0}NU^{2}}
 !! \f]
@@ -908,7 +909,7 @@
 !! \f$a_{1}\f$ is the half-width of
 !! the forcing function.\f$g\f$ is gravity. \f$c_{p}\f$ is specific
 !! heat at constant pressure. \f$T_{0}\f$ is the layer mean
-!! temperature (T1). As eqs.(18) and (19) \cite chun_and_baik_1998,
+!! temperature (T1). As eqs.(18) and (19) Chun and Baik (1998) \cite chun_and_baik_1998,
 !! the zonal momentum flux is given by
 !! \f[
 !! \tau_{x}=-[\rho U^{3}/(N\triangle x)]G(\mu)
