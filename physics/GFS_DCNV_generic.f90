@@ -202,9 +202,9 @@
           enddo
         endif ! if (ldiag3d)
 
-      endif   ! end if_lssav
-!
-!       update dqdt_v to include moisture tendency due to deep convection
+endif   ! end if_lssav
+
+      !update dqdt_v to include moisture tendency due to deep convection
       if (lgocart) then
         do k=1,levs
           do i=1,im
