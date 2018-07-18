@@ -135,7 +135,7 @@ in the future. Unless problems occur during the manual builds in steps 10-12, th
        (these folders are read-only, i.e. users might have to add the write-flag after copying/rsyncing them)
 
         theia:    /scratch4/BMC/gmtb/Dom.Heinzeller/macosx_rundirs/C96_trunk_20180618/gnu/
-        cheyenne: /glade/p/work/heinzell/fv3/macosx_rundirs/C96_trunk_20180618/gnu/
+        cheyenne: /glade/p/ral/jntp/GMTB/NEMSfv3gfs/macosx_rundirs/C96_trunk_20180618/gnu/
 
     b) edit run_macosx.sh in change the variable FV3_BUILD_DIR to the top-level directory of your FV3-build
 
