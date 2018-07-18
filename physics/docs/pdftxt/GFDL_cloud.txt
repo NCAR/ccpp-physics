@@ -1,42 +1,54 @@
 /**
 \page GFDL_cloud GFDL Cloud Microphysics Scheme 
 \section des_GFDL_cloud Description
-Unique attributes of GFDL microphysics:
-1. \b Fast \b physics (phase changes only, for now) between "Lagrangian-to-Eulerian" remapping in FV3
-2. \b Time-split between warm-rain (faster) and ice-phase (slower) processes
-3. \b Time \b implicit monotonic scheme for terminal fall of condensates
-4. \b Thermodynamic \b consistency between the dynamics and cloud microphysics:
+GFDL cloud microphysics scheme is a six-category microphysics scheme to replace Zhao-Carr scheme, and moves the GFS from
+a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).
+This scheme utilizes the "bulk water" microphysical parameterization technique in Lin et al. (1983) \cite lin_et_al_1983 
+and has been significantly improved over years at GFDL (Lord et al.(1984) \cite lord_et_al_1984, 
+Krueger et al.(1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
+Some unique attributes of GFDL cloud microphysics include:
+
+a. \b Physics \b Processes \b included \b in \b warm_rain() \b and \b icloud()
+
+\image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
+\image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
+
+GFDL cloud MP is feature with time-split between warm-rain (faster) and ice-phase (slower) processes.
+(see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values)
+
+b. \b Fast \b Saturation \b Adjustment 
+
+In current fv3gfs, phase-changes is called after the "Lagrangian-to-Eulerian" remapping in FV3
+dynamic solver. When fast saturation adjustment \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block) to adjust 
+cloud water evaporation (cloud water \f$\rightarrow\f$ water vapor), cloud water freezing (cloud water \f$\rightarrow\f$ cloud ice),
+cloud ice deposition (water vapor \f$\rightarrow\f$ cloud ice). 
+
+ Thermodynamic consistency between the dynamics and cloud microphysics:
   - exact local moist energy conservation between phase changes
   - condensates carry heat & 3D momentum
-5. \b Scale-awareness achieved by an assumed horizontal subgrid variability and a 2nd
-order FV-type vertical reconstruction (\cite lin_et_al_1994) for autoconversions (ice->snow)
 
-\image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance" width=10cm
-\image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance" width=10cm
 
-\subsection column_phys Column Physics Processes
-Table 1. Physics processes in GFDL cloud microphysics
-|Symbol         |        Meaning                                               |
-|---------------|--------------------------------------------------------------|
-|\f$P_{imlt}\f$ | Melting of cloud ice to form cloud water, \f$ T \geq T_{0}\f$| 
-|\f$P_{ihom}\f$ | Homogenerous freezing of cloud water to form cloud ice       |
-|\f$P_{sacw}\f$ | Accretion of cloud water by snow                             |
-|\f$P_{sacr}\f$ | Accretion of rain by melted snow                             |
-|\f$P_{racs}\f$ | Accretion of snow by rain                                    |
+c. \b Horizontal \b Sub-grid \b Variability
 
-\subsection sat_adj_phys Saturation Adjustment Processes
-In current fv3gfs, phase-changes is called after the "Lagrangian-to-Eulerian" remapping in FV3
-dynamic solver.
+Scale-awareness achieved by an assumed horizontal subgrid variability and a 2nd
+order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994) for autoconversions (ice->snow)
 
-\subsection hor_sub_var Horizontal Sub-grid Variability
-\subsection cld_fra_cal Cloud Fraction Calculation
-\subsection cld_ra_diag Cloud Radii Diagnosis
+
+
+d. \b Cloud \b Fraction
+
+Similar to autoconversion, calculation of cloud fraction is based on horizontal sub-grid variability. Cloud fraction
+calculation includes all hydrometers.
+
+e. \b Time \b implicit monotonic scheme for terminal fall of condensates
+
 
 
 \section intro_GFDL_cloud Intraphysics Communication
+ + \ref arg_table_gfdl_cloud_microphys_run
 
 \section Gen_GFDL_cloud  General Algorithm
- + \ref gen_gfdlcloud
+ + \ref detmpdrv
 
 
 */

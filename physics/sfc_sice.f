@@ -156,9 +156,9 @@
       end subroutine sfc_sice_finalize
 
 ! \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
-!  \brief  This is three-layer thermodynomics sea-ice model based on \cite winton_2000.
+!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !>\defgroup gfs_sice_main GFS sfc_sice Main
-!!  \brief  This is three-layer thermodynomics sea-ice model based on \cite winton_2000.
+!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !! \section arg_table_sfc_sice_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -623,7 +623,7 @@
 
 !-----------------------------------
 !> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
-!! based on \cite winton_2000 .
+!! based on Winton(2000) \cite winton_2000 .
 !! @{
 !!\ingroup gfs_sice_main
 !\param[in] im    integer, horizontal dimension
@@ -797,11 +797,11 @@
           ai   = hfi(i) - sneti(i) + ip - tice(i)*bi  ! +v sol input here
 !>  - Calculate the effective conductive coupling of the snow-ice layer 
 !! between the surface and the upper layer ice temperature \f$h_i/4\f$
-!! beneath the snow-ice interface (see \a eq.(5) in \cite winton_2000).
+!! beneath the snow-ice interface (see \a eq.(5) in Winton (2000) \cite winton_2000).
           k12  = ki4*ks / (ks*hice(i) + ki4*snowd(i))
 
 !>  - Calculate the conductive coupling between the two ice temperature 
-!! points (see \a eq.(10) in \cite winton_2000).
+!! points (see \a eq.(10) in Winton (2000) \cite winton_2000).
           k32  = (ki+ki) / hice(i)
 
           wrk    = 1.0 / (dt6*k32 + dici*hice(i))
@@ -816,7 +816,7 @@
           c1    = dili * tfi * dt2i * hice(i)
 
 !>  - Calculate the new upper ice temperature following \a eq.(21)
-!! in \cite winton_2000.
+!! in Winton (2000) \cite winton_2000.
           stsice(i,1) = -(sqrt(b1*b1 - 4.0*a1*c1) + b1)/(a1+a1)
           tice(i) = (k12*stsice(i,1) - ai) / (k12 + bi)
 
@@ -838,7 +838,7 @@
             snowd(i) = snowd(i) + snof(i)*delt
           endif
 !>  - Calculate the new lower ice temperature following \a eq.(15)
-!! in \cite winton_2000.
+!! in Winton (2000) \cite winton_2000.
           stsice(i,2) = (dt2*k32*(stsice(i,1) + tfw + tfw)              &
      &                +  dici*hice(i)*stsice(i,2)) * wrk
 

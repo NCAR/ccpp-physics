@@ -17,13 +17,26 @@
  portions, since the "dynamic" control is not necessary to find the 
  cloud base mass flux. 
 
-
  The previous version of the shallow convection scheme (shalcnv.f)
- is described in \cite han_and_pan_2011 and differences
+ is described in Han and Pan (2011) \cite han_and_pan_2011 and differences
  between the shallow and deep convection schemes are presented in
- \cite han_and_pan_2011 and \cite han_et_al_2017 . 
+ Han and Pan (2011) \cite han_and_pan_2011 and Han et al. (2017) \cite han_et_al_2017 . 
  Details of scale- and aerosol-aware parameterizations
- are described in \cite han_et_al_2017 .
+ are described in Han et al. (2017) \cite han_et_al_2017 .
+
+ In further update for FY19 GFS implementation, interaction with turbulent
+ kinetic energy (TKE), which is a prognostic variable used in a scale-aware
+ TKE-based moist EDMF vertical turbulent mixing scheme, is included.
+ Entrainment rates in updrafts are proportional to sub-cloud mean TKE. TKE is
+ transported by cumulus convection. TKE contribution from cumulus convection
+ is deduced from cumulus mass flux. On the other hand, tracers such as ozone
+ and aerosol are also transported by cumulus convection.
+
+ To reduce too much convective cooling at the cloud top, the convection
+ schemes have been modified for the rain conversion rate, entrainment and
+ detrainment rates, overshooting layers, and maximum allowable cloudbase mass
+ flux (as of June 2018).
+
 
 \section intr_shal Intraphysics Communication
 \ref arg_table_samfshalcnv_run

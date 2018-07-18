@@ -140,12 +140,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../tridi.f \
 ### Orographic Gravity Wave
                         ../gwdps.f \
+### Rayleigh Dampling
+                        ../rayleigh_damp.f  \
 ### Prognostic Ozone
                         ../ozphys.f \
 ### Deep Convection
                         ../samfdeepcnv.f \
-### Rayleigh Dampling
-                        ../rayleigh_damp.f  \
 ### Convective Gravity Wave
                         ../gwdc.f \
 ### Shallow Convection

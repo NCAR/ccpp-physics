@@ -4,16 +4,18 @@
  Land-atmosphere interactions are a main driver of Earth's surface
  water and energy budgets. The importance of the land surface is
  rather intuitive, and has been demonstrated not only in terms of
- predictability on daily to seasonal timescale (\cite betts_et_al_2017), but also in terms
- of influencing extremes such as drought and heatwaves (\cite paimazumder_and_done_2016), PBL evolution and cloud
- formation (\cite milovac_et_al_2016) and afternoon
- convection (\cite guillod_et_al_2015), and
- tropical cyclone re-intensification (\cite andersen_and_shepherd_2014). 
+ predictability on daily to seasonal timescale (Betts et al. (2017) \cite betts_et_al_2017), but also in terms
+ of influencing extremes such as drought and heatwaves (Paimazumder and Done (2016) \cite paimazumder_and_done_2016),
+ PBL evolution and cloud
+ formation (Milovac et al.(2016) \cite milovac_et_al_2016) and afternoon
+ convection (Guillod et al. (2015) \cite guillod_et_al_2015), and
+ tropical cyclone re-intensification (Andersen and Shepherd (2014) \cite andersen_and_shepherd_2014). 
  Other linkages, such as the role of soil
  moisture (SM) or vegetation heterogeneity in mesoscale circulation
- (\cite hsu_et_al_2017) and planetary waves (\cite koster_et_al_2014), and those driven by land use
- and land cover change or management (\cite hirsch_et_al_2015; 
- \cite findell_et_al_2017) are topics of active research.
+ (Hsu et al.(2017) \cite hsu_et_al_2017) and planetary waves (Koster et al.(2014) \cite koster_et_al_2014), 
+ and those driven by land use
+ and land cover change or management (Hirsch et al. (2015) \cite hirsch_et_al_2015; 
+ Findell et al.(2017) \cite findell_et_al_2017) are topics of active research.
 
  Figure 1 is a schematic of local land-atmosphere interactions in a
  quiescent synoptic regime, including the soil moisture-precipitation

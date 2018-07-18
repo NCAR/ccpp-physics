@@ -42,7 +42,7 @@
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
-!! (\cite mccormack_et_al_2006).
+!! (McCormack et al. (2006) \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
 !! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|

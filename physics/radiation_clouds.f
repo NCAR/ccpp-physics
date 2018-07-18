@@ -186,35 +186,6 @@
 !!  Maximum-randomly cloud overlapping is used in both long-wave
 !! radiation and short-wave radiation. Convective clouds are not
 !! considered in radiation.
-!!\n
-!! -# The parameterization of effective radius of water/ice droplet
-!!    (\f$r_{e}\f$)
-!>\n Two methods has been used to parameterize cloud properties in the
-!! GFS model. The first method makes use of a diagnostic cloud scheme,
-!! in which cloud properties are determined based on model-predicted
-!! temperature, pressure, and boundary layer circulation from
-!! \cite harshvardhan_et_al_1989 . The
-!! diagnostic scheme is now replaced with a prognostic scheme that uses
-!! cloud condensate information instead (NCEP Office Note 441).
-!! \n For the parameterization of effective radius,\f$r_{ew}\f$, of
-!! water droplet, we fix \f$r_{ew}\f$ to a value of \f$10\mu m\f$ over
-!! the oceans. Over the land, \f$r_{ew}\f$ is defined as:
-!!\f[
-!! r_{ew} = 5+5 \times F
-!!\f]
-!! Thus, the effective radius of cloud water droplets will reach to a
-!! minimum values of \f$5\mu m\f$ when F=0, and to a maximum value of
-!! \f$10\mu m\f$ when the ice fraction is increasing.
-!! \n For ice clouds, following \cite heymsfield_and_mcfarquhar_1996,
-!! we have made the effective ice droplet radius to be an empirical
-!! function of ice water concentration (IWC) and environmental temperature as:
-!! \f[
-!! r_{ei}=\begin{cases}(1250/9.917)IWC^{0.109} & T <-50^0C \\(1250/9.337)IWC^{0.080} & -50^0C \leq T<-40^0C\\(1250/9.208)IWC^{0.055} & -40^0C\leq T <-30^0C\\(1250/9.387)IWC^{0.031} & -30^0C \leq T\end{cases}
-!! \f]
-!! where IWC and IWP satisfy:
-!! \f[
-!! IWP_{\triangle Z}=\int_{\triangle Z} IWCdZ
-!! \f]
 !! @}
 !========================================!
       module module_radiation_clouds     !
@@ -1921,15 +1892,11 @@
 !!\param  mbot    vertical indices for low, mid, hi cloud bases
 !>\section gen_progcld4  progcld4 General Algorithm
 !! @{
-      subroutine progcld4                                               &
-!...................................
-
-!  ---  inputs:
-     &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          &
+      subroutine progcld4                                               & 
+     &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          & !  ---  inputs:
      &       xlat,xlon,slmsk,cldtot,                                    &
-     &       IX, NLAY, NLP1,                                            &
-!  ---  outputs:
-     &       clouds,clds,mtop,mbot                                      &
+     &       IX, NLAY, NLP1,                                            & 
+     &       clouds,clds,mtop,mbot                                      & !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -2260,15 +2227,11 @@
 !>\section gen_progcld4o progcld4o General Algorithm
 !! @{
       subroutine progcld4o                                              &
-!...................................
-
-!  ---  inputs:
-     &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &
+     &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    & !  ---  inputs:
      &       xlat,xlon,slmsk,                                           &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,ntclamt,                    &
      &       IX, NLAY, NLP1,                                            &
-!  ---  outputs:
-     &       clouds,clds,mtop,mbot                                      &
+     &       clouds,clds,mtop,mbot                                      & !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -3172,7 +3135,7 @@
         enddo
       enddo
 
-!> -# Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
+!> -# Compute cloud liquid/ice/rain/snow condensate path in \f$ g/m^2 \f$ .
 
       if ( ivflip == 0 ) then          ! input data from toa to sfc
         if (ncnd == 2) then

@@ -1357,7 +1357,6 @@ end subroutine sedi_heat
 !>\ingroup gfdlcloud
 !> This subroutine includes warm rain cloud microphysics.
 !>\section warm_det GFDL cloud MP warm_rain Detailed Algorithm
-!! @ {
 ! -----------------------------------------------------------------------
 
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
@@ -1573,7 +1572,6 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
 
 end subroutine warm_rain
-!! @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
@@ -1739,18 +1737,13 @@ end subroutine linear_prof
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!> This subrroutine includes cloud ice microphysics processes,which is featured with:
+!> This subroutine includes cloud ice microphysics processes.
+!! This which is featured with:
 !! - bulk cloud microphysics; 
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
-!! The following processes are included in this subroutine:
-!! - \f$P_{imlt}\f$: Melting of cloud ice to form cloud water
-!! - \f$P_{ihom}\f$: Homogeneous freezing of cloud water to form cloud ice
-!>\todo list process in icloud
 !>@author Shian-Jiann Lin, GFDL
 !>\section det_icloud GFDL icloud Detailed Algorithm
-!>\param[in] ktop
-! 
 ! =======================================================================
 
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
@@ -1929,7 +1922,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
 
                 ! -----------------------------------------------------------------------
                 !>  - Total snow sink:
-                !! \f$P_{smlt}\f$: snow melt (due to rain accretion)
+                !! \f$P_{smlt}\f$: snow melt (smlt(); due to rain accretion)
                 ! -----------------------------------------------------------------------
 
                 psmlt = max (0., smlt (tc, dqs0, qs * den (k), psacw, psacr, csmlt, &
@@ -4781,7 +4774,8 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 end subroutine interpolate_z
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+! CCPP: not used yet
+! \ingroup gfdlcloud
 !>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud 
 !! species.
 ! =======================================================================

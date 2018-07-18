@@ -2,7 +2,7 @@
 \page GFS_ZHAOC GFS Zhao-Carr Microphysics Scheme
 \section des_zhao Description
  This is the GFS scheme for grid-scale condensation and precipitation which is based on
- \cite zhao_and_carr_1997 and \cite sundqvist_et_al_1989 .
+ Zhao and Carr (1997) \cite zhao_and_carr_1997 and Sundqvist et al. (1989) \cite sundqvist_et_al_1989 .
  The main feature of this parameterization is the inclusion of cloud water and cloud ice in both the 
  convective and grid-scale precipitation paramterizations, and use only one predictive variable, the 
  cloud water/ice mixing ratio \f$m\f$, to represent both cloud water and cloud ice. This will reduce 
