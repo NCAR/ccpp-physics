@@ -162,9 +162,11 @@
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
 
       real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk, cnvprcp, cnvprcpb
-      real(kind=kind_phys), dimension(im, levs), intent(inout) :: dt3dt, dq3dt, du3dt, dv3dt
-      real(kind=kind_phys), dimension(im, levs), intent(inout) :: upd_mf, dwn_mf, det_mf
-      real(kind=kind_phys), dimension(im, levs), intent(inout) :: dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi
+      ! dt3dt, dq3dt, du3dt, dv3dt upd_mf, dwn_mf, det_mf only allocated if ldiag3d == .true.
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt, du3dt, dv3dt
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: upd_mf, dwn_mf, det_mf
+      ! dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi only allocated if ldiag3d == .true. or lgocart == .true.
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d
 
       character(len=*), intent(out) :: errmsg
