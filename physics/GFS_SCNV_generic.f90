@@ -108,8 +108,10 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_t, save_qv
 
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dqdti
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dt3dt, dq3dt
+      ! dqdti only allocated if ldiag3d == .true. or lgocart == .true.
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
+      ! dt3dt, dq3dt, only allocated if ldiag3d == .true.
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: clw_liquid
 
       character(len=*),              intent(out) :: errmsg
