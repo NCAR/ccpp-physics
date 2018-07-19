@@ -393,7 +393,7 @@ end subroutine fv_sat_adj_run
 
 !>\ingroup fast_sat_adj
 !> This subroutine includes the entity of the fast saturation adjustment processes.
-!>\section fast_gen fv_sat_adj_work General Algorithm
+!>\section fast_gen GFDL Cloud Fast Physics General Algorithm
 !! @{
 subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te, &
         te0, qv, ql, qi, qr, qs, qg, hs, dpln, delz, pt, dp, q_con, cappa,       &

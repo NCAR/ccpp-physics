@@ -14,19 +14,12 @@ Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain
 Some unique attributes of GFDL cloud microphysics include:
 
 \subsection fast a. Fast Physics 
-
-In current fv3gfs, phase-changes is called after the "Lagrangian-to-Eulerian" remapping in FV3
-dynamic solver. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block) to adjust 
-cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice),
+In current fv3gfs, phase-changes are called after the "Lagrangian-to-Eulerian" remapping in FV3
+dynamic solver. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts 
+cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and
 cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). 
 
- Thermodynamic consistency between the dynamics and cloud microphysics:
-  - exact local moist energy conservation between phase changes
-  - condensates carry heat & 3D momentum
-
-
 \subsection subgrid b. Horizontal Sub-grid Variability
-
 Horizontal sub-grid variability is a function of cell area:
 - Over land:
 \f[
@@ -53,6 +46,7 @@ CF=\max[0,\min(1,\frac{q_{plus}-q_{sat}}{q_{plus}-q_{minus}})]
 
 \section Gen_GFDL_cloud  General Algorithm
  + \ref detmpdrv
+ + \ref fast_gen
 
 
 */

@@ -887,7 +887,7 @@ end subroutine gfdl_cloud_microphys_work
 !! Rutledge and Hobbs, 1984 \cite rutledge_and_hobbs_1984.
 ! Terminal fall is handled lagrangianly by conservative fv algorithm.
 !!
-!>\section detmpdrv GFDL Cloud mpdrv Detailed Algorithm
+!>\section detmpdrv GFDL Cloud mpdrv General Algorithm
 !! @{
 ! -----------------------------------------------------------------------
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
