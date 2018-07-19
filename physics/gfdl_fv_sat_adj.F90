@@ -63,11 +63,11 @@ module fv_sat_adj
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
-    use machine,                  only: kind_grid
-    use gfdl_cloud_microphys_mod, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
-    use gfdl_cloud_microphys_mod, only: icloud_f, sat_adj0, t_sub, cld_min
-    use gfdl_cloud_microphys_mod, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
-    use gfdl_cloud_microphys_mod, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
+    use machine,              only: kind_grid
+    use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
+    use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
+    use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
+    use gfdl_cloud_microphys, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
     implicit none
     private
 
@@ -415,26 +415,6 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     real :: fac_smlt, fac_r2g, fac_i2s, fac_imlt, fac_l2r, fac_v2l, fac_l2v
     real :: factor, qim, tice0, c_air, c_vap, dw
     integer :: i, j
-
-    ! DH* 20180705
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of dp   :", shape(dp   ), size(dp   ), sizeof(dp   ), kind(dp   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of delz :", shape(delz ), size(delz ), sizeof(delz ), kind(delz )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of hs   :", shape(hs   ), size(hs   ), sizeof(hs   ), kind(hs   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of dpln :", shape(dpln ), size(dpln ), sizeof(dpln ), kind(dpln )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of pt   :", shape(pt   ), size(pt   ), sizeof(pt   ), kind(pt   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qv   :", shape(qv   ), size(qv   ), sizeof(qv   ), kind(qv   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of ql   :", shape(ql   ), size(ql   ), sizeof(ql   ), kind(ql   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qi   :", shape(qi   ), size(qi   ), sizeof(qi   ), kind(qi   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qr   :", shape(qr   ), size(qr   ), sizeof(qr   ), kind(qr   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qs   :", shape(qs   ), size(qs   ), sizeof(qs   ), kind(qs   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qg   :", shape(qg   ), size(qg   ), sizeof(qg   ), kind(qg   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of q_con:", shape(q_con), size(q_con), sizeof(q_con), kind(q_con)
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of cappa:", shape(cappa), size(cappa), sizeof(cappa), kind(cappa)
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of dtdt :", shape(dtdt ), size(dtdt ), sizeof(dtdt ), kind(dtdt )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of qa   :", shape(qa   ), size(qa   ), sizeof(qa   ), kind(qa   )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of te0  :", shape(te0  ), size(te0  ), sizeof(te0  ), kind(te0  )
-    !write(0,*) "DH DEBUG fv_sat_adj_work: shape, size, sizeof, type, kind of area :", shape(area ), size(area ), sizeof(area ), kind(area )
-    ! *DH 20180705
 
     sdt = 0.5 * mdt ! half remapping time step
     dt_bigg = mdt ! bigg mechinism time step

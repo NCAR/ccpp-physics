@@ -136,7 +136,7 @@
               enddo
             enddo
             if (Model%ntoz > 0) then
-              Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * Model%dtf
+              Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(:,:,Model%ntoz) * Model%dtf
             endif
           endif
 

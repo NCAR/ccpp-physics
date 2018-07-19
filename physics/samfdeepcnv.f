@@ -142,8 +142,8 @@
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux          | (updraft mass flux) * delt                                                                               | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux        | (downdraft mass flux) * delt                                                                             | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none    |    0 | real      | kind_phys | in     | F        |
 !! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1     |    0 | real      | kind_phys | in     | F        |
 !! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
@@ -196,11 +196,12 @@
 
       integer, intent(inout)  :: kcnv(im)
       real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km)
+     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),
+     &   cnvw(ix,km),  cnvc(ix,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: cldwrk(im),
-     &   rn(im),      cnvw(ix,km),  cnvc(ix,km),
+     &   rn(im),
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
 
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,

@@ -91,10 +91,6 @@ set(CCPP_LIB_DIRS "" CACHE FILEPATH "Path to ccpp library")
 link_directories(${CCPP_LIB_DIRS})
 list(APPEND LIBS "ccpp")
 
-# Add the required preprocessor flags so that cmake can sort out the dependencies
-# DH* this should go into the calling CMakeLists.txt of the host model *DH
-ADD_DEFINITIONS(-DNEMS_GSM)
-
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
 include(./CCPP_SCHEMES.cmake)
