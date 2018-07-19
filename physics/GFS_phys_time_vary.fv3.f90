@@ -2,6 +2,7 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
     module GFS_phys_time_vary_1
+   public GFS_phys_time_vary_1_init, GFS_phys_time_vary_1_run, GFS_phys_time_vary_1_finalize
 
       contains
 
@@ -79,6 +80,7 @@
 
     module GFS_phys_time_vary_2
 
+   public GFS_phys_time_vary_2_init, GFS_phys_time_vary_2_run, GFS_phys_time_vary_2_finalize
       contains
 
       subroutine GFS_phys_time_vary_2_init ()
