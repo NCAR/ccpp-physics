@@ -160,18 +160,10 @@
 !!\version NCEP-Radiation_clouds    v5.1  Nov 2012
 !!
 !> \section gen_al_clouds  RRTMG Clouds Module General Algorithm
-!!\todo gen_al_clouds to be removed here.
 !! @{
-!! -# Cloud Liquid/Ice Water Path (LWP,IWP)
-!!\n We define the fraction of liquid and ice cloud as:
-!!\n Fraction of ice cloud (F): \f$F=(273.16K-T)/20\f$
-!!\n LWP = total cloud condensate path X (1-F)
-!!\n IWP = total clod condensate path X F
-!!
-!! -# GFS Cloud Fraction
 !! \n The cloud fraction in a given grid box of the GFS model is
 !! computed using the parameterization scheme of 
-!! \cite xu_and_randall_1996 :
+!! Xu and Randall (1996) \cite xu_and_randall_1996 :
 !!  \f[
 !!  \sigma =RH^{k_{1}}\left[1-exp\left(-\frac{k_{2}q_{l}}{\left[\left(1-RH\right)q_{s}\right]^{k_{3}}}\right)\right]
 !!  \f]
@@ -182,7 +174,7 @@
 !!  cloud water and ice in radiation based on temperature. Cloud drop
 !! effective radius ranges 5-10 microns over land depending on
 !!  temperature. Ice crystal radius is function of ice water content
-!! (\cite heymsfield_and_mcfarquhar_1996).
+!! (Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996).
 !!  Maximum-randomly cloud overlapping is used in both long-wave
 !! radiation and short-wave radiation. Convective clouds are not
 !! considered in radiation.
@@ -707,7 +699,6 @@
       endif
 
 !> - Compute layer cloud fraction.
-!!\todo move gen_al_clouds part 2 here 
       if (uni_cld) then     ! use unified sgs clouds generated outside
         do k = 1, NLAY
           do i = 1, IX

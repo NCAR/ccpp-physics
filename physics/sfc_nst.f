@@ -86,7 +86,7 @@
 !! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
-!! \section NSST_general_algorithm GFS Near Sea Surface Temperature Scheme General Algorithm
+!! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
@@ -436,7 +436,7 @@ cc
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
 !> - Call cool_skin(), which is the sub-layer cooling parameterization 
-!! (\cite fairall_et_al_1996).
+!! (Fairfall et al. (1996) \cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
           call cool_skin(ustar_a,f_nsol,nswsfc(i),evap(i),sss,alpha,beta
@@ -526,7 +526,7 @@ cc
               dz = min(xz(i),max(d_conv(i),delz))
 !
 !>  - Call sw_ps_9b() to compute the fraction of the solar radiation
-!! absorbed by the depth \a delz (\cite paulson_and_simpson_1981).
+!! absorbed by the depth \a delz (Paulson and Simpson (1981) \cite paulson_and_simpson_1981).
 !! And calculate the total heat absorbed in warm layer.
               call sw_ps_9b(delz,fw)
               q_warm = fw*nswsfc(i)-f_nsol    !total heat absorbed in warm layer
@@ -698,7 +698,7 @@ cc
 
       contains
 
-! \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
+! \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land
@@ -783,7 +783,7 @@ cc
 
       contains
 
-! \defgroup GFS_NSST_POST GFS Near Sea Surface Temperature Post
+! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
 !! \brief Brief description of the parameterization
 !!
 

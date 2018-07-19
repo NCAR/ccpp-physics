@@ -23,11 +23,10 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!>\defgroup fast_sat_adj GFDL Cloud Saturation Adjustment Processes
-!>@brief The module 'fv_sat_adj' implements the fast procesesses in the GFDL
-!! microphysics
+!>\defgroup fast_sat_adj GFDL Cloud Fast Physics
+!>@brief The module 'fv_sat_adj' implements the fast processes in the GFDL
+!! cloud MP. It is part of the GFDL cloud MP.
 !!>@author Shian-Jiann Lin, Linjiong Zhou
-! Fast saturation adjustment is part of the gfdl cloud microphysics
 ! =======================================================================
 
 module fv_sat_adj
@@ -936,7 +935,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 !>   - "scale - aware" subgrid variability: 100 - km as the base
                 hvar (i) = min (0.2, max (0.01, dw * sqrt (sqrt (area (i, j)) / 100.e3)))
                 ! -----------------------------------------------------------------------
-                !>   - partial cloudiness by pdf:
+                !>   - calculate partial cloudiness by pdf
                 ! assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
                 ! binary cloud scheme; qa = 0.5 if qstar (i) == qpz
                 ! -----------------------------------------------------------------------

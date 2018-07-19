@@ -1,8 +1,7 @@
 !>\file module_nst_water_prop.f90
-!>\defgroup nst_water_prop GFS NSST Water Prop Module
+!>\defgroup waterprop GFS NSST Water Property
 !! @{
-!>\ingroup GFS_NSST
-!!\brief
+!>\ingroup gfs_nst_main
 module module_nst_water_prop
   use machine, only : kind_phys
   use module_nst_parameters, only : t0k
@@ -39,6 +38,7 @@ module module_nst_water_prop
   end interface
 contains
   ! ------------------------------------------------------
+!>\ingroup waterprop
 !> This subroutine computes thermal expansion coefficient (alpha)
 !! and saline contraction coefficient (beta). 
   subroutine rhocoef(t, s, rhoref, alpha, beta)
@@ -83,6 +83,7 @@ contains
 
   end subroutine rhocoef
   ! ----------------------------------------
+!>\ingroup waterprop
 !> This subroutine computes sea water density.
   subroutine density(t, s, rho)
     ! ----------------------------------------
@@ -120,6 +121,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
 !> This subroutine computes the fraction of the solar radiation absorbed 
 !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
@@ -154,6 +156,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
   elemental subroutine sw_ps_9b_aw(z,aw)
     !
     ! d(fw)/d(z) for 9-band 
@@ -181,6 +184,7 @@ contains
   end subroutine sw_ps_9b_aw
   !
   !======================
+!>\ingroup waterprop
   elemental subroutine sw_fairall_6exp_v1(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -213,6 +217,7 @@ contains
   !======================
   !
   !
+!>\ingroup waterprop
   elemental subroutine sw_fairall_6exp_v1_aw(z,aw)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -248,6 +253,7 @@ contains
     !
   end subroutine sw_fairall_6exp_v1_aw
   !
+!>\ingroup waterprop
   elemental subroutine sw_fairall_6exp_v1_sum(z,sum)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -278,7 +284,7 @@ contains
   end subroutine sw_fairall_6exp_v1_sum
   !
   !======================
-
+!>\ingroup waterprop
   elemental subroutine sw_fairall_simple_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -304,6 +310,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
   elemental subroutine sw_wick_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (zeng and beljaars, 2005, p.5)
@@ -329,6 +336,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
   elemental subroutine sw_soloviev_3exp_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
@@ -359,6 +367,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
   elemental subroutine sw_soloviev_3exp_v2(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
@@ -387,6 +396,7 @@ contains
     !
   end subroutine sw_soloviev_3exp_v2
 
+!>\ingroup waterprop
   elemental subroutine sw_soloviev_3exp_v2_aw(z,aw)
     !
     ! aw = d(fxp)/d(z)
@@ -418,6 +428,7 @@ contains
   !
   !======================
   !
+!>\ingroup waterprop
   elemental subroutine sw_ohlmann_v1(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z
@@ -441,6 +452,7 @@ contains
   end subroutine sw_ohlmann_v1
   !
 
+!>\ingroup waterprop
 function grv(lat)
   real(kind=kind_phys) :: lat
   real(kind=kind_phys) :: gamma,c1,c2,c3,c4,pi,phi,x
@@ -457,6 +469,7 @@ function grv(lat)
   !print *,'grav=',grv,lat
 end function grv
 
+!>\ingroup waterprop
 !>This subroutine computes solar time from the julian date.
 subroutine solar_time_from_julian(jday,xlon,soltim)
   !
@@ -481,6 +494,7 @@ end subroutine solar_time_from_julian
 !
 !***********************************************************************
 !
+!>\ingroup waterprop
 !> This subroutine computes julian day and fraction from year,
 !! month, day and time UTC.
       subroutine compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
@@ -530,6 +544,7 @@ end subroutine solar_time_from_julian
       endif
       end subroutine compjd
 
+!>\ingroup waterprop
 !>This subroutine computes dtm (the mean of \f$dT(z)\f$). 
  subroutine get_dtzm_point(xt,xz,dt_cool,zc,z1,z2,dtm)
 ! ===================================================================== !
@@ -611,6 +626,7 @@ end subroutine solar_time_from_julian
 
  end subroutine get_dtzm_point
 
+!>\ingroup waterprop
  subroutine get_dtzm_2d(xt,xz,dt_cool,zc,slmsk,z1,z2,nx,ny,dtm)
 ! ===================================================================== !
 !                                                                       !

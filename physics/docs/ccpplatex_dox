@@ -129,6 +129,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Land Surface
                         ../sfc_diff.f \
                         ../sfc_nst.f \
+                        ../module_nst_model.f90 \
+                        ../module_nst_parameters.f90 \
+                        ../module_nst_water_prop.f90  \
                         ../sfc_drv.f \
                         ../sflx.f    \
                         ../surface_perturbation.F90 \

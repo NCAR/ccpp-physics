@@ -1,48 +1,52 @@
 /**
 \page GFDL_cloud GFDL Cloud Microphysics Scheme 
 \section des_GFDL_cloud Description
-GFDL cloud microphysics scheme is a six-category microphysics scheme to replace Zhao-Carr scheme, and moves the GFS from
+GFDL cloud microphysics (MP) scheme is a six-category MP scheme to replace Zhao-Carr MP scheme, and moves the GFS from
 a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).
 This scheme utilizes the "bulk water" microphysical parameterization technique in Lin et al. (1983) \cite lin_et_al_1983 
 and has been significantly improved over years at GFDL (Lord et al.(1984) \cite lord_et_al_1984, 
 Krueger et al.(1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
-Some unique attributes of GFDL cloud microphysics include:
-
-a. \b Physics \b Processes \b included \b in \b warm_rain() \b and \b icloud()
+Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain() and icloud()) and are feature with time-split between warm-rain (faster) and ice-phase (slower) processes (see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values). 
 
 \image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
 \image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
 
-GFDL cloud MP is feature with time-split between warm-rain (faster) and ice-phase (slower) processes.
-(see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values)
+Some unique attributes of GFDL cloud microphysics include:
 
-b. \b Fast \b Saturation \b Adjustment 
+\subsection fast a. Fast Physics 
 
 In current fv3gfs, phase-changes is called after the "Lagrangian-to-Eulerian" remapping in FV3
-dynamic solver. When fast saturation adjustment \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block) to adjust 
-cloud water evaporation (cloud water \f$\rightarrow\f$ water vapor), cloud water freezing (cloud water \f$\rightarrow\f$ cloud ice),
-cloud ice deposition (water vapor \f$\rightarrow\f$ cloud ice). 
+dynamic solver. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block) to adjust 
+cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice),
+cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). 
 
  Thermodynamic consistency between the dynamics and cloud microphysics:
   - exact local moist energy conservation between phase changes
   - condensates carry heat & 3D momentum
 
 
-c. \b Horizontal \b Sub-grid \b Variability
+\subsection subgrid b. Horizontal Sub-grid Variability
 
-Scale-awareness achieved by an assumed horizontal subgrid variability and a 2nd
-order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994) for autoconversions (ice->snow)
+Horizontal sub-grid variability is a function of cell area:
+- Over land:
+\f[
+h_{var}=\min \left\{0.2,\max\left[0.01, D_{land}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+\f]
+- Over Ocean:
+\f[
+h_{var}=\min \left\{0.2,\max\left[0.01, D_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+\f]
 
+Where \f$A_{r}\f$ is cell area, \f$D_{land}\f$ and \f$D_{ocean}\f$ are base values for sub-grid variability over land 
+and ocean (larger sub-grid variability appears in larger area). Horizontal sub-grid variability is used in cloud fraction,
+relative humidity calculation, evaporation and condensation processes.  Scale-awareness is achieved by this horizontal subgrid variability and a \f$2^{nd}\f$
+order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994). 
 
-
-d. \b Cloud \b Fraction
-
-Similar to autoconversion, calculation of cloud fraction is based on horizontal sub-grid variability. Cloud fraction
-calculation includes all hydrometers.
-
-e. \b Time \b implicit monotonic scheme for terminal fall of condensates
-
-
+\subsection cloud c. Cloud Fraction
+Calculation of cloud fraction is based on horizontal sub-grid variability. Cloud fraction calculation includes all hydrometeors:
+\f[
+CF=\max[0,\min(1,\frac{q_{plus}-q_{sat}}{q_{plus}-q_{minus}})]
+\f]
 
 \section intro_GFDL_cloud Intraphysics Communication
  + \ref arg_table_gfdl_cloud_microphys_run
