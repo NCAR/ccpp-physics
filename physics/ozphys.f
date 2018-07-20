@@ -26,6 +26,69 @@
 
       end module ozphys_pre
 
+      module ozphys_post
+
+      contains
+
+!> \section arg_table_ozphys_post_init Argument Table
+!!
+      subroutine ozphys_post_init()
+      end subroutine ozphys_post_init
+
+
+!! \section arg_table_ozphys_post_run Argument Table
+!! | local_name     | standard_name                                | long_name                                    | units   | rank | type          | kind      | intent | optional |
+!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   |    0 | integer       |           | in     | F        |
+!! | levs           | vertical_dimension                           | number of vertical layers                    | count   |    0 | integer       |           | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   |    0 | integer       |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    |    0 | logical       |           | in     | F        |
+!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 |    3 | real          | kind_phys | in     | F        |
+!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     |    0 | GFS_diag_type |           | inout  | F        |
+!! | errmsg         | error_message                                | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
+!! | errflg         | error_flag                                   | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
+!!
+      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp,      &
+     &                           Diag, errmsg, errflg)
+
+      use GFS_typedefs, only: GFS_diag_type
+      use machine,      only: kind_phys
+
+      implicit none
+
+      integer, intent(in) :: ix, levs, pl_coeff
+      logical, intent(in) :: ldiag3d
+      real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
+      type(GFS_diag_type), intent(inout) :: Diag
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (ldiag3d) then
+          Diag%dq3dt(:,:,6) = ozp(:,:,1)
+          Diag%dq3dt(:,:,7) = ozp(:,:,2)
+          Diag%dq3dt(:,:,8) = ozp(:,:,3)
+          Diag%dq3dt(:,:,9) = ozp(:,:,4)
+      end if
+
+      return
+
+      end subroutine ozphys_post_run
+
+
+!> \section arg_table_ozphys_post_finalize Argument Table
+!!
+      subroutine ozphys_post_finalize()
+      end subroutine ozphys_post_finalize
+
+
+      end module ozphys_post
+
+
 
       module ozphys
 
@@ -33,12 +96,21 @@
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_ozphys_init Argument Table
+! \section arg_table_ozphys_init Argument Table
 !!
       subroutine ozphys_init()
       end subroutine ozphys_init
 
+! \brief Brief description of the subroutine
+!
+!> \section arg_table_ozphys_finalize Argument Table
+!!
+      subroutine ozphys_finalize()
+      end subroutine ozphys_finalize
+
+
 !>\defgroup GFS_ozphys GFS ozphys Main
+!! @{
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
@@ -64,8 +136,8 @@
 !! | errmsg         | error_message                                     | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | error_flag                                        | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section genal_ozphys GFS Ozone Physics Scheme General Algorithm
-!> @{
+!! \section genal_ozphys GFS ozphys_run General Algorithm
+!! @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
@@ -204,77 +276,8 @@
 !
       return
       end subroutine ozphys_run
-!> @}
-
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_ozphys_finalize Argument Table
-!!
-      subroutine ozphys_finalize()
-      end subroutine ozphys_finalize
+!! @}
+!! @}
 
       end module ozphys
-
-
-      module ozphys_post
-
-      contains
-
-!> \section arg_table_ozphys_post_init Argument Table
-!!
-      subroutine ozphys_post_init()
-      end subroutine ozphys_post_init
-
-
-!! \section arg_table_ozphys_post_run Argument Table
-!! | local_name     | standard_name                                | long_name                                    | units   | rank | type          | kind      | intent | optional |
-!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   |    0 | integer       |           | in     | F        |
-!! | levs           | vertical_dimension                           | number of vertical layers                    | count   |    0 | integer       |           | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   |    0 | integer       |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    |    0 | logical       |           | in     | F        |
-!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 |    3 | real          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     |    0 | GFS_diag_type |           | inout  | F        |
-!! | errmsg         | error_message                                | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
-!! | errflg         | error_flag                                   | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
-!!
-      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp,      &
-     &                           Diag, errmsg, errflg)
-
-      use GFS_typedefs, only: GFS_diag_type
-      use machine,      only: kind_phys
-
-      implicit none
-
-      integer, intent(in) :: ix, levs, pl_coeff
-      logical, intent(in) :: ldiag3d
-      real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
-      type(GFS_diag_type), intent(inout) :: Diag
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      if (ldiag3d) then
-          Diag%dq3dt(:,:,6) = ozp(:,:,1)
-          Diag%dq3dt(:,:,7) = ozp(:,:,2)
-          Diag%dq3dt(:,:,8) = ozp(:,:,3)
-          Diag%dq3dt(:,:,9) = ozp(:,:,4)
-      end if
-
-      return
-
-      end subroutine ozphys_post_run
-
-
-!> \section arg_table_ozphys_post_finalize Argument Table
-!!
-      subroutine ozphys_post_finalize()
-      end subroutine ozphys_post_finalize
-
-
-      end module ozphys_post
 

@@ -8,7 +8,7 @@
 !!
 !>\section genal_h2ophys GFS h2ophys General Algorithm
 !! @{
-      subroutine h2ophys (ix, im, levs, kh2o, dt, h2oi, h2oo, ph2o,
+      subroutine h2ophys (ix, im, levs, kh2o, dt, h2oi, h2oo, ph2o,  &
      &                    prsl, h2opltc, h2o_coeff, ldiag3d, h2op,me)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for
@@ -21,9 +21,9 @@
       implicit none
 !
       integer im, ix, levs, kh2o, h2o_coeff,me
-      real(kind=kind_phys) h2oi(ix,levs),  h2oo(ix,levs), ph2o(kh2o),
-     &                     prsl(ix,levs),  tin(ix,levs),
-     &                     h2opltc(ix,kh2o,h2o_coeff),
+      real(kind=kind_phys) h2oi(ix,levs),  h2oo(ix,levs), ph2o(kh2o), &
+     &                     prsl(ix,levs),  tin(ix,levs),              &
+     &                     h2opltc(ix,kh2o,h2o_coeff),                &
      &                     h2op(ix,levs,h2o_coeff),  dt
 !
       integer k,kmax,kmin,l,i,j
