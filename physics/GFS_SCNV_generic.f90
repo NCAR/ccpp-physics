@@ -80,6 +80,7 @@
 !! |-----------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | im              | horizontal_loop_extent                                                                      | horizontal loop extent                                               | count         |    0 | integer     |           | in     | F        |
 !! | levs            | vertical_dimension                                                                          | vertical layer dimension                                             | count         |    0 | integer     |           | in     | F        |
+!! | nn              | number_of_tracers_for_allocating_cloud_work_function                                        | number of tracers for allocating cloud work function                 | count         |    0 | integer     |           | in     | F        |
 !! | lssav           | flag_diagnostics                                                                            | logical flag for storing diagnostics                                 | flag          |    0 | logical     |           | in     | F        |
 !! | ldiag3d         | flag_diagnostics_3D                                                                         | flag for 3d diagnostic fields                                        | flag          |    0 | logical     |           | in     | F        |
 !! | lgocart         | flag_gocart                                                                                 | flag for 3d diagnostic fields for gocart 1                           | flag          |    0 | logical     |           | in     | F        |
@@ -91,18 +92,18 @@
 !! | dqdti           | instantaneous_water_vapor_specific_humidity_tendency_due_to_convection_on_dynamics_timestep | instantaneous total moisture tendency                                | kg kg-1 s-1   |    2 | real        | kind_phys | inout  | F        |
 !! | dt3dt           | cumulative_change_in_temperature_due_to_shal_convection                                     | cumulative change in temperature due to shal conv.                   | K             |    2 | real        | kind_phys | inout  | F        |
 !! | dq3dt           | cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection                   | cumulative change in water vapor specific humidity due to shal conv. | kg kg-1       |    2 | real        | kind_phys | inout  | F        |
-!! | clw_liquid      | cloud_liquid_water_mixing_ratio                                                             | moist cloud water mixing ratio                                       | kg kg-1       |    2 | real        | kind_phys | inout  | F        |
+!! | clw             | convective_transportable_tracers                                                            | array to contain cloud water and other convective trans. tracers     | kg kg-1       |    3 | real        | kind_phys | inout  | F        |
 !! | errmsg          | error_message                                                                               | error message for error handling in CCPP                             | none          |    0 | character   | len=*     | out    | F        |
 !! | errflg          | error_flag                                                                                  | error flag for error handling in CCPP                                | flag          |    0 | integer     |           | out    | F        |
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor, &
-        save_t, save_qv, dqdti, dt3dt, dq3dt, clw_liquid, errmsg, errflg)
+      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor, &
+        save_t, save_qv, dqdti, dt3dt, dq3dt, clw, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs
+      integer, intent(in) :: im, levs, nn
       logical, intent(in) :: lssav, ldiag3d, lgocart
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
@@ -112,7 +113,7 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
       ! dt3dt, dq3dt, only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: clw_liquid
+      real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
 
       character(len=*),              intent(out) :: errmsg
       integer,                       intent(out) :: errflg
@@ -146,7 +147,7 @@
 !
       do k=1,levs
         do i=1,im
-          if (clw_liquid(i,k) <= -999.0) clw_liquid(i,k) = 0.0
+          if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
         enddo
       enddo
 
