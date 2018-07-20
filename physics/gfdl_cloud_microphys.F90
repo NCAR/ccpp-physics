@@ -910,9 +910,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     real, intent (in), dimension (is:, js:, ks:) :: uin, vin, delp, pt, dz
     real, intent (in), dimension (is:, js:, ks:) :: qv, ql, qr, qg, qa, qn
     
-! ccpp: intent is not correct here
-!    real, intent (inout), dimension (is:, js:, ks:) :: qi, qs
-    real, intent (in), dimension (is:, js:, ks:) :: qi, qs
+    real, intent (inout), dimension (is:, js:, ks:) :: qi, qs
     real, intent (inout), dimension (is:, js:, ks:) :: u_dt, v_dt, w, pt_dt, qa_dt
     real, intent (inout), dimension (is:, js:, ks:) :: qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt
 
@@ -4774,8 +4772,7 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 end subroutine interpolate_z
 
 ! =======================================================================
-! CCPP: not used yet
-! \ingroup gfdlcloud
+!> \ingroup gfdlcloud
 !>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud 
 !! species.
 ! =======================================================================
