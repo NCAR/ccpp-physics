@@ -44,11 +44,8 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  at the reference state \f$r_0\f$,\f$T_0\f$,\f$\Sigma_0\f$, and are all zonally averaged quantities.
  The reference-state production and loss, \f$(P-L)_0\f$, and the various partial derivative terms about the state (the last 
  three terms on the right) are computed offline using CHEM2D model photochemistry. These coefficients are then stored in tabular 
- form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location (\c global_o3prdlos.f77).
- However, when implementing (2) in GFS physics suite, the perturbation terms \f$(r-r_0, T-T_0, \Sigma-\Sigma_0)\f$ are computed
- with respect to a zonal mean climatological reference state used to derive the partial derivatives in (2). such discrepancies
- can potentially introduce systematic, non-physical biases into the photochemical parameterization (Mccormack et al.(2006) \cite mccormack_et_al_2006).
- 
+ form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location (\c global_o3prdlos.f77). The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that depend on the temperature and column ozone climatology.
+
 
 
 \section intra_ozone  Intraphysics Communication

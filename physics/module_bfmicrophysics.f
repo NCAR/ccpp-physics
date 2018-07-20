@@ -2903,7 +2903,7 @@
 !! subprogram. It computes layer's cloud liquid, ice, rain, and snow
 !! water condensate path and the partical effective radius for liquid
 !! droplet, rain drop, and snow flake.
-!>\section gen_rsipath rsipath2 General Algorithm
+!\section gen_rsipath rsipath2 General Algorithm
       subroutine rsipath2                                               &
 !...................................
 

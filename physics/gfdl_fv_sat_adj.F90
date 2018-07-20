@@ -596,7 +596,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) / 48.)
         enddo
         ! -----------------------------------------------------------------------
-        !> - Condensation / evaporation between water vapor and cloud water.
+        !> - Condensation/evaporation between water vapor and cloud water.
         ! -----------------------------------------------------------------------
             call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
             adj_fac = sat_adj0
@@ -630,7 +630,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         enddo
             if (last_step) then
             ! -----------------------------------------------------------------------
-            !> - condensation / evaporation between water vapor and cloud water, last time step
+            !> - condensation/evaporation between water vapor and cloud water, last time step
             !! enforce upper (no super_sat) & lower (critical rh) bounds.
             ! final iteration:
             ! -----------------------------------------------------------------------
@@ -771,7 +771,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             tcp2 (i) = lcp2 (i) + icp2 (i)
         enddo
         ! -----------------------------------------------------------------------
-        !> - Sublimation / deposition between water vapor and cloud ice.
+        !> - Sublimation/deposition between water vapor and cloud ice.
         ! -----------------------------------------------------------------------
             do i = is, ie
             src (i) = 0.
@@ -991,7 +991,7 @@ end subroutine fv_sat_adj_work
 ! =======================================================================
 !>\ingroup fast_sat_adj
 !>@brief the function 'wqs1' computes the 
-!! saturated specific humidity for table ii
+!! saturated specific humidity for table ii.
 ! =======================================================================
 real function wqs1 (ta, den)
 

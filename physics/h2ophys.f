@@ -1,3 +1,13 @@
+!>\file h2ophys.f
+!! This file include NRL H2O physics for stratosphere and mesosphere.
+
+!>\defgroup main_h2o GFS h2ophys Main
+!! @{
+!> This subroutine is NRL H2O physics for stratosphere and mesosphere.
+!>\section arg_table_h2ophys_run
+!!
+!>\section genal_h2ophys GFS h2ophys General Algorithm
+!! @{
       subroutine h2ophys (ix, im, levs, kh2o, dt, h2oi, h2oo, ph2o,
      &                    prsl, h2opltc, h2o_coeff, ldiag3d, h2op,me)
 !
@@ -98,3 +108,5 @@
 !
       return
       end
+!! @}
+!! @}

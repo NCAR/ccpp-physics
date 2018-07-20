@@ -3194,7 +3194,7 @@
 !! bands. there are seven different vertical profile structures. in the
 !! troposphere, aerosol distribution at each grid point is composed
 !! from up to six components out of ten different substances.
-!!\section radclimaer_gen radclimaer General Algorithm
+!\section radclimaer_gen radclimaer General Algorithm
 !--------------------------------
       subroutine radclimaer
 !................................
@@ -4151,7 +4151,7 @@
 !>\ingroup module_radiation_aerosols
 !> This subroutine reads input gocart aerosol optical data from Mie
 !! code calculations.
-!>\section rd_gocart_luts_gen rd_gocart_luts General Algorithm
+!\section rd_gocart_luts_gen rd_gocart_luts General Algorithm
 !-----------------------------
       subroutine rd_gocart_luts
 !.............................

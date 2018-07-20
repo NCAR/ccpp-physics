@@ -45,8 +45,8 @@ CF=\max[0,\min(1,\frac{q_{plus}-q_{sat}}{q_{plus}-q_{minus}})]
  + \ref arg_table_gfdl_cloud_microphys_run
 
 \section Gen_GFDL_cloud  General Algorithm
- + \ref detmpdrv
- + \ref fast_gen
+ + mpdrv()
+ + fv_sat_adj_work()
 
 
 */

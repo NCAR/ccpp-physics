@@ -21,12 +21,6 @@
 !* License along with the GFDL Cloud Microphysics.
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
-!> \defgroup gfdlcloud GFDL Cloud Microphysics Main
-!>@brief The module "gfdl_cloud_microphys" contains the GFDL cloud
-!! microphysics Chen and Lin (2013) \cite chen_and_lin_2013.
-!>@details The module is paired with \ref fast_sat_adj, which performs the "fast"
-!! processes.
-!>\author Shian-Jiann Lin, Linjiong Zhou
 ! =======================================================================
 ! cloud micro - physics package for gfdl global cloud resolving model
 ! the algorithms are originally derived from lin et al 1983. most of the
@@ -414,11 +408,9 @@ contains
    end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
-! end of gfdl cloud microphysics
 !>@brief The subroutine 'gfdl_cloud_microphys_finalize' terminates the GFDL
 !! cloud microphysics.
-! =======================================================================
-
+!!
 !! \section arg_table_gfdl_cloud_microphys_finalize  Argument Table
 !! | local_name  | standard_name | long_name                                   | units   | rank | type      | kind   | intent | optional |
 !! |-------------|---------------|---------------------------------------------|---------|------|-----------|--------|--------|----------|
@@ -451,6 +443,14 @@ contains
    
    end subroutine gfdl_cloud_microphys_finalize
 
+!> \defgroup gfdlcloud GFDL Cloud Microphysics Main
+!>@brief The module "gfdl_cloud_microphys" contains the GFDL cloud
+!! microphysics Chen and Lin (2013) \cite chen_and_lin_2013.
+!> The module is paired with \ref fast_sat_adj, which performs the "fast"
+!! processes.
+!>\author Shian-Jiann Lin, Linjiong Zhou
+!! @{
+!!
 !>\ingroup gfdlcloud
 !>@brief The subroutine 'gfdl_cloud_microphys_run' executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
@@ -882,14 +882,12 @@ end subroutine gfdl_cloud_microphys_work
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
-!>@brief GFDL cloud microphysics, major program.
-!>@details Lin et al., 1983 \cite lin_et_al_1983 and
-!! Rutledge and Hobbs, 1984 \cite rutledge_and_hobbs_1984.
-! Terminal fall is handled lagrangianly by conservative fv algorithm.
+!>@brief GFDL cloud microphysics, major program, and is based on
+!!  Lin et al.(1983) \cite lin_et_al_1983 and
+!! Rutledge and Hobbs (1984) \cite rutledge_and_hobbs_1984.
 !!
 !>\section detmpdrv GFDL Cloud mpdrv General Algorithm
 !! @{
-! -----------------------------------------------------------------------
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
         rain, snow, graupel, ice, m2_rain, m2_sol, cond, area1, land,         &
@@ -1354,7 +1352,8 @@ end subroutine sedi_heat
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
 !> This subroutine includes warm rain cloud microphysics.
-!>\section warm_det GFDL cloud MP warm_rain Detailed Algorithm
+!>\section warm_gen GFDL Cloud warm_rain General Algorithm
+!! @{
 ! -----------------------------------------------------------------------
 
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
@@ -1399,7 +1398,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     dt5 = 0.5 * dt
 
     ! -----------------------------------------------------------------------
-    !> - Call check_column() to check the terminal speed of rain.
+    !> - Call check_column() to check if the water species is large enough to fall.
     ! -----------------------------------------------------------------------
 
     m1_rain (:) = 0.
@@ -1412,7 +1411,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     else
 
         ! -----------------------------------------------------------------------
-        !>  - Calculate fall speed of rain.
+        !> - Calculate fall speed of rain.
         ! -----------------------------------------------------------------------
 
         if (const_vr) then
@@ -1436,7 +1435,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         enddo
 
         ! -----------------------------------------------------------------------
-        !>  - Call revap_racc(), to calculate evaporation and accretion 
+        !> - Call revap_racc(), to calculate evaporation and accretion 
         !! of rain for the first 1/2 time step.
         ! -----------------------------------------------------------------------
 
@@ -1450,8 +1449,8 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
 
         ! -----------------------------------------------------------------------
-        !>  - Calculate mass flux induced by falling rain. 
-        !! (if use_ppm =.false, call implicit_fall())
+        !> - Calculate mass flux induced by falling rain 
+        !! ( use_ppm =.false, call implicit_fall(): time-implicit monotonic fall scheme.)
         ! -----------------------------------------------------------------------
 
         if (use_ppm) then
@@ -1470,7 +1469,9 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
 
         ! -----------------------------------------------------------------------
-        !>  - Calculate vertical velocity transportation during sedimentation.
+        !  - Calculate vertical velocity transportation during sedimentation.
+        ! (do_sedi_w =.true. to turn on vertical motion tranport during sedimentation
+        ! .false. by default)
         ! -----------------------------------------------------------------------
 
         if (do_sedi_w) then
@@ -1482,15 +1483,15 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
 
         ! -----------------------------------------------------------------------
-        !>  - Call sedi_heat() to calculate heat transportation during sedimentation.
+        !> - Call sedi_heat() to calculate heat transportation during sedimentation.
         ! -----------------------------------------------------------------------
 
         if (do_sedi_heat) &
             call sedi_heat (ktop, kbot, dp, m1_rain, dz, tz, qv, ql, qr, qi, qs, qg, c_liq)
 
         ! -----------------------------------------------------------------------
-        !>  - Call revap_racc() to calculate evaporation and accretion 
-        !! of rain for the remaing 1 / 2 time step.
+        !> - Call revap_racc() to calculate evaporation and accretion 
+        !! of rain for the remaing 1/2 time step.
         ! -----------------------------------------------------------------------
 
         call revap_racc (ktop, kbot, dt5, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
@@ -1500,7 +1501,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     ! -----------------------------------------------------------------------
     !> - Auto-conversion
     !! (assuming linear subgrid vertical distribution of cloud water
-    !! following Lin et al. 1994 \cite lin_et_al_1994.)
+    !! following Lin et al. (1994) \cite lin_et_al_1994.)
     ! -----------------------------------------------------------------------
 
     if (irain_f /= 0) then
@@ -1537,6 +1538,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
 
         call linear_prof (kbot - ktop + 1, ql (ktop), dl (ktop), z_slope_liq, h_var)
 
+        !>  
         do k = ktop, kbot
             qc0 = fac_rc * ccn (k)
             if (tz (k) > t_wfr + dt_fr) then
@@ -1559,7 +1561,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
                 ! --------------------------------------------------------------------
                 if (dq > 0.) then ! q_plus > qc
                     ! --------------------------------------------------------------------
-                    ! revised continuous form: linearly decays (with subgrid dl) to zero at qc == ql + dl
+                    !>  - Revised continuous form: linearly decays (with subgrid dl) to zero at qc == ql + dl
                     ! --------------------------------------------------------------------
                     sink = min (1., dq / dl (k)) * dt * c_praut (k) * den (k) * exp (so3 * log (ql (k)))
                     ql (k) = ql (k) - sink
@@ -1570,10 +1572,13 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
 
 end subroutine warm_rain
+!! @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
 !> This subroutine calculates evaporation of rain and accretion of rain.
+!!\section gen_ravap GFDL Cloud revap_racc General Algorithm
+!! @{
 ! -----------------------------------------------------------------------
 
 subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
@@ -1671,6 +1676,7 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
     enddo
 
 end subroutine revap_racc
+!! @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup gfdlcloud
@@ -1678,6 +1684,8 @@ end subroutine revap_racc
 !! used for cloud ice and cloud water autoconversion.
 ! qi -- > ql & ql -- > qr
 ! edges: qe == qbar + / - dm
+!>\section gen_linear GFDL cloud linear_prof General Algorithm
+!! @{
 ! -----------------------------------------------------------------------
 
 subroutine linear_prof (km, q, dm, z_var, h_var)
@@ -1703,7 +1711,8 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
         dm (1) = 0.
 
         ! -----------------------------------------------------------------------
-        ! use twice the strength of the positive definiteness limiter (lin et al 1994)
+        !> - Use twice the strength of the positive definiteness limiter (Lin et al.(1994)
+        !! \cite lin_et_al_1994).
         ! -----------------------------------------------------------------------
 
         do k = 2, km - 1
@@ -1719,7 +1728,8 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
         dm (km) = 0.
 
         ! -----------------------------------------------------------------------
-        ! impose a presumed background horizontal variability that is proportional to the value itself
+        !> - Impose the background horizontal variability (\f$h_{var}\f$) that 
+        !! is proportional to the value itself.
         ! -----------------------------------------------------------------------
 
         do k = 1, km
@@ -1732,16 +1742,19 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
     endif
 
 end subroutine linear_prof
+!! @}
 
 ! =======================================================================
 !>\ingroup gfdlcloud
 !> This subroutine includes cloud ice microphysics processes.
-!! This which is featured with:
-!! - bulk cloud microphysics; 
+!>\author Shian-Jiann Lin, GFDL
+!!
+!! This scheme is featured with:
+!! - bulk cloud microphysics 
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
-!>@author Shian-Jiann Lin, GFDL
 !>\section det_icloud GFDL icloud Detailed Algorithm
+!! @{
 ! =======================================================================
 
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
@@ -1776,7 +1789,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
     rdts = 1. / dts
 
     ! -----------------------------------------------------------------------
-    !> - Define conversion scalar / factor.
+    !> - Define conversion scalar/factor.
     ! -----------------------------------------------------------------------
 
     fac_i2s = 1. - exp (- dts / tau_i2s)
@@ -1825,7 +1838,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
 
             ! -----------------------------------------------------------------------
             !> - Calculate \f$P_{ihom}\f$: homogeneous freezing of cloud water into cloud ice.
-            !! This is the 1st occurance of liquid water freezing in the split mp process.
+            !! This is the 1st occurance of liquid water freezing in the split MP process.
             ! -----------------------------------------------------------------------
 
             dtmp = t_wfr - tzk (k)
@@ -1885,7 +1898,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         if (tc .ge. 0.) then
 
             ! -----------------------------------------------------------------------
-            !> - Melting of snow
+            !> - Melting of snow:
             ! -----------------------------------------------------------------------
 
             dqs0 = ces0 / p1 (k) - qv
@@ -1949,7 +1962,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             icpk (k) = lhi (k) / cvm (k)
 
             ! -----------------------------------------------------------------------
-            !> - Melting of graupel
+            !> - Melting of graupel:
             ! -----------------------------------------------------------------------
 
             if (qg > qcmin .and. tc > 0.) then
@@ -1973,7 +1986,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
 
                 ! -----------------------------------------------------------------------
-                !>  - \f$P_{gmlt}\f$: graupel melt
+                !>  - \f$P_{gmlt}\f$: graupel melt (gmlt())
                 ! -----------------------------------------------------------------------
 
                 pgmlt = dts * gmlt (tc, dqs0, qden, pgacw, pgacr, cgmlt, den (k))
@@ -2085,7 +2098,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 ! -----------------------------------------------------------------------
 
                 ! -----------------------------------------------------------------------
-                !>  - \f$P_{sacr}\f$: accretion of rain by snow
+                !>  - \f$P_{sacr}\f$: accretion of rain by snow (acr3d())
                 ! -----------------------------------------------------------------------
 
                 if (qs > 1.e-7) then ! if snow exists
@@ -2102,7 +2115,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                     exp (1.75 * log (qr * den (k)))
 
                 ! -----------------------------------------------------------------------
-                !>  - Calculate total sink to \f$q_r\f$. 
+                !>  - Calculate total sink to \f$q_r\f$ :
                 !!\n  Sink terms to \f$q_r\f$:  \f$P_{sacr}+P_{gfr}\f$
                 !!\n  source term to \f$q_s\f$: \f$P_{sacr}\f$
                 !!\n  source term to \f$q_g\f$: \f$P_{gfr}\f$
@@ -2139,7 +2152,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
             if (qs > 1.e-7) then
 
                 ! -----------------------------------------------------------------------
-                !>  - accretion: snow \f$\rightarrow\f$ graupel
+                !>  - accretion: snow \f$\rightarrow\f$ graupel (acr3d())
                 ! -----------------------------------------------------------------------
 
                 if (qg > qrmin) then
@@ -2178,7 +2191,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 endif
 
                 ! -----------------------------------------------------------------------
-                !>  - \f$P_{gacr}\f$: accretion of rain by graupel
+                !>  - \f$P_{gacr}\f$: accretion of rain by graupel (acr3d())
                 ! -----------------------------------------------------------------------
 
                 if (qr > 1.e-6) then
@@ -2224,11 +2237,13 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         qlk, qrk, qik, qsk, qgk, qak, h_var, rh_rain)
 
 end subroutine icloud
+!! @}
 
 ! =======================================================================
 !>\ingroup gfdlcloud
 !> This subroutine calculates temperature sentive high vertical resolution processes.
-!>\section det_subz subgrid_z_proc Detailed Algorithm
+!>\section gen_subz GFDL Cloud subgrid_z_proc General Algorithm
+!! @{
 ! =======================================================================
 
 subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
@@ -2647,6 +2662,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
     enddo
 
 end subroutine subgrid_z_proc
+!! @}
 
 ! =======================================================================
 !>\ingroup gfdlcloud
@@ -3059,7 +3075,7 @@ end subroutine terminal_fall
 ! =======================================================================
 !>\ingroup gfdlcloud
 !>@brief The subroutine 'check_column' checks
-!!       if the water species is large enough to fall.
+!! if the water species is large enough to fall.
 ! =======================================================================
 
 subroutine check_column (ktop, kbot, q, no_fall)
@@ -3087,8 +3103,8 @@ end subroutine check_column
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief The subroutine 'implicit_fall' computes the time-implicit monotonic 
-!! scheme.
+!>@brief The subroutine computes the time-implicit monotonic 
+!! fall scheme.
 !>@author Shian-Jiann Lin, 2016
 ! =======================================================================
 
@@ -3158,11 +3174,10 @@ subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 end subroutine implicit_fall
 
 ! =======================================================================
-!\ingroup gfdlcloud
-! lagrangian scheme
-!  developed by sj lin, ????
+!!\ingroup gfdlcloud
+!! Lagrangian scheme
+!>  \author  S.J. Lin
 ! =======================================================================
-
 subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
 
     implicit none
@@ -3267,7 +3282,7 @@ subroutine cs_profile (a4, del, km, do_mono)
 
     implicit none
 
-    integer, intent (in) :: km !< vertical dimension
+    integer, intent (in) :: km ! vertical dimension
 
     real, intent (in) :: del (km)
 
@@ -3441,13 +3456,14 @@ subroutine cs_profile (a4, del, km, do_mono)
 end subroutine cs_profile
 
 !>\ingroup gfdlcloud
+!! This subroutine perform positive definite constraint.
 subroutine cs_limiters (km, a4)
 
     implicit none
 
     integer, intent (in) :: km
 
-    real, intent (inout) :: a4 (4, km) !< ppm array
+    real, intent (inout) :: a4 (4, km) ! ppm array
 
     real, parameter :: r12 = 1. / 12.
 
@@ -3743,8 +3759,8 @@ end subroutine setupm
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief The function 'acr3d' is an accretion function (lin et al. 1983)
-!! \cite lin_et_al_1983
+!>@brief The function is an accretion function (Lin et al.(1983)
+!! \cite lin_et_al_1983 )
 ! =======================================================================
 
 real function acr3d (v1, v2, q1, q2, c, cac, rho)
@@ -3778,7 +3794,7 @@ end function acr3d
 
 ! =======================================================================
 !>\ingroup gfdlcloud
-!>@brief Melting of snow function (Lin et al. 1983 \cite lin_et_al_1983)
+!>@brief Melting of snow function (Lin et al.(1983) \cite lin_et_al_1983)
 !!  note: psacw and psacr must be calc before smlt is called
 ! =======================================================================
 
@@ -3910,8 +3926,8 @@ real function wqs2 (ta, den, dqdt)
 
     implicit none
 
-    !> pure water phase; universal dry / moist formular using air density
-    !> input "den" can be either dry or moist air density
+    ! pure water phase; universal dry / moist formular using air density
+    ! input "den" can be either dry or moist air density
 
     real, intent (in) :: ta, den
 
@@ -4737,7 +4753,7 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 
     real, intent (in), dimension (is:ie, js:je, km) :: a3
 
-    real, intent (in), dimension (is:ie, js:je, km + 1) :: hgt !< hgt (k) > hgt (k + 1)
+    real, intent (in), dimension (is:ie, js:je, km + 1) :: hgt ! hgt (k) > hgt (k + 1)
 
     real, intent (in) :: zl
 
@@ -4785,10 +4801,10 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
     integer, intent (in) :: is, ie, js, je
 
     real, intent (in), dimension (is:ie, js:je) :: den, t
-    real, intent (in), dimension (is:ie, js:je) :: qw, qi, qr, qs, qg !< units: kg / kg
+    real, intent (in), dimension (is:ie, js:je) :: qw, qi, qr, qs, qg ! units: kg / kg
 
-    real, intent (out), dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg !< units: kg / m^3
-    real, intent (out), dimension (is:ie, js:je) :: rew, rei, rer, res, reg !< units: micron
+    real, intent (out), dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg ! units: kg / m^3
+    real, intent (out), dimension (is:ie, js:je) :: rew, rei, rer, res, reg ! units: micron
 
     integer :: i, j
 
@@ -4894,6 +4910,7 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
     enddo
 
 end subroutine cloud_diagnosis
+!! @}
 !! @}
 !! @}
 
