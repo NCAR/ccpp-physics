@@ -23,12 +23,6 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!>\defgroup fast_sat_adj GFDL Cloud Fast Physics
-!>@brief The module 'fv_sat_adj' implements the fast processes in the GFDL
-!! cloud MP. It is part of the GFDL cloud MP.
-!!>@author Shian-Jiann Lin, Linjiong Zhou
-! =======================================================================
-
 module fv_sat_adj
 ! Modules Included:
 ! <table>
@@ -194,7 +188,12 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
 
 end subroutine fv_sat_adj_finalize
 
-!>\ingroup fast_sat_adj
+!>\defgroup fast_sat_adj GFDL Cloud Fast Physics
+!! @{
+!>@brief The module 'fv_sat_adj' implements the fast processes in the GFDL
+!! Cloud MP. It is part of the GFDL Cloud MP.
+!!>@author Shian-Jiann Lin, Linjiong Zhou
+!!
 !>@brief The subroutine 'fv_sat_adj' performs the fast processes in the GFDL microphysics.
 !>@details This is designed for single-moment 6-class cloud microphysics schemes.
 !! It handles the heat release due to in situ phase changes.
@@ -1144,12 +1143,9 @@ real function iqs2 (ta, den, dqdt)
 
 end function iqs2
 
-! =======================================================================
 !>\ingroup fast_sat_adj
-! saturation water vapor pressure table i
+!! saturation water vapor pressure table i
 ! 3 - phase table
-! =======================================================================
-
 subroutine qs_table (n)
     implicit none
     integer, intent (in) :: n
@@ -1195,12 +1191,9 @@ subroutine qs_table (n)
     enddo
 end subroutine qs_table
 
-! =======================================================================
 !>\ingroup fast_sat_adj
-! saturation water vapor pressure table ii
+!! saturation water vapor pressure table ii.
 ! 1 - phase table
-! =======================================================================
-
 subroutine qs_tablew (n)
     implicit none
     integer, intent (in) :: n
@@ -1220,12 +1213,9 @@ subroutine qs_tablew (n)
     enddo
 end subroutine qs_tablew
 
-! =======================================================================
 !>\ingroup fast_sat_adj
-! saturation water vapor pressure table iii
+!! saturation water vapor pressure table iii.
 ! 2 - phase table
-! =======================================================================
-
 subroutine qs_table2 (n)
     implicit none
     integer, intent (in) :: n
@@ -1263,3 +1253,4 @@ subroutine qs_table2 (n)
 end subroutine qs_table2
 
 end module fv_sat_adj
+!! @}

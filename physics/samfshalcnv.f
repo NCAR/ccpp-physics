@@ -23,7 +23,6 @@
 
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !! @{
-
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
 !!

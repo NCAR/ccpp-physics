@@ -42,11 +42,12 @@ CF=\max[0,\min(1,\frac{q_{plus}-q_{sat}}{q_{plus}-q_{minus}})]
 \f]
 
 \section intro_GFDL_cloud Intraphysics Communication
- + \ref arg_table_gfdl_cloud_microphys_run
-
+ + For GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run
+ + For GFDL Fast Physics: \ref arg_table_fv_sat_adj_run 
+ 
 \section Gen_GFDL_cloud  General Algorithm
- + mpdrv()
- + fv_sat_adj_work()
+ + For GFDL Cloud MP:  mpdrv()
+ + For GFDL Fast Physics: fv_sat_adj_work()
 
 
 */

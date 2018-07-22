@@ -1,6 +1,6 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the column GFDL cloud microphysics Chen and Lin (2013) 
-!! \cite chen_and_lin_2013.
+!! This file contains the column GFDL cloud microphysics ( Chen and Lin (2013) 
+!! \cite chen_and_lin_2013 ).
 !***********************************************************************
 !*                   GNU Lesser General Public License
 !*
@@ -22,14 +22,6 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 ! =======================================================================
-! cloud micro - physics package for gfdl global cloud resolving model
-! the algorithms are originally derived from lin et al 1983. most of the
-! key elements have been simplified / improved. this code at this stage
-! bears little to no similarity to the original lin mp in zetac.
-! therefore, it is best to be called gfdl micro - physics (gfdl mp) .
-! developer: shian-jiann lin, linjiong zhou
-! =======================================================================
-
 module gfdl_cloud_microphys
 
    use machine, only: kind_phys
@@ -48,96 +40,96 @@ module gfdl_cloud_microphys
    ! DH* CLEANUP!!!
    real(kind=kind_phys), parameter :: one = 1.0d0
    real(kind=kind_phys), parameter :: con_d00 = 0.0d0
-   real,                 parameter :: grav = 9.80665 !< gfs: acceleration due to gravity
-   real,                 parameter :: rgrav = 1./grav
-   real,                 parameter :: rdgas = 287.05 !< gfs: gas constant for dry air
-   real,                 parameter :: rvgas = 461.50 !< gfs: gas constant for water vapor
-   real,                 parameter :: cp_air = 1004.6 !< gfs: heat capacity of dry air at constant pressure
-   real,                 parameter :: hlv = 2.5e6 !< gfs: latent heat of evaporation
-   real,                 parameter :: hlf = 3.3358e5 !< gfs: latent heat of fusion
+   real,                 parameter :: grav = 9.80665       !< gfs: acceleration due to gravity
+   real,                 parameter :: rgrav = 1./grav      !< gfs: 1./grav
+   real,                 parameter :: rdgas = 287.05       !< gfs: gas constant for dry air
+   real,                 parameter :: rvgas = 461.50       !< gfs: gas constant for water vapor
+   real,                 parameter :: cp_air = 1004.6      !< gfs: heat capacity of dry air at constant pressure
+   real,                 parameter :: hlv = 2.5e6          !< gfs: latent heat of evaporation
+   real,                 parameter :: hlf = 3.3358e5       !< gfs: latent heat of fusion
    real,                 parameter :: pi = 3.1415926535897931 !< gfs: ratio of circle circumference to diameter
 
-   ! real, parameter :: rdgas = 287.04 !< gfdl: gas constant for dry air
+   ! real, parameter :: rdgas = 287.04                     !< gfdl: gas constant for dry air
 
-   ! real, parameter :: cp_air = rdgas * 7. / 2. ! 1004.675, heat capacity of dry air at constant pressure
-   real, parameter :: cp_vap = 4.0 * rvgas !< 1846.0, heat capacity of water vapore at constnat pressure
-   ! real, parameter :: cv_air = 717.56 ! satoh value
-   real, parameter :: cv_air = cp_air - rdgas !< 717.55, heat capacity of dry air at constant volume
-   ! real, parameter :: cv_vap = 1410.0 ! emanuel value
-   real, parameter :: cv_vap = 3.0 * rvgas !< 1384.5, heat capacity of water vapor at constant volume
+   ! real, parameter :: cp_air = rdgas * 7. / 2.           ! 1004.675, heat capacity of dry air at constant pressure
+   real, parameter :: cp_vap = 4.0 * rvgas                 !< 1846.0, heat capacity of water vapore at constnat pressure
+   ! real, parameter :: cv_air = 717.56                    ! satoh value
+   real, parameter :: cv_air = cp_air - rdgas              !< 717.55, heat capacity of dry air at constant volume
+   ! real, parameter :: cv_vap = 1410.0                    ! emanuel value
+   real, parameter :: cv_vap = 3.0 * rvgas                 !< 1384.5, heat capacity of water vapor at constant volume
 
    ! the following two are from emanuel's book "atmospheric convection"
-   ! real, parameter :: c_ice = 2106.0 ! heat capacity of ice at 0 deg c: c = c_ice + 7.3 * (t - tice)
-   ! real, parameter :: c_liq = 4190.0 ! heat capacity of water at 0 deg c
+   ! real, parameter :: c_ice = 2106.0                     ! heat capacity of ice at 0 deg c: c = c_ice + 7.3 * (t - tice)
+   ! real, parameter :: c_liq = 4190.0                     ! heat capacity of water at 0 deg c
 
-   real, parameter :: c_ice = 1972.0 !< gfdl: heat capacity of ice at - 15 deg c
-   real, parameter :: c_liq = 4185.5 !< gfdl: heat capacity of water at 15 deg c
-   ! real, parameter :: c_liq = 4218.0 ! ifs: heat capacity of liquid at 0 deg c
+   real, parameter :: c_ice = 1972.0                       !< gfdl: heat capacity of ice at - 15 deg c
+   real, parameter :: c_liq = 4185.5                       !< gfdl: heat capacity of water at 15 deg c
+   ! real, parameter :: c_liq = 4218.0                     ! ifs: heat capacity of liquid at 0 deg c
 
-   real, parameter :: eps = rdgas / rvgas ! 0.6219934995
-   real, parameter :: zvir = rvgas / rdgas - 1. !< 0.6077338443
+   real, parameter :: eps = rdgas / rvgas                  !< 0.6219934995
+   real, parameter :: zvir = rvgas / rdgas - 1.            !< 0.6077338443
 
-   real, parameter :: t_ice = 273.16 !< freezing temperature
-   real, parameter :: table_ice = 273.16 !< freezing point for qs table
+   real, parameter :: t_ice = 273.16                       !< freezing temperature
+   real, parameter :: table_ice = 273.16                   !< freezing point for qs table
 
-   ! real, parameter :: e00 = 610.71 ! gfdl: saturation vapor pressure at 0 deg c
-   real, parameter :: e00 = 611.21 !< ifs: saturation vapor pressure at 0 deg c
+   ! real, parameter :: e00 = 610.71                       ! gfdl: saturation vapor pressure at 0 deg c
+   real, parameter :: e00 = 611.21                         !< ifs: saturation vapor pressure at 0 deg c
 
-   real, parameter :: dc_vap = cp_vap - c_liq !< - 2339.5, isobaric heating / cooling
-   real, parameter :: dc_ice = c_liq - c_ice !< 2213.5, isobaric heating / colling
+   real, parameter :: dc_vap = cp_vap - c_liq              !< - 2339.5, isobaric heating / cooling
+   real, parameter :: dc_ice = c_liq - c_ice               !< 2213.5, isobaric heating / colling
 
-   real, parameter :: hlv0 = hlv !< gfs: evaporation latent heat coefficient at 0 deg c
-   ! real, parameter :: hlv0 = 2.501e6 ! emanuel appendix - 2
-   real, parameter :: hlf0 = hlf !< gfs: fussion latent heat coefficient at 0 deg c
-   ! real, parameter :: hlf0 = 3.337e5 ! emanuel
+   real, parameter :: hlv0 = hlv                           !< gfs: evaporation latent heat coefficient at 0 deg c
+   ! real, parameter :: hlv0 = 2.501e6                     ! emanuel appendix - 2
+   real, parameter :: hlf0 = hlf                           !< gfs: fussion latent heat coefficient at 0 deg c
+   ! real, parameter :: hlf0 = 3.337e5                     ! emanuel
 
-   real, parameter :: lv0 = hlv0 - dc_vap * t_ice!< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
-   real, parameter :: li00 = hlf0 - dc_ice * t_ice!< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
+   real, parameter :: lv0 = hlv0 - dc_vap * t_ice          !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
+   real, parameter :: li00 = hlf0 - dc_ice * t_ice         !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
 
-   real, parameter :: d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
-   real, parameter :: li2 = lv0 + li00 !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
+   real, parameter :: d2ice = dc_vap + dc_ice              !< - 126, isobaric heating/cooling
+   real, parameter :: li2 = lv0 + li00                     !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
 
-   real, parameter :: qrmin = 1.e-8 ! min value for ???
-   real, parameter :: qvmin = 1.e-20 !< min value for water vapor (treated as zero)
-   real, parameter :: qcmin = 1.e-12 !< min value for cloud condensates
+   real, parameter :: qrmin = 1.e-8                        !< min value for rain
+   real, parameter :: qvmin = 1.e-20                       !< min value for water vapor (treated as zero)
+   real, parameter :: qcmin = 1.e-12                       !< min value for cloud condensates
 
-   real, parameter :: vr_min = 1.e-3 !< min fall speed for rain
-   real, parameter :: vf_min = 1.e-5 !< min fall speed for cloud ice, snow, graupel
+   real, parameter :: vr_min = 1.e-3                       !< min fall speed for rain
+   real, parameter :: vf_min = 1.e-5                       !< min fall speed for cloud ice, snow, graupel
 
-   real, parameter :: dz_min = 1.e-2 ! use for correcting flipped height
+   real, parameter :: dz_min = 1.e-2                       !< use for correcting flipped height
 
-   real, parameter :: sfcrho = 1.2 !< surface air density
-   real, parameter :: rhor = 1.e3 !< density of rain water, lin83
+   real, parameter :: sfcrho = 1.2                         !< surface air density
+   real, parameter :: rhor = 1.e3                          !< density of rain water, lin83
 
    real :: cracs, csacr, cgacr, cgacs, csacw, craci, csaci, cgacw, cgaci, cracw !< constants for accretions
-   real :: acco (3, 4) !< constants for accretions
+   real :: acco (3, 4)                                     !< constants for accretions
    real :: cssub (5), cgsub (5), crevp (5), cgfr (2), csmlt (5), cgmlt (5)
 
    real :: es0, ces0
    real :: pie, fac_rc
    real :: c_air, c_vap
 
-   real :: lati, latv, lats, lat2, lcp, icp, tcp !< used in bigg mechanism and wet bulk
+   real :: lati, latv, lats, lat2, lcp, icp, tcp           !< used in bigg mechanism and wet bulk
 
-   real :: d0_vap !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
-   real :: lv00 !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
+   real :: d0_vap                                          !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
+   real :: lv00                                            !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
 
    ! cloud microphysics switchers
 
-   integer :: icloud_f = 0 !< cloud scheme
-   integer :: irain_f = 0 !< cloud water to rain auto conversion scheme
+   integer :: icloud_f = 0                                 !< cloud scheme
+   integer :: irain_f = 0                                  !< cloud water to rain auto conversion scheme
 
-   logical :: de_ice = .false. !< to prevent excessive build - up of cloud ice from external sources
-   logical :: sedi_transport = .true. !< transport of momentum in sedimentation
-   logical :: do_sedi_w = .false. !< transport of vertical motion in sedimentation
-   logical :: do_sedi_heat = .true. !< transport of heat in sedimentation
-   logical :: prog_ccn = .false. !< do prognostic ccn (yi ming's method)
-   logical :: do_qa = .true. !< do inline cloud fraction
-   logical :: rad_snow = .true. !< consider snow in cloud fraciton calculation
-   logical :: rad_graupel = .true. !< consider graupel in cloud fraction calculation
-   logical :: rad_rain = .true. !< consider rain in cloud fraction calculation
-   logical :: fix_negative = .false. !< fix negative water species
-   logical :: p_nonhydro = .false. !< perform hydrosatic adjustment on air density
+   logical :: de_ice = .false.                             !< to prevent excessive build - up of cloud ice from external sources
+   logical :: sedi_transport = .true.                      !< transport of momentum in sedimentation
+   logical :: do_sedi_w = .false.                          !< transport of vertical motion in sedimentation
+   logical :: do_sedi_heat = .true.                        !< transport of heat in sedimentation
+   logical :: prog_ccn = .false.                           !< do prognostic ccn (yi ming's method)
+   logical :: do_qa = .true.                               !< do inline cloud fraction
+   logical :: rad_snow = .true.                            !< consider snow in cloud fraciton calculation
+   logical :: rad_graupel = .true.                         !< consider graupel in cloud fraction calculation
+   logical :: rad_rain = .true.                            !< consider rain in cloud fraction calculation
+   logical :: fix_negative = .false.                       !< fix negative water species
+   logical :: p_nonhydro = .false.                         !< perform hydrosatic adjustment on air density
 
    real, allocatable :: table (:), table2 (:), table3 (:), tablew (:)
    real, allocatable :: des (:), des2 (:), des3 (:), desw (:)
@@ -147,11 +139,11 @@ module gfdl_cloud_microphys
    ! id_ice, id_prec, id_cond, id_var, id_droplets
    ! integer :: gfdl_mp_clock ! clock for timing of run routine
 
-   real, parameter :: dt_fr = 8. !< homogeneous freezing of all cloud water at t_wfr - dt_fr
+   real, parameter :: dt_fr = 8.                           !< homogeneous freezing of all cloud water at t_wfr - dt_fr
    ! minimum temperature water can exist (moore & molinero nov. 2011, nature)
    ! dt_fr can be considered as the error bar
 
-   real :: p_min = 100. !< minimum pressure (pascal) for mp to operate
+   real :: p_min = 100.                                    !< minimum pressure (pascal) for mp to operate
 
    ! slj, the following parameters are for cloud - resolving resolution: 1 - 5 km
 
@@ -161,46 +153,46 @@ module gfdl_cloud_microphys
    ! c_pgacs = 0.1
 
    ! -----------------------------------------------------------------------
-   !> namelist parameters
+   ! namelist parameters
    ! -----------------------------------------------------------------------
 
-   real :: cld_min = 0.05 !< minimum cloud fraction
-   real :: tice = 273.16 !< set tice = 165. to trun off ice - phase phys (kessler emulator)
+   real :: cld_min = 0.05                                  !< minimum cloud fraction
+   real :: tice = 273.16                                   !< set tice = 165. to trun off ice - phase phys (kessler emulator)
 
-   real :: t_min = 178. !< min temp to freeze - dry all water vapor
-   real :: t_sub = 184. !< min temp for sublimation of cloud ice
-   real :: mp_time = 150. !< maximum micro - physics time step (sec)
+   real :: t_min = 178.                                    !< min temp to freeze - dry all water vapor
+   real :: t_sub = 184.                                    !< min temp for sublimation of cloud ice
+   real :: mp_time = 150.                                  !< maximum micro - physics time step (sec)
 
    ! relative humidity increment
 
-   real :: rh_inc = 0.25 !< rh increment for complete evaporation of cloud water and cloud ice
-   real :: rh_inr = 0.25 !< rh increment for minimum evaporation of rain
-   real :: rh_ins = 0.25 !< rh increment for sublimation of snow
+   real :: rh_inc = 0.25                                   !< rh increment for complete evaporation of cloud water and cloud ice
+   real :: rh_inr = 0.25                                   !< rh increment for minimum evaporation of rain
+   real :: rh_ins = 0.25                                   !< rh increment for sublimation of snow
 
    ! conversion time scale
 
-   real :: tau_r2g = 900. !< rain freezing during fast_sat
-   real :: tau_smlt = 900. !< snow melting
-   real :: tau_g2r = 600. !< graupel melting to rain
-   real :: tau_imlt = 600. !< cloud ice melting
-   real :: tau_i2s = 1000. !< cloud ice to snow auto - conversion
-   real :: tau_l2r = 900. !< cloud water to rain auto - conversion
-   real :: tau_v2l = 150. !< water vapor to cloud water (condensation)
-   real :: tau_l2v = 300. !< cloud water to water vapor (evaporation)
-   real :: tau_g2v = 900. !< graupel sublimation
-   real :: tau_v2g = 21600. !< graupel deposition -- make it a slow process
+   real :: tau_r2g = 900.                                  !< rain freezing during fast_sat
+   real :: tau_smlt = 900.                                 !< snow melting
+   real :: tau_g2r = 600.                                  !< graupel melting to rain
+   real :: tau_imlt = 600.                                 !< cloud ice melting
+   real :: tau_i2s = 1000.                                 !< cloud ice to snow auto-conversion
+   real :: tau_l2r = 900.                                  !< cloud water to rain auto-conversion
+   real :: tau_v2l = 150.                                  !< water vapor to cloud water (condensation)
+   real :: tau_l2v = 300.                                  !< cloud water to water vapor (evaporation)
+   real :: tau_g2v = 900.                                  !< graupel sublimation
+   real :: tau_v2g = 21600.                                !< graupel deposition -- make it a slow process
 
    ! horizontal subgrid variability
 
-   real :: dw_land = 0.20 !< base value for subgrid deviation / variability over land
-   real :: dw_ocean = 0.10 !< base value for ocean
+   real :: dw_land = 0.20                                  !< base value for subgrid deviation / variability over land
+   real :: dw_ocean = 0.10                                 !< base value for ocean
 
    ! prescribed ccn
 
-   real :: ccn_o = 90. !< ccn over ocean (cm^ - 3)
-   real :: ccn_l = 270. !< ccn over land (cm^ - 3)
+   real :: ccn_o = 90.                                     !< ccn over ocean (cm^ - 3)
+   real :: ccn_l = 270.                                    !< ccn over land (cm^ - 3)
 
-   real :: rthresh = 10.0e-6 !< critical cloud drop radius (micro m)
+   real :: rthresh = 10.0e-6                               !< critical cloud drop radius (micro m)
 
    ! -----------------------------------------------------------------------
    ! wrf / wsm6 scheme: qi_gen = 4.92e-11 * (1.e3 * exp (0.1 * tmp)) ** 1.33
@@ -210,70 +202,70 @@ module gfdl_cloud_microphys
    ! wrf / wsm6 ice initiation scheme; qi_crt = qi_gen * min (qi_lim, 0.1 * tmp) / den
    ! -----------------------------------------------------------------------
 
-   real :: sat_adj0 = 0.90 !< adjustment factor (0: no, 1: full) during fast_sat_adj
+   real :: sat_adj0 = 0.90                                 !< adjustment factor (0: no, 1: full) during fast_sat_adj
 
-   real :: qc_crt = 5.0e-8 !< mini condensate mixing ratio to allow partial cloudiness
+   real :: qc_crt = 5.0e-8                                 !< mini condensate mixing ratio to allow partial cloudiness
 
-   real :: qi_lim = 1. !< cloud ice limiter to prevent large ice build up
+   real :: qi_lim = 1.                                     !< cloud ice limiter to prevent large ice build up
 
-   real :: ql_mlt = 2.0e-3 !< max value of cloud water allowed from melted cloud ice
-   real :: qs_mlt = 1.0e-6 !< max cloud water due to snow melt
+   real :: ql_mlt = 2.0e-3                                 !< max value of cloud water allowed from melted cloud ice
+   real :: qs_mlt = 1.0e-6                                 !< max cloud water due to snow melt
 
-   real :: ql_gen = 1.0e-3 !< max cloud water generation during remapping step if fast_sat_adj = .t.
-   real :: qi_gen = 1.82e-6 !< max cloud ice generation during remapping step
+   real :: ql_gen = 1.0e-3                                 !< max cloud water generation during remapping step if fast_sat_adj = .t.
+   real :: qi_gen = 1.82e-6                                !< max cloud ice generation during remapping step
 
    ! cloud condensate upper bounds: "safety valves" for ql & qi
 
-   real :: ql0_max = 2.0e-3 !< max cloud water value (auto converted to rain)
-   real :: qi0_max = 1.0e-4 !< max cloud ice value (by other sources)
+   real :: ql0_max = 2.0e-3                                !< max cloud water value (auto converted to rain)
+   real :: qi0_max = 1.0e-4                                !< max cloud ice value (by other sources)
 
-   real :: qi0_crt = 1.0e-4 !< cloud ice to snow autoconversion threshold (was 1.e-4)
-                            !! qi0_crt is highly dependent on horizontal resolution
-   real :: qr0_crt = 1.0e-4 !< rain to snow or graupel / hail threshold
-                            !! lfo used * mixing ratio * = 1.e-4 (hail in lfo)
-   real :: qs0_crt = 1.0e-3 !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
+   real :: qi0_crt = 1.0e-4                                !< cloud ice to snow autoconversion threshold (was 1.e-4);
+                                                           !! qi0_crt is highly dependent on horizontal resolution
+   real :: qr0_crt = 1.0e-4                                !< rain to snow or graupel/hail threshold
+                                                           ! lfo used * mixing ratio * = 1.e-4 (hail in lfo)
+   real :: qs0_crt = 1.0e-3                                !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
 
-   real :: c_paut = 0.55 !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
-   real :: c_psaci = 0.02 !< accretion: cloud ice to snow (was 0.1 in zetac)
-   real :: c_piacr = 5.0 !< accretion: rain to ice:
-   real :: c_cracw = 0.9 !< rain accretion efficiency
-   real :: c_pgacs = 2.0e-3 !< snow to graupel "accretion" eff. (was 0.1 in zetac)
+   real :: c_paut = 0.55                                   !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
+   real :: c_psaci = 0.02                                  !< accretion: cloud ice to snow (was 0.1 in zetac)
+   real :: c_piacr = 5.0                                   !< accretion: rain to ice:
+   real :: c_cracw = 0.9                                   !< rain accretion efficiency
+   real :: c_pgacs = 2.0e-3                                !< snow to graupel "accretion" eff. (was 0.1 in zetac)
 
    ! decreasing clin to reduce csacw (so as to reduce cloud water --- > snow)
 
-   real :: alin = 842.0 !< "a" in lin1983
-   real :: clin = 4.8 !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
+   real :: alin = 842.0                                    !< "a" in lin1983
+   real :: clin = 4.8                                      !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
 
    ! fall velocity tuning constants:
 
-   logical :: const_vi = .false. !< if .t. the constants are specified by v * _fac
-   logical :: const_vs = .false. !< if .t. the constants are specified by v * _fac
-   logical :: const_vg = .false. !< if .t. the constants are specified by v * _fac
-   logical :: const_vr = .false. !< if .t. the constants are specified by v * _fac
+   logical :: const_vi = .false.                           !< if .t. the constants are specified by v * _fac
+   logical :: const_vs = .false.                           !< if .t. the constants are specified by v * _fac
+   logical :: const_vg = .false.                           !< if .t. the constants are specified by v * _fac
+   logical :: const_vr = .false.                           !< if .t. the constants are specified by v * _fac
 
    ! good values:
 
-   real :: vi_fac = 1. !< if const_vi: 1 / 3
-   real :: vs_fac = 1. !< if const_vs: 1.
-   real :: vg_fac = 1. !< if const_vg: 2.
-   real :: vr_fac = 1. !< if const_vr: 4.
+   real :: vi_fac = 1.                                     !< if const_vi: 1 / 3
+   real :: vs_fac = 1.                                     !< if const_vs: 1.
+   real :: vg_fac = 1.                                     !< if const_vg: 2.
+   real :: vr_fac = 1.                                     !< if const_vr: 4.
 
    ! upper bounds of fall speed (with variable speed option)
 
-   real :: vi_max = 0.5 !< max fall speed for ice
-   real :: vs_max = 5.0 !< max fall speed for snow
-   real :: vg_max = 8.0 !< max fall speed for graupel
-   real :: vr_max = 12. !< max fall speed for rain
+   real :: vi_max = 0.5                                    !< max fall speed for ice
+   real :: vs_max = 5.0                                    !< max fall speed for snow
+   real :: vg_max = 8.0                                    !< max fall speed for graupel
+   real :: vr_max = 12.                                    !< max fall speed for rain
 
    ! cloud microphysics switchers
 
-   logical :: fast_sat_adj = .false. !< has fast saturation adjustments
-   logical :: z_slope_liq = .true. !< use linear mono slope for autocconversions
-   logical :: z_slope_ice = .false. !< use linear mono slope for autocconversions
-   logical :: use_ccn = .false. !< must be true when prog_ccn is false
-   logical :: use_ppm = .false. !< use ppm fall scheme
-   logical :: mono_prof = .true. !< perform terminal fall with mono ppm scheme
-   logical :: mp_print = .false. !< cloud microphysics debugging printout
+   logical :: fast_sat_adj = .false.                       !< has fast saturation adjustments
+   logical :: z_slope_liq = .true.                         !< use linear mono slope for autocconversions
+   logical :: z_slope_ice = .false.                        !< use linear mono slope for autocconversions
+   logical :: use_ccn = .false.                            !< must be true when prog_ccn is false
+   logical :: use_ppm = .false.                            !< use ppm fall scheme
+   logical :: mono_prof = .true.                           !< perform terminal fall with mono ppm scheme
+   logical :: mp_print = .false.                           !< cloud microphysics debugging printout
 
    ! real :: global_area = - 1.
 
@@ -313,13 +305,10 @@ contains
 ! CCPP entry points for gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-! =======================================================================
-! initialization of gfdl cloud microphysics
 !>@brief The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
-! =======================================================================
-
-!! \section arg_table_gfdl_cloud_microphys_init Argument Table
+!!
+!> \section arg_table_gfdl_cloud_microphys_init Argument Table
 !! | local_name       | standard_name                                    | long_name                                          | units  | rank | type      | kind  | intent | optional |
 !! |------------------|--------------------------------------------------|----------------------------------------------------|--------|------|-----------|-------|--------|----------|
 !! | me               | mpi_rank                                         | MPI rank of current process                        | index  | 0    | integer   |       | in     | F        |
@@ -443,16 +432,22 @@ contains
    
    end subroutine gfdl_cloud_microphys_finalize
 
-!> \defgroup gfdlcloud GFDL Cloud Microphysics Main
-!>@brief The module "gfdl_cloud_microphys" contains the GFDL cloud
-!! microphysics Chen and Lin (2013) \cite chen_and_lin_2013.
+!>\defgroup gfdlmp  GFDL Cloud Microphysics Module
+!! @{
+!! This is cloud microphysics package for GFDL global cloud resolving model.
+!! The algorithms are originally derived from Lin et al. (1983) \cite lin_et_al_1983.
+!! most of the key elements have been simplified/improved. This code at this stage
+!! bears little to no similarity to the original Lin MP in zetac.
+!! therefore, it is best to be called GFDL microphysics (GFDL MP) .
+!>\author Shian-Jiann Lin, Linjiong Zhou
+!!
+!>@brief The module contains the GFDL cloud
+!! microphysics (Chen and Lin (2013) \cite chen_and_lin_2013 ).
 !> The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
-!>\author Shian-Jiann Lin, Linjiong Zhou
-!! @{
 !!
-!>\ingroup gfdlcloud
-!>@brief The subroutine 'gfdl_cloud_microphys_run' executes the full GFDL cloud microphysics.
+!>\ingroup gfdlmp
+!>@brief The subroutine executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! | local_name       | standard_name                                              | long_name                                              | units      | rank | type      | kind      | intent| optional |
 !! |------------------|------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|-------|----------|
@@ -617,7 +612,7 @@ contains
 
 ! ------------------------------------------------------------------------------------------
 
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 subroutine gfdl_cloud_microphys_work (iis, iie, jjs, jje, kks, kke, ktop, kbot, &
             qv, ql, qr, qi, qs, qg, qa, qn,                                     &
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
@@ -881,13 +876,13 @@ subroutine gfdl_cloud_microphys_work (iis, iie, jjs, jje, kks, kke, ktop, kbot, 
 end subroutine gfdl_cloud_microphys_work
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlcloud
 !>@brief GFDL cloud microphysics, major program, and is based on
 !!  Lin et al.(1983) \cite lin_et_al_1983 and
 !! Rutledge and Hobbs (1984) \cite rutledge_and_hobbs_1984.
 !!
 !>\section detmpdrv GFDL Cloud mpdrv General Algorithm
 !! @{
+!>\ingroup gfdlmp
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
         rain, snow, graupel, ice, m2_rain, m2_sol, cond, area1, land,         &
@@ -1294,10 +1289,8 @@ end subroutine mpdrv
 !! @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>\brief This subroutine calculates sedimentation of heat.
-! -----------------------------------------------------------------------
-
 subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
 
     implicit none
@@ -1350,7 +1343,7 @@ subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
 end subroutine sedi_heat
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> This subroutine includes warm rain cloud microphysics.
 !>\section warm_gen GFDL Cloud warm_rain General Algorithm
 !! @{
@@ -1575,7 +1568,7 @@ end subroutine warm_rain
 !! @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> This subroutine calculates evaporation of rain and accretion of rain.
 !!\section gen_ravap GFDL Cloud revap_racc General Algorithm
 !! @{
@@ -1679,7 +1672,7 @@ end subroutine revap_racc
 !! @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> Definition of vertical subgrid variability
 !! used for cloud ice and cloud water autoconversion.
 ! qi -- > ql & ql -- > qr
@@ -1745,7 +1738,7 @@ end subroutine linear_prof
 !! @}
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> This subroutine includes cloud ice microphysics processes.
 !>\author Shian-Jiann Lin, GFDL
 !!
@@ -2240,7 +2233,7 @@ end subroutine icloud
 !! @}
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> This subroutine calculates temperature sentive high vertical resolution processes.
 !>\section gen_subz GFDL Cloud subgrid_z_proc General Algorithm
 !! @{
@@ -2665,7 +2658,7 @@ end subroutine subgrid_z_proc
 !! @}
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> This subroutine calculates rain evaporation.
 ! =======================================================================
 
@@ -2759,7 +2752,7 @@ subroutine revap_rac1 (hydrostatic, is, ie, dt, tz, qv, ql, qr, qi, qs, qg, den,
 end subroutine revap_rac1
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'terminal_fall' computes terminal fall speed.
 !>@details It considers cloud ice, snow, and graupel's melting during fall.
 ! =======================================================================
@@ -3073,7 +3066,7 @@ subroutine terminal_fall (dtm, ktop, kbot, tz, qv, ql, qr, qg, qs, qi, dz, dp, &
 end subroutine terminal_fall
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'check_column' checks
 !! if the water species is large enough to fall.
 ! =======================================================================
@@ -3102,7 +3095,7 @@ subroutine check_column (ktop, kbot, q, no_fall)
 end subroutine check_column
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine computes the time-implicit monotonic 
 !! fall scheme.
 !>@author Shian-Jiann Lin, 2016
@@ -3174,7 +3167,7 @@ subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 end subroutine implicit_fall
 
 ! =======================================================================
-!!\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !! Lagrangian scheme
 !>  \author  S.J. Lin
 ! =======================================================================
@@ -3277,7 +3270,7 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
 
 end subroutine lagrangian_fall_ppm
 
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 subroutine cs_profile (a4, del, km, do_mono)
 
     implicit none
@@ -3455,7 +3448,7 @@ subroutine cs_profile (a4, del, km, do_mono)
 
 end subroutine cs_profile
 
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !! This subroutine perform positive definite constraint.
 subroutine cs_limiters (km, a4)
 
@@ -3494,7 +3487,7 @@ subroutine cs_limiters (km, a4)
 end subroutine cs_limiters
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !> The subroutine calculates vertical fall speed of snow/ice/graupel.
 ! =======================================================================
 
@@ -3609,7 +3602,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
 end subroutine fall_speed
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine sets up gfdl cloud microphysics parameters.
 ! =======================================================================
 
@@ -3758,7 +3751,7 @@ subroutine setupm
 end subroutine setupm
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The function is an accretion function (Lin et al.(1983)
 !! \cite lin_et_al_1983 )
 ! =======================================================================
@@ -3793,7 +3786,7 @@ real function acr3d (v1, v2, q1, q2, c, cac, rho)
 end function acr3d
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief Melting of snow function (Lin et al.(1983) \cite lin_et_al_1983)
 !!  note: psacw and psacr must be calc before smlt is called
 ! =======================================================================
@@ -3829,7 +3822,7 @@ end function gmlt
 ! initialization
 ! prepare saturation water vapor pressure tables
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'qsmith_init' initializes lookup tables for saturation
 !! water vapor pressure for the following utility routines that are designed
 !! to return qs consistent with the assumptions in FV3.
@@ -3888,7 +3881,7 @@ end subroutine qsmith_setup
 
 ! =======================================================================
 ! compute the saturated specific humidity for table ii
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The function 'wqs1' returns the saturation vapor pressure over pure
 !! liquid water for a given temperature and air density.
 ! =======================================================================
@@ -4216,7 +4209,7 @@ real function es2_table (ta)
 end function es2_table
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'esw_table1d' computes the saturated water vapor
 !! pressure for table ii.
 ! =======================================================================
@@ -4247,7 +4240,7 @@ subroutine esw_table1d (ta, es, n)
 end subroutine esw_table1d
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iii.
 ! =======================================================================
@@ -4278,7 +4271,7 @@ subroutine es2_table1d (ta, es, n)
 end subroutine es2_table1d
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iv.
 ! =======================================================================
@@ -4309,7 +4302,7 @@ subroutine es3_table1d (ta, es, n)
 end subroutine es3_table1d
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief saturation water vapor pressure table ii
 ! 1 - phase table
 ! =======================================================================
@@ -4342,7 +4335,7 @@ subroutine qs_tablew (n)
 end subroutine qs_tablew
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief saturation water vapor pressure table iii
 ! 2 - phase table
 ! =======================================================================
@@ -4393,7 +4386,7 @@ subroutine qs_table2 (n)
 end subroutine qs_table2
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief saturation water vapor pressure table iv
 ! 2 - phase table with " - 2 c" as the transition point
 ! =======================================================================
@@ -4458,7 +4451,7 @@ end subroutine qs_table3
 ! =======================================================================
 ! compute the saturated specific humidity for table
 ! note: this routine is based on "moist" mixing ratio
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The function 'qs_blend' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature.
 ! =======================================================================
@@ -4483,7 +4476,7 @@ real function qs_blend (t, p, q)
 end function qs_blend
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief saturation water vapor pressure table i
 ! 3 - phase table
 ! =======================================================================
@@ -4548,7 +4541,7 @@ end subroutine qs_table
 ! =======================================================================
 ! compute the saturated specific humidity and the gradient of saturated specific humidity
 ! input t in deg k, p in pa; p = rho rdry tv, moist pressure
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The function 'qsmith' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature in 3D.
 !@details It als oincludes the option for computing des/dT.
@@ -4599,7 +4592,7 @@ subroutine qsmith (im, km, ks, t, p, q, qs, dqdt)
 end subroutine qsmith
 
 ! =======================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'neg_adj' fixes negative water species.
 !>@details This is designed for 6-class micro-physics schemes.
 ! =======================================================================
@@ -4741,7 +4734,7 @@ end subroutine neg_adj
 !end function g_sum
 
 ! ==========================================================================
-!>\ingroup gfdlcloud
+!>\ingroup gfdlmp
 !>@brief The subroutine 'interpolate_z' interpolates to a prescribed height.
 ! ==========================================================================
 
@@ -4788,7 +4781,7 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 end subroutine interpolate_z
 
 ! =======================================================================
-!> \ingroup gfdlcloud
+!> \ingroup gfdlmp
 !>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud 
 !! species.
 ! =======================================================================
@@ -4912,6 +4905,6 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
 end subroutine cloud_diagnosis
 !! @}
 !! @}
-!! @}
 
 end module gfdl_cloud_microphys
+!!@}

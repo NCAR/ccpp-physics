@@ -185,6 +185,9 @@ contains
   !
   !======================
 !>\ingroup waterprop
+!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the depth
+!! z (Fairall et al. (1996) \cite fairall_et_al_1996, p. 1298) following Paulson and Simpson
+!! (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_fairall_6exp_v1(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -254,6 +257,11 @@ contains
   end subroutine sw_fairall_6exp_v1_aw
   !
 !>\ingroup waterprop
+!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the 
+!! depth z (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1298) following Paulson and
+!! Simpson (1981) \cite paulson_and_simpson (1981).
+!>\param[in] z     depth (m)
+!>\param[out] sum  for convection depth calculation
   elemental subroutine sw_fairall_6exp_v1_sum(z,sum)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -285,6 +293,11 @@ contains
   !
   !======================
 !>\ingroup waterprop
+!! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996) 
+!! \cite fairall_et_al_1996, p.1298)
+!>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+!>\param[in] z           depth (m)
+!>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_fairall_simple_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -311,6 +324,11 @@ contains
   !======================
   !
 !>\ingroup waterprop
+!! solar radiation absorbed by the ocean at the depth z (Zeng and Beljaars (2005) 
+!! \cite zeng_and_beljaars_2005 , p.5).
+!>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+!>\param[in] z           depth (m)
+!>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_wick_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (zeng and beljaars, 2005, p.5)
@@ -337,6 +355,12 @@ contains
   !======================
   !
 !>\ingroup waterprop
+!! This subroutine computes solar radiation absorbed by the ocean at the depth z
+!! (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1301) following 
+!! Soloviev and Vershinsky (1982) \cite soloviev_and_vershinsky_1982.
+!>\param[in]f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+!>\param[in]z           depth (m)
+!>\param[out]df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_soloviev_3exp_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)

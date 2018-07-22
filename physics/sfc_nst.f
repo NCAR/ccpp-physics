@@ -415,7 +415,7 @@ cc
           qrain(i) =  (1000.*rain(i)/rho_w)*alfac*cp_w*
      &                (tsea-t1(i)+(1000.*qss(i)-1000.*q0(i))*le/cp)
 
-!  --- ...  input non solar heat flux as upward = positive to models here
+!> - Calculate input non solar heat flux as upward = positive to models here
 
           f_nsol   = hflx(i) + evap(i) + ulwflx(i) - dlwflx(i)
      &             + omg_sh*qrain(i)
