@@ -89,14 +89,14 @@
 
 ! \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection
 !>\defgroup SAMF_shal_main GFS mfshalcnv Main
-!! @{
 !> \brief The subroutine contains the entirety of the SAMF shallow convection scheme.
+!!
 !! The scale-aware mass-flux shallow  convection
 !! scheme is an updated version of the previous mass-flux shallow
 !! convection scheme with scale and aerosol awareness and
 !! parameterizes the effect of shallow convection on the environment.
 !!
-!! \section arg_table_sasas_shal_run Argument Table
+!> \section arg_table_sasas_shal_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                              | units   | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|--------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                                 | count   |    0 | integer   |           | in     | F        |
@@ -1769,7 +1769,6 @@ c
 !!
       return
       end subroutine sasas_shal_run
-!! @}
 !! @}
 
 !!
