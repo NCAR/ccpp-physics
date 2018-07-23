@@ -446,7 +446,6 @@ contains
 !> The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
 !!
-!>\ingroup gfdlmp
 !>@brief The subroutine executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! | local_name       | standard_name                                              | long_name                                              | units      | rank | type      | kind      | intent| optional |
@@ -4001,14 +4000,12 @@ end function iqs1
 ! =======================================================================
 !>@brief The function 'iqs2' computes the gradient of saturated specific
 !! humidity for table iii
-! =======================================================================
-
 real function iqs2 (ta, den, dqdt)
 
     implicit none
 
-    !> water - ice phase; universal dry / moist formular using air density
-    !> input "den" can be either dry or moist air density
+    ! water - ice phase; universal dry / moist formular using air density
+    ! input "den" can be either dry or moist air density
 
     real, intent (in) :: ta, den
 

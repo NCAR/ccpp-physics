@@ -2,8 +2,6 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
-!\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
-!
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
