@@ -77,8 +77,8 @@
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | cnvw           | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio           | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac    |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                             | error message for error handling in CCPP            | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                | error flag for error handling in CCPP               | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_mfdeep GFS SAMF Deep Convection Scheme General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and

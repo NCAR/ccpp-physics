@@ -28,8 +28,8 @@
 !! | save_v          | y_wind_save                                            | y-wind before entering a physics scheme                                   | m s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | save_t          | air_temperature_save                                   | air temperature before entering a physics scheme                          | K       |    2 | real      | kind_phys | inout  | F        |
 !! | save_qv         | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg          | error_message                                          | error message for error handling in CCPP                                  | none    |    0 | character | len=*     | out    | F        |
-!! | errflg          | error_flag                                             | error flag for error handling in CCPP                                     | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                  | none    |    0 | character | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag    |    0 | integer   |           | out    | F        |
 !!
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, cnvgwd, lgocart, gu0, gv0, gt0, gq0_water_vapor, &
       save_u, save_v, save_t, save_qv, errmsg, errflg)
@@ -136,8 +136,8 @@
 !! | cnvc            | convective_cloud_cover                                                                      | convective cloud cover                                               | frac          |    2 | real              | kind_phys | inout  | F        |
 !! | cnvw_phy_f3d    | convective_cloud_water_mixing_ratio_in_phy_f3d                                              | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | cnvc_phy_f3d    | convective_cloud_cover_in_phy_f3d                                                           | convective cloud cover in the phy_f3d array                          | frac          |    2 | real              | kind_phys | inout  | F        |
-!! | errmsg          | error_message                                                                               | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg          | error_flag                                                                                  | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
 !!
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, frain, rain1, dtf, cld1d, &
       save_u, save_v, save_t, save_qv, gu0, gv0, gt0, gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, &

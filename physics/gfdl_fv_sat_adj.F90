@@ -114,8 +114,8 @@ contains
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | kmp            | top_layer_index_for_fast_physics                              | top_layer_inder_for_gfdl_mp                                                            | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | error_message                                                 | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
 !!
 subroutine fv_sat_adj_init(kmp, errmsg, errflg)
 
@@ -163,8 +163,8 @@ end subroutine fv_sat_adj_init
 !! \section arg_table_fv_sat_adj_finalize Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | errmsg         | error_message                                                 | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
 !!
 subroutine fv_sat_adj_finalize (errmsg, errflg)
 
@@ -236,8 +236,8 @@ end subroutine fv_sat_adj_finalize
 !! | do_qa          | flag_for_inline_cloud_fraction_calculation                    | flag for the inline cloud fraction calculation                                         | flag      |    0 | logical   |           | in     | F        |
 !! | qa             | cloud_fraction_at_Lagrangian_surface                          | cloud fraction at Lagrangian surface                                                   | none      |    3 | real      |           | out    | F        |
 !! | nthreads       | omp_threads                                                   | number of OpenMP threads available for fast physics schemes                            | count     |    0 | integer   |           | in     | F        |
-!! | errmsg         | error_message                                                 | error message for error handling in CCPP                                               | none      |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                                                  | flag      |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none      |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag      |    0 | integer   |           | out    | F        |
 !!
 subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, jsd, jed, &
                  ng, hydrostatic, fast_mp_consv, te0_2d, te0, qv, ql, qi, qr, qs, qg,     &

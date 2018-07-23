@@ -39,8 +39,8 @@ module GFS_suite_setup_scm
 !! | ozone_pres           | natural_log_of_ozone_forcing_data_pressure_levels_from_host | natural logarithm of the pressure levels of the ozone forcing data      | Pa            |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_time           | time_levels_in_ozone_forcing_data_from_host                 | time values of the ozone forcing data coming from host                  | day           |    1 | real                          | kind_phys | in     | F        |
 !! | ozone_forcing_in     | ozone_forcing_from_host                                     | ozone forcing data from host                                            | various       |    4 | real                          | kind_phys | in     | F        |
-!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! | errmsg               | ccpp_error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | ccpp_error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
   subroutine GFS_suite_setup_scm_init (Model, Statein, Stateout, Sfcprop,           &
                              Coupling, Grid, Tbd, Cldprop, Radtend, Diag,         &
@@ -201,8 +201,8 @@ module GFS_suite_setup_scm
 !> \section arg_table_GFS_suite_setup_scm_run Argument Table
 !! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! | errmsg               | ccpp_error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | ccpp_error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
   subroutine GFS_suite_setup_scm_run (errmsg, errflg)
     character(len=*), intent(out) :: errmsg
@@ -216,8 +216,8 @@ module GFS_suite_setup_scm
 !> \section arg_table_GFS_suite_setup_scm_finalize Argument Table
 !! | local_name           | standard_name                                               | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | errmsg               | error_message                                               | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg               | error_flag                                                  | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! | errmsg               | ccpp_error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg               | ccpp_error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
   subroutine GFS_suite_setup_scm_finalize (errmsg, errflg)
 

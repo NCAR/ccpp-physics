@@ -26,8 +26,8 @@
 !! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
 !! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
 !! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                           | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                              | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
@@ -179,8 +179,8 @@
 !! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
 !! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                 | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                    | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                            | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                               | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
 !!
 !> \section gen_gwdps GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
@@ -1457,8 +1457,8 @@
 !! | du3dt          | cumulative_change_in_x_wind_due_to_surface_processes      | cumulative change in zonal wind due to surface processes         | m s-1 |    2 | real      | kind_phys | inout  | F        |
 !! | dv3dt          | cumulative_change_in_y_wind_due_to_surface_processes      | cumulative change in meridional wind due to surface processes    | m s-1 |    2 | real      | kind_phys | inout  | F        |
 !! | dt3dt          | cumulative_change_in_temperature_due_to_surface_processes | cumulative change in temperature due to surface processes        | K     |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                             | error message for error handling in CCPP                         | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                | error flag for error handling in CCPP                            | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP                         | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP                            | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdps_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &

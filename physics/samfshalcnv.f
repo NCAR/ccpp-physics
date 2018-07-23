@@ -105,8 +105,8 @@
 !! | c1             | detrainment_conversion_parameter_shallow_convection        | convective detrainment conversion parameter for shal conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
 !! | pgcon          | momentum_transport_reduction_factor_pgf_shallow_convection | reduction factor in momentum transport due to shal conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
 !! | asolfac        | aerosol_aware_parameter_shallow_convection                 | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.

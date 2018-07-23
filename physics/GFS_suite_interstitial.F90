@@ -15,8 +15,8 @@
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, errmsg, errflg)
 
@@ -54,8 +54,8 @@
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
@@ -110,8 +110,8 @@
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics                         | updated tendency of the temperature                                     | K s-1         |    2 | real             | kind_phys | out    | F        |
 !! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky  | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real             | kind_phys | out    | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                                 | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real             | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                            | error message for error handling in CCPP                                | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                                               | error flag for error handling in CCPP                                   | flag          |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                                | none          |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                   | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_1_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
                                              frland, work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
@@ -201,8 +201,8 @@
 !! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | flag          |    1 | integer          |           | out    | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real             | kind_phys | out    | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real             | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                                   | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_2_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, &
                                              Diag, kcnv, hflx, evap, errmsg, errflg)
@@ -308,8 +308,8 @@
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics             | updated tendency of the temperature                                   | K s-1         |    2 | real              | kind_phys | in     | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                     | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real              | kind_phys | in     | F        |
 !! | Stateout       | FV3-GFS_Stateout_type                                        | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type |           | inout  | F        |
-!! | errmsg         | error_message                                                | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg         | error_flag                                                   | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
 !!
     subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
 
@@ -370,8 +370,8 @@
 !! | ktop           | vertical_index_at_cloud_top                                              | vertical index at cloud top                                           | index         |    1 | integer          |           | inout  | F        |
 !! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                          | index         |    1 | integer          |           | inout  | F        |
 !! | rhc            | critical_relative_humidity                                               | critical relative humidity                                            | frac          |    2 | real             | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                            | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                                               | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, &
                                              ktop, kbot, rhc, errmsg, errflg)

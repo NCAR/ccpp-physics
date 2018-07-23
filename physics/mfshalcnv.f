@@ -15,8 +15,8 @@
 !! | Grid           | FV3-GFS_Grid_type                                        | Fortran DDT containing FV3-GFS grid and interpolation related data   | DDT     |    0 | GFS_grid_type    |           | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT     |    0 | GFS_diag_type    |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                         | Fortran DDT containing FV3-GFS miscellaneous data                    | DDT     |    0 | GFS_tbd_type     |           | inout  | F        |
-!! | errmsg         | error_message                                            | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                               | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                       | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                          | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
 !!
       subroutine sasas_shal_post_run (frain, rain1, cnvc, cnvw, Model,   &
      &                                Grid, Diag, Tbd, errmsg, errflg)
@@ -126,8 +126,8 @@
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                         | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | cnvw           | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio              | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                                 | frac    |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                             | error message for error handling in CCPP               | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                | error flag for error handling in CCPP                  | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP               | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP                  | flag    |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_mfshal GFS SAMF Shallow Convection Scheme General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback

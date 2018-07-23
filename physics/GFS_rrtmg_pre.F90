@@ -72,8 +72,8 @@
 !! | mtopa             | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer          |           | out    | F        |
 !! | mbota             | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer          |           | out    | F        |
 !! | alb1d             | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real             | kind_phys | out    | F        |
-!! | errmsg            | error_message                                                 | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
-!! | errflg            | error_flag                                                    | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
+!! | errmsg            | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
+!! | errflg            | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine

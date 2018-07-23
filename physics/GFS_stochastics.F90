@@ -46,8 +46,8 @@
 !! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                 | total snow precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
 !! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling            | change in rain_cpl (coupling_type)                           | m       |    1 | real      | kind_phys | in     | F        |
 !! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                     | change in show_cpl (coupling_type)                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                             | error message for error handling in CCPP                     | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                | error flag for error handling in CCPP                        | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                     | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                        | flag    |    0 | integer   |           | out    | F        |
 !!
 !-------------------------------------------------------------------------
 ! GFS stochastic_driver

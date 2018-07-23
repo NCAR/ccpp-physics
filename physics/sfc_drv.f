@@ -27,8 +27,8 @@
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux                  | latent heat flux due to snow and frz rain  | W m-2      |    1 | real      | kind_phys | out    | F        |
 !! | smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point | soil water fraction at wilting point       | frac       |    1 | real      | kind_phys | out    | F        |
 !! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil        | soil moisture threshold                    | frac       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine lsm_noah_pre_run                                       &
      &  (im,km,drain,runof,evbs,evcw,trans,sbsno,snowc,snohf,smcwlt2,   &
@@ -90,8 +90,8 @@
 !! | runof          | surface_runoff_flux                                         | surface runoff flux                        | g m-2 s-1  |    1 | real      | kind_phys | in     | F        |
 !! | runoff         | total_runoff                                                | total runoff                               | kg m-2     |    1 | real      | kind_phys | inout  | F        |
 !! | srunoff        | surface_runoff                                              | surface runoff                             | kg m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                               | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                  | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
 !!  \section lsm_post_general General Algorithm
 !!  \section lsm_post_detailed Detailed Algorithm
@@ -325,8 +325,8 @@
 !! | smcwlt2        | volume_fraction_of_condensed_water_in_soil_at_wilting_point                  | soil water fraction at wilting point                            | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | smcref2        | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | wet1           | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_noah_drv GFS Noah Driver General Algorithm
 !!  @{
