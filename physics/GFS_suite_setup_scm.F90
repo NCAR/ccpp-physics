@@ -155,8 +155,6 @@ module GFS_suite_setup_scm
     allocate(si(Model%levr+1))
     si = (Init_parm%ak + Init_parm%bk * p_ref - Init_parm%ak(Model%levr+1)) &
              / (p_ref - Init_parm%ak(Model%levr+1))
-    Interstitial%errmsg = ''
-    Interstitial%errflg = 0
     call GFS_rrtmg_setup_init (si, Model%levr, Model%ictm, Model%isol,     &
                  Model%ico2, Model%iaer, Model%ialb, Model%iems,           &
                  Model%ntcw,  Model%num_p2d, Model%num_p3d, Model%npdf3d,  &
@@ -165,9 +163,9 @@ module GFS_suite_setup_scm
                  Model%imp_physics, Model%norad_precip, Model%idate,       &
                  Model%iflip, Interstitial%im, Interstitial%faerlw,        &
                  Interstitial%faersw, Interstitial%aerodp,                 &
-                 Model%me, Interstitial%errmsg, Interstitial%errflg)
-    if (Interstitial%errflg/=0) then
-       print *, "An error occured in GFS_rrtmg_setup_init: " // trim(Interstitial%errmsg)
+                 Model%me, errmsg, errflg)
+    if (errflg/=0) then
+       print *, "An error occured in GFS_rrtmg_setup_init: " // trim(errmsg)
        stop
     endif
     deallocate (si)
