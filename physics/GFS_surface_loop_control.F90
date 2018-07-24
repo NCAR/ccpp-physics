@@ -53,7 +53,7 @@
       errmsg = ''
       errflg = 0
 
-      do i = 1, im
+      do i=1,im
         if (iter == 1 .and. wind(i) < 2.0) then
           flag_guess(i) = .true.
         endif
@@ -107,11 +107,11 @@
       ! Interface variables
       integer,                             intent(in)    :: im
       integer,                             intent(in)    :: iter
-      integer,                             intent(in)    :: nstf_name1
-      integer,              dimension(im), intent(in)    :: islmsk
       real(kind=kind_phys), dimension(im), intent(in)    :: wind
       logical,              dimension(im), intent(inout) :: flag_guess
       logical,              dimension(im), intent(inout) :: flag_iter
+      integer,              dimension(im), intent(in)    :: islmsk
+      integer,                             intent(in)    :: nstf_name1
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
