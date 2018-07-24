@@ -44,8 +44,8 @@
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
 !! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -293,8 +293,8 @@
 !! | Diag           | FV3-GFS_Diag_type                                      | derived type GFS_diag_type in FV3                       | DDT           |    0 | GFS_diag_type         |           | in     | F        |
 !! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
 !! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &

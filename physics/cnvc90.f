@@ -25,8 +25,8 @@
 !! | cv             | fraction_of_convective_cloud                                          | fraction of convective cloud                            | frac  |    1 | real      | kind_phys | inout  | F        |
 !! | cvb            | pressure_at_bottom_of_convective_cloud                                | pressure at bottom of convective cloud                  | Pa    |    1 | real      | kind_phys | inout  | F        |
 !! | cvt            | pressure_at_top_of_convective_cloud                                   | pressure at top of convective cloud                     | Pa    |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                         | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                            | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)

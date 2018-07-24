@@ -505,8 +505,8 @@
 !! | cld_od          | cloud_optical_depth                                                                            | cloud optical depth                                                      | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_ssa         | cloud_single_scattering_albedo                                                                 | cloud single scattering albedo                                           | frac    |    2 | real        | kind_phys | in     | T        |
 !! | cld_asy         | cloud_asymmetry_parameter                                                                      | cloud asymmetry parameter                                                | none    |    2 | real        | kind_phys | in     | T        |
-!! | errmsg          | error_message                                                                                  | error message for error handling in CCPP                                 | none    |    0 | character   | len=*     | out    | F        |
-!! | errflg          | error_flag                                                                                     | error flag for error handling in CCPP                                    | flag    |    0 | integer     |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                                                             | error message for error handling in CCPP                                 | none    |    0 | character   | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                    | flag    |    0 | integer     |           | out    | F        |
 !!
 !> \section gen_swrad RRTMG Shortwave Radiation Scheme General Algorithm
 !> @{

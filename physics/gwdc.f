@@ -34,8 +34,8 @@
 !! | gt0_init       | air_temperature_save                                                     | air temperature before entering convection scheme             | K     |    2 | real      | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                | difference between mid-layer pressures                        | Pa    |    2 | real      | kind_phys | in     | F        |
 !! | cumabs         | maximum_column_heating_rate                                              | maximum heating rate in column                                | K s-1 |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                            | error message for error handling in CCPP                      | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                               | error flag for error handling in CCPP                         | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                      | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                         | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdc_pre_run (                                         &
      &  im, cgwf, dx, work1, work2, dlength, cldf,                      &
@@ -156,8 +156,8 @@
 !! | vtgwc          | tendency_of_y_wind_due_to_convective_gravity_wave_drag | meridional wind tendency due to convective gravity wave drag       | m s-2      |    2 | real      | kind_phys | out    | F        |
 !! | tauctx         | instantaneous_x_stress_due_to_gravity_wave_drag        | zonal stress at cloud top due to convective gravity wave drag      | Pa         |    1 | real      | kind_phys | out    | F        |
 !! | taucty         | instantaneous_y_stress_due_to_gravity_wave_drag        | meridional stress at cloud top due to convective gravity wave drag | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
 !!
 !>\section gen_gwdc GFS Convective GWD Scheme General Algorithm
 !! Parameterizing subgrid-scale convection-induced gravity wave
@@ -1525,8 +1525,8 @@
 !! | gu0            | x_wind_updated_by_physics                                       | updated zonal wind                                                       | m s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | gv0            | y_wind_updated_by_physics                                       | updated meridional wind                                                  | m s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | gt0            | air_temperature_updated_by_physics                              | updated air temperature                                                  | K          |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                   | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                      | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdc_post_run(                                         &
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp,                     &

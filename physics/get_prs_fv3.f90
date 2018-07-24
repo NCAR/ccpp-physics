@@ -30,8 +30,8 @@ contains
 !! | qgrs1          | water_vapor_specific_humidity                                                     | mid-layer specific humidity of water vapor                                          | kg kg-1    |    2 | real      | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                         | difference between mid-layer pressures                                              | Pa         |    2 | real      | kind_phys | out    | F        |
 !! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                     | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                        | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                                | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
 !!
    subroutine get_prs_fv3_run(ix, levs, phii, prsi, tgrs, qgrs1, del, del_gz, errmsg, errflg)
 
@@ -108,8 +108,8 @@ contains
 !! | del_gz         | geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature | difference between mid-layer geopotentials divided by mid-layer virtual temperature | m2 s-2 K-1 |    2 | real      | kind_phys | inout  | F        |
 !! | phii           | geopotential_at_interface                                                         | interface geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | out    | F        |
 !! | phil           | geopotential                                                                      | mid-layer geopotential                                                              | m2 s-2     |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                     | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                        | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                                | error message for error handling in CCPP                                            | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                               | flag       |    0 | integer   |           | out    | F        |
 !!
    subroutine get_phi_fv3_run(ix, levs, gt0, gq01, del_gz, phii, phil, errmsg, errflg)
 

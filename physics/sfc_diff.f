@@ -55,8 +55,8 @@
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                    | K          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag       |    1 | logical   |           | in     | F        |
 !! | redrag         | flag_for_reduced_drag_coefficient_over_sea                                   | flag for reduced drag coefficient over sea                  | flag       |    0 | logical   |           | in     | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
 !! @{

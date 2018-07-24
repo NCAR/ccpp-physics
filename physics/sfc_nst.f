@@ -83,8 +83,8 @@
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
@@ -724,8 +724,8 @@ cc
 !! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K     |    1 | real      | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature_for_nsst                      | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
@@ -822,8 +822,8 @@ cc
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K       |    1 | real      | kind_phys | inout  | F        |
 !! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                | K       |    1 | real      | kind_phys | out    | F        |
 !! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
 !!
 ! \section NSST_general_post_algorithm General Algorithm
 !

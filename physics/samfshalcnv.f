@@ -70,8 +70,8 @@
 !! | c1             | detrainment_conversion_parameter_shallow_convection        | convective detrainment conversion parameter for shal conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
 !! | pgcon          | momentum_transport_reduction_factor_pgf_shallow_convection | reduction factor in momentum transport due to shal conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
 !! | asolfac        | aerosol_aware_parameter_shallow_convection                 | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section gen_samfshalcnv GFS samfshalcnv General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
@@ -1823,8 +1823,8 @@ c
 !! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket | cumulative convective precipitation in bucket                        | m       |    1 | real             | kind_phys | inout  | F        |
 !! | cnvw_phy_f3d   | convective_cloud_water_mixing_ratio_in_phy_f3d                        | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1 |    2 | real             | kind_phys | inout  | F        |
 !! | cnvc_phy_f3d   | convective_cloud_cover_in_phy_f3d                                     | convective cloud cover in the phy_f3d array                          | frac    |    2 | real             | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                         | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                                            | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
 !!
       subroutine samfshalcnv_post_run (im, levs, lssav, shcnvcw, frain,
      &  rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,

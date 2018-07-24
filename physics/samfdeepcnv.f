@@ -87,8 +87,8 @@
 !! | evfactl        | rain_evaporation_coefficient_over_land_deep_convection         | convective rain evaporation coefficient over land for deep conv.                                         | frac    |    0 | real      | kind_phys | in     | F        |
 !! | pgcon          | momentum_transport_reduction_factor_pgf_deep_convection        | reduction factor in momentum transport due to deep conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
 !! | asolfac        | aerosol_aware_parameter_deep_convection                        | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                  | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                     | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_samfdeep GFS samfdeepcnv General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.

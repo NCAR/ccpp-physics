@@ -21,8 +21,8 @@
 !! | levs           | vertical_dimension                                         | vertical layer dimension                                | count       |    0 | integer   |           | in     | F        |
 !! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics      | moist cloud condensed water mixing ratio                | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | clw1           | cloud_ice_mixing_ratio                                     | moist cloud ice mixing ratio                            | kg kg-1     |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                   | flag        |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                   | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_zhao_carr_pre_run (im, ix, levs, cwm, clw1, errmsg, errflg)
 !

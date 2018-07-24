@@ -31,8 +31,8 @@
 !! | sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct                                                        | surface albedo due to UV+VIS direct beam                                     | frac     |    1 | real                  | kind_phys | in     | F        |
 !! | sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused                                                      | surface albedo due to UV+VIS diffused beam                                   | frac     |    1 | real                  | kind_phys | in     | F        |
 !! | scmpsw         | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes     | W m-2    |    1 | cmpfsw_type           |           | inout  | F        |
-!! | errmsg         | error_message                                                                                  | error message for error handling in CCPP                                     | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                                     | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                                             | error message for error handling in CCPP                                     | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out    | F        |
 !!
 #endif
       subroutine rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling,  &

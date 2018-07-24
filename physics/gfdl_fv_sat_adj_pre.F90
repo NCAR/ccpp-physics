@@ -15,8 +15,8 @@
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                   |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|------------------------|-----------|--------|----------|
 !! | Interstitial   | CCPP_Interstitial_type                                 | derived type CCPP_interstitial_type                     | DDT           |    0 | CCPP_interstitial_type |           | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                | none          |    0 | character              | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer                |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character              | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer                |           | out    | F        |
 !!
     subroutine fv_sat_adj_pre_run (Interstitial, errmsg, errflg)
 

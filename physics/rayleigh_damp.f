@@ -36,8 +36,8 @@
 !! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         |    2 | real      | kind_phys | in     | F        |
 !! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         |    0 | real      | kind_phys | in     | F        |
 !! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                        | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                           | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                   | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                      | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine rayleigh_damp_run (                            &
      &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,             &
