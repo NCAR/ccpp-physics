@@ -337,8 +337,8 @@ contains
 !! | imp_physics      | flag_for_microphysics_scheme                     | choice of microphysics scheme                      | flag   | 0    | integer   |       | in     | F        |
 !! | imp_physics_gfdl | flag_for_gfdl_microphysics_scheme                | choice of GFDL microphysics scheme                 | flag   | 0    | integer   |       | in     | F        |
 !! | do_shoc          | flag_for_shoc                                    | flag to indicate use of SHOC                       | flag   | 0    | logical   |       | in     | F        |
-!! | errmsg           | error_message                                    | error message for error handling in CCPP           | none   | 0    | character | len=* |   out  | F        |
-!! | errflg           | error_flag                                       | error flag for error handling in CCPP              | flag   | 0    | integer   |       |   out  | F        |
+!! | errmsg           | ccpp_error_message                               | error message for error handling in CCPP           | none   | 0    | character | len=* |   out  | F        |
+!! | errflg           | ccpp_error_flag                                  | error flag for error handling in CCPP              | flag   | 0    | integer   |       |   out  | F        |
 !!
    subroutine gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, logunit, fn_nml, &
                                          imp_physics, imp_physics_gfdl, do_shoc, errmsg, errflg)
@@ -420,10 +420,10 @@ contains
 ! =======================================================================
 
 !! \section arg_table_gfdl_cloud_microphys_finalize  Argument Table
-!! | local_name  | standard_name | long_name                                   | units   | rank | type      | kind   | intent | optional |
-!! |-------------|---------------|---------------------------------------------|---------|------|-----------|--------|--------|----------|
-!! | errmsg      | error_message | error message for error handling in CCPP    | none    |    0 | character | len=*  |   out  | F        |
-!! | errflg      | error_flag    | error flag for error handling in CCPP       | flag    |    0 | integer   |        |   out  | F        |
+!! | local_name  | standard_name      | long_name                                   | units   | rank | type      | kind   | intent | optional |
+!! |-------------|--------------------|---------------------------------------------|---------|------|-----------|--------|--------|----------|
+!! | errmsg      | ccpp_error_message | error message for error handling in CCPP    | none    |    0 | character | len=*  |   out  | F        |
+!! | errflg      | ccpp_error_flag    | error flag for error handling in CCPP       | flag    |    0 | integer   |        |   out  | F        |
 !!
    subroutine gfdl_cloud_microphys_finalize(errmsg, errflg)
 
@@ -483,8 +483,8 @@ contains
 !! | dtp              | time_step_for_physics                                      | physics timestep                                       | s          |    0 | real      | kind_phys | in    | F        |
 !! | hydrostatic      | flag_for_hydrostatic_solver                                | flag indicating hydrostatic solver                     | flag       |    0 | logical   |           | in    | F        |
 !! | phys_hydrostatic | flag_for_hydrostatic_heating_from_physics                  | flag indicating hydrostatic heating from physics       | flag       |    0 | logical   |           | in    | F        |
-!! | errmsg           | error_message                                              | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
-!! | errflg           | error_flag                                                 | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
+!! | errmsg           | ccpp_error_message                                         | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
+!! | errflg           | ccpp_error_flag                                            | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
       levs, im, con_g, con_fvirt, con_rd, frland, garea,                      &

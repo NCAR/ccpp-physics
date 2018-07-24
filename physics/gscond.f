@@ -49,8 +49,8 @@
 !! | u              | critical_relative_humidity                                 | critical relative humidity                               | frac    |    2 | real      | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                                 | flag for printing diagnostics to output                  | flag    |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                         | horizontal index of printed column                       | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !> \section general_gscond GFS gscond Scheme General Algorithm
 !! -# Calculate ice-water identification number \f$IW\f$ in order to make a distinction betwee

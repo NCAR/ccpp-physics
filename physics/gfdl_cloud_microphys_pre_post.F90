@@ -24,8 +24,8 @@ contains
 !! | ice0             | lwe_thickness_of_ice_amount_per_day                        | ice fall over 24h period                               | mm         |    1 | real      | kind_phys | out   | F        |
 !! | snow0            | lwe_thickness_of_snow_amount_per_day                       | snow fall over 24h period                              | mm         |    1 | real      | kind_phys | out   | F        |
 !! | graupel0         | lwe_thickness_of_graupel_amount_per_day                    | graupel fall over 24h period                           | mm         |    1 | real      | kind_phys | out   | F        |
-!! | errmsg           | error_message                                              | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
-!! | errflg           | error_flag                                                 | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
+!! | errmsg           | ccpp_error_message                                         | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
+!! | errflg           | ccpp_error_flag                                            | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_pre_run(im, rain0, ice0, snow0, graupel0, errmsg, errflg)
 
@@ -90,8 +90,8 @@ contains
 !! | graupel1         | lwe_thickness_of_graupel_amount_on_dynamics_timestep                  | graupel fall at this time step                         | m          |    1 | real      | kind_phys | out   | F        |
 !! | sr               | ratio_of_snowfall_to_rainfall                                         | snow ratio: ratio of snow to total precipitation       | frac       |    1 | real      | kind_phys | out   | F        |
 !! | dtp              | time_step_for_physics                                                 | physics timestep                                       | s          |    0 | real      | kind_phys | in    | F        |
-!! | errmsg           | error_message                                                         | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
-!! | errflg           | error_flag                                                            | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
+!! | errmsg           | ccpp_error_message                                                    | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
+!! | errflg           | ccpp_error_flag                                                       | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_post_run(im, rain0, ice0, snow0, graupel0, &
                                                 rain1, ice1, snow1, graupel1, &

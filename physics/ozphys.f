@@ -61,8 +61,8 @@
 !! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
 !! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
 !! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | error_message                                     | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                        | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
 !! \section genal_ozphys GFS Ozone Physics Scheme General Algorithm
 !> @{
@@ -235,8 +235,8 @@
 !! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    |    0 | logical       |           | in     | F        |
 !! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 |    3 | real          | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     |    0 | GFS_diag_type |           | inout  | F        |
-!! | errmsg         | error_message                                | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
-!! | errflg         | error_flag                                   | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
+!! | errmsg         | ccpp_error_message                           | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                              | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
 !!
       subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp,      &
      &                           Diag, errmsg, errflg)

@@ -16,8 +16,8 @@
 !! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type      |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_phys_time_vary_1_run (Model, Tbd, errmsg, errflg)
 
@@ -100,8 +100,8 @@
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                   | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
 !! | Cldprop        | FV3-GFS_Cldprop_type                                   | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
 !! | Diag           | FV3-GFS_Diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
       subroutine GFS_phys_time_vary_2_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 

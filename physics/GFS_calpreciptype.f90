@@ -77,8 +77,8 @@
 !! | cplflx           | flag_for_flux_coupling                                                 | flag controlling cplflx collection (default off)           | flag        |    0 | logical   |           | in     | F        |
 !! | rain_cpl         | lwe_thickness_of_precipitation_amount_for_coupling                     | total rain precipitation for model coupling                | m           |    1 | real      | kind_phys | inout  | F        |
 !! | snow_cpl         | lwe_thickness_of_snow_amount_for_coupling                              | total snow precipitation for model coupling                | m           |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg           | error_message                                                          | error message for error handling in CCPP                   | none        |    0 | character | len=*     | out    | F        |
-!! | errflg           | error_flag                                                             | error flag for error handling in CCPP                      | flag        |    0 | integer   |           | out    | F        |
+!! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                   | none        |    0 | character | len=*     | out    | F        |
+!! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                      | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno, &
                                cal_pre,lssav,ldiag3d,                  &

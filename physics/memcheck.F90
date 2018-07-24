@@ -29,8 +29,8 @@
 !! | seconds_elapsed | seconds_elapsed_since_model_initialization             | seconds elapsed since model initialization              | s             |    0 | real      | kind_phys | in     | F        |
 !! | block_number    | block_number                                           | for explicit data blocking: block number of this block  | index         |    0 | integer   |           | in     | F        |
 !! | mpicomm         | mpi_comm                                               | MPI communicator                                        | index         |    0 | integer   |           | in     | F        |
-!! | errmsg          | error_message                                          | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
-!! | errflg          | error_flag                                             | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine memcheck_run (seconds_elapsed, block_number, mpicomm, errmsg, errflg)
 

@@ -22,8 +22,8 @@
 !! | gq0_water_vapor | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                      | kg kg-1       |    2 | real                  | kind_phys | in     | F        |
 !! | save_t          | air_temperature_save                                   | air temperature before entering a physics scheme                      | K             |    2 | real                  | kind_phys | inout  | F        |
 !! | save_qv         | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme        | kg kg-1       |    2 | real                  | kind_phys | inout  | F        |
-!! | errmsg          | error_message                                          | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg          | error_flag                                             | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, lgocart, gt0, gq0_water_vapor, &
         save_t, save_qv, errmsg, errflg)
@@ -93,8 +93,8 @@
 !! | dt3dt           | cumulative_change_in_temperature_due_to_shal_convection                                     | cumulative change in temperature due to shal conv.                   | K             |    2 | real        | kind_phys | inout  | F        |
 !! | dq3dt           | cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection                   | cumulative change in water vapor specific humidity due to shal conv. | kg kg-1       |    2 | real        | kind_phys | inout  | F        |
 !! | clw             | convective_transportable_tracers                                                            | array to contain cloud water and other convective trans. tracers     | kg kg-1       |    3 | real        | kind_phys | inout  | F        |
-!! | errmsg          | error_message                                                                               | error message for error handling in CCPP                             | none          |    0 | character   | len=*     | out    | F        |
-!! | errflg          | error_flag                                                                                  | error flag for error handling in CCPP                                | flag          |    0 | integer     |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character   | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer     |           | out    | F        |
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor, &
         save_t, save_qv, dqdti, dt3dt, dq3dt, clw, errmsg, errflg)

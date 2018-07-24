@@ -32,8 +32,8 @@
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                                    | flag       |    1 | logical               |           | inout  | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                                    | flag       |    1 | logical               |           | inout  | F        |
 !! | ep1d           | surface_upward_potential_latent_heat_flux                                    | surface upward potential latent heat flux                             | W m-2      |    1 | real                  | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                              | none       |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                                 | flag       |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                              | none       |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                                 | flag       |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_surface_generic_pre_run (Model, Grid, Sfcprop, Radtend, Statein, adjsfcdlw, Diag, sigmaf, islmsk, &
                         soiltyp, vegtype, slopetyp, work3, gabsbdlw, tsurf, flag_guess, flag_iter, ep1d, errmsg, errflg)
@@ -150,8 +150,8 @@
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux          | latent heat flux due to snow and frz rain                            | W m-2      |    1 | real                  | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                   | Fortran DDT containing FV3-GFS fields targeted for diagnostic output | DDT        |    0 | GFS_diag_type         |           | inout  | F        |
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                | Fortran DDT containing FV3-GFS surface fields                        | DDT        |    0 | GFS_sfcprop_type      |           | inout  | F        |
-!! | errmsg         | error_message                                       | error message for error handling in CCPP                             | none       |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                          | error flag for error handling in CCPP                                | flag       |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                  | error message for error handling in CCPP                             | none       |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                     | error flag for error handling in CCPP                                | flag       |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_surface_generic_post_run (Model, Grid, ep1d, gflx, evbs, evcw, trans, sbsno, snowc, snohf, Diag, &
                                                Sfcprop, errmsg, errflg)
