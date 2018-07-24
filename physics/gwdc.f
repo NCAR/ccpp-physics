@@ -2,6 +2,8 @@
 !! stationary convection forced gravity wave drag based on
 !! Chun and Baik (1998) \cite chun_and_baik_1998.
 
+!> This module contains the CCPP-compliant convective gravity 
+!! wave drag pre interstitial codes.
       module gwdc_pre
       contains
 
@@ -101,6 +103,8 @@
 
       end module gwdc_pre
 
+!> This module contains the CCPP-compliant 
+!! convective gravity wave drag scheme.
       module gwdc
 
       contains
@@ -1485,6 +1489,8 @@
 
       end module gwdc
 
+!> This module contains the CCPP-compliant convective gravity wave 
+!! drag post intersititial codes.
       module gwdc_post
 
       contains
@@ -1497,7 +1503,7 @@
       end subroutine gwdc_post_init
 
 ! \brief Brief description of the subroutine
-!
+!!
 !> \section arg_table_gwdc_post_run Argument Table
 !! | local_name     | standard_name                                                   | long_name                                                                | units      | rank | type      | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|

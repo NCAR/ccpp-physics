@@ -22,6 +22,7 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 ! =======================================================================
+!> This module contains the CCPP-compliant GFDL Cloud microphysics scheme.
 module gfdl_cloud_microphys
 
    use machine, only: kind_phys
@@ -305,7 +306,7 @@ contains
 ! CCPP entry points for gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>@brief The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
+!>@brief The subroutine initializes the GFDL
 !! cloud microphysics.
 !!
 !> \section arg_table_gfdl_cloud_microphys_init Argument Table

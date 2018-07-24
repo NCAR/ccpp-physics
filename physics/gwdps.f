@@ -2,7 +2,8 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.
 
-
+!> This module contains the CCPP-compliant orographic gravity wave 
+!! drag pre interstitial codes.
       module gwdps_pre
 
       contains
@@ -115,8 +116,7 @@
 
       end module gwdps_pre
 
-
-
+!> This module includes the CCPP-compliant orographic gravity wave dray scheme.
       module gwdps
 
       contains
@@ -1430,8 +1430,8 @@
 
       end module gwdps
 
-
-
+!> This module contains the CCPP-compliant orographic gravity wave drag post
+!! interstitial codes.
       module gwdps_post
 
       contains

@@ -23,6 +23,8 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
+!> This module is part of the GFDL Cloud MP and it is the CCPP-compliant 
+!! fast phyiscs called in FV3 dynamics solver.
 module fv_sat_adj
 ! Modules Included:
 ! <table>
@@ -190,7 +192,7 @@ end subroutine fv_sat_adj_finalize
 
 !>\defgroup fast_sat_adj GFDL Cloud Fast Physics
 !! @{
-!>@brief The module 'fv_sat_adj' implements the fast processes in the GFDL
+!>@brief The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
 !! Cloud MP. It is part of the GFDL Cloud MP.
 !!>@author Shian-Jiann Lin, Linjiong Zhou
 !!

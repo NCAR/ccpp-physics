@@ -2,6 +2,8 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
+!> This module contains the CCPP-compliant hybrid eddy-diffusivity mass-flux
+!! scheme.
       module hedmf
 
       contains
