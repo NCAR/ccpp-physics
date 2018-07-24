@@ -49,10 +49,13 @@
       type (random_stat) :: stat
       integer :: ix, nb, j, i, nblks, ipseed
       integer :: numrdm(Model%cnx*Model%cny*2)
+      real(kind=kind_phys) :: sec
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      sec = Model%sec
+
 
       if (Model%lsswr .or. Model%lslwr) then
 
@@ -64,7 +67,7 @@
 
         !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
         if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
-          ipseed = mod(nint(con_100*sqrt(Model%sec)), ipsdlim) + 1 + ipsd0
+          ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
           call random_setseed (ipseed, stat)
           call random_index (ipsdlim, numrdm, stat)
     
@@ -81,6 +84,7 @@
                 ix = 1
                 nb = nb + 1
               endif
+              
               !--- for testing purposes, replace numrdm with '100'
               Tbd(nb)%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
               Tbd(nb)%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
@@ -88,7 +92,7 @@
           enddo
         endif  ! isubc_lw and isubc_sw
 
-        if (Model%num_p3d == 4) then
+        if (Model%imp_physics == 99) then
           if (Model%kdt == 1) then
 ! DH* OpenMP?
             do nb = 1,nblks
