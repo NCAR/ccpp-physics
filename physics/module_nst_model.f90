@@ -2,7 +2,9 @@
 !>\defgroup dtm_module GFS NSST Diurnal Thermocline Model
 !>\ingroup gfs_nst_main
 !! @{
-!!\brief This is the module of diurnal thermocline layer model (DTM).
+
+!> This module contains the diurnal thermocline layer model (DTM) of
+!! the GFS NSST scheme.
 module nst_module
 
 !

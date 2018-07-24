@@ -1,6 +1,7 @@
 !>  \file sfc_drv.f
 !!  This file contains the Noah land surface scheme driver.
 
+!> This module contains the CCPP-compliant Noah land surface pre interstitial codes.
       module lsm_noah_pre
       contains
 
@@ -66,6 +67,7 @@
       end module lsm_noah_pre
 
 
+!> This module contains the CCPP-compliant Noah land surface post interstitial codes.
       module lsm_noah_post
       contains
 
@@ -123,6 +125,7 @@
 
       end module lsm_noah_post
 
+!> This module contains the CCPP-compliant Noah land surface scheme driver.
       module lsm_noah
       contains
 

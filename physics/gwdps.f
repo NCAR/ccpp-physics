@@ -116,7 +116,7 @@
 
       end module gwdps_pre
 
-!> This module includes the CCPP-compliant orographic gravity wave dray scheme.
+!> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module gwdps
 
       contains

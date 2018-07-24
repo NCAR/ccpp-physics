@@ -1,8 +1,7 @@
 !> \file ozphys.f
 !! This file is ozone sources and sinks.
 
-! \defgroup GFS_ozn GFS Ozone Physics 
-!
+!> This module contains the CCPP-compliant Ozone photochemistry pre interstitial codes. 
       module ozphys_pre
       contains
 
@@ -26,6 +25,7 @@
 
       end module ozphys_pre
 
+!> This module contains the CCPP-compliant Ozone photochemistry post interstitial codes.
       module ozphys_post
 
       contains
@@ -89,7 +89,7 @@
       end module ozphys_post
 
 
-
+!> This module contains the CCPP-compliant Ozone photochemistry scheme.
       module ozphys
 
       contains

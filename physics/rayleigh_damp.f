@@ -1,6 +1,8 @@
 !>\file rayleigh_damp.f
 !! This file contains the Rayleigh friction calculation with total
 !! energy conservation.
+
+!> This module contains the CCPP-compliant rayleigh damping scheme.
       module rayleigh_damp
       contains
 
