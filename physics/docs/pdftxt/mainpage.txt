@@ -5,7 +5,7 @@
 
 \author  Global Model Test Bed (GMTB) at NCAR and NOAA/GSD
 
-Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b 2017 \b Operational \b GFS \b physics \b suite. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
+Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b GFS \b physics \b suite on the top of NEMSfv3gfs repository on NOAA VLab in July 2018. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
 
 A major upgrade to the parameterization of \ref GFDL_cloud was implemented in the fv3gfs, 
 which is slate to be operational at NCEP in 2019. It is the most significant change to 
@@ -47,7 +47,6 @@ Documentation for the individual physics scheme can be accessed through the foll
  + @ref GFS_GWDPS
  + @ref GFS_RAYLEIGH
  + @ref GFS_OZPHYS
- + @ref GFS_H2OPHYS
  + @ref GFS_SAMFdeep
  + @ref GFS_GWDC
  + @ref GFS_SAMFshal

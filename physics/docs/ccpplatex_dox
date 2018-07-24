@@ -108,7 +108,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
-                          pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
@@ -149,7 +148,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Prognostic Ozone
                         ../ozphys.f \
 ### stratospheric h2o
-                        ../h2ophys.f \
+###                        ../h2ophys.f \
 ### Deep Convection
                         ../samfdeepcnv.f \
 ### Convective Gravity Wave
