@@ -1,6 +1,7 @@
 !>  \file radiation_clouds.f
 !!  This file contains routines to compute cloud related quantities
 !!  for radiation computations.
+
 !              module_radiation_clouds description             !!!!!
 !  ==========================================================  !!!!!
 !                                                                      !
@@ -13,7 +14,7 @@
 !                                                                      !
 !       'cld_init'           --- initialization routine                !
 !          inputs:                                                     !
-!           ( si, NLAY, imp_physics,  me )                                           !
+!           ( si, NLAY, imp_physics,  me )                             !
 !          outputs:                                                    !
 !           ( none )                                                   !
 !                                                                      !
@@ -179,9 +180,9 @@
 !! radiation and short-wave radiation. Convective clouds are not
 !! considered in radiation.
 !! @}
-!========================================!
-      module module_radiation_clouds     !
-!........................................!
+
+!> This module computes cloud related quantities for radiation computations.
+      module module_radiation_clouds     
 !
       use physparam,           only : icldflg, iovrsw, iovrlw,          &
      &                                lcrick, lcnorm, lnoprec,          &

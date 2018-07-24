@@ -1,6 +1,8 @@
 !>  \file samfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
+!> This module contains the CCPP-compliant scale-aware mass-flux 
+!! shallow convection scheme.
       module samfshalcnv
 
       contains
@@ -1801,6 +1803,8 @@ c
 !! @}
       end module samfshalcnv
 
+!> This module contains the CCPP-compliant scale-aware mass-flux shallow convection
+!! post interstitial codes.
       module samfshalcnv_post
       contains
 

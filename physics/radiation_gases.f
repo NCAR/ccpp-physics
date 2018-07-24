@@ -110,9 +110,10 @@
 !! data are entered as mixing ratio by volume, except ozone which is
 !! mass mixing ratio (g/g).
 !!\version NCEP-Radiation_gases     v5.1  Nov 2012
-!========================================!
-      module module_radiation_gases      !
-!........................................!
+
+!> This module sets up ozone climatological profiles and other constant gas
+!! profiles, such as co2, ch4, n2o, o2, and those of cfc gases.
+      module module_radiation_gases      
 !
       use physparam,         only : ico2flg, ictmflg, ioznflg, ivflip,  &
      &                              co2dat_file, co2gbl_file,           &

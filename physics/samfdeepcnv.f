@@ -2,6 +2,8 @@
 !!  This file contains the entire scale-aware mass-flux (SAMF)
 !! deep convection scheme.
 
+!> This module contains the CCPP-compliant scale-aware mass-flux deep
+!! convection scheme.
       module samfdeepcnv
 
       contains

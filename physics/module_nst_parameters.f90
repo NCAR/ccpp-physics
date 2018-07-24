@@ -1,6 +1,9 @@
 !>\file module_nst_parameters.f90
 !>\defgroup nst_parameters GFS NSST Parameter Module
+!> This module contains constants and parameters used in GFS
+!! near surface sea temperature scheme.
 !! \ingroup gfs_nst_main
+
 !> This module contains constants and parameters used in GFS
 !! near surface sea temperature scheme.
 module module_nst_parameters

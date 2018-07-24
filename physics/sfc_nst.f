@@ -1,6 +1,7 @@
 !>  \file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
+!> This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
       module sfc_nst
 
       contains
@@ -692,8 +693,8 @@ cc
 !> @}
       end module sfc_nst
 
-
-
+!> This module contains the CCPP-compliant GFS near-surface sea temperature pre
+!! interstitial codes.
       module sfc_nst_pre
 
       contains
@@ -776,9 +777,8 @@ cc
 !! @}
       end module sfc_nst_pre
 
-
-
-
+!> This module contains the CCPP-compliant GFS near-surface sea temperature post
+!! interstitial codes.
       module sfc_nst_post
 
       contains

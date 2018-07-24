@@ -3,6 +3,7 @@
 !! the surface sublayer scheme in 
 !! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998. 
 
+!> This module contains the CCPP-compliant GFS surface layer scheme.
       module sfc_ex_coef
       contains
 

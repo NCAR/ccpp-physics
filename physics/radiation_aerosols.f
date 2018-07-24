@@ -130,12 +130,14 @@
 !! - setaer() -- mapping aeros profile, compute aeros opticals
 !!
 !!\n References:
-!! - OPAC climatological aerosols: \cite hou_et_al_2002; \cite hess_et_al_1998
-!! - GOCART interactive aerosols: \cite chin_et_al_2000
-!! - Stratospheric volcanical aerosols: \cite sato_et_al_1993
-!========================================!
-      module module_radiation_aerosols   !
-!........................................!
+!! - OPAC climatological aerosols: Hou et al. (2002) \cite hou_et_al_2002; 
+!! Hess et al. (1998) \cite hess_et_al_1998
+!! - GOCART interactive aerosols: Chin et al.(2000) \cite chin_et_al_2000
+!! - Stratospheric volcanical aerosols: Sato et al. (1993) \cite sato_et_al_1993
+
+!> This module contains climatological atmospheric aerosol schemes for
+!! radiation computations.
+      module module_radiation_aerosols   
 !
       use physparam,only : iaermdl, iaerflg, lavoflg, lalwflg, laswflg, &
      &                     lalw1bd, aeros_file, ivflip, kind_phys       &

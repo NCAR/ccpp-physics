@@ -2,6 +2,7 @@
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice.
 
+!> This module contains the CCPP-compliant zhao_carr_precpd scheme.
       module zhaocarr_precpd
       contains
 

@@ -259,9 +259,9 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!========================================!
-      module rrtmg_sw                    !
-!........................................!
+!> This module contains the CCPP-compliant NCEP's modifications of the rrtm-sw radiation 
+!! code from aer inc.     
+      module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
      &                             isubcsw, icldflg, iovrsw,  ivflip,   &

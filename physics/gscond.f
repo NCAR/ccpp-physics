@@ -3,6 +3,7 @@
 !! condensation and evaporation for use in Zhao and Carr (1997)
 !! \cite zhao_and_carr_1997 scheme.
 
+!> This module contains the CCPP-compliant zhao_carr_gscond scheme.
       module zhaocarr_gscond
       contains
 

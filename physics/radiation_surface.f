@@ -84,9 +84,10 @@
 !! - sfc_init(): initialization radiation surface data
 !! - setalb(): set up four-component surface albedoes
 !! - setemis(): set up surface emissivity for lw radiation
-!========================================!
-      module module_radiation_surface    !
-!........................................!
+
+!> This module sets up surface albedo for SW radiation and surface  
+!! emissivity for LW radiation.  
+      module module_radiation_surface   
 !
       use physparam,         only : ialbflg, iemsflg, semis_file,       &
      &                              kind_phys

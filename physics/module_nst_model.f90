@@ -1,5 +1,7 @@
 !>\file module_nst_model.f90
 !>\defgroup dtm_module GFS NSST Diurnal Thermocline Model
+!> This module contains the diurnal thermocline layer model (DTM) of
+!! the GFS NSST scheme.
 !>\ingroup gfs_nst_main
 !! @{
 

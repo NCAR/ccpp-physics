@@ -1,6 +1,8 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
+!> This module contains the CCPP-compliant GFS sea ice pre interstitial
+!! codes.
       module sfc_sice_pre
       contains
 
@@ -69,6 +71,8 @@
 
       end module sfc_sice_pre
 
+!> This module contains the CCPP-compliant GFS sea ice post
+!! interstitial codes.
       module sfc_sice_post
 
       contains
@@ -143,7 +147,7 @@
 
       end module  sfc_sice_post
 
-
+!> This module contains the CCPP-compliant GFS sea ice scheme.
       module sfc_sice
 
       contains

@@ -1,8 +1,11 @@
 !>\file surface_perturbation.F90
 !! This file includes routines used in the percentile matching algorithm for the
-!! albedo and vegentation fraction perturbations.
+!! albedo and vegetation fraction perturbations.
 
 !>\ingroup Noah_LSM
+
+!> This module contains routines used in the percentile matching algorithm for the
+!! albedo and vegetation fraction perturbations.
 module surface_perturbation
 
       implicit none
