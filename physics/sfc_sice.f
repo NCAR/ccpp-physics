@@ -27,8 +27,8 @@
 !! | zice           | sea_ice_thickness_for_physics                                                | sea-ice thickness                                           | m     |    1 | real      | kind_phys | out    | F        |
 !! | tice           | sea_ice_temperature_for_physics                                              | sea-ice surface temperature                                 | K     |    1 | real      | kind_phys | out    | F        |
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine sfc_sice_pre_run(im, fice, hice, tisfc, prsik, prslk,  &
      &                          cice, zice, tice, work3, errmsg, errflg)
@@ -95,8 +95,8 @@
 !! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac  |    1 | real      | kind_phys | out    | F        |
 !! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m     |    1 | real      | kind_phys | out    | F        |
 !! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K     |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                         | error message for error handling in CCPP    | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                            | error flag for error handling in CCPP       | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP    | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP       | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine sfc_sice_post_run(im, islmsk, cice, zice, tice, tsfc,        &
      &                             fice, hice, tisfc, errmsg, errflg)
@@ -202,8 +202,8 @@
 !! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_sice_run GFS Sea Ice Driver General Algorithm
 !!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
@@ -313,8 +313,8 @@
 !     qsurf    - real, specific humidity at sfc                    im   !
 !     snowmt   - real, snow melt (m)                               im   !
 !     gflux    - real, soil heat flux (w/m**2)                     im   !
-!     cmm      - real,                                             im   !
-!     chh      - real,                                             im   !
+!     cmm      - real, surface exchange coeff for momentum (m/s)   im   !
+!     chh      - real, surface exchange coeff heat&moisture (m/s)  im   !
 !     evap     - real, evaperation from latent heat flux           im   !
 !     hflx     - real, sensible heat flux                          im   !
 !                                                                       !

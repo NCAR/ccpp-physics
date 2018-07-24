@@ -30,8 +30,8 @@
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | out    | F        |
 !! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1     |    2 | real      | kind_phys | out    | F        |
 !! | save_qcw       | cloud_condensed_water_mixing_ratio_save                | moist cloud condensed water mixing ratio before entering a physics scheme | kg kg-1     |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_MP_generic_pre_run(im, ix, levs, clw1, clw2, &
                   ldiag3d, ntcw, ncld, num_p3d, t, q,             &

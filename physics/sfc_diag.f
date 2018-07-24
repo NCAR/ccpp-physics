@@ -37,8 +37,8 @@
 !! | fh             | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                        | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
 !! | fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                             | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm

@@ -118,8 +118,8 @@
 !! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                    | index         |    0 | integer   |           | in     | F        |
 !! | xkzminv        | atmosphere_heat_diffusivity_background_maximum                              | maximum background value of heat diffusivity          | m2 s-1        |    0 | real      | kind_phys | in     | F        |
 !! | moninq_fac     | atmosphere_diffusivity_coefficient_factor                                   | multiplicative constant for atmospheric diffusivities | none          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_edmf Hybrid EDMF General Algorithm
 !!  -# Compute preliminary variables from input arguments.

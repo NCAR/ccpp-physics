@@ -17,8 +17,8 @@
 !! | im             | horizontal_loop_extent                                 | horizontal loop extent                             | count         |    0 | integer   |           | in     | F        |
 !! | levs           | vertical_dimension                                     | vertical layer dimension                           | count         |    0 | integer   |           | in     | F        |
 !! | kinver         | index_of_highest_temperature_inversion                 | index of highest temperature inversion             | index         |    1 | integer   |           | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP           | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP              | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP           | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP              | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, kinver, errmsg, errflg)
 
@@ -67,8 +67,8 @@
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                     | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real             | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          |    1 | real             | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type    |           | inout  | F        |
-!! | errmsg         | error_message                                                | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | error_flag                                                   | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
 !!
       subroutine GFS_PBL_generic_post_run (Grid, Model, Radtend, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
         dudt, dvdt, dtdt, dqdt, xmu, Diag, errmsg, errflg)
@@ -136,7 +136,7 @@
               enddo
             enddo
             if (Model%ntoz > 0) then
-              Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(i,k,Model%ntoz) * Model%dtf
+              Diag%dq3dt(:,:,5) = Diag%dq3dt(:,:,5) + dqdt(:,:,Model%ntoz) * Model%dtf
             endif
           endif
 

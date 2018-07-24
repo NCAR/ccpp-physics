@@ -59,8 +59,8 @@ module gmtb_scm_sfc_flux_spec
 !! | qss              | surface_specific_humidity                                                    | surface air saturation specific humidity                        | kg kg-1       |    1 | real      | kind_phys | out    | F        |
 !! | t2m              | temperature_at_2m                                                            | 2 meter temperature                                             | K             |    1 | real      | kind_phys | out    | F        |
 !! | q2m              | specific_humidity_at_2m                                                      | 2 meter specific humidity                                       | kg kg-1       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg           | error_message                                                                | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg           | error_flag                                                                   | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg           | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
+!! | errflg           | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !! \section general_sfc_flux_spec General Algorithm
 !!  -# Compute friction velocity from the wind speed at the lowest model layer, the height about the ground, and the roughness length.

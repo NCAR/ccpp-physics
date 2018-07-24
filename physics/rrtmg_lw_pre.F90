@@ -21,8 +21,8 @@
 !! | im             | horizontal_loop_extent                    | horizontal loop extent                                             | count    |    0 | integer               |           | in     | F        |
 !! | tsfg           | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                           | K        |    1 | real                  | kind_phys | in     | F        |
 !! | tsfa           | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                   | K        |    1 | real                  | kind_phys | in     | F        |
-!! | errmsg         | error_message                             | error message for error handling in CCPP                           | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                                | error flag for error handling in CCPP                              | flag     |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                        | error message for error handling in CCPP                           | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                           | error flag for error handling in CCPP                              | flag     |    0 | integer               |           | out    | F        |
 !!
       subroutine rrtmg_lw_pre_run (Model, Grid, Sfcprop, Radtend, im, tsfg, tsfa, errmsg, errflg)
     

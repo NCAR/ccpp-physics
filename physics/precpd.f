@@ -40,8 +40,8 @@
 !! | wk1            | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |    1 | real      | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                                    | flag for printing diagnostics to output                           | flag        |    0 | logical   |           | in     | F        |
 !! | jpr            | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |    0 | integer   |           | in     | F        |
-!! | errmsg         | error_message                                                 | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
 !!
 !> \section general_precpd GFS precpd Scheme General Algorithm
 !! The following two equations can be used to calculate the

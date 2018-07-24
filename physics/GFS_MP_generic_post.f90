@@ -40,8 +40,8 @@
 !! | dt3dt6         | large_scale_condensate_heating_rate_at_model_layers        | large scale condensate heating rate at model layers            | K s-1       |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt4         | large_scale_condensate_moistening_rate_at_model_layers     | large scale condensate moistening rate at model layers         | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
 !! | pwat           | column_precipitable_water                                  | column integrated precipitable water                           | kg m-2      |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                       | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                          | flag        |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                       | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                          | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_MP_generic_post_run(im,ix,levs,dtf,del,          &
                  lssav,ldiag3d,rain,frain,ntcw,ncld,cwm,              & ! input

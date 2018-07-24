@@ -199,8 +199,8 @@
 !! | adjnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux                                       | surface downwelling diffuse near-infrared shortwave flux at current time                             | W m-2   |    1 | real      | kind_phys | out    | F        |
 !! | adjvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux                              | surface downwelling beam ultraviolet plus visible shortwave flux at current time                     | W m-2   |    1 | real      | kind_phys | out    | F        |
 !! | adjvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux                             | surface downwelling diffuse ultraviolet plus visible shortwave flux at current time                  | W m-2   |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                                  | error message for error handling in CCPP                                                             | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                                     | error flag for error handling in CCPP                                                                | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                                             | error message for error handling in CCPP                                                             | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                                                | flag    |    0 | integer   |           | out    | F        |
 !!
       subroutine dcyc2t3_run                                            &
 !...................................
@@ -364,8 +364,8 @@
 !! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   |    1 | real                  | kind_phys | in     | F        |
 !! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   |    1 | real                  | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | DDT     |    0 | GFS_diag_type         |           | inout  | F        |
-!! | errmsg         | error_message                          | error message for error handling in CCPP               | none    |    0 | character             | len=*     | out    | F        |
-!! | errflg         | error_flag                             | error flag for error handling in CCPP                  | flag    |    0 | integer               |           | out    | F        |
+!! | errmsg         | ccpp_error_message                     | error message for error handling in CCPP               | none    |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                        | error flag for error handling in CCPP                  | flag    |    0 | integer               |           | out    | F        |
 !!
       subroutine dcyc2t3_post_run(                                      &
      &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag,  &
