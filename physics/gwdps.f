@@ -1,4 +1,4 @@
-cumulative_change_in_x_wind_due_to_surface_processes!> \file gwdps.f
+!> \file gwdps.f
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.
 
