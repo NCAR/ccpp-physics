@@ -1,27 +1,3 @@
-      module dcyc2t3_pre
-
-      contains
-
-!! \section arg_table_dcyc2t3_pre_init Argument Table
-!!
-      subroutine dcyc2t3_pre_init()
-      end subroutine dcyc2t3_pre_init
-
-
-!! \section arg_table_dcyc2t3_pre_run Argument Table
-!!
-      subroutine dcyc2t3_pre_run()
-      end subroutine dcyc2t3_pre_run
-
-
-!! \section arg_table_dcyc2t3_pre_finalize Argument Table
-!!
-      subroutine dcyc2t3_pre_finalize()
-      end subroutine dcyc2t3_pre_finalize
-
-      end module dcyc2t3_pre
-
-
       module dcyc2t3
 
       contains
@@ -359,16 +335,14 @@
 !! | local_name     | standard_name                          | long_name                                              | units   | rank | type                  | kind      | intent | optional |
 !! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                 | horizontal loop extent                                 | count   |    0 | integer               |           | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux      | surface downwelling longwave flux at current time      | W m-2   |    1 | real                  | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux        | surface upwelling longwave flux at current time        | W m-2   |    1 | real                  | kind_phys | in     | F        |
 !! | adjsfcdsw      | surface_downwelling_shortwave_flux     | surface downwelling shortwave flux at current time     | W m-2   |    1 | real                  | kind_phys | in     | F        |
 !! | adjsfcnsw      | surface_net_downwelling_shortwave_flux | surface net downwelling shortwave flux at current time | W m-2   |    1 | real                  | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                      | GFS diagnostics derived data type variable             | DDT     |    0 | GFS_diag_type         |           | inout  | F        |
+!! | adjsfcusw      | surface_upwelling_shortwave_flux       | surface upwelling shortwave flux at current time       | W m-2   |    1 | real                  | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                     | error message for error handling in CCPP               | none    |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                        | error flag for error handling in CCPP                  | flag    |    0 | integer               |           | out    | F        |
 !!
       subroutine dcyc2t3_post_run(                                      &
-     &           im, adjsfcdlw, adjsfculw, adjsfcdsw, adjsfcnsw, Diag,  &
+     &           im, adjsfcdsw, adjsfcnsw, adjsfcusw,                   &
      &           errmsg, errflg)
 
       use GFS_typedefs, only: GFS_diag_type
@@ -377,20 +351,17 @@
       implicit none
 
       integer, intent(in) :: im
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
-     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw
-      type(GFS_diag_type), intent(inout) :: Diag
-      character(len=*),      intent(out) :: errmsg
-      integer,               intent(out) :: errflg
+      real(kind=kind_phys), dimension(im), intent(in)  :: adjsfcdsw
+      real(kind=kind_phys), dimension(im), intent(in)  :: adjsfcnsw
+      real(kind=kind_phys), dimension(im), intent(out) :: adjsfcusw
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      Diag%dlwsfci(:) = adjsfcdlw(:)
-      Diag%ulwsfci(:) = adjsfculw(:)
-      Diag%uswsfci(:) = adjsfcdsw(:) - adjsfcnsw(:)
-      Diag%dswsfci(:) = adjsfcdsw(:)
+      adjsfcusw(:) = adjsfcdsw(:) - adjsfcnsw(:)
 
       return
 
