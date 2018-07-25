@@ -1073,7 +1073,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         !!\f[
         !! t_{ocean}=dw_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}
         !!\f]
-        !! where \f$A_{r}\f$ is cell area. \f$dw_{land}=0.20\f$ and \f$dw_{ocean}=0.10\f$ 
+        !! where \f$A_{r}\f$ is cell area. \f$dw_{land}=0.16\f$ and \f$dw_{ocean}=0.10\f$ 
         !! are base value for sub-grid variability over land and ocean.
         !! The total horizontal sub-grid variability is:
         !!\f[
