@@ -37,7 +37,7 @@
 !! | save_t         | air_temperature_save                                       | air temperature before entering a physics scheme               | K           |    2 | real      | kind_phys | in     | F        |
 !! | save_qv        | water_vapor_specific_humidity_save                         | water vapor specific humidity before entering a physics scheme | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | totprcp        | accumulated_lwe_thickness_of_precipitation_amount          | accumulated total precipitation amount                         | m           |    1 | real      | kind_phys | inout  | F        |
-!! | dt3dt6         | large_scale_condensate_heating_rate_at_model_layers        | large scale condensate heating rate at model layers            | K s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | dt3dt6         | cumulative_change_in_temperature_due_to_microphysics       | cumulative change in temperature due to microphysics           | K           |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt4         | large_scale_condensate_moistening_rate_at_model_layers     | large scale condensate moistening rate at model layers         | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
 !! | pwat           | column_precipitable_water                                  | column integrated precipitable water                           | kg m-2      |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                       | none        |    0 | character | len=*     | out    | F        |
