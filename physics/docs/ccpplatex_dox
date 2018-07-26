@@ -161,7 +161,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_bfmicrophysics.f \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
-                        ../gfdl_fv_sat_adj.F90 
+                        ../gfdl_fv_sat_adj.F90    \
+###
+                        ../physparam.f
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F90 \

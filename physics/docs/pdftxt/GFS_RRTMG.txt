@@ -41,14 +41,35 @@
  oxygen, and in the longwave up to four types of halocarbons (CFCs).
  To represent statistically the unresolved subgrid cloud variability
  when dealing multi layered clouds, a Monte-Carlo Independent Column
- Approximation (McICA) method is used in the RRTMG radiative transfer.
+ Approximation (\b McICA) method is used in the RRTMG radiative transfer.
  A maximum-random cloud overlap method is used in both LW and SW
- radiation calculations. Cloud condensate path and effective radius
- for water and ice are used for the calculation of cloud-radiative
- properties. Hu and Stamnes (1993) \cite hu_and_stamnes_1993
- is used to treat water clouds in both LW and SW parameterizations.
- For ice clouds. Fu's parameterizations (Fu(1996) \cite fu_1996
- and Fu et al.(1998) \cite fu_et_al_1998) are used in the SW and LW, respectively.
+ radiation calculations. 
+
+ Radiative fields from model outputs (\f$W m^{-2}\f$) include:
+- At surface total sky
+ - DLWRFsfc: Downward LW
+ - DSWRFsfc: Downward SW
+ - ULWRFsfc: Upward LW
+ - USWRFsfc: Upward SW
+ - NBDSFsfc: Near IR beam downward
+ - NDDSFsfc: Near IR diffuse downward
+ - VBDSFsfc: UV+Visible beam downward
+ - VDDSFsfc: UV+Visible diffuse downward
+ - DUVBsfc:  UV-B downward flux
+- At surface clear sky
+ - CSDLFsfc: Downward LW
+ - CSDSFsfc: Downward SW
+ - CSULFsfc: Upward LW
+ - CSULFsfc: Upward LW
+ - CSUSFsfc: Upward sw
+ - CDUVBsfc: UV-B downward flux
+- At TOA total sky
+ - DSWRFtoa: Downward SW
+ - ULWRFtoa: Upward LW
+ - USWRFtoa: Upward SW
+- At TOA clear sky:
+ - CSULFtoa: Upward LW
+ - CSUSFtoa: Upward SW
 
 \section  intraphysics_rrtmg Intraphysics Communication
  + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)

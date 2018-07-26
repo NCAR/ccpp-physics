@@ -109,6 +109,32 @@
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
 !! data are entered as mixing ratio by volume, except ozone which is
 !! mass mixing ratio (g/g).
+!!\image html rad_gas_AGGI.png "Figure 1: Atmospheric radiative forcing, relative to 1750, by long-lived greenhouse gases and the 2016 update of the NOAA Annual Greenhouse Gas Index (AGGI)"
+!! NOAA Annual Greenhouse Gas Index (AGGI) shows that from 1990 to 2016, 
+!! radiative forcing by long-lived greenhouse gases (LLGHGs) increased by
+!! 40%, with \f$CO_2\f$ accounting for about 80% of this increase(WMO 
+!! Greenhouse Gas Bulletin (2017) \cite wmo_greenhouse_gas_bulletin_2017).
+!!
+!! Operational GFS selection for gas distribution:
+!!\n CO2 Distribution (namelist control parameter -\b ICO2=2):
+!!\n ICO2=0: use prescribed global annual mean value (currently = 380 ppmv)  
+!!\n ICO2=1: use observed global annual mean value
+!!\n ICO2=2: use observed monthly 2-d data table in \f$15^o\f$ horizontal resolution
+!!
+!! O3 Distribution (namelist control parameter -\b NTOZ):
+!!\n NTOZ=0: use seasonal and zonal averaged climatological ozone
+!!\n NTOZ>0: use 3-D prognostic ozone
+!!
+!! Trace Gases (currently using the global mean climatology in unit of ppmv):
+!! \f$CH_4-1.50\times10^{-6}\f$;
+!! \f$N_2O-0.31\times10^{-6}\f$;
+!! \f$O_2-0.209\f$;
+!! \f$CO-1.50\times10^{-8}\f$;
+!! \f$CF12-6.36\times10^{-10}\f$;
+!! \f$CF22-1.50\times10^{-10}\f$;
+!! \f$CF113-0.82\times10^{-10}\f$;
+!! \f$CCL4-1.40\times10^{-10}\f$
+!!
 !!\version NCEP-Radiation_gases     v5.1  Nov 2012
 
 !> This module sets up ozone climatological profiles and other constant gas

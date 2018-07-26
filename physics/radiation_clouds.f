@@ -158,9 +158,25 @@
 !! Administration National Centers for Environmental Prediction Global
 !! Forecast System (GFS) include (i) cloud liquid/ice water path; (ii)
 !! the fraction of clouds; (iii) effective radius of water/ice droplet:
+!!
+!! Cloud prediction model (namelist control parameter - \b NTCW, \b IMP_PHYSICS):
+!!\n NTCW=0: legacy diagnostic cloud scheme based on RH-table lookup table
+!!\n NTCW>0: prognostic cloud condensate
+!!\n IMP_PHYSICS =98/99: Zhao-Carr-Sundqvist MP - Xu-Randall diagnostic cloud fraction
+!!\n IMP_PHYSICS =11: GFDL MP - unified diagnostic cloud fraction provided by GFDL MP
+!!
+!! Cloud overlapping method (namelist control parameter - \b IOVR_LW, \b IOVR_SW)
+!!\n IOVR=0: randomly overlapping vertical cloud layers
+!!\n IOVR=1: maximum-random overlapping vertical cloud layers
+!!
+!! Sub-grid cloud approximation (namelist control parameter - \b ISUBC_LW=2, \b ISUBC_SW=2)
+!!\n ISUBC=0: grid averaged quantities, without sub-grid cloud approximation
+!!\n ISUBC=1: with McICA sub-grid approximation (use prescribed permutation seeds) 
+!!\n ISUBC=2: with McICA sub-grid approximation (use random permutation seeds)
+!!
 !!\version NCEP-Radiation_clouds    v5.1  Nov 2012
 !!
-!> \section gen_al_clouds  RRTMG Clouds Module General Algorithm
+!> \section gen_al_clouds  Zhao-Carr-Sundqvist MP - Xu-Randall Diagnostic Cloud Fraction Calculation
 !! @{
 !! \n The cloud fraction in a given grid box of the GFS model is
 !! computed using the parameterization scheme of 

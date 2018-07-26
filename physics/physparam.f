@@ -19,12 +19,9 @@
 !                                                                      !
 !!!!!  ==========================================================  !!!!!
 
-!> \ingroup RRTMG
-!> \defgroup physparam physparam
+! \ingroup RRTMG
+!> \defgroup phy_sparam GFS Physics Parameter Definition
 !! @{
-!> This module defines commonly used control variables and parameters
-!! in physics related programs.
-!!
 !! Those variables are grouped  together in accordance with functionaity
 !! and are given brief descriptions and value specifications. There are
 !! two types of attributes (parameters vs. save) designated for the
@@ -33,9 +30,10 @@
 !! are given a default value but could be changed at the model's
 !! execution-time (usually through an input of name-list file or through
 !! run scripts).
-!========================================!
-      module physparam                   !
-!........................................!
+
+!> This module defines commonly used control variables and parameters
+!! in physics related programs.
+      module physparam            
 !
 !     implicit   none
 
@@ -61,7 +59,7 @@
 !==================================================================================
 
 ! ............................................. !
-!> \name  -1.1- Control flags for SW radiation
+!> \name  1.1 Control flags for SW radiation
 ! ............................................. !
 
 !> SW heating rate unit control flag: =1:k/day; =2:k/second.
@@ -97,7 +95,7 @@
       integer,parameter :: iswmode = 2
 
 ! ............................................. !
-!> \name  -1.2- Control flags for LW radiation
+!> \name  1.2 Control flags for LW radiation
 ! ............................................. !
 
 !> LW heating rate unit: =1:k/day; =2:k/second.
@@ -124,7 +122,7 @@
       integer,save      :: ilwcice = 3
 
 ! ............................................. !
-!>\name  -1.3- Control flag for LW aerosol property
+!>\name  1.3 Control flag for LW aerosol property
 
 !> selects 1 band or multi bands for LW aerosol properties
 !!\n =.true.:aerosol properties calculated in 1 broad LW band
@@ -139,7 +137,7 @@
 !==================================================================================
 
 ! ............................................. !
-!>\name  -2.1- For module radiation_astronomy
+!>\name  2.1 For module radiation_astronomy
 ! ............................................. !
 
 !> solar constant scheme control flag
@@ -158,7 +156,7 @@
       data solar_file   / 'solarconstant_noaa_a0.txt ' /
 
 ! ............................................. !
-!> \name  -2.2- For module radiation_aerosols
+!> \name  2.2 For module radiation_aerosols
 ! ............................................. !
 
 !> aerosol model scheme control flag
@@ -194,7 +192,7 @@
       data aeros_file   / 'aerosol.dat               ' /
 
 ! ............................................. !
-!> \name  -2.3- For module radiation_gases
+!> \name  2.3 For module radiation_gases
 ! ............................................. !
 
 !> co2 data source control flag
@@ -232,7 +230,7 @@
       data co2cyc_file   / 'co2monthlycyc.txt         ' /
 
 ! ............................................. !
-!>\name  -2.4- For module radiation_clouds
+!>\name  2.4 For module radiation_clouds
 ! ............................................. !
 
 !> cloud optical property scheme control flag
@@ -264,7 +262,7 @@
       logical, save :: lsashal =.false.
 
 ! ............................................. !
-!>\name  -2.5- For module radiation_surface
+!>\name  2.5 For module radiation_surface
 ! ............................................. !
 
 !> surface albedo scheme control flag
@@ -282,7 +280,7 @@
       data semis_file   / 'sfc_emissivity_idx.txt    ' /
 
 ! ............................................. !
-!> \name  -2.6- general purpose
+!> \name  2.6 general purpose
 ! ............................................. !
 
 !> vertical profile indexing flag
@@ -296,7 +294,7 @@
 !> sub-column cloud approx flag in LW radiation
 !!\n =0:no McICA approximation in LW radiation
 !!\n =1:use McICA with prescribed permutation seeds (test mode)
-!!\n =2:use McICA with randomly generatedo
+!!\n =2:use McICA with randomly generated
 !!\n Opr GFS/CFS=2; see ISUBC_LW in run scripts
       integer, save :: isubclw = 0
 !> initial permutaion seed for mcica radiation

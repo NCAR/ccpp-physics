@@ -78,13 +78,23 @@
 !! @{
 !> This module sets up surface albedo for sw radiation and surface
 !! emissivity for lw radiation.
-!!\version NCEP-Radiation_surface   v5.1  Nov 2012
 !!
 !! In the module, the externally callable subroutines are :
 !! - sfc_init(): initialization radiation surface data
 !! - setalb(): set up four-component surface albedoes
 !! - setemis(): set up surface emissivity for lw radiation
-
+!!
+!! SW surface albedo (namelist control parameter - \b IALB=1)
+!!\n IALB=0: surface vegetation type based climatology scheme (monthly 
+!! data in \f$1^o\f$ horizontal resolution)
+!!\n IALB=1: MODIS retrievals based monthly mean climatology
+!!
+!! LW surface emissivity (namelist control parameter - \b IEMS=1)
+!!\n IEMS=0: black-body emissivity (=1.0)
+!!\n IEMS=1: surface type based climatology in \f$1^o\f$ horizontal resolution
+!!
+!!\version NCEP-Radiation_surface   v5.1  Nov 2012
+!!
 !> This module sets up surface albedo for SW radiation and surface  
 !! emissivity for LW radiation.  
       module module_radiation_surface   

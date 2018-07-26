@@ -10,7 +10,7 @@ The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subseq
 At the forecast step, Near-Surface Sea Temperature (NSST) is an oceanic vertical temperature profile just below the sea surface. Here, only the vertical thermal structure due to \b diurnal \b thermocline \b layer \b warming and \b thermal 
 \b skin \b layer \b cooling is resolved, both with an origin on Fairall et al. (1996) \cite fairall_et_al_1996 .
 
-\image html NSST_schematic.png "Figure 1: NSST T-Profile"
+\image html NSST_schematic.png "Figure 1: NSST T-Profile (Courtesy of X. Li at EMC)"
 
 Linear T-Profile:
 \f[
