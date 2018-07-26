@@ -37,8 +37,8 @@
 !! | qgrs_snow                    | snow_water_mixing_ratio                                | moist (dry+vapor, no condensates) mixing ratio of snow water                        | kg kg-1       |    2 | real      | kind_phys | in     | F        |
 !! | qgrs_graupel                 | graupel_mixing_ratio                                   | moist (dry+vapor, no condensates) mixing ratio of graupel                           | kg kg-1       |    2 | real      | kind_phys | in     | F        |
 !! | vdftra                       | vertically_diffused_tracer_concentration               | tracer concentration diffused by PBL scheme                                         | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
-!! | errmsg                       | error_message                                          | error message for error handling in CCPP                                            | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                       | error_flag                                             | error flag for error handling in CCPP                                               | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg                       | ccpp_error_message                                     | error message for error handling in CCPP                                            | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                       | ccpp_error_flag                                        | error flag for error handling in CCPP                                               | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, &
         imp_physics_wsm6, ltaerosol, qgrs, qgrs_water_vapor, qgrs_liquid_cloud, qgrs_ice_cloud, qgrs_ozone, &
@@ -157,6 +157,7 @@
 !! | lssav                        | flag_diagnostics                                                                  | logical flag for storing diagnostics                                                        | flag          |    0 | logical   |           | in     | F        |
 !! | ldiag3d                      | flag_diagnostics_3D                                                               | flag for 3d diagnostic fields                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | lsidea                       | flag_idealized_physics                                                            | flag for idealized physics                                                                  | flag          |    0 | logical   |           | in     | F        |
+!! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)                                                 | flag          |    0 | logical   |           | in     | F        |
 !! | dvdftra                      | tendency_of_vertically_diffused_tracer_concentration                              | updated tendency of the tracers due to vertical diffusion in PBL scheme                     | kg kg-1 s-1   |    3 | real      | kind_phys | in     | F        |
 !! | dusfc1                       | instantaneous_surface_x_momentum_flux                                             | surface momentum flux in the x-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | dvsfc1                       | instantaneous_surface_y_momentum_flux                                             | surface momentum flux in the y-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
@@ -204,11 +205,11 @@
 !! | dv3dt_OGWD                   | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                   | cumulative change in y wind due to orographic gravity wave drag                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt                        | cumulative_change_in_water_vapor_specific_humidity_due_to_PBL                     | cumulative change in water vapor specific humidity due to PBL                               | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt_ozone                  | cumulative_change_in_ozone_mixing_ratio_due_to_PBL                                | cumulative change in ozone mixing ratio due to PBL                                          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg                       | error_message                                                                     | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                       | error_flag                                                                        | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac, ntoz, imp_physics, imp_physics_gfdl, imp_physics_thompson, &
-        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, &
+        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, &
         dudt, dvdt, dtdt, htrsw, htrlw, xmu,&
         dqdt, dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,&
         dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain, dqdt_snow, dqdt_graupel, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, &
@@ -221,13 +222,14 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntoz, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
 
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: dqdt
       real(kind=kind_phys), dimension(im, levs), intent(inout) :: dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, &
         dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain,&
         dqdt_snow, dqdt_graupel, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
@@ -243,7 +245,8 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      if (nvdiff == ntrac) then
+!GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
+      if (nvdiff == ntrac .and. hybedmf) then
         dqdt = dvdftra
       else
         if (imp_physics == imp_physics_wsm6) then
