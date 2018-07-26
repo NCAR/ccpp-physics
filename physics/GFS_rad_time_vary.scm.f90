@@ -1,6 +1,13 @@
 !>\file GFS_rad_time_vary.f90
 !!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
       module GFS_rad_time_vary
+
+      implicit none
+
+      private
+
+      public GFS_rad_time_vary_init, GFS_rad_time_vary_run, GFS_rad_time_vary_finalize
+
       contains
 
 !>\defgroup GFS_rad_time_vary GFS RRTMG Update 
@@ -29,7 +36,6 @@
                                            GFS_control_type,   &
                                            GFS_grid_type,      &
                                            GFS_tbd_type
-      use GFS_radupdate,             only: GFS_radupdate_run
       use radcons,                   only: qmin, con_100
 
       implicit none
@@ -51,12 +57,7 @@
 
       if (Model%lsswr .or. Model%lslwr) then
 
-        if (Tbd%blkno==1) then
-
-          call GFS_radupdate_run (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
-                        Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon,            &
-                        Model%ictm, Model%isol )
-        endif
+        !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
 
         !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
         if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
