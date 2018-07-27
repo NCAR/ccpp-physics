@@ -110,7 +110,7 @@ module gfdl_cloud_microphys
    real :: pie, fac_rc
    real :: c_air, c_vap
 
-   real :: lati, latv, lats, lat2, lcp, icp, tcp           !< used in bigg mechanism and wet bulk
+   real :: lati, latv, lats, lat2, lcp, icp, tcp           !< used in Bigg mechanism and wet bulk
 
    real :: d0_vap                                          !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
    real :: lv00                                            !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
@@ -687,7 +687,7 @@ subroutine gfdl_cloud_microphys_work (iis, iie, jjs, jje, kks, kke, ktop, kbot, 
    if (hydrostatic) do_sedi_w = .false.
 
    ! -----------------------------------------------------------------------
-   ! define latent heat coefficient used in wet bulb and bigg mechanism
+   ! define latent heat coefficient used in wet bulb and Bigg mechanism
    ! -----------------------------------------------------------------------
 
    latv = hlv
@@ -2408,7 +2408,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         icpk (k) = lhi (k) / cvm (k)
 
         ! -----------------------------------------------------------------------
-        !> - Apply bigg mechanism.
+        !> - Apply Bigg mechanism.
         ! -----------------------------------------------------------------------
 
         if (fast_sat_adj) then

@@ -3,7 +3,12 @@
 \section des_gwdc  Description
  GFS physics includes parameterizations of gravity waves from two
  important sources: mountains and convection. This parameterization
- addresses the latter. 
+ addresses the latter. Non-orographic gravity waves are forced by dynamical motions such as convection, frontogenesis,
+ and jet stream activity (Fritts and Nastrom (1980) \cite fritts_and_nastrom_1980 ). They have 
+ vertical wavelengths which vary from less than one to many tens of kilometers and horizontal wavelengths 
+ which vary from tens to thousands of kilometers (Ern et al. 2004 \cite ern_et_al_2004). Thus these
+ waves are generally unresolved or under-resolved by the model as the generating process is often poorly 
+ represented, and therefore have to be parametrized.
 
  The importance of convectively-generated tropical waves
  in driving the equatorial stratospheric semi-annual oscillation (SAO) and
