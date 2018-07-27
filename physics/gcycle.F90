@@ -1,3 +1,4 @@
+# 1 "physics/gcycle.F90"
   SUBROUTINE GCYCLE (nblks, Model, Grid, Sfcprop, Cldprop)
 !
 !
@@ -5,6 +6,7 @@
     USE PHYSCONS,     only: PI => con_PI
     USE GFS_typedefs, only: GFS_control_type, GFS_grid_type, &
                             GFS_sfcprop_type, GFS_cldprop_type
+    use module_nst_water_prop, only: get_dtzm_point
     implicit none
 
     integer,                  intent(in)    :: nblks
@@ -16,7 +18,7 @@
 !
 !     Local variables
 !     ---------------
-    real(kind=kind_phys) ::             &
+    real(kind=kind_phys) ::                     &
            RLA (Model%nx*Model%ny),             &
            RLO (Model%nx*Model%ny),             &
         SLMASK (Model%nx*Model%ny),             &
@@ -50,7 +52,7 @@
         STCFC1 (Model%nx*Model%ny*Model%lsoil), &
         SLCFC1 (Model%nx*Model%ny*Model%lsoil)
 
-    real(kind=kind_phys)    :: sig1t, pifac
+    real(kind=kind_phys)    :: sig1t, pifac, zsea1, zsea2, dtzm
     integer :: npts, len, nb, ix, ls, ios
     logical :: exists
 !
@@ -121,40 +123,55 @@
 
 !     if (Model%me .eq. 0)
 !    &   print *,' len=',len,' rla=',rla(len),' rlo=',rlo(len)
-        end do
-      end do
+        ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
+      ENDDO                   !-----END BLOCK LOOP-------------------------------
 
 ! check
 !     call mymaxmin(slifcs,len,len,1,'slifcs')
 !     call mymaxmin(slmask,len,len,1,'slmsk')
 !
+#ifndef INTERNAL_FILE_NML
       inquire (file=trim(Model%fn_nml),exist=exists)
       if (.not. exists) then
         write(6,*) 'gcycle:: namelist file: ',trim(Model%fn_nml),' does not exist'
         stop
       else
         open (unit=Model%nlunit, file=trim(Model%fn_nml), action='READ', status='OLD', iostat=ios)
+        rewind (Model%nlunit)
       endif
-      CALL SFCCYCLE_SUB (9998, npts, Model%lsoil, SIG1T, Model%fhcyc, &
-                     Model%idate(4), Model%idate(2),                  &
-                     Model%idate(3), Model%idate(1),                  &
-                     Model%fhour, RLA, RLO, SLMASK,                   &
-                     OROG, OROG_UF, Model%USE_UFO, Model%nst_anl,     &
-                     SIHFCS, SICFCS, SITFCS, SWDFCS, SLCFC1,          &
-                     VMNFCS, VMXFCS, SLPFCS, ABSFCS, TSFFCS,          &
-                     SNOFCS, ZORFCS, ALBFC1, TG3FCS, CNPFCS,          &
-                     SMCFC1, STCFC1, SLIFCS, AISFCS, F10MFCS,         &
-                     VEGFCS, VETFCS, SOTFCS, ALFFC1, CVFCS,           &
-                     CVBFCS, CVTFCS, Model%me, Model%nlunit,          &
+#endif
+      CALL SFCCYCLE (9998, npts, Model%lsoil, SIG1T, Model%fhcyc, &
+                     Model%idate(4), Model%idate(2),              &
+                     Model%idate(3), Model%idate(1),              &
+                     Model%fhour, RLA, RLO, SLMASK,               &
+                     OROG, OROG_UF, Model%USE_UFO, Model%nst_anl, &
+                     SIHFCS, SICFCS, SITFCS, SWDFCS, SLCFC1,      &
+                     VMNFCS, VMXFCS, SLPFCS, ABSFCS, TSFFCS,      &
+                     SNOFCS, ZORFCS, ALBFC1, TG3FCS, CNPFCS,      &
+                     SMCFC1, STCFC1, SLIFCS, AISFCS, F10MFCS,     &
+                     VEGFCS, VETFCS, SOTFCS, ALFFC1, CVFCS,       &
+                     CVBFCS, CVTFCS, Model%me, Model%nlunit,      &
+                     size(Model%input_nml_file),                  &
+                     Model%input_nml_file,                        &
                      Model%ialb, Model%isot, Model%ivegsrc)
+#ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
+#endif
 
+      zsea1 = 0.001*real(Model%nstf_name(4))
+      zsea2 = 0.001*real(Model%nstf_name(5))
       len = 0 
       do nb = 1,nblks
         do ix = 1,size(Grid(nb)%xlat,1)
           len = len + 1
           Sfcprop(nb)%slmsk  (ix) = SLIFCS  (len)
           Sfcprop(nb)%tsfc   (ix) = TSFFCS  (len)
+          if ( Sfcprop(nb)%slmsk(ix) == 0.0 .and. Model%nstf_name(1) > 0 ) then
+             call get_dtzm_point(Sfcprop(nb)%xt(ix),      Sfcprop(nb)%xz(ix),  & 
+                                 Sfcprop(nb)%dt_cool(ix), Sfcprop(nb)%z_c(ix), &
+                                 zsea1, zsea2, dtzm)
+             Sfcprop(nb)%tref(ix) = Sfcprop(nb)%tsfc(ix)-dtzm
+          endif
           Sfcprop(nb)%weasd  (ix) = SNOFCS  (len)
           Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)
           Sfcprop(nb)%tg3    (ix) = TG3FCS  (len)
@@ -187,8 +204,8 @@
             Sfcprop(nb)%stc (ix,ls) = STCFC1 (len + (ls-1)*npts)
             Sfcprop(nb)%slc (ix,ls) = SLCFC1 (len + (ls-1)*npts)
           enddo
-        end do
-      end do
+        ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
+      ENDDO                   !-----END BLOCK LOOP-------------------------------
 
 ! check
 !     call mymaxmin(slifcs,len,len,1,'slifcs')

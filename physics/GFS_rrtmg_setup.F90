@@ -147,8 +147,8 @@ module GFS_rrtmg_setup
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faerlw,",        &
                " check definitions of levr, ltp, nbdlw, nf_aelw:",     &
-               " expected shape ", shape(faerlw_check(1,:,:,:)),       &
-               " but got ", shape(faerlw(1,:,:,:))
+               " expected shape ", shape(faerlw_check(:,:,:,:)),       &
+               " but got ", shape(faerlw(:,:,:,:))
          errflg = 1
          return
       end if
@@ -156,17 +156,17 @@ module GFS_rrtmg_setup
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faersw,",        &
                " check definitions of levr, ltp, nbdsw, nf_aesw:",     &
-               " expected shape ", shape(faersw_check(1,:,:,:)),       &
-               " but got ", shape(faersw(1,:,:,:))
+               " expected shape ", shape(faersw_check(:,:,:,:)),       &
+               " but got ", shape(faersw(:,:,:,:))
          errflg = 1
          return
       end if
       if (size(aerodp(1,:)).ne.size(aerodp_check(1,:))) then
-         write(errmsg,"(3a,4i4,a,4i4)") &
+         write(errmsg,"(3a,2i4,a,2i4)") &
                "Runtime error: dimension mismatch for aerodp,",        &
                " check definitions of nspc1:",                         &
-               " expected shape ", shape(aerodp_check(1,:)),           &
-               " but got ", shape(aerodp(1,:))
+               " expected shape ", shape(aerodp_check(:,:)),           &
+               " but got ", shape(aerodp(:,:))
          errflg = 1
          return
       end if
