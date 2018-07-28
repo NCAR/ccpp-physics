@@ -248,7 +248,7 @@
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. hybedmf) then
         dqdt = dvdftra
-      else
+      elseif (nvdiff /= ntrac) then
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
