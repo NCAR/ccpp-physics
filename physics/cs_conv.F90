@@ -192,8 +192,8 @@ module cs_conv
 !! | cnv_ndrop  | number_concentration_of_cloud_liquid_water_particles_for_detrainment | droplet number concentration in convective detrainment                                                | m-3        |    2 | real      | kind_phys | out    | F        |
 !! | cnv_nice   | number_concentration_of_ice_crystals_for_detrainment   | crystal number concentration in convective detrainment                                                | m-3        |    2 | real      | kind_phys | out    | F        |
 !! | mp_phys    | flag_for_microphysics_scheme                           | flag for microphysics scheme                                                                          | flag       |    0 | integer   |           | in     | F        |
-!! | errmsg     | error_message                                          | error message for error handling in CCPP                                                              | none       |    0 | character | len=*     | out    | F        |
-!! | errflg     | error_flag                                             | error flag for error handling in CCPP                                                                 | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg     | ccpp_error_message                                     | error message for error handling in CCPP                                                              | none       |    0 | character | len=*     | out    | F        |
+!! | errflg     | ccpp_error_flag                                        | error flag for error handling in CCPP                                                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_cs_conv CS Convection Scheme General Algorithm
 !!  -# Add comments
