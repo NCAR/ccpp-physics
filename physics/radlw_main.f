@@ -425,8 +425,8 @@
 !! | cld_od_total    | cloud_optical_depth_weighted                                                                  | cloud optical depth, weighted                             | none    |    2 | real        | kind_phys | in     | T        |
 !! | cld_od_layer    | cloud_optical_depth_layers_678                                                                | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | out    | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
-!! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
-!! | errflg          | error_flag                                                                                    | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
+!! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !!
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{

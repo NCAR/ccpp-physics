@@ -105,8 +105,8 @@
 !! | c1             | detrainment_conversion_parameter_shallow_convection        | convective detrainment conversion parameter for shal conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
 !! | pgcon          | momentum_transport_reduction_factor_pgf_shallow_convection | reduction factor in momentum transport due to shal conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
 !! | asolfac        | aerosol_aware_parameter_shallow_convection                 | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
@@ -1835,3 +1835,99 @@ c
 !> @}
 !! @}
       end module samfshalcnv
+
+      module samfshalcnv_post
+      contains
+
+!! \section arg_table_samfshalcnv_post_run Argument Table
+!! | local_name     | standard_name                                                         | long_name                                                            | units   | rank | type             |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------------------|----------------------------------------------------------------------|---------|------|------------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                | horizontal loop extent                                               | count   |    0 | integer          |           | in     | F        |
+!! | levs           | vertical_dimension                                                    | vertical layer dimension                                             | count   |    0 | integer          |           | in     | F        |
+!! | lssav          | flag_diagnostics                                                      | logical flag for storing diagnostics                                 | flag    |    0 | logical          |           | in     | F        |
+!! | shcnvcw        | flag_shallow_convective_cloud                                         | flag for shallow convective cloud                                    |         |    0 | logical          |           | in     | F        |
+!! | frain          | dynamics_to_physics_timestep_ratio                                    | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount              | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
+!! | npdf3d         | number_of_3d_arrays_associated_with_pdf-based_clouds                  | number of 3d arrays associated with pdf based clouds/mp              | count   |    0 | integer          |           | in     | F        |
+!! | num_p3d        | array_dimension_of_3d_arrays_for_microphysics                         | number of 3D arrays needed for microphysics                          | count   |    0 | integer          |           | in     | F        |
+!! | ncnvcld3d      | number_of_convective_3d_cloud_fields                                  | number of convective 3d clouds fields                                | count   |    0 | integer          |           | in     | F        |
+!! | cnvc           | convective_cloud_cover                                                | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                                   | moist convective cloud water mixing ratio                            | kg kg-1 |    2 | real             | kind_phys | in     | F        |
+!! | rainc          | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep | convective rain at this time step                                    | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvprcp        | cumulative_lwe_thickness_of_convective_precipitation_amount           | cumulative convective precipitation                                  | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket | cumulative convective precipitation in bucket                        | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvw_phy_f3d   | convective_cloud_water_mixing_ratio_in_phy_f3d                        | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1 |    2 | real             | kind_phys | inout  | F        |
+!! | cnvc_phy_f3d   | convective_cloud_cover_in_phy_f3d                                     | convective cloud cover in the phy_f3d array                          | frac    |    2 | real             | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
+!!
+      subroutine samfshalcnv_post_run (im, levs, lssav, shcnvcw, frain,
+     &  rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,
+     &  rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,
+     &  errmsg, errflg)
+
+        use machine,               only: kind_phys
+
+        implicit none
+!
+        integer, intent(in) :: im, levs
+        integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
+        logical, intent(in) :: lssav, shcnvcw
+        real(kind=kind_phys), intent(in) :: frain
+        real(kind=kind_phys), dimension(im), intent(in) :: rain1
+        real(kind=kind_phys), dimension(im,levs), intent(in) :: cnvw,
+     &    cnvc
+
+        real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
+     &    cnvprcp, cnvprcpb
+        real(kind=kind_phys), dimension(im,levs), intent(inout) ::
+     &    cnvw_phy_f3d, cnvc_phy_f3d
+
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        real(kind=kind_phys), dimension(im) :: raincs
+        integer :: i, k
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        do i=1,im
+          raincs(i)     = frain * rain1(i)
+          rainc(i) = rainc(i) + raincs(i)
+        enddo
+        if (lssav) then
+          do i=1,im
+            cnvprcp(i)  = cnvprcp(i)  + raincs(i)
+            cnvprcpb(i) = cnvprcpb(i) + raincs(i)
+          enddo
+        endif
+! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
+        if ((shcnvcw) .and. (num_p3d == 4) .and. (npdf3d == 3)) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
+              cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
+            enddo
+          enddo
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)
+            enddo
+          enddo
+        endif
+      end subroutine samfshalcnv_post_run
+
+!! \section arg_table_sasas_shal_post_init Argument Table
+!!
+      subroutine samfshalcnv_post_init ()
+      end subroutine samfshalcnv_post_init
+
+!! \section arg_table_sasas_shal_post_finalize Argument Table
+!!
+      subroutine samfshalcnv_post_finalize ()
+      end subroutine samfshalcnv_post_finalize
+
+      end module samfshalcnv_post

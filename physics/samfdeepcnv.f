@@ -142,8 +142,8 @@
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux          | (updraft mass flux) * delt                                                                               | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux        | (downdraft mass flux) * delt                                                                             | kg m-2  |    2 | real      | kind_phys | out    | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none    |    0 | real      | kind_phys | in     | F        |
 !! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1     |    0 | real      | kind_phys | in     | F        |
 !! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
@@ -153,8 +153,8 @@
 !! | evfactl        | rain_evaporation_coefficient_over_land_deep_convection         | convective rain evaporation coefficient over land for deep conv.                                         | frac    |    0 | real      | kind_phys | in     | F        |
 !! | pgcon          | momentum_transport_reduction_factor_pgf_deep_convection        | reduction factor in momentum transport due to deep conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
 !! | asolfac        | aerosol_aware_parameter_deep_convection                        | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                  | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                     | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -196,11 +196,12 @@
 
       integer, intent(inout)  :: kcnv(im)
       real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km)
+     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),
+     &   cnvw(ix,km),  cnvc(ix,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: cldwrk(im),
-     &   rn(im),      cnvw(ix,km),  cnvc(ix,km),
+     &   rn(im),
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
 
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,

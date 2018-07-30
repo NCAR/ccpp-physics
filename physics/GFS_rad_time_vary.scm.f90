@@ -1,6 +1,13 @@
 !>\file GFS_rad_time_vary.f90
 !!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
       module GFS_rad_time_vary
+
+      implicit none
+
+      private
+
+      public GFS_rad_time_vary_init, GFS_rad_time_vary_run, GFS_rad_time_vary_finalize
+
       contains
 
 !>\defgroup GFS_rad_time_vary GFS RRTMG Update 
@@ -17,8 +24,8 @@
 !! | Model             | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
 !! | Statein           | FV3-GFS_Statein_type                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type      |           | in     | F        |
 !! | Tbd               | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type          |           | inout  | F        |
-!! | errmsg            | error_message                                          | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg            | error_flag                                             | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
+!! | errmsg            | ccpp_error_message                                     | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg            | ccpp_error_flag                                        | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
       subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
 
@@ -29,7 +36,6 @@
                                            GFS_control_type,   &
                                            GFS_grid_type,      &
                                            GFS_tbd_type
-      use GFS_radupdate,             only: GFS_radupdate_run
       use radcons,                   only: qmin, con_100
 
       implicit none
@@ -51,12 +57,7 @@
 
       if (Model%lsswr .or. Model%lslwr) then
 
-        if (Tbd%blkno==1) then
-
-          call GFS_radupdate_run (Model%idat, Model%jdat, Model%fhswr, Model%dtf, Model%lsswr, &
-                        Model%me, Model%slag, Model%sdec, Model%cdec, Model%solcon,            &
-                        Model%ictm, Model%isol )
-        endif
+        !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
 
         !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
         if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then

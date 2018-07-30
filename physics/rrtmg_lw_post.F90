@@ -26,8 +26,8 @@
 !! | tsfa            | surface_air_temperature_for_radiation                                                         | lowest model layer air temperature for radiation                             | K        |    1 | real                  | kind_phys | in        | F        |
 !! | htlwc           | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | total sky heating rate due to longwave radiation                             | K s-1    |    2 | real                  | kind_phys | in        | F        |
 !! | htlw0           | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | clear sky heating rate due to longwave radiation                             | K s-1    |    2 | real                  | kind_phys | in        | F        |
-!! | errmsg          | error_message                                                                                 | error message for error handling in CCPP                                     | none     |    0 | character             | len=*     | out       | F        |
-!! | errflg          | error_flag                                                                                    | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out       | F        |
+!! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                                     | none     |    0 | character             | len=*     | out       | F        |
+!! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out       | F        |
 !!
 #endif
       subroutine rrtmg_lw_post_run (Model, Grid, Radtend, Coupling,   &

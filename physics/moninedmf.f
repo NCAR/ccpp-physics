@@ -73,11 +73,11 @@
 !! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | tau            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers                       | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
+!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
 !! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | tracer_concentration                                                        | layer mean tracer concentration, cf. GFS_typedefs.F90 | kg kg-1       |    3 | real      | kind_phys | in     | F        |
+!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in    | F        |
 !! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real      | kind_phys | in     | F        |
@@ -118,8 +118,8 @@
 !! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                    | index         |    0 | integer   |           | in     | F        |
 !! | xkzminv        | atmosphere_heat_diffusivity_background_maximum                              | maximum background value of heat diffusivity          | m2 s-1        |    0 | real      | kind_phys | in     | F        |
 !! | moninq_fac     | atmosphere_diffusivity_coefficient_factor                                   | multiplicative constant for atmospheric diffusivities | none          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                               | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                  | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_edmf Hybrid EDMF General Algorithm
 !!  -# Compute preliminary variables from input arguments.
