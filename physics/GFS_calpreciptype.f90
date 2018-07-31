@@ -21,64 +21,64 @@
 
 
 !>\defgroup gfs_calpreciptype GFS calpreciptype Main
-!!\ingroup CALPRECIPTYPE 
+!!\ingroup CALPRECIPTYPE
 !!\brief This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
 !> \section arg_table_GFS_calpreciptype_run Argument Table
-!! | local_name       | standard_name                                                          | long_name                                                  | units       | rank |  type     |   kind    | intent | optional |
-!! |------------------|------------------------------------------------------------------------|------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
-!! | kdt              | index_of_time_step                                                     | current time step index                                    | index       |    0 | integer   |           | in     | F        |
-!! | nrcm             | array_dimension_of_random_number                                       | second dimension of random number array                    | count       |    0 | integer   |           | in     | F        |
-!! | im               | horizontal_loop_extent                                                 | horizontal loop extent                                     | count       |    0 | integer   |           | in     | F        |
-!! | ix               | horizontal_dimension                                                   | horizontal dimension                                       | count       |    0 | integer   |           | in     | F        |
-!! | lm               | vertical_dimension                                                     | vertical layer dimension                                   | count       |    0 | integer   |           | in     | F        |
-!! | lp1              | vertical_interface_dimension                                           | vertical interface dimension                               | count       |    0 | integer   |           | in     | F        |
-!! | randomno         | random_number_array                                                    | random number array                                        | none        |    2 | real      | kind_phys | in     | F        |
-!! | cal_pre          | flag_for_precipitation_type_algorithm                                  | flag controls precip type algorithm                        | flag        |    0 | logical   |           | in     | F        |
-!! | lssav            | flag_diagnostics                                                       | logical flag for storing diagnostics                       | flag        |    0 | logical   |           | in     | F        |
-!! | ldiag3d          | flag_diagnostics_3D                                                    | flag for 3d diagnostic fields                              | flag        |    0 | logical   |           | in     | F        |
-!! | gt0              | air_temperature_updated_by_physics                                     | layer mean air temperature                                 | K           |    2 | real      | kind_phys | in     | F        |
-!! | gq0              | water_vapor_specific_humidity_updated_by_physics                       | water vapor specific humidity                              | kg kg-1     |    2 | real      | kind_phys | in     | F        |
-!! | prsl             | air_pressure                                                           | layer mean pressure                                        | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | prsi             | air_pressure_at_interface                                              | pressure at layer interface                                | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | rainc            | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep  | convective rainfall amount on dynamics timestep            | m           |    1 | real      | kind_phys | in     | F        |
-!! | frain            | dynamics_to_physics_timestep_ratio                                     | dtf/dtp, dynamics to physics timestep ratio                | none        |    0 | real      | kind_phys | in     | F        |
-!! | rain1            | lwe_thickness_of_stratiform_precipitation_amount                       | stratiform rainfall amount on physics timestep             | m           |    1 | real      | kind_phys | in     | F        |
-!! | phii             | geopotential_at_interface                                              | geopotential at model layer interfaces                     | m2 s-2      |    2 | real      | kind_phys | in     | F        |
-!! | tsfc             | surface_skin_temperature                                               | surface skin temperature                                   | K           |    1 | real      | kind_phys | in     | F        |
-!! | rain             | lwe_thickness_of_precipitation_amount_on_dynamics_timestep             | total rainfall amount on dynamics timestep                 | m           |    1 | real      | kind_phys | out    | F        |
-!! | ice              | lwe_thickness_of_ice_amount_on_dynamics_timestep                       | ice fall at this time step                                 | m           |    1 | real      | kind_phys | in     | F        |
-!! | snow             | lwe_thickness_of_snow_amount_on_dynamics_timestep                      | snow fall at this time step                                | m           |    1 | real      | kind_phys | in     | F        |
-!! | graupel          | lwe_thickness_of_graupel_amount_on_dynamics_timestep                   | graupel fall at this time step                             | m           |    1 | real      | kind_phys | in     | F        |
-!! | dtf              | time_step_for_dynamics                                                 | dynamics timestep                                          | s           |    0 | real      | kind_phys | in     | F        |
-!! | tdomr            | dominant_rain_type                                                     | dominant rain type                                         | none        |    1 | real      | kind_phys | inout  | F        |
-!! | tdomzr           | dominant_freezing_rain_type                                            | dominant freezing rain type                                | none        |    1 | real      | kind_phys | inout  | F        |
-!! | tdomip           | dominant_sleet_type                                                    | dominant sleet type                                        | none        |    1 | real      | kind_phys | inout  | F        |
-!! | tdoms            | dominant_snow_type                                                     | dominant snow type                                         | none        |    1 | real      | kind_phys | inout  | F        |
-!! | srflag           | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                     | flag        |    1 | real      | kind_phys | out    | F        |
-!! | tprcp            | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step | m           |    1 | real      | kind_phys | out    | F        |
-!! | imp_physics      | flag_for_microphysics_scheme                                           | choice of microphysics scheme                              | flag        |    0 | integer   |           | in     | F        |
-!! | imp_physics_gfdl | flag_for_gfdl_microphysics_scheme                                      | choice of GFDL microphysics scheme                         | flag        |    0 | integer   |           | in     | F        |
-!! | totprcp          | accumulated_lwe_thickness_of_precipitation_amount                      | accumulated total precipitation                            | m           |    1 | real      | kind_phys | inout  | F        |
-!! | totice           | accumulated_lwe_thickness_of_ice_amount                                | accumulated ice precipitation                              | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | totsnw           | accumulated_lwe_thickness_of_snow_amount                               | accumulated snow precipitation                             | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | totgrp           | accumulated_lwe_thickness_of_graupel_amount                            | accumulated graupel precipitation                          | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | totprcpb         | accumulated_lwe_thickness_of_precipitation_amount_in_bucket            | accumulated total precipitation in bucket                  | m           |    1 | real      | kind_phys | inout  | F        |
-!! | toticeb          | accumulated_lwe_thickness_of_ice_amount_in_bucket                      | accumulated ice precipitation in bucket                    | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | totsnwb          | accumulated_lwe_thickness_of_snow_amount_in_bucket                     | accumulated snow precipitation in bucket                   | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | totgrpb          | accumulated_lwe_thickness_of_graupel_amount_in_bucket                  | accumulated graupel precipitation in bucket                | kg m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | hrate            | large_scale_condensate_heating_rate_at_model_layers                    | large scale condensate heating rate at model layers        | K s-1       |    2 | real      | kind_phys | inout  | F        |
-!! | mrate            | large_scale_condensate_moistening_rate_at_model_layers                 | large scale condensate moistening rate at model layers     | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dtdt             | tendency_of_air_temperature_due_to_model_physics                       | air temperature tendency due to model physics              | K s-1       |    2 | real      | kind_phys | in     | F        |
-!! | dqdt             | tendency_of_water_vapor_specific_humidity_due_to_model_physics         | water vapor specific humidity tendency due to model physics| kg kg-1 s-1 |    2 | real      | kind_phys | in     | F        |
-!! | rain0            | lwe_thickness_of_stratiform_precipitation_amount_per_day               | stratiform rain over 24h period                            | mm          |    1 | real      | kind_phys | in     | F        |
-!! | ice0             | lwe_thickness_of_ice_amount_per_day                                    | ice fall over 24h period                                   | mm          |    1 | real      | kind_phys | in     | F        |
-!! | snow0            | lwe_thickness_of_snow_amount_per_day                                   | snow fall over 24h period                                  | mm          |    1 | real      | kind_phys | in     | F        |
-!! | graupel0         | lwe_thickness_of_graupel_amount_per_day                                | graupel fall over 24h period                               | mm          |    1 | real      | kind_phys | in     | F        |
-!! | cplflx           | flag_for_flux_coupling                                                 | flag controlling cplflx collection (default off)           | flag        |    0 | logical   |           | in     | F        |
-!! | rain_cpl         | lwe_thickness_of_precipitation_amount_for_coupling                     | total rain precipitation for model coupling                | m           |    1 | real      | kind_phys | inout  | F        |
-!! | snow_cpl         | lwe_thickness_of_snow_amount_for_coupling                              | total snow precipitation for model coupling                | m           |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                   | none        |    0 | character | len=*     | out    | F        |
-!! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                      | flag        |    0 | integer   |           | out    | F        |
+!! | local_name       | standard_name                                                          | long_name                                                              | units       | rank |  type     |   kind    | intent | optional |
+!! |------------------|------------------------------------------------------------------------|------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
+!! | kdt              | index_of_time_step                                                     | current time step index                                                | index       |    0 | integer   |           | in     | F        |
+!! | nrcm             | array_dimension_of_random_number                                       | second dimension of random number array                                | count       |    0 | integer   |           | in     | F        |
+!! | im               | horizontal_loop_extent                                                 | horizontal loop extent                                                 | count       |    0 | integer   |           | in     | F        |
+!! | ix               | horizontal_dimension                                                   | horizontal dimension                                                   | count       |    0 | integer   |           | in     | F        |
+!! | lm               | vertical_dimension                                                     | vertical layer dimension                                               | count       |    0 | integer   |           | in     | F        |
+!! | lp1              | vertical_interface_dimension                                           | vertical interface dimension                                           | count       |    0 | integer   |           | in     | F        |
+!! | randomno         | random_number_array                                                    | random number array                                                    | none        |    2 | real      | kind_phys | in     | F        |
+!! | cal_pre          | flag_for_precipitation_type_algorithm                                  | flag controls precip type algorithm                                    | flag        |    0 | logical   |           | in     | F        |
+!! | lssav            | flag_diagnostics                                                       | logical flag for storing diagnostics                                   | flag        |    0 | logical   |           | in     | F        |
+!! | ldiag3d          | flag_diagnostics_3D                                                    | flag for 3d diagnostic fields                                          | flag        |    0 | logical   |           | in     | F        |
+!! | gt0              | air_temperature_updated_by_physics                                     | layer mean air temperature                                             | K           |    2 | real      | kind_phys | in     | F        |
+!! | gq0              | water_vapor_specific_humidity_updated_by_physics                       | water vapor specific humidity                                          | kg kg-1     |    2 | real      | kind_phys | in     | F        |
+!! | prsl             | air_pressure                                                           | layer mean pressure                                                    | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | prsi             | air_pressure_at_interface                                              | pressure at layer interface                                            | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | rainc            | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep  | convective rainfall amount on dynamics timestep                        | m           |    1 | real      | kind_phys | in     | F        |
+!! | frain            | dynamics_to_physics_timestep_ratio                                     | dtf/dtp, dynamics to physics timestep ratio                            | none        |    0 | real      | kind_phys | in     | F        |
+!! | rain1            | lwe_thickness_of_stratiform_precipitation_amount                       | stratiform rainfall amount on physics timestep                         | m           |    1 | real      | kind_phys | in     | F        |
+!! | phii             | geopotential_at_interface                                              | geopotential at model layer interfaces                                 | m2 s-2      |    2 | real      | kind_phys | in     | F        |
+!! | tsfc             | surface_skin_temperature                                               | surface skin temperature                                               | K           |    1 | real      | kind_phys | in     | F        |
+!! | rain             | lwe_thickness_of_precipitation_amount_on_dynamics_timestep             | total rainfall amount on dynamics timestep                             | m           |    1 | real      | kind_phys | out    | F        |
+!! | ice              | lwe_thickness_of_ice_amount_on_dynamics_timestep                       | ice fall at this time step                                             | m           |    1 | real      | kind_phys | in     | F        |
+!! | snow             | lwe_thickness_of_snow_amount_on_dynamics_timestep                      | snow fall at this time step                                            | m           |    1 | real      | kind_phys | in     | F        |
+!! | graupel          | lwe_thickness_of_graupel_amount_on_dynamics_timestep                   | graupel fall at this time step                                         | m           |    1 | real      | kind_phys | in     | F        |
+!! | dtf              | time_step_for_dynamics                                                 | dynamics timestep                                                      | s           |    0 | real      | kind_phys | in     | F        |
+!! | tdomr            | dominant_rain_type                                                     | dominant rain type                                                     | none        |    1 | real      | kind_phys | inout  | F        |
+!! | tdomzr           | dominant_freezing_rain_type                                            | dominant freezing rain type                                            | none        |    1 | real      | kind_phys | inout  | F        |
+!! | tdomip           | dominant_sleet_type                                                    | dominant sleet type                                                    | none        |    1 | real      | kind_phys | inout  | F        |
+!! | tdoms            | dominant_snow_type                                                     | dominant snow type                                                     | none        |    1 | real      | kind_phys | inout  | F        |
+!! | srflag           | flag_for_precipitation_type                                            | snow(1)/rain(0) flag for precipitation                                 | flag        |    1 | real      | kind_phys | out    | F        |
+!! | tprcp            | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep | nonnegative precipitation amount in one dynamics time step             | m           |    1 | real      | kind_phys | out    | F        |
+!! | imp_physics      | flag_for_microphysics_scheme                                           | choice of microphysics scheme                                          | flag        |    0 | integer   |           | in     | F        |
+!! | imp_physics_gfdl | flag_for_gfdl_microphysics_scheme                                      | choice of GFDL microphysics scheme                                     | flag        |    0 | integer   |           | in     | F        |
+!! | totprcp          | accumulated_lwe_thickness_of_precipitation_amount                      | accumulated total precipitation                                        | m           |    1 | real      | kind_phys | inout  | F        |
+!! | totice           | accumulated_lwe_thickness_of_ice_amount                                | accumulated ice precipitation                                          | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | totsnw           | accumulated_lwe_thickness_of_snow_amount                               | accumulated snow precipitation                                         | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | totgrp           | accumulated_lwe_thickness_of_graupel_amount                            | accumulated graupel precipitation                                      | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | totprcpb         | accumulated_lwe_thickness_of_precipitation_amount_in_bucket            | accumulated total precipitation in bucket                              | m           |    1 | real      | kind_phys | inout  | F        |
+!! | toticeb          | accumulated_lwe_thickness_of_ice_amount_in_bucket                      | accumulated ice precipitation in bucket                                | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | totsnwb          | accumulated_lwe_thickness_of_snow_amount_in_bucket                     | accumulated snow precipitation in bucket                               | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | totgrpb          | accumulated_lwe_thickness_of_graupel_amount_in_bucket                  | accumulated graupel precipitation in bucket                            | kg m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | hrate            | cumulative_change_in_temperature_due_to_microphysics                   | cumulative change in temperature due to microphysics                   | K           |    2 | real      | kind_phys | inout  | F        |
+!! | mrate            | cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics | cumulative change in water vapor specific humidity due to microphysics | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | save_t           | air_temperature_save                                                   | air temperature before entering a physics scheme                       | K           |    2 | real      | kind_phys | in     | F        |
+!! | save_qv          | water_vapor_specific_humidity_save                                     | water vapor specific humidity before entering a physics scheme         | kg kg-1     |    2 | real      | kind_phys | in     | F        |
+!! | rain0            | lwe_thickness_of_stratiform_precipitation_amount_per_day               | stratiform rain over 24h period                                        | mm          |    1 | real      | kind_phys | in     | F        |
+!! | ice0             | lwe_thickness_of_ice_amount_per_day                                    | ice fall over 24h period                                               | mm          |    1 | real      | kind_phys | in     | F        |
+!! | snow0            | lwe_thickness_of_snow_amount_per_day                                   | snow fall over 24h period                                              | mm          |    1 | real      | kind_phys | in     | F        |
+!! | graupel0         | lwe_thickness_of_graupel_amount_per_day                                | graupel fall over 24h period                                           | mm          |    1 | real      | kind_phys | in     | F        |
+!! | cplflx           | flag_for_flux_coupling                                                 | flag controlling cplflx collection (default off)                       | flag        |    0 | logical   |           | in     | F        |
+!! | rain_cpl         | lwe_thickness_of_precipitation_amount_for_coupling                     | total rain precipitation for model coupling                            | m           |    1 | real      | kind_phys | inout  | F        |
+!! | snow_cpl         | lwe_thickness_of_snow_amount_for_coupling                              | total snow precipitation for model coupling                            | m           |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                               | none        |    0 | character | len=*     | out    | F        |
+!! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                                  | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno, &
                                cal_pre,lssav,ldiag3d,                  &
@@ -89,7 +89,7 @@
                                imp_physics,imp_physics_gfdl,           &
                                totprcp,totice,totsnw,totgrp,           &
                                totprcpb,toticeb,totsnwb,totgrpb,       &
-                               hrate,mrate,dtdt,dqdt,                  &
+                               hrate,mrate,save_t,save_qv,             &
                                rain0,ice0,snow0,graupel0,              &
                                cplflx,rain_cpl,snow_cpl,errmsg,errflg)
 
@@ -131,7 +131,7 @@
       real(kind=kind_phys), dimension(im),    intent(inout) :: totprcpb,toticeb,totsnwb,totgrpb
       ! hrate, mrate only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: hrate,mrate
-      real(kind=kind_phys), dimension(ix,lm), intent(in)    :: dtdt,dqdt
+      real(kind=kind_phys), dimension(ix,lm), intent(in)    :: save_t,save_qv
       ! rain0, ice0, snow0, graupel0 only allocated if GFDL MP is selected (imp_physics == imp_physics_gfdl)
       real(kind=kind_phys), dimension(:),     intent(in)    :: rain0,ice0,snow0,graupel0
       logical,                                intent(in)    :: cplflx
@@ -364,8 +364,8 @@
         if (ldiag3d) then
           do k=1,lm
             do i=1,im
-              hrate(i,k) = hrate(i,k) + (gt0(i,k)-dtdt(i,k)) * frain
-              mrate(i,k) = mrate(i,k) + (gq0(i,k)-dqdt(i,k)) * frain
+              hrate(i,k) = hrate(i,k) + (gt0(i,k)-save_t(i,k)) * frain
+              mrate(i,k) = mrate(i,k) + (gq0(i,k)-save_qv(i,k)) * frain
             enddo
           enddo
         endif

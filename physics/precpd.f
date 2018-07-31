@@ -32,7 +32,7 @@
 !! | t              | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K           |    2 | real      | kind_phys | inout  | F        |
 !! | rn             | lwe_thickness_of_stratiform_precipitation_amount              | stratiform rainfall amount on physics timestep                    | m           |    1 | real      | kind_phys | out    | F        |
 !! | sr             | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac        |    1 | real      | kind_phys | out    | F        |
-!! | rainp          | tendency_of_rain_water_mixing_ratio_due_to_model_physics      | tendency of rain water mixing ratio due to model physics          | kg kg-1 s-1 |    2 | real      | kind_phys | out    | F        |
+!! | rainp          | tendency_of_rain_water_mixing_ratio_due_to_microphysics       | tendency of rain water mixing ratio due to microphysics           | kg kg-1 s-1 |    2 | real      | kind_phys | out    | F        |
 !! | u00k           | critical_relative_humidity                                    | critical relative humidity                                        | frac        |    2 | real      | kind_phys | in     | F        |
 !! | psautco        | coefficient_from_cloud_ice_to_snow                            | conversion coefficient from cloud ice to snow                     | none        |    1 | real      | kind_phys | in     | F        |
 !! | prautco        | coefficient_from_cloud_water_to_rain                          | conversion coefficient from cloud water to rain                   | none        |    1 | real      | kind_phys | in     | F        |
