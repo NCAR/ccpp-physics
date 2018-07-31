@@ -74,10 +74,10 @@
 !!!!!  ==========================================================  !!!!!
 
 
+!>\ingroup RRTMG
 !> \defgroup module_radiation_surface RRTMG Surface Module
-!! @{
-!> This module sets up surface albedo for sw radiation and surface
-!! emissivity for lw radiation.
+!> This module sets up surface albedo for SW radiation and surface
+!! emissivity for LW radiation.
 !!
 !! In the module, the externally callable subroutines are :
 !! - sfc_init(): initialization radiation surface data
@@ -94,7 +94,7 @@
 !!\n IEMS=1: surface type based climatology in \f$1^o\f$ horizontal resolution
 !!
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
-!!
+
 !> This module sets up surface albedo for SW radiation and surface  
 !! emissivity for LW radiation.  
       module module_radiation_surface   
@@ -841,9 +841,6 @@
 !! @}
 !-----------------------------------
 
-!> @}
-!
 !.........................................!
       end module module_radiation_surface !
 !=========================================!
-!> @}

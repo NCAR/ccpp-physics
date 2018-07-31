@@ -2635,8 +2635,8 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
 
         ! -----------------------------------------------------------------------
-        !> - Assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
-        !! binary cloud scheme.
+        !> - Compute cloud fraction, assuming subgrid linear distribution in horizontal; 
+        !! this is effectively a smoother for the binary cloud scheme.
         ! -----------------------------------------------------------------------
 
         if (qpz > qrmin) then

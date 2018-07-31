@@ -1,0 +1,41 @@
+/**
+\page subpage_overview Overview of the Code
+The GFS physics parameterization suite is called by GMTB-SCM or FV3 after the explicit dynamical computations. The
+physics computations are performed only in the vertical. The input information for the physics consists of the values
+of the gridbox mean prognostic variables (wind components \f$u/v\f$, temperature \f$T\f$, specific humidity \f$q\f$, cloud
+fraction \f$q_a\f$, water contents for cloud liquid \f$q_l\f$, cloud ice \f$q_i\f$, rain \f$q_r\f$, snow \f$q_s\f$, graupel 
+\f$q_r\f$, and ozone concentration), the provisional dynamical tendencies for the same variables and various surface fields,
+both fixed and variable.
+
+In CCPPv2, physics suite have separate modules for different processes. Such modularity is desirable from the model development
+and code maintenance point of view. The GFS physics routines are called in the following order as defined in  suite_GFS_operational_2017_scm.xml file:
+ + @ref GFS_RRTMG
+ + @ref GFS_SFCLYR
+ + @ref GFS_NSST
+ + @ref GFS_NOAH
+ + @ref GFS_SFCSICE
+ + @ref GFS_HEDMF
+ + @ref GFS_GWDPS
+ + @ref GFS_RAYLEIGH
+ + @ref GFS_OZPHYS
+ + @ref GFS_SAMFdeep
+ + @ref GFS_GWDC
+ + @ref GFS_SAMFshal
+ + @ref GFDL_cloud
+
+The time integration of the physics is based on the following:
+- It has be to written in CCPP-compliant modern Fortran with augument table and modules.
+- The tendencies from the different physical processes are computed in separate interstitial routines; Evaluating the forcing terms resulting from the parameterizations at the departure point and at the arrival point ensures the accuracy of the coupling.
+- The value of a prognostic variable is updated with the tendency from one process and the next process starts from this updated
+value (in what is usually refered to as the sequential splitting (Beljaars(1991) \cite beljaars_1991)).
+
+At NCEP, FV3 coupling to GFS physics suite is straightforward; The primary complication is interpolating between cell-centered, orthogonal
+winds used by most physics packages and FV3's staggered non-orthogonal D-grid. Two-stage horizontal re-mapping is used. The D-grid
+winds are first transformed to locally orthogonal and unstaggered wind components at cell centers, as input to the physics. The wind
+tendencies (du/dt, dv/dt) from the physics are then remapped (using high-order algorithm) back to the native grid for updating the 
+prognostic winds. This procedure satifies the "no data no harm" principle - that the interpolation/remapping procedure creates no
+tendency on its own if there are no external sources from physics.
+
+
+
+*/

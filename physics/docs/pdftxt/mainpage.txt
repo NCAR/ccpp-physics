@@ -36,22 +36,6 @@ Other physics Upgrade of Q3FY17 GFS include:
 + Included a Near-Surface Sea Temperature model to represent diurnal warming and sub-layer cooling effects.
 + Reduced Rayleigh damping in the upper stratosphere to improve temperature and circulation forecast.
 
-
-Documentation for the individual physics scheme can be accessed through the following links:
- + @ref GFS_RRTMG 
- + @ref GFS_SFCLYR
- + @ref GFS_NSST
- + @ref GFS_NOAH
- + @ref GFS_SFCSICE
- + @ref GFS_HEDMF
- + @ref GFS_GWDPS
- + @ref GFS_RAYLEIGH
- + @ref GFS_OZPHYS
- + @ref GFS_SAMFdeep
- + @ref GFS_GWDC
- + @ref GFS_SAMFshal
- + @ref GFDL_cloud 
-
  You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
 
 */
