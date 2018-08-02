@@ -81,6 +81,8 @@ else
   NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
 
+INCLUDE += $(MKL_INC)
+
 FPPFLAGS := -cpp -Wp,-w $(INCLUDE)
 CFLAGS := $(INCLUDE)
 
@@ -187,5 +189,5 @@ LDFLAGS += $(LIBS)
 ifdef InNemsMakefile
 FFLAGS += $(ESMF_INC)
 CPPFLAGS += -cpp -traditional
-EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
+EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB) $(MKL_LIB)
 endif
