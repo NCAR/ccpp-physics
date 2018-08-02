@@ -132,7 +132,7 @@ elseif(UNIX)
   ADD_DEFINITIONS(-DLINUX)
 else (APPLE)
   message (FATAL_ERROR "Unsupported platform, only Linux and MacOSX are supported at this time.")
-endif()
+endif(APPLE)
 
 #------------------------------------------------------------------------------
 # Add -DCCPP preprocessor flag (needed to preprocess GFS_typedefs.F90 from FV3)
@@ -168,7 +168,7 @@ else (OPENMP)
 endif (OPENMP)
 
 #------------------------------------------------------------------------------
-# Set SIONlib flags for Fortran compiler, preprocessor and linker
+# Set SIONlib flags for preprocessor, compiler and linker (if defined)
 if (SIONLIB)
   execute_process(COMMAND ${SIONLIB}/bin/sionconfig --mpi --cflags --f90
                   RESULT_VARIABLE exit_code
@@ -189,16 +189,43 @@ if (SIONLIB)
      message (FATAL_ERROR "Execution of '${SIONLIB}/bin/sionconfig --mpi --libs --f90' failed")
   endif (NOT exit_code EQUAL "0")
   set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${SIONlib_Fortran_FLAGS} ${SIONlib_Fortran_LIBS}")
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SIONlib_Fortran_LIBS}")
-  set (CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS} ${SIONlib_Fortran_LIBS}")
   ADD_DEFINITIONS(-DSION)
-  message (STATUS "Enable SIONlib support for Fortran compiler")
-  message (STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
-  message (STATUS "CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS}")
-  message (STATUS "CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS ${CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS}")
+  message (STATUS "Enable SIONlib support")
 else (SIONLIB)
-  message (STATUS "Disable SIONlib support for Fortran compiler")
+  message (STATUS "Disable SIONlib support")
 endif (SIONLIB)
+
+#------------------------------------------------------------------------------
+# Set Intel MKL flags for preprocessor, compiler and linker (if defined)
+if(MKL_DIR)
+  set (MKL_INC "-m64 -I${MKL_DIR}/include")
+  set (MKL_LIB "-L${MKL_DIR}/lib -Wl,-rpath,${MKL_DIR}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${MKL_INC} ${MKL_LIB}")
+  ADD_DEFINITIONS(-DMKL)
+  message (STATUS "Enable Intel MKL support")
+else(MKL_DIR)
+  message (STATUS "Disable Intel MKL support")
+endif(MKL_DIR)
+
+#------------------------------------------------------------------------------
+# Set ESMF flags for preprocessor, compiler and linker (if defined)
+if(ESMF_LIB_DIR)
+  message (STATUS "ESMF_LIB_DIR: ${ESMF_LIB_DIR}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -L${ESMF_LIB_DIR} -lesmf")
+  message (STATUS "Enable ESMF support")
+else(ESMF_LIB_DIR)
+  message (STATUS "Disable ESMF support")
+endif(ESMF_LIB_DIR)
+
+#------------------------------------------------------------------------------
+# Set netCDF flags for preprocessor, compiler and linker (if defined)
+if(NETCDF_DIR)
+  message (STATUS "NETCDF_DIR: ${NETCDF_DIR}")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -L${NETCDF_DIR} -lnetcdff -lnetcdf")
+  message (STATUS "Enable netCDF support")
+else(NETCDF_DIR)
+  message (STATUS "Disable netCDF support")
+endif(NETCDF_DIR)
 
 #------------------------------------------------------------------------------
 # Build CCPP framework and physics
