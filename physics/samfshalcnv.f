@@ -142,8 +142,8 @@
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
-      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,
-     &   fv, grav, hvap, rd, rv, t0c
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap,
+     &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
      &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
@@ -167,7 +167,7 @@
 !
       real(kind=kind_phys) clamd,   tkemx,   tkemn,   dtke
 !
-      real(kind=kind_phys) dellat,  delta,
+      real(kind=kind_phys) dellat,
      &                     c0l,     d0,
      &                     desdt,   dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
@@ -179,7 +179,7 @@
      &                     es,      etah,    h1,
      &                     evef,    evfact,  evfactl, fact1,
      &                     fact2,   factor,  dthk,
-     &                     g,       gamma,   pprime,  betaw,
+     &                     gamma,   pprime,  betaw,
      &                     qlk,     qrch,    qs,
      &                     rfact,   shear,   tfac,
      &                     val,     val1,    val2,
@@ -218,12 +218,13 @@ c
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
      &                     bb1,     bb2
 !    &                     bb1,     bb2,     wucb
+
 cc
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
-      parameter(g=grav)
-      parameter(elocp=hvap/cp,
-     &          el2orc=hvap*hvap/(rv*cp))
+!     parameter(g=grav)
+!     parameter(elocp=hvap/cp,
+!    &          el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=0.002,c1=5.e-4,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
@@ -236,8 +237,8 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,delta=fv)
-      parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
+      parameter(cm=1.0)
+!     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.1,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dthk=25.)
@@ -281,6 +282,13 @@ c-----------------------------------------------------------------------
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      elocp = hvap/cp
+      el2orc = hvap*hvap/(rv*cp)
+
+      fact1 = (cvap-cliq)/rv
+      fact2 = hvap/rv-fact1*t0c
+
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
 !>  ## Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
@@ -408,7 +416,7 @@ c
 !>  - Calculate hydrostatic height at layer centers assuming a flat surface (no terrain) from the geopotential.
       do k = 1, km
         do i=1,im
-          zo(i,k) = phil(i,k) / g
+          zo(i,k) = phil(i,k) / grav
         enddo
       enddo
 !>  - Calculate interface height
@@ -494,7 +502,7 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-!           tvo(i,k)  = to(i,k) + delta * to(i,k) * qo(i,k)
+!           tvo(i,k)  = to(i,k) + fv * to(i,k) * qo(i,k)
           endif
         enddo
       enddo
@@ -505,7 +513,7 @@ c
       do k = 1, km
         do i=1,im
           if (cnvflg(i) .and. k <= kmax(i)) then
-!           tem       = g * zo(i,k) + cp * to(i,k)
+!           tem       = grav * zo(i,k) + cp * to(i,k)
             tem       = phil(i,k) + cp * to(i,k)
             heo(i,k)  = tem  + hvap * qo(i,k)
             heso(i,k) = tem  + hvap * qeso(i,k)
@@ -549,7 +557,7 @@ c
             desdt   = es * (fact1 / to(i,k+1) + fact2 / (to(i,k+1)**2))
             dqsdt   = qs * pfld(i,k+1) * desdt / (es * pprime)
             gamma   = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
-            dt      = (g * dz + hvap * dqsdp * dp) / (cp * (1. + gamma))
+            dt      = (grav*dz + hvap*dqsdp*dp) / (cp*(1. + gamma))
             dq      = dqsdt * dt + dqsdp * dp
             to(i,k) = to(i,k+1) + dt
             qo(i,k) = qo(i,k+1) + dq
@@ -569,9 +577,9 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-            heo(i,k)  = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heo(i,k)  = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qo(i,k)
-            heso(i,k) = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heso(i,k) = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qeso(i,k)
             uo(i,k)   = .5 * (uo(i,k) + uo(i,k+1))
             vo(i,k)   = .5 * (vo(i,k) + vo(i,k+1))
@@ -903,17 +911,17 @@ c
             if(k > kb(i) .and. k < kbcon1(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
               val = 0.
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * g * delta *
-     &                 dz1 * g * delta *
+!    &                 dz1 * eta(i,k) * grav * fv *
+     &                 dz1 * grav * fv *
      &                 max(val,(qeso(i,k) - qo(i,k)))
             endif
           endif
@@ -990,11 +998,11 @@ c
 !
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          xmbmax(i) = dp / (2. * g * dt2)
+          xmbmax(i) = dp / (2. * grav * dt2)
 !
-!         xmbmax(i) = dp / (g * dt2)
+!         xmbmax(i) = dp / (grav * dt2)
 !
-!         tem = dp / (g * dt2)
+!         tem = dp / (grav * dt2)
 !         xmbmax(i) = min(tem, xmbmax(i))
         endif
       enddo
@@ -1038,26 +1046,26 @@ c
                 if(ncloud > 0) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
-                buo(i,k) = buo(i,k) - g * qlk
+                buo(i,k) = buo(i,k) - grav * qlk
                 qcko(i,k)= qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
-                cnvwt(i,k) = etah * qlk * g / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
 !
 !  compute buoyancy and drag for updraft velocity
 !
               if(k >= kbcon(i)) then
-                rfact =  1. + delta * cp * gamma
+                rfact =  1. + fv * cp * gamma
      &                   * to(i,k) / hvap
-                buo(i,k) = buo(i,k) + (g / (cp * to(i,k)))
+                buo(i,k) = buo(i,k) + (grav / (cp * to(i,k)))
      &                   * dbyo(i,k) / (1. + gamma)
      &                   * rfact
                 val = 0.
-                buo(i,k) = buo(i,k) + g * delta *
+                buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i))
               endif
@@ -1075,17 +1083,17 @@ c
 !           if(k >= kbcon(i) .and. k < ktcon(i)) then
 !             dz1 = zo(i,k+1) - zo(i,k)
 !             gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-!             rfact =  1. + delta * cp * gamma
+!             rfact =  1. + fv * cp * gamma
 !    &                 * to(i,k) / hvap
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-!    &                 dz1 * (g / (cp * to(i,k)))
+!!   &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+!    &                 dz1 * (grav / (cp * to(i,k)))
 !    &                 * dbyo(i,k) / (1. + gamma)
 !    &                 * rfact
 !             val = 0.
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
 !           endif
 !         endif
@@ -1151,17 +1159,17 @@ c
             if(k >= ktcon(i) .and. k < kbm(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               aa1(i) = aa1(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
 !             val = 0.
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
               if(aa1(i) < 0.) then
                 ktcon1(i) = k
@@ -1202,13 +1210,13 @@ c
                 if(ncloud > 0) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
-                cnvwt(i,k) = etah * qlk * g / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
             endif
           endif
@@ -1234,7 +1242,7 @@ c
 !       if (cnvflg(i)) then
 !         k = kbcon1(i)
 !         tem = po(i,k) / (rd * to(i,k))
-!         wucb = -0.01 * dot(i,k) / (tem * g)
+!         wucb = -0.01 * dot(i,k) / (tem * grav)
 !         if(wucb > 0.) then
 !           wu2(i,k) = wucb * wucb
 !         else
@@ -1408,21 +1416,21 @@ cj
      &     ( eta(i,k)*dv1h - eta(i,k-1)*dv3h
      &    -  tem*eta(i,k-1)*dv2h*dz
      &    +  tem1*eta(i,k-1)*.5*(hcko(i,k)+hcko(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               dellaq(i,k) = dellaq(i,k) +
      &     ( eta(i,k)*dv1q - eta(i,k-1)*dv3q
      &    -  tem*eta(i,k-1)*dv2q*dz
      &    +  tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               tem1=eta(i,k)*(uo(i,k)-ucko(i,k))
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
-              dellau(i,k) = dellau(i,k) + (tem1-tem2) * g/dp
+              dellau(i,k) = dellau(i,k) + (tem1-tem2) * grav/dp
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
-              dellav(i,k) = dellav(i,k) + (tem1-tem2) * g/dp
+              dellav(i,k) = dellav(i,k) + (tem1-tem2) * grav/dp
 cj
             endif
           endif
@@ -1437,7 +1445,7 @@ cj
 cj
               tem1=eta(i,k)*(ctro(i,k,n)-ecko(i,k,n))
               tem2=eta(i,k-1)*(ctro(i,k-1,n)-ecko(i,k-1,n))
-              dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * g/dp
+              dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * grav/dp
 cj
             endif
           endif
@@ -1453,19 +1461,19 @@ c
           dp = 1000. * del(i,indx)
           dv1h = heo(i,indx-1)
           dellah(i,indx) = eta(i,indx-1) *
-     &                     (hcko(i,indx-1) - dv1h) * g / dp
+     &                     (hcko(i,indx-1) - dv1h) * grav / dp
           dv1q = qo(i,indx-1)
           dellaq(i,indx) = eta(i,indx-1) *
-     &                     (qcko(i,indx-1) - dv1q) * g / dp
+     &                     (qcko(i,indx-1) - dv1q) * grav / dp
           dellau(i,indx) = eta(i,indx-1) *
-     &             (ucko(i,indx-1) - uo(i,indx-1)) * g / dp
+     &             (ucko(i,indx-1) - uo(i,indx-1)) * grav / dp
           dellav(i,indx) = eta(i,indx-1) *
-     &             (vcko(i,indx-1) - vo(i,indx-1)) * g / dp
+     &             (vcko(i,indx-1) - vo(i,indx-1)) * grav / dp
 c
 c  cloud water
 c
           dellal(i,indx) = eta(i,indx-1) *
-     &                     qlko_ktcon(i) * g / dp
+     &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
       do n = 1, ntr
@@ -1474,7 +1482,7 @@ c
           indx = ktcon(i)
           dp = 1000. * del(i,indx)
           dellae(i,indx,n) = eta(i,indx-1) *
-     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * g / dp
+     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * grav / dp
         endif
       enddo
       enddo
@@ -1607,11 +1615,11 @@ c
               u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
               v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
               dp = 1000. * del(i,k)
-              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/g
-              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/g
-              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/g
-              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/g
-              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/g
+              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/grav
+              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/grav
+              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/grav
+              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/grav
+              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/grav
             endif
           endif
         enddo
@@ -1623,7 +1631,7 @@ c
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
               ctr(i,k,n) = ctr(i,k,n)+dellae(i,k,n)*xmb(i)*dt2
-              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/g
+              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/grav
               qtr(i,k,kk) = ctr(i,k,n)
             endif
           endif
@@ -1688,16 +1696,16 @@ c             if(islimsk(i) == 1) evef = 0.
               dp = 1000. * del(i,k)
               if(rn(i) > 0. .and. qcond(i) < 0.) then
                 qevap(i) = -qcond(i) * (1.-exp(-.32*sqrt(dt2*rn(i))))
-                qevap(i) = min(qevap(i), rn(i)*1000.*g/dp)
-                delq2(i) = delqev(i) + .001 * qevap(i) * dp / g
+                qevap(i) = min(qevap(i), rn(i)*1000.*grav/dp)
+                delq2(i) = delqev(i) + .001 * qevap(i) * dp / grav
               endif
               if(rn(i) > 0. .and. qcond(i) < 0. .and.
      &           delq2(i) > rntot(i)) then
-                qevap(i) = 1000.* g * (rntot(i) - delqev(i)) / dp
+                qevap(i) = 1000.* grav * (rntot(i) - delqev(i)) / dp
                 flg(i) = .false.
               endif
               if(rn(i) > 0. .and. qevap(i) > 0.) then
-                tem  = .001 * dp / g
+                tem  = .001 * dp / grav
                 tem1 = qevap(i) * tem
                 if(tem1 > rn(i)) then
                   qevap(i) = rn(i) / tem
@@ -1709,10 +1717,10 @@ c             if(islimsk(i) == 1) evef = 0.
                 t1(i,k) = t1(i,k) - elocp * qevap(i)
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
-                delqev(i) = delqev(i) + .001*dp*qevap(i)/g
+                delqev(i) = delqev(i) + .001*dp*qevap(i)/grav
               endif
-              delqbar(i) = delqbar(i) + delq(i)*dp/g
-              deltbar(i) = deltbar(i) + deltv(i)*dp/g
+              delqbar(i) = delqbar(i) + delq(i)*dp/grav
+              deltbar(i) = deltbar(i) + deltv(i)*dp/grav
             endif
           endif
         enddo
