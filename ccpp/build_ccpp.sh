@@ -90,6 +90,16 @@ fi
 CCPP_CMAKE_FLAGS=$(trim "${CCPP_CMAKE_FLAGS}")
 CCPP_MAKE_FLAGS=$(trim "${CCPP_MAKE_FLAGS}")
 
+# Generate additional CCPP cmake flags depending on machine / compiler
+if [[ "${MACHINE_ID}" == "macosx.gnu" ]]; then
+  # Intel MKL (for FFTW)
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMKL_DIR=${MKL_DIR}"
+  # ESMF (for DGEMM) - replace with MKL version in the future?
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
+  # netCDF (needed when linking ESMF)
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNETCDF_DIR=${NETCDF}"
+fi
+
 # Build and install CCPP
 
 echo "Building CCPP with options '${CCPP_CMAKE_FLAGS}' ..."
