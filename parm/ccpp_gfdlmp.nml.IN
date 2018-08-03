@@ -169,6 +169,10 @@
        xkzminv        = 0.3
        xkzm_m         = 1.0
        xkzm_h         = 1.0
+       do_sppt        = @[DO_SPPT]
+       do_shum        = @[DO_SHUM]
+       do_skeb        = @[DO_SKEB]
+       do_sfcperts    = @[DO_SFCPERTS]
 /
 
 &gfdl_cloud_microphysics_nml

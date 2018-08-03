@@ -112,6 +112,10 @@ export SHOUR=00
 export FHMAX=${FHMAX:-`expr $DAYS \* 24`}
 export DT_ATMOS=1800
 
+export DO_SPPT=.F.
+export DO_SHUM=.F.
+export DO_SKEB=.F.
+export DO_SFCPERTS=.F.
 export SKEB=-999.
 export SPPT=-999.
 export SHUM=-999.
