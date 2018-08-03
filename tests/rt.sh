@@ -156,13 +156,13 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
   # Re-instantiate COMPILER in case it gets deleted by module purge
   COMPILER=${NEMS_COMPILER:-intel}
-  
+
   export PYTHONPATH=
   ECFLOW_START=
   QUEUE=premium
   PARTITION=
   dprefix=/glade/scratch
-  DISKNM=/glade/p/work/heinzell/fv3/RT
+  DISKNM=/glade/p/ral/jntp/GMTB/NEMSfv3gfs/RT
   STMP=$dprefix
   PTMP=$dprefix
   SCHEDULER=pbs
@@ -234,7 +234,11 @@ while getopts ":cfsl:mreh" opt; do
   esac
 done
 
-RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180605}
+if [[ $MACHINE_ID = cheyenne.* ]]; then
+  RTPWD=${RTPWD:-$DISKNM/trunk-20180605/${COMPILER^^}}
+else
+  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180605}
+fi
 
 shift $((OPTIND-1))
 [[ $# -gt 1 ]] && usage
