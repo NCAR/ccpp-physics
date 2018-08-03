@@ -8,7 +8,7 @@
 Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b GFS \b physics \b suite on the top of NEMSfv3gfs repository on NOAA VLab in July 2018. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
 
 A major upgrade to the parameterization of \ref GFDL_cloud was implemented in the FV3GFS, 
-which is being configured to replace spectral model (NEMS GSM) in operations in Q2FY19. It is the most significant change to 
+which is being configured to replace spectral model (NEMS GSM) in operational implementation (Q2FY19). It is the most significant change to 
 the GFS physics suite since the Zhao-Carr microphysics scheme was implemented in the NCEP 
 Global Forecasting System(GFS) as a simple scheme and predicted only total cloud condensate. 
 Six prognostic cloud spieces variables have been introduced to enable a more physically based 

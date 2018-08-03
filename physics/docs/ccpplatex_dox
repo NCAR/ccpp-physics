@@ -164,10 +164,13 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90    \
 ###
-                        ../physparam.f
+                        ../physparam.f      \
+                        ../physcons.f90     \
+                        ../radcons.f90
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F90 \
+                         *.f90 \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =
