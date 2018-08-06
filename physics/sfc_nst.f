@@ -391,7 +391,7 @@ cc
       zsea2 = 0.001*real(nstf_name5)
 
 !> - Call module_nst_water_prop::density() to compute sea water density.
-!> - Call module_nst_water_prop::rhocoef() to compute thermal expansion 
+!> - Call module_nst_water_prop::rhocoef() to compute thermal expansion
 !! coefficient (\a alpha) and saline contraction coefficient (\a beta).
       do i = 1, im
         if ( flag(i) ) then
@@ -435,7 +435,7 @@ cc
           rf_ts  = (1000.*rain(i)/rho_w)*alfac*cp_w*(1.0+rch(i)*hl_ts)
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
-!> - Call cool_skin(), which is the sub-layer cooling parameterization 
+!> - Call cool_skin(), which is the sub-layer cooling parameterization
 !! (\cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
@@ -531,7 +531,7 @@ cc
               call sw_ps_9b(delz,fw)
               q_warm = fw*nswsfc(i)-f_nsol    !total heat absorbed in warm layer
 
-!>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with 
+!>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with
 !! thickness of \a dz.
               if ( q_warm > 0.0 ) then
                 call cal_ttop(kdt,timestep,q_warm,rho_w,dz,
@@ -721,7 +721,7 @@ cc
 !! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag  |    1 | integer   |           | in     | F        |
 !! | oro            | orography                                              | orography                                      | m     |    1 | real      | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                   | unfiltered orographyo                          | m     |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K     |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K     |    1 | real      | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature_for_nsst                      | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
@@ -821,7 +821,7 @@ cc
 !! | xlon           | longitude                                              | longitude                                      | radians |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K       |    1 | real      | kind_phys | inout  | F        |
 !! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                | K       |    1 | real      | kind_phys | out    | F        |
-!! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K       |    1 | real      | kind_phys | inout  | F        |
+!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K       |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
 !!
