@@ -1,5 +1,6 @@
 /**
 \page subpage_overview Overview of the Code
+
 The GFS physics parameterization suite is called by GMTB-SCM or FV3 after the explicit dynamical computations. The
 physics computations are performed only in the vertical. The input information for the physics consists of the values
 of the gridbox mean prognostic variables (wind components \f$u/v\f$, temperature \f$T\f$, specific humidity \f$q\f$, cloud
@@ -46,6 +47,11 @@ progress have been made towards a more consistent incorporation of the physical 
 interaction and it may be necessary to enforce a balance, e.g. between
 dynamics and boundary layer diffusion (Beljaars(1991) \cite beljaars_1991), or between dynamics and clouds in FV3GFS:
  + @ref fast_sat_adj
+
+Besides scientific documentation of GFS suite physical schemes, there are three modules to define physics (or radiation) attributes and constants:
+ + @ref phy_sparam
+ + @ref physcons
+ + @ref radcons
 
 
 */

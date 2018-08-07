@@ -14,6 +14,10 @@ Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain
 Some unique attributes of GFDL cloud microphysics include:
 
 \subsection fast a. Fast Physics 
+The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment
+is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order
+to have the correct balance.
+
 In current fv3gfs, phase-changes are called after the "Lagrangian-to-Eulerian" remapping in FV3
 dynamic solver. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts 
 cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and

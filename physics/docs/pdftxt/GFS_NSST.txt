@@ -5,7 +5,7 @@
 Sea Surface Temperature (SST) is required in a Numerical Weather Prediction (NWP) system as the lower thermal
 boundary condition of air-sea heat fluxes calculation at forecast step and a radiative transfer model (CRTM or RTTOV)
 at analysis step. SST analysis has been previously produced independently and then provided to NWP system as an input.
-The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li(2015)\cite Li_2015 and Li and Derber (2009) \cite li_and_derber_2009).
+The GFS NSST scheme was initially developed at NCEP by Xu Li in 2007, and subsequently received contributions by S. Moorthi,  Y.-T. Hu and J. Derber, leading to operational implementation in the GFS in 2017 (Li (2015)\cite Li_2015 and Li and Derber (2009) \cite li_and_derber_2009).
 
 At the forecast step, Near-Surface Sea Temperature (NSST) is an oceanic vertical temperature profile just below the sea surface. Here, only the vertical thermal structure due to \b diurnal \b thermocline \b layer \b warming and \b thermal 
 \b skin \b layer \b cooling is resolved, both with an origin on Fairall et al. (1996) \cite fairall_et_al_1996 .

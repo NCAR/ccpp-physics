@@ -16,7 +16,7 @@
       end subroutine hedmf_finalize
 
 
-!> \defgroup HEDMF GFS Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF GFS moninedmf Main
 !! @{
 !!  \brief  This subroutine contains all of logic for the 
 !! Hybrid EDMF PBL scheme except for the calculation of 
