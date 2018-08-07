@@ -12,6 +12,7 @@
       end subroutine GFS_PBL_generic_pre_finalize
 
 !> \brief This scheme sets up the vertically diffused tracer array for any PBL scheme based on the microphysics scheme chosen
+#if 0
 !! \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! | local_name                   | standard_name                                          | long_name                                                                           | units         | rank | type      |    kind   | intent | optional |
 !! |------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -40,6 +41,7 @@
 !! | errmsg                       | ccpp_error_message                                     | error message for error handling in CCPP                                            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                        | error flag for error handling in CCPP                                               | flag          |    0 | integer   |           | out    | F        |
 !!
+#endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, &
         imp_physics_wsm6, ltaerosol, qgrs, qgrs_water_vapor, qgrs_liquid_cloud, qgrs_ice_cloud, qgrs_ozone, &
         qgrs_cloud_droplet_num_conc, qgrs_cloud_ice_num_conc, qgrs_water_aer_num_conc, qgrs_ice_aer_num_conc, qgrs_rain, &
@@ -139,7 +141,7 @@
     end subroutine GFS_PBL_generic_post_finalize
 
 
-
+#if 0
 !> \section arg_table_GFS_PBL_generic_post_run Argument Table
 !! | local_name                   | standard_name                                                                     | long_name                                                                                   | units         | rank | type      |    kind   | intent | optional |
 !! |------------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -208,6 +210,7 @@
 !! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
+#endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac, ntoz, imp_physics, imp_physics_gfdl, imp_physics_thompson, &
         imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, &
         dudt, dvdt, dtdt, htrsw, htrlw, xmu,&

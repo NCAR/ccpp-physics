@@ -49,48 +49,59 @@
 !! of the large-scale environment due to the cumulus convection.
 !!
 !! \section arg_table_samfdeepcnv_run Argument Table
-!! | local_name     | standard_name                                                  | long_name                                                                                                | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                         | horizontal loop extent                                                                                   | count   |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                           | horizontal dimension                                                                                     | count   |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                             | vertical layer dimension                                                                                 | count   |    0 | integer   |           | in     | F        |
-!! | delt           | time_step_for_physics                                          | physics time step                                                                                        | s       |    0 | real      | kind_phys | in     | F        |
-!! | ntk            | index_of_TKE_convective_transport_tracer                       | index of TKE in the convectively transported tracer array                                                | index   |    0 | integer   |           | in     | F        |
-!! | ntr            | number_of_tracers_for_samf                                     | number of tracers for scale-aware mass flux schemes                                                      | count   |    0 | integer   |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                      | pres(k) - pres(k+1)                                                                                      | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | prslp          | air_pressure                                                   | mean layer pressure                                                                                      | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | psp            | surface_air_pressure                                           | surface pressure                                                                                         | Pa      |    1 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                   | layer geopotential                                                                                       | m2 s-2  |    2 | real      | kind_phys | in     | F        |
-!! | qtr            | convective_transportable_tracers                               | array to contain cloud water and other convective trans. tracers                                         | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_updated_by_physics               | updated vapor specific humidity                                                                          | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | t1             | air_temperature_updated_by_physics                             | updated temperature                                                                                      | K       |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind_updated_by_physics                                      | updated x-direction wind                                                                                 | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | v1             | y_wind_updated_by_physics                                      | updated y-direction wind                                                                                 | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | cldwrk         | cloud_work_function                                            | cloud work function                                                                                      | m2 s-2  |    1 | real      | kind_phys | out    | F        |
-!! | rn             | lwe_thickness_of_deep_convective_precipitation_amount          | deep convective rainfall amount on physics timestep                                                      | m       |    1 | real      | kind_phys | out    | F        |
-!! | kbot           | vertical_index_at_cloud_base                                   | index for cloud base                                                                                     | index   |    1 | integer   |           | out    | F        |
-!! | ktop           | vertical_index_at_cloud_top                                    | index for cloud top                                                                                      | index   |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                           | deep convection: 0=no, 1=yes                                                                             | flag    |    1 | integer   |           | inout  | F        |
-!! | islimsk        | sea_land_ice_mask                                              | landmask: sea/land/ice=0/1/2                                                                             | flag    |    1 | integer   |           | in     | F        |
-!! | garea          | cell_area                                                      | grid cell area                                                                                           | m2      |    1 | real      | kind_phys | in     | F        |
-!! | dot            | omega                                                          | layer mean vertical velocity                                                                             | Pa s-1  |    2 | real      | kind_phys | in     | F        |
-!! | ncloud         | number_of_hydrometeors                                         | number of hydrometeors                                                                                   | count   |    0 | integer   |           | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux          | (updraft mass flux) * delt                                                                               | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux        | (downdraft mass flux) * delt                                                                             | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | inout  | F        |
-!! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none    |    0 | real      | kind_phys | in     | F        |
-!! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1     |    0 | real      | kind_phys | in     | F        |
-!! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
-!! | betal          | downdraft_fraction_reaching_surface_over_land_deep_convection  | downdraft fraction reaching surface over land for deep conv.                                             | frac    |    0 | real      | kind_phys | in     | F        |
-!! | betas          | downdraft_fraction_reaching_surface_over_ocean_deep_convection | downdraft fraction reaching surface over ocean for deep conv.                                            | frac    |    0 | real      | kind_phys | in     | F        |
-!! | evfact         | rain_evaporation_coefficient_deep_convection                   | convective rain evaporation coefficient for deep conv.                                                   | frac    |    0 | real      | kind_phys | in     | F        |
-!! | evfactl        | rain_evaporation_coefficient_over_land_deep_convection         | convective rain evaporation coefficient over land for deep conv.                                         | frac    |    0 | real      | kind_phys | in     | F        |
-!! | pgcon          | momentum_transport_reduction_factor_pgf_deep_convection        | reduction factor in momentum transport due to deep conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
-!! | asolfac        | aerosol_aware_parameter_deep_convection                        | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                  | long_name                                                                                                | units       | rank | type      |    kind   | intent | optional |
+!! |----------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                         | horizontal loop extent                                                                                   | count       |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                           | horizontal dimension                                                                                     | count       |    0 | integer   |           | in     | F        |
+!! | km             | vertical_dimension                                             | vertical layer dimension                                                                                 | count       |    0 | integer   |           | in     | F        |
+!! | cliq           | specific_heat_of_liquid_water_at_constant_pressure             | specific heat of liquid water at constant pressure                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                  | specific heat of dry air at constant pressure                                                            | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | cvap           | specific_heat_of_water_vapor_at_constant_pressure              | specific heat of water vapor at constant pressure                                                        | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                  | rd/rv                                                                                                    | none        |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one        | (rd/rv) - 1                                                                                              | none        |    0 | real      | kind_phys | in     | F        |
+!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one              | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                                    | none        |    0 | real      | kind_phys | in     | F        |
+!! | grav           | gravitational_acceleration                                     | gravitational acceleration                                                                               | m s-2       |    0 | real      | kind_phys | in     | F        |
+!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                     | latent heat of evaporation/sublimation                                                                   | J kg-1      |    0 | real      | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                           | ideal gas constant for dry air                                                                           | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | rv             | gas_constant_water_vapor                                       | ideal gas constant for water vapor                                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | t0c            | temperature_at_zero_celsius                                    | temperature at 0 degrees Celsius                                                                         | K           |    0 | real      | kind_phys | in     | F        |
+!! | delt           | time_step_for_physics                                          | physics time step                                                                                        | s           |    0 | real      | kind_phys | in     | F        |
+!! | ntk            | index_of_TKE_convective_transport_tracer                       | index of TKE in the convectively transported tracer array                                                | index       |    0 | integer   |           | in     | F        |
+!! | ntr            | number_of_tracers_for_samf                                     | number of tracers for scale-aware mass flux schemes                                                      | count       |    0 | integer   |           | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                      | pres(k) - pres(k+1)                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                                   | mean layer pressure                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                           | surface pressure                                                                                         | Pa          |    1 | real      | kind_phys | in     | F        |
+!! | phil           | geopotential                                                   | layer geopotential                                                                                       | m2 s-2      |    2 | real      | kind_phys | in     | F        |
+!! | qtr            | convective_transportable_tracers                               | array to contain cloud water and other convective trans. tracers                                         | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics               | updated vapor specific humidity                                                                          | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                             | updated temperature                                                                                      | K           |    2 | real      | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                      | updated x-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                      | updated y-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | cldwrk         | cloud_work_function                                            | cloud work function                                                                                      | m2 s-2      |    1 | real      | kind_phys | out    | F        |
+!! | rn             | lwe_thickness_of_deep_convective_precipitation_amount          | deep convective rainfall amount on physics timestep                                                      | m           |    1 | real      | kind_phys | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                                   | index for cloud base                                                                                     | index       |    1 | integer   |           | out    | F        |
+!! | ktop           | vertical_index_at_cloud_top                                    | index for cloud top                                                                                      | index       |    1 | integer   |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                           | deep convection: 0=no, 1=yes                                                                             | flag        |    1 | integer   |           | inout  | F        |
+!! | islimsk        | sea_land_ice_mask                                              | landmask: sea/land/ice=0/1/2                                                                             | flag        |    1 | integer   |           | in     | F        |
+!! | garea          | cell_area                                                      | grid cell area                                                                                           | m2          |    1 | real      | kind_phys | in     | F        |
+!! | dot            | omega                                                          | layer mean vertical velocity                                                                             | Pa s-1      |    2 | real      | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                         | number of hydrometeors                                                                                   | count       |    0 | integer   |           | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux          | (updraft mass flux) * delt                                                                               | kg m-2      |    2 | real      | kind_phys | out    | F        |
+!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux        | (downdraft mass flux) * delt                                                                             | kg m-2      |    2 | real      | kind_phys | out    | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2      |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac        |    2 | real      | kind_phys | inout  | F        |
+!! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none        |    0 | real      | kind_phys | in     | F        |
+!! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1         |    0 | real      | kind_phys | in     | F        |
+!! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1         |    0 | real      | kind_phys | in     | F        |
+!! | betal          | downdraft_fraction_reaching_surface_over_land_deep_convection  | downdraft fraction reaching surface over land for deep conv.                                             | frac        |     0 | real      | kind_phys | in     | F        |
+!! | betas          | downdraft_fraction_reaching_surface_over_ocean_deep_convection | downdraft fraction reaching surface over ocean for deep conv.                                            | frac        |    0 | real      | kind_phys | in     | F        |
+!! | evfact         | rain_evaporation_coefficient_deep_convection                   | convective rain evaporation coefficient for deep conv.                                                   | frac        |    0 | real      | kind_phys | in     | F        |
+!! | evfactl        | rain_evaporation_coefficient_over_land_deep_convection         | convective rain evaporation coefficient over land for deep conv.                                         | frac        |    0 | real      | kind_phys | in     | F        |
+!! | pgcon          | momentum_transport_reduction_factor_pgf_deep_convection        | reduction factor in momentum transport due to deep conv. induced pressure gradient force                 | frac        |    0 | real      | kind_phys | in     | F        |
+!! | asolfac        | aerosol_aware_parameter_deep_convection                        | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv. | none        |    0 | real      | kind_phys | in     | F        |
+!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag        |    0 | integer   |           | out    | F        |
 !!
 !!  \section general_samfdeep GFS samfdeepcnv General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -107,7 +118,9 @@
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,delt,ntk,ntr,delp,
+      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,
+     &     eps,epsm1,fv,grav,hvap,rd,rv,
+     &     t0c,delt,ntk,ntr,delp,
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,
      &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,
@@ -116,16 +129,13 @@
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      ! DH* TODO these must come in via the argument list!
-      use physcons, grav => con_g, cp => con_cp, hvap => con_hvap
-     &,             rv => con_rv, fv => con_fvirt, t0c => con_t0c
-     &,             rd => con_rd, cvap => con_cvap, cliq => con_cliq
-     &,             eps => con_eps, epsm1 => con_epsm1
-      ! *DH
+
       implicit none
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,
+     &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
@@ -158,7 +168,7 @@
 !
 !     real(kind=kind_phys) detad
       real(kind=kind_phys) adw,     aup,     aafac,   d0,
-     &                     dellat,  delta,   desdt,   dg,
+     &                     dellat,  desdt,   dg,
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
      &                     dt2,     dtmax,   dtmin,
@@ -170,7 +180,7 @@
      &                     es,      etah,
      &                     cthk,    dthk,
      &                     evef,    fact1,   fact2,   factor,
-     &                     g,       gamma,   pprime,  cm,
+     &                     gamma,   pprime,  cm,
      &                     qlk,     qrch,    qs,
      &                     rain,    rfact,   shear,   tfac,
      &                     val,     val1,    val2,
@@ -221,9 +231,9 @@ cj
 !    &                     bb1,     bb2,     wucb
 !
 c  physical parameters
-!     parameter(g=grav,asolfac=0.958)
-      parameter(g=grav)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
+!     parameter(grav=grav,asolfac=0.958)
+!     parameter(grav=grav)
+!     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=.002,c1=.002,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
@@ -236,8 +246,8 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,delta=fv)
-      parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
+      parameter(cm=1.0)
+!     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dbeta=0.1)
@@ -293,6 +303,12 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      elocp = hvap/cp
+      el2orc = hvap*hvap/(rv*cp)
+
+      fact1 = (cvap-cliq)/rv
+      fact2 = hvap/rv-fact1*t0c
 !
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -455,7 +471,7 @@ c
 !>  - Calculate hydrostatic height at layer centers assuming a flat surface (no terrain) from the geopotential.
       do k = 1, km
         do i=1,im
-          zo(i,k) = phil(i,k) / g
+          zo(i,k) = phil(i,k) / grav
         enddo
       enddo
 !>  - Calculate interface height
@@ -534,7 +550,7 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-!           tvo(i,k)  = to(i,k) + delta * to(i,k) * qo(i,k)
+!           tvo(i,k)  = to(i,k) + fv * to(i,k) * qo(i,k)
           endif
         enddo
       enddo
@@ -545,7 +561,7 @@ c
       do k = 1, km
         do i=1,im
           if (k <= kmax(i)) then
-!           tem       = g * zo(i,k) + cp * to(i,k)
+!           tem       = grav * zo(i,k) + cp * to(i,k)
             tem       = phil(i,k) + cp * to(i,k)
             heo(i,k)  = tem  + hvap * qo(i,k)
             heso(i,k) = tem  + hvap * qeso(i,k)
@@ -587,7 +603,7 @@ c
             desdt   = es * (fact1 / to(i,k+1) + fact2 / (to(i,k+1)**2))
             dqsdt   = qs * pfld(i,k+1) * desdt / (es * pprime)
             gamma   = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
-            dt      = (g * dz + hvap * dqsdp * dp) / (cp * (1. + gamma))
+            dt      = (grav*dz + hvap*dqsdp*dp) / (cp * (1. + gamma))
             dq      = dqsdt * dt + dqsdp * dp
             to(i,k) = to(i,k+1) + dt
             qo(i,k) = qo(i,k+1) + dq
@@ -609,9 +625,9 @@ c
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
             tem = min(qo(i,k)/qeso(i,k), 1.)
             frh(i,k)  = 1. - tem
-            heo(i,k)  = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heo(i,k)  = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qo(i,k)
-            heso(i,k) = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heso(i,k) = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qeso(i,k)
             uo(i,k)   = .5 * (uo(i,k) + uo(i,k+1))
             vo(i,k)   = .5 * (vo(i,k) + vo(i,k+1))
@@ -998,17 +1014,17 @@ c
             if(k > kb(i) .and. k < kbcon1(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
               val = 0.
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * g * delta *
-     &                 dz1 * g * delta *
+!    &                 dz1 * eta(i,k) * grav * fv *
+     &                 dz1 * grav * fv *
      &                 max(val,(qeso(i,k) - qo(i,k)))
             endif
           endif
@@ -1132,13 +1148,13 @@ c
 !
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          xmbmax(i) = dp / (2. * g * dt2)
+          xmbmax(i) = dp / (2. * grav * dt2)
 !
-!         xmbmax(i) = dp / (g * dt2)
+!         xmbmax(i) = dp / (grav * dt2)
 !
-!         mbdt(i) = 0.1 * dp / g
+!         mbdt(i) = 0.1 * dp / grav
 !
-!         tem = dp / (g * dt2)
+!         tem = dp / (grav * dt2)
 !         xmbmax(i) = min(tem, xmbmax(i))
         endif
       enddo
@@ -1183,30 +1199,30 @@ c
                 if(ncloud > 0 .and. k > jmin(i)) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
-!               aa1(i) = aa1(i) - dz * g * qlk * etah
-!               aa1(i) = aa1(i) - dz * g * qlk
-                buo(i,k) = buo(i,k) - g * qlk
+!               aa1(i) = aa1(i) - dz * grav * qlk * etah
+!               aa1(i) = aa1(i) - dz * grav * qlk
+                buo(i,k) = buo(i,k) - grav * qlk
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 pwavo(i) = pwavo(i) + pwo(i,k)
-!               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * g / dp
-                cnvwt(i,k) = etah * qlk * g / dp
+!               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
 !
 !  compute buoyancy and drag for updraft velocity
 !
               if(k >= kbcon(i)) then
-                rfact =  1. + delta * cp * gamma
+                rfact =  1. + fv * cp * gamma
      &                   * to(i,k) / hvap
-                buo(i,k) = buo(i,k) + (g / (cp * to(i,k)))
+                buo(i,k) = buo(i,k) + (grav / (cp * to(i,k)))
      &                   * dbyo(i,k) / (1. + gamma)
      &                   * rfact
                 val = 0.
-                buo(i,k) = buo(i,k) + g * delta *
+                buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i,k))
               endif
@@ -1231,17 +1247,17 @@ c
 !           if(k >= kbcon(i) .and. k < ktcon(i)) then
 !             dz1 = zo(i,k+1) - zo(i,k)
 !             gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-!             rfact =  1. + delta * cp * gamma
+!             rfact =  1. + fv * cp * gamma
 !    &                 * to(i,k) / hvap
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-!    &                 dz1 * (g / (cp * to(i,k)))
+!!   &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+!    &                 dz1 * (grav / (cp * to(i,k)))
 !    &                 * dbyo(i,k) / (1. + gamma)
 !    &                 * rfact
 !             val = 0.
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
 !           endif
 !         endif
@@ -1305,17 +1321,17 @@ c
             if(k >= ktcon(i) .and. k < kmax(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               aa2(i) = aa2(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
 !             val = 0.
 !             aa2(i) = aa2(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
               if(aa2(i) < 0.) then
                 ktcon1(i) = k
@@ -1356,15 +1372,15 @@ c
                 if(ncloud > 0) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 pwavo(i) = pwavo(i) + pwo(i,k)
-!               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * g / dp
-                cnvwt(i,k) = etah * qlk * g / dp
+!               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
             endif
           endif
@@ -1390,7 +1406,7 @@ c
 !       if (cnvflg(i)) then
 !         k = kbcon1(i)
 !         tem = po(i,k) / (rd * to(i,k))
-!         wucb = -0.01 * dot(i,k) / (tem * g)
+!         wucb = -0.01 * dot(i,k) / (tem * grav)
 !         if(wucb > 0.) then
 !           wu2(i,k) = wucb * wucb
 !         else
@@ -1720,12 +1736,12 @@ c
               dz=-1.*(zo(i,k+1)-zo(i,k))
 !             aa1(i)=aa1(i)+edto(i)*dz*etad(i,k)
               aa1(i)=aa1(i)+edto(i)*dz
-     &               *(g/(cp*dt))*((dhh-dh)/(1.+dg))
-     &               *(1.+delta*cp*dg*dt/hvap)
+     &               *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
+     &               *(1.+fv*cp*dg*dt/hvap)
               val=0.
 !             aa1(i)=aa1(i)+edto(i)*dz*etad(i,k)
               aa1(i)=aa1(i)+edto(i)*dz
-     &               *g*delta*max(val,(qeso(i,k)-qo(i,k)))
+     &               *grav*fv*max(val,(qeso(i,k)-qo(i,k)))
           endif
         enddo
       enddo
@@ -1770,13 +1786,13 @@ c
         if(cnvflg(i)) then
           dp = 1000. * del(i,1)
           dellah(i,1) = edto(i) * etad(i,1) * (hcdo(i,1)
-     &                   - heo(i,1)) * g / dp
+     &                   - heo(i,1)) * grav / dp
           dellaq(i,1) = edto(i) * etad(i,1) * (qrcdo(i,1)
-     &                   - qo(i,1)) * g / dp
+     &                   - qo(i,1)) * grav / dp
           dellau(i,1) = edto(i) * etad(i,1) * (ucdo(i,1)
-     &                   - uo(i,1)) * g / dp
+     &                   - uo(i,1)) * grav / dp
           dellav(i,1) = edto(i) * etad(i,1) * (vcdo(i,1)
-     &                   - vo(i,1)) * g / dp
+     &                   - vo(i,1)) * grav / dp
         endif
       enddo
       do n = 1, ntr
@@ -1784,7 +1800,7 @@ c
         if(cnvflg(i)) then
           dp = 1000. * del(i,1)
           dellae(i,1,n) = edto(i) * etad(i,1) * (ecdo(i,1,n)
-     &                   - ctro(i,1,n)) * g / dp
+     &                   - ctro(i,1,n)) * grav / dp
         endif
       enddo
       enddo
@@ -1825,7 +1841,7 @@ cj
      &    - (aup*tem*eta(i,k-1)+adw*edto(i)*ptem*etad(i,k))*dv2h*dz
      &    +  aup*tem1*eta(i,k-1)*.5*(hcko(i,k)+hcko(i,k-1))*dz
      &    +  adw*edto(i)*ptem1*etad(i,k)*.5*(hcdo(i,k)+hcdo(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               dellaq(i,k) = dellaq(i,k) +
      &     ((aup*eta(i,k)-adw*edto(i)*etad(i,k))*dv1q
@@ -1833,21 +1849,21 @@ cj
      &    - (aup*tem*eta(i,k-1)+adw*edto(i)*ptem*etad(i,k))*dv2q*dz
      &    +  aup*tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
      &    +  adw*edto(i)*ptem1*etad(i,k)*.5*(qrcdo(i,k)+qcdo(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               tem1=eta(i,k)*(uo(i,k)-ucko(i,k))
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
               ptem1=etad(i,k)*(uo(i,k)-ucdo(i,k))
               ptem2=etad(i,k-1)*(uo(i,k-1)-ucdo(i,k-1))
               dellau(i,k) = dellau(i,k) +
-     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
+     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*grav/dp
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
               ptem1=etad(i,k)*(vo(i,k)-vcdo(i,k))
               ptem2=etad(i,k-1)*(vo(i,k-1)-vcdo(i,k-1))
               dellav(i,k) = dellav(i,k) +
-     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
+     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*grav/dp
 cj
           endif
         enddo
@@ -1867,7 +1883,7 @@ cj
               ptem1=etad(i,k)*(ctro(i,k,n)-ecdo(i,k,n))
               ptem2=etad(i,k-1)*(ctro(i,k-1,n)-ecdo(i,k-1,n))
               dellae(i,k,n) = dellae(i,k,n) +
-     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*g/dp
+     &           (aup*(tem1-tem2)-adw*edto(i)*(ptem1-ptem2))*grav/dp
 cj
           endif
         enddo
@@ -1882,19 +1898,19 @@ c
           dp = 1000. * del(i,indx)
           dv1h = heo(i,indx-1)
           dellah(i,indx) = eta(i,indx-1) *
-     &                     (hcko(i,indx-1) - dv1h) * g / dp
+     &                     (hcko(i,indx-1) - dv1h) * grav / dp
           dv1q = qo(i,indx-1)
           dellaq(i,indx) = eta(i,indx-1) *
-     &                     (qcko(i,indx-1) - dv1q) * g / dp
+     &                     (qcko(i,indx-1) - dv1q) * grav / dp
           dellau(i,indx) = eta(i,indx-1) *
-     &             (ucko(i,indx-1) - uo(i,indx-1)) * g / dp
+     &             (ucko(i,indx-1) - uo(i,indx-1)) * grav / dp
           dellav(i,indx) = eta(i,indx-1) *
-     &             (vcko(i,indx-1) - vo(i,indx-1)) * g / dp
+     &             (vcko(i,indx-1) - vo(i,indx-1)) * grav / dp
 c
 c  cloud water
 c
           dellal(i,indx) = eta(i,indx-1) *
-     &                     qlko_ktcon(i) * g / dp
+     &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
       do n = 1, ntr
@@ -1903,7 +1919,7 @@ c
           indx = ktcon(i)
           dp = 1000. * del(i,indx)
           dellae(i,indx,n) = eta(i,indx-1) *
-     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * g / dp
+     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * grav / dp
         endif
       enddo
       enddo
@@ -1958,7 +1974,7 @@ c
             qeso(i,k) = eps * qeso(i,k) / (pfld(i,k)+epsm1*qeso(i,k))
             val       =             1.e-8
             qeso(i,k) = max(qeso(i,k), val )
-!           tvo(i,k)  = to(i,k) + delta * to(i,k) * qo(i,k)
+!           tvo(i,k)  = to(i,k) + fv * to(i,k) * qo(i,k)
           endif
         enddo
       enddo
@@ -1978,7 +1994,7 @@ c
             desdt = es * (fact1 / to(i,k+1) + fact2 / (to(i,k+1)**2))
             dqsdt = qs * pfld(i,k+1) * desdt / (es * pprime)
             gamma = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
-            dt = (g * dz + hvap * dqsdp * dp) / (cp * (1. + gamma))
+            dt = (grav * dz + hvap * dqsdp * dp) / (cp * (1. + gamma))
             dq = dqsdt * dt + dqsdp * dp
             to(i,k) = to(i,k+1) + dt
             qo(i,k) = qo(i,k+1) + dq
@@ -1996,9 +2012,9 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-            heo(i,k)   = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heo(i,k)   = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                    cp * to(i,k) + hvap * qo(i,k)
-            heso(i,k) = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heso(i,k) = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qeso(i,k)
           endif
         enddo
@@ -2006,8 +2022,8 @@ c
       do i = 1, im
         if(asqecflg(i)) then
           k = kmax(i)
-          heo(i,k) = g * zo(i,k) + cp * to(i,k) + hvap * qo(i,k)
-          heso(i,k) = g * zo(i,k) + cp * to(i,k) + hvap * qeso(i,k)
+          heo(i,k) = grav * zo(i,k) + cp * to(i,k) + hvap * qo(i,k)
+          heso(i,k) = grav * zo(i,k) + cp * to(i,k) + hvap * qeso(i,k)
 c         heo(i,k) = min(heo(i,k),heso(i,k))
         endif
       enddo
@@ -2072,8 +2088,8 @@ c
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
                 if(k < ktcon1(i)) then
-!                 xaa0(i) = xaa0(i) - dz * g * qlk * etah
-                  xaa0(i) = xaa0(i) - dz * g * qlk
+!                 xaa0(i) = xaa0(i) - dz * grav * qlk * etah
+                  xaa0(i) = xaa0(i) - dz * grav * qlk
                 endif
                 qcko(i,k) = qlk + xqrch
                 xpw = etah * c0t(i,k) * dz * qlk
@@ -2083,17 +2099,17 @@ c
             if(k >= kbcon(i) .and. k < ktcon1(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               xaa0(i) = xaa0(i)
-!    &                + dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                + dz1 * (g / (cp * to(i,k)))
+!    &                + dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                + dz1 * (grav / (cp * to(i,k)))
      &                * xdby / (1. + gamma)
      &                * rfact
               val=0.
               xaa0(i) = xaa0(i) +
-!    &                 dz1 * eta(i,k) * g * delta *
-     &                 dz1 * g * delta *
+!    &                 dz1 * eta(i,k) * grav * fv *
+     &                 dz1 * grav * fv *
      &                 max(val,(qeso(i,k) - qo(i,k)))
             endif
           endif
@@ -2194,12 +2210,12 @@ c
               dz=-1.*(zo(i,k+1)-zo(i,k))
 !             xaa0(i)=xaa0(i)+edtx(i)*dz*etad(i,k)
               xaa0(i)=xaa0(i)+edtx(i)*dz
-     &                *(g/(cp*dt))*((dhh-dh)/(1.+dg))
-     &                *(1.+delta*cp*dg*dt/hvap)
+     &                *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
+     &                *(1.+fv*cp*dg*dt/hvap)
               val=0.
 !             xaa0(i)=xaa0(i)+edtx(i)*dz*etad(i,k)
               xaa0(i)=xaa0(i)+edtx(i)*dz
-     &                *g*delta*max(val,(qeso(i,k)-qo(i,k)))
+     &                *grav*fv*max(val,(qeso(i,k)-qo(i,k)))
           endif
         enddo
       enddo
@@ -2460,11 +2476,11 @@ c
               u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
               v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
               dp = 1000. * del(i,k)
-              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/g
-              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/g
-              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/g
-              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/g
-              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/g
+              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/grav
+              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/grav
+              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/grav
+              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/grav
+              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/grav
             endif
           endif
         enddo
@@ -2476,7 +2492,7 @@ c
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
               ctr(i,k,n) = ctr(i,k,n)+dellae(i,k,n)*xmb(i)*dt2
-              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/g
+              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/grav
               qtr(i,k,kk) = ctr(i,k,n)
             endif
           endif
@@ -2545,24 +2561,24 @@ c             if(islimsk(i) == 1) evef = 0.
               dp = 1000. * del(i,k)
               if(rn(i) > 0. .and. qcond(i) < 0.) then
                 qevap(i) = -qcond(i) * (1.-exp(-.32*sqrt(dt2*rn(i))))
-                qevap(i) = min(qevap(i), rn(i)*1000.*g/dp)
-                delq2(i) = delqev(i) + .001 * qevap(i) * dp / g
+                qevap(i) = min(qevap(i), rn(i)*1000.*grav/dp)
+                delq2(i) = delqev(i) + .001 * qevap(i) * dp / grav
               endif
               if(rn(i) > 0. .and. qcond(i) < 0. .and.
      &           delq2(i) > rntot(i)) then
-                qevap(i) = 1000.* g * (rntot(i) - delqev(i)) / dp
+                qevap(i) = 1000.* grav * (rntot(i) - delqev(i)) / dp
                 flg(i) = .false.
               endif
               if(rn(i) > 0. .and. qevap(i) > 0.) then
                 q1(i,k) = q1(i,k) + qevap(i)
                 t1(i,k) = t1(i,k) - elocp * qevap(i)
-                rn(i) = rn(i) - .001 * qevap(i) * dp / g
+                rn(i) = rn(i) - .001 * qevap(i) * dp / grav
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
-                delqev(i) = delqev(i) + .001*dp*qevap(i)/g
+                delqev(i) = delqev(i) + .001*dp*qevap(i)/grav
               endif
-              delqbar(i) = delqbar(i) + delq(i)*dp/g
-              deltbar(i) = deltbar(i) + deltv(i)*dp/g
+              delqbar(i) = delqbar(i) + delq(i)*dp/grav
+              deltbar(i) = deltbar(i) + deltv(i)*dp/grav
             endif
           endif
         enddo
