@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 WSM6 MP test
+#  FV3 CCPP GFDL-MP ldiag3d test
 #
 ###############################################################################
 
-export TEST_DESCR="Compare FV3 WSM6 MP results with previous trunk version"
+export TEST_DESCR="Compare FV3 CCPP GFDL-MP ldiag3d results with previous trunk version"
 
-export CNTL_DIR=fv3_wsm6
+export CNTL_DIR=fv3_gfdlmp_ldiag3d
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -75,10 +75,11 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
-export DT_ATMOS="1200"
-export LRADAR=.T.
+DT_ATMOS="1200"
 
-export INPUT_NML=wsm6.nml.IN
-export FV3_RUN=wsm6_run.IN
+export FV3_RUN=ccpp_gfdlmp_ldiag3d_run.IN
+export CCPP_SDF=ccpp/framework/examples/suite_FV3_test_gfdlmp.xml
+export CCPP_LIB_DIR=ccpp/lib
+export INPUT_NML=ccpp_gfdlmp_ldiag3d.nml.IN
 
 RUN_SCRIPT=rt_fv3.sh
