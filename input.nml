@@ -152,8 +152,8 @@
        random_clds    = .true.
        trans_trac     = .true.
        cnvcld         = .true.
-       imfshalcnv     = 2
-       imfdeepcnv     = 2
+       imfshalcnv     = 3
+       imfdeepcnv     = 3
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
        ivegsrc        = 1

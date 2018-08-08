@@ -125,6 +125,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/wv_saturation.F
                                 ./physics/cldwat2m_micro.F
                                 ./physics/surface_perturbation.F90
+                                ./physics/cu_gf_deep.F90
+                                ./physics/cu_gf_sh.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
     set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
