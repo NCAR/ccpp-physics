@@ -22,10 +22,13 @@
 !! | do_skeb        | flag_for_stochastic_skeb_option                                           | flag for stochastic skeb option                              | flag    |    0 | logical   |           | in     | F        |
 !! | zmtnblck       | level_of_dividing_streamline                                              | level of the dividing streamline                             | none    |    1 | real      | kind_phys | in     | F        |
 !! | sppt_wts       | weights_for_stochastic_surface_physics_perturbation                       | weights for stochastic surface physics perturbation          | none    |    2 | real      | kind_phys | inout  | F        |
-!! | sppt_wts_inv   | weights_for_stochastic_surface_physics_perturbation_flipped               | weights for stochastic surface physics perturbation, flipped | none    |    2 | real      | kind_phys | out    | F        |
 !! | skebu_wts      | weights_for_stochastic_skeb_perturbation_of_x_wind                        | weights for stochastic skeb perturbation of x wind           | none    |    2 | real      | kind_phys | in     | F        |
 !! | skebv_wts      | weights_for_stochastic_skeb_perturbation_of_y_wind                        | weights for stochastic skeb perturbation of y wind           | none    |    2 | real      | kind_phys | in     | F        |
 !! | shum_wts       | weights_for_stochastic_shum_perturbation                                  | weights for stochastic shum perturbation                     | none    |    2 | real      | kind_phys | in     | F        |
+!! | sppt_wts_inv   | weights_for_stochastic_surface_physics_perturbation_flipped               | weights for stochastic surface physics perturbation, flipped | none    |    2 | real      | kind_phys | inout  | F        |
+!! | skebu_wts_inv  | weights_for_stochastic_skeb_perturbation_of_x_wind_flipped                | weights for stochastic skeb perturbation of x wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
+!! | skebv_wts_inv  | weights_for_stochastic_skeb_perturbation_of_y_wind_flipped                | weights for stochastic skeb perturbation of y wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
+!! | shum_wts_inv   | weights_for_stochastic_shum_perturbation_flipped                          | weights for stochastic shum perturbation, flipped            | none    |    2 | real      | kind_phys | inout  | F        |
 !! | diss_est       | dissipation_estimate_of_air_temperature_at_model_layers                   | dissipation estimate model layer mean temperature            | K       |    2 | real      | kind_phys | in     | F        |
 !! | ugrs           | x_wind                                                                    | zonal wind                                                   | m s-1   |    2 | real      | kind_phys | in     | F        |
 !! | vgrs           | y_wind                                                                    | meridional wind                                              | m s-1   |    2 | real      | kind_phys | in     | F        |
@@ -60,8 +63,9 @@
 !      6) performs surface data cycling via the GFS gcycle routine
 !-------------------------------------------------------------------------
       subroutine GFS_stochastics_run (im, km, do_sppt, use_zmtnblck, do_shum, do_skeb,   &
-                                      zmtnblck, sppt_wts, sppt_wts_inv, skebu_wts,       &
-                                      skebv_wts, shum_wts, diss_est,                     &
+                                      zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
+                                      sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
+                                      shum_wts_inv, diss_est,                            &
                                       ugrs, vgrs, tgrs, qgrs, gu0, gv0, gt0, gq0, dtdtr, &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
                                       cplflx, rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,  &
@@ -78,14 +82,18 @@
          logical,                               intent(in)    :: do_shum
          logical,                               intent(in)    :: do_skeb
          real(kind_phys), dimension(1:im),      intent(in)    :: zmtnblck
-         ! sppt_wts only allocated if do_sppt == .true. (sppt_wts_inv is always allocated)
+         ! sppt_wts only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts
-         real(kind_phys), dimension(1:im,1:km), intent(out)   :: sppt_wts_inv
          ! skebu_wts, skebv_wts only allocated if do_skeb == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: skebu_wts
          real(kind_phys), dimension(:,:),       intent(in)    :: skebv_wts
          ! shum_wts only allocated if do_shum == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: shum_wts
+         ! inverse/flipped weights are always allocated
+         real(kind_phys), dimension(1:im,1:km), intent(inout) :: sppt_wts_inv
+         real(kind_phys), dimension(1:im,1:km), intent(inout) :: skebu_wts_inv
+         real(kind_phys), dimension(1:im,1:km), intent(inout) :: skebv_wts_inv
+         real(kind_phys), dimension(1:im,1:km), intent(inout) :: shum_wts_inv
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: diss_est
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: ugrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: vgrs
@@ -172,16 +180,20 @@
             endif
          
          endif
-         
+
          if (do_shum) then
-           gq0(:,:) = gq0(:,:)*(1.0 + shum_wts(:,:))
+           do k=1,km
+             gq0(:,k) = gq0(:,k)*(1.0 + shum_wts(:,k))
+             shum_wts_inv(:,km-k+1) = shum_wts(:,k)
+           end do
          endif
          
          if (do_skeb) then
            do k=1,km
-               gu0(:,k) = gu0(:,k)+skebu_wts(:,k)*(diss_est(:,k))
-               gv0(:,k) = gv0(:,k)+skebv_wts(:,k)*(diss_est(:,k))
-           !    print*,'in do skeb',skebu_wts(1,k),diss_est(1,k)
+             gu0(:,k) = gu0(:,k)+skebu_wts(:,k)*(diss_est(:,k))
+             gv0(:,k) = gv0(:,k)+skebv_wts(:,k)*(diss_est(:,k))
+             skebu_wts_inv(:,km-k+1) = skebu_wts(:,k)
+             skebv_wts_inv(:,km-k+1) = skebv_wts(:,k)
            enddo
          endif
 
