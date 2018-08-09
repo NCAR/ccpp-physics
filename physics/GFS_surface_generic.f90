@@ -74,6 +74,13 @@
 
         do i=1,im
           sigmaf(i) = max(vfrac(i),0.01 )
+
+          if (islmsk(i) == 1) then
+            frland(i) = 1.0
+          else
+            frland(i) = 0.
+          endif
+
           if (islmsk(i) == 2) then
             if (isot == 1) then
               soiltyp(i)  = 16
