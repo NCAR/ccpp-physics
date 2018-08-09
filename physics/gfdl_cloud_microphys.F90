@@ -51,9 +51,12 @@ module gfdl_cloud_microphys
    real :: missing_value = - 1.e10
    character (len = 17) :: mod_name = 'gfdl_cloud_microphys'
 
-   ! DH* CLEANUP!!!
+   ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
    real(kind=kind_phys), parameter :: one = 1.0d0
    real(kind=kind_phys), parameter :: con_d00 = 0.0d0
+   real(kind=kind_phys), parameter :: con_p001= 0.001d0
+   real(kind=kind_phys), parameter :: con_day = 86400.d0
+   real(kind=kind_phys), parameter :: rainmin = 1.0e-13
    real,                 parameter :: grav = 9.80665 !< gfs: acceleration due to gravity
    real,                 parameter :: rgrav = 1./grav
    real,                 parameter :: rdgas = 287.05 !< gfs: gas constant for dry air
@@ -587,12 +590,26 @@ contains
            garea, dtp, frland, rain0, snow0, ice0, graupel0, hydrostatic,      &
            phys_hydrostatic)
 
+      tem   = dtp*con_p001/con_day
+
       ! fix negative values
       do i = 1, im
-        rain0(i)    = max(con_d00, rain0(i))
-        snow0(i)    = max(con_d00, snow0(i))
-        ice0(i)     = max(con_d00, ice0(i))
-        graupel0(i) = max(con_d00, graupel0(i))
+        !rain0(i)    = max(con_d00, rain0(i))
+        !snow0(i)    = max(con_d00, snow0(i))
+        !ice0(i)     = max(con_d00, ice0(i))
+        !graupel0(i) = max(con_d00, graupel0(i))
+        if(rain0(i)*tem < rainmin) then
+          rain0(i) = 0.0
+        endif
+        if(ice0(i)*tem < rainmin) then
+          ice0(i) = 0.0
+        endif
+        if(snow0(i)*tem < rainmin) then
+          snow0(i) = 0.0
+        endif
+        if(graupel0(i)*tem < rainmin) then
+          graupel0(i) = 0.0
+        endif
       enddo
 
       ! flip vertical coordinate back
