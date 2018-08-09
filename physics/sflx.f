@@ -2566,7 +2566,9 @@
 !           so with snoexp = 2.0 (>1), surface skin temperature is higher than
 !           for the linear case (snoexp = 1).
 
-        t1 = tfreez * sncovr**snoexp + t12 * (1.0 - sncovr**snoexp)
+!       t1 = tfreez * sncovr**snoexp + t12 * (1.0 - sncovr**snoexp)
+        t1 = tfreez * max(0.01,sncovr**snoexp) +                          &
+     & 			t12 * (1.0 - max(0.01,sncovr**snoexp))
 
         beta = 1.0
         ssoil = df1 * (t1 - stc(1)) / dtot
