@@ -20,27 +20,29 @@ module mp_thompson_hrrr
 
 #if 0
 !! \section arg_table_mp_thompson_hrrr_init Argument Table
-!! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | con_g           | gravitational_acceleration                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | con_rd          | gas_constant_dry_air                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | phil            | geopotential                                          | geopotential at model layer centers                      | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | prsl            | air_pressure                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | tgrs            | air_temperature                                       | model layer mean temperature                             | K          |    2 | real      | kind_phys | in     | F        |
-!! | is_aerosol_aware| flag_for_aerosol_physics                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
-!! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | nifa2d          | tendency_of_ice_friendly_aerosols_at_surface          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | nwfa            | water_friendly_aerosol_number_concentration           | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nifa            | ice_friendly_aerosol_number_concentration             | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | area            | cell_area                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
-!! | mpicomm         | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpirank         | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot         | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | threads         | omp_threads                                           | number of OpenMP threads available to scheme             | count      |    0 | integer   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! | local_name           | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
+!! |----------------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | ncol                 | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
+!! | nlev                 | vertical_dimension                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
+!! | con_g                | gravitational_acceleration                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
+!! | con_rd               | gas_constant_dry_air                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
+!! | phil                 | geopotential                                          | geopotential at model layer centers                      | m2 s-2     |    2 | real      | kind_phys | in     | F        |
+!! | prsl                 | air_pressure                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
+!! | tgrs                 | air_temperature                                       | model layer mean temperature                             | K          |    2 | real      | kind_phys | in     | F        |
+!! | is_aerosol_aware     | flag_for_aerosol_physics                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
+!! | nwfa2d               | tendency_of_water_friendly_aerosols_at_surface        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
+!! | nifa2d               | tendency_of_ice_friendly_aerosols_at_surface          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
+!! | nwfa                 | water_friendly_aerosol_number_concentration           | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
+!! | nifa                 | ice_friendly_aerosol_number_concentration             | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
+!! | area                 | cell_area                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
+!! | mpicomm              | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
+!! | mpirank              | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
+!! | mpiroot              | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
+!! | threads              | omp_threads                                           | number of OpenMP threads available to scheme             | count      |    0 | integer   |           | in     | F        |
+!! | imp_physics          | flag_for_microphysics_scheme                          | choice of microphysics scheme                            | flag       |    0 | integer   |           | in     | F        |
+!! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                 | choice of Thompson microphysics scheme                   | flag       |    0 | integer   |           | in     | F        |
+!! | errmsg               | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg               | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
       subroutine mp_thompson_hrrr_init(ncol, nlev, con_g, con_rd,  &
@@ -49,6 +51,8 @@ module mp_thompson_hrrr
                                        nwfa2d, nifa2d, nwfa, nifa, &
                                        area,                       &
                                        mpicomm, mpirank, mpiroot,  &
+                                       imp_physics,                &
+                                       imp_physics_thompson,       &
                                        threads, errmsg, errflg)
 
          implicit none
@@ -72,6 +76,8 @@ module mp_thompson_hrrr
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          integer,                   intent(in)    :: threads
+         integer,                   intent(in)    :: imp_physics
+         integer,                   intent(in)    :: imp_physics_thompson
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 
@@ -90,6 +96,12 @@ module mp_thompson_hrrr
          errflg = 0
 
          if (is_initialized) return
+
+         if (imp_physics/=imp_physics_thompson) then
+            write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
+            errflg = 1
+            return
+         end if
 
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
