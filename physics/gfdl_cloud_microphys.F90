@@ -371,7 +371,7 @@ contains
        if (is_initialized) return
 
        if (imp_physics/=imp_physics_gfdl) then
-          write(errmsg,'(*(a))') 'Namelist option for micrphysics does not match choice in suite definition file'
+          write(errmsg,'(*(a))') 'Namelist option for microphysics does not match choice in suite definition file'
           errflg = 1
           return
        end if
@@ -528,6 +528,7 @@ contains
                                                       qs1, pt_dt, qa_dt, u_dt, v_dt, w, qv_dt, ql_dt, qr_dt, qi_dt, &
                                                       qs_dt, qg_dt
       real(kind=kind_phys) :: onebg
+      real(kind=kind_phys) :: tem
 
       ! Initialize CCPP error handling variables
       errmsg = ''
