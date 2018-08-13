@@ -249,12 +249,12 @@
 
 !-----------------------------------
 !      subroutine sfc_drv                                                &
-! \defgroup Noah_Main GFS Noah Land Surface Model 
+! \defgroup Noah_Main GFS Noah Land Surface Model
 !> \defgroup Noah_drv GFS Noah LSM Driver
-!!  \brief This is Noah LSM driver module, with the functionality of 
+!!  \brief This is Noah LSM driver module, with the functionality of
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
-!! variables for return to the parent model suite including unit conversion, as well 
-!! as diagnotics calculation. 
+!! variables for return to the parent model suite including unit conversion, as well
+!! as diagnotics calculation.
 !! \section arg_table_lsm_noah_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -265,9 +265,9 @@
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
 !! | q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | soiltyp        | cell_soil_type                                                               | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
-!! | vegtype        | cell_vegetation_type                                                         | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
-!! | sigmaf         | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | frac          |    1 | real      | kind_phys | in     | F        |
+!! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
+!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
+!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom| frac          |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                     | frac          |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | dswsfc         | surface_downwelling_shortwave_flux                                           | total sky surface downward shortwave flux                       | W m-2         |    1 | real      | kind_phys | in     | F        |
@@ -281,15 +281,15 @@
 !! | zf             | height_above_ground_at_lowest_model_layer                                    | height above ground at 1st model layer                          | m             |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | integer   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | slopetyp       | surface_slope_classification                                                 | class of sfc slope                                              | index         |    1 | integer   |           | in     | F        |
+!! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                            | index         |    1 | integer   |           | in     | F        |
 !! | shdmin         | minimum_vegetation_area_fraction                                             | min fractional coverage of green veg                            | frac          |    1 | real      | kind_phys | in     | F        |
 !! | shdmax         | maximum_vegetation_area_fraction                                             | max fractnl cover of green veg (not used)                       | frac          |    1 | real      | kind_phys | in     | F        |
 !! | snoalb         | upper_bound_on_max_albedo_over_deep_snow                                     | upper bound on max albedo over deep snow                        | frac          |    1 | real      | kind_phys | in     | F        |
 !! | sfalb          | surface_diffused_shortwave_albedo                                            | mean surface diffused shortwave albedo                          | frac          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                              | flag          |    1 | logical   |           | in     | F        |
-!! | isot           | soil_type                                                                    | soil type (not used)                                            | index         |    0 | integer   |           | in     | F        |
-!! | ivegsrc        | vegetation_type                                                              | vegetation type data source umd or igbp                         | index         |    0 | integer   |           | in     | F        |
+!! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                        | index         |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                         | index         |    0 | integer   |           | in     | F        |
 !! | bexppert       | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                         | frac          |    1 | real      | kind_phys | in     | F        |
 !! | xlaipert       | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                 | frac          |    1 | real      | kind_phys | in     | F        |
 !! | vegfpert       | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                             | frac          |    1 | real      | kind_phys | in     | F        |
@@ -512,7 +512,7 @@
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
 
-!> - Prepare variables to run Noah LSM: 
+!> - Prepare variables to run Noah LSM:
 !!  -   1. configuration information (c):
 !!\n  ----------------------------------------
 !!\n  \a couple  - couple-uncouple flag (=1: coupled, =0: uncoupled)
@@ -653,7 +653,7 @@
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
           xlaip  = xlaipert(i)                   ! sfc perts, mgehne
 
-!> - Call Noah LSM gfssflx(). 
+!> - Call Noah LSM gfssflx().
 
 !          call sflx                                                     &
           call gfssflx                                                  & ! ccppdox: these is sflx in mpbl
@@ -774,7 +774,7 @@
       enddo
 
 !> - Compute surface upward sensible heat flux (\a hflx) and evaporation
-!! flux (\a evap). 
+!! flux (\a evap).
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
           tem     = 1.0 / rho(i)
