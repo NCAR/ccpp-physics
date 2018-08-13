@@ -1,6 +1,139 @@
 !>  \file cs_conv.f90
 !!  This file contains the Chikira-Sugiyama Convection scheme.
 
+module cs_conv_pre
+  contains
+
+!! \section arg_table_cs_conv_pre_init  Argument Table
+!!
+  subroutine cs_conv_pre_init
+  end subroutine cs_conv_pre_init
+
+!! \section arg_table_cs_conv_pre_finalize  Argument Table
+!!
+  subroutine cs_conv_pre_finalize
+  end subroutine cs_conv_pre_finalize
+
+!! \section arg_table_cs_conv_pre_run Argument Table
+!! | local_name | standard_name                                                   | long_name                                                                | units   | rank | type      |    kind   | intent | optional |
+!! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | im         | horizontal_loop_extent                                          | horizontal loop extent                                                   | count   |    0 | integer   |           | in     | F        |
+!! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count   |    0 | integer   |           | in     | F        |
+!! | ntr        | number_of_total_tracers_CS                                      | number of total tracers convectively transported by CS scheme            | count   |    0 | integer   |           | in     | F        |
+!! | q          | water_vapor_specific_humidity_updated_by_physics                | mid-layer specific humidity of water vapor                               | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | clw        | convective_transportable_tracers                                | cloud water and other convective trans. tracers                          | kg kg-1 |    3 | real      | kind_phys | in     | F        |
+!! | fswtr      | fraction_of_cloud_top_water_scavenged                           | fraction of the tracer (cloud top water) that is scavenged by convection | km-1    |    1 | real      | kind_phys | out    | F        |
+!! | save_qv    | water_vapor_specific_humidity_save                              | water vapor specific humidity before entering a physics scheme           | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag    |    0 | integer   |           | out    | F        |
+!!
+  subroutine cs_conv_pre_run(im, kmax, ntr, q, clw, fswtr, save_qv, errmsg, errflg)
+
+  use machine ,   only : r8    => kind_phys
+
+  implicit none
+
+! --- inputs
+  integer, intent(in) :: im, kmax, ntr
+  real(r8), dimension(im,kmax), intent(in) :: q
+  real(r8), dimension(im,kmax,2), intent(in) :: clw
+
+! --- input/output
+  real(r8), dimension(ntr), intent(out) :: fswtr
+  real(r8), dimension(im,kmax,3), intent(out) :: save_qv
+
+  character(len=*), intent(out) :: errmsg
+  integer,          intent(out) :: errflg
+
+! --- locals
+  integer :: i, k
+
+  ! Initialize CCPP error handling variables
+  errmsg = ''
+  errflg = 0
+
+  fswtr(:) = 0.0
+  do k=1,kmax
+    do i=1,im
+      save_qv(i,k,1) = q(i,k,1)
+      save_qv(i,k,2) = max(0.0,clw(i,k,2))
+      save_qv(i,k,3) = max(0.0,clw(i,k,1))
+    enddo
+  enddo
+
+  return
+  end subroutine cs_conv_pre_run
+
+end module cs_conv_pre
+
+module cs_conv_post
+  contains
+
+!! \section arg_table_cs_conv_post_init  Argument Table
+!!
+  subroutine cs_conv_post_init
+  end subroutine cs_conv_post_init
+
+!! \section arg_table_cs_conv_post_finalize  Argument Table
+!!
+  subroutine cs_conv_post_finalize
+  end subroutine cs_conv_post_finalize
+
+!! \section arg_table_cs_conv_post_run Argument Table
+!! | local_name | standard_name                                                   | long_name                                                                | units      | rank | type      |    kind   | intent | optional |
+!! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im         | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      |    0 | integer   |           | in     | F        |
+!! | ijsdim     | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      |    0 | integer   |           | in     | F        |
+!! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count      |    0 | integer   |           | in     | F        |
+!! | rain1      | convective_precipitation_flux_at_surface                        | convective precipitation flux at surface (including snowfall)            | kg m-2 s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | dtp        | time_step_for_physics                                           | time step for physics                                                    | s          |    0 | real      | kind_phys | in     | F        |
+!! | do_aw      | flag_arakawa_wu                                                 | flag to enable treating convective tendencies following Arakwaw-Wu (2013)| flag       |    0 | logical   |           | in     | F        |
+!! | sigmatot   | convective_updraft_area_fraction                                | convective updraft area fraction                                         | frac       |    2 | real      | kind_phys | in     | F        |
+!! | sigmafrac  | let_grant_decide                                                |                                                                          | frac       |    2 | real      | kind_phys | in     | F        |
+!! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
+!!
+  subroutine cs_conv_post_run(im, ijsdim, kmax, rain1, dtp, do_aw, sigmatot, sigmafrac, errmsg, errflg)
+
+  use machine ,   only : r8    => kind_phys
+
+  implicit none
+
+! --- inputs
+  integer, intent(in)  :: im, ijsdim, kmax
+  logical,  intent(in) :: do_aw
+  real(r8), intent(in) :: dtp
+  real(r8), dimension(im,kmax), intent(in) :: sigmatot
+
+! --- input/output
+  real(r8), dimension(ijsdim), intent(inout) :: rain1
+  real(r8), dimension(im,kmax), intent(out)  :: sigmafrac
+
+  character(len=*), intent(out) :: errmsg
+  integer,          intent(out) :: errflg
+
+! --- locals
+  integer :: i, k, kk
+
+  ! Initialize CCPP error handling variables
+  errmsg = ''
+  errflg = 0
+
+  rain1(:) = rain1(:) * (dtp*0.001)
+  if (do_aw) then
+    do k=1,kmax
+      kk = min(k+1,kmax)  ! assuming no cloud top reaches the model top
+      do i=1,im                                               !DD
+        sigmafrac(i,k) = 0.5 * (sigmatot(i,k)+sigmatot(i,kk))
+      enddo
+    enddo
+  endif
+
+  return
+  end subroutine cs_conv_post_run
+
+end module cs_conv_post
+
 module cs_conv
 !---------------------------------------------------------------------------------
 ! Purpose:
