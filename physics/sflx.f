@@ -431,9 +431,9 @@
 !! b in the soil hydraulic conductivity calculation (bexpp) are added to account for
 !! the uncertainties of LAI and b associated with different vegetation types and soil 
 !! types using a linear scaling. The spatial pattern of xlaip is drawn from a normal 
-!! distrubtion with a standard deviation of 0.25 while makes the LAI between 0 and 8.
+!! distribution with a standard deviation of 0.25 while makes the LAI between 0 and 8.
 !! The spatial pattern of bexpp is drawn from a normal distribution with a standard 
-!! deviation of 0.4 while is bounded between -1 and 1.
+!! deviation of 0.4, and is bounded between -1 and 1.
 
       if( bexpp < 0.) then
          bexp = bexp * max(1.+bexpp, 0.)
