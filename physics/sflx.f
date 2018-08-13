@@ -426,6 +426,15 @@
 !            z0, czil, xlai, csoil )                                       !
 
 !  --- ...  bexp sfc-perts, mgehne
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of LAI
+!! "leaf area index" (xlaip) and a perturbation of the empirical exponent parameter
+!! b in the soil hydraulic conductivity calculation (bexpp) are added to account for
+!! the uncertainties of LAI and b associated with different vegetation types and soil 
+!! types using a linear scaling. The spatial pattern of xlaip is drawn from a normal 
+!! distrubtion with a standard deviation of 0.25 while makes the LAI between 0 and 8.
+!! The spatial pattern of bexpp is drawn from a normal distribution with a standard 
+!! deviation of 0.4 while is bounded between -1 and 1.
+
       if( bexpp < 0.) then
          bexp = bexp * max(1.+bexpp, 0.)
       endif

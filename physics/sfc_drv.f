@@ -590,6 +590,14 @@
 
 !  perturb vegetation fraction that goes into sflx, use the same
 !  perturbation strategy as for albedo (percentile matching)
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of vegetation
+
+!! fraction is added to account for the uncertainty. A percentile matching technique
+!! is applied to guarantee the perturbed vegetation fraction is bounded between 0 and
+!! 1. The standard deviation of the perturbations is 0.25 for vegetation fraction of
+!! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper 
+!! or lower bound.
+
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
         ! sfc perts, mgehne
         if (pertvegf(1)>0.0) then
