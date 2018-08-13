@@ -6,14 +6,14 @@
 !! It is a soil/veg/snowpack land-surface model to update soil moisture, soil
 !! ice, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance
-!! (excluding input atmospheric forcings of downward radiation and 
+!! (excluding input atmospheric forcings of downward radiation and
 !! precipitation ).
 !!
 !! The land-surface model component was substantially upgraded from the Oregon
 !! State University (OSU) land surface model to EMC's new Noah Land Surface Model
 !! (Noah LSM) during the major implementation in the NCEP Global Forecast System
 !! (GFS) on May 31, 2005. Forecast System (GFS). The Noah LSM embodies about 10
-!! years of upgrades (see \cite chen_et_al_1996; \cite koren_et_al_1999; 
+!! years of upgrades (see \cite chen_et_al_1996; \cite koren_et_al_1999;
 !! \cite ek_et_al_2003) to its ancestor, the OSU LSM.  The Noah LSM upgrade includes:
 !!  - An increase from two (10, 190 cm thick) to four soil layers (10, 30, 60, 100 cm thick)
 !!  - Addition of frozen soil physics
@@ -28,83 +28,83 @@
 !!  - Improved seasonality of green vegetation cover.
 !!  - Improved evaporation treatment over bare soil and snowpack
 !!
-!!\param[in] nsoil     integer, number of soil layers (>=2 but <=nsold) 
-!!\param[in] couple    integer, =0:uncoupled (land model only),    
-!! =1:coupled with parent atmos model  
-!!\param[in] icein     integer, sea-ice flag (=1: sea-ice, =0: land) 
-!!\param[in] ffrozp    real, flag for snow-rain detection (1.=snow, 0.=rain)                                     
-!!\param[in] dt        real, time step (<3600 sec)                
+!!\param[in] nsoil     integer, number of soil layers (>=2 but <=nsold)
+!!\param[in] couple    integer, =0:uncoupled (land model only),
+!! =1:coupled with parent atmos model
+!!\param[in] icein     integer, sea-ice flag (=1: sea-ice, =0: land)
+!!\param[in] ffrozp    real, flag for snow-rain detection (1.=snow, 0.=rain)
+!!\param[in] dt        real, time step (<3600 sec)
 !!\param[in] zlvl      real, height abv atmos ground forcing vars (\f$m\f$)
-!!\param[in] sldpth    real, thickness of each soil layer (\f$m\f$), nsoil 
+!!\param[in] sldpth    real, thickness of each soil layer (\f$m\f$), nsoil
 !!\param[in] swdn      real, downward SW radiation flux (\f$W/m^2\f$)
 !!\param[in] swnet     real, downward SW net (dn-up) flux (\f$W/m^2\f$)
 !!\param[in] lwdn      real, downward LW radiation flux (\f$W/m^2\f$)
-!!\param[in] sfcems    real, sfc LW emissivity (fractional) 
-!!\param[in] sfcprs    real, pressure at height zlvl above ground(\f$Pa\f$) 
-!!\param[in] sfctmp    real, air temp at height zlvl above ground (\f$K\f$)   
-!!\param[in] sfcspd    real, wind speed at height zlvl above ground (\f$m s^{-1}\f$)  
-!!\param[in] prcp      real, precipitation rate (\f$kgm^{-2}s^{-1}\f$)                    
-!!\param[in] q2        real, mixing ratio at hght zlvl above ground (\f$kgkg^{-1}\f$) 
-!!\param[in] q2sat     real, sat mixing ratio at zlvl above ground (\f$kgkg^{-1}\f$) 
-!!\param[in] dqsdt2    real, slope of sat specific humidity curve at t=sfctmp (\f$kgkg^{-1}k^{-1}\f$) 
-!!\param[in] th2       real, air potential temperature at zlvl above ground (\f$K\f$) 
-!!\param[in] ivegsrc   integer, sfc veg type data source UMD or IGBP   
-!!\param[in] vegtyp    integer, vegetation type (integer index) 
-!!\param[in] soiltyp   integer, soil type (integer index)    
-!!\param[in] slopetyp  integer, class of sfc slope (integer index) 
-!!\param[in] shdmin    real, min areal coverage of green veg (fraction)  
-!!\param[in] alb       real, background snow-free sfc albedo (fraction) 
-!!\param[in] snoalb    real, max albedo over deep snow (fraction)  
-!!\param[in] bexpp     real, perturbation of soil type "b" parameter (perturbation) 
-!!\param[in] xlaip     real, perturbation of leave area index (perturbation) 
-!!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)  
+!!\param[in] sfcems    real, sfc LW emissivity (fractional)
+!!\param[in] sfcprs    real, pressure at height zlvl above ground(\f$Pa\f$)
+!!\param[in] sfctmp    real, air temp at height zlvl above ground (\f$K\f$)
+!!\param[in] sfcspd    real, wind speed at height zlvl above ground (\f$m s^{-1}\f$)
+!!\param[in] prcp      real, precipitation rate (\f$kgm^{-2}s^{-1}\f$)
+!!\param[in] q2        real, mixing ratio at hght zlvl above ground (\f$kgkg^{-1}\f$)
+!!\param[in] q2sat     real, sat mixing ratio at zlvl above ground (\f$kgkg^{-1}\f$)
+!!\param[in] dqsdt2    real, slope of sat specific humidity curve at t=sfctmp (\f$kgkg^{-1}k^{-1}\f$)
+!!\param[in] th2       real, air potential temperature at zlvl above ground (\f$K\f$)
+!!\param[in] ivegsrc   integer, sfc veg type data source UMD or IGBP
+!!\param[in] vegtyp    integer, vegetation type (integer index)
+!!\param[in] soiltyp   integer, soil type (integer index)
+!!\param[in] slopetyp  integer, class of sfc slope (integer index)
+!!\param[in] shdmin    real, min areal coverage of green veg (fraction)
+!!\param[in] alb       real, background snow-free sfc albedo (fraction)
+!!\param[in] snoalb    real, max albedo over deep snow (fraction)
+!!\param[in] bexpp     real, perturbation of soil type "b" parameter (perturbation)
+!!\param[in] xlaip     real, perturbation of leave area index (perturbation)
+!!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)
 !!\param[in,out] cmc      real, canopy moisture content (\f$m\f$)
-!!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$) 
-!!\param[in,out] stc      real, soil temp (\f$K\f$)     
-!!\param[in,out] smc      real, total soil moisture (vol fraction) 
-!!\param[in,out] sh2o     real, unfrozen soil moisture (vol fraction), note: frozen part = smc-sh2o 
-!!\param[in,out] sneqv    real, water-equivalent snow depth (\f$m\f$), note: snow density = snwqv/snowh 
-!!\param[in,out] ch       real, sfc exchange coeff for heat & moisture (\f$ms^{-1}\f$), note: conductance since it's been mult by wind   
+!!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$)
+!!\param[in,out] stc      real, soil temp (\f$K\f$)
+!!\param[in,out] smc      real, total soil moisture (vol fraction)
+!!\param[in,out] sh2o     real, unfrozen soil moisture (vol fraction), note: frozen part = smc-sh2o
+!!\param[in,out] sneqv    real, water-equivalent snow depth (\f$m\f$), note: snow density = snwqv/snowh
+!!\param[in,out] ch       real, sfc exchange coeff for heat & moisture (\f$ms^{-1}\f$), note: conductance since it's been mult by wind
 !!\param[in,out] cm       real, sfc exchange coeff for momentum (\f$ms^{-1}\f$), note: conductance since it's been mult by wind
 !!\param[in,out] z0       real, roughness length (\f$m\f$)
-!!\param[out] nroot    integer, number of root layers          
-!!\param[out] shdfac   real, aeral coverage of green veg (fraction) 
-!!\param[out] snowh    real, snow depth (\f$m\f$)         
-!!\param[out] albedo   real, sfc albedo incl snow effect (fraction) 
-!!\param[out] eta      real, downward latent heat flux (\f$W/m^2\f$) 
-!!\param[out] sheat    real, downward sensible heat flux (\f$W/m^2\f$)  
-!!\param[out] ec       real, canopy water evaporation (\f$W/m^2\f$)  
+!!\param[out] nroot    integer, number of root layers
+!!\param[out] shdfac   real, aeral coverage of green veg (fraction)
+!!\param[out] snowh    real, snow depth (\f$m\f$)
+!!\param[out] albedo   real, sfc albedo incl snow effect (fraction)
+!!\param[out] eta      real, downward latent heat flux (\f$W/m^2\f$)
+!!\param[out] sheat    real, downward sensible heat flux (\f$W/m^2\f$)
+!!\param[out] ec       real, canopy water evaporation (\f$W/m^2\f$)
 !!\param[out] edir     real, direct soil evaporation (\f$W/m^2\f$)
 !!\param[out] et       real, plant transpiration (\f$W/m^2\f$)
-!!\param[out] ett      real, total plant transpiration (\f$W/m^2\f$) 
+!!\param[out] ett      real, total plant transpiration (\f$W/m^2\f$)
 !!\param[out] esnow    real, sublimation from snowpack (\f$W/m^2\f$)
-!!\param[out] drip     real, through-fall of precip and/or dew in excess of canopy water-holding capacity (\f$m\f$)             
-!!\param[out] dew      real, dewfall (or frostfall for t<273.15) (\f$m\f$) 
-!!\param[out] beta     real, ratio of actual/potential evap     
-!!\param[out] etp      real, potential evaporation (\f$W/m^2\f$)  
+!!\param[out] drip     real, through-fall of precip and/or dew in excess of canopy water-holding capacity (\f$m\f$)
+!!\param[out] dew      real, dewfall (or frostfall for t<273.15) (\f$m\f$)
+!!\param[out] beta     real, ratio of actual/potential evap
+!!\param[out] etp      real, potential evaporation (\f$W/m^2\f$)
 !!\param[out] ssoil    real, upward soil heat flux (\f$W/m^2\f$)
-!!\param[out] flx1     real, precip-snow sfc flux  (\f$W/m^2\f$) 
-!!\param[out] flx2     real, freezing rain latent heat flux (\f$W/m^2\f$) 
-!!\param[out] flx3     real, phase-change heat flux from snowmelt (\f$W/m^2\f$) 
-!!\param[out] runoff1  real, surface runoff (\f$ms^{-1}\f$) not infiltrating sfc 
-!!\param[out] runoff2  real, sub sfc runoff (\f$ms^{-1}\f$) (baseflow)   
-!!\param[out] runoff3  real, excess of porosity for a given soil layer 
+!!\param[out] flx1     real, precip-snow sfc flux  (\f$W/m^2\f$)
+!!\param[out] flx2     real, freezing rain latent heat flux (\f$W/m^2\f$)
+!!\param[out] flx3     real, phase-change heat flux from snowmelt (\f$W/m^2\f$)
+!!\param[out] runoff1  real, surface runoff (\f$ms^{-1}\f$) not infiltrating sfc
+!!\param[out] runoff2  real, sub sfc runoff (\f$ms^{-1}\f$) (baseflow)
+!!\param[out] runoff3  real, excess of porosity for a given soil layer
 !!\param[out] snomlt   real, snow melt (\f$m\f$) (water equivalent)
 !!\param[out] sncovr   real, fractional snow cover
-!!\param[out] rc       real, canopy resistance (s/m) 
-!!\param[out] pc       real, plant coeff (fraction) where pc*etp=transpi 
-!!\param[out] rsmin    real, minimum canopy resistance (s/m) 
-!!\param[out] xlai     real, leaf area index  (dimensionless) 
-!!\param[out] rcs      real, incoming solar rc factor (dimensionless) 
-!!\param[out] rct      real, air temperature rc factor (dimensionless) 
-!!\param[out] rcq      real, atoms vapor press deficit rc factor   
-!!\param[out] rcsoil   real, soil moisture rc factor (dimensionless) 
-!!\param[out] soilw    real, available soil moisture in root zone  
+!!\param[out] rc       real, canopy resistance (s/m)
+!!\param[out] pc       real, plant coeff (fraction) where pc*etp=transpi
+!!\param[out] rsmin    real, minimum canopy resistance (s/m)
+!!\param[out] xlai     real, leaf area index  (dimensionless)
+!!\param[out] rcs      real, incoming solar rc factor (dimensionless)
+!!\param[out] rct      real, air temperature rc factor (dimensionless)
+!!\param[out] rcq      real, atoms vapor press deficit rc factor
+!!\param[out] rcsoil   real, soil moisture rc factor (dimensionless)
+!!\param[out] soilw    real, available soil moisture in root zone
 !!\param[out] soilm    real, total soil column moisture (frozen+unfrozen) (\f$m\f$)
-!!\param[out] smcwlt   real, wilting point (volumetric)       
-!!\param[out] smcdry   real, dry soil moisture threshold (volumetric) 
-!!\param[out] smcref   real, soil moisture threshold (volumetric) 
-!!\param[out] smcmax   real, porosity (sat val of soil mois) 
+!!\param[out] smcwlt   real, wilting point (volumetric)
+!!\param[out] smcdry   real, dry soil moisture threshold (volumetric)
+!!\param[out] smcref   real, soil moisture threshold (volumetric)
+!!\param[out] smcmax   real, porosity (sat val of soil mois)
 !!\section general_sflx GFS Noah LSM General Algorithm
 !! @{
 !      subroutine sflx                                                   & !  ---  inputs:
@@ -272,7 +272,7 @@
 !  ---  constant parameters:
 !      *** note: some of the constants are different in subprograms and need to
 !          be consolidated with the standard def in module physcons at sometime
-!          at the present time, those diverse values are kept temperately to 
+!          at the present time, those diverse values are kept temperately to
 !          provide the same result as the original codes.  -- y.t.h.  may09
 
       integer,               parameter :: nsold   = 4           ! max soil layers
@@ -305,7 +305,7 @@
       real (kind=kind_phys), intent(in) :: ffrozp, dt, zlvl, lwdn,      &
      &       sldpth(nsoil), swdn, swnet, sfcems, sfcprs, sfctmp,        &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
-     &       bexpp, xlaip  
+     &       bexpp, xlaip
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -354,7 +354,7 @@
 !    note - for open-sea, sflx should *not* have been called. set green
 !           vegetation fraction (shdfac) = 0.
 !> - For open-sea, sea-ice and glacial-ice cases, sflx() should not have
-!! been called (set green vegetation fraction (shdfac) =0.)  
+!! been called (set green vegetation fraction (shdfac) =0.)
       ice = icein
 
       if(ivegsrc == 2) then
@@ -385,7 +385,7 @@
 
       else
 
-!  --- ...  calculate depth (negative) below ground from top skin sfc to 
+!  --- ...  calculate depth (negative) below ground from top skin sfc to
 !           bottom of each soil layer.
 !    note - sign of zsoil is negative (denoting below ground)
 
@@ -395,8 +395,8 @@
         end do
 
       endif   ! end if_ice_block
-         
-!  --- ...  next is crucial call to set the land-surface parameters, 
+
+!  --- ...  next is crucial call to set the land-surface parameters,
 !           including soil-type and veg-type dependent parameters.
 !           set shdfac=0.0 for bare soil surfaces
 
@@ -478,8 +478,8 @@
         enddo
       endif
 
-!> - If input snowpack (\a sneqv) is nonzero, then call csnow() to compute 
-!! snow density (\a sndens) and snow thermal conductivity (\a sncond). 
+!> - If input snowpack (\a sneqv) is nonzero, then call csnow() to compute
+!! snow density (\a sndens) and snow thermal conductivity (\a sncond).
 ! (note that csnow is a function subroutine)
 
       if (sneqv .eq. 0.0) then
@@ -499,9 +499,9 @@
       endif
 
 !> - Determine if it's precipitating and what kind of precipitation it is.
-!! if it's precipitating and the air temperature is colder than \f$0^oC\f$, 
-!! it's snowing! if it's precipitating and the air temperature is warmer than 
-!! \f$0^oC\f$, but the ground temperature is colder than \f$0^oC\f$, freezing 
+!! if it's precipitating and the air temperature is colder than \f$0^oC\f$,
+!! it's snowing! if it's precipitating and the air temperature is warmer than
+!! \f$0^oC\f$, but the ground temperature is colder than \f$0^oC\f$, freezing
 !! rain is presumed to be falling.
 
       if (prcp > 0.0) then
@@ -513,7 +513,7 @@
       endif
 
 !> - If either precipitation flag (\a snowng, \a frzgra) is set as true:
-! determine new snowfall (converting precipitation rate from 
+! determine new snowfall (converting precipitation rate from
 ! \f$kg m^{-2} s^{-1}\f$ to a liquid equiv snow depth in meters)
 !  and add it to the existing snowpack.
 !>  - Since all precip is added to snowpack, no precip infiltrates
@@ -525,8 +525,8 @@
         sneqv = sneqv + sn_new
         prcp1 = 0.0
 
-!>  - Call snow_new() to update snow density based on new snowfall, 
-!! using old and new snow. 
+!>  - Call snow_new() to update snow density based on new snowfall,
+!! using old and new snow.
         call snow_new
 !  ---  inputs:                                                         !
 !          ( sfctmp, sn_new,                                            !
@@ -550,7 +550,7 @@
 
       endif   ! end if_snowng_block
 
-!> - Determine snowcover fraction and albedo fraction over sea-ice, 
+!> - Determine snowcover fraction and albedo fraction over sea-ice,
 !! glacial-ice, and land. For nonzero snow depth over land case:
 
       if (ice /= 0) then
@@ -607,18 +607,18 @@
 
 !  --- ...  next calculate the subsurface heat flux, which first requires
 !           calculation of the thermal diffusivity.  treatment of the
-!           latter follows that on pages 148-149 from "heat transfer in 
-!           cold climates", by v. j. lunardini (published in 1981 
-!           by van nostrand reinhold co.) i.e. treatment of two contiguous 
-!           "plane parallel" mediums (namely here the first soil layer 
-!           and the snowpack layer, if any). this diffusivity treatment 
-!           behaves well for both zero and nonzero snowpack, including the 
+!           latter follows that on pages 148-149 from "heat transfer in
+!           cold climates", by v. j. lunardini (published in 1981
+!           by van nostrand reinhold co.) i.e. treatment of two contiguous
+!           "plane parallel" mediums (namely here the first soil layer
+!           and the snowpack layer, if any). this diffusivity treatment
+!           behaves well for both zero and nonzero snowpack, including the
 !           limit of very thin snowpack.  this treatment also eliminates
-!           the need to impose an arbitrary upper bound on subsurface 
+!           the need to impose an arbitrary upper bound on subsurface
 !           heat flux when the snowpack becomes extremely thin.
 
 !  --- ...   first calculate thermal diffusivity of top soil layer, using
-!            both the frozen and liquid soil moisture, following the 
+!            both the frozen and liquid soil moisture, following the
 !            soil thermal diffusivity function of peters-lidard et al.
 !            (1998,jas, vol 55, 1209-1224), which requires the specifying
 !            the quartz content of the given soil class (see routine redprm)
@@ -636,15 +636,15 @@
             if ( vegtyp == 13 ) df1=3.24
         endif
 
-!>   - Add subsurface heat flux reduction effect from the 
-!!  overlying green canopy, adapted from section 2.1.2 of 
+!>   - Add subsurface heat flux reduction effect from the
+!!  overlying green canopy, adapted from section 2.1.2 of
 !!  \cite peters-lidard_et_al_1997.
 
         df1 = df1 * exp( sbeta*shdfac )
 
       endif   ! end if_ice_block
 
-!  --- ...  finally "plane parallel" snowpack effect following 
+!  --- ...  finally "plane parallel" snowpack effect following
 !           v.j. linardini reference cited above. note that dtot is
 !           combined depth of snowdepth and thickness of first soil layer
 
@@ -685,7 +685,7 @@
 
       endif   ! end if_sneqv_block
 
-!> - For uncoupled mode, call snowz0() to calculate surface roughness 
+!> - For uncoupled mode, call snowz0() to calculate surface roughness
 !! (\a z0) over snowpack using snow condition from the previous timestep.
 
 !     if (couple == 0) then            ! uncoupled mode
@@ -707,17 +707,17 @@
 
 !  --- ...  next call routine sfcdif to calculate the sfc exchange coef (ch)
 !           for heat and moisture.
-!    note - comment out call sfcdif, if sfcdif already called in calling 
+!    note - comment out call sfcdif, if sfcdif already called in calling
 !           program (such as in coupled atmospheric model).
 !         - do not call sfcdif until after above call to redprm, in case
 !           alternative values of roughness length (z0) and zilintinkevich
 !           coef (czil) are set there via namelist i/o.
 !         - routine sfcdif returns a ch that represents the wind spd times
 !           the "original" nondimensional "ch" typical in literature.  hence
-!           the ch returned from sfcdif has units of m/s.  the important 
+!           the ch returned from sfcdif has units of m/s.  the important
 !           companion coefficient of ch, carried here as "rch", is the ch
 !           from sfcdif times air density and parameter "cp".  "rch" is
-!           computed in "call penman". rch rather than ch is the coeff 
+!           computed in "call penman". rch rather than ch is the coeff
 !           usually invoked later in eqns.
 !         - sfcdif also returns the surface exchange coefficient for momentum,
 !           cm, also known as the surface drage coefficient, but cm is not
@@ -783,7 +783,7 @@
 
       if (shdfac > 0.) then
 
-!  --- ...  frozen ground extension: total soil water "smc" was replaced 
+!  --- ...  frozen ground extension: total soil water "smc" was replaced
 !           by unfrozen soil water "sh2o" in call to canres below
 
         call canres
@@ -804,7 +804,7 @@
       if (sneqv .eq. 0.0) then
 !>  - For no snowpack is present, call nopac() to calculate soil moisture
 !! and heat flux values and update soil moisture contant and soil heat
-!! content values. 
+!! content values.
         call nopac
 !  ---  inputs:                                                         !
 !          ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref,           !
@@ -836,7 +836,7 @@
 !            ett, snomlt, drip, dew, flx1, flx3, esnow )                !
 
       endif
-!> - Noah LSM post-processing: 
+!> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
       sheat = -(ch*cp1*sfcprs) / (rd1*t2v) * (th2 - t1)
@@ -870,12 +870,12 @@
 !!   -  ssoil>0: warm the surface  (night time)
 !!   -  ssoil<0: cool the surface  (day time)
 
-      ssoil = -1.0 * ssoil      
+      ssoil = -1.0 * ssoil
 
       if (ice == 0) then
 
 !>  - For the case of land (but not glacial-ice):
-!!  convert runoff3 (internal layer runoff from supersat) from \f$m\f$ 
+!!  convert runoff3 (internal layer runoff from supersat) from \f$m\f$
 !!  to \f$ms^-1\f$ and add to subsurface runoff/baseflow (runoff2).
 !!  runoff2 is already a rate at this point.
 
@@ -892,7 +892,7 @@
         runoff1 = snomlt / dt
       endif
 
-!>  - Calculate total column soil moisture in meters (soilm) and root-zone 
+!>  - Calculate total column soil moisture in meters (soilm) and root-zone
 !! soil moisture availability (fraction) relative to porosity/saturation.
 
       soilm = -1.0 * smc(1) * zsoil(1)
@@ -1228,7 +1228,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates soil moisture and heat flux values and 
+!> This subroutine calculates soil moisture and heat flux values and
 !! update soil moisture content and soil heat content values for the
 !! case when no snow pack is present.
       subroutine nopac
@@ -1605,7 +1605,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine internally sets default values or optionally read-in 
+!> This subroutine internally sets default values or optionally read-in
 !! via namelist i/o, all soil and vegetation parateters requied for the execusion
 !! of the Noah LSM.
       subroutine redprm
@@ -2257,7 +2257,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates soil moisture and heat flux values and 
+!> This subroutine calculates soil moisture and heat flux values and
 !! update soil moisture content and soil heat content values for the
 !! case when a snow pack is present.
       subroutine snopac
@@ -2622,7 +2622,7 @@
 
             ex = sneqv / dt
             flx3 = ex * 1000.0 * lsubf
-            snomlt = sneqv 
+            snomlt = sneqv
             sneqv = 0.0
 
           endif   ! end if_sneqv-snomlt_block
@@ -3579,8 +3579,8 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates compaction of a snowpack under conditions of 
-!! increasing snow density, as obtained from an approximate solution of 
+!> This subroutine calculates compaction of a snowpack under conditions of
+!! increasing snow density, as obtained from an approximate solution of
 !! E. Anderson's differential equation (3.29),NOAA technical report NWS 19,
 !! by Victor Koren, 03/25/95. subroutine will return new values of \a snowh
 !! and \a sndens .
@@ -3826,7 +3826,7 @@
 !! New version (June 2001): much faster and more accurate Newton iteration
 !! achieved by first taking log of eqn cited above -- less than 4 (typically
 !! 1 or 2) iterations achieves convergence. Also, explicit 1-step solution
-!! option for special case of paramter ck=0, which reduces the orginal 
+!! option for special case of paramter ck=0, which reduces the orginal
 !! implicit equation to a simpler explicit form, known as the "flerchinger eqn".
 !! Improved handling of solution in the limit of freezing point temperature t0.
       subroutine frh2o                                                  &
@@ -3981,7 +3981,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates the right hand side of the time tendency 
+!> This subroutine calculates the right hand side of the time tendency
 !! term of the soil thermal diffusion equation. Also to compute (prepare)
 !! the matrix coefficients for the tri-diagonal matrix of the implicit time
 !! scheme.
@@ -4856,7 +4856,7 @@
 !>\ingroup Noah_LSM
 !> This subroutine calculates the right hand side of the time tendency
 !! term of the soil water diffusion equation. Also to compute
-!! (prepare) the matrix coefficients for the tri-diagonal matrix of 
+!! (prepare) the matrix coefficients for the tri-diagonal matrix of
 !! the implicit time scheme.
       subroutine srt                                                    &
 !...................................
@@ -5318,7 +5318,7 @@ c ----------------------------------------------------------------------
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates temperature on the boundary of the 
+!> This subroutine calculates temperature on the boundary of the
 !! layer by interpolation of the middle layer temperatures.
       subroutine tbnd                                                   &
 !...................................
