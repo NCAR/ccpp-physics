@@ -17,7 +17,7 @@ module cs_conv_pre
 !! \section arg_table_cs_conv_pre_run Argument Table
 !! | local_name | standard_name                                                   | long_name                                                                | units   | rank | type      |    kind   | intent | optional |
 !! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_loop_extent                                          | horizontal loop extent                                                   | count   |    0 | integer   |           | in     | F        |
+!! | im         | horizontal_dimension                                            | horizontal dimension                                                     | count   |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count   |    0 | integer   |           | in     | F        |
 !! | ntr        | number_of_total_tracers_CS                                      | number of total tracers convectively transported by CS scheme            | count   |    0 | integer   |           | in     | F        |
 !! | q          | water_vapor_specific_humidity_updated_by_physics                | mid-layer specific humidity of water vapor                               | kg kg-1 |    2 | real      | kind_phys | in     | F        |
@@ -55,7 +55,7 @@ module cs_conv_pre
   fswtr(:) = 0.0
   do k=1,kmax
     do i=1,im
-      save_qv(i,k,1) = q(i,k,1)
+      save_qv(i,k,1) = q(i,k)
       save_qv(i,k,2) = max(0.0,clw(i,k,2))
       save_qv(i,k,3) = max(0.0,clw(i,k,1))
     enddo
@@ -82,7 +82,7 @@ module cs_conv_post
 !! \section arg_table_cs_conv_post_run Argument Table
 !! | local_name | standard_name                                                   | long_name                                                                | units      | rank | type      |    kind   | intent | optional |
 !! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      |    0 | integer   |           | in     | F        |
+!! | im         | horizontal_dimension                                            | horizontal dimension                                                     | count      |    0 | integer   |           | in     | F        |
 !! | ijsdim     | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count      |    0 | integer   |           | in     | F        |
 !! | rain1      | convective_precipitation_flux_at_surface                        | convective precipitation flux at surface (including snowfall)            | kg m-2 s-1 |    1 | real      | kind_phys | inout  | F        |
@@ -254,7 +254,7 @@ module cs_conv
 
 !  PUBLIC: interfaces
 !
-   public cs_convr        ! CS scheme main driver
+   public cs_conv_init, cs_conv_run, cs_conv_finalize         ! CS scheme main driver
   
    contains
 
@@ -276,7 +276,7 @@ module cs_conv
 !! \section arg_table_cs_conv_run Argument Table
 !! | local_name | standard_name                                             | long_name                                                                                             | units      | rank | type      |    kind   | intent | optional |
 !! |------------|-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_loop_extent                                    | horizontal loop extent                                                                                | count      |    0 | integer   |           | in     | F        |
+!! | im         | horizontal_dimension                                      | horizontal dimension                                                                                  | count      |    0 | integer   |           | in     | F        |
 !! | ijsdim     | horizontal_loop_extent                                    | horizontal loop extent                                                                                | count      |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                        | number of veritcal levels                                                                             | count      |    0 | integer   |           | in     | F        |
 !! | ntr        | number_of_total_tracers_CS                                | number of total tracers convectively transported by CS scheme                                         | count      |    0 | integer   |           | in     | F        |
