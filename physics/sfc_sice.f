@@ -194,7 +194,7 @@
 !! | fice           | sea_ice_concentration_for_physics                                            | sea-ice concentration [0,1]                                     | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | tice           | sea_ice_temperature_for_physics                                              | sea-ice surface temperature                                     | K             |    1 | real      | kind_phys | inout  | F        |
 !! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | mm            |    1 | real      | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature                                                     | ground surface skin temperature                                 | K             |    1 | real      | kind_phys | inout  | F        |
+!! | tskin          | surface_skin_temperature                                                     | surface skin temperature                                        | K             |    1 | real      | kind_phys | inout  | F        |
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real      | kind_phys | inout  | F        |
 !! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
@@ -220,15 +220,15 @@
 !! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
 !! \image latex GFS_sice_wonton2000_fig1.eps "Schematic representation of the three-layer model" width=5cm
 !!  The ice model main program ice3lay() performs two functions:
-!!  - \b Calculation \b of \b ice \b temperature 
+!!  - \b Calculation \b of \b ice \b temperature
 !!\n The surface temperature is determined from the diagnostic balance between
-!! the upward conduction of heat through snow and/or ice and upward flux of heat 
-!! from the surface. 
+!! the upward conduction of heat through snow and/or ice and upward flux of heat
+!! from the surface.
 !!  - \b Calculation \b of \b ice \b and \b snow \b changes
 !!\n In addition to calculating ice temperature changes, the ice model must
 !! also readjust the sizes of the snow and ice layers 1) to accommodate
 !! mass fluxes at the upper and lower surfaces, 2) to convert snow below
-!! the water line to ice, and 3) to equalize the thickness of the two 
+!! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !!  @{
@@ -631,11 +631,11 @@
 !! @{
 !!\ingroup gfs_sice_main
 !\param[in] im    integer, horizontal dimension
-!\param[in] kmi   integer, number of ice layers (2) 
+!\param[in] kmi   integer, number of ice layers (2)
 !\param[in] fice  real, sea-ice concentration
 !\param[in] flag  logical, ice mask flag
 !\param[in] hfi   real, net non-solar and heat flux at surface (\f$W/m^2\f$)
-!\param[in] hfd   real, heat flux derivative at surface 
+!\param[in] hfd   real, heat flux derivative at surface
 !\param[in] sneti real, net solar incoming at top (\f$W/m^2\f$)
 !\param[in] focn  real, heat flux from ocean (\f$W/m^2\f$)
 !\param[in] delt  real, time step(\f$sec\f$)
@@ -799,7 +799,7 @@
 
           bi   = hfd(i)
           ai   = hfi(i) - sneti(i) + ip - tice(i)*bi  ! +v sol input here
-!>  - Calculate the effective conductive coupling of the snow-ice layer 
+!>  - Calculate the effective conductive coupling of the snow-ice layer
 !! between the surface and the upper layer ice temperature \f$h_i/4\f$
 !! beneath the snow-ice interface (see \a eq.(5) in Winton (2000) \cite winton_2000).
           k12  = ki4*ks / (ks*hice(i) + ki4*snowd(i))
@@ -827,7 +827,7 @@
 !>  - If the surface temperature is greater than the freezing temperature
 !! of snow (when there is snow over) or sea ice (when there is none), the
 !! surface temperature is fixed at the melting temperature of snow or sea
-!! ice, respectively, and the upper ice temperature is recomputed from 
+!! ice, respectively, and the upper ice temperature is recomputed from
 !! \a eq.(21) using the coefficients given by \a eqs. (19),(20), and (18). An energy flux
 !! \a eq.(22) is applied toward surface melting thereby balancing the surface
 !! energy budget.
@@ -848,7 +848,7 @@
 
 !>  - Calculate the energy for bottom melting (or freezing, if negative)
 !! following \a eq.(23), which serves to balance the difference between
-!! the oceanic heat flux to the ice bottom and the conductive flux of 
+!! the oceanic heat flux to the ice bottom and the conductive flux of
 !! heat upward from the bottom.
           bmelt = (focn(i) + ki4*(stsice(i,2) - tfw)/hice(i)) * delt
 
@@ -943,5 +943,3 @@
 !! @}
 !! @}
       end module sfc_sice
-
-
