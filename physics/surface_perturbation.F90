@@ -2,8 +2,8 @@
 !! This file includes routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
 
-!>\ingroup Noah_LSM
-
+!>\defgroup sfc_pert GEFS Surface Parameter Perturbation Module
+!! @{
 !> This module contains routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
 module surface_perturbation
@@ -431,3 +431,4 @@ module surface_perturbation
 ! *** mg, sfc perts
 
 end module surface_perturbation
+!! @}

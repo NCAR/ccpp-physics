@@ -48,10 +48,19 @@ interaction and it may be necessary to enforce a balance, e.g. between
 dynamics and boundary layer diffusion (Beljaars(1991) \cite beljaars_1991), or between dynamics and clouds in FV3GFS:
  + @ref fast_sat_adj
 
+The NCEP Global Ensemble Forecast System (GEFS) is under-spread near the surface, a common characteristic of ensemble prediction systems. Several
+methods for increasing the spread have been tested. Perturbation of roughness lengths for heat and momentum, soil hydraulic conductivity, vegetation
+fraction, surface albedo, and leaf area index are applied, with the amplitude and perturbation scales based on previous reseach:
+
+Results show that these surface perturbation have a modest impact on the spread of near-surface temperature and other variables in the GEFS, and
+ have been shown to impact forecasts of 2m temperature, 10m wind and precipitation.
+
 Besides scientific documentation of GFS suite physical schemes, there are three modules to define physics (or radiation) attributes and constants:
  + @ref phy_sparam
  + @ref physcons
  + @ref radcons
+
+
 
 
 */

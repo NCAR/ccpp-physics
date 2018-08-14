@@ -13,17 +13,25 @@ Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain
 
 Some unique attributes of GFDL cloud microphysics include:
 
-\subsection fast a. Fast Physics 
-The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment
-is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order
-to have the correct balance.
+\subsection fast a. Fast Physics in FV3 dynamical solver
+\image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=10cm
+The leftmost column of Figure 1 shows the external API calls used during a typical process-split model integration procedure. First,
+the solver is called, which advances the solver a full "physics" time step. This updated state is then passed to the physical parameterization
+package, which then computes the physics tendencies over the same time interval. Finally, the tendencies are then used to update the 
+model state using a forward-in-time evaluation consistent with the dynamics.
+\n There are two levels of time-stepping inside FV3. The first is the "remapping" loop, the green column in Figure 1. This loop has three steps:
+-# Perform the Lagrangian dynamics, the loop shown in the blue column of Figure 1.
+-# Perform the subcycled tracer advection along Lagrangian surfaces, using accumulated mass fluxes from the Lagrangian dynamics. Subcycling is 
+done independently within each layer to maintain local (within each layer) stability.
+-# Remap the deformal Lagrangian surfaces on to the reference, or "Eulerian", coordinate levels. 
 
-In current fv3gfs, phase-changes are called after the "Lagrangian-to-Eulerian" remapping in FV3
-dynamic solver. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts 
-cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and
-cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). 
+In current fv3gfs, the fast physics (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
 
-\subsection subgrid b. Horizontal Sub-grid Variability
+This loop is typically performed once per call to the solver,
+
+
+
+\subsection subgrid b. Horizontal Sub-grid Variability ("Scale-aware")
 Horizontal sub-grid variability is a function of cell area:
 - Over land:
 \f[

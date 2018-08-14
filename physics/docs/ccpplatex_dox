@@ -109,12 +109,14 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
+                          pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFS_ZHAOC.txt    \
                           pdftxt/GFDL_cloud.txt   \
+                          pdftxt/GEFS_SFC_PERT.txt  \
 ### Radiation
                         ../radlw_main.f \
                         ../radsw_main.f \
@@ -135,7 +137,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_nst_water_prop.f90  \
                         ../sfc_drv.f \
                         ../sflx.f    \
-                        ../surface_perturbation.F90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -149,7 +150,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Prognostic Ozone
                         ../ozphys.f \
 ### stratospheric h2o
-###                        ../h2ophys.f \
+                        ../h2ophys.f \
 ### Deep Convection
                         ../samfdeepcnv.f \
 ### Convective Gravity Wave
@@ -164,6 +165,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90    \
 ###
+                        ../surface_perturbation.F90 \
                         ../physparam.f      \
                         ../physcons.f90     \
                         ../radcons.f90
