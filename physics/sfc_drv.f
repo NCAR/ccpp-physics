@@ -134,13 +134,75 @@
 !! @}
 
       module lsm_noah
+
+      use set_soilveg_mod,  only: set_soilveg
+
+      implicit none
+
+      private
+
+      public :: lsm_noah_init, lsm_noah_run, lsm_noah_finalize
+
+      logical :: is_initialized = .false.
+
       contains
 
-      subroutine lsm_noah_init
+!! \section arg_table_lsm_noah_init Argument Table
+!! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | me             | mpi_rank                                                    | current MPI-rank                                        | index      |    0 | integer   |           | in     | F        |
+!! | isot           | soil_type_dataset_choice                                    | soil type dataset choice                                | index      |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                              | land use dataset choice                                 | index      |    0 | integer   |           | in     | F        |
+!! | nlunit         | iounit_namelist                                             | fortran unit number for file opens                      | none       |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP                | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP                   | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_init(me, isot, ivegsrc, nlunit,
+     &                         errmsg, errflg)
+
+      implicit none
+
+      integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (is_initialized) return
+
+      !--- initialize soil vegetation
+      call set_soilveg(me, isot, ivegsrc, nlunit)
+
+      is_initialized = .true.
+
       end subroutine lsm_noah_init
 
-      subroutine lsm_noah_finalize
+
+!! \section arg_table_lsm_noah_finalize Argument Table
+!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_finalize(errmsg, errflg)
+
+      implicit none
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not. is_initialized) return
+
+      is_initialized = .false.
+
       end subroutine lsm_noah_finalize
+
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -438,6 +500,14 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      ! Check initialization status
+      if (.not. is_initialized) then
+         write(errmsg,'(*(a))') 
+     & "Logic error: lsm_noah_run called before lsm_noah_init"
+         errflg = 1
+         return
+      end if
 
 !> - Set flag for land points.
 
