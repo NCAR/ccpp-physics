@@ -1,19 +1,173 @@
 !> \file GFS_phys_time_vary.f90
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
-    module GFS_phys_time_vary
+   module GFS_phys_time_vary
+
+      use ozne_def, only : levozp, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
+      use ozinterp, only : read_o3data, setindxoz, ozinterpol
+
+      use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
+      use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
+
+      implicit none
 
       private
 
       public GFS_phys_time_vary_init, GFS_phys_time_vary_run, GFS_phys_time_vary_finalize
 
+      logical :: is_initialized = .false.
+
       contains
 
-      subroutine GFS_phys_time_vary_init ()
+!> \section arg_table_GFS_phys_time_vary_init Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | Data           | FV3-GFS_Data_type_all_blocks                           | Fortran DDT containing FV3-GFS data                                     | DDT      |    1 | GFS_data_type         |           | inout  | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | Interstitial   | FV3-GFS_Interstitial_type_all_threads                  | Fortran DDT containing FV3-GFS interstitial data                        | DDT      |    1 | GFS_interstitial_type |           | inout  | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_phys_time_vary_init (Data, Model, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, GFS_interstitial_type
+
+         implicit none
+
+         ! Interface variables
+         type(GFS_data_type),              intent(inout) :: Data(:)
+         type(GFS_control_type),           intent(inout) :: Model
+         type(GFS_interstitial_type),      intent(inout) :: Interstitial(:)
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         ! Local variables
+         integer :: nb, nblks, nt, nthrds
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (is_initialized) return
+
+         nblks = size(Model%blksz)
+         nthrds = size(Interstitial)
+
+         call read_o3data  (Model%ntoz, Model%me, Model%master)
+
+         ! Consistency check that the hardcoded values for levozp and
+         ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! in GFS_typedefs.F90: allocate (Tbd%ozpl  (IM,levozp,oz_coeff))
+         if (size(Data(1)%Tbd%ozpl, dim=2).ne.levozp) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
+                  "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
+                  levozp, " /= ", size(Data(1)%Tbd%ozpl, dim=2)
+            errflg = 1
+            return
+         end if
+         if (size(Data(1)%Tbd%ozpl, dim=3).ne.oz_coeff) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
+                  "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
+                  oz_coeff, " /= ", size(Data(1)%Tbd%ozpl, dim=3)
+            errflg = 1
+            return
+         end if
+
+         call read_h2odata (Model%h2o_phys, Model%me, Model%master)
+
+         ! Consistency check that the hardcoded values for levh2o and
+         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
+         if (size(Data(1)%Tbd%h2opl, dim=2).ne.levh2o) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+                  "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
+                  levh2o, " /= ", size(Data(1)%Tbd%h2opl, dim=2)
+            errflg = 1
+            return
+         end if
+         if (size(Data(1)%Tbd%h2opl, dim=3).ne.h2o_coeff) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
+                  "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
+                  h2o_coeff, " /= ", size(Data(1)%Tbd%h2opl, dim=3)
+            errflg = 1
+            return
+         end if
+
+         ! DH* OpenMP parallel region with OpenMP do loops for the three do loops?
+         ! there is no threading on the outside, i.e. can use CCPP's omp_threads here
+
+         ! Update values of oz_pres in Interstitial data type for all threads
+         if (Model%ntoz > 0) then
+            do nt=1,nthrds
+               Interstitial(nt)%oz_pres = oz_pres
+            end do
+         end if
+
+         ! Update values of h2o_pres in Interstitial data type for all threads
+         if (Model%h2o_phys) then
+            do nt=1,nthrds
+               Interstitial(nt)%h2o_pres = h2o_pres
+            end do
+         end if
+
+         !--- read in and initialize ozone and water
+         if (Model%ntoz > 0) then
+           do nb = 1, nblks
+             call setindxoz (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_o3, &
+                             Data(nb)%Grid%jindx2_o3, Data(nb)%Grid%ddy_o3)
+           enddo
+         endif
+
+         if (Model%h2o_phys) then
+           do nb = 1, nblks
+             call setindxh2o (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_h, &
+                              Data(nb)%Grid%jindx2_h, Data(nb)%Grid%ddy_h)
+           enddo
+         endif
+
+         ! *DH
+
+         is_initialized = .true.
+
       end subroutine GFS_phys_time_vary_init
 
-      subroutine GFS_phys_time_vary_finalize()
+
+!> \section arg_table_GFS_phys_time_vary_finalize Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_phys_time_vary_finalize(errmsg, errflg)
+
+         implicit none
+
+         ! Interface variables
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (.not.is_initialized) return
+
+         ! Deallocate ozone arrays
+         if (allocated(oz_lat)  ) deallocate(oz_lat)
+         if (allocated(oz_pres) ) deallocate(oz_pres)
+         if (allocated(oz_time) ) deallocate(oz_time)
+         if (allocated(ozplin)  ) deallocate(ozplin)
+
+         ! Deallocate h2o arrays
+         if (allocated(h2o_lat) ) deallocate(h2o_lat)
+         if (allocated(h2o_pres)) deallocate(h2o_pres)
+         if (allocated(h2o_time)) deallocate(h2o_time)
+         if (allocated(h2oplin) ) deallocate(h2oplin)
+
+         is_initialized = .false.
+
       end subroutine GFS_phys_time_vary_finalize
+
 
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
@@ -25,9 +179,8 @@
 !!
       subroutine GFS_phys_time_vary_run (Data, Model, errmsg, errflg)
 
-        use mersenne_twister, only: random_setseed, random_number
+        use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
-        use physcons,              only: dxmin, dxinv
         use GFS_typedefs,          only: GFS_control_type, GFS_data_type
 
         implicit none
@@ -51,6 +204,13 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Check initialization status
+        if (.not.is_initialized) then
+           write(errmsg,'(*(a))') "Logic error: GFS_phys_time_vary_run called before GFS_phys_time_vary_init"
+           errflg = 1
+           return
+        end if
 
         nblks = size(Model%blksz)
 
@@ -141,4 +301,4 @@
 
       end subroutine GFS_phys_time_vary_run
 
-    end module GFS_phys_time_vary
+   end module GFS_phys_time_vary
