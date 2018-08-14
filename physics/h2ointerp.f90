@@ -1,3 +1,13 @@
+module h2ointerp
+
+   implicit none
+
+   private
+
+   public :: read_h2odata, setindxh2o, h2ointerpol
+
+contains
+
       subroutine read_h2odata (h2o_phys, me, master)
       use machine,  only: kind_phys
       use h2o_def
@@ -185,3 +195,5 @@
 !
       return
       end
+
+end module h2ointerp
