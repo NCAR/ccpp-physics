@@ -151,13 +151,23 @@ else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-#apply general fortran tags to all fortran source files
-if(${CMAKE_VERSION} LESS 3.3)
-  string (REPLACE ";" " " f_flags_str "${f_flags}")
-  SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " ${f_flags_str}")
-else(${CMAKE_VERSION} LESS 3.3)
-  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
-endif (${CMAKE_VERSION} LESS 3.3)
+# The auto-generated caps can contain calls to physics schemes in
+# which some of the arguments (pointers) are not associated. This is
+# on purpose to avoid allocating fields that are not used inside the
+# scheme if, for example, certain conditions are not met. To avoid
+# Fortran runtime errors, it is necessary to remove checks for pointers
+# that are not associated from the caps ONLY. For the physics schemes,
+# these checks can and should remain enabled. Overwriting the check flags
+# explicitly works for Intel and GNU, but not for PGI.
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check no-pointers")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
+  if (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+    message (FATAL_ERROR "PGI compiler option chkptr cannot be used for CCPP physics")
+  endif (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)
