@@ -1,3 +1,13 @@
+module ozinterp
+
+   implicit none
+
+   private
+
+   public :: read_o3data, setindxoz, ozinterpol
+
+contains
+
       SUBROUTINE read_o3data (ntoz, me, master)
       use machine,  only: kind_phys
       use ozne_def
@@ -9,6 +19,7 @@
       integer :: i, n, k
       real(kind=4), allocatable, dimension(:) :: oz_lat4, oz_pres4
       real(kind=4), allocatable, dimension(:) :: oz_time4, tempin
+      real(kind=4) :: blatc4
 
       if (ntoz <= 0) then      ! Diagnostic ozone
         rewind (kozc)
@@ -191,3 +202,5 @@
 !
       RETURN
       END
+
+end module ozinterp

@@ -23,7 +23,6 @@
       subroutine ozphys_pre_finalize()
       end subroutine ozphys_pre_finalize
 
-
       end module ozphys_pre
 
 
@@ -56,7 +55,7 @@
 !! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa) |    1 | real      | kind_phys | in     | F        |
 !! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      |    2 | real      | kind_phys | in     | F        |
 !! | prdout         | ozone_forcing                                     | ozone forcing data                                | various |    3 | real      | kind_phys | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   |    0 | integer   |           | in     | F        |
+!! | oz_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   |    0 | integer   |           | in     | F        |
 !! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa      |    2 | real      | kind_phys | in     | F        |
 !! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
 !! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
@@ -68,7 +67,7 @@
 !> @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
-     &  prsl, prdout, pl_coeff, delp, ldiag3d,                          &
+     &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
      &  ozp, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
@@ -79,11 +78,11 @@
       implicit none
 !
       ! Interface variables
-      integer, intent(in) :: im, ix, levs, ko3, pl_coeff, me
+      integer, intent(in) :: im, ix, levs, ko3, oz_coeff, me
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     oz(ix,levs), ozp(ix,levs,pl_coeff)
+     &                     oz(ix,levs), ozp(ix,levs,oz_coeff)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     dt, po3(ko3), prdout(ix,ko3,pl_coeff),       &
+     &                     dt, po3(ko3), prdout(ix,ko3,oz_coeff),       &
      &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs)
       logical, intent(in) :: ldiag3d
       character(len=*), intent(out) :: errmsg
@@ -94,7 +93,7 @@
       integer k,kmax,kmin,l,i,j
       logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
-      real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
+      real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,oz_coeff),
      &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
 !
       ! Initialize CCPP error handling variables
@@ -105,7 +104,7 @@
       ozi = oz
 !
 !> - Calculate vertical integrated column ozone values.
-      if (pl_coeff > 2) then
+      if (oz_coeff > 2) then
         colo3(:,levs+1) = 0.0
         do l=levs,1,-1
           do i=1,im
@@ -142,7 +141,7 @@
               wk3(i) = 1.0 - wk2(i)
             endif
           enddo
-          do j=1,pl_coeff
+          do j=1,oz_coeff
             do i=1,im
               if (flg(i)) then
                 prod(i,j)  = wk2(i) * prdout(i,k,j)
@@ -152,7 +151,7 @@
           enddo
         enddo
 !
-        do j=1,pl_coeff
+        do j=1,oz_coeff
           do i=1,im
             if (wk1(i) < po3(ko3)) then
               prod(i,j) = prdout(i,ko3,j)
@@ -163,7 +162,7 @@
           enddo
         enddo
 
-        if (pl_coeff == 2) then
+        if (oz_coeff == 2) then
           do i=1,im
             ozib(i)   = ozi(i,l)           ! no filling
             oz(i,l)   = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
@@ -181,7 +180,7 @@
 !!  - ozp(:,:,2) - Ozone tendency at model layers 
 !!  - ozp(:,:,3) - Ozone production from temperature term at model layers 
 !!  - ozp(:,:,4) - Ozone production from column ozone term at model layers
-        if (pl_coeff == 4) then
+        if (oz_coeff == 4) then
           do i=1,im
             ozib(i)  = ozi(i,l)            ! no filling
             tem      = prod(i,1) + prod(i,3)*tin(i,l)
@@ -226,31 +225,34 @@
       end subroutine ozphys_post_init
 
 
+#if 0
+! DH* TODO - split dq3dt into individual components? Or replace Interstitial%dq3dt_loc(:,:,1:) / dq3dt_loc(:,:,1:)
+! in GFS_physics_driver entirely with Diag%dq3dt(:,:,6:) ? *DH
 !! \section arg_table_ozphys_post_run Argument Table
-!! | local_name     | standard_name                                | long_name                                    | units   | rank | type          | kind      | intent | optional |
-!! |----------------|----------------------------------------------|----------------------------------------------|---------|------|---------------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                         | horizontal dimension                         | count   |    0 | integer       |           | in     | F        |
-!! | levs           | vertical_dimension                           | number of vertical layers                    | count   |    0 | integer       |           | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data | number of coefficients in ozone forcing data | index   |    0 | integer       |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                          | logical flag for 3D diagnostics              | flag    |    0 | logical       |           | in     | F        |
-!! | ozp            | change_in_ozone_concentration                | change in ozone concentration                | kg kg-1 |    3 | real          | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                            | GFS diagnostics derived data type variable   | DDT     |    0 | GFS_diag_type |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                           | error message for error handling in CCPP     | none    |    0 | character     | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                              | error flag for error handling in CCPP        | flag    |    0 | integer       |           | out    | F        |
+!! | local_name     | standard_name                                                     | long_name                                                         | units   | rank | type          | kind      | intent | optional |
+!! |----------------|-------------------------------------------------------------------|-------------------------------------------------------------------|---------|------|---------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                            | horizontal loop extent                                            | count   |    0 | integer       |           | in     | F        |
+!! | levs           | vertical_dimension                                                | number of vertical layers                                         | count   |    0 | integer       |           | in     | F        |
+!! | oz_coeff       | number_of_coefficients_in_ozone_forcing_data                      | number of coefficients in ozone forcing data                      | index   |    0 | integer       |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                               | logical flag for 3D diagnostics                                   | flag    |    0 | logical       |           | in     | F        |
+!! | ozp            | change_in_ozone_concentration                                     | change in ozone concentration                                     | kg kg-1 |    3 | real          | kind_phys | in     | F        |
+!! | dq3dt          | cumulative_change_in_water_vapor_specific_humidity_due_to_physics | cumulative change in water vapor specific humidity due to physics | kg kg-1 |    3 | real          | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                | error message for error handling in CCPP                          | none    |    0 | character     | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                   | error flag for error handling in CCPP                             | flag    |    0 | integer       |           | out    | F        |
 !!
-      subroutine ozphys_post_run(ix, levs, pl_coeff, ldiag3d, ozp,      &
-     &                           Diag, errmsg, errflg)
+#endif
+      subroutine ozphys_post_run(im, levs, oz_coeff, ldiag3d, ozp,      &
+     &                           dq3dt, errmsg, errflg)
 
       use GFS_typedefs, only: GFS_diag_type
       use machine,      only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: ix, levs, pl_coeff
+      integer, intent(in) :: im, levs, oz_coeff
       logical, intent(in) :: ldiag3d
-      real(kind=kind_phys), intent(in) :: ozp(ix,levs,pl_coeff)
-      type(GFS_diag_type), intent(inout) :: Diag
-
+      real(kind=kind_phys), intent(in)    :: ozp(im,levs,oz_coeff)
+      real(kind=kind_phys), intent(inout) :: dq3dt(im,levs,oz_coeff+5)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -259,10 +261,10 @@
       errflg = 0
 
       if (ldiag3d) then
-          Diag%dq3dt(:,:,6) = ozp(:,:,1)
-          Diag%dq3dt(:,:,7) = ozp(:,:,2)
-          Diag%dq3dt(:,:,8) = ozp(:,:,3)
-          Diag%dq3dt(:,:,9) = ozp(:,:,4)
+          dq3dt(:,:,6) = ozp(:,:,1)
+          dq3dt(:,:,7) = ozp(:,:,2)
+          dq3dt(:,:,8) = ozp(:,:,3)
+          dq3dt(:,:,9) = ozp(:,:,4)
       end if
 
       return
