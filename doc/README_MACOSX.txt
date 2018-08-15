@@ -161,8 +161,8 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
     a) copy the contents of the run directory templates to where you want to run the model, change to this directory
        (these folders are read-only, i.e. users might have to add the write-flag after copying/rsyncing them)
 
-        theia:    /scratch4/BMC/gmtb/Dom.Heinzeller/macosx_rundirs/C96_trunk_20180618/gnu/
-        cheyenne: /glade/p/ral/jntp/GMTB/NEMSfv3gfs/macosx_rundirs/C96_trunk_20180618/gnu/
+        theia:    /scratch4/BMC/gmtb/Dom.Heinzeller/macosx_rundirs/C96_trunk_20180727/gnu/
+        cheyenne: /glade/p/ral/jntp/GMTB/NEMSfv3gfs/macosx_rundirs/C96_trunk_20180727/gnu/
 
     b) edit run_macosx.sh in change the variable FV3_BUILD_DIR to the top-level directory of your FV3-build
 
