@@ -4,6 +4,13 @@
 !! - pwat: column integrated precipitable water
 
       module GFS_gfdlmp_pwat
+
+      implicit none
+
+      private
+
+      public GFS_gfdlmp_pwat_init, GFS_gfdlmp_pwat_run, GFS_gfdlmp_pwat_finalize
+
       contains
 
 !> \defgroup GFS_gfdlmp_pwat GFS Zhao-Carr PWAT Calculation
@@ -35,9 +42,9 @@
 !! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer   |           | out    | F        |
 !!
       subroutine GFS_gfdlmp_pwat_run(im,ix,levs,del,          &
-                 ntcw,ncld,nncl,gq0_ntcw, gq0_ntrw,           &
-                 gq0_ntiw, gq0_ntsw, gq0_ntgl,q,              & ! input
-                 pwat,errmsg,errflg)              ! output
+                 ntcw,ncld,nncl,gq0_ntcw,gq0_ntrw,            &
+                 gq0_ntiw,gq0_ntsw,gq0_ntgl,q,                & ! input
+                 pwat,errmsg,errflg)                            ! output
 
       use machine,               only: kind_phys
       use physcons,              only:  con_g
