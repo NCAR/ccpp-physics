@@ -1,7 +1,9 @@
 !> \file GFS_time_vary_pre.f90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
-    module GFS_time_vary_pre
+   module GFS_time_vary_pre
+
+      use funcphys, only: gfuncphys
 
       implicit none
 
@@ -11,11 +13,42 @@
 
       contains
 
-      subroutine GFS_time_vary_pre_init ()
+!> \section arg_table_GFS_time_vary_pre_init Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_time_vary_pre_init (errmsg, errflg)
+
+         implicit none
+
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
+         call gfuncphys ()
+
       end subroutine GFS_time_vary_pre_init
 
-      subroutine GFS_time_vary_pre_finalize()
+
+!> \section arg_table_GFS_time_vary_pre_finalize Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_time_vary_pre_finalize(errmsg, errflg)
+
+         implicit none
+
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         ! DH* this is the place to deallocate whatever is allocated by gfuncphys() in GFS_time_vary_pre_init
+
       end subroutine GFS_time_vary_pre_finalize
+
 
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                                             | units         | rank | type                  |    kind   | intent | optional |
