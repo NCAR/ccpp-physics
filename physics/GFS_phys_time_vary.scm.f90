@@ -1,7 +1,13 @@
 !> \file GFS_phys_time_vary.f90
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
-    module GFS_phys_time_vary
+   module GFS_phys_time_vary
+
+      use ozinterp, only : setindxoz, ozinterpol
+
+      use h2ointerp, only : setindxh2o, h2ointerpol
+
+      implicit none
 
       private
 
@@ -9,7 +15,49 @@
 
       contains
 
-      subroutine GFS_phys_time_vary_init ()
+!> \section arg_table_GFS_phys_time_vary_init Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT      |    0 | GFS_grid_type         |           | inout  | F        |
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | in     | F        |
+!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_phys_time_vary_init (Grid, Model, Tbd, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
+                                          GFS_Tbd_type
+
+         implicit none
+
+         ! Interface variables
+         type(GFS_grid_type),              intent(inout) :: Grid
+         type(GFS_control_type),           intent(in)    :: Model
+         type(GFS_tbd_type),               intent(in)    :: Tbd
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         ! Local variables
+         integer :: nb
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         nb = Tbd%blkno
+
+         !--- initialize ozone and water
+         if (Model%ntoz > 0) then
+            call setindxoz (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_o3, &
+                            Grid%jindx2_o3, Grid%ddy_o3)
+         endif
+
+         if (Model%h2o_phys) then
+            call setindxh2o (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_h, &
+                             Grid%jindx2_h, Grid%ddy_h)
+         endif
+
       end subroutine GFS_phys_time_vary_init
 
       subroutine GFS_phys_time_vary_finalize()
@@ -29,9 +77,8 @@
 !!
       subroutine GFS_phys_time_vary_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
-        use mersenne_twister, only: random_setseed, random_number
+        use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
-        use physcons,              only: dxmin, dxinv
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
                                          GFS_Tbd_type, GFS_sfcprop_type,  &
                                          GFS_cldprop_type, GFS_diag_type
