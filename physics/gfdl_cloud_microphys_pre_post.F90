@@ -63,7 +63,7 @@ module gfdl_cloud_microphys_post
 
    public gfdl_cloud_microphys_post_run, gfdl_cloud_microphys_post_init, gfdl_cloud_microphys_post_finalize
 
-   ! DH* CLEANUP !!!
+   ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
    real(kind=kind_phys), parameter :: con_p001= 0.001d0
    real(kind=kind_phys), parameter :: con_day = 86400.d0
    real(kind=kind_phys), parameter :: rainmin = 1.0e-13

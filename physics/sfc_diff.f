@@ -258,6 +258,13 @@
             endif
 ! - Calculate the roughness length for heat (see eq.(1) of \cite zheng_et_al_2012 ) .
 ! mg, sfc-perts: add surface perturbations to z0max over land
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of the momentum
+!! roughness length (z0pert) is added using a logrithmic scaling. The spatial pattern of
+!! z0pert is drawn from a normal distribution with a standard deviation of 0.14 while is 
+!! bounded between -0.5 and 0.5. Similarly, a perturbation of the ratio between the roughness
+!! length for heat to the momentum roughness length (ztpert) is added. The spatial pattern
+!! of ztpert is drawn from a normal distribution with a standard deviation of 0.08.
+
             if ( islimsk(i) == 1 .and. z0pert(i) /= 0.0 ) then
               z0max = z0max * (10.**z0pert(i))
             endif

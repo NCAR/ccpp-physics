@@ -75,7 +75,9 @@
 !! | snow0            | lwe_thickness_of_snow_amount_per_day                                   | snow fall over 24h period                                              | mm          |    1 | real      | kind_phys | in     | F        |
 !! | graupel0         | lwe_thickness_of_graupel_amount_per_day                                | graupel fall over 24h period                                           | mm          |    1 | real      | kind_phys | in     | F        |
 !! | cplflx           | flag_for_flux_coupling                                                 | flag controlling cplflx collection (default off)                       | flag        |    0 | logical   |           | in     | F        |
+!! | cplchm           | flag_for_chemistry_coupling                                            | flag controlling cplchm collection (default off)                       | flag        |    0 | logical   |           | in     | F        |
 !! | rain_cpl         | lwe_thickness_of_precipitation_amount_for_coupling                     | total rain precipitation for model coupling                            | m           |    1 | real      | kind_phys | inout  | F        |
+!! | rainc_cpl        | lwe_thickness_of_convective_precipitation_amount_for_coupling          | total convective precipitation                                         | m           |    1 | real      | kind_phys | inout  | F        |
 !! | snow_cpl         | lwe_thickness_of_snow_amount_for_coupling                              | total snow precipitation for model coupling                            | m           |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                               | none        |    0 | character | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                                  | flag        |    0 | integer   |           | out    | F        |
@@ -91,7 +93,8 @@
                                totprcpb,toticeb,totsnwb,totgrpb,       &
                                hrate,mrate,save_t,save_qv,             &
                                rain0,ice0,snow0,graupel0,              &
-                               cplflx,rain_cpl,snow_cpl,errmsg,errflg)
+                               cplflx,cplchm,rain_cpl,rainc_cpl,       &
+                               snow_cpl,errmsg,errflg)
 
 !$$$  subprogram documentation block
 !                .      .    .
@@ -134,9 +137,9 @@
       real(kind=kind_phys), dimension(ix,lm), intent(in)    :: save_t,save_qv
       ! rain0, ice0, snow0, graupel0 only allocated if GFDL MP is selected (imp_physics == imp_physics_gfdl)
       real(kind=kind_phys), dimension(:),     intent(in)    :: rain0,ice0,snow0,graupel0
-      logical,                                intent(in)    :: cplflx
+      logical,                                intent(in)    :: cplflx,cplchm
       ! rain_cpl, snow_cpl only allocated if cplflx == .true.
-      real(kind=kind_phys), dimension(:),     intent(inout) :: rain_cpl,snow_cpl
+      real(kind=kind_phys), dimension(:),     intent(inout) :: rain_cpl,rainc_cpl,snow_cpl
       character(len=*),                       intent(out)   :: errmsg
       integer,                                intent(out)   :: errflg
 
@@ -399,7 +402,8 @@
             crain = 0.0
             csnow = rainc(i)
           endif
-          if ((snow0(i)+ice0(i)+graupel0(i)+csnow) > (rain0(i)+crain)) then
+!         if ((snow0(i)+ice0(i)+graupel0(i)+csnow) > (rain0(i)+crain)) then
+          if ((snow0(i)+ice0(i)+graupel0(i)+csnow) > 0.0) then
             srflag(i) = 1.               ! clu: set srflag to 'snow' (i.e. 1)
           endif
         enddo
@@ -422,6 +426,13 @@
           else
              snow_cpl(i) = snow_cpl(i) + rain(i)
           endif
+        enddo
+      endif
+
+      if ((cplchm).and.(.not.cplflx)) then
+        do i = 1, im
+             rain_cpl(i) = rain_cpl(i) + rain(i)
+             rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
       endif
 

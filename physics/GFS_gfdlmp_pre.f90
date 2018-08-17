@@ -3,6 +3,13 @@
 !! before calling microphysics scheme:
 
       module GFS_gfdlmp_pre
+
+      implicit none
+
+      private
+
+      public GFS_gfdlmp_pre_init, GFS_gfdlmp_pre_run, GFS_gfdlmp_pre_finalize
+
       contains 
 
 !> \defgroup GFS_gfdlmp_pre GFS gfdlmp pre Scheme 

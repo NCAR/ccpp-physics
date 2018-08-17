@@ -1,9 +1,18 @@
+      module set_soilveg_mod
+
+      implicit none
+
+      private
+
+      public set_soilveg
+
+      contains
+
       subroutine set_soilveg(me,isot,ivet,nlunit)
       use namelist_soilveg
       implicit none
 
-      integer, intent(in) :: isot,ivet,nlunit
-      integer me
+      integer, intent(in) :: me,isot,ivet,nlunit
 !my begin locals
 !for 20 igbp veg type and 19 stasgo soil type
       integer i
@@ -405,4 +414,6 @@ c-----------------------------
          
 !       if (me == 0) write(6,soil_veg)
        return
-       end
+       end subroutine set_soilveg
+
+       end module set_soilveg_mod
