@@ -1,15 +1,51 @@
 !>\file h2ophys.f
 !! This file include NRL H2O physics for stratosphere and mesosphere.
 
-!>\defgroup main_h2o GFS h2ophys Main
+      module h2ophys
+
+      implicit none
+
+      private
+
+      public :: h2ophys_init, h2ophys_run, h2ophys_finalize
+
+      contains
+
+! \brief Brief description of the subroutine
+!
+!> \section arg_table_h2ophys_init Argument Table
+!!
+      subroutine h2ophys_init()
+      end subroutine h2ophys_init
+
+
+!>\defgroup GFS_h2ophys GFS h2ophys Main
 !! @{
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
-!>\section arg_table_h2ophys_run
+!! \section arg_table_h2ophys_run Argument Table
+!! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
+!! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   |    0 | integer   |           | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                | number of vertical layers                         | count   |    0 | integer   |           | in     | F        |
+!! | kh2o           | vertical_dimension_of_h2o_forcing_data            | number of vertical layers in h2o forcing data     | count   |    0 | integer   |           | in     | F        |
+!! | dt             | time_step_for_physics                             | physics time step                                 | s       |    0 | real      | kind_phys | in     | F        |
+!! | h2o            | water_vapor_specific_humidity_updated_by_physics  | water vapor specific humidity updated by physics  | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | ph2o           | natural_log_of_h2o_forcing_data_pressure_levels   | natural log of h2o forcing data pressure levels   | log(Pa) |    1 | real      | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | h2opltc        | h2o_forcing                                       | water forcing data                                | various |    3 | real      | kind_phys | in     | F        |
+!! | h2o_coeff      | number_of_coefficients_in_h2o_forcing_data        | number of coefficients in h2o forcing data        | index   |    0 | integer   |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
+!! | h2op           | change_in_h2o_concentration                       | change in h2o concentration                       | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
+!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
-!>\section genal_h2ophys GFS h2ophys General Algorithm
+!! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !! @{
-      subroutine h2ophys (ix, im, levs, kh2o, dt, h2oi, h2oo, ph2o,  &
-     &                    prsl, h2opltc, h2o_coeff, ldiag3d, h2op,me)
+      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,
+     &                     h2opltc, h2o_coeff, ldiag3d, h2op, me,
+     &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for
 !                                stratosphere and mesosphere
@@ -19,19 +55,28 @@
 !
       use machine , only : kind_phys
       implicit none
-!
-      integer im, ix, levs, kh2o, h2o_coeff,me
-      real(kind=kind_phys) h2oi(ix,levs),  h2oo(ix,levs), ph2o(kh2o), &
-     &                     prsl(ix,levs),  tin(ix,levs),              &
-     &                     h2opltc(ix,kh2o,h2o_coeff),                &
-     &                     h2op(ix,levs,h2o_coeff),  dt
-!
+!     interface variables
+      integer, intent(in) :: ix, im, levs, kh2o, h2o_coeff, me
+      real(kind=kind_phys), intent(in) :: dt
+      real(kind=kind_phys), intent(inout) :: h2o(ix,levs)
+      real(kind=kind_phys), intent(in) :: ph2o(kh2o)
+      real(kind=kind_phys), intent(in) :: prsl(ix,levs)
+      real(kind=kind_phys), intent(in) :: h2opltc(ix,kh2o,h2o_coeff)
+      logical             , intent(in) :: ldiag3d
+      real(kind=kind_phys), intent(inout) :: h2op(ix,levs,h2o_coeff)
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+!     local variables
       integer k,kmax,kmin,l,i,j
-      logical              ldiag3d, flg(im)
+      logical              flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), pltc(im,h2o_coeff)
      &,                    h2oib(im)
       real, parameter :: prsmax=10000.0, pmaxl=log(prsmax)
+!
+!     initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !
 !     write(1000+me,*)' in h2ophys ix=',ix, im, levs, kh2o, dt
       do l=1,levs
@@ -85,12 +130,10 @@
         endif
         do i=1,im
           if (prsl(i,l) < prsmax) then
-            h2oib(i)   = h2oi(i,l)           ! no filling
-            tem        = 1.0 / pltc(i,2)     ! 1/teff
-            h2oo(i,l)  = (h2oib(i) + (pltc(i,1)+pltc(i,3)*tem)*dt)
+            h2oib(i)  = h2o(i,l)            ! no filling
+            tem       = 1.0 / pltc(i,2)     ! 1/teff
+            h2o(i,l)  = (h2oib(i) + (pltc(i,1)+pltc(i,3)*tem)*dt)
      &                 / (1.0 + tem*dt)
-          else
-            h2oo(i,l)  = h2oi(i,l)
           endif
 
 !           if (i == 1) write(1000+me,*)' h2oib=',h2oib(i),' pltc1=',
@@ -107,6 +150,15 @@
       enddo                   ! vertical loop
 !
       return
-      end
+      end subroutine h2ophys_run
 !! @}
 !! @}
+
+! \brief Brief description of the subroutine
+!
+! \section arg_table_h2ophys_finalize Argument Table
+!
+      subroutine h2ophys_finalize()
+      end subroutine h2ophys_finalize
+
+      end module h2ophys

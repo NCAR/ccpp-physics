@@ -105,6 +105,8 @@
 !! | frland         | land_area_fraction                                                       | land area fraction                                                      | frac          |    1 | real             | kind_phys | out    | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real             | kind_phys | out    | F        |
 !! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                     | none          |    1 | real             | kind_phys | out    | F        |
+!! | dxmin          | minimum_scaling_factor_for_critical_relative_humidity                    | minimum scaling factor for critical relative humidity                   | m2 rad-2      |    0 | real             | kind_phys | in     | F        |
+!! | dxinv          | inverse_scaling_factor_for_critical_relative_humidity                    | inverse scaling factor for critical relative humidity                   | rad2 m-2      |    0 | real             | kind_phys | in     | F        |
 !! | dudt           | tendency_of_x_wind_due_to_model_physics                                  | updated tendency of the x wind                                          | m s-2         |    2 | real             | kind_phys | out    | F        |
 !! | dvdt           | tendency_of_y_wind_due_to_model_physics                                  | updated tendency of the y wind                                          | m s-2         |    2 | real             | kind_phys | out    | F        |
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics                         | updated tendency of the temperature                                     | K s-1         |    2 | real             | kind_phys | out    | F        |
@@ -114,10 +116,9 @@
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                   | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_1_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
-                                             frland, work1, work2, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+                                             frland, work1, work2, dxmin, dxinv, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use physcons,              only: dxmin, dxinv
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_statein_type, GFS_diag_type
 
       implicit none
@@ -135,6 +136,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: work1, work2
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
+      real(kind=kind_phys), intent(in) :: dxmin, dxinv
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -370,15 +372,15 @@
 !! | ktop           | vertical_index_at_cloud_top                                              | vertical index at cloud top                                           | index         |    1 | integer          |           | inout  | F        |
 !! | kbot           | vertical_index_at_cloud_base                                             | vertical index at cloud base                                          | index         |    1 | integer          |           | inout  | F        |
 !! | rhc            | critical_relative_humidity                                               | critical relative humidity                                            | frac          |    2 | real             | kind_phys | out    | F        |
+!! | rhcmax         | maximum_critical_relative_humidity                                       | maximum critical relative humidity                                    | frac          |    0 | real             | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_3_run (Model, Grid, Statein, rhbbot, rhbtop, work1, work2, clw, cnvc, cnvw, &
-                                             ktop, kbot, rhc, errmsg, errflg)
+                                             ktop, kbot, rhc, rhcmax, errmsg, errflg)
 
       use machine,               only: kind_phys
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type
-      use physcons,              only: rhc_max
 
       implicit none
 
@@ -392,6 +394,7 @@
       real(kind=kind_phys), intent(inout)                                        :: clw(:,:,:), cnvc(:,:), cnvw(:,:)
       integer, dimension(size(Grid%xlon,1)), intent(out)                         :: ktop, kbot
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: rhc
+      real(kind=kind_phys), intent(in) :: rhcmax
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -419,7 +422,7 @@
         do k=1,Model%levs
           do i=1, size(Grid%xlon,1)
             tem      = rhbbot - (rhbbot-rhbtop) * (1.0-Statein%prslk(i,k))
-            tem      = rhc_max * work1(i) + tem * work2(i)
+            tem      = rhcmax * work1(i) + tem * work2(i)
             rhc(i,k) = max(0.0, min(1.0,tem))
           enddo
         enddo

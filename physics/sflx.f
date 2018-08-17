@@ -273,7 +273,7 @@
 !  ---  constant parameters:
 !      *** note: some of the constants are different in subprograms and need to
 !          be consolidated with the standard def in module physcons at sometime
-!          at the present time, those diverse values are kept temperately to 
+!          at the present time, those diverse values are kept temperately to
 !          provide the same result as the original codes.  -- y.t.h.  may09
 
       integer,               parameter :: nsold   = 4           !< max soil layers
@@ -306,7 +306,7 @@
       real (kind=kind_phys), intent(in) :: ffrozp, dt, zlvl, lwdn,      &
      &       sldpth(nsoil), swdn, swnet, sfcems, sfcprs, sfctmp,        &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
-     &       bexpp, xlaip  
+     &       bexpp, xlaip
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -396,8 +396,8 @@
         end do
 
       endif   ! end if_ice_block
-         
-!  --- ...  next is crucial call to set the land-surface parameters, 
+
+!  --- ...  next is crucial call to set the land-surface parameters,
 !           including soil-type and veg-type dependent parameters.
 !           set shdfac=0.0 for bare soil surfaces
 
@@ -511,9 +511,9 @@
       endif
 
 !> - Determine if it's precipitating and what kind of precipitation it is.
-!! if it's precipitating and the air temperature is colder than \f$0^oC\f$, 
-!! it's snowing! if it's precipitating and the air temperature is warmer than 
-!! \f$0^oC\f$, but the ground temperature is colder than \f$0^oC\f$, freezing 
+!! if it's precipitating and the air temperature is colder than \f$0^oC\f$,
+!! it's snowing! if it's precipitating and the air temperature is warmer than
+!! \f$0^oC\f$, but the ground temperature is colder than \f$0^oC\f$, freezing
 !! rain is presumed to be falling.
 
       if (prcp > 0.0) then
@@ -525,7 +525,7 @@
       endif
 
 !> - If either precipitation flag (\a snowng, \a frzgra) is set as true:
-! determine new snowfall (converting precipitation rate from 
+! determine new snowfall (converting precipitation rate from
 ! \f$kg m^{-2} s^{-1}\f$ to a liquid equiv snow depth in meters)
 !  and add it to the existing snowpack.
 !>  - Since all precip is added to snowpack, no precip infiltrates
@@ -619,18 +619,18 @@
 
 !  --- ...  next calculate the subsurface heat flux, which first requires
 !           calculation of the thermal diffusivity.  treatment of the
-!           latter follows that on pages 148-149 from "heat transfer in 
-!           cold climates", by v. j. lunardini (published in 1981 
-!           by van nostrand reinhold co.) i.e. treatment of two contiguous 
-!           "plane parallel" mediums (namely here the first soil layer 
-!           and the snowpack layer, if any). this diffusivity treatment 
-!           behaves well for both zero and nonzero snowpack, including the 
+!           latter follows that on pages 148-149 from "heat transfer in
+!           cold climates", by v. j. lunardini (published in 1981
+!           by van nostrand reinhold co.) i.e. treatment of two contiguous
+!           "plane parallel" mediums (namely here the first soil layer
+!           and the snowpack layer, if any). this diffusivity treatment
+!           behaves well for both zero and nonzero snowpack, including the
 !           limit of very thin snowpack.  this treatment also eliminates
-!           the need to impose an arbitrary upper bound on subsurface 
+!           the need to impose an arbitrary upper bound on subsurface
 !           heat flux when the snowpack becomes extremely thin.
 
 !  --- ...   first calculate thermal diffusivity of top soil layer, using
-!            both the frozen and liquid soil moisture, following the 
+!            both the frozen and liquid soil moisture, following the
 !            soil thermal diffusivity function of peters-lidard et al.
 !            (1998,jas, vol 55, 1209-1224), which requires the specifying
 !            the quartz content of the given soil class (see routine redprm)
@@ -648,15 +648,15 @@
             if ( vegtyp == 13 ) df1=3.24
         endif
 
-!>   - Add subsurface heat flux reduction effect from the 
-!!  overlying green canopy, adapted from section 2.1.2 of 
+!>   - Add subsurface heat flux reduction effect from the
+!!  overlying green canopy, adapted from section 2.1.2 of
 !!  \cite peters-lidard_et_al_1997.
 
         df1 = df1 * exp( sbeta*shdfac )
 
       endif   ! end if_ice_block
 
-!  --- ...  finally "plane parallel" snowpack effect following 
+!  --- ...  finally "plane parallel" snowpack effect following
 !           v.j. linardini reference cited above. note that dtot is
 !           combined depth of snowdepth and thickness of first soil layer
 
@@ -697,7 +697,7 @@
 
       endif   ! end if_sneqv_block
 
-!> - For uncoupled mode, call snowz0() to calculate surface roughness 
+!> - For uncoupled mode, call snowz0() to calculate surface roughness
 !! (\a z0) over snowpack using snow condition from the previous timestep.
 
 !     if (couple == 0) then            ! uncoupled mode
@@ -719,17 +719,17 @@
 
 !  --- ...  next call routine sfcdif to calculate the sfc exchange coef (ch)
 !           for heat and moisture.
-!    note - comment out call sfcdif, if sfcdif already called in calling 
+!    note - comment out call sfcdif, if sfcdif already called in calling
 !           program (such as in coupled atmospheric model).
 !         - do not call sfcdif until after above call to redprm, in case
 !           alternative values of roughness length (z0) and zilintinkevich
 !           coef (czil) are set there via namelist i/o.
 !         - routine sfcdif returns a ch that represents the wind spd times
 !           the "original" nondimensional "ch" typical in literature.  hence
-!           the ch returned from sfcdif has units of m/s.  the important 
+!           the ch returned from sfcdif has units of m/s.  the important
 !           companion coefficient of ch, carried here as "rch", is the ch
 !           from sfcdif times air density and parameter "cp".  "rch" is
-!           computed in "call penman". rch rather than ch is the coeff 
+!           computed in "call penman". rch rather than ch is the coeff
 !           usually invoked later in eqns.
 !         - sfcdif also returns the surface exchange coefficient for momentum,
 !           cm, also known as the surface drage coefficient, but cm is not
@@ -795,7 +795,7 @@
 
       if (shdfac > 0.) then
 
-!  --- ...  frozen ground extension: total soil water "smc" was replaced 
+!  --- ...  frozen ground extension: total soil water "smc" was replaced
 !           by unfrozen soil water "sh2o" in call to canres below
 
         call canres
@@ -848,7 +848,7 @@
 !            ett, snomlt, drip, dew, flx1, flx3, esnow )                !
 
       endif
-!> - Noah LSM post-processing: 
+!> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
       sheat = -(ch*cp1*sfcprs) / (rd1*t2v) * (th2 - t1)
@@ -882,12 +882,12 @@
 !!   -  ssoil>0: warm the surface  (night time)
 !!   -  ssoil<0: cool the surface  (day time)
 
-      ssoil = -1.0 * ssoil      
+      ssoil = -1.0 * ssoil
 
       if (ice == 0) then
 
 !>  - For the case of land (but not glacial-ice):
-!!  convert runoff3 (internal layer runoff from supersat) from \f$m\f$ 
+!!  convert runoff3 (internal layer runoff from supersat) from \f$m\f$
 !!  to \f$ms^-1\f$ and add to subsurface runoff/baseflow (runoff2).
 !!  runoff2 is already a rate at this point.
 
@@ -904,7 +904,7 @@
         runoff1 = snomlt / dt
       endif
 
-!>  - Calculate total column soil moisture in meters (soilm) and root-zone 
+!>  - Calculate total column soil moisture in meters (soilm) and root-zone
 !! soil moisture availability (fraction) relative to porosity/saturation.
 
       soilm = -1.0 * smc(1) * zsoil(1)
@@ -1239,7 +1239,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates soil moisture and heat flux values and 
+!> This subroutine calculates soil moisture and heat flux values and
 !! update soil moisture content and soil heat content values for the
 !! case when no snow pack is present.
       subroutine nopac
@@ -1616,7 +1616,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine internally sets default values or optionally read-in 
+!> This subroutine internally sets default values or optionally read-in
 !! via namelist i/o, all soil and vegetation parateters requied for the execusion
 !! of the Noah LSM.
       subroutine redprm
@@ -2268,7 +2268,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates soil moisture and heat flux values and 
+!> This subroutine calculates soil moisture and heat flux values and
 !! update soil moisture content and soil heat content values for the
 !! case when a snow pack is present.
       subroutine snopac
@@ -2577,7 +2577,9 @@
 !           so with snoexp = 2.0 (>1), surface skin temperature is higher than
 !           for the linear case (snoexp = 1).
 
-        t1 = tfreez * sncovr**snoexp + t12 * (1.0 - sncovr**snoexp)
+!       t1 = tfreez * sncovr**snoexp + t12 * (1.0 - sncovr**snoexp)
+        t1 = tfreez * max(0.01,sncovr**snoexp) +                          &
+     & 			t12 * (1.0 - max(0.01,sncovr**snoexp))
 
         beta = 1.0
         ssoil = df1 * (t1 - stc(1)) / dtot
@@ -2631,7 +2633,7 @@
 
             ex = sneqv / dt
             flx3 = ex * 1000.0 * lsubf
-            snomlt = sneqv 
+            snomlt = sneqv
             sneqv = 0.0
 
           endif   ! end if_sneqv-snomlt_block
@@ -3574,8 +3576,8 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates compaction of a snowpack under conditions of 
-!! increasing snow density, as obtained from an approximate solution of 
+!> This subroutine calculates compaction of a snowpack under conditions of
+!! increasing snow density, as obtained from an approximate solution of
 !! E. Anderson's differential equation (3.29),NOAA technical report NWS 19,
 !! by Victor Koren, 03/25/95. subroutine will return new values of \a snowh
 !! and \a sndens .
@@ -3815,7 +3817,7 @@
 !! New version (June 2001): much faster and more accurate Newton iteration
 !! achieved by first taking log of eqn cited above -- less than 4 (typically
 !! 1 or 2) iterations achieves convergence. Also, explicit 1-step solution
-!! option for special case of paramter ck=0, which reduces the orginal 
+!! option for special case of paramter ck=0, which reduces the orginal
 !! implicit equation to a simpler explicit form, known as the "flerchinger eqn".
 !! Improved handling of solution in the limit of freezing point temperature t0.
       subroutine frh2o                                                  &
@@ -3967,7 +3969,7 @@
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates the right hand side of the time tendency 
+!> This subroutine calculates the right hand side of the time tendency
 !! term of the soil thermal diffusion equation. Also to compute (prepare)
 !! the matrix coefficients for the tri-diagonal matrix of the implicit time
 !! scheme.
@@ -4822,7 +4824,7 @@
 !>\ingroup Noah_LSM
 !> This subroutine calculates the right hand side of the time tendency
 !! term of the soil water diffusion equation. Also to compute
-!! (prepare) the matrix coefficients for the tri-diagonal matrix of 
+!! (prepare) the matrix coefficients for the tri-diagonal matrix of
 !! the implicit time scheme.
       subroutine srt                                                    &
      &     ( nsoil, edir, et, sh2o, sh2oa, pcpdrp, zsoil, dwsat,        &    !  ---  inputs:
@@ -5277,7 +5279,7 @@ c ----------------------------------------------------------------------
 
 !-----------------------------------
 !>\ingroup Noah_LSM
-!> This subroutine calculates temperature on the boundary of the 
+!> This subroutine calculates temperature on the boundary of the
 !! layer by interpolation of the middle layer temperatures.
       subroutine tbnd                                                   &
      &     ( tu, tb, zsoil, zbot, k, nsoil,                             &     !  ---  inputs:
