@@ -83,8 +83,8 @@
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
         cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
         prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
-        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnow,                            &
-        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat)
+        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                             &
+        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
@@ -98,12 +98,12 @@
                                                                     ice0, snow0, graupel0
       real(kind=kind_phys), dimension(ix,nrcm),       intent(in) :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: gt0, gq0_water_vapor, prsl, save_t, save_qv, del
-      real(kind=kind_phys), dimension(im,lev+1),      intent(in) :: prsi, phii
+      real(kind=kind_phys), dimension(im,levs+1),     intent(in) :: prsi, phii
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in) :: gq0
 
 
       real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,     &
-        srflag, totprcp, totice, totsnow, totgrp, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat
+        srflag, totprcp, totice, totsnw, totgrp, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dt3dt, dq3dt
 
       character(len=*), intent(out) :: errmsg
@@ -214,7 +214,7 @@
             csnow = rainc(i)
           endif
 !         if ((snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow) > (rain0(i,1)+crain)) then
-          if ((snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow) > 0.0) then
+          if ((snow0(i)+ice0(i)+graupel0(i)+csnow) > 0.0) then
             srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
           endif
         enddo
