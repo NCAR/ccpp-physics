@@ -289,17 +289,63 @@
   end module GFS_suite_interstitial_2
 
 
-  module GFS_suite_update_stateout
+  module GFS_suite_stateout_reset
 
   contains
 
-    subroutine GFS_suite_update_stateout_init ()
-    end subroutine GFS_suite_update_stateout_init
+    subroutine GFS_suite_stateout_reset_init ()
+    end subroutine GFS_suite_stateout_reset_init
 
-    subroutine GFS_suite_update_stateout_finalize()
-    end subroutine GFS_suite_update_stateout_finalize
+    subroutine GFS_suite_stateout_reset_finalize()
+    end subroutine GFS_suite_stateout_reset_finalize
 
-!> \section arg_table_GFS_suite_update_stateout_run Argument Table
+!> \section arg_table_GFS_suite_stateout_reset_run Argument Table
+!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type              |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
+!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type  |           | in     | F        |
+!! | Stateout       | FV3-GFS_Stateout_type                                        | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type |           | inout  | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
+!!
+    subroutine GFS_suite_stateout_reset_run (Statein, Stateout, errmsg, errflg)
+
+      use machine,               only: kind_phys
+      use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type
+
+      implicit none
+
+      ! interface variables
+      type(GFS_statein_type),           intent(in)    :: Statein
+      type(GFS_stateout_type),          intent(inout) :: Stateout
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      Stateout%gt0(:,:)   = Statein%tgrs(:,:)
+      Stateout%gu0(:,:)   = Statein%ugrs(:,:)
+      Stateout%gv0(:,:)   = Statein%vgrs(:,:)
+      Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:)
+
+    end subroutine GFS_suite_stateout_reset_run
+
+  end module GFS_suite_stateout_reset
+
+
+  module GFS_suite_stateout_update
+
+  contains
+
+    subroutine GFS_suite_stateout_update_init ()
+    end subroutine GFS_suite_stateout_update_init
+
+    subroutine GFS_suite_stateout_update_finalize()
+    end subroutine GFS_suite_stateout_update_finalize
+
+!> \section arg_table_GFS_suite_stateout_update_run Argument Table
 !! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type              |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
 !! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type  |           | in     | F        |
@@ -313,7 +359,7 @@
 !! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
 !!
-    subroutine GFS_suite_update_stateout_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
+    subroutine GFS_suite_stateout_update_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
 
       use machine,               only: kind_phys
       use GFS_typedefs,          only: GFS_control_type, GFS_statein_type, GFS_grid_type, GFS_stateout_type
@@ -330,7 +376,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs, Model%ntrac), intent(in) :: dqdt
 
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,          intent(out) :: errflg
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -341,9 +387,9 @@
       Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * Model%dtp
       Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * Model%dtp
 
-    end subroutine GFS_suite_update_stateout_run
+    end subroutine GFS_suite_stateout_update_run
 
-  end module GFS_suite_update_stateout
+  end module GFS_suite_stateout_update
 
 
   module GFS_suite_interstitial_3
