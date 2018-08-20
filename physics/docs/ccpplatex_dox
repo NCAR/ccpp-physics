@@ -116,7 +116,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFS_ZHAOC.txt    \
                           pdftxt/GFDL_cloud.txt   \
-                          pdftxt/GEFS_SFC_PERT.txt  \
+##                          pdftxt/GEFS_SFC_PERT.txt  \
 ### Radiation
                         ../radlw_main.f \
                         ../radsw_main.f \
@@ -166,6 +166,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_fv_sat_adj.F90    \
 ###
                         ../surface_perturbation.F90 \
+                        ../GFS_calpreciptype.f90 \
+                        ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.f90     \
                         ../radcons.f90

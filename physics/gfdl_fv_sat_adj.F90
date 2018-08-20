@@ -192,9 +192,9 @@ end subroutine fv_sat_adj_finalize
 
 !>\defgroup fast_sat_adj GFDL Cloud Fast Physics
 !! @{
-!>@brief The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
+!! The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
 !! Cloud MP. It is part of the GFDL Cloud MP.
-!!>@author Shian-Jiann Lin, Linjiong Zhou
+!>@author Shian-Jiann Lin, Linjiong Zhou
 !!
 !>@brief The subroutine 'fv_sat_adj' performs the fast processes in the GFDL microphysics.
 !>@details This is designed for single-moment 6-class cloud microphysics schemes.

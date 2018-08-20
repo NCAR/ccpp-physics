@@ -3,7 +3,10 @@
 !! albedo and vegetation fraction perturbations.
 
 !>\defgroup sfc_pert GEFS Surface Parameter Perturbation Module
+!! This module contains routines used in the percentile matching algorithm for the
+!! albedo and vegetation fraction perturbations.
 !! @{
+
 !> This module contains routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
 module surface_perturbation

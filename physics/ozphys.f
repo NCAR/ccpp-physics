@@ -135,7 +135,7 @@
 !! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section genal_ozphys GFS ozphys_run General Algorithm
+!> \section genal_ozphys GFS ozphys_run General Algorithm
 !! @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &

@@ -1,6 +1,7 @@
 !>\file h2ophys.f
 !! This file include NRL H2O physics for stratosphere and mesosphere.
 
+!> This module contains the CCPP-compliant H2O physics for stratosphere and mesosphere. 
       module h2ophys
 
       implicit none
@@ -43,8 +44,8 @@
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !! @{
-      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,
-     &                     h2opltc, h2o_coeff, ldiag3d, h2op, me,
+      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,          &
+     &                     h2opltc, h2o_coeff, ldiag3d, h2op, me,              &
      &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for

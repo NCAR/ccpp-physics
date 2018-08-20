@@ -2,8 +2,7 @@
 !! This file contains the subroutine that calculates dominant precipitation type (calpreciptype),
 !! which provides precipitation forcing for LSM.
 
-!>\defgroup CALPRECIPTYPE GFS Dominant Precipitation Type
-!!\brief This scheme contains the subroutine that calculates dominant
+!> This module contains the subroutine that calculates dominant
 !! precipitation type and its post, which provides precipitation forcing
 !! to LSM.
 !!
@@ -21,8 +20,11 @@
 
 
 !>\defgroup gfs_calpreciptype GFS calpreciptype Main
-!!\ingroup CALPRECIPTYPE
-!!\brief This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
+!! If dominant precip type is requested (i.e., non GFDL cloud MP), 4 more algorithms
+!! will be called.  the tallies are then summed in calwxt_dominant().
+!!
+!! @{
+!! This subroutine calculates dominant precipitation type, which provides precipitation forcing for LSM.
 !> \section arg_table_GFS_calpreciptype_run Argument Table
 !! | local_name       | standard_name                                                          | long_name                                                              | units       | rank |  type     |   kind    | intent | optional |
 !! |------------------|------------------------------------------------------------------------|------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
@@ -82,6 +84,7 @@
 !! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                               | none        |    0 | character | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                                  | flag        |    0 | integer   |           | out    | F        |
 !!
+!!>\section gen_GFS_calprecip GFS calpreciptype General Algorithm
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno, &
                                cal_pre,lssav,ldiag3d,                  &
                                gt0,gq0,prsl,prsi,rainc,frain,rain1,    &
@@ -162,6 +165,7 @@
       errflg = 0
 
 !--- original GFS calpreciptype_pre interstitial-------------------
+!> - Calculate totoal precipitation from convective and noconvective portion.
       do i = 1, im
           rain(i) = rainc(i) + frain * rain1(i)
       enddo
@@ -238,6 +242,7 @@
 !
 !     instantaneous precipitation type.
 
+!> - Call calwxt() to calculte instantaneous precipitation type component 1.
         call calwxt(lm,lp1,t,q,pmid,pint,con_fvirt,con_rog,con_epsq,zint,iwx,twet)
         snowl(1)  = mod(iwx,2)
         sleet(1)  = mod(iwx,4)/2
@@ -439,8 +444,11 @@
       return
       end subroutine GFS_calpreciptype_run
 !
-!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!
+!> This subroutine computes precipitation type using a decision tree
+!! approach that uses variables such as integrated wet bulb temperatue
+!! below freezing and lowest layer temperature (Baldwin et al. 1994 
+!! \cite baldwin_et_al_1994).
+!>\author Michael Baldwin
        subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
                          d608,rog,epsq,zint,iwx,twet)
 !
@@ -692,6 +700,8 @@
 !   code adapted for wrf post  24 august 2005    g manikin
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !
+!> This subroutine is written and provided by Jim Ramer at NOAA/ESRL
+!!(Ramer (1993) \cite ramer_1993).
       subroutine calwxt_ramer(lm,lp1,t,q,pmid,rh,td,pint,ptyp)
 
 !      subroutine dophase(pq,   !  input pressure sounding mb
@@ -1092,6 +1102,10 @@
 !                                       and layer lmh = bottom
 !
 !$$$
+!>this routine computes precipitation type using a decision tree 
+!! approach that uses the so-called "energy method" of Bourgouin(2000) 
+!! \cite bourgouin_2000.
+!of aes (canada) 1992
       subroutine calwxt_bourg(lm,lp1,rn,g,t,q,pmid,pint,zint,ptype)
       implicit none
 !
@@ -1256,6 +1270,7 @@
       end subroutine calwxt_bourg
 !
 !
+!> This subroutine 
        subroutine calwxt_revised(lm,lp1,t,q,pmid,pint,         &
                                  d608,rog,epsq,zint,twet,iwx)
 !
@@ -1512,14 +1527,15 @@
       end subroutine calwxt_revised
 !
 !
+!> This subroutine takes the precipitation type solutions from 
+!! different algorithms and sums them up to give a dominant type.
+!!
+!>\section gen_calwxt_dominant GFS calwxt_dominant General Algorithm
+!! @{
        subroutine calwxt_dominant(nalg,rain,freezr,sleet,snow, &
      &                            domr,domzr,domip,doms)
 !
 !     written: 24 august 2005, g manikin
-!
-!     this routine takes the precip type solutions from different
-!       algorithms and sums them up to give a dominant type
-!
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
@@ -1540,7 +1556,7 @@
       totip = 0
       totr  = 0
       totzr = 0
-!   loop over the number of different algorithms that are used
+!> - Loop over the number of different algorithms that are used.
       do l = 1, nalg
         if (rain(l)       > 0) then
            totr  = totr  + 1
@@ -1553,8 +1569,8 @@
         endif
       enddo
 
-!   ties are broken to favor the most dangerous form of precip
-!     freezing rain > snow > sleet > rain
+!> - Ties are broken to favor the most dangerous form of precip
+!! freezing rain > snow > sleet > rain.
       if (totsn > totip) then
         if (totsn > totzr) then
           if (totsn >= totr) then
@@ -1581,6 +1597,8 @@
 !
       return
       end subroutine calwxt_dominant
+!! @}
+!! @}
 
 
       end module GFS_calpreciptype
