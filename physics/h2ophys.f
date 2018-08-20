@@ -37,7 +37,6 @@
 !! | h2opltc        | h2o_forcing                                       | water forcing data                                | various |    3 | real      | kind_phys | in     | F        |
 !! | h2o_coeff      | number_of_coefficients_in_h2o_forcing_data        | number of coefficients in h2o forcing data        | index   |    0 | integer   |           | in     | F        |
 !! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
-!! | h2op           | change_in_h2o_concentration                       | change in h2o concentration                       | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
 !! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
@@ -64,7 +63,7 @@
       real(kind=kind_phys), intent(in) :: prsl(ix,levs)
       real(kind=kind_phys), intent(in) :: h2opltc(ix,kh2o,h2o_coeff)
       logical             , intent(in) :: ldiag3d
-      real(kind=kind_phys), intent(inout) :: h2op(ix,levs,h2o_coeff)
+      !real(kind=kind_phys), intent(inout) :: h2op(ix,levs,h2o_coeff)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !     local variables
