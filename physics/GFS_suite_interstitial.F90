@@ -559,6 +559,9 @@
       errmsg = ''
       errflg = 0
 
+!  --- update the tracers due to deep & shallow cumulus convective transport
+!           (except for suspended water and ice)
+
       if (tracers_total > 0) then
         tracers = 2
         do n=2,ntrac
