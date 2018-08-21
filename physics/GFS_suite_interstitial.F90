@@ -621,3 +621,154 @@
     end subroutine GFS_suite_interstitial_3_run
 
   end module GFS_suite_interstitial_3
+
+  module GFS_suite_interstitial_4
+
+  contains
+
+    subroutine GFS_suite_interstitial_4_init ()
+    end subroutine GFS_suite_interstitial_4_init
+
+    subroutine GFS_suite_interstitial_4_finalize()
+    end subroutine GFS_suite_interstitial_4_finalize
+
+!> \section arg_table_GFS_suite_interstitial_4_run Argument Table
+!! | local_name                 | standard_name                                                                 | long_name                                                         | units         | rank | type             |    kind   | intent | optional |
+!! |----------------------------|-------------------------------------------------------------------------------|-------------------------------------------------------------------|---------------|------|------------------|-----------|--------|----------|
+!! | im                         | horizontal_loop_extent                                                        | horizontal loop extent                                            | count         |    0 | integer          |           | in     | F        |
+!! | levs                       | vertical_dimension                                                            | vertical layer dimension                                          | count         |    0 | integer          |           | in     | F        |
+!! | ltaerosol                  | flag_for_aerosol_physics                                                      | flag for aerosol physics                                          | flag          |    0 | logical          |           | in     | F        |
+!! | tracers_total              | number_of_total_tracers                                                       | total number of tracers                                           | count         |    0 | integer          |           | in     | F        |
+!! | ntrac                      | number_of_tracers                                                             | number of tracers                                                 | count         |    0 | integer          |           | in     | F        |
+!! | ntcw                       | index_for_liquid_cloud_condensate                                             | tracer index for cloud condensate (or liquid water)               | index         |    0 | integer          |           | in     | F        |
+!! | ntiw                       | index_for_ice_cloud_condensate                                                | tracer index for  ice water                                       | index         |    0 | integer          |           | in     | F        |
+!! | ntclamt                    | index_for_cloud_amount                                                        | tracer index for cloud amount integer                             | index         |    0 | integer          |           | in     | F        |
+!! | ntrw                       | index_for_rain_water                                                          | tracer index for rain water                                       | index         |    0 | integer          |           | in     | F        |
+!! | ntsw                       | index_for_snow_water                                                          | tracer index for snow water                                       | index         |    0 | integer          |           | in     | F        |
+!! | ntrnc                      | index_for_rain_number_concentration                                           | tracer index for rain   number concentration                      | index         |    0 | integer          |           | in     | F        |
+!! | ntsnc                      | index_for_snow_number_concentration                                           | tracer index for snow   number concentration                      | index         |    0 | integer          |           | in     | F        |
+!! | ntgl                       | index_for_graupel                                                             | tracer index for graupel                                          | index         |    0 | integer          |           | in     | F        |
+!! | ntgnc                      | index_for_graupel_number_concentration                                        | tracer index for graupel number concentration                     | index         |    0 | integer          |           | in     | F        |
+!! | ntlnc                      | index_for_liquid_cloud_number_concentration                                   | tracer index for liquid number concentration                      | index         |    0 | integer          |           | in     | F        |
+!! | ntinc                      | index_for_ice_cloud_number_concentration                                      | tracer index for ice    number concentration                      | index         |    0 | integer          |           | in     | F        |
+!! | nn                         | number_of_tracers_for_convective_transport                                    | number of tracers for convective transport                        | count         |    0 | integer          |           | in     | F        |
+!! | imp_physics                | flag_for_microphysics_scheme                                                  | choice of microphysics scheme                                     | flag          |    0 | integer          |           | in     | F        |
+!! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                             | choice of GFDL microphysics scheme                                | flag          |    0 | integer          |           | in     | F        |
+!! | imp_physics_thompson       | flag_for_thompson_microphysics_scheme                                         | choice of Thompson microphysics scheme                            | flag          |    0 | integer          |           | in     | F        |
+!! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                        | choice of Zhao-Carr microphysics scheme                           | flag          |    0 | integer          |           | in     | F        |
+!! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                    | choice of Zhao-Carr microphysics scheme with PDF clouds           | flag          |    0 | integer          |           | in     | F        |
+!! | save_qc                    | cloud_liquid_water_mixing_ratio_save                                          | cloud liquid water mixing ratio before entering a physics scheme  | kg kg-1       |    2 | real             | kind_phys | in     | F        |
+!! | save_qi                    | cloud_ice_water_mixing_ratio_save                                             | cloud ice water mixing ratio before entering a physics scheme     | kg kg-1       |    2 | real             | kind_phys | in     | F        |
+!! | con_pi                     | pi                                                                            | ratio of a circle's circumference to its diameter                 | radians       |    0 | real             | kind_phys | in     | F        |
+!! | gq0                        | tracer_concentration_updated_by_physics                                       | tracer concentration updated by physics                           | kg kg-1       |    3 | real             | kind_phys | inout  | F        |
+!! | clw                        | convective_transportable_tracers                                              | array to contain cloud water and other convective trans. tracers  | kg kg-1       |    3 | real             | kind_phys | inout  | F        |
+!! | errmsg                     | ccpp_error_message                                                            | error message for error handling in CCPP                          | none          |    0 | character        | len=*     | out    | F        |
+!! | errflg                     | ccpp_error_flag                                                               | error flag for error handling in CCPP                             | flag          |    0 | integer          |           | out    | F        |
+!!
+    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,  &
+      ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,                   &
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, save_qc, save_qi, con_pi,                                         &
+      gq0, clw, errmsg, errflg)
+
+      use machine,               only: kind_phys
+
+      implicit none
+
+      ! interface variables
+
+      integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
+        ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
+
+      logical,                                  intent(in) :: ltaerosol
+
+      real(kind=kind_phys),                     intent(in) :: con_pi
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, save_qi
+
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
+      real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! local variables
+      integer :: i,k,n,tracers
+
+      real(kind=kind_phys) :: liqm, icem
+
+      liqm = 4./3.*con_pi*1.e-12
+      icem = 4./3.*con_pi*3.2768*1.e-14*890.
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+!  --- update the tracers due to deep & shallow cumulus convective transport
+!           (except for suspended water and ice)
+
+      if (tracers_total > 0) then
+        tracers = 2
+        do n=2,ntrac
+!         if ( n /= ntcw .and. n /= ntiw .and. n /= ntclamt) then
+          if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
+               n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+               n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc ) then
+              tracers = tracers + 1
+            do k=1,levs
+              do i=1,im
+                gq0(i,k,n) = clw(i,k,tracers)
+              enddo
+            enddo
+          endif
+        enddo
+      endif
+
+      if (ntcw > 0) then
+
+!  for microphysics
+        if (imp_physics == imp_physics_zhao_carr_pdf .or. imp_physics == imp_physics_zhao_carr    &
+                               .or. imp_physics == imp_physics_gfdl) then
+           gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
+        elseif (ntiw > 0) then
+          do k=1,levs
+            do i=1,im
+              gq0(i,k,ntiw) = clw(i,k,1)                     ! ice
+              gq0(i,k,ntcw) = clw(i,k,2)                     ! water
+            enddo
+          enddo
+          if (imp_physics == imp_physics_thompson) then
+            if (ltaerosol) then
+              do k=1,levs
+                do i=1,im
+                  gq0(i,k,ntlnc) = gq0(i,k,ntlnc)  &
+                           +  max(0.0, (clw(i,k,2)-save_qc(i,k))) / liqm
+                  gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
+                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                enddo
+              enddo
+            else
+              do k=1,levs
+                do i=1,im
+                  gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
+                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                enddo
+              enddo
+            endif
+          endif
+        else
+          do k=1,levs
+            do i=1,im
+              gq0(i,k,ntcw) = clw(i,k,1) + clw(i,k,2)
+            enddo
+          enddo
+        endif   ! end if_ntiw
+      else
+        do k=1,levs
+          do i=1,im
+            clw(i,k,1) = clw(i,k,1) + clw(i,k,2)
+          enddo
+        enddo
+      endif   ! end if_ntcw
+    end subroutine GFS_suite_interstitial_4_run
+
+  end module GFS_suite_interstitial_4
