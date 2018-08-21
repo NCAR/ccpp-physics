@@ -56,6 +56,7 @@ AVX2 = Y
 HYDRO = N
 CCPP = N
 SION = N
+MEMCHECK = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -182,6 +183,13 @@ CPPDEFS += -DSION
 CFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
 FFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
 LDFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --libs --f90`
+endif
+
+ifeq ($(MEMCHECK),Y)
+CPPDEFS += -DMEMCHECK
+CFLAGS += $(MEMCHECK_INC)
+FFLAGS += $(MEMCHECK_INC)
+LDFLAGS += $(MEMCHECK_LIB)
 endif
 
 LDFLAGS += $(LIBS)
