@@ -482,7 +482,7 @@
 
       ! local variables
       integer :: i,k,n,tracers,kk
-      real(kind=kind_phys) :: tem
+      real(kind=kind_phys) :: tem, tem1, tem2
       real(kind=kind_phys), dimension(im) :: tx1, tx2
 
       real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.02,  &
