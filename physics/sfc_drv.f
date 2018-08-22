@@ -143,8 +143,6 @@
 
       public :: lsm_noah_init, lsm_noah_run, lsm_noah_finalize
 
-      logical :: is_initialized = .false.
-
       contains
 
 !! \section arg_table_lsm_noah_init Argument Table
@@ -170,12 +168,8 @@
       errmsg = ''
       errflg = 0
 
-      if (is_initialized) return
-
       !--- initialize soil vegetation
       call set_soilveg(me, isot, ivegsrc, nlunit)
-
-      is_initialized = .true.
 
       end subroutine lsm_noah_init
 
@@ -196,10 +190,6 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      if (.not. is_initialized) return
-
-      is_initialized = .false.
 
       end subroutine lsm_noah_finalize
 
@@ -497,17 +487,10 @@
 !===> ...  begin here
 !
 
-      ! Initialize CCPP error handling variables
+!> - Initialize CCPP error handling variables
+
       errmsg = ''
       errflg = 0
-
-      ! Check initialization status
-      if (.not. is_initialized) then
-         write(errmsg,'(*(a))') 
-     & "Logic error: lsm_noah_run called before lsm_noah_init"
-         errflg = 1
-         return
-      end if
 
 !> - Set flag for land points.
 
