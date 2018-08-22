@@ -46,8 +46,6 @@ module gfdl_cloud_microphys
 
    public gfdl_cloud_microphys_run, gfdl_cloud_microphys_init, gfdl_cloud_microphys_finalize
 
-   logical :: is_initialized = .false.
-
    real :: missing_value = - 1.e10
    character (len = 17) :: mod_name = 'gfdl_cloud_microphys'
 
@@ -368,8 +366,6 @@ contains
        errmsg = ''
        errflg = 0
 
-       if (is_initialized) return
-
        if (imp_physics/=imp_physics_gfdl) then
           write(errmsg,'(*(a))') 'Namelist option for microphysics does not match choice in suite definition file'
           errflg = 1
@@ -412,8 +408,6 @@ contains
        tice0 = tice - 0.01
        t_wfr = tice - 40.0 ! supercooled water can exist down to - 48 c, which is the "absolute"
 
-       is_initialized = .true.
-
    end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
@@ -439,8 +433,6 @@ contains
        errmsg = ''
        errflg = 0
 
-       if (.not.is_initialized) return
-
        if (allocated(table))  deallocate (table)
        if (allocated(table2)) deallocate (table2)
        if (allocated(table3)) deallocate (table3)
@@ -450,8 +442,6 @@ contains
        if (allocated(des3))   deallocate (des3)
        if (allocated(desw))   deallocate (desw)
 
-       is_initialized = .false.
-   
    end subroutine gfdl_cloud_microphys_finalize
 
 !>@brief The subroutine 'gfdl_cloud_microphys_run' executes the full GFDL cloud microphysics.
@@ -533,13 +523,6 @@ contains
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! Check initialization state
-      if (.not.is_initialized) then
-         write(errmsg, fmt='((a))') 'gfdl_cloud_microphys_run called before gfdl_cloud_microphys_init'
-         errflg = 1
-         return
-      end if
 
       iis = 1
       iie = im
@@ -3793,7 +3776,7 @@ subroutine qsmith_setup
 
     integer :: i
 
-    if (.not. is_initialized) then
+    if (.not.allocated(table)) then
 
        ! master = (mpp_pe () .eq. mpp_root_pe ())
        ! if (master) print *, ' gfdl mp: initializing qs tables'
