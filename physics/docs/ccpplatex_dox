@@ -165,10 +165,13 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90    \
 ###
-                        ../GFS_calpreciptype.f90 \
-###                        ../GFS_stochastics.F90   \
-###                        ../surface_perturbation.F90 \
-###                        ../../stochastic_physics/stochastic_physics.F90  \
+                        ../GFS_MP_generic_post.F90 \
+                        ../calpreciptype.f90   \
+### stochy
+###                     ../GFS_stochastics.F90   \
+###                     ../surface_perturbation.F90 \
+###                     ../../stochastic_physics/stochastic_physics.F90  \
+### utils
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.f90     \

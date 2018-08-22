@@ -1,19 +1,25 @@
 !> \file GFS_MP_generic_post.f90
-!! This file contains the subroutines that calculate diagnotics variables
-!! after calling any microphysics scheme:
+!! This file contains the subroutines that calculate precipitation type
+!! which provides precipitation forcing for LSM
 
+!> This module contains the subroutine that calculates 
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM.
       module GFS_MP_generic_post
       contains
 
-!> \defgroup GFS_MP_generic_post GFS MP generic post
-!! @{
 !! \section arg_table_GFS_MP_generic_post_init Argument Table
 !!
       subroutine GFS_MP_generic_post_init
       end subroutine GFS_MP_generic_post_init
 
-
-!> \section arg_table_GFS_MP_generic_post_run Argument Table
+!>\defgroup gfs_calpreciptype GFS/GFDL calpreciptype Main
+!! @{
+!! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
+!! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
+!! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
+!! 
+!! \section arg_table_GFS_MP_generic_post_run Argument Table
 !! | local_name       | standard_name                                                           | long_name                                                               | units       | rank |  type      |   kind    | intent | optional |
 !! |------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im               | horizontal_loop_extent                                                  | horizontal loop extent                                                  | count       |    0 | integer    |           | in     | F        |
@@ -80,6 +86,7 @@
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
+!! \section general_mpcal GFS/GFDL MP Generic Post General Algorithm
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
         cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
         prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
@@ -125,6 +132,8 @@
           rain(i) = rainc(i) + frain * rain1(i)
       enddo
 
+!> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
+!! precipitation type.
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
         call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
@@ -200,6 +209,8 @@
         enddo
       enddo
 
+!> - For GFDL cloud MP scheme, determine convective rain/snow by surface temperature;
+!! and determine explicit rain/snow by rain/snow coming out directly from MP.
       if (imp_physics == imp_physics_gfdl) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
@@ -268,10 +279,10 @@
       enddo
 
     end subroutine GFS_MP_generic_post_run
+!! @}
 
 !> \section arg_table_GFS_MP_generic_post_finalize Argument Table
 !!
       subroutine GFS_MP_generic_post_finalize
       end subroutine GFS_MP_generic_post_finalize
-!! @}
       end module GFS_MP_generic_post

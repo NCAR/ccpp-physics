@@ -49,7 +49,7 @@ direct diagnosis of precipitation type (e.g. rain or snow) at the surface.
 
 
 \section intra_calprecip  Intraphysics Communication
-\ref arg_table_GFS_calpreciptype_run
+\ref arg_table_GFS_MP_generic_post_run
 
 \section gen_GFS_calprecip  General Algorithm
 \ref gen_calprecip

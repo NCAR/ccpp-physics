@@ -936,9 +936,9 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 !>   - "scale - aware" subgrid variability: 100 - km as the base
                 hvar (i) = min (0.2, max (0.01, dw * sqrt (sqrt (area (i, j)) / 100.e3)))
                 ! -----------------------------------------------------------------------
-                !>   - calculate partial cloudiness by pdf
-                ! assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
-                ! binary cloud scheme; qa = 0.5 if qstar (i) == qpz
+                !>   - calculate partial cloudiness by pdf;
+                !! assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
+                !! binary cloud scheme; qa = 0.5 if qstar (i) == qpz
                 ! -----------------------------------------------------------------------
                 rh = qpz (i) / qstar (i)
                 ! -----------------------------------------------------------------------

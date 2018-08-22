@@ -1,3 +1,12 @@
+!>\file calpreciptype.f90
+!! This file contains the subroutines that calculates dominant precipitation type.
+
+!>\ingroup gfs_calpreciptype
+!! Foure algorithms are called to calculate dominant precipitation type, and the 
+!!tallies are sumed in calwxt_dominant().
+!!
+!>\section gen_calp GFS calpreciptype General Algorithm
+!! @{
       subroutine calpreciptype(kdt,nrcm,im,ix,lm,lp1,randomno,      &
                                xlat,xlon,                           &
                                gt0,gq0,prsl,prsi,prec,              & !input
@@ -207,9 +216,13 @@
       deallocate (twet,rh,td)        
       return
       end
+!! @}
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!
+!>\ingroup gfs_calpreciptype
+!! This subroutine computes precipitation type using a decision tree approach that uses 
+!! variables such as integrated wet bulb temperatue below freezing and lowest layer 
+!! temperature (Baldwin et al. 1994 \cite baldwin_et_al_1994)
        subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
                          d608,rog,epsq,zint,iwx,twet)
 ! 
@@ -460,7 +473,7 @@
 !
 !   code adapted for wrf post  24 august 2005    g manikin
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!
+!>\ingroup gfs_calpreciptype
 !> This subroutine is written and provided by Jim Ramer at NOAA/ESRL
 !!(Ramer (1993) \cite ramer_1993).
       subroutine calwxt_ramer(lm,lp1,t,q,pmid,rh,td,pint,ptyp)
@@ -861,6 +874,7 @@
 !                                       and layer lmh = bottom
 !
 !$$$
+!>\ingroup gfs_calpreciptype
 !>this routine computes precipitation type using a decision tree 
 !! approach that uses the so-called "energy method" of Bourgouin(2000) 
 !! \cite bourgouin_2000.
@@ -1028,7 +1042,7 @@
       return
       end
 !
-!
+!>\ingroup gfs_calpreciptype
 !> This subroutine computes precipitation type using a decision tree
 !! approach that uses variables such as integrated wet bulb temperature
 !! below freezing and lowest layer temperature (Baldwin et al.1994
@@ -1290,7 +1304,7 @@
       return
       end
 !
-!
+!>\ingroup gfs_calpreciptype
 !> This subroutine takes the precipitation type solutions from 
 !! different algorithms and sums them up to give a dominant type.
 !!
