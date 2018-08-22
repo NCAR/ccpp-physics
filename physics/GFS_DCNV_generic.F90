@@ -1,4 +1,4 @@
-!> \file GFS_DCNV_generic.f90
+!> \file GFS_DCNV_generic.F90
 !!  Contains code related to deep convective schemes to be used within the GFS physics suite.
 
       module GFS_DCNV_generic_pre

@@ -1,4 +1,4 @@
-!> \file gmtb_scm_sfc_flux_spec.f90
+!> \file gmtb_scm_sfc_flux_spec.F90
 !!  Contains code to calculate parameters needed by the rest of the GFS physics suite given specified surface fluxes.
 
 module gmtb_scm_sfc_flux_spec
