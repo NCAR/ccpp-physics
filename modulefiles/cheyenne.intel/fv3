@@ -47,6 +47,13 @@ setenv W3EMC_LIBd   ${NCEPLIBS_DIR}/lib/libw3emc_d.a
 setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
 
 ##
+## memcheck utility
+##
+set MEMCHECK_DIR /glade/p/ral/jntp/GMTB/tools/memcheck/20180720/intel-18.0.1
+setenv MEMCHECK_INC "-I${MEMCHECK_DIR}/include"
+setenv MEMCHECK_LIB "-L${MEMCHECK_DIR}/lib -lmemcheck"
+
+##
 ## Set compiler environment variables for CCPP
 ##
 setenv CC  mpicc
