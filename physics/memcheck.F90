@@ -63,14 +63,8 @@
 #else
          ompthread = 0
 #endif
- 
-         if (ompthread/=0) return
 
          ierr = ccpp_memory_usage(mpicomm, memory_usage)
-         ! DH*
-         !write(0,*) "DH DEBUG: mpicomm, mpirank, mpisize", mpicomm, mpirank, mpisize
-         !if (present(mpiroot)) write(0,*) "DH DEBUG: mpiroot", mpiroot
-         ! *DH
          if (present(mpiroot) .and. mpirank==mpiroot) then
             write(0,'(a)') trim(memory_usage)
          else if (.not.present(mpiroot)) then
