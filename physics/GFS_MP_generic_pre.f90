@@ -1,9 +1,9 @@
 !> \file GFS_MP_generic_pre.f90
-!! This file contains the subroutines that calculates physics/diagnotics variables 
+!! This file contains the subroutines that calculates physics/diagnotics variables
 !! before calling microphysics scheme:
 
       module GFS_MP_generic_pre
-      contains 
+      contains
 
 !> \defgroup GFS_MP_generic_pre GFS MP generic pre
 !! @{
@@ -29,7 +29,7 @@
 !! | q              | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity                                             | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | out    | F        |
 !! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1     |    2 | real      | kind_phys | out    | F        |
-!! | save_qcw       | cloud_condensed_water_mixing_ratio_save                | moist cloud condensed water mixing ratio before entering a physics scheme | kg kg-1     |    2 | real      | kind_phys | out    | F        |
+!! | save_qcw       | cloud_liquid_water_mixing_ratio_save                   | cloud liquid water mixing ratio before entering a physics scheme          | kg kg-1     |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
 !!
@@ -41,7 +41,7 @@
       use physcons,              only:  con_g
 
       implicit none
-!    
+!
 !     declare variables.
 !
       integer, intent(in) :: im, ix, levs, ntcw, ncld, num_p3d
@@ -92,4 +92,3 @@
       end subroutine GFS_MP_generic_pre_finalize
 !! @}
       end module GFS_MP_generic_pre
-
