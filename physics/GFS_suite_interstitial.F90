@@ -638,6 +638,7 @@
 !! | im                         | horizontal_loop_extent                                                        | horizontal loop extent                                            | count         |    0 | integer          |           | in     | F        |
 !! | levs                       | vertical_dimension                                                            | vertical layer dimension                                          | count         |    0 | integer          |           | in     | F        |
 !! | ltaerosol                  | flag_for_aerosol_physics                                                      | flag for aerosol physics                                          | flag          |    0 | logical          |           | in     | F        |
+!! | lgocart                    | flag_gocart                                                                   | flag for 3d diagnostic fields for gocart 1                        | flag          |    0 | logical          |           | in     | F        |
 !! | tracers_total              | number_of_total_tracers                                                       | total number of tracers                                           | count         |    0 | integer          |           | in     | F        |
 !! | ntrac                      | number_of_tracers                                                             | number of tracers                                                 | count         |    0 | integer          |           | in     | F        |
 !! | ntcw                       | index_for_liquid_cloud_condensate                                             | tracer index for cloud condensate (or liquid water)               | index         |    0 | integer          |           | in     | F        |
@@ -657,18 +658,20 @@
 !! | imp_physics_thompson       | flag_for_thompson_microphysics_scheme                                         | choice of Thompson microphysics scheme                            | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                        | choice of Zhao-Carr microphysics scheme                           | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                    | choice of Zhao-Carr microphysics scheme with PDF clouds           | flag          |    0 | integer          |           | in     | F        |
+!! | dtf                        | time_step_for_dynamics                                                        | dynamics timestep                                                 | s             |    0 | real             | kind_phys | in     | F        |
 !! | save_qc                    | cloud_liquid_water_mixing_ratio_save                                          | cloud liquid water mixing ratio before entering a physics scheme  | kg kg-1       |    2 | real             | kind_phys | in     | F        |
 !! | save_qi                    | cloud_ice_water_mixing_ratio_save                                             | cloud ice water mixing ratio before entering a physics scheme     | kg kg-1       |    2 | real             | kind_phys | in     | F        |
 !! | con_pi                     | pi                                                                            | ratio of a circle's circumference to its diameter                 | radians       |    0 | real             | kind_phys | in     | F        |
 !! | gq0                        | tracer_concentration_updated_by_physics                                       | tracer concentration updated by physics                           | kg kg-1       |    3 | real             | kind_phys | inout  | F        |
 !! | clw                        | convective_transportable_tracers                                              | array to contain cloud water and other convective trans. tracers  | kg kg-1       |    3 | real             | kind_phys | inout  | F        |
+!! | dqdti                      | instantaneous_water_vapor_specific_humidity_tendency_due_to_convection        | instantaneous moisture tendency due to convection                 | kg kg-1 s-1   |    2 | real             | kind_phys | inout  | F        |
 !! | errmsg                     | ccpp_error_message                                                            | error message for error handling in CCPP                          | none          |    0 | character        | len=*     | out    | F        |
 !! | errflg                     | ccpp_error_flag                                                               | error flag for error handling in CCPP                             | flag          |    0 | integer          |           | out    | F        |
 !!
-    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,  &
-      ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,                   &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, save_qc, save_qi, con_pi,                                         &
-      gq0, clw, errmsg, errflg)
+    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, lgocart, tracers_total, ntrac, ntcw, ntiw, ntclamt,      &
+      ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                                    &
+      gq0, clw, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -680,13 +683,14 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,                                  intent(in) :: ltaerosol
+      logical,                                  intent(in) :: ltaerosol, lgocart
 
-      real(kind=kind_phys),                     intent(in) :: con_pi
+      real(kind=kind_phys),                     intent(in) :: con_pi, dtf
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, save_qi
 
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
+      real(kind=kind_phys), dimension(im,levs),       intent(inout) :: dqdti
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -769,6 +773,16 @@
           enddo
         enddo
       endif   ! end if_ntcw
+
+! dqdt_v : instaneous moisture tendency (kg/kg/sec)
+      if (lgocart) then
+        do k=1,levs
+          do i=1,im
+            dqdti(i,k) = dqdti(i,k) * (1.0 / dtf)
+          enddo
+        enddo
+      endif
+
     end subroutine GFS_suite_interstitial_4_run
 
   end module GFS_suite_interstitial_4
