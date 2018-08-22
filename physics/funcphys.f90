@@ -316,7 +316,6 @@ contains
 !! pressures are calculated in subprogram fpvslx(). The current implementation
 !! computes a table with a length of 7501 for temperature ranging from 180. to
 !! 330. Kelvin.
-!>\authour N Phillips
   subroutine gpvsl
 !$$$     Subprogram Documentation Block
 !

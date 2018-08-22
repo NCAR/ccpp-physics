@@ -25,11 +25,10 @@ model state using a forward-in-time evaluation consistent with the dynamics.
 done independently within each layer to maintain local (within each layer) stability.
 -# Remap the deformal Lagrangian surfaces on to the reference, or "Eulerian", coordinate levels. 
 
+This loop is typically performed once per call to the solver, although it is possible to improve the model's 
+stability by executing the loop (and thereby the vertical remapping) multiple times per solver call.
+
 In current fv3gfs, the fast physics (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
-
-This loop is typically performed once per call to the solver,
-
-
 
 \subsection subgrid b. Horizontal Sub-grid Variability ("Scale-aware")
 Horizontal sub-grid variability is a function of cell area:

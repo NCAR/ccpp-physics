@@ -84,7 +84,8 @@
 !! | errmsg           | ccpp_error_message                                                     | error message for error handling in CCPP                               | none        |    0 | character | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                        | error flag for error handling in CCPP                                  | flag        |    0 | integer   |           | out    | F        |
 !!
-!!>\section gen_GFS_calprecip GFS calpreciptype General Algorithm
+!>\section gen_calprecip GFS calpreciptype General Algorithm
+!! @{
       subroutine GFS_calpreciptype_run(kdt,nrcm,im,ix,lm,lp1,randomno, &
                                cal_pre,lssav,ldiag3d,                  &
                                gt0,gq0,prsl,prsi,rainc,frain,rain1,    &
@@ -191,7 +192,7 @@
             q(k1)       = gq0(i,k)
             pmid(k1)    = prsl(i,k)                      ! pressure in pascals
 !
-!         compute wet bulb temperature
+!> - Compute wet bulb temperature and relative humidity.
 !
             pv     = pmid(k1)*q(k1)/(con_eps-con_epsm1*q(k1))
             td(k1) = ftdp(pv)
@@ -270,6 +271,7 @@
 !     write(0,*)' i=',i,' lm=',lm,' lp1=',lp1,' t=',t(1),q(1),pmid(1) &
 !    &,' pint=',pint(1),' prec=',prec(i),' pthresh=',pthresh
 
+!> - Call calwxt_ramer() to calculate instantaneous precipitation type component 2.
         call calwxt_ramer(lm,lp1,t,q,pmid,rh,td,pint,iwx)
 
 !
@@ -282,6 +284,7 @@
 !      iseed=44641*(int(sdat(1)-1)*24*31+int(sdat(2))*24+ihrst)+   &
 !     &  mod(ifhr*60+ifmin,44641)+4357
 
+!> - Call calwxt_bourg() to calculate instantaneous precipitation type component 3.
         ranl = randomno(i,1:2)
         call calwxt_bourg(lm,lp1,ranl,con_g,t,q,pmid,pint,zint(1),iwx)
 
@@ -293,6 +296,7 @@
 !
 ! revised ncep algorithm
 !
+!> - Call calwxt_revised() to calculate instantateous precipitation type component 4.
         call calwxt_revised(lm,lp1,t,q,pmid,pint,                       &
                             con_fvirt,con_rog,con_epsq,zint,twet,iwx)
 !
@@ -308,6 +312,9 @@
         freezr(5) = 0
         rainl(5)  = 0
 !
+! 
+!> - Call calwxt_dominant() to takes the precipitation type solution from different algorithm
+!! and sums them up to give a dominant type.
          call calwxt_dominant(nalg,rainl(1),freezr(1),sleet(1),         &
                               snowl(1),domr(i),domzr(i),domip(i),doms(i))
 
@@ -334,6 +341,8 @@
 !       end do
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
+!> - For zhao-carr MP scheme, use new precipitation type to decide snow flag for 
+!! land surface model snow accumulation.  
       if (imp_physics /= imp_physics_gfdl) then
         do i=1,im
           tprcp(:) = max(0.0, rain(:))
@@ -394,6 +403,8 @@
         enddo
       enddo
 
+!> - For GFDL cloud MP sheme, determine convective rain/snow by surface temperature;
+!! determine explicit rain/snow by rain/snow coming out directly from MP.
       if (imp_physics == imp_physics_gfdl) then
         ! determine convective rain/snow by surface temperature
         ! determine large-scale rain/snow by rain/snow coming out directly from MP
@@ -443,12 +454,13 @@
 
       return
       end subroutine GFS_calpreciptype_run
-!
+!! @}
+
+!>\ingroup gfs_calpreciptype
 !> This subroutine computes precipitation type using a decision tree
 !! approach that uses variables such as integrated wet bulb temperatue
 !! below freezing and lowest layer temperature (Baldwin et al. 1994 
 !! \cite baldwin_et_al_1994).
-!>\author Michael Baldwin
        subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
                          d608,rog,epsq,zint,iwx,twet)
 !
@@ -1270,7 +1282,12 @@
       end subroutine calwxt_bourg
 !
 !
-!> This subroutine 
+!> This subroutine computes precipitation type using a decision tree
+!! approach that uses variables such as integrated wet bulb temperature
+!! below freezing and lowest layer temperature (Baldwin et al.1994
+!! \cite baldwin_et_al_1994). Since the original version of the algorithm
+!! has a high bias for freezing rain and sleet, the revised version is 
+!! to balance that bias with a version more likely to predict snow.
        subroutine calwxt_revised(lm,lp1,t,q,pmid,pint,         &
                                  d608,rog,epsq,zint,twet,iwx)
 !
