@@ -105,8 +105,6 @@ module fv_sat_adj
     real :: lv00 !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
     real, allocatable :: table (:), table2 (:), tablew (:), des2 (:), desw (:)
 
-    logical :: is_initialized = .false.
-
 contains
 
 !>@brief The subroutine 'fv_sat_adj_init' initializes lookup tables for the saturation mixing ratio.
@@ -134,7 +132,7 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
     errmsg = ''
     errflg = 0
 
-    if (is_initialized) return
+    if (allocated(table)) return
 
     ! generate es table (dt = 0.1 deg c)
 
@@ -154,8 +152,6 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
     enddo
     des2 (length) = des2 (length - 1)
     desw (length) = desw (length - 1)
-
-    is_initialized = .true.
 
 end subroutine fv_sat_adj_init
 
@@ -177,15 +173,11 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
     errmsg = ''
     errflg = 0
 
-    if (.not.is_initialized) return
-
     if (allocated(table )) deallocate(table )
     if (allocated(table2)) deallocate(table2)
     if (allocated(tablew)) deallocate(tablew)
     if (allocated(des2  )) deallocate(des2  )
     if (allocated(desw  )) deallocate(desw  )
-
-    is_initialized = .false.
 
 end subroutine fv_sat_adj_finalize
 
@@ -312,13 +304,6 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     ! Initialize the CCPP error handling variables
     errmsg = ''
     errflg = 0
-
-    ! Check initialization state
-    if (.not.is_initialized) then
-       write(errmsg, fmt='((a))') 'fv_sat_adj_run called before fv_sat_adj_init'
-       errflg = 1
-       return
-    end if
 
 #ifndef FV3
 ! Open parallel region if not already opened by host model
