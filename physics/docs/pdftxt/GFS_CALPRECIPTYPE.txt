@@ -52,7 +52,7 @@ direct diagnosis of precipitation type (e.g. rain or snow) at the surface.
 \ref arg_table_GFS_MP_generic_post_run
 
 \section gen_GFS_calprecip  General Algorithm
-\ref gen_calprecip
+\ref gfs_mp_gen
 
 
 

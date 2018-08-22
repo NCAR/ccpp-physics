@@ -28,8 +28,6 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup physcons GFS Physics Constants Module
-!> This module contains some of the most frequently used math and physics
-!! constants for GCM models.
 !! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for GCM models.

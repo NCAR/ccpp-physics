@@ -86,7 +86,8 @@
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
-!! \section general_mpcal GFS/GFDL MP Generic Post General Algorithm
+!> \section gfs_mp_gen GFS MP Generic Post General Algorithm
+!! @{
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
         cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
         prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
@@ -279,6 +280,7 @@
       enddo
 
     end subroutine GFS_MP_generic_post_run
+!! @}
 !! @}
 
 !> \section arg_table_GFS_MP_generic_post_finalize Argument Table

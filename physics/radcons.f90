@@ -3,9 +3,9 @@
 
 
 !> \defgroup radcons GFS RRTMG Constants Module
+!! @{
 !> This module contains some of the most frequently used math and physics 
 !! constants for RRTMG.
-!! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for RRTMG.
           module radcons                
