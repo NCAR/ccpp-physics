@@ -94,12 +94,12 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,      &
-     &     eps,epsm1,fv,grav,hvap,rd,rv,                     &
-     &     t0c,delt,ntk,ntr,delp,                            &
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                   &
-     &     rn,kbot,ktop,kcnv,islimsk,garea,                  &
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,            &
+      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,                 &
+     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
+     &     t0c,delt,ntk,ntr,delp,                                       &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
+     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
 !
       use machine , only : kind_phys

@@ -19,7 +19,6 @@
       subroutine h2ophys_init()
       end subroutine h2ophys_init
 
-
 !>\defgroup GFS_h2ophys GFS h2ophys Main
 !! @{
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
@@ -43,8 +42,8 @@
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !! @{
-      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,          &
-     &                     h2opltc, h2o_coeff, ldiag3d, h2op, me,              &
+      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,
+     &                     h2opltc, h2o_coeff, ldiag3d, me,
      &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for
@@ -156,8 +155,8 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_h2ophys_finalize Argument Table
-!
+!> \section arg_table_h2ophys_finalize Argument Table
+!!
       subroutine h2ophys_finalize()
       end subroutine h2ophys_finalize
 

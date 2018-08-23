@@ -9,7 +9,7 @@
 
 ! \brief Brief description of the subroutine
 !
-! \section arg_table_ozphys_init Argument Table
+!> \section arg_table_ozphys_init Argument Table
 !!
       subroutine ozphys_init()
       end subroutine ozphys_init

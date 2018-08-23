@@ -118,13 +118,13 @@
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,            &
-     &     eps,epsm1,fv,grav,hvap,rd,rv,                            &
-     &     t0c,delt,ntk,ntr,delp,                                   &
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                          &
-     &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                  &
-     &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                  &
-     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,    &
+      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,                &
+     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
+     &     t0c,delt,ntk,ntr,delp,                                       &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                      &
+     &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                      &
+     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,        &
      &     errmsg,errflg)
 !
       use machine , only : kind_phys

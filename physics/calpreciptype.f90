@@ -197,13 +197,10 @@
         snow(5)   = 0
         sleet(5)  = 0
         freezr(5) = 0
-        rainl(5)  = 0
-!
-! 
-!> - Call calwxt_dominant() to takes the precipitation type solution from different algorithm
-!! and sums them up to give a dominant type.
-         call calwxt_dominant(nalg,rainl(1),freezr(1),sleet(1),         &
-                              snowl(1),domr(i),domzr(i),domip(i),doms(i))
+        rain(5)   = 0
+!               
+         call calwxt_dominant(nalg,rain(1),freezr(1),sleet(1),         &
+                            snow(1),domr(i),domzr(i),domip(i),doms(i))
 
         else     !  prec < pthresh
           domr(i)  = 0.
@@ -1379,3 +1376,4 @@
 !
       return
       end
+!! @}

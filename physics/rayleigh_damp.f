@@ -41,8 +41,8 @@
 !! | errmsg         | ccpp_error_message                                   | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                      | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
 !!
-      subroutine rayleigh_damp_run (                            &
-     &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,             &
+      subroutine rayleigh_damp_run (                                    &
+     &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
      &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
 !
 !   ********************************************************************
