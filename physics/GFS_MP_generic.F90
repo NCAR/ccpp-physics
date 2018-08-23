@@ -117,7 +117,7 @@
 !! | dtf              | time_step_for_dynamics                                                  | dynamics timestep                                                       | s           |    0 | real       | kind_phys | in     | F        |
 !! | frain            | dynamics_to_physics_timestep_ratio                                      | ratio of dynamics timestep to physics timestep                          | none        |    0 | real       | kind_phys | in     | F        |
 !! | rainc            | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep   | convective rain at this time step                                       | m           |    1 | real       | kind_phys | in     | F        |
-!! | rain1            | lwe_thickness_of_stratiform_precipitation_amount                        | stratiform rainfall amount on physics timestep                          | m           |    1 | real       | kind_phys | in     | F        |
+!! | rain1            | lwe_thickness_of_explicit_precipitation_amount                          | explicit rainfall amount on physics timestep                            | m           |    1 | real       | kind_phys | in     | F        |
 !! | rann             | random_number_array                                                     | random number array (0-1)                                               | none        |    2 | real       | kind_phys | in     | F        |
 !! | xlat             | latitude                                                                | latitude                                                                | radians     |    1 | real       | kind_phys | in     | F        |
 !! | xlon             | longitude                                                               | longitude                                                               | radians     |    1 | real       | kind_phys | in     | F        |
@@ -128,14 +128,14 @@
 !! | prsi             | air_pressure_at_interface                                               | pressure at layer interface                                             | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | phii             | geopotential_at_interface                                               | geopotential at model layer interfaces                                  | m2 s-2      |    2 | real       | kind_phys | in     | F        |
 !! | tsfc             | surface_skin_temperature                                                | surface skin temperature                                                | K           |    1 | real       | kind_phys | in     | F        |
-!! | ice              | lwe_thickness_of_ice_amount_on_dynamics_timestep                        | ice fall at this time step                                              | m           |    1 | real       | kind_phys | in     | F        |
-!! | snow             | lwe_thickness_of_snow_amount_on_dynamics_timestep                       | snow fall at this time step                                             | m           |    1 | real       | kind_phys | in     | F        |
-!! | graupel          | lwe_thickness_of_graupel_amount_on_dynamics_timestep                    | graupel fall at this time step                                          | m           |    1 | real       | kind_phys | in     | F        |
+!! | ice              | lwe_thickness_of_ice_amount_on_dynamics_timestep                        | ice fall at this time step                                              | m           |    1 | real       | kind_phys | inout  | F        |
+!! | snow             | lwe_thickness_of_snow_amount_on_dynamics_timestep                       | snow fall at this time step                                             | m           |    1 | real       | kind_phys | inout  | F        |
+!! | graupel          | lwe_thickness_of_graupel_amount_on_dynamics_timestep                    | graupel fall at this time step                                          | m           |    1 | real       | kind_phys | inout  | F        |
 !! | save_t           | air_temperature_save                                                    | air temperature before entering a physics scheme                        | K           |    2 | real       | kind_phys | in     | F        |
 !! | save_qv          | water_vapor_specific_humidity_save                                      | water vapor specific humidity before entering a physics scheme          | kg kg-1     |    2 | real       | kind_phys | in     | F        |
-!! | ice0             | lwe_thickness_of_ice_amount_per_day                                     | ice fall over 24h period                                                | mm          |    1 | real       | kind_phys | in     | F        |
-!! | snow0            | lwe_thickness_of_snow_amount_per_day                                    | snow fall over 24h period                                               | mm          |    1 | real       | kind_phys | in     | F        |
-!! | graupel0         | lwe_thickness_of_graupel_amount_per_day                                 | graupel fall over 24h period                                            | mm          |    1 | real       | kind_phys | in     | F        |
+!! | ice0             | lwe_thickness_of_ice_amount                                             | ice fall on physics timestep                                            | m           |    1 | real       | kind_phys | in     | F        |
+!! | snow0            | lwe_thickness_of_snow_amount                                            | snow fall on physics timestep                                           | m           |    1 | real       | kind_phys | in     | F        |
+!! | graupel0         | lwe_thickness_of_graupel_amount                                         | graupel fall on physics timestep                                        | m           |    1 | real       | kind_phys | in     | F        |
 !! | del              | air_pressure_difference_between_midlayers                               | air pressure difference between midlayers                               | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | rain             | lwe_thickness_of_precipitation_amount_on_dynamics_timestep              | total rain at this time step                                            | m           |    1 | real       | kind_phys | inout  | F        |
 !! | domr_diag        | dominant_rain_type                                                      | dominant rain type                                                      | none        |    1 | real       | kind_phys | inout  | F        |
@@ -176,13 +176,14 @@
       integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl
       logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
 
-      real(kind=kind_phys),                           intent(in) :: dtf, frain, con_g
-      real(kind=kind_phys), dimension(im),            intent(in) :: rainc, rain1, xlat, xlon, tsfc, ice, snow, graupel,         &
-                                                                    ice0, snow0, graupel0
-      real(kind=kind_phys), dimension(ix,nrcm),       intent(in) :: rann
-      real(kind=kind_phys), dimension(im,levs),       intent(in) :: gt0, gq0_water_vapor, prsl, save_t, save_qv, del
-      real(kind=kind_phys), dimension(im,levs+1),     intent(in) :: prsi, phii
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in) :: gq0
+      real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
+      real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
+      real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
+      real(kind=kind_phys), dimension(im),            intent(in)    :: ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
+      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, gq0_water_vapor, prsl, save_t, save_qv, del
+      real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
 
 
       real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,     &
@@ -210,6 +211,21 @@
 
 !> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
 !! precipitation type.
+      ! DH* TODO - Fix wrong code in non-CCPP build (GFS_physics_driver)
+      ! and use commented lines here (keep wrong version for bit-for-bit):
+      ! put ice, snow, graupel on dynamics timestep. The way the code in
+      ! GFS_physics_driver is written, Diag%{graupel,ice,snow} are on the
+      ! physics timestep, while Diag%{rain,rainc} and all totprecip etc
+      ! are on the dynamics timestep. Totally confusing and wrong. *DH
+      if (imp_physics == imp_physics_gfdl) then
+        !graupel = frain*graupel0
+        !ice     = frain*ice0
+        !snow    = frain*snow0
+        graupel = graupel0
+        ice     = ice0
+        snow    = snow0
+      end if
+
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
         call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
