@@ -446,44 +446,46 @@ contains
 
 !>@brief The subroutine 'gfdl_cloud_microphys_run' executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
-!! | local_name       | standard_name                                              | long_name                                              | units      | rank | type      | kind      | intent| optional |
-!! |------------------|------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|-------|----------|
-!! | levs             | vertical_dimension                                         | number of vertical levels                              | count      |    0 | integer   |           | in    | F        |
-!! | im               | horizontal_loop_extent                                     | horizontal loop extent                                 | count      |    0 | integer   |           | in    | F        |
-!! | con_g            | gravitational_acceleration                                 | gravitational acceleration                             | m s-2      |    0 | real      | kind_phys | in    | F        |
-!! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one          | rv/rd - 1 (rv = ideal gas constant for water vapor)    | none       |    0 | real      | kind_phys | in    | F        |
-!! | con_rd           | gas_constant_dry_air                                       | ideal gas constant for dry air                         | J kg-1 K-1 |    0 | real      | kind_phys | in    | F        |
-!! | frland           | land_area_fraction                                         | land area fraction                                     | frac       |    1 | real      | kind_phys | in    | F        |
-!! | garea            | cell_area                                                  | area of grid cell                                      | m2         |    1 | real      | kind_phys | in    | F        |
-!! | gq0              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity updated by physics       | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntcw         | cloud_condensed_water_mixing_ratio_updated_by_physics      | cloud condensed water mixing ratio updated by physics  | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntrw         | rain_water_mixing_ratio_updated_by_physics                 | moist mixing ratio of rain updated by physics          | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntiw         | ice_water_mixing_ratio_updated_by_physics                  | moist mixing ratio of cloud ice updated by physics     | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntsw         | snow_water_mixing_ratio_updated_by_physics                 | moist mixing ratio of snow updated by physics          | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntgl         | graupel_mixing_ratio_updated_by_physics                    | moist mixing ratio of graupel updated by physics       | kg kg-1    |    2 | real      | kind_phys | inout | F        |
-!! | gq0_ntclamt      | cloud_fraction_updated_by_physics                          | cloud fraction updated by physics                      | frac       |    2 | real      | kind_phys | inout | F        |
-!! | gt0              | air_temperature_updated_by_physics                         | air temperature updated by physics                     | K          |    2 | real      | kind_phys | inout | F        |
-!! | gu0              | x_wind_updated_by_physics                                  | zonal wind updated by physics                          | m s-1      |    2 | real      | kind_phys | inout | F        |
-!! | gv0              | y_wind_updated_by_physics                                  | meridional wind updated by physics                     | m s-1      |    2 | real      | kind_phys | inout | F        |
-!! | vvl              | omega                                                      | layer mean vertical velocity                           | Pa s-1     |    2 | real      | kind_phys | in    | F        |
-!! | prsl             | air_pressure                                               | mean layer pressure                                    | Pa         |    2 | real      | kind_phys | in    | F        |
-!! | phii             | geopotential_at_interface                                  | geopotential at model layer interfaces                 | m2 s-2     |    2 | real      | kind_phys | in    | F        |
-!! | del              | air_pressure_difference_between_midlayers                  | air pressure difference between mid-layers             | Pa         |    2 | real      | kind_phys | in    | F        |
-!! | rain0            | lwe_thickness_of_stratiform_precipitation_amount_per_day   | stratiform rain over 24h period                        | mm         |    1 | real      | kind_phys | inout | F        |
-!! | ice0             | lwe_thickness_of_ice_amount_per_day                        | ice fall over 24h period                               | mm         |    1 | real      | kind_phys | inout | F        |
-!! | snow0            | lwe_thickness_of_snow_amount_per_day                       | snow fall over 24h period                              | mm         |    1 | real      | kind_phys | inout | F        |
-!! | graupel0         | lwe_thickness_of_graupel_amount_per_day                    | graupel fall over 24h period                           | mm         |    1 | real      | kind_phys | inout | F        |
-!! | dtp              | time_step_for_physics                                      | physics timestep                                       | s          |    0 | real      | kind_phys | in    | F        |
-!! | hydrostatic      | flag_for_hydrostatic_solver                                | flag indicating hydrostatic solver                     | flag       |    0 | logical   |           | in    | F        |
-!! | phys_hydrostatic | flag_for_hydrostatic_heating_from_physics                  | flag indicating hydrostatic heating from physics       | flag       |    0 | logical   |           | in    | F        |
-!! | errmsg           | ccpp_error_message                                         | error message for error handling in CCPP               | none       |    0 | character | len=*     | out   | F        | 
-!! | errflg           | ccpp_error_flag                                            | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out   | F        |
+!! | local_name       | standard_name                                              | long_name                                                             | units      | rank | type      | kind      | intent| optional |
+!! |------------------|------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|-------|----------|
+!! | levs             | vertical_dimension                                         | number of vertical levels                                             | count      |    0 | integer   |           | in    | F        |
+!! | im               | horizontal_loop_extent                                     | horizontal loop extent                                                | count      |    0 | integer   |           | in    | F        |
+!! | con_g            | gravitational_acceleration                                 | gravitational acceleration                                            | m s-2      |    0 | real      | kind_phys | in    | F        |
+!! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one          | rv/rd - 1 (rv = ideal gas constant for water vapor)                   | none       |    0 | real      | kind_phys | in    | F        |
+!! | con_rd           | gas_constant_dry_air                                       | ideal gas constant for dry air                                        | J kg-1 K-1 |    0 | real      | kind_phys | in    | F        |
+!! | frland           | land_area_fraction                                         | land area fraction                                                    | frac       |    1 | real      | kind_phys | in    | F        |
+!! | garea            | cell_area                                                  | area of grid cell                                                     | m2         |    1 | real      | kind_phys | in    | F        |
+!! | gq0              | water_vapor_specific_humidity_updated_by_physics           | water vapor specific humidity updated by physics                      | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntcw         | cloud_condensed_water_mixing_ratio_updated_by_physics      | cloud condensed water mixing ratio updated by physics                 | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntrw         | rain_water_mixing_ratio_updated_by_physics                 | moist mixing ratio of rain updated by physics                         | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntiw         | ice_water_mixing_ratio_updated_by_physics                  | moist mixing ratio of cloud ice updated by physics                    | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntsw         | snow_water_mixing_ratio_updated_by_physics                 | moist mixing ratio of snow updated by physics                         | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntgl         | graupel_mixing_ratio_updated_by_physics                    | moist mixing ratio of graupel updated by physics                      | kg kg-1    |    2 | real      | kind_phys | inout | F        |
+!! | gq0_ntclamt      | cloud_fraction_updated_by_physics                          | cloud fraction updated by physics                                     | frac       |    2 | real      | kind_phys | inout | F        |
+!! | gt0              | air_temperature_updated_by_physics                         | air temperature updated by physics                                    | K          |    2 | real      | kind_phys | inout | F        |
+!! | gu0              | x_wind_updated_by_physics                                  | zonal wind updated by physics                                         | m s-1      |    2 | real      | kind_phys | inout | F        |
+!! | gv0              | y_wind_updated_by_physics                                  | meridional wind updated by physics                                    | m s-1      |    2 | real      | kind_phys | inout | F        |
+!! | vvl              | omega                                                      | layer mean vertical velocity                                          | Pa s-1     |    2 | real      | kind_phys | in    | F        |
+!! | prsl             | air_pressure                                               | mean layer pressure                                                   | Pa         |    2 | real      | kind_phys | in    | F        |
+!! | phii             | geopotential_at_interface                                  | geopotential at model layer interfaces                                | m2 s-2     |    2 | real      | kind_phys | in    | F        |
+!! | del              | air_pressure_difference_between_midlayers                  | air pressure difference between mid-layers                            | Pa         |    2 | real      | kind_phys | in    | F        |
+!! | rain0            | lwe_thickness_of_explicit_rain_amount                      | explicit rain on physics timestep                                     | m          |    1 | real      | kind_phys | out   | F        |
+!! | ice0             | lwe_thickness_of_ice_amount                                | ice fall on physics timestep                                          | m          |    1 | real      | kind_phys | out   | F        |
+!! | snow0            | lwe_thickness_of_snow_amount                               | snow fall on physics timestep                                         | m          |    1 | real      | kind_phys | out   | F        |
+!! | graupel0         | lwe_thickness_of_graupel_amount                            | graupel fall on physics timestep                                      | m          |    1 | real      | kind_phys | out   | F        |
+!! | prcp0            | lwe_thickness_of_explicit_precipitation_amount             | explicit precipitation (rain, ice, snow, graupel) on physics timestep | m          |    1 | real      | kind_phys | out   | F        |
+!! | sr               | ratio_of_snowfall_to_rainfall                              | snow ratio: ratio of snow to total precipitation                      | frac       |    1 | real      | kind_phys | out   | F        |
+!! | dtp              | time_step_for_physics                                      | physics timestep                                                      | s          |    0 | real      | kind_phys | in    | F        |
+!! | hydrostatic      | flag_for_hydrostatic_solver                                | flag indicating hydrostatic solver                                    | flag       |    0 | logical   |           | in    | F        |
+!! | phys_hydrostatic | flag_for_hydrostatic_heating_from_physics                  | flag indicating hydrostatic heating from physics                      | flag       |    0 | logical   |           | in    | F        |
+!! | errmsg           | ccpp_error_message                                         | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out   | F        | 
+!! | errflg           | ccpp_error_flag                                            | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
       levs, im, con_g, con_fvirt, con_rd, frland, garea,                      &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
-      rain0, ice0, snow0, graupel0,                                           &
+      rain0, ice0, snow0, graupel0, prcp0, sr,                                &
       dtp, hydrostatic, phys_hydrostatic, errmsg, errflg)
 
       implicit none
@@ -498,11 +500,13 @@ contains
       real(kind=kind_phys), intent(in   ), dimension(1:im,1:levs)   :: vvl, prsl, del
       real(kind=kind_phys), intent(in   ), dimension(1:im,1:levs+1) :: phii
 
-      ! rain/snow/graupel fall amounts and fraction of frozen precip
-      real(kind_phys),      intent(inout), dimension(1:im)   :: rain0
-      real(kind_phys),      intent(inout), dimension(1:im)   :: snow0
-      real(kind_phys),      intent(inout), dimension(1:im)   :: ice0
-      real(kind_phys),      intent(inout), dimension(1:im)   :: graupel0
+      ! rain/snow/ice/graupel/precip amounts, fraction of frozen precip
+      real(kind_phys),      intent(out  ), dimension(1:im) :: rain0
+      real(kind_phys),      intent(out  ), dimension(1:im) :: snow0
+      real(kind_phys),      intent(out  ), dimension(1:im) :: ice0
+      real(kind_phys),      intent(out  ), dimension(1:im) :: graupel0
+      real(kind_phys),      intent(out  ), dimension(1:im) :: prcp0
+      real(kind_phys),      intent(out  ), dimension(1:im) :: sr
 
       real(kind_phys),      intent(in) :: dtp !< physics time step
       logical, intent (in) :: hydrostatic, phys_hydrostatic
@@ -513,7 +517,6 @@ contains
       ! local variables
       integer :: iis, iie, jjs, jje, kks, kke, kbot, ktop
       integer :: i, k, kk
-      !real(kind=kind_phys), dimension(1:im)        :: rain0, snow0, ice0, graupel0
       real(kind=kind_phys), dimension(1:im,1:levs) :: delp, dz, uin, vin, pt, qv1, ql1, qr1, qg1, qa1, qn1, qi1,    &
                                                       qs1, pt_dt, qa_dt, u_dt, v_dt, w, qv_dt, ql_dt, qr_dt, qi_dt, &
                                                       qs_dt, qg_dt
@@ -568,6 +571,12 @@ contains
          enddo
       enddo
 
+      ! reset precipitation amounts to zero
+      rain0     = 0
+      ice0      = 0
+      snow0     = 0
+      graupel0  = 0
+
       call gfdl_cloud_microphys_work(iis, iie, jjs, jje, kks, kke, ktop, kbot, &
            qv1, ql1, qr1, qi1, qs1, qg1, qa1, qn1, qv_dt, ql_dt, qr_dt, qi_dt, &
            qs_dt, qg_dt, qa_dt, pt_dt, pt, w,  uin, vin, u_dt, v_dt, dz, delp, &
@@ -595,6 +604,24 @@ contains
           graupel0(i) = 0.0
         endif
       enddo
+
+      ! calculate fraction of frozen precipitation using unscaled
+      ! values of rain0, ice0, snow0, graupel0 (for bit-for-bit)
+      do i=1,im
+        prcp0(i) = (rain0(i)+snow0(i)+ice0(i)+graupel0(i)) * tem
+        if ( prcp0(i) > rainmin ) then
+          sr(i) = (snow0(i) + ice0(i)  + graupel0(i)) &
+                      / (rain0(i) + snow0(i) + ice0(i) + graupel0(i))
+        else
+          sr(i) = 0.0
+        endif
+      enddo
+
+      ! convert rain0, ice0, snow0, graupel0 from mm per day to m per physics timestep
+      rain0    = rain0*tem
+      ice0     = ice0*tem
+      snow0    = snow0*tem
+      graupel0 = graupel0*tem
 
       ! flip vertical coordinate back
       do k = 1, levs
