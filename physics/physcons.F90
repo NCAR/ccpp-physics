@@ -31,6 +31,9 @@
 !! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for GCM models.
+
+!> This module contains some of the most frequently used math and physics
+!! constants for GCM models.
           module physcons                
 !
   use machine,      only : kind_phys

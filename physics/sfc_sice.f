@@ -1,6 +1,9 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
+!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns 
+!! updated ice thickness and concentration to global arrays
+!! where there is no ice, and set temperature to surface skin temperature.
       module sfc_sice_post
 
       contains

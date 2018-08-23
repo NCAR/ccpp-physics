@@ -42,8 +42,8 @@
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !! @{
-      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,
-     &                     h2opltc, h2o_coeff, ldiag3d, me,
+      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,   &
+     &                     h2opltc, h2o_coeff, ldiag3d, me,             &
      &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for

@@ -436,7 +436,7 @@ contains
    
    end subroutine gfdl_cloud_microphys_finalize
 
-!>\defgroup gfdlmp  GFDL Cloud Microphysics Module
+!>\defgroup gfdlmp  GFDL MP Module
 !! @{
 !! This is cloud microphysics package for GFDL global cloud resolving model.
 !! The algorithms are originally derived from Lin et al. (1983) \cite lin_et_al_1983.

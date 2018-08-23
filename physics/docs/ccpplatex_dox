@@ -165,7 +165,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90    \
 ###
-                        ../GFS_MP_generic_post.F90 \
+                        ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
 ###                     ../GFS_stochastics.F90   \

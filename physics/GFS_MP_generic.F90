@@ -2,11 +2,11 @@
 !! This file contains the subroutines that calculate diagnotics variables
 !! before/after calling any microphysics scheme:
 
+!> This module contains the CCPP-compliant MP generic pre interstitial codes.
       module GFS_MP_generic_pre
       contains
 
-!> \defgroup GFS_MP_generic_pre GFS MP generic pre
-!! @{
+
 !! \section arg_table_GFS_MP_generic_pre_init Argument Table
 !!
       subroutine GFS_MP_generic_pre_init
@@ -74,7 +74,7 @@
 !!
       subroutine GFS_MP_generic_pre_finalize
       end subroutine GFS_MP_generic_pre_finalize
-!! @}
+
       end module GFS_MP_generic_pre
 
 !> This module contains the subroutine that calculates 
