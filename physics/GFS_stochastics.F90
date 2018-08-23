@@ -44,6 +44,8 @@
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                 | m       |    1 | real      | kind_phys | inout  | F        |
 !! | totprcp        | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                              | m       |    1 | real      | kind_phys | inout  | F        |
 !! | cnvprcp        | cumulative_lwe_thickness_of_convective_precipitation_amount               | cumulative convective precipitation                          | m       |    1 | real      | kind_phys | inout  | F        |
+!! | totprcpb       | accumulated_lwe_thickness_of_precipitation_amount_in_bucket               | accumulated total precipitation in bucket                    | m       |    1 | real      | kind_phys | inout  | F        |
+!! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket     | cumulative convective precipitation in bucket                | m       |    1 | real      | kind_phys | inout  | F        |
 !! | cplflx         | flag_for_flux_coupling                                                    | flag controlling cplflx collection (default off)             | flag    |    0 | logical   |           | in     | F        |
 !! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                        | total rain precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
 !! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                 | total snow precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
@@ -68,7 +70,8 @@
                                       shum_wts_inv, diss_est,                            &
                                       ugrs, vgrs, tgrs, qgrs, gu0, gv0, gt0, gq0, dtdtr, &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
-                                      cplflx, rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,  &
+                                      totprcpb, cnvprcpb, cplflx,                        &
+                                      rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,          &
                                       errmsg, errflg)
 
          use machine,               only: kind_phys
@@ -110,6 +113,8 @@
          real(kind_phys), dimension(1:im),      intent(inout) :: tprcp
          real(kind_phys), dimension(1:im),      intent(inout) :: totprcp
          real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcp
+         real(kind_phys), dimension(1:im),      intent(inout) :: totprcpb
+         real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcpb
          logical,                               intent(in)    :: cplflx
          ! rain_cpl, snow_cpl only allocated if cplflx == .true. or do_sppt == .true.
          real(kind_phys), dimension(:),         intent(inout) :: rain_cpl
@@ -174,6 +179,10 @@
            totprcp(:) = totprcp(:) + (sppt_wts(:,15) - 1 )*rain(:)
            ! acccumulated total and convective preciptiation
            cnvprcp(:) = cnvprcp(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+           ! bucket precipitation adjustment due to sppt
+           totprcpb(:) = totprcpb(:) + (sppt_wts(:,15) - 1 )*rain(:)
+           cnvprcpb(:) = cnvprcpb(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+
             if (cplflx) then
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)

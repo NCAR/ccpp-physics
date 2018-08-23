@@ -134,13 +134,65 @@
 !! @}
 
       module lsm_noah
+
+      use set_soilveg_mod,  only: set_soilveg
+
+      implicit none
+
+      private
+
+      public :: lsm_noah_init, lsm_noah_run, lsm_noah_finalize
+
       contains
 
-      subroutine lsm_noah_init
+!! \section arg_table_lsm_noah_init Argument Table
+!! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | me             | mpi_rank                                                    | current MPI-rank                                        | index      |    0 | integer   |           | in     | F        |
+!! | isot           | soil_type_dataset_choice                                    | soil type dataset choice                                | index      |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                              | land use dataset choice                                 | index      |    0 | integer   |           | in     | F        |
+!! | nlunit         | iounit_namelist                                             | fortran unit number for file opens                      | none       |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP                | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP                   | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_init(me, isot, ivegsrc, nlunit,
+     &                         errmsg, errflg)
+
+      implicit none
+
+      integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      !--- initialize soil vegetation
+      call set_soilveg(me, isot, ivegsrc, nlunit)
+
       end subroutine lsm_noah_init
 
-      subroutine lsm_noah_finalize
+
+!! \section arg_table_lsm_noah_finalize Argument Table
+!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_finalize(errmsg, errflg)
+
+      implicit none
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
       end subroutine lsm_noah_finalize
+
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -264,7 +316,7 @@
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
 !! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
 !! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom| frac          |    1 | real      | kind_phys | in     | F        |
@@ -435,7 +487,8 @@
 !===> ...  begin here
 !
 
-      ! Initialize CCPP error handling variables
+!> - Initialize CCPP error handling variables
+
       errmsg = ''
       errflg = 0
 
@@ -590,6 +643,13 @@
 
 !  perturb vegetation fraction that goes into sflx, use the same
 !  perturbation strategy as for albedo (percentile matching)
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of vegetation
+!! fraction is added to account for the uncertainty. A percentile matching technique
+!! is applied to guarantee the perturbed vegetation fraction is bounded between 0 and
+!! 1. The standard deviation of the perturbations is 0.25 for vegetation fraction of
+!! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper 
+!! or lower bound.
+
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
         ! sfc perts, mgehne
         if (pertvegf(1)>0.0) then

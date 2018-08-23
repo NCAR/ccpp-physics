@@ -101,7 +101,7 @@ include(./CCPP_CAPS.cmake)
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
-  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
@@ -114,7 +114,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/sfc_diff.f
                                 ./physics/sfc_diag.f
                                 ./physics/module_nst_model.f90
-                                ./physics/GFS_calpreciptype.f90
+                                ./physics/calpreciptype.f90
                                 ./physics/mersenne_twister.f
                                 ./physics/module_nst_water_prop.f90
                                 ./physics/aer_cloud.F
@@ -134,14 +134,14 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
-    SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
+    SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
   endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
-  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/GFS_calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
@@ -151,13 +151,23 @@ else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-#apply general fortran tags to all fortran source files
-if(${CMAKE_VERSION} LESS 3.3)
-  string (REPLACE ";" " " f_flags_str "${f_flags}")
-  SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " ${f_flags_str}")
-else(${CMAKE_VERSION} LESS 3.3)
-  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${f_flags}>")
-endif (${CMAKE_VERSION} LESS 3.3)
+# The auto-generated caps can contain calls to physics schemes in
+# which some of the arguments (pointers) are not associated. This is
+# on purpose to avoid allocating fields that are not used inside the
+# scheme if, for example, certain conditions are not met. To avoid
+# Fortran runtime errors, it is necessary to remove checks for pointers
+# that are not associated from the caps ONLY. For the physics schemes,
+# these checks can and should remain enabled. Overwriting the check flags
+# explicitly works for Intel and GNU, but not for PGI.
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers")
+elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
+  if (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+    message (FATAL_ERROR "PGI compiler option chkptr cannot be used for CCPP physics")
+  endif (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)

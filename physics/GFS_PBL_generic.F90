@@ -1,4 +1,4 @@
-!> \file GFS_PBL_generic.f90
+!> \file GFS_PBL_generic.F90
 !!  Contains code related to PBL schemes to be used within the GFS physics suite.
 
       module GFS_PBL_generic_pre

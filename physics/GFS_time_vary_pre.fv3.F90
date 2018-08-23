@@ -1,7 +1,9 @@
-!> \file GFS_time_vary_pre.f90
+!> \file GFS_time_vary_pre.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
+
+      use funcphys, only: gfuncphys
 
       implicit none
 
@@ -9,13 +11,54 @@
 
       public GFS_time_vary_pre_init, GFS_time_vary_pre_run, GFS_time_vary_pre_finalize
 
+      logical :: is_initialized = .false.
+
       contains
 
-      subroutine GFS_time_vary_pre_init ()
+!> \section arg_table_GFS_time_vary_pre_init Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_time_vary_pre_init (errmsg, errflg)
+
+         implicit none
+
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         if (is_initialized) return
+
+         !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
+         call gfuncphys ()
+
+         is_initialized = .true.
+
       end subroutine GFS_time_vary_pre_init
 
-      subroutine GFS_time_vary_pre_finalize()
+
+!> \section arg_table_GFS_time_vary_pre_finalize Argument Table
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_time_vary_pre_finalize(errmsg, errflg)
+
+         implicit none
+
+         character(len=*),                 intent(out)   :: errmsg
+         integer,                          intent(out)   :: errflg
+
+         if (.not. is_initialized) return
+
+         ! DH* this is the place to deallocate whatever is allocated by gfuncphys() in GFS_time_vary_pre_init
+
+         is_initialized = .false.
+
       end subroutine GFS_time_vary_pre_finalize
+
 
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
@@ -42,6 +85,13 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Check initialization status
+        if (.not.is_initialized) then
+           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_run called before GFS_time_vary_pre_init"
+           errflg = 1
+           return
+        end if
 
         !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers

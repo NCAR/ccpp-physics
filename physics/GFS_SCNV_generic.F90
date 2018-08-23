@@ -1,4 +1,4 @@
-!> \file GFS_SCNV_generic.f90
+!> \file GFS_SCNV_generic.F90
 !!  Contains code related to shallow convective schemes to be used within the GFS physics suite.
 
       module GFS_SCNV_generic_pre
@@ -80,7 +80,7 @@
 !! |-----------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | im              | horizontal_loop_extent                                                                      | horizontal loop extent                                               | count         |    0 | integer     |           | in     | F        |
 !! | levs            | vertical_dimension                                                                          | vertical layer dimension                                             | count         |    0 | integer     |           | in     | F        |
-!! | nn              | number_of_tracers_for_allocating_cloud_work_function                                        | number of tracers for allocating cloud work function                 | count         |    0 | integer     |           | in     | F        |
+!! | nn              | number_of_tracers_for_convective_transport                                                  | number of tracers for convective transport                           | count         |    0 | integer     |           | in     | F        |
 !! | lssav           | flag_diagnostics                                                                            | logical flag for storing diagnostics                                 | flag          |    0 | logical     |           | in     | F        |
 !! | ldiag3d         | flag_diagnostics_3D                                                                         | flag for 3d diagnostic fields                                        | flag          |    0 | logical     |           | in     | F        |
 !! | lgocart         | flag_gocart                                                                                 | flag for 3d diagnostic fields for gocart 1                           | flag          |    0 | logical     |           | in     | F        |
@@ -89,7 +89,7 @@
 !! | gq0_water_vapor | water_vapor_specific_humidity_updated_by_physics                                            | water vapor specific humidity updated by physics                     | kg kg-1       |    2 | real        | kind_phys | in     | F        |
 !! | save_t          | air_temperature_save                                                                        | air temperature before entering a physics scheme                     | K             |    2 | real        | kind_phys | in     | F        |
 !! | save_qv         | water_vapor_specific_humidity_save                                                          | water vapor specific humidity before entering a physics scheme       | kg kg-1       |    2 | real        | kind_phys | in     | F        |
-!! | dqdti           | instantaneous_water_vapor_specific_humidity_tendency_due_to_convection_on_dynamics_timestep | instantaneous total moisture tendency                                | kg kg-1 s-1   |    2 | real        | kind_phys | inout  | F        |
+!! | dqdti           | instantaneous_water_vapor_specific_humidity_tendency_due_to_convection                      | instantaneous moisture tendency due to convection                    | kg kg-1 s-1   |    2 | real        | kind_phys | inout  | F        |
 !! | dt3dt           | cumulative_change_in_temperature_due_to_shal_convection                                     | cumulative change in temperature due to shal conv.                   | K             |    2 | real        | kind_phys | inout  | F        |
 !! | dq3dt           | cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection                   | cumulative change in water vapor specific humidity due to shal conv. | kg kg-1       |    2 | real        | kind_phys | inout  | F        |
 !! | clw             | convective_transportable_tracers                                                            | array to contain cloud water and other convective trans. tracers     | kg kg-1       |    3 | real        | kind_phys | inout  | F        |
