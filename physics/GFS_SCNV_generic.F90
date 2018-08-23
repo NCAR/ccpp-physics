@@ -1,4 +1,4 @@
-!> \file GFS_SCNV_generic.f90
+!> \file GFS_SCNV_generic.F90
 !!  Contains code related to shallow convective schemes to be used within the GFS physics suite.
 
       module GFS_SCNV_generic_pre

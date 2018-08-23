@@ -1,4 +1,4 @@
-!> \file GFS_phys_time_vary.f90
+!> \file GFS_phys_time_vary.F90
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
    module GFS_phys_time_vary

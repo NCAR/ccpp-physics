@@ -1,4 +1,4 @@
-!> \file GFS_surface_generic.f90
+!> \file GFS_surface_generic.F90
 !!  Contains code related to all GFS surface schemes.
 
       module GFS_surface_generic_pre

@@ -1,4 +1,4 @@
-!> \file GFS_time_vary_pre.f90
+!> \file GFS_time_vary_pre.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
@@ -10,6 +10,8 @@
       private
 
       public GFS_time_vary_pre_init, GFS_time_vary_pre_run, GFS_time_vary_pre_finalize
+
+      logical :: is_initialized = .false.
 
       contains
 
@@ -26,8 +28,12 @@
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
+         if (is_initialized) return
+
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
          call gfuncphys ()
+
+         is_initialized = .true.
 
       end subroutine GFS_time_vary_pre_init
 
@@ -45,28 +51,30 @@
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
+         if (.not. is_initialized) return
+
          ! DH* this is the place to deallocate whatever is allocated by gfuncphys() in GFS_time_vary_pre_init
+
+         is_initialized = .false.
 
       end subroutine GFS_time_vary_pre_finalize
 
 
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                             | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type      |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                     | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                              | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                 | flag          |    0 | integer               |           | out    | F        |
+!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_time_vary_pre_run (Model, Tbd, errmsg, errflg)
+      subroutine GFS_time_vary_pre_run (Model, errmsg, errflg)
 
         use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type, GFS_tbd_type
+        use GFS_typedefs,          only: GFS_control_type
 
         implicit none
 
         type(GFS_control_type),           intent(inout) :: Model
-        type(GFS_tbd_type),               intent(in)    :: Tbd
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -78,41 +86,46 @@
         errmsg = ''
         errflg = 0
 
-        if (Tbd%blkno==1) then
-          !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
-          !--- update calendars and triggers
-          rinc(1:5)   = 0
-          call w3difdat(Model%jdat,Model%idat,4,rinc)
-          Model%sec = rinc(4)
-          Model%phour = Model%sec/con_hr
-          !--- set current bucket hour
-          Model%zhour = Model%phour
-          Model%fhour = (Model%sec + Model%dtp)/con_hr
-          Model%kdt   = nint((Model%sec + Model%dtp)/Model%dtp)
+        ! Check initialization status
+        if (.not.is_initialized) then
+           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_run called before GFS_time_vary_pre_init"
+           errflg = 1
+           return
+        end if
 
-          Model%ipt    = 1
-          Model%lprnt  = .false.
-          Model%lssav  = .true.
+        !--- Model%jdat is being updated directly inside of FV3GFS_cap.F90
+        !--- update calendars and triggers
+        rinc(1:5)   = 0
+        call w3difdat(Model%jdat,Model%idat,4,rinc)
+        Model%sec = rinc(4)
+        Model%phour = Model%sec/con_hr
+        !--- set current bucket hour
+        Model%zhour = Model%phour
+        Model%fhour = (Model%sec + Model%dtp)/con_hr
+        Model%kdt   = nint((Model%sec + Model%dtp)/Model%dtp)
 
-          !--- radiation triggers
-          Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
-          Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+        Model%ipt    = 1
+        Model%lprnt  = .false.
+        Model%lssav  = .true.
 
-          !--- set the solar hour based on a combination of phour and time initial hour
-          Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+        !--- radiation triggers
+        Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
+        Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
 
-          if ((Model%debug) .and. (Model%me == Model%master)) then
-            print *,'   sec ', Model%sec
-            print *,'   kdt ', Model%kdt
-            print *,' nsswr ', Model%nsswr
-            print *,' nslwr ', Model%nslwr
-            print *,' nscyc ', Model%nscyc
-            print *,' lsswr ', Model%lsswr
-            print *,' lslwr ', Model%lslwr
-            print *,' fhour ', Model%fhour
-            print *,' phour ', Model%phour
-            print *,' solhr ', Model%solhr
-          endif
+        !--- set the solar hour based on a combination of phour and time initial hour
+        Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+
+        if ((Model%debug) .and. (Model%me == Model%master)) then
+          print *,'   sec ', Model%sec
+          print *,'   kdt ', Model%kdt
+          print *,' nsswr ', Model%nsswr
+          print *,' nslwr ', Model%nslwr
+          print *,' nscyc ', Model%nscyc
+          print *,' lsswr ', Model%lsswr
+          print *,' lslwr ', Model%lslwr
+          print *,' fhour ', Model%fhour
+          print *,' phour ', Model%phour
+          print *,' solhr ', Model%solhr
         endif
 
       end subroutine GFS_time_vary_pre_run
