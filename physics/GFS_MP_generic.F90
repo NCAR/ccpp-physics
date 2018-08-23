@@ -1,6 +1,81 @@
-!> \file GFS_MP_generic_post.f90
-!! This file contains the subroutines that calculate precipitation type
-!! which provides precipitation forcing for LSM
+!> \file GFS_MP_generic.F90
+!! This file contains the subroutines that calculate diagnotics variables
+!! before/after calling any microphysics scheme:
+
+      module GFS_MP_generic_pre
+      contains
+
+!> \defgroup GFS_MP_generic_pre GFS MP generic pre
+!! @{
+!! \section arg_table_GFS_MP_generic_pre_init Argument Table
+!!
+      subroutine GFS_MP_generic_pre_init
+      end subroutine GFS_MP_generic_pre_init
+
+
+!> \section arg_table_GFS_MP_generic_pre_run Argument Table
+!! | local_name     | standard_name                                          | long_name                                                                 | units       | rank |  type     |   kind    | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                                    | count       |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                     | vertical layer dimension                                                  | count       |    0 | integer   |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                    | logical flag for 3D diagnostics                                           | flag        |    0 | logical   |           | in     | F        |
+!! | do_aw          | flag_for_Arakawa_Wu_adjustment                         | flag for Arakawa Wu scale-aware adjustment                                | flag        |    0 | logical   |           | in     | F        |
+!! | ntcw           | index_for_liquid_cloud_condensate                      | tracer index for cloud condensate (or liquid water)                       | index       |    0 | integer   |           | in     | F        |
+!! | nncl           | number_of_tracers_for_cloud_condensate                 | number of tracers for cloud condensate                                    | count       |    0 | integer   |           | in     | F        |
+!! | ntrac          | number_of_tracers                                      | number of tracers                                                         | count       |    0 | integer   |           | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                     | temperature updated by physics                                            | K           |    2 | real      | kind_phys | in     | F        |
+!! | gq0_water_vapor| water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                          | kg kg-1     |    2 | real      | kind_phys | in     | F        |
+!! | gq0            | tracer_concentration_updated_by_physics                | tracer concentration updated by physics                                   | kg kg-1     |    3 | real      | kind_phys | in     | F        |
+!! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | inout  | F        |
+!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | save_q         | tracer_concentration_save                              | tracer concentration before entering a physics scheme                     | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
+!!
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0_water_vapor, gq0, &
+        save_t, save_qv, save_q, errmsg, errflg)
+!
+      use machine,               only: kind_phys
+
+      implicit none
+
+      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
+      logical,                                          intent(in) :: ldiag3d, do_aw
+      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0, gq0_water_vapor
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
+
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
+
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
+
+      integer :: i, k, n
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (ldiag3d .or. do_aw) then
+        do k=1,levs
+          do i=1,im
+            save_t(i,k)   = gt0(i,k)
+            save_qv(i,k)  = gq0_water_vapor(i,k)
+          enddo
+        enddo
+        do n=ntcw,ntcw+nncl-1
+          save_q(1:im,:,n) = gq0(1:im,:,n)
+        enddo
+      endif
+
+      end subroutine GFS_MP_generic_pre_run
+
+!> \section arg_table_GFS_MP_generic_pre_finalize Argument Table
+!!
+      subroutine GFS_MP_generic_pre_finalize
+      end subroutine GFS_MP_generic_pre_finalize
+!! @}
+      end module GFS_MP_generic_pre
 
 !> This module contains the subroutine that calculates 
 !! precipitation type and its post, which provides precipitation forcing
