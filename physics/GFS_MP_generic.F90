@@ -2,11 +2,11 @@
 !! This file contains the subroutines that calculate diagnotics variables
 !! before/after calling any microphysics scheme:
 
+!> This module contains the CCPP-compliant MP generic pre interstitial codes.
       module GFS_MP_generic_pre
       contains
 
-!> \defgroup GFS_MP_generic_pre GFS MP generic pre
-!! @{
+
 !! \section arg_table_GFS_MP_generic_pre_init Argument Table
 !!
       subroutine GFS_MP_generic_pre_init
@@ -74,21 +74,27 @@
 !!
       subroutine GFS_MP_generic_pre_finalize
       end subroutine GFS_MP_generic_pre_finalize
-!! @}
+
       end module GFS_MP_generic_pre
 
+!> This module contains the subroutine that calculates 
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM.
       module GFS_MP_generic_post
       contains
 
-!> \defgroup GFS_MP_generic_post GFS MP generic post
-!! @{
 !! \section arg_table_GFS_MP_generic_post_init Argument Table
 !!
       subroutine GFS_MP_generic_post_init
       end subroutine GFS_MP_generic_post_init
 
-
-!> \section arg_table_GFS_MP_generic_post_run Argument Table
+!>\defgroup gfs_calpreciptype GFS/GFDL calpreciptype Main
+!! @{
+!! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
+!! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
+!! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
+!! 
+!! \section arg_table_GFS_MP_generic_post_run Argument Table
 !! | local_name       | standard_name                                                           | long_name                                                               | units       | rank |  type      |   kind    | intent | optional |
 !! |------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im               | horizontal_loop_extent                                                  | horizontal loop extent                                                  | count       |    0 | integer    |           | in     | F        |
@@ -160,6 +166,8 @@
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
+!> \section gfs_mp_gen GFS MP Generic Post General Algorithm
+!! @{
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
         cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
         prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
@@ -214,6 +222,8 @@
           rain(i) = rainc(i) + frain * rain1(i)
       enddo
 
+!> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
+!! precipitation type.
       ! DH* TODO - Fix wrong code in non-CCPP build (GFS_physics_driver)
       ! and use commented lines here (keep wrong version for bit-for-bit):
       ! put ice, snow, graupel on dynamics timestep. The way the code in
@@ -304,6 +314,8 @@
         enddo
       enddo
 
+!> - For GFDL cloud MP scheme, determine convective rain/snow by surface temperature;
+!! and determine explicit rain/snow by rain/snow coming out directly from MP.
       if (imp_physics == imp_physics_gfdl) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
@@ -387,10 +399,11 @@
       endif
 
     end subroutine GFS_MP_generic_post_run
+!! @}
+!! @}
 
 !> \section arg_table_GFS_MP_generic_post_finalize Argument Table
 !!
       subroutine GFS_MP_generic_post_finalize
       end subroutine GFS_MP_generic_post_finalize
-!! @}
       end module GFS_MP_generic_post

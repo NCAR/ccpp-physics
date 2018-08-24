@@ -2,6 +2,8 @@
 !!  This file contains the entire scale-aware mass-flux (SAMF)
 !! deep convection scheme.
 
+!> This module contains the CCPP-compliant scale-aware mass-flux deep
+!! convection scheme.
       module samfdeepcnv
 
       contains
@@ -21,78 +23,12 @@
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
-!> \defgroup SAMF Scale-Aware Mass-Flux Deep Convection
+!> \defgroup SAMFdeep GFS samfdeepcnv Main
 !! @{
-!! \brief The scale-aware mass-flux (SAMF) deep convection scheme is an updated
-!! version of the previous Simplified Arakawa-Schubert (SAS) scheme with scale
-!! and aerosol awareness and parameterizes the effect of deep convection on the
-!! environment (represented by the model state variables) in the following way.
-!! First, a simple cloud model is used to determine the change in model state
-!! variables due to one entraining/detraining cloud type, per unit cloud-base
-!! mass flux. Next, the total change in state variables is retrieved by
-!! determining the actual cloud base mass flux using the quasi-equilibrium
-!! assumption (for grid sizes larger than a threshold value [currently set to
-!! 8 km]) or a mean updraft velocity (for grid sizes smaller than the
-!! threshold value). With a scale-aware parameterization, the cloud mass flux
-!! decreases with increasing grid resolution. A simple aerosol-aware
-!! parameterization is employed, where rain conversion in the convective updraft
-!! is modified by aerosol number concentration. The name SAS is replaced with
-!! SAMF as for the smaller grid sizes, the parameterization does not use
-!! Arakawa-Schubert's quasi-equilibrium assumption any longer where the cloud
-!! work function (interpreted as entrainment-moderated convective available
-!! potential energy [CAPE]) by the large scale dynamics is in balance with the
-!! consumption of the cloud work function by the convection.
-!!
-!! The SAS scheme uses the working concepts put forth in
-!! \cite arakawa_and_schubert_1974 but includes modifications and
-!! simplifications from \cite grell_1993 such as saturated downdrafts and only
-!! one cloud type (the deepest possible), rather than a spectrum based on cloud
-!! top heights or assumed entrainment rates. The scheme was implemented for the
-!! GFS in 1995 by \cite pan_and_wu_1995, with further modifications
-!! discussed in \cite han_and_pan_2011 , including the calculation of cloud top,
-!! a greater CFL-criterion-based maximum cloud base mass flux, updated cloud
-!! model entrainment and detrainment, improved convective transport of
-!! horizontal momentum, a more general triggering function, and the inclusion of
-!! convective overshooting.
-!!
-!! The SAMF scheme updates the SAS scheme with scale- and aerosol-aware
-!! parameterizations from \cite han_et_al_2017 based on the studies by \cite
-!! arakawa_and_wu_2013 and \cite grell_and_freitus_2014 for scale awareness and
-!! by \cite lim_2011 for aerosol awareness. The ratio of advective time to
-!! convective turnover time is also taken into account for the scale-aware
-!! parameterization. Along with the scale- and aerosol-aware parameterizations,
-!! more changes are made to the SAMF scheme. The cloud base mass-flux
-!! computation is modified to use convective turnover time as the convective
-!! adjustment time scale. The rain conversion rate is modified to decrease with
-!! decreasing air temperature above the freezing level. Convective inhibition
-!! in the sub-cloud layer is used as an additional trigger condition. Convective
-!! cloudiness is enhanced by considering suspended cloud condensate in the
-!! updraft. The lateral entrainment is also enhanced to more strongly suppress
-!! convection in a drier environment.
-!!
-!! In further update for FY19 GFS implementation, interaction with turbulent
-!! kinetic energy (TKE), which is a prognostic variable used in a scale-aware
-!! TKE-based moist EDMF vertical turbulent mixing scheme, is included.
-!! Entrainment rates in updrafts and downdrafts are proportional to sub-cloud
-!! mean TKE. TKE is transported by cumulus convection. TKE contribution from
-!! cumulus convection is deduced from cumulus mass flux. On the other hand,
-!! tracers such as ozone and aerosol are also transported by cumulus convection.
-!!
-!! Occasional model crashes have been occurred when stochastic physics is on,
-!! due to too much convective cooling and heating tendencies near the cumulus
-!! top which are amplified by stochastic physics. To reduce too much convective
-!! cooling at the cloud top, the convection schemes have been modified for the
-!! rain conversion rate, entrainment and detrainment rates, overshooting layers,
-!! and maximum allowable cloudbase mass flux (as of June 2018).
-!!
-!!  \section diagram Calling Hierarchy Diagram
-!!  \image html SAMF_Flowchart.png "Diagram depicting how the SAMF deep
-!!  convection scheme is called from the FV3GFS physics time loop" height=2cm
-
 !>  \brief This subroutine contains the entirety of the SAMF deep convection
 !! scheme.
 !!
-!! For grid sizes larger than threshold value, as in \cite grell_1993 , the SAMF
+!! For grid sizes larger than threshold value, as in Grell (1993) \cite grell_1993 , the SAMF
 !! deep convection scheme can be described in terms of three types of
 !! "controls": static, dynamic, and feedback. The static control component
 !! consists of the simple entraining/detraining updraft/downdraft cloud model
@@ -109,7 +45,7 @@
 !!
 !! For grid sizes smaller than threshold value, the cloud base mass flux in the
 !! SAMF scheme is determined by the cumulus updraft velocity averaged ove the
-!! whole cloud depth (\cite han_et_al_2017 ), which in turn, determines changes
+!! whole cloud depth (Han et al. (2017) \cite han_et_al_2017 ), which in turn, determines changes
 !! of the large-scale environment due to the cumulus convection.
 !!
 !! \section arg_table_samfdeepcnv_run Argument Table
@@ -167,7 +103,7 @@
 !! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag        |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section general_samfdeep GFS samfdeepcnv General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# Perform calculations related to the downdraft of the entraining/detraining cloud model ("static control").
@@ -180,15 +116,15 @@
 !!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1−sigma) 2  .
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
-!!  \section detailed Detailed Algorithm
+!!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,
-     &     eps,epsm1,fv,grav,hvap,rd,rv,
-     &     t0c,delt,ntk,ntr,delp,
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,
-     &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,
-     &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,
-     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,
+      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,                &
+     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
+     &     t0c,delt,ntk,ntr,delp,                                       &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                      &
+     &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                      &
+     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,        &
      &     errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -2453,7 +2389,7 @@ c
       if(totflg) return
 !!
 !
-!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitus_2014.
+!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 7.e-5), 3.e-4)

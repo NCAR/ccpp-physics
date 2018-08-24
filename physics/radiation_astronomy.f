@@ -79,10 +79,19 @@
 !> \defgroup module_radiation_astronomy RRTMG Astronomy Module
 !> \brief This module sets up astronomical quantities for solar radiation
 !!  calculations.
+!!
+!! Operational GFS selection for Solar constant value 
+!! (namelist control parameter - \b ISOL = 2) 
+!! \n ISOL=0: presribed value = 1366 \f$W m^{-2}\f$ (old) 
+!! \n ISOL=10: prescibed value = 1361 \f$W m^{-2}\f$ (new)
+!! \n ISOL=1: NOAA old yearly solar constant table with 11-year cycle (range: 1944-2006)
+!! \n ISOL=2: NOAA new yearly solar constant table with 11-year cycle (range: 1850-2019)
+!! \n ISOL=3: CMIP5 yearly solar constant table with 11-year cycle (range: 1610-2008)
+!! \n ISOL=4: CMIP5 monthly solar constant table with 11-year cycle (range: 1882-2008)
 !! \version NCEP-Radiation_astronomy v5.2  Jan 2013
-!========================================!
-      module module_radiation_astronomy  !
-!........................................!
+
+!> This module sets up astronomy quantities for solar radiation calculations.
+      module module_radiation_astronomy  
 !
       use physparam,         only : isolar, solar_file, kind_phys
       use physcons,          only : con_solr, con_solr_old, con_pi
@@ -97,7 +106,7 @@
      &   VTAGAST='NCEP-Radiation_astronomy v5.2  Jan 2013 '
 !    &   VTAGAST='NCEP-Radiation_astronomy v5.1  Nov 2012 '
 
-!>\name Parameter constants
+! Parameter constants
       real (kind=kind_phys), parameter :: degrad = 180.0/con_pi
       real (kind=kind_phys), parameter :: tpi    = 2.0 * con_pi
       real (kind=kind_phys), parameter :: hpi    = 0.5 * con_pi
@@ -107,12 +116,12 @@
 !     real (kind=kind_phys), parameter :: pid12  = con_pi/f12  ! angle per hour
       real (kind=kind_phys), parameter :: pid12  = (2.0*asin(1.0))/f12
 
-! \name Module variable (to be set in module_radiation_astronomy::sol_init):
+! Module variable (to be set in module_radiation_astronomy::sol_init):
       real (kind=kind_phys), public    :: solc0 = con_solr
       integer   :: isolflg = 10
       character(26) :: solar_fname = ' '
 
-! \name Module variables (to be set in module_radiation_astronomy::sol_update)
+! Module variables (to be set in module_radiation_astronomy::sol_update)
 
 ! equation of time
       real (kind=kind_phys) :: sollag=0.0

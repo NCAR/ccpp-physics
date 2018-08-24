@@ -1,7 +1,9 @@
 !>  \file sfc_diff.f
-!!  This file contains the surface roughness length formulation based on
-!! the surface sublayer scheme in \cite zeng_and_dickinson_1998.
+!! This file contains the surface roughness length formulation based on 
+!! the surface sublayer scheme in 
+!! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998. 
 
+!> This module contains the CCPP-compliant GFS surface layer scheme.
       module sfc_ex_coef
       contains
 
@@ -12,10 +14,12 @@
       end subroutine sfc_ex_coef_finalize
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
+!! @{
 !> \brief This subroutine calculates surface roughness length.
 !!
 !! This subroutine includes the surface roughness length formulation
-!! based on the surface sublayer scheme in \cite zeng_and_dickinson_1998.
+!! based on the surface sublayer scheme in 
+!! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998.
 !> \section arg_table_sfc_ex_coef_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -57,11 +61,12 @@
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
 !! @{
-!! -# Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
-!!  in \cite zeng_et_al_1998).
-!! -# Calculate Zeng's momentum roughness length formulation over land and sea ice.
-!! -# Calculate the new vegetation-dependent formulation of thermal roughness length (\cite zheng_et_al_2009).
-!! \cite zheng_et_al_2009 proposed a new formulation on
+!! - Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
+!!  in Zeng et al. (1998) \cite zeng_et_al_1998). 
+!! - Calculate Zeng's momentum roughness length formulation over land and sea ice.
+!! - Calculate the new vegetation-dependent formulation of thermal roughness length 
+!! (Zheng et al.(2009) \cite zheng_et_al_2009).
+!! Zheng et al. (2009) \cite zheng_et_al_2009 proposed a new formulation on
 !! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
 !! \f[
 !!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
@@ -79,7 +84,7 @@
 !! \f[
 !!  \ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
 !!\f]
-!! -# Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
+!! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
       subroutine sfc_ex_coef_run                                        &
      &                   (im,ps,u1,v1,t1,q1,z1,                         &
@@ -213,7 +218,7 @@
 !  rat taken from zeng, zhao and dickinson 1997
 
 ! - Over the ocean, calculate the roughness length of temperature
-!! (see eq.(25) and (26) in \cite zeng_et_al_1998).
+!! (see eq.(25) and (26) in Zeng et al.(1998) \cite zeng_et_al_1998).
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax  = z0max * exp(-rat)
 
@@ -433,5 +438,6 @@
 
       return
       end subroutine sfc_ex_coef_run
+!! @}
 !! @}
       end module sfc_ex_coef

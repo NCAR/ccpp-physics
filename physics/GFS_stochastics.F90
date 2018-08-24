@@ -1,6 +1,9 @@
 !> \file GFS_stochastics.f90
-!!  Contains code previously in GFS_stochastics_driver.
+!! This file contains code previously in GFS_stochastics_driver.
 
+!>\defgroup gfs_stoch GFS Stochastics Main Module
+!! This module
+!! @ {
     module GFS_stochastics
 
       contains
@@ -209,3 +212,4 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
+!! @}

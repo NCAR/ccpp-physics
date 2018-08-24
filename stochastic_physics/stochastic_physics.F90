@@ -1,3 +1,8 @@
+!>\file stochastic_physics.F90
+!! This file includes
+
+!>\ingroup gfs_stoch
+!! This module 
 module stochastic_physics
 
 use stochy_ccpp, only : is_initialized, &
@@ -322,7 +327,8 @@ end subroutine stochastic_physics_finalize
 
 end module stochastic_physics
 
-
+!>\ingroup gfs_stoch
+!! This module 
 module stochastic_physics_sfc
 
 use stochy_ccpp, only : is_initialized, is_master

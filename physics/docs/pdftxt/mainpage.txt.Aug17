@@ -1,0 +1,39 @@
+/**
+\mainpage Introduction 
+
+\anchor mainpage-top
+
+Welcome to the GMTB Common Community Physics Package (CCPP) V2.0 scientific documentation. This version contains all parameterizations of \b the \b GFS \b physics \b suite on the top of NEMSfv3gfs repository on NOAA VLab in July 2018. In this website you will find documentation on various aspects of the parameterizations, including basic description, input/output argument list and general/detailed algorithm.
+
+A major upgrade to the parameterization of \ref GFDL_cloud was implemented in the FV3GFS, 
+which is being configured to replace spectral model (NEMS GSM) in operational implementation (Q2FY19). It is the most significant change to 
+the GFS physics suite since the Zhao-Carr microphysics scheme was implemented in the NCEP 
+Global Forecasting System(GFS) as a simple scheme and predicted only total cloud condensate. 
+Six prognostic cloud spieces variables have been introduced to enable a more physically based 
+representation of water vapor, mixed-phase (liquid/ice) cloud and precipitating rain/snow/graupel. A fast physics 
+(phase change only, for now) has been implemented between "Lagrangian-to-Eulerian" remapping in the FV3 dynamic solver.  
+
+Other physics Upgrade of Q3FY17 GFS include:
++ Use of higher resolution land surface climatologies and new surface albedo data.
+  + IGBP 20-type land classifications and STASGO 19-type soil classifications
+  + New MODIS-based snow free albedo
+  + New MODIS-based maximum snow albedo
+  + Updated diurnal albedo treatment
+  + Unified snow cover and snow albedo between radiation and Noah LSM
+  + Fixed excessive cooling of T2m during sunset
+  + Increased ground heat flux under deep snow
+
+    Major issue addressed:
+  + Reduced patchiness of land cover and its properties
+  + Reduced cold temperature bias over snow: Alaska, Northwest, Northeast
+  + Mitigated stable boundary layer decoupling
+  + Improved surface exchange coefficient 
+  + Removed excessive large snow albedo
++ Updated land parameterization to reduced excessive cooling of 2m temperatures during sunset (00Z).
++ Changes to cumulus convection parameterization to improve summertime precipitation forecasts.
++ Included a Near-Surface Sea Temperature model to represent diurnal warming and sub-layer cooling effects.
++ Reduced Rayleigh damping in the upper stratosphere to improve temperature and circulation forecast.
+
+ You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/">the GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
+
+*/

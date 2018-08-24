@@ -1,6 +1,8 @@
 !>  \file samfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
+!> This module contains the CCPP-compliant scale-aware mass-flux 
+!! shallow convection scheme.
       module samfshalcnv
 
       contains
@@ -21,47 +23,12 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal Scale-Aware Mass-Flux Shallow Convection
+!> \defgroup SAMF_shal GFS samfshalcnv Main
 !! @{
-!!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection scheme is an
-!!  updated version of the previous mass-flux shallow convection scheme with
-!!  scale and aerosol awareness and parameterizes the effect of shallow
-!!  convection on the environment.  The SAMF_shal scheme is similar to the SAMF
-!!  deep convection scheme but with a few key differences. First, no
-!!  quasi-equilibrium assumption is used for any grid size and the shallow cloud
-!!  base mass flux is parameterized using a mean updraft velocity. Further,
-!!  there are no convective downdrafts, the entrainment rate is greater than for
-!!  deep convection, and the shallow convection is limited to not extend over
-!!  the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and aerosol
-!!  awareness follows that of the SAMF deep convection scheme.
-!!
-!!  The previous version of the shallow convection scheme (shalcnv.f) is
-!!  described in \cite han_and_pan_2011 and differences between the shallow and
-!!  deep convection schemes are presented in \cite han_and_pan_2011 and
-!!  \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
-!!  are described in \cite han_et_al_2017 .
-!!
-!!  In further update for FY19 GFS implementation, interaction with turbulent
-!!  kinetic energy (TKE), which is a prognostic variable used in a scale-aware
-!!  TKE-based moist EDMF vertical turbulent mixing scheme, is included.
-!!  Entrainment rates in updrafts are proportional to sub-cloud mean TKE. TKE is
-!!  transported by cumulus convection. TKE contribution from cumulus convection
-!!  is deduced from cumulus mass flux. On the other hand, tracers such as ozone
-!!  and aerosol are also transported by cumulus convection.
-!!
-!!  To reduce too much convective cooling at the cloud top, the convection
-!!  schemes have been modified for the rain conversion rate, entrainment and
-!!  detrainment rates, overshooting layers, and maximum allowable cloudbase mass
-!!  flux (as of June 2018).
-!!
-!!  \image html SAMF_shal_Flowchart.png "Diagram depicting how the SAMF shallow
-!!  convection scheme is called from the FV3GFS physics time loop" height=2cm
-
-
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
 !!
-!!  This routine follows the \ref SAMF deep scheme quite closely, although it
+!!  This routine follows the \ref SAMFdeep quite closely, although it
 !!  can be interpreted as only having the "static" and "feedback" control
 !!  portions, since the "dynamic" control is not necessary to find the cloud
 !!  base mass flux. The algorithm is simplified from SAMF deep convection by
@@ -119,20 +86,20 @@
 !! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                                                                 | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                                                                    | flag        |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section gen_samfshalcnv GFS samfshalcnv General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# The cloud base mass flux is obtained using the cumulus updraft velocity averaged ove the whole cloud depth.
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
-!!  \section detailed Detailed Algorithm
+!!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,
-     &     eps,epsm1,fv,grav,hvap,rd,rv,
-     &     t0c,delt,ntk,ntr,delp,
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,
-     &     rn,kbot,ktop,kcnv,islimsk,garea,
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,
+      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,                 &
+     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
+     &     t0c,delt,ntk,ntr,delp,                                       &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
+     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -1544,7 +1511,7 @@ c
         endif
       enddo
 !
-!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitus_2014.
+!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 2.e-4), 6.e-4)
@@ -1856,6 +1823,8 @@ c
 !! @}
       end module samfshalcnv
 
+!> This module contains the CCPP-compliant scale-aware mass-flux shallow convection
+!! post interstitial codes.
       module samfshalcnv_post
       contains
 
