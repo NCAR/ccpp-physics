@@ -44,8 +44,10 @@ the melting and freezing energies.
 If the Zhao-Carr MP scheme is called, calwxt_dominant() takes the precipitation type solution from different algorithms 
 (calwxt(), calwxt_ramer(), calwxt_revised(), and calwxt_bourg())and uses them up to output a dominant type.
 
-If the GFDL MP scheme is called, the precipitation type at the surface is directly diagnosed from the microphysics species 
-predicted by the scheme.
+GFDL MP scheme permits the prognostic surface precipitation to simultaneously consist of ice, snow and graupel at the
+same location. Hence if the GFDL MP scheme is called, the precipitation type at the surface is 
+directly diagnosed from the explicit surface precipitation (i.e. ice, snow and graupel)  
+predicted by the scheme and convective rainfall predicted by the cumulus scheme if surface temperature is below \f$0^oC\f$ .
 
 
 \section intra_calprecip  Intraphysics Communication
