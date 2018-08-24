@@ -9,7 +9,6 @@ This is the Rayleigh friction calculation with total energy conservation.
 \section intra_rayleigh Intraphysics Communication
 \ref arg_table_rayleigh_damp_run
 
-\section gen_ozone 3. General Algorithm
 
 
 

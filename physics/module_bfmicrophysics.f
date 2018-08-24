@@ -1,3 +1,7 @@
+!>\file module_bfmicrophysics.f This file contains some subroutines used
+!! in microphysics.
+
+!> This module contains some subroutines used in microphysics.
       MODULE module_microphysics
 !
       USE MACHINE , ONLY : kind_phys
@@ -111,10 +115,7 @@
 !
       CONTAINS
 !
-!#######################################################################
-!------- Initialize constants & lookup tables for microphysics ---------
-!#######################################################################
-!
+!> This subroutine initializes constants & lookup tables for microphysics.
       SUBROUTINE GSMCONST (DTPG,mype,first)
 !
       implicit none
@@ -284,17 +285,17 @@
 !      mass-weighted fall speeds of rain as functions of mean diameter
 !      from the lookup tables.
 !
-      RR_DRmin=N0r0*RRATE(MDRmin)     ! RR for mean drop diameter of .05 mm
-      RR_DR1=N0r0*RRATE(MDR1)         ! RR for mean drop diameter of .10 mm
-      RR_DR2=N0r0*RRATE(MDR2)         ! RR for mean drop diameter of .20 mm
-      RR_DR3=N0r0*RRATE(MDR3)         ! RR for mean drop diameter of .32 mm
-      RR_DRmax=N0r0*RRATE(MDRmax)     ! RR for mean drop diameter of .45 mm
+      RR_DRmin=N0r0*RRATE(MDRmin)     !< RR for mean drop diameter of .05 mm
+      RR_DR1=N0r0*RRATE(MDR1)         !< RR for mean drop diameter of .10 mm
+      RR_DR2=N0r0*RRATE(MDR2)         !< RR for mean drop diameter of .20 mm
+      RR_DR3=N0r0*RRATE(MDR3)         !< RR for mean drop diameter of .32 mm
+      RR_DRmax=N0r0*RRATE(MDRmax)     !< RR for mean drop diameter of .45 mm
 !
-      RQR_DRmin=N0r0*MASSR(MDRmin)    ! Rain content for mean drop diameter of .05 mm
-      RQR_DR1=N0r0*MASSR(MDR1)        ! Rain content for mean drop diameter of .10 mm
-      RQR_DR2=N0r0*MASSR(MDR2)        ! Rain content for mean drop diameter of .20 mm
-      RQR_DR3=N0r0*MASSR(MDR3)        ! Rain content for mean drop diameter of .32 mm
-      RQR_DRmax=N0r0*MASSR(MDRmax)    ! Rain content for mean drop diameter of .45 mm
+      RQR_DRmin=N0r0*MASSR(MDRmin)    !< Rain content for mean drop diameter of .05 mm
+      RQR_DR1=N0r0*MASSR(MDR1)        !< Rain content for mean drop diameter of .10 mm
+      RQR_DR2=N0r0*MASSR(MDR2)        !< Rain content for mean drop diameter of .20 mm
+      RQR_DR3=N0r0*MASSR(MDR3)        !< Rain content for mean drop diameter of .32 mm
+      RQR_DRmax=N0r0*MASSR(MDRmax)    !< Rain content for mean drop diameter of .45 mm
       C_N0r0=PI*RHOL*N0r0
       CN0r0=1.E6/C_N0r0**.25
       CN0r_DMRmin=1./(PI*RHOL*DMRmin**4)
@@ -338,8 +339,8 @@
       CRACW=DTPH*0.25*PI*0.1
 !     CRACW = 0.0      ! Brad's suggestion 20040614
 !
-      ESW0=FPVSL(T0C)           ! Saturation vapor pressure at 0C
-      RFmax=1.1**Nrime          ! Maximum rime factor allowed
+      ESW0=FPVSL(T0C)           !< Saturation vapor pressure at 0C
+      RFmax=1.1**Nrime          !< Maximum rime factor allowed
 !
 !------------------------------------------------------------------------
 !--------------- Constants passed through argument list -----------------
@@ -384,10 +385,7 @@
       END subroutine gsmconst
 
 !
-!#######################################################################
-!--- Sets up lookup table for calculating initial ice crystal growth ---
-!#######################################################################
-!
+!> This subrouine sets up lookup table for calculating initial ice crystal growth.
       SUBROUTINE MY_GROWTH_RATES (DTPH)
 !
       implicit none
@@ -426,10 +424,7 @@
 !
       END subroutine MY_GROWTH_RATES
 !
-!#######################################################################
-!--------------- Creates lookup tables for ice processes ---------------
-!#######################################################################
-!
+!> This subroutine creates lookup tables for ice processes.
       subroutine ice_lookup
 !
       implicit none
@@ -961,10 +956,7 @@
 !
       end subroutine ice_lookup
 !
-!#######################################################################
-!-------------- Creates lookup tables for rain processes ---------------
-!#######################################################################
-!
+!> This subroutine creates lookup tables for rain processes.
       subroutine rain_lookup
       implicit none
 !
@@ -2896,14 +2888,16 @@
 
 
 !-----------------------------------
+!>\ingroup module_radiation_clouds
+!> This program is a modified version of Ferrier's original "rshipath"
+!! subprogram. It computes layer's cloud liquid, ice, rain, and snow
+!! water condensate path and the partical effective radius for liquid
+!! droplet, rain drop, and snow flake.
+!\section gen_rsipath rsipath2 General Algorithm
       subroutine rsipath2                                               &
-!...................................
-
-!  ---  inputs:
-     &     ( plyr, plvl, tlyr, qlyr, qcwat, qcice, qrain, rrime,        &
+     &     ( plyr, plvl, tlyr, qlyr, qcwat, qcice, qrain, rrime,        &     ! inputs
      &       IM, LEVS, iflip, flgmin,                                   &
-!  ---  outputs:
-     &       cwatp, cicep, rainp, snowp, recwat, rerain, resnow, snden  &
+     &       cwatp, cicep, rainp, snowp, recwat, rerain, resnow, snden  &     ! outputs
      &     )
 
 ! =================   subprogram documentation block   ================ !

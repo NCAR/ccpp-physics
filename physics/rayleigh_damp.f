@@ -1,6 +1,8 @@
 !>\file rayleigh_damp.f
 !! This file contains the Rayleigh friction calculation with total
 !! energy conservation.
+
+!> This module contains the CCPP-compliant Rayleigh damping scheme.
       module rayleigh_damp
       contains
 
@@ -9,14 +11,13 @@
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
-!>\defgroup GFS_rayleigh GFS Rayleigh Damping Calculation
-!>\defgroup rayleigh_main  Rayleigh Damping Main
-!!\ingroup GFS_rayleigh
+!>\defgroup rayleigh_main GFS Rayleigh Damping Main
+!! @{
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
+!!
 !! Role of Rayleigh friction, it attempts to resolve two issues:
 !! - The top lid model effects, sponge layer to suppress resolved wave reflections and extra-heating
 !! - The winter-summer zonal wind drag in the strato-mesosphere
-!!
 !!
 !! \section arg_table_rayleigh_damp_run Argument Table
 !! | local_name     | standard_name                                        | long_name                                            | units      | rank | type      | kind      | intent | optional |
@@ -40,8 +41,8 @@
 !! | errmsg         | ccpp_error_message                                   | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                      | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
 !!
-      subroutine rayleigh_damp_run (
-     &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,
+      subroutine rayleigh_damp_run (                                    &
+     &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
      &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
 !
 !   ********************************************************************
@@ -137,6 +138,7 @@
 
       RETURN
       end subroutine rayleigh_damp_run
+!! @}
 
 
 !! \section arg_table_rayleigh_damp_finalize Argument Table
