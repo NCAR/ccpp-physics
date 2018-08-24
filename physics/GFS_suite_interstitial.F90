@@ -300,23 +300,39 @@
     end subroutine GFS_suite_stateout_reset_finalize
 
 !> \section arg_table_GFS_suite_stateout_reset_run Argument Table
-!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type              |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
-!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type  |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                        | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
+!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type       |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                       | horizontal loop extent                                                | count         |    0 | integer    |           | in     | F        |
+!! | levs           | vertical_dimension                                           | vertical layer dimension                                              | count         |    0 | integer    |           | in     | F        |
+!! | ntrac          | number_of_tracers                                            | number of tracers                                                     | count         |    0 | integer    |           | in     | F        |
+!! | tgrs           | air_temperature                                              | model layer mean temperature                                          | K             |    2 | real       | kind_phys | in     | F        |
+!! | ugrs           | x_wind                                                       | zonal wind                                                            | m s-1         |    2 | real       | kind_phys | in     | F        |
+!! | vgrs           | y_wind                                                       | meridional wind                                                       | m s-1         |    2 | real       | kind_phys | in     | F        |
+!! | qgrs           | tracer_concentration                                         | model layer mean tracer concentration                                 | kg kg-1       |    3 | real       | kind_phys | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                           | temperature updated by physics                                        | K             |    2 | real       | kind_phys | out    | F        |
+!! | gu0            | x_wind_updated_by_physics                                    | zonal wind updated by physics                                         | m s-1         |    2 | real       | kind_phys | out    | F        |
+!! | gv0            | y_wind_updated_by_physics                                    | meridional wind updated by physics                                    | m s-1         |    2 | real       | kind_phys | out    | F        |
+!! | gq0            | tracer_concentration_updated_by_physics                      | tracer concentration updated by physics                               | kg kg-1       |    3 | real       | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character  | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer    |           | out    | F        |
 !!
-    subroutine GFS_suite_stateout_reset_run (Statein, Stateout, errmsg, errflg)
+    subroutine GFS_suite_stateout_reset_run (im, levs, ntrac,        &
+                                             tgrs, ugrs, vgrs, qgrs, &
+                                             gt0 , gu0 , gv0 , gq0 , &
+                                             errmsg, errflg)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_statein_type, GFS_stateout_type
 
       implicit none
 
       ! interface variables
-      type(GFS_statein_type),           intent(in)    :: Statein
-      type(GFS_stateout_type),          intent(inout) :: Stateout
+      integer, intent(in) :: im
+      integer, intent(in) :: levs
+      integer, intent(in) :: ntrac
+      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
+      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -325,10 +341,10 @@
       errmsg = ''
       errflg = 0
 
-      Stateout%gt0(:,:)   = Statein%tgrs(:,:)
-      Stateout%gu0(:,:)   = Statein%ugrs(:,:)
-      Stateout%gv0(:,:)   = Statein%vgrs(:,:)
-      Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:)
+      gt0(:,:)   = tgrs(:,:)
+      gu0(:,:)   = ugrs(:,:)
+      gv0(:,:)   = vgrs(:,:)
+      gq0(:,:,:) = qgrs(:,:,:)
 
     end subroutine GFS_suite_stateout_reset_run
 
@@ -346,34 +362,47 @@
     end subroutine GFS_suite_stateout_update_finalize
 
 !> \section arg_table_GFS_suite_stateout_update_run Argument Table
-!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type              |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
-!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type  |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type  |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type     |           | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                      | updated tendency of the x wind                                        | m s-2         |    2 | real              | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                      | updated tendency of the y wind                                        | m s-2         |    2 | real              | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics             | updated tendency of the temperature                                   | K s-1         |    2 | real              | kind_phys | in     | F        |
-!! | dqdt           | tendency_of_tracers_due_to_model_physics                     | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real              | kind_phys | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                        | Fortran DDT containing FV3-GFS prognostic state to return to dycore   | DDT           |    0 | GFS_stateout_type |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer           |           | out    | F        |
+!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type       |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                       | horizontal loop extent                                                | count         |    0 | integer    |           | in     | F        |
+!! | levs           | vertical_dimension                                           | vertical layer dimension                                              | count         |    0 | integer    |           | in     | F        |
+!! | ntrac          | number_of_tracers                                            | number of tracers                                                     | count         |    0 | integer    |           | in     | F        |
+!! | dtp            | time_step_for_physics                                        | physics timestep                                                      | s             |    0 | real       | kind_phys | in     | F        |
+!! | tgrs           | air_temperature                                              | model layer mean temperature                                          | K             |    2 | real       | kind_phys | in     | F        |
+!! | ugrs           | x_wind                                                       | zonal wind                                                            | m s-1         |    2 | real       | kind_phys | in     | F        |
+!! | vgrs           | y_wind                                                       | meridional wind                                                       | m s-1         |    2 | real       | kind_phys | in     | F        |
+!! | qgrs           | tracer_concentration                                         | model layer mean tracer concentration                                 | kg kg-1       |    3 | real       | kind_phys | in     | F        |
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                      | updated tendency of the x wind                                        | m s-2         |    2 | real       | kind_phys | in     | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                      | updated tendency of the y wind                                        | m s-2         |    2 | real       | kind_phys | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics             | updated tendency of the temperature                                   | K s-1         |    2 | real       | kind_phys | in     | F        |
+!! | dqdt           | tendency_of_tracers_due_to_model_physics                     | updated tendency of the tracers                                       | kg kg-1 s-1   |    3 | real       | kind_phys | in     | F        |
+!! | gt0            | air_temperature_updated_by_physics                           | temperature updated by physics                                        | K             |    2 | real       | kind_phys | out    | F        |
+!! | gu0            | x_wind_updated_by_physics                                    | zonal wind updated by physics                                         | m s-1         |    2 | real       | kind_phys | out    | F        |
+!! | gv0            | y_wind_updated_by_physics                                    | meridional wind updated by physics                                    | m s-1         |    2 | real       | kind_phys | out    | F        |
+!! | gq0            | tracer_concentration_updated_by_physics                      | tracer concentration updated by physics                               | kg kg-1       |    3 | real       | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character  | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer    |           | out    | F        |
 !!
-    subroutine GFS_suite_stateout_update_run (Statein, Model, Grid, dudt, dvdt, dtdt, dqdt, Stateout, errmsg, errflg)
+    subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp,  &
+                     tgrs, ugrs, vgrs, qgrs, dudt, dvdt, dtdt, dqdt, &
+                     gt0, gu0, gv0, gq0, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_control_type, GFS_statein_type, GFS_grid_type, GFS_stateout_type
 
       implicit none
 
-      ! interface variables
-      type(GFS_control_type),           intent(in)    :: Model
-      type(GFS_statein_type),           intent(in)    :: Statein
-      type(GFS_grid_type),              intent(in)    :: Grid
-      type(GFS_stateout_type),          intent(inout) :: Stateout
+      ! Interface variables
+      integer,              intent(in) :: im
+      integer,              intent(in) :: levs
+      integer,              intent(in) :: ntrac
+      real(kind=kind_phys), intent(in) :: dtp
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs), intent(in) :: dudt, dvdt, dtdt
-      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levs, Model%ntrac), intent(in) :: dqdt
+      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
+      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: dudt, dvdt, dtdt
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: dqdt
+      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
+      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -382,10 +411,10 @@
       errmsg = ''
       errflg = 0
 
-      Stateout%gt0(:,:)   = Statein%tgrs(:,:) + dtdt(:,:) * Model%dtp
-      Stateout%gu0(:,:)   = Statein%ugrs(:,:) + dudt(:,:) * Model%dtp
-      Stateout%gv0(:,:)   = Statein%vgrs(:,:) + dvdt(:,:) * Model%dtp
-      Stateout%gq0(:,:,:) = Statein%qgrs(:,:,:) + dqdt(:,:,:) * Model%dtp
+      gt0(:,:)   = tgrs(:,:)   + dtdt(:,:)   * dtp
+      gu0(:,:)   = ugrs(:,:)   + dudt(:,:)   * dtp
+      gv0(:,:)   = vgrs(:,:)   + dvdt(:,:)   * dtp
+      gq0(:,:,:) = qgrs(:,:,:) + dqdt(:,:,:) * dtp
 
     end subroutine GFS_suite_stateout_update_run
 
