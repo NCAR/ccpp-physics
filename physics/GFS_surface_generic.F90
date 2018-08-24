@@ -11,6 +11,7 @@
       subroutine GFS_surface_generic_pre_finalize()
       end subroutine GFS_surface_generic_pre_finalize
 
+#if 0
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -38,17 +39,42 @@
 !! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground  | W m-2      |    1 | real      | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                         | K          |    1 | real      | kind_phys | inout  | F        |
 !! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                            | m          |    1 | real      | kind_phys | inout  | F        |
+!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                | flag       |    0 | logical   |           | in     | F        |
+!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step              | K          |    2 | real      | kind_phys | out    | F        |
+!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling               | change in rain_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
+!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                        | change in show_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
+!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                           | total rain precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
+!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                    | total snow precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
+!! | do_sfcperts    | flag_for_stochastic_surface_perturbations                                    | flag for stochastic surface perturbations option                 | flag       |    0 | logical   |           | in     | F        |
+!! | nsfcpert       | number_of_surface_perturbations                                              | number of surface perturbations                                  | count      |    0 | integer   |           | in     | F        |
+!! | sfc_wts        | weights_for_stochastic_surface_physics_perturbation                          | weights for stochastic surface physics perturbation              | none       |    2 | real      | kind_phys | in     | F        |
+!! | pertz0         | magnitude_of_perturbation_of_momentum_roughness_length                       | magnitude of perturbation of momentum roughness length           | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertzt         | magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio         | magnitude of perturbation of heat to momentum roughness length r.| frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertshc        | magnitude_of_perturbation_of_soil_type_b_parameter                           | magnitude of perturbation of soil type b parameter               | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertlai        | magnitude_of_perturbation_of_leaf_area_index                                 | magnitude of perturbation of leaf area index                     | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertvegf       | magnitude_of_perturbation_of_vegetation_fraction                             | magnitude of perturbation of vegetation fraction                 | frac       |    1 | real      | kind_phys | in     | F        |
+!! | z01d           | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                        | frac       |    1 | real      | kind_phys | out    | F        |
+!! | zt1d           | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | out    | F        |
+!! | bexp1d         | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                          | frac       |    1 | real      | kind_phys | out    | F        |
+!! | xlai1d         | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                  | frac       |    1 | real      | kind_phys | out    | F        |
+!! | vegf1d         | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                              | frac       |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
 !!
+#endif
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
-        prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, slopetyp, work3, gabsbdlw, &
-        tsurf, zlvl, errmsg, errflg)
+                          prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
+                          slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
+                          drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
+                          pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
+                          errmsg, errflg)
 
         use machine,               only: kind_phys
+        use surface_perturbation,  only: cdfnor
 
         implicit none
 
+        ! Interface variables
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
@@ -60,17 +86,85 @@
 
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
 
+        ! Stochastic physics / surface perturbations
+        logical, intent(in) :: do_sppt
+        real(kind=kind_phys), dimension(im,levs),     intent(out) :: dtdtr
+        real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
+        real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
+        real(kind=kind_phys), dimension(im),          intent(in)  :: rain_cpl
+        real(kind=kind_phys), dimension(im),          intent(in)  :: snow_cpl
+        logical, intent(in) :: do_sfcperts
+        integer, intent(in) :: nsfcpert
+        real(kind=kind_phys), dimension(im,nsfcpert), intent(in)  :: sfc_wts
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertz0
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertzt
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertshc
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertlai
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertvegf
+        real(kind=kind_phys), dimension(im),          intent(out) :: z01d
+        real(kind=kind_phys), dimension(im),          intent(out) :: zt1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
+
+        ! CCPP error handling
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        integer :: i
+        ! Local variables
+        integer              :: i
         real(kind=kind_phys) :: onebg
+        real(kind=kind_phys) :: cdfz
 
+        ! Set constants
         onebg  = 1.0/con_g
 
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Set initial quantities for stochastic physics deltas
+        if (do_sppt) then
+          dtdtr     = 0.0
+          do i=1,im
+            drain_cpl(i) = rain_cpl (i)
+            dsnow_cpl(i) = snow_cpl (i)
+          enddo
+        endif
+
+        ! Scale random patterns for surface perturbations with perturbation size
+        ! Turn vegetation fraction pattern into percentile pattern
+        if (do_sfcperts) then
+          if (pertz0(1) > 0.) then
+            z01d(:) = pertz0(1) * sfc_wts(:,1)
+  !          if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
+  !          if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
+          endif
+          if (pertzt(1) > 0.) then
+            zt1d(:) = pertzt(1) * sfc_wts(:,2)
+          endif
+          if (pertshc(1) > 0.) then
+            bexp1d(:) = pertshc(1) * sfc_wts(:,3)
+          endif
+          if (pertlai(1) > 0.) then
+            xlai1d(:) = pertlai(1) * sfc_wts(:,4)
+          endif
+  ! --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
+  !        if (pertalb(1) > 0.) then
+  !          do i=1,im
+  !            call cdfnor(sfc_wts(i,5),cdfz)
+  !            alb1d(i) = cdfz
+  !          enddo
+  !        endif
+          if (pertvegf(1) > 0.) then
+            do i=1,im
+              call cdfnor(sfc_wts(i,6),cdfz)
+              vegf1d(i) = cdfz
+            enddo
+          endif
+        endif
+
+        ! End of stochastic physics / surface perturbation
 
         do i=1,im
           sigmaf(i) = max(vfrac(i),0.01 )
