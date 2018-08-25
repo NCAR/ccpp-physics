@@ -149,6 +149,12 @@ if (MPI)
 endif (MPI)
 
 #------------------------------------------------------------------------------
+# Set TEMPLOG flags for C/C++/Fortran preprocessor (temporary, need better logging)
+if (TEMPLOG)
+  ADD_DEFINITIONS(-DTEMPLOG)
+endif (TEMPLOG)
+
+#------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor
 ADD_DEFINITIONS(-DMOIST_CAPPA -DUSE_COND -DNEMS_GSM)
 ADD_DEFINITIONS(-DINTERNAL_FILE_NML)
