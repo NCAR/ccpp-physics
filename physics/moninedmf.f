@@ -18,8 +18,8 @@
 
 !> \defgroup HEDMF GFS moninedmf Main
 !! @{
-!!  \brief  This subroutine contains all of logic for the 
-!! Hybrid EDMF PBL scheme except for the calculation of 
+!!  \brief  This subroutine contains all of logic for the
+!! Hybrid EDMF PBL scheme except for the calculation of
 !! the updraft properties and mass flux.
 !!
 !> \section arg_table_hedmf_run Argument Table
@@ -270,6 +270,10 @@ c
  610      format(1x,' k pr dkt dku ',i5,3f8.2,' l2 ri t2',
      1         ' sr2  ',2f8.2,2e10.2)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !>  ## Compute preliminary variables from input arguments
 
 ! compute preliminary variables
