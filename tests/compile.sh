@@ -3,7 +3,6 @@
 # DH* note: currently, the default options for MAKE_OPT in conf/configure.fv3.* are not
 # used by CCPP. However, the default options for MAKE_OPT in conf/configure.fv3.* are
 # currently matched to those for CCPP (c.f. conf/configure.fv3.* and ccpp/build.sh).
-# The only options that CCPP cares about are DEBUG=Y/N (def. N) and OpenMP=Y/N (def. Y).
 
 SECONDS=0
 
@@ -55,11 +54,6 @@ fi
 if [[ "${MAKE_OPT}" == *"CCPP=Y"* ]]; then
   export readonly PATH_CCPP="$PATHTR/../ccpp"
   export readonly NEMS_CCPP_CPPFLAGS="-DCCPP"
-  # DH* temporarily add '-lccppphys; to allow calls to SCHEME_NAME_run
-  # (i.e. the CCPP-compliant version of a scheme, but called directly
-  # rather than through CCPP).
-  export readonly NEMS_CCPP_LDFLAGS="-L${PATH_CCPP}/lib -lccpp -lccppphys"
-  # *DH
   # Run ccpp_prebuild.py from the top-level directory before building the CCPP framework and physics
   cd ${PATHTR}/..
   if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
