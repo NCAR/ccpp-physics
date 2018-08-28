@@ -378,7 +378,7 @@ contains
 #endif
 
        ! write version number and namelist to log file
-       if (me == master) then
+       if (me==master .and. logunit>=0) then
            write (logunit, *) " ================================================================== "
            write (logunit, *) "gfdl_cloud_microphys_mod"
            write (logunit, nml = gfdl_cloud_microphysics_nml)
