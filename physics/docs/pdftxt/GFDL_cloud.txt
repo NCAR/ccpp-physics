@@ -13,7 +13,7 @@ Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain
 
 Some unique attributes of GFDL cloud microphysics include:
 
-\b Fast \b Physics \b in \b FV3 \b dynamical \b solver
+\section fast_phys Fast Physics in FV3 Dynamical Solver
 \image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=10cm
 The leftmost column of Figure 1 shows the external API calls used during a typical process-split model integration procedure. First,
 the solver is called, which advances the solver a full "physics" time step. This updated state is then passed to the physical parameterization
@@ -30,8 +30,8 @@ stability by executing the loop (and thereby the vertical remapping) multiple ti
 
 In current fv3gfs, the fast physics (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
 
-\b Horizontal \b Sub-grid \b Variability \b ("Scale-aware")
-\n Horizontal sub-grid variability is a function of cell area:
+\section gfdl_fast Horizontal Sub-grid Variability ("Scale-aware")
+Horizontal sub-grid variability is a function of cell area:
 - Over land:
 \f[
 h_{var}=\min \left\{0.2,\max\left[0.01, D_{land}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}

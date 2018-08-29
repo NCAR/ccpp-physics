@@ -148,6 +148,7 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup module_radiation_clouds RRTMG Clouds Module
+!! @{
 !! \brief This module computes cloud related quantities for radiation
 !! computations.
 !!
@@ -176,25 +177,6 @@
 !!
 !!\version NCEP-Radiation_clouds    v5.1  Nov 2012
 !!
-!> \section gen_al_clouds  Zhao-Carr-Sundqvist MP - Xu-Randall Diagnostic Cloud Fraction Calculation
-!! @{
-!! \n The cloud fraction in a given grid box of the GFS model is
-!! computed using the parameterization scheme of 
-!! Xu and Randall (1996) \cite xu_and_randall_1996 :
-!!  \f[
-!!  \sigma =RH^{k_{1}}\left[1-exp\left(-\frac{k_{2}q_{l}}{\left[\left(1-RH\right)q_{s}\right]^{k_{3}}}\right)\right]
-!!  \f]
-!!  Where \f$RH\f$ is relative humidity, \f$q_{l}\f$ is the cloud
-!!  condensate, \f$q_{s}\f$ is saturation specific humidity,
-!! \f$k_{1}(=0.25)\f$, \f$k_{2}(=100)\f$, \f$k_{3}(=0.49)\f$ are the
-!! empirical parameters. The cloud condensate is partitioned into
-!!  cloud water and ice in radiation based on temperature. Cloud drop
-!! effective radius ranges 5-10 microns over land depending on
-!!  temperature. Ice crystal radius is function of ice water content
-!! (Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996).
-!!  Maximum-randomly cloud overlapping is used in both long-wave
-!! radiation and short-wave radiation. Convective clouds are not
-!! considered in radiation.
 !! @}
 
 !> This module computes cloud related quantities for radiation computations.
@@ -221,13 +203,13 @@
 !  ---  set constant parameters
       real (kind=kind_phys), parameter :: gfac=1.0e5/con_g              &
      &,                                   gord=con_g/con_rd
-!> number of fields in cloud array
-      integer, parameter, public :: NF_CLDS = 11   
-!> number of cloud vertical domains
-      integer, parameter, public :: NK_CLDS = 3  
+
+      integer, parameter, public :: NF_CLDS = 11          !< number of fields in cloud array   
+      integer, parameter, public :: NK_CLDS = 3           !< number of cloud vertical domains
 
 ! pressure limits of cloud domain interfaces (low,mid,high) in mb (0.1kPa)
-      real (kind=kind_phys), save :: ptopc(NK_CLDS+1,2)
+      real (kind=kind_phys), save :: ptopc(NK_CLDS+1,2)   !< pressure limits of cloud domain interfaces
+                                                          !! (low, mid, high) in mb (0.1kPa)
 
 !org  data ptopc / 1050., 642., 350., 0.0,  1050., 750., 500., 0.0 /
       data ptopc / 1050., 650., 400., 0.0,  1050., 750., 500., 0.0 /
@@ -236,57 +218,37 @@
       real (kind=kind_phys), parameter :: climit = 0.001, climit2=0.05
       real (kind=kind_phys), parameter :: ovcst  = 1.0 - 1.0e-8
 
-! default liq radius to 10 micron
-      real (kind=kind_phys), parameter :: reliq_def = 10.0
-! default ice radius to 50 micron
-      real (kind=kind_phys), parameter :: reice_def = 50.0
-! default rain radius to 1000 micron
-      real (kind=kind_phys), parameter :: rrain_def = 1000.0
-! default snow radius to 250 micron
-      real (kind=kind_phys), parameter :: rsnow_def = 250.0
+      real (kind=kind_phys), parameter :: reliq_def = 10.0    !< default liquid radius to 10 micron
+      real (kind=kind_phys), parameter :: reice_def = 50.0    !< default ice radius to 50 micron
+      real (kind=kind_phys), parameter :: rrain_def = 1000.0  !< default rain radius to 1000 micron
+      real (kind=kind_phys), parameter :: rsnow_def = 250.0   !< default snow radius to 250 micron
 
-! rh in one percent interval
-      integer, parameter :: NBIN=100
-! =1,2 for eastern and western hemispheres
-      integer, parameter :: NLON=2
-! =1,4 for 60n-30n,30n-equ,equ-30s,30s-60s
-      integer, parameter :: NLAT=4
-! =1,4 for bl,low,mid,hi cld type
-      integer, parameter :: MCLD=4
-! =1,2 for land,sea
-      integer, parameter :: NSEAL=2
+      integer, parameter :: NBIN=100                          !< relative humidity in one percent interval
+      integer, parameter :: NLON=2                            !< =1,2 for eastern and western hemisphere
+      integer, parameter :: NLAT=4                            !< =1,4 for 60n-30n,30n-equ,equ-30s,30s-60s
+      integer, parameter :: MCLD=4                            !< =1,4 for bl,low,mid,hi cld type
+      integer, parameter :: NSEAL=2                           !< =1,2 for land,sea
 
-! default cld single scat albedo
-      real (kind=kind_phys), parameter :: cldssa_def = 0.99
-! default cld asymmetry factor
-      real (kind=kind_phys), parameter :: cldasy_def = 0.84
+      real (kind=kind_phys), parameter :: cldssa_def = 0.99   !< default cloud single scatter albedo
+      real (kind=kind_phys), parameter :: cldasy_def = 0.84   !< default cloud asymmetry factor
 
-!  ---  xlabdy: lat bndry between tuning regions, +/- xlim for transition
-!       xlobdy: lon bndry between tuning regions
-! lat bndry between tuning regions
-      real (kind=kind_phys)            :: xlabdy(3)
-! lon bndry between tuning regions
-      real (kind=kind_phys)            :: xlobdy(3)
-! +/- xlim for transition
-      real (kind=kind_phys), parameter :: xlim=5.0
+      real (kind=kind_phys)            :: xlabdy(3)           !< lat bndry between tuning regions
+      real (kind=kind_phys)            :: xlobdy(3)           !< lon bndry between tuning regions
+      real (kind=kind_phys), parameter :: xlim=5.0            !< +/- xlim for transition
 
       data xlabdy / 30.0,  0.0, -30.0 /,  xlobdy / 0.0, 180., 360. /
 
-! low cloud vertical velocity adjustment boundaries in mb/sec
-      real (kind=kind_phys), parameter :: vvcld1= 0.0003e0
-! low cloud vertical velocity adjustment boundaries in mb/sec
-      real (kind=kind_phys), parameter :: vvcld2=-0.0005e0
+      real (kind=kind_phys), parameter :: vvcld1= 0.0003e0    !< low cloud vertical velocity adjustment boundaries in mb/sec
+      real (kind=kind_phys), parameter :: vvcld2=-0.0005e0    !< low cloud vertical velocity adjustment boundaries in mb/sec
 
 !  ---  those data will be set up by "cld_init"
 !     rhcl : tuned rh relation table for diagnostic cloud scheme
 
-! tuned relative humidity relation table for diagnostic cloud scheme
-      real (kind=kind_phys) :: rhcl(NBIN,NLON,NLAT,MCLD,NSEAL)
+      real (kind=kind_phys) :: rhcl(NBIN,NLON,NLAT,MCLD,NSEAL)    !< tuned relative humidity relation table 
+                                                                  !! for diagnostic cloud scheme
 
-! upper limit of boundary layer clouds
-      integer  :: llyr   = 2
-! maximum-random cloud overlapping method
-      integer  :: iovr   = 1
+      integer  :: llyr   = 2                                  !< upper limit of boundary layer clouds
+      integer  :: iovr   = 1                                  !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
      &       diagcld1, cld_init, progcld5, progcld4o
@@ -454,7 +416,7 @@
 !!\param xlon        (IX), grid longitude in radians  (not used)
 !!\param slmsk       (IX), sea/land mask array (sea:0,land:1,sea-ice:2)
 !!\param IX          horizontal dimention
-!!\param NLAY1       vertical layer
+!!\param NLAY        vertical layer
 !!\param NLP1        level dimensions
 !!\param uni_cld     logical, true for cloud fraction from shoc
 !!\param lmfshal     logical, mass-flux shallow convection scheme flag
@@ -2921,30 +2883,34 @@
 !> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! for unified cloud microphysics scheme.
-!!\param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
-!!\param plvl    (IX,NLP1), model level pressure in mb (100Pa)
-!!\param tlyr    (IX,NLAY), model layer mean temperature in K
-!!\param tvly    (IX,NLAY), model layer virtual temperature in K
-!!\param qlyr    (IX,NLAY), layer specific humidity in gm/gm
-!!\param clw     (IX,NLAY), layer cloud liquid water amount
-!!\param ciw     (IX,NLAY), layer cloud ice water amount
-!!\param xlat    (IX), grid latitude in radians, default to pi/2 ->
-!!               -pi/2 range, otherwise see in-line comment
-!!\param xlon    (IX), grid longitude in radians  (not used)
-!!\param slmsk   (IX), sea/land mask array (sea:0,land:1,sea-ice:2)
+!!\param plyr        (IX,NLAY), model layer mean pressure in mb (100Pa)
+!!\param plvl        (IX,NLP1), model level pressure in mb (100Pa)
+!!\param tlyr        (IX,NLAY), model layer mean temperature in K
+!!\param tvly        (IX,NLAY), model layer virtual temperature in K
+!!\param ccnd        (IX,NLAY), layer cloud condensate amount
+!!\param ncnd        (IX,NLAY), number of layer cloud condensate types
+!!\param xlat        (IX), grid latitude in radians, default to pi/2 ->
+!!                   -pi/2 range, otherwise see in-line comment
+!!\param xlon        (IX), grid longitude in radians  (not used)
+!!\param slmsk       (IX), sea/land mask array (sea:0,land:1,sea-ice:2)
 !!\param IX           horizontal dimention
 !!\param NLAY,NLP1    vertical layer/level dimensions
+!!\param cldtot       unified cloud fraction from moist physics
+!!\param effrl       (IX,NLAY), effective radius for liquid water
+!!\param effri       (IX,NLAY), effective radius for ice water
+!!\param effrr       (IX,NLAY), effective radius for rain water
+!!\param effrs       (IX,NLAY), effective radius for snow water
+!!\param effr_in      logical - if .true. use input effective radii
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path \f$(g/m^2)\f$
 !!\n                 (:,:,3) - mean eff radius for liq cloud (micron)
 !!\n                 (:,:,4) - layer cloud ice water path \f$(g/m^2)\f$
 !!\n                 (:,:,5) - mean eff radius for ice cloud (micron)
-!!\n                 (:,:,6) - layer rain drop water path (not assigned)
+!!\n                 (:,:,6) - layer rain drop water path 
 !!\n                 (:,:,7) - mean eff radius for rain drop (micron)
-!!\n                 (:,:,8) - layer snow flake water path (not assigned)
+!!\n                 (:,:,8) - layer snow flake water path 
 !!\n                 (:,:,9) - mean eff radius for snow flake (micron)
-!!\n  *** fu's scheme need to be normalized by snow density \f$ (g/m^3/1.0e6)\f$
 !!\param clds       (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
@@ -3128,7 +3094,7 @@
         enddo
       endif
 
-!> -# Find top pressure for each cloud domain for given latitude.
+!> - Find top pressure for each cloud domain for given latitude.
 !     ptopc(k,i): top presure of each cld domain (k=1-4 are sfc,L,m,h;
 !  ---  i=1,2 are low-lat (<45 degree) and pole regions)
 
@@ -3143,7 +3109,7 @@
         enddo
       enddo
 
-!> -# Compute cloud liquid/ice/rain/snow condensate path in \f$ g/m^2 \f$ .
+!> - Compute cloud liquid/ice/rain/snow condensate path in \f$ g/m^2 \f$ .
 
       if ( ivflip == 0 ) then          ! input data from toa to sfc
         if (ncnd == 2) then
@@ -3192,7 +3158,7 @@
 
       endif                            ! end_if_ivflip
 
-!> -# Compute effective liquid cloud droplet radius over land.
+!> - Compute effective liquid cloud droplet radius over land.
 
       if(.not. effr_in) then
         do i = 1, IX
@@ -3229,8 +3195,8 @@
         enddo
       endif
 
-!> -# Compute effective ice cloud droplet radius following 
-!! \cite heymsfield_and_mcfarquhar_1996.
+!> - Compute effective ice cloud droplet radius following 
+!! Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
 
       if(.not. effr_in) then
         do k = 1, NLAY
@@ -3274,7 +3240,7 @@
       enddo
 
 
-!> -# Call gethml() to compute low,mid,high,total, and boundary layer
+!> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds.
 !  ---  compute low, mid, high, total, and boundary layer cloud fractions
@@ -3301,6 +3267,13 @@
 
 !> \ingroup module_radiation_clouds
 !> This subroutine computes cloud fractions for radiation calculations.
+!!
+!! Clouds are diagnosed from layer relative humidity, and estimate cloud optical 
+!! depth from temperature and layer thickness. then computes the low, mid, high,
+!! total and boundary layer cloud fractions and the vertical indices of low, mid,
+!! and high cloud top and base. The three vertical cloud domains are set up in the 
+!! initial subroutine cld_init().
+!!
 !!\param plyr      (IX,NLAY), model layer mean pressure in mb (100Pa)
 !!\param plvl      (IX,NLP1), model level pressure in mb (100Pa)
 !!\param tlyr      (IX,NLAY), model layer mean temperature in K
@@ -4026,7 +3999,7 @@
 !  ---  total and bl clouds, where cl1, cl2 are fractions of clear-sky view
 !       layer processed from surface and up
 
-!> -# Calculate total and BL cloud fractions (maximum-random cloud
+!> - Calculate total and BL cloud fractions (maximum-random cloud
 !!    overlapping is operational).
 
       if ( ivflip == 0 ) then                   ! input data from toa to sfc
@@ -4089,7 +4062,7 @@
 !  ---  change! layer processed from surface to top, so low clouds will
 !       contains both bl and low clouds.
 
-!> -# Calculte high, mid, low cloud fractions and vertical indices of
+!> - Calculte high, mid, low cloud fractions and vertical indices of
 !!    cloud tops/bases.
       if ( ivflip == 0 ) then                   ! input data from toa to sfc
 
@@ -4529,4 +4502,5 @@
 !
 !........................................!
       end module module_radiation_clouds !
+!! @}
 !========================================!
