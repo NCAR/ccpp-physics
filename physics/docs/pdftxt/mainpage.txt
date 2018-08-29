@@ -3,9 +3,9 @@
 
 Welcome to the GMTB Common Community Physics Package (CCPP) v2.0 scientific documentation. This release 
 of the CCPP contains two parts: CCPP-Physics (a collection of physical parameterizations) and 
-CCPP-framework (the infrastructure that connects the CCPP-Physics to host models).
+CCPP-Framework (the infrastructure that connects the CCPP-Physics to host models).
 
-The CCPP-physics is envisioned to contain parameterizations used by NOAA operational models for weather through
+The CCPP-Physics is envisioned to contain parameterizations used by NOAA operational models for weather through
 seasonal prediction timescales, as well as developmental schemes under consideration for upcoming 
 operational implementations. This version contains the parameterizations of the default physics suite
 of FV3GFS as of August 2018, along with the microphysics scheme that is used in the operational 

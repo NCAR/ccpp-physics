@@ -309,8 +309,10 @@
         enddo
       enddo
 
-!> - For GFDL cloud MP scheme, determine convective rain/snow by surface temperature;
-!! and determine explicit rain/snow by rain/snow coming out directly from MP.
+!> - For GFDL cloud MP scheme, determine convective snow by surface temperature;
+!! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
+!! and convective rainfall from the cumulus scheme if the surface temperature is below
+!! \f$0^oC\f$.
       if (imp_physics == imp_physics_gfdl) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
