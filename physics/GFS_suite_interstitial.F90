@@ -200,14 +200,11 @@
 !! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         |    1 | real             | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          |    1 | real             | kind_phys | in     | F        |
 !! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type    |           | inout  | F        |
-!! | kcnv           | flag_deep_convection                                         | flag indicating whether convection occurs in column (0 or 1)          | flag          |    1 | integer          |           | out    | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                  | kinematic surface upward sensible heat flux                           | K m s-1       |    1 | real             | kind_phys | out    | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                    | kinematic surface upward latent heat flux                             | kg kg-1 m s-1 |    1 | real             | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_2_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, &
-                                             Diag, kcnv, hflx, evap, errmsg, errflg)
+                                             Diag, errmsg, errflg)
 
       use machine,               only: kind_phys
       use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type, GFS_radtend_type, GFS_diag_type
@@ -221,9 +218,7 @@
       type(GFS_radtend_type),           intent(in)    :: Radtend
       type(GFS_diag_type),              intent(inout) :: Diag
 
-      integer, dimension(size(Grid%xlon,1)), intent(out) :: kcnv
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: hflx, evap
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -273,16 +268,6 @@
           endif
         endif
       endif    ! end if_lssav_block
-
-      kcnv(:)   = 0
-
-      hflx(:)       = 0.0
-      evap(:)       = 0.0
-
-      Diag%t1(:)      = Statein%tgrs(:,1)
-      Diag%q1(:)      = Statein%qgrs(:,1,1)
-      Diag%u1(:)      = Statein%ugrs(:,1)
-      Diag%v1(:)      = Statein%vgrs(:,1)
 
     end subroutine GFS_suite_interstitial_2_run
 

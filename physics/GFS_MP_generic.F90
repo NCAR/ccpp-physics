@@ -24,27 +24,23 @@
 !! | nncl           | number_of_tracers_for_cloud_condensate                 | number of tracers for cloud condensate                                    | count       |    0 | integer   |           | in     | F        |
 !! | ntrac          | number_of_tracers                                      | number of tracers                                                         | count       |    0 | integer   |           | in     | F        |
 !! | gt0            | air_temperature_updated_by_physics                     | temperature updated by physics                                            | K           |    2 | real      | kind_phys | in     | F        |
-!! | gq0_water_vapor| water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                          | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | gq0            | tracer_concentration_updated_by_physics                | tracer concentration updated by physics                                   | kg kg-1     |    3 | real      | kind_phys | in     | F        |
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | inout  | F        |
-!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
 !! | save_q         | tracer_concentration_save                              | tracer concentration before entering a physics scheme                     | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0_water_vapor, gq0, &
-        save_t, save_qv, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-
       integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
       logical,                                          intent(in) :: ldiag3d, do_aw
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0, gq0_water_vapor
+      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
@@ -59,8 +55,8 @@
       if (ldiag3d .or. do_aw) then
         do k=1,levs
           do i=1,im
-            save_t(i,k)   = gt0(i,k)
-            save_qv(i,k)  = gq0_water_vapor(i,k)
+            save_t(i,k) = gt0(i,k)
+            save_q(1:im,:,1) = gq0(1:im,:,1)
           enddo
         enddo
         do n=ntcw,ntcw+nncl-1
@@ -123,7 +119,6 @@
 !! | xlon             | longitude                                                               | longitude                                                               | radians     |    1 | real       | kind_phys | in     | F        |
 !! | gt0              | air_temperature_updated_by_physics                                      | temperature updated by physics                                          | K           |    2 | real       | kind_phys | in     | F        |
 !! | gq0              | tracer_concentration_updated_by_physics                                 | tracer concentration updated by physics                                 | kg kg-1     |    3 | real       | kind_phys | in     | F        |
-!! | gq0_water_vapor  | water_vapor_specific_humidity_updated_by_physics                        | water vapor specific humidity updated by physics                        | kg kg-1     |    2 | real       | kind_phys | in     | F        |
 !! | prsl             | air_pressure                                                            | layer mean pressure                                                     | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | prsi             | air_pressure_at_interface                                               | pressure at layer interface                                             | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | phii             | geopotential_at_interface                                               | geopotential at model layer interfaces                                  | m2 s-2      |    2 | real       | kind_phys | in     | F        |
@@ -168,11 +163,11 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !! @{
-      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
-        cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
-        prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
-        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                             &
-        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                         &
+      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
+        cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0,             &
+        prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                          &
+        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                       &
+        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                   &
         do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, errmsg, errflg)
 !
       use machine,               only: kind_phys
@@ -187,7 +182,7 @@
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
       real(kind=kind_phys), dimension(im),            intent(in)    :: ice0, snow0, graupel0
       real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
-      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, gq0_water_vapor, prsl, save_t, save_qv, del
+      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
 
@@ -243,7 +238,7 @@
 !
         call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
                             rann, xlat, xlon, gt0,    &
-                            gq0_water_vapor, prsl, prsi,        &
+                            gq0(:,:,1), prsl, prsi,        &
                             rain, phii, tsfc,           &  !input
                             domr, domzr, domip, doms)                           ! output
 !
@@ -296,7 +291,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
         endif
@@ -376,7 +371,7 @@
           enddo
         endif
         do i=1,im
-          pwat(i) = pwat(i) + del(i,k)*(gq0_water_vapor(i,k)+work1(i))
+          pwat(i) = pwat(i) + del(i,k)*(gq0(i,k,1)+work1(i))
         enddo
 !     if (lprnt .and. i == ipr) write(0,*)' gq0=',
 !    &gq0(i,k,1),' qgrs=',qgrs(i,k,1),' work2=',work2(i),' k=',k
