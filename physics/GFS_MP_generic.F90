@@ -2,11 +2,11 @@
 !! This file contains the subroutines that calculate diagnotics variables
 !! before/after calling any microphysics scheme:
 
+!> This module contains the CCPP-compliant MP generic pre interstitial codes.
       module GFS_MP_generic_pre
       contains
 
-!> \defgroup GFS_MP_generic_pre GFS MP generic pre
-!! @{
+
 !! \section arg_table_GFS_MP_generic_pre_init Argument Table
 !!
       subroutine GFS_MP_generic_pre_init
@@ -24,27 +24,23 @@
 !! | nncl           | number_of_tracers_for_cloud_condensate                 | number of tracers for cloud condensate                                    | count       |    0 | integer   |           | in     | F        |
 !! | ntrac          | number_of_tracers                                      | number of tracers                                                         | count       |    0 | integer   |           | in     | F        |
 !! | gt0            | air_temperature_updated_by_physics                     | temperature updated by physics                                            | K           |    2 | real      | kind_phys | in     | F        |
-!! | gq0_water_vapor| water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                          | kg kg-1     |    2 | real      | kind_phys | in     | F        |
 !! | gq0            | tracer_concentration_updated_by_physics                | tracer concentration updated by physics                                   | kg kg-1     |    3 | real      | kind_phys | in     | F        |
 !! | save_t         | air_temperature_save                                   | air temperature before entering a physics scheme                          | K           |    2 | real      | kind_phys | inout  | F        |
-!! | save_qv        | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
 !! | save_q         | tracer_concentration_save                              | tracer concentration before entering a physics scheme                     | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                  | none        |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag        |    0 | integer   |           | out    | F        |
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0_water_vapor, gq0, &
-        save_t, save_qv, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-
       integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
       logical,                                          intent(in) :: ldiag3d, do_aw
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0, gq0_water_vapor
+      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
@@ -59,8 +55,8 @@
       if (ldiag3d .or. do_aw) then
         do k=1,levs
           do i=1,im
-            save_t(i,k)   = gt0(i,k)
-            save_qv(i,k)  = gq0_water_vapor(i,k)
+            save_t(i,k) = gt0(i,k)
+            save_q(1:im,:,1) = gq0(1:im,:,1)
           enddo
         enddo
         do n=ntcw,ntcw+nncl-1
@@ -74,21 +70,27 @@
 !!
       subroutine GFS_MP_generic_pre_finalize
       end subroutine GFS_MP_generic_pre_finalize
-!! @}
+
       end module GFS_MP_generic_pre
 
+!> This module contains the subroutine that calculates 
+!! precipitation type and its post, which provides precipitation forcing
+!! to LSM.
       module GFS_MP_generic_post
       contains
 
-!> \defgroup GFS_MP_generic_post GFS MP generic post
-!! @{
 !! \section arg_table_GFS_MP_generic_post_init Argument Table
 !!
       subroutine GFS_MP_generic_post_init
       end subroutine GFS_MP_generic_post_init
 
-
-!> \section arg_table_GFS_MP_generic_post_run Argument Table
+!>\defgroup gfs_calpreciptype GFS/GFDL calpreciptype Main
+!! @{
+!! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
+!! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
+!! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
+!! 
+!! \section arg_table_GFS_MP_generic_post_run Argument Table
 !! | local_name       | standard_name                                                           | long_name                                                               | units       | rank |  type      |   kind    | intent | optional |
 !! |------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im               | horizontal_loop_extent                                                  | horizontal loop extent                                                  | count       |    0 | integer    |           | in     | F        |
@@ -117,7 +119,6 @@
 !! | xlon             | longitude                                                               | longitude                                                               | radians     |    1 | real       | kind_phys | in     | F        |
 !! | gt0              | air_temperature_updated_by_physics                                      | temperature updated by physics                                          | K           |    2 | real       | kind_phys | in     | F        |
 !! | gq0              | tracer_concentration_updated_by_physics                                 | tracer concentration updated by physics                                 | kg kg-1     |    3 | real       | kind_phys | in     | F        |
-!! | gq0_water_vapor  | water_vapor_specific_humidity_updated_by_physics                        | water vapor specific humidity updated by physics                        | kg kg-1     |    2 | real       | kind_phys | in     | F        |
 !! | prsl             | air_pressure                                                            | layer mean pressure                                                     | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | prsi             | air_pressure_at_interface                                               | pressure at layer interface                                             | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | phii             | geopotential_at_interface                                               | geopotential at model layer interfaces                                  | m2 s-2      |    2 | real       | kind_phys | in     | F        |
@@ -152,14 +153,22 @@
 !! | rainc_cpl        | lwe_thickness_of_convective_precipitation_amount_for_coupling           | total convective precipitation                                          | m           |    1 | real       | kind_phys | inout  | F        |
 !! | snow_cpl         | lwe_thickness_of_snow_amount_for_coupling                               | total snow precipitation                                                | m           |    1 | real       | kind_phys | inout  | F        |
 !! | pwat             | column_precipitable_water                                               | precipitable water                                                      | kg m-2      |    1 | real       | kind_phys | inout  | F        |
+!! | do_sppt          | flag_for_stochastic_surface_physics_perturbations                       | flag for stochastic surface physics perturbations                       | flag        |    0 | logical    |           | in     | F        |
+!! | dtdtr            | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step| temp. change due to radiative heating per time step                    | K           |    2 | real       | kind_phys | inout  | F        |
+!! | dtdtc            | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1       |    2 | real       | kind_phys | in     | F        |
+!! | drain_cpl        | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling          | change in rain_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
+!! | dsnow_cpl        | tendency_of_lwe_thickness_of_snow_amount_for_coupling                   | change in show_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
-      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,       &
-        cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, gq0_water_vapor,  &
-        prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                                &
-        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                             &
-        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, errmsg, errflg)
+!> \section gfs_mp_gen GFS MP Generic Post General Algorithm
+!! @{
+      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
+        cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0,             &
+        prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                          &
+        rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                       &
+        totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                   &
+        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
@@ -173,15 +182,22 @@
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
       real(kind=kind_phys), dimension(im),            intent(in)    :: ice0, snow0, graupel0
       real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
-      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, gq0_water_vapor, prsl, save_t, save_qv, del
+      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
-
 
       real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,     &
         srflag, totprcp, totice, totsnw, totgrp, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dt3dt, dq3dt
 
+      ! Stochastic physics / surface perturbations
+      logical, intent(in) :: do_sppt
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdtr
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: dtdtc
+      real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
+      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+
+      ! CCPP error handling
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -201,6 +217,8 @@
           rain(i) = rainc(i) + frain * rain1(i)
       enddo
 
+!> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
+!! precipitation type.
       ! DH* TODO - Fix wrong code in non-CCPP build (GFS_physics_driver)
       ! and use commented lines here (keep wrong version for bit-for-bit):
       ! put ice, snow, graupel on dynamics timestep. The way the code in
@@ -220,7 +238,7 @@
 !
         call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
                             rann, xlat, xlon, gt0,    &
-                            gq0_water_vapor, prsl, prsi,        &
+                            gq0(:,:,1), prsl, prsi,        &
                             rain, phii, tsfc,           &  !input
                             domr, domzr, domip, doms)                           ! output
 !
@@ -273,7 +291,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
         endif
@@ -291,6 +309,10 @@
         enddo
       enddo
 
+!> - For GFDL cloud MP scheme, determine convective snow by surface temperature;
+!! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
+!! and convective rainfall from the cumulus scheme if the surface temperature is below
+!! \f$0^oC\f$.
       if (imp_physics == imp_physics_gfdl) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
@@ -349,7 +371,7 @@
           enddo
         endif
         do i=1,im
-          pwat(i) = pwat(i) + del(i,k)*(gq0_water_vapor(i,k)+work1(i))
+          pwat(i) = pwat(i) + del(i,k)*(gq0(i,k,1)+work1(i))
         enddo
 !     if (lprnt .and. i == ipr) write(0,*)' gq0=',
 !    &gq0(i,k,1),' qgrs=',qgrs(i,k,1),' work2=',work2(i),' k=',k
@@ -358,11 +380,27 @@
         pwat(i) = pwat(i) * onebg
       enddo
 
+      ! Stochastic physics / surface perturbations
+      if (do_sppt) then
+!--- radiation heating rate
+        dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
+        do i = 1, im
+          if (t850(i) > 273.16) then
+!--- change in change in rain precip
+             drain_cpl(i) = rain(i) - drain_cpl(i)
+          else
+!--- change in change in snow precip
+             dsnow_cpl(i) = rain(i) - dsnow_cpl(i)
+          endif
+        enddo
+      endif
+
     end subroutine GFS_MP_generic_post_run
+!! @}
+!! @}
 
 !> \section arg_table_GFS_MP_generic_post_finalize Argument Table
 !!
       subroutine GFS_MP_generic_post_finalize
       end subroutine GFS_MP_generic_post_finalize
-!! @}
       end module GFS_MP_generic_post

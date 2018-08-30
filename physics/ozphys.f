@@ -1,3 +1,8 @@
+!> \file ozphys.f
+!! This file is ozone sources and sinks.
+
+
+!> This module contains the CCPP-compliant Ozone photochemistry scheme.
       module ozphys
 
       contains
@@ -9,11 +14,20 @@
       subroutine ozphys_init()
       end subroutine ozphys_init
 
+! \brief Brief description of the subroutine
+!
+!> \section arg_table_ozphys_finalize Argument Table
+!!
+      subroutine ozphys_finalize()
+      end subroutine ozphys_finalize
+
+
 !>\defgroup GFS_ozphys GFS ozphys Main
+!! @{
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
-!! (\cite mccormack_et_al_2006).
+!! (McCormack et al. (2006) \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
 !! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
 !! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -35,8 +49,8 @@
 !! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section genal_ozphys GFS Ozone Physics Scheme General Algorithm
-!> @{
+!> \section genal_ozphys GFS ozphys_run General Algorithm
+!! @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
@@ -175,13 +189,7 @@
 !
       return
       end subroutine ozphys_run
-!> @}
-
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_ozphys_finalize Argument Table
-!!
-      subroutine ozphys_finalize()
-      end subroutine ozphys_finalize
+!! @}
+!! @}
 
       end module ozphys

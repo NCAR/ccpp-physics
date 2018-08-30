@@ -2,6 +2,8 @@
 !!  Contains most of the hybrid eddy-diffusivity mass-flux scheme except for the
 !!  subroutine that calculates the mass flux and updraft properties.
 
+!> This module contains the CCPP-compliant hybrid eddy-diffusivity mass-flux
+!! scheme.
       module hedmf
 
       contains
@@ -14,55 +16,13 @@
       end subroutine hedmf_finalize
 
 
-!> \defgroup HEDMF Hybrid Eddy-diffusivity Mass-flux Scheme
+!> \defgroup HEDMF GFS moninedmf Main
 !! @{
-!!  \brief The Hybrid EDMF scheme is a first-order turbulent transport
-!!  scheme used for subgrid-scale vertical turbulent mixing in the PBL
-!!  and above. It blends the traditional first-order approach that has
-!!  been used and improved over the last several years with a more recent
-!!  scheme that uses a mass-flux approach to calculate the countergradient
-!!  diffusion terms.
+!!  \brief  This subroutine contains all of logic for the
+!! Hybrid EDMF PBL scheme except for the calculation of
+!! the updraft properties and mass flux.
 !!
-!!  The PBL scheme's main task is to calculate tendencies of temperature,
-!!  moisture, and momentum due to vertical diffusion throughout the column
-!!  (not just the PBL). The scheme is an amalgamation of decades of work,
-!!  starting from the initial first-order PBL scheme of Troen and Mahrt (1986)
-!!  \cite troen_and_mahrt_1986, implemented according to Hong and Pan (1996)
-!!  \cite hong_and_pan_1996 and modified by Han and Pan (2011)
-!!  \cite han_and_pan_2011 and Han et al. (2015) \cite han_et_al_2015 to
-!!  include top-down mixing due to stratocumulus layers from Lock et al. (2000)
-!!  \cite lock_et_al_2000 and replacement of counter-gradient terms with a mass
-!!  flux scheme according to Siebesma et al. (2007) \cite siebesma_et_al_2007
-!!  and Soares et al. (2004) \cite soares_et_al_2004. Recently, heating due to
-!!  TKE dissipation was also added according to Han et al. (2015)
-!!  \cite han_et_al_2015.
-!!
-!!  This subroutine contains all of logic for the Hybrid EDMF PBL scheme except
-!!  for the calculation of the updraft properties and mass flux. The scheme
-!!  works on a basic level by calculating background diffusion coefficients
-!!  and updating them according to which processes are occurring in the column.
-!!  The most important difference in diffusion coefficients occurs between
-!!  those levels in the PBL and those above the PBL, so the PBL height
-!!  calculation is of utmost importance. An initial estimate is calculated in a
-!!  "predictor" step in order to calculate Monin-Obukhov similarity values and
-!!  a corrector step recalculates the PBL height based on updated surface
-!!  thermal characteristics. Using the PBL height and the similarity parameters,
-!!  the diffusion coefficients are updated below the PBL top based on Hong and
-!!  Pan (1996) \cite hong_and_pan_1996 (including counter-gradient terms).
-!!  Diffusion coefficients in the free troposphere (above the PBL top) are
-!!  calculated according to Louis (1979) \cite louis_1979 with updated
-!!  Richardson number-dependent functions. If it is diagnosed that PBL top-down
-!!  mixing is occurring according to Lock et al. (2000) \cite lock_et_al_2000 ,
-!!  then then diffusion coefficients are updated accordingly. Finally, for
-!!  convective boundary layers (defined as when the Obukhov length exceeds a
-!!  threshold), the counter-gradient terms are replaced using the mass flux
-!!  scheme of Siebesma et al. (2007) \cite siebesma_et_al_2007 . In order to
-!!  return time tendencies, a fully implicit solution is found using tridiagonal
-!!  matrices, and time tendencies are "backed out." Before returning, the time
-!!  tendency of temperature is updated to reflect heating due to TKE
-!!  dissipation following Han et al. (2015) \cite han_et_al_2015 .
-!!
-!! \section arg_table_hedmf_run Argument Table
+!> \section arg_table_hedmf_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
@@ -310,6 +270,10 @@ c
  610      format(1x,' k pr dkt dku ',i5,3f8.2,' l2 ri t2',
      1         ' sr2  ',2f8.2,2e10.2)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !>  ## Compute preliminary variables from input arguments
 
 ! compute preliminary variables

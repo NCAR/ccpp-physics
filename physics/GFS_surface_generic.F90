@@ -11,6 +11,7 @@
       subroutine GFS_surface_generic_pre_finalize()
       end subroutine GFS_surface_generic_pre_finalize
 
+#if 0
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -38,17 +39,42 @@
 !! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground  | W m-2      |    1 | real      | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                         | K          |    1 | real      | kind_phys | inout  | F        |
 !! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                            | m          |    1 | real      | kind_phys | inout  | F        |
+!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                | flag       |    0 | logical   |           | in     | F        |
+!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step              | K          |    2 | real      | kind_phys | out    | F        |
+!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling               | change in rain_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
+!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                        | change in show_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
+!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                           | total rain precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
+!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                    | total snow precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
+!! | do_sfcperts    | flag_for_stochastic_surface_perturbations                                    | flag for stochastic surface perturbations option                 | flag       |    0 | logical   |           | in     | F        |
+!! | nsfcpert       | number_of_surface_perturbations                                              | number of surface perturbations                                  | count      |    0 | integer   |           | in     | F        |
+!! | sfc_wts        | weights_for_stochastic_surface_physics_perturbation                          | weights for stochastic surface physics perturbation              | none       |    2 | real      | kind_phys | in     | F        |
+!! | pertz0         | magnitude_of_perturbation_of_momentum_roughness_length                       | magnitude of perturbation of momentum roughness length           | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertzt         | magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio         | magnitude of perturbation of heat to momentum roughness length r.| frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertshc        | magnitude_of_perturbation_of_soil_type_b_parameter                           | magnitude of perturbation of soil type b parameter               | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertlai        | magnitude_of_perturbation_of_leaf_area_index                                 | magnitude of perturbation of leaf area index                     | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertvegf       | magnitude_of_perturbation_of_vegetation_fraction                             | magnitude of perturbation of vegetation fraction                 | frac       |    1 | real      | kind_phys | in     | F        |
+!! | z01d           | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                        | frac       |    1 | real      | kind_phys | out    | F        |
+!! | zt1d           | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | out    | F        |
+!! | bexp1d         | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                          | frac       |    1 | real      | kind_phys | out    | F        |
+!! | xlai1d         | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                  | frac       |    1 | real      | kind_phys | out    | F        |
+!! | vegf1d         | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                              | frac       |    1 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
 !!
+#endif
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
-        prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, slopetyp, work3, gabsbdlw, &
-        tsurf, zlvl, errmsg, errflg)
+                          prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
+                          slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
+                          drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
+                          pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
+                          errmsg, errflg)
 
         use machine,               only: kind_phys
+        use surface_perturbation,  only: cdfnor
 
         implicit none
 
+        ! Interface variables
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
@@ -60,17 +86,85 @@
 
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
 
+        ! Stochastic physics / surface perturbations
+        logical, intent(in) :: do_sppt
+        real(kind=kind_phys), dimension(im,levs),     intent(out) :: dtdtr
+        real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
+        real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
+        real(kind=kind_phys), dimension(im),          intent(in)  :: rain_cpl
+        real(kind=kind_phys), dimension(im),          intent(in)  :: snow_cpl
+        logical, intent(in) :: do_sfcperts
+        integer, intent(in) :: nsfcpert
+        real(kind=kind_phys), dimension(im,nsfcpert), intent(in)  :: sfc_wts
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertz0
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertzt
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertshc
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertlai
+        real(kind=kind_phys), dimension(:),           intent(in)  :: pertvegf
+        real(kind=kind_phys), dimension(im),          intent(out) :: z01d
+        real(kind=kind_phys), dimension(im),          intent(out) :: zt1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
+        real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
+
+        ! CCPP error handling
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        integer :: i
+        ! Local variables
+        integer              :: i
         real(kind=kind_phys) :: onebg
+        real(kind=kind_phys) :: cdfz
 
+        ! Set constants
         onebg  = 1.0/con_g
 
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Set initial quantities for stochastic physics deltas
+        if (do_sppt) then
+          dtdtr     = 0.0
+          do i=1,im
+            drain_cpl(i) = rain_cpl (i)
+            dsnow_cpl(i) = snow_cpl (i)
+          enddo
+        endif
+
+        ! Scale random patterns for surface perturbations with perturbation size
+        ! Turn vegetation fraction pattern into percentile pattern
+        if (do_sfcperts) then
+          if (pertz0(1) > 0.) then
+            z01d(:) = pertz0(1) * sfc_wts(:,1)
+  !          if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
+  !          if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
+          endif
+          if (pertzt(1) > 0.) then
+            zt1d(:) = pertzt(1) * sfc_wts(:,2)
+          endif
+          if (pertshc(1) > 0.) then
+            bexp1d(:) = pertshc(1) * sfc_wts(:,3)
+          endif
+          if (pertlai(1) > 0.) then
+            xlai1d(:) = pertlai(1) * sfc_wts(:,4)
+          endif
+  ! --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
+  !        if (pertalb(1) > 0.) then
+  !          do i=1,im
+  !            call cdfnor(sfc_wts(i,5),cdfz)
+  !            alb1d(i) = cdfz
+  !          enddo
+  !        endif
+          if (pertvegf(1) > 0.) then
+            do i=1,im
+              call cdfnor(sfc_wts(i,6),cdfz)
+              vegf1d(i) = cdfz
+            enddo
+          endif
+        endif
+
+        ! End of stochastic physics / surface perturbation
 
         do i=1,im
           sigmaf(i) = max(vfrac(i),0.01 )
@@ -115,7 +209,7 @@
         gabsbdlw(:) = semis(:) * adjsfcdlw(:)
 
         do i=1,im
-          tsurf(i)        = tsfc(i)
+          tsurf(i)   = tsfc(i)
           zlvl(i)    = phil(i,1) * onebg
         end do
 
@@ -171,8 +265,6 @@
 !! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux                                                                 | latent heat flux from snow depo/subl                                                | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | snowc          | surface_snow_area_fraction                                                                                          | surface snow area fraction                                                          | frac        |    1 | real       | kind_phys | in     | F        |
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux                                                                          | latent heat flux due to snow and frz rain                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | con_eps        | ratio_of_dry_air_to_water_vapor_gas_constants                                                                       | rd/rv                                                                               | none        |    0 | real       | kind_phys | in     | F        |
-!! | con_epsm1      | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                                                             | (rd/rv) - 1                                                                         | none        |    0 | real       | kind_phys | in     | F        |
 !! | epi            | instantaneous_surface_potential_evaporation                                                                         | instantaneous sfc potential evaporation                                             | W m-2       |    1 | real       | kind_phys | inout  | F        |
 !! | gfluxi         | instantaneous_surface_ground_heat_flux                                                                              | instantaneous sfc ground heat flux                                                  | W m-2       |    1 | real       | kind_phys | inout  | F        |
 !! | t1             | air_temperature_at_lowest_model_layer_for_diag                                                                      | layer 1 temperature for diag                                                        | K           |    1 | real       | kind_phys | inout  | F        |
@@ -217,26 +309,22 @@
 !! | snowca         | cumulative_surface_snow_area_fraction_multiplied_by_timestep                                                        | cumulative surface snow area fraction multiplied by timestep                        | s           |    1 | real       | kind_phys | inout  | F        |
 !! | snohfa         | cumulative_snow_freezing_rain_upward_latent_heat_flux_multiplied_by_timestep                                        | cumulative latent heat flux due to snow and frz rain multiplied by timestep         | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
 !! | ep             | cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep                                         | cumulative surface upward potential latent heat flux multiplied by timestep         | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | tmpmin         | minimum_temperature_at_2m                                                                                           | min temperature at 2m height                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | tmpmax         | maximum_temperature_at_2m                                                                                           | max temperature at 2m height                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | spfhmin        | minimum_specific_humidity_at_2m                                                                                     | minimum specific humidity at 2m height                                              | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | spfhmax        | maximum_specific_humidity_at_2m                                                                                     | maximum specific humidity at 2m height                                              | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | wind10mmax     | maximum_wind_at_10m                                                                                                 | maximum wind speed at 10 m                                                          | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | u10mmax        | maximum_x_wind_at_10m                                                                                               | maximum x wind at 10 m                                                              | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | v10mmax        | maximum_y_wind_at_10m                                                                                               | maximum y wind at 10 m                                                              | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | dpt2m          | dewpoint_temperature_at_2m                                                                                          | 2 meter dewpoint temperature                                                        | K           |    1 | real       | kind_phys | inout  | F        |
+!! | runoff         | total_runoff                                                                                                        | total water runoff                                                                  | kg m-2      |    1 | real       | kind_phys | inout  | F        |
+!! | srunoff        | surface_runoff                                                                                                      | surface water runoff (from lsm)                                                     | kg m-2      |    1 | real       | kind_phys | inout  | F        |
+!! | runof          | surface_runoff_flux                                                                                                 | surface runoff flux                                                                 | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
+!! | drain          | subsurface_runoff_flux                                                                                              | subsurface runoff flux                                                              | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                                                                  | error message for error handling in CCPP                                            | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
       subroutine GFS_surface_generic_post_run (im, cplflx, lssav, islmsk, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,          &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-        t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, con_eps, con_epsm1,                         &
+        t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
-        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep, tmpmin, tmpmax, spfhmin,       &
-        spfhmax, wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
+        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
+        runoff, srunoff, runof, drain, errmsg, errflg)
 
         use machine,               only: kind_phys
 
@@ -246,7 +334,7 @@
         logical,                              intent(in) :: cplflx, lssav
         integer, dimension(im),               intent(in) :: islmsk
 
-        real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
+        real(kind=kind_phys),                 intent(in) :: dtf
 
         real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
           adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                   &
@@ -256,10 +344,13 @@
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
           nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, &
           nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, &
-          evcwa, transa, sbsnoa, snowca, snohfa, ep, tmpmin, tmpmax, spfhmin, spfhmax, wind10mmax, u10mmax, v10mmax, dpt2m
+          evcwa, transa, sbsnoa, snowca, snohfa, ep
 
-        character(len=*),                     intent(out) :: errmsg
-        integer,                              intent(out) :: errflg
+        real(kind=kind_phys), dimension(im), intent(inout) :: runoff, srunoff
+        real(kind=kind_phys), dimension(im), intent(in)    :: drain, runof
+
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
 
         real(kind=kind_phys), parameter :: albdf   = 0.06
 
@@ -347,28 +438,17 @@
             snowca(i)  = snowca(i) + snowc(i) * dtf
             snohfa(i)  = snohfa(i) + snohf(i) * dtf
             ep(i)      = ep(i)     + ep1d(i)  * dtf
-
-            tmpmax(i)  = max(tmpmax(i),t2m(i))
-            tmpmin(i)  = min(tmpmin(i),t2m(i))
-
-            spfhmax(i) = max(spfhmax(i),q2m(i))
-            spfhmin(i) = min(spfhmin(i),q2m(i))
           enddo
+        endif
 
-          do i=1, im
-  ! find max wind speed then decompose
-             tem = sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
-             if (tem > wind10mmax(i)) then
-                wind10mmax(i) = tem
-                u10mmax(i)    = u10m(i)
-                v10mmax(i)    = v10m(i)
-             endif
-
-  ! Compute dew point, first using vapor pressure
-             tem = max(pgr(i) * q2m(i) / ( con_eps - con_epsm1 *q2m(i)), 1.e-8)
-             dpt2m(i) = 243.5 / ( ( 17.67 / log(tem/611.2) ) - 1.) + 273.14
+!  --- ...  total runoff is composed of drainage into water table and
+!           runoff at the surface and is accumulated in unit of meters
+        if (lssav) then
+          tem = dtf * 0.001
+          do i=1,im
+            runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * tem
+            srunoff(i) = srunoff(i) + runof(i) * tem
           enddo
-
         endif
 
       end subroutine GFS_surface_generic_post_run

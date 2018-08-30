@@ -26,6 +26,10 @@
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
          call gfuncphys ()
 
@@ -46,6 +50,10 @@
          integer,                          intent(out)   :: errflg
 
          ! DH* this is the place to deallocate whatever is allocated by gfuncphys() in GFS_time_vary_pre_init
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
       end subroutine GFS_time_vary_pre_finalize
 
