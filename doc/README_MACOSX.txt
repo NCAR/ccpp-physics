@@ -1,6 +1,6 @@
 # Dom Heinzeller (dom.heinzeller@noaa.gov), 08/02/2018
 
-In order to build and run the FV3 trunk (May 2018) with possible CCPP extensions by GMTB (until August 2018) on Mac OS X,
+In order to build and run the FV3 trunk (August 2018) with possible CCPP extensions by GMTB on Mac OS X,
 the following installation steps are recommended. The version numbers for the "brew" correspond to the default versions
 in April/May 2018 and will change to newer versions in the future. Unless problems occur during the manual builds in
 steps 12-15, these differences can be ignored. It is also assumed that the bash shell is used in the following.
@@ -154,22 +154,24 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
 
     # Build model
     cd tests
-    ./compile.sh $PWD/../FV3 macosx.gnu 2>&1 | tee log.compile
+    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=N'          2>&1 | tee log.compile # without CCPP
+    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=Y'          2>&1 | tee log.compile # with CCPP, hybrid mode
+    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=Y HYBRID=N' 2>&1 | tee log.compile # with CCPP, standalone mode
 
 16. Set up the run directory using the template on Theia or Cheyenne at some location on your machine:
 
     a) copy the contents of the run directory templates to where you want to run the model, change to this directory
        (these folders are read-only, i.e. users might have to add the write-flag after copying/rsyncing them)
 
-        theia:    /scratch4/BMC/gmtb/Dom.Heinzeller/macosx_rundirs/C96_trunk_20180727/gnu/
-        cheyenne: /glade/p/ral/jntp/GMTB/NEMSfv3gfs/macosx_rundirs/C96_trunk_20180727/gnu/
+        theia:    /scratch4/BMC/gmtb/Dom.Heinzeller/macosx_rundirs/C96_trunk_20180831/gnu/
+        cheyenne: /glade/p/ral/jntp/GMTB/NEMSfv3gfs/macosx_rundirs/C96_trunk_20180831/gnu/
 
-    b) edit run_macosx.sh in change the variable FV3_BUILD_DIR to the top-level directory of your FV3-build
+    b) edit run_macosx_no_ccpp.sh/run_macosx_ccpp.sh and change the variable FV3_BUILD_DIR to the top-level directory of your FV3-build
 
-    c) source ~/setenv_develop.sh script and execute the model run using the wrapper run_macosx.sh
+    c) source ~/setenv_develop.sh script and execute the model run using the wrapper run_macosx_no_ccpp.sh (same for run_macosx_ccpp.sh)
         . ~/setenv_develop.sh
-        ./run_macosx.sh 2>&1 | tee run_macosx.log
+        ./run_macosx_no_ccpp.sh 2>&1 | tee run_macosx.log
         # or, with X OpenMP threads
-        OMP_NUM_THREADS=X ./run_macosx.sh 2>&1 | tee run_macosx.log
+        OMP_NUM_THREADS=X ./run_macosx_no_ccpp.sh 2>&1 | tee run_macosx.log
 
     d) go and get yourself a cup of coffee ...

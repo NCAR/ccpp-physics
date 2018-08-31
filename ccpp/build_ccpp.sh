@@ -4,7 +4,7 @@ set +x
 set -eu
 
 # List of valid/tested machines
-VALID_MACHINES=( theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi macosx.gnu )
+VALID_MACHINES=( theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi macosx.gnu linux.gnu )
 
 ###################################################################################################
 
@@ -101,6 +101,11 @@ CCPP_MAKE_FLAGS=$(trim "${CCPP_MAKE_FLAGS}")
 if [[ "${MACHINE_ID}" == "macosx.gnu" ]]; then
   # Intel MKL (for FFTW)
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMKL_DIR=${MKL_DIR}"
+  # ESMF (for DGEMM) - replace with MKL version in the future?
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
+  # netCDF (needed when linking ESMF)
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNETCDF_DIR=${NETCDF}"
+elif [[ "${MACHINE_ID}" == "linux.gnu" ]]; then
   # ESMF (for DGEMM) - replace with MKL version in the future?
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
   # netCDF (needed when linking ESMF)
