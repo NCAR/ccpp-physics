@@ -46,7 +46,7 @@ fi
 
 # Load the "module" command, purge modules, and load modules
 source $PATHNEMS/src/conf/modules.nems.sh
-if [[ $BUILD_TARGET != "macosx.gnu" ]]; then
+if [[ $BUILD_TARGET != "macosx.gnu" ]] && [[ $BUILD_TARGET != "linux.gnu" ]] ; then
   module list
 fi
 
