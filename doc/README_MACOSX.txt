@@ -26,6 +26,8 @@ in the future. Unless problems occur during the manual builds in steps 10-12, th
 
 4. Install clang-5.0.0 with openmp support
     brew install llvm
+    cd /usr/local/Cellar/llvm
+    ln -sf 5.0.0/lib .
 
 5. Install mpich-3.2.1
     brew install mpich
