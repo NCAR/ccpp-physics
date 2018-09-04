@@ -1,13 +1,60 @@
 /**
-\page GFS_CALPRECIPTYPE GFS Dominant Precipitation Scheme
+\page GFS_CALPRECIPTYPE GFS Precipitation Type Diagnosis Scheme
 \section des_calprecip  Description
-This scheme calculates dominant precipitation type (calpreciptype),
-which provides precipitation forcing for LSM.
+The forecast of precipitation type from operational numerical weather prediction models can have a substantial impact on 
+downstream users, such as those concerned with air and
+ground transportation, and also for surface energy, and hydrology. Well before the 
+introduction of mixed-phase microphysics schemes into numerical weather prediction models,
+successful diagnostic techniques were designed using implicit assumptions about microphysical processes
+to allow estimation of the precipitation type. Among several factors that control the precipitation type at
+the surface, the vertical profile of wet-bulb temperature \f$T_w\f$ plays a key role (Bourgouin(2000)
+\cite bourgouin_2000), and a number of algorithms have been devised to determine the precipitation type 
+based on the \f$T_w\f$ profile or quantities derived from it (e.g., Ramer(1993) \cite ramer_1993; 
+Baldwin et al. 1994 \cite baldwin_et_al_1994 ; Bourgouin(2000) \cite bourgouin_2000; Schuur et al. (2012)
+\cite schuur_et_al_2012). A description of Ramer's algorithm can be found in Bourgouin(2000) 
+\cite bourgouin_2000 and Wandishin et al.(2005) \cite wandishin_et_al_2005. We will briefly review those methods.
+
+Ramer's approach (calwxt_ramer()) uses temperature(\f$T\f$), relative humidity(\f$RH\f$), and wet-bulb temperature(\f$T_w\f$)
+on different pressure levels to diagnose precipitation types. This procedure performs two checks before doing
+a full calculation. First, if the surface \f$T_w\f$ is greater than \f$2^oC\f$, liquid precipitation is
+diagnosed. Second, if \f$T_w\f$ remains below a specified value at all levels, solid precipitation is expected.
+A full calculation will be needed if neither condition is satisfied. The basic parameters(\f$T\f$, \f$RH\f$, \f$T_w\f$)
+are used to determine layers where precipitation is likely to be generated and also to determine the ice fraction.
+A generating layer exists if relative humidity exceeds a specified threshold value over a sufficiently thick layer.
+The generating level is defined as the top of the highest generating layer. The ice fraction is the basic quantity 
+calculated for diagnosing the precipitation type. Precipitation at the generating level is assumed to be entirely
+liquid if the \f$T_w\f$ is above a specified value. Otherwise, it is considered fully frozen. If frozen precipitation
+is dianosed at the generating level and if the \f$T_w\f$ is below freezing for the entire sounding below the generating 
+layer, solid precipitation is assumed. As precipitation falls, the ice fraction value changes according to the vertical 
+distribution of \f$T_w\f$ and  relative humidity. The precipitation type is determined by the values of the ice fraction and 
+the \f$T_w\f$ at the surface. If the ice fraction is greater than a specified threshold (e.g.,0.85), solid precipitation 
+(i.e., snow or ice pellets) will be diagnosed. If the ice fraction is lower than another threshold (0.04), liquid 
+precipitation (i.e., freezing precipitation or rain) is expected. 
+
+The Baldwin et al. algorithms (calwxt() and calwxt_revised()) also considers the vertical profile of the \f$T_w\f$ below saturated
+layers where precipitation is presumed to form. If this precipitation is presumed frozen, the precipitation 
+type at the surface is obtained by using the vertically integrated departure of the \f$T_w\f$ from \f$0^oC\f$
+in various layers and the temperature in the lowest model layer. A more complete description can be found in 
+Bourgouin(2000) \cite bourgouin_2000 and Wandishin et al.(2005) \cite wandishin_et_al_2005 .
+
+Conceptually similar to the Baldwin algorithm, the Bourgouin method (calwxt_bourg()) computes the melting and freezing
+energies of warm and cold layers from a standard tephigram. The final precipitation type is determined by comparing 
+the melting and freezing energies. 
+
+If the Zhao-Carr MP scheme is called, calwxt_dominant() takes the precipitation type solution from different algorithms 
+(calwxt(), calwxt_ramer(), calwxt_revised(), and calwxt_bourg())and uses them up to output a dominant type.
+
+GFDL MP scheme permits the prognostic surface precipitation to simultaneously consist of ice, snow and graupel at the
+same location. Hence if the GFDL MP scheme is called, the precipitation type at the surface is 
+directly diagnosed from the explicit surface precipitation (i.e. ice, snow and graupel)  
+predicted by the scheme and convective rainfall predicted by the cumulus scheme if surface temperature is below \f$0^oC\f$ .
+
 
 \section intra_calprecip  Intraphysics Communication
-\ref arg_table_GFS_calpreciptype_run
+\ref arg_table_GFS_MP_generic_post_run
 
-\section gen_calprecip  General Algorithm
+\section gen_GFS_calprecip  General Algorithm
+\ref gfs_mp_gen
 
 
 
