@@ -75,6 +75,9 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
+export DO_SPPT=.T.
+export DO_SHUM=.T.
+export DO_SKEB=.T.
 export SKEB=0.3
 export SHUM=0.003
 export SPPT=0.2
@@ -82,7 +85,7 @@ export DT_ATMOS=600
 export FHMAX=12
 
 export FV3_RUN=ccpp_control_run.IN
-export CCPP_SDF=ccpp/framework/examples/suite_FV3_test.xml
+export CCPP_SDF=ccpp/framework/suites/suite_FV3_GFS_2017_updated.xml
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_control.nml.IN
 

@@ -55,6 +55,7 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
+HYBRID = Y
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -92,6 +93,10 @@ ifeq ($(HYDRO),Y)
 CPPDEFS +=
 else
 CPPDEFS += -DMOIST_CAPPA -DUSE_COND
+endif
+
+ifeq ($(NAM_phys),Y)
+CPPDEFS += -DNAM_phys
 endif
 
 ifeq ($(32BIT),Y)
@@ -169,6 +174,9 @@ endif
 
 ifeq ($(CCPP),Y)
 CPPDEFS += -DCCPP
+ifeq ($(HYBRID),Y)
+CPPDEFS += -DHYBRID
+endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp

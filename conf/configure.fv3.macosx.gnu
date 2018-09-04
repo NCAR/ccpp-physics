@@ -55,7 +55,9 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
+HYBRID = Y
 SION = N
+MEMCHECK = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -80,6 +82,8 @@ ifneq ($(findstring netcdf/4,$(LOADEDMODULES)),)
 else
   NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
+
+INCLUDE += $(MKL_INC)
 
 FPPFLAGS := -cpp -Wp,-w $(INCLUDE)
 CFLAGS := $(INCLUDE)
@@ -170,6 +174,9 @@ endif
 
 ifeq ($(CCPP),Y)
 CPPDEFS += -DCCPP
+ifeq ($(HYBRID),Y)
+CPPDEFS += -DHYBRID
+endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
@@ -182,10 +189,17 @@ FFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
 LDFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --libs --f90`
 endif
 
+ifeq ($(MEMCHECK),Y)
+CPPDEFS += -DMEMCHECK
+CFLAGS += $(MEMCHECK_INC)
+FFLAGS += $(MEMCHECK_INC)
+LDFLAGS += $(MEMCHECK_LIB)
+endif
+
 LDFLAGS += $(LIBS)
 
 ifdef InNemsMakefile
 FFLAGS += $(ESMF_INC)
 CPPFLAGS += -cpp -traditional
-EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
+EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB) $(MKL_LIB)
 endif

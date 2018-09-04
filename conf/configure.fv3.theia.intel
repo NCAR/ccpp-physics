@@ -51,6 +51,8 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
+HYBRID = Y
+MEMCHECK = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -79,7 +81,7 @@ endif
 FPPFLAGS := -fpp -Wp,-w $(INCLUDE)
 CFLAGS := $(INCLUDE)
 
-FFLAGS := $(INCLUDE) -fno-alias -auto -safe-cray-ptr -ftz -assume byterecl -nowarn -sox -align array64byte
+FFLAGS := $(INCLUDE) -fno-alias -auto -safe-cray-ptr -save-temps -ftz -assume byterecl -nowarn -sox -align array64byte
 
 CPPDEFS += -Duse_libMPI -Duse_netCDF -DSPMD -DUSE_LOG_DIAG_FIELD_INFO -Duse_LARGEFILE -DUSE_GFSL63 -DGFS_PHYS -Duse_WRTCOMP
 CPPDEFS += -DNEW_TAUCTMAX -DINTERNAL_FILE_NML
@@ -88,6 +90,10 @@ ifeq ($(HYDRO),Y)
 CPPDEFS +=
 else
 CPPDEFS += -DMOIST_CAPPA -DUSE_COND
+endif
+
+ifeq ($(NAM_phys),Y)
+CPPDEFS += -DNAM_phys
 endif
 
 ifeq ($(32BIT),Y)
@@ -116,7 +122,7 @@ endif
 
 FFLAGS_OPT = -O2 -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3
 FFLAGS_REPRO = -O2 -debug minimal -fp-model source -qoverride-limits -g -traceback
-FFLAGS_DEBUG = -g -O0 -check -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check -fstack-protector-all -fpe0 -debug -traceback -ftrapuv
+FFLAGS_DEBUG = -g -O0 -check all -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check -fstack-protector-all -fpe0 -debug -traceback -ftrapuv
 
 TRANSCENDENTALS := -fast-transcendentals
 FFLAGS_OPENMP = -qopenmp
@@ -174,9 +180,19 @@ endif
 
 ifeq ($(CCPP),Y)
 CPPDEFS += -DCCPP
+ifeq ($(HYBRID),Y)
+CPPDEFS += -DHYBRID
+endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
+
+ifeq ($(MEMCHECK),Y)
+CPPDEFS += -DMEMCHECK
+CFLAGS += $(MEMCHECK_INC)
+FFLAGS += $(MEMCHECK_INC)
+LDFLAGS += $(MEMCHECK_LIB)
 endif
 
 LDFLAGS += $(LIBS)

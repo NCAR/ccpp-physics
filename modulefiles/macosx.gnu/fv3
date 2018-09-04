@@ -55,10 +55,26 @@ export DYLD_LIBRARY_PATH="/usr/local/${ESMF_VERSION}/lib/libO/Darwin.gfortrancla
 ##
 ## NCEP libraries (need to download and build manually, see doc/README_MACOSX.txt and https://github.com/climbfuji/NCEPlibs)
 ##
-export NCEPLIBS_DIR=/usr/local/NCEPlibs-20180401
+NCEPLIBS_DIR=/usr/local/NCEPlibs-20180401
+export NCEPLIBS_DIR=${NCEPLIBS_DIR}
 export NEMSIO_INC=${NCEPLIBS_DIR}/include
 export BACIO_LIB4=${NCEPLIBS_DIR}/lib/libbacio_4.a
 export SP_LIBd=${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
 export W3EMC_LIBd=${NCEPLIBS_DIR}/lib/libw3emc_d.a
 export W3NCO_LIBd=${NCEPLIBS_DIR}/lib/libw3nco_d.a
 export NEMSIO_LIB=${NCEPLIBS_DIR}/lib/libnemsio_d.a
+
+##
+## Intel MKL library
+##
+MKL_DIR=/usr/local/mkl/compilers_and_libraries_2018.3.185/mac/mkl
+export MKL_DIR=${MKL_DIR}
+export MKL_INC="-m64 -I${MKL_DIR}/include"
+export MKL_LIB="-L${MKL_DIR}/lib -Wl,-rpath,${MKL_DIR}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl"
+
+##
+## memcheck utility
+##
+MEMCHECK_DIR=/usr/local/memcheck-20180820
+export MEMCHECK_INC="-I${MEMCHECK_DIR}/include"
+export MEMCHECK_LIB="-L${MEMCHECK_DIR}/lib -lmemcheck"
