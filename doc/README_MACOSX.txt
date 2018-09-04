@@ -51,6 +51,8 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
 
 5. Install clang-5.0.0 with openmp support
     brew install llvm
+    cd /usr/local/Cellar/llvm
+    ln -sf 5.0.0/lib .
 
 6. Install mpich-3.2.1
     brew install mpich
