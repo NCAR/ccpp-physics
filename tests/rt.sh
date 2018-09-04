@@ -56,6 +56,9 @@ else
   exit 1
 fi
 
+# Default compiler "intel" for Theia and Cheyenne
+export COMPILER=${NEMS_COMPILER:-intel}
+
 source detect_machine.sh
 source rt_utils.sh
 
@@ -115,6 +118,9 @@ elif [[ $MACHINE_ID = gaea ]]; then
   ECFLOW_START=
   DISKNM=/lustre/f1/pdata/ncep_shared/emc.nemspara/RT
   QUEUE=debug
+#  DO NOT SET AN ACCOUNT EVERYONE IS NOT A MEMBER OF
+#  USE AN ENVIRONMENT VARIABLE TO SET ACCOUNT
+#  ACCNR=cmp
   PARTITION=c4
   STMP=/lustre/f1/
   PTMP=/lustre/f1/
@@ -123,9 +129,11 @@ elif [[ $MACHINE_ID = gaea ]]; then
   MPIEXECOPTS="\"-j 1 -n @[TASKS] -N @[TPN] -d @[THRD]\""
   cp fv3_conf/fv3_msub.IN_gaea fv3_conf/fv3_msub.IN
 
-elif [[ $MACHINE_ID = theia ]]; then
+elif [[ $MACHINE_ID = theia.* ]]; then
 
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
 
   module load rocoto
   ROCOTORUN=$(which rocotorun)
@@ -134,6 +142,7 @@ elif [[ $MACHINE_ID = theia ]]; then
   export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
   ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
   QUEUE=debug
+#  ACCNR=fv3-cpu
   PARTITION=
   dprefix=/scratch4/NCEPDEV
   DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
@@ -144,6 +153,25 @@ elif [[ $MACHINE_ID = theia ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
 
+elif [[ $MACHINE_ID = cheyenne.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+  export PYTHONPATH=
+  ECFLOW_START=
+  QUEUE=premium
+  PARTITION=
+  dprefix=/glade/scratch
+  DISKNM=/glade/p/ral/jntp/GMTB/NEMSfv3gfs/RT
+  STMP=$dprefix
+  PTMP=$dprefix
+  SCHEDULER=pbs
+  MPIEXEC=mpiexec_mpt
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
+
 else
   die "Unknown machine ID, please edit detect_machine.sh file"
 fi
@@ -151,8 +179,11 @@ fi
 mkdir -p ${STMP}/${USER}
 mkdir -p ${PTMP}/${USER}
 
- NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
-#NEW_BASELINE=/gpfs/hps3/emc/global/noscrub/Shrinivas.Moorthi/REGRESSION_TEST
+# Different own baseline directories for different compilers on Theia/Cheyenne
+NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
+if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]]; then
+    NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
+fi
 
 RUNDIR_ROOT=${PTMP}/${USER}/FV3_RT/rt_$$
 mkdir -p ${RUNDIR_ROOT}
@@ -205,7 +236,11 @@ while getopts ":cfsl:mreh" opt; do
   esac
 done
 
-RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180507}
+if [[ $MACHINE_ID = cheyenne.* ]]; then
+  RTPWD=${RTPWD:-$DISKNM/trunk-20180829/${COMPILER^^}}
+else
+  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20180829}
+fi
 
 shift $((OPTIND-1))
 [[ $# -gt 1 ]] && usage
@@ -251,7 +286,7 @@ if [[ $ROCOTO == true ]]; then
     QUEUE=dev
     COMPILE_QUEUE=dev
     ROCOTO_SCHEDULER=lsf
-  elif [[ $MACHINE_ID = theia ]]; then
+  elif [[ $MACHINE_ID = theia.* ]]; then
     QUEUE=batch
     COMPILE_QUEUE=service
     ROCOTO_SCHEDULER=moabtorque
@@ -297,7 +332,7 @@ EOF
     QUEUE=dev
   elif [[ $MACHINE_ID = wcoss_cray ]]; then
     QUEUE=dev
-  elif [[ $MACHINE_ID = theia ]]; then
+  elif [[ $MACHINE_ID = theia.* ]]; then
     QUEUE=batch
   else
     die "ecFlow is not supported on this machine $MACHINE_ID"
