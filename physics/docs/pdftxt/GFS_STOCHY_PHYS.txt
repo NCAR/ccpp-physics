@@ -1,0 +1,13 @@
+/**
+\page STOCHY_PHYS GFS Stochastic Physics
+\section des_stochy Description
+Traditionally, physical parameterization schemes were assumed to be deterministic, producing representations of small-scale
+processes unique to the resolved-scale atmospheric state. This assumption becomes increasingly problematic as computational 
+advances permit more accurate simulations at finer resolutions where small-scale processes exhibit more stochastic qualities.
+Small-scale convective fluctuations often interact strongly with the nonlinear flow dynamics, with substantial repercussions
+for large-scale model evolution. Producing accurate and reliable probabilistic predictions therefore depends critically on
+representations of parameterization uncertainties.
+
+
+
+*/

@@ -130,6 +130,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
+                        ../dcyc2.f        \
 ### Land Surface
                         ../sfc_diff.f \
                         ../sfc_nst.f \
@@ -138,6 +139,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_nst_water_prop.f90  \
                         ../sfc_drv.f \
                         ../sflx.f    \
+                        ../namelist_soilveg.f   \
+                        ../set_soilveg.f        \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -169,15 +172,16 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
-###                     ../GFS_stochastics.F90   \
-###                     ../surface_perturbation.F90 \
-###                     ../../stochastic_physics/stochastic_physics.F90  \
+                        ../../stochastic_physics/stochastic_physics.F90  \
+                        ../../stochastic_physics/stochy_data_mod.F90 \
+                        ../GFS_stochastics.F90   \
+                        ../surface_perturbation.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.f90     \
-                        ../radcons.f90
-
+                        ../radcons.f90      \
+                        ../mersenne_twister.f
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F90 \

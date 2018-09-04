@@ -138,6 +138,8 @@
 
       contains
 
+!>\ingroup Noah_LSM
+!! This subroutine contains the CCPP-compliant lsm_noah_init to initialize soil vegetation.
 !! \section arg_table_lsm_noah_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|

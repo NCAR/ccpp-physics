@@ -1,3 +1,7 @@
+!>\file mersenne_twister.f
+
+!> \defgroup mersenne_ge Mersenne Twister Module
+!! @{
 !$$$  Module Documentation Block
 !
 ! Module: mersenne_twister   Modern random number generator
@@ -479,7 +483,7 @@
           call random_index_t(imax,iharvest,sstat)
         end subroutine
 !  Subprogram random_index_t
-!  Generates random indices in thread-safe mode.
+!> This subroutine  generates random indices in thread-safe mode.
         subroutine random_index_t(imax,iharvest,stat)
           implicit none
           integer,intent(in):: imax
@@ -496,3 +500,4 @@
           enddo
         end subroutine
       end module
+!! @}
