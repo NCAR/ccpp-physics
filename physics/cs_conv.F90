@@ -79,41 +79,30 @@ module cs_conv_post
   subroutine cs_conv_post_finalize
   end subroutine cs_conv_post_finalize
 
-!! JLS NOTE:  The variable rain1 output from cs_conv_run (called prec inside the subroutine) is a precipitation flux (kg/m2/sec),
-!!            not meters LWE like the other schemes.  In cs_conv_post_run, it is converted to m.  In GFS_typedefs, I added rain1 
-!!            as a flux.  This probably wasn't a good idea, since in GFS_physics_driver the units of rain1 used by other schemes is m.
-!!            It would be nice to change the name of the variable output from cs_conv_run to something that actually has flux
-!!            units, or just convert it to m in cs_conv_run and be done with it, or pass in flux to cs_conv_post_run and
-!!            output rain1 in m.
 !!
 !! \section arg_table_cs_conv_post_run Argument Table
 !! | local_name | standard_name                                                   | long_name                                                                | units      | rank | type      |    kind   | intent | optional |
 !! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im         | horizontal_dimension                                            | horizontal dimension                                                     | count      |    0 | integer   |           | in     | F        |
-!! | ijsdim     | horizontal_loop_extent                                          | horizontal loop extent                                                   | count      |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count      |    0 | integer   |           | in     | F        |
-!! | rain1      | convective_precipitation_flux_at_surface                        | convective precipitation flux at surface (including snowfall)            | kg m-2 s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | dtp        | time_step_for_physics                                           | time step for physics                                                    | s          |    0 | real      | kind_phys | in     | F        |
 !! | do_aw      | flag_for_Arakawa_Wu_adjustment                                  | flag for Arakawa Wu scale-aware adjustment                               | flag       |    0 | logical   |           | in     | F        |
 !! | sigmatot   | convective_updraft_area_fraction_at_model_interfaces            | convective updraft area fraction at model interfaces                     | frac       |    2 | real      | kind_phys | in     | F        |
 !! | sigmafrac  | convective_updraft_area_fraction                                | convective updraft area fraction                                         | frac       |    2 | real      | kind_phys | in     | F        |
 !! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
 !!
-  subroutine cs_conv_post_run(im, ijsdim, kmax, rain1, dtp, do_aw, sigmatot, sigmafrac, errmsg, errflg)
+  subroutine cs_conv_post_run(im, kmax, do_aw, sigmatot, sigmafrac, errmsg, errflg)
 
   use machine ,   only : r8    => kind_phys
 
   implicit none
 
 ! --- inputs
-  integer, intent(in)  :: im, ijsdim, kmax
+  integer, intent(in)  :: im, kmax
   logical,  intent(in) :: do_aw
-  real(r8), intent(in) :: dtp
   real(r8), dimension(im,kmax), intent(in) :: sigmatot
 
 ! --- input/output
-  real(r8), dimension(ijsdim), intent(inout) :: rain1
   real(r8), dimension(im,kmax), intent(out)  :: sigmafrac
 
   character(len=*), intent(out) :: errmsg
@@ -126,7 +115,6 @@ module cs_conv_post
   errmsg = ''
   errflg = 0
 
-  rain1(:) = rain1(:) * (dtp*0.001)      ! Convert rain1 from kg/m2/sec to m
   if (do_aw) then
     do k=1,kmax
       kk = min(k+1,kmax)  ! assuming no cloud top reaches the model top
@@ -298,7 +286,7 @@ module cs_conv
 !! | kdt        | index_of_time_step                                        | current forecast iteration                                                                            | index      |    0 | integer   |           | in     | F        |
 !! | t          | air_temperature_updated_by_physics                        | mid-layer temperature                                                                                 | K          |    2 | real      | kind_phys | inout  | F        |
 !! | q          | water_vapor_specific_humidity_updated_by_physics          | mid-layer specific humidity of water vapor                                                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | prec       | convective_precipitation_flux_at_surface                  | convective precipitation flux at surface (including snowfall)                                         | kg m-2 s-1 |    1 | real      | kind_phys | out    | F        |
+!! | rain1      | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep                                                   | m          |    1 | real      | kind_phys | out    | F        |
 !! | clw        | convective_transportable_tracers                          | cloud water and other convective trans. tracers                                                       | kg kg-1    |    3 | real      | kind_phys | inout  | F        |
 !! | zm         | geopotential                                              | mid-layer geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | zi         | geopotential_at_interface                                 | interface geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
@@ -349,7 +337,7 @@ module cs_conv
 !---------------------------------------------------------------------------------
    subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , NTR     , nctp,     & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
-                          t      , q      ,  prec     , clw     ,           &
+                          t      , q      ,  rain1    , clw     ,           &
                           zm     , zi     ,  pap      , paph    ,           &
                           delta  , delti  ,  ud_mf    , dd_mf   , dt_mf,    &
                           u      , v      ,  fscav    , fswtr,              &
@@ -374,7 +362,7 @@ module cs_conv
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, NTR, mype, nctp, mp_phys, kdt,lat !! DD, for GFS, pass in
+   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
    logical, intent(in)     :: otspt(ntr,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
                                              !              downdraft. should not include subgrid PDF and turbulence
                                              ! otspt(:,2) - on/off switch for tracer transport by subsidence
@@ -406,7 +394,7 @@ module cs_conv
 !  updraft, downdraft, and detrainment mass flux (kg/m2/s)
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
-   real(r8), intent(out)   :: prec(IJSDIM)        ! precipitation at surface (including snowfall) (kg/m2/s)
+   real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convecctive precipitation amount (m)
    real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd, cnv_prc3,&
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
@@ -436,6 +424,7 @@ module cs_conv
    integer  KT(IJSDIM,nctp)            ! cloud top index for each cloud type
 
    real(r8) :: cape(IJSDIM)            ! convective available potential energy (J/kg)
+   real(r8) :: prec(IJSDIM)            ! precipitation at surface (including snowfall) (kg/m2/s)
    real(r8) :: snow(IJSDIM)            ! snowfall at surface (kg/m2/s)
 !
 ! input arguments of CS_CUMLUS
@@ -696,6 +685,9 @@ module cs_conv
        kcnv(i) = 0
      endif
    enddo
+
+   rain1(:) = prec(:) * (delta*0.001)      ! Convert prec flux kg/m2/sec to rain1 in m
+
 !  if (lprnt) then
 !    write(0,*)' aft cs_cum prec=',prec(ipr),'GTPRP=',GTPRP(ipr,1)
 !  endif
