@@ -56,6 +56,7 @@ AVX2 = Y
 HYDRO = N
 CCPP = N
 HYBRID = Y
+STATIC = N
 SION = N
 MEMCHECK = N
 
@@ -179,7 +180,12 @@ CPPDEFS += -DHYBRID
 endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
+ifeq ($(STATIC),Y)
+CPPDEFS += -DSTATIC
+LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp
+else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
 endif
 
 ifeq ($(SION),Y)
