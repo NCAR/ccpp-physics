@@ -8,6 +8,83 @@ Small-scale convective fluctuations often interact strongly with the nonlinear f
 for large-scale model evolution. Producing accurate and reliable probabilistic predictions therefore depends critically on
 representations of parameterization uncertainties.
 
+In the 2015 GFS implementation, new stochastic physics schemes were employed to represent model error to replace
+the artificial additive inflation. The upgraded stochastic physics suite has three components, including
+- Stochastically Perturbed Physics Tendencies (\b SPPT; Buizza et al. 1999 \cite buizza_et_al_1999 ; Palmer (1997)
+\cite palmer_1997 ; Palmer (2001) \cite Palmer_2001)
+- Specific HUMidity perturbations (\b SHUM; Tompkins and Berner (2008) \cite tompkins_and_berner_2008)
+- Stochastic Kinetic Energy Backscatter (\b SKEB; Berner et al. 2009 \cite berner_et_al_2009; Shutts (2005) \cite Shutts_2005)
+
+These schemes have already been implemented in the hybrid-EnKF data assimilation system of GFS, making them readily available for 
+use in the GEFS. In FV3GFS, adaption of stochastic physics parameterizations from NEMS GSM with the exception of SKEB to provide 
+model uncertainty estimate.
+
+SPPT perturbs the combined tendencies of wind, temperature, and water vapor produced by the CCPP-Physics parameterizations (excluding
+clear-air radiation). The implementaion use a first-order auto-regrassive  (AR(1)) random pattern generator (see get_stochy_pattern_mod)
+to produce spatially and temporally correlated perturbations with three different horizontal length/time scales 500 km/0.25 days, 
+1000 km/3 days and 2000 km/30 days, and standard deviations of 0.8, 0.4 and 0.2 respectively. Zhu et al.(2018) \cite Zhu_2018 
+show an example of a realization of the three components. The above nine numbers are meant to span the uncertainty at mesoscale, 
+synoptic scale and planetary space and time scales with pattern 1 (500 km decorrelation scale) being the starting point and most 
+important component for the medium-range ensemble prediction system. The patterns are uniform in the vertical, except they are
+reduced in magnitude near the surface and tapered to zero near and above the tropopause. 
+
+SHUM introduces stochastic perturbation to represent model uncertainty of humidity. It perturbs the near-surface humidity state
+to present subgrid distribution and variability through convection. SHUM uses the same random pattern generator as SPPT, but only
+a single spatial-temporal scale is used. The perturbation is maximized in the lowest model level and decreased exponentially with
+height.
+
+SKEB is used to represent uncertainty in representing the upscale impacts from subgrid-scale processes. This is done via a stream
+function forcing based on the dissipation rate. The 2015 GFS implementation of SKEB only considers numerical dissipation (diffusion),
+where perturbations are generated independently on each vertical level and then vertically smoothed to provide some vertical coherence.
+The inclusion of SKEB improves the power spectrum of kinetic energy of the global model, which otherwise exhibits damped power near
+the truncation frequency. 
+
+\image html GFS_stochy_spread.png "Figure 3 of Zhu et al.(2018): Global meridional cross section showing the impact of stochastic perturnations for 144-hr forecasts from the average of six spring initializations (left) and six fall initializations (right). Paneled are zonal wind spread (m/s) from no stochastic perturbations (noSP;top), and the difference of Stochastic Total Tendency Perturbation (STTP;upper middle),stochastic kinetic energy backscatter (SKEB;middle),stochastically perturbed parameterization tendencies (SPPT; lower middle), and stochastic perturbed humidity (SHUM;bottom) from noSP.GEFS=Global Ensemble Forecast System." width=10cm
+
+Figure 3 of Zhu et al.(2018) \cite Zhu_2018 shows the impact of the individual stochastic schemes in the current operational GFS  
+on ensemble spread at 144 hr (average of six spring cases and six fall cases) when compared to ensemble spread without introducing 
+stochastic perturbations. The stochastic system used in the control (previously operational GEFS),STTP,produces additional spread 
+in the extratropics but has little impact in the tropics. Of the components in the stochastic physics suite, SKEB produces additional
+spread in similar areas as STTP
+(though slightly muted). The other two components,SPPT and SHUM, both increase spread in the tropics where the control system is 
+deficient. SPPT also has an impact in the spring/summer hemisphere. In combination, these stochastic schemes generally improve forecast
+uncertainty, particularly in the tropics, which may lead to improvements in tropical forecast skill.
+
+In 2019 FV3GFS implementation, the adaption of stochastic physics parameterizations from FY2015 with the exception of SKEB will 
+provide model uncertainty estimate.
+
+\section nml_stochy  GFS Stochastic Physics Namelist Options
+- General Stochastic Physics
+ - \c \b NTRUNC: spectral resolution (e.g. T126) of random patterns
+ - \c \b LON_S, \c \b LAT_S: number of longitude and latitude point for the Gaussian grid
+ - \c \b FHSTOCH: forecast hour to write out random pattern in order to restart the pattern for a different forecast (used in DA),file
+is \c stoch_out.F<HHH>
+ - \c \b STOCHINI: set to true if wanting to read in a previous random pattern (input file need to be named stoch_ini)
+
+- Controls for SPPT
+ - \c \b SPPT: amplitudes of random patterns (0.8, 0.4, 0.2, 0.08, 0.04)
+ - \c \b SPPT_TAU: decorrelation timescales in seconds (21600, 1.728E5, 6.912E5, 7.776E6, 3.1536E7)
+ - \c \b SPPT_LSCALE: decorrelation spatial scales in meters (250.E3, 1000.E3, 2000.E3, 2000.E3, 2000.E3)
+ - \c \b SPPT_LOGIT: should be true to limit the SPPT perturbations between 0 and 2. Otherwise model will crash.
+ - \c \b ISEED_SPPT: seeds for setting the random number sequence (ignored if \c stochini is true)
+ - \c \b SPPT_SIGTOP1, \c \b SPPT_SIGTOP2: sigma levels to taper perturbations to zeros (default is 0.1, 0.025)
+ - \c \b SPPT_SFCLIMIT: .T.= tapers the SPPT perturbations to zero at model's lowest level (helps reduce model crashes) 
+ - \c \b USE_ZMTNBLCK: .T.= do not apply perturbations below the dividing streamline that is dianosed by the gravity wave drag,mountian blocking scheme
+
+- Controls for SHUM
+ - \c \b SHUM: amplitudes of random patterns (0.004)
+ - \c \b SHUM_TAU: decorrelation timescales in seconds (21600)
+ - \c \b SHUM_LSCALE: decorrelation spatial scales in meters (250000)
+ - \c \b SHUM_SIGEFOLD: e-folding lengthscale (in units of sigma) of specific humidity perturbations, default is 0.2
+
+- Controls for SKEB
+ - \c \b SKEB: amplitude of random patterns (1.0)
+ - \c \b SKEB_TAU: decorrelation timescales in seconds (21600)
+ -
+
+\section intra_stochy Intraphysics Communication
+
+\section gen_stochy  General Algorithm
 
 
 */

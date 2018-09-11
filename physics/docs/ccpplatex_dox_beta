@@ -99,32 +99,34 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  pdftxt/mainpage.txt     \
-                          pdftxt/code_overview.txt \
-                          pdftxt/GFS_RRTMG.txt    \
-                          pdftxt/GFS_SFCLYR.txt   \
-                          pdftxt/GFS_NSST.txt     \
-                          pdftxt/GFS_NOAH.txt     \
-                          pdftxt/GFS_SFCSICE.txt  \
-                          pdftxt/GFS_HEDMF.txt    \
-                          pdftxt/GFS_GWDPS.txt    \
-                          pdftxt/GFS_OZPHYS.txt   \
-                          pdftxt/GFS_H2OPHYS.txt  \
-                          pdftxt/GFS_RAYLEIGH.txt \
-                          pdftxt/GFS_SAMFdeep.txt \
-                          pdftxt/GFS_GWDC.txt     \
-                          pdftxt/GFS_SAMFshal.txt \
-                          pdftxt/GFS_ZHAOC.txt    \
-                          pdftxt/GFDL_cloud.txt   \
+INPUT                  =  pdftxt/mainpage.txt            \
+                          pdftxt/code_overview.txt       \
+                          pdftxt/GFS_RRTMG.txt           \
+                          pdftxt/GFS_SFCLYR.txt          \
+                          pdftxt/GFS_NSST.txt            \
+                          pdftxt/GFS_NOAH.txt            \
+                          pdftxt/GFS_SFCSICE.txt         \
+                          pdftxt/GFS_HEDMF.txt           \
+                          pdftxt/GFS_GWDPS.txt           \
+                          pdftxt/GFS_OZPHYS.txt          \
+                          pdftxt/GFS_H2OPHYS.txt         \
+                          pdftxt/GFS_RAYLEIGH.txt        \
+                          pdftxt/GFS_SAMFdeep.txt        \
+                          pdftxt/GFS_GWDC.txt            \
+                          pdftxt/GFS_SAMFshal.txt        \
+                          pdftxt/GFS_ZHAOC.txt           \
+                          pdftxt/GFDL_cloud.txt          \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \
-                          pdftxt/rad_cld.txt      \
+                          pdftxt/rad_cld.txt             \
+                          pdftxt/GFS_STOCHY_PHYS.txt     \
+                          pdftxt/GFS_SURFACE_PERT.txt    \
 ### Radiation
-                        ../radlw_main.f \
-                        ../radsw_main.f \
-                        ../radiation_aerosols.f \
-                        ../radiation_astronomy.f \
-                        ../radiation_clouds.f \
-                        ../radiation_gases.f \
+                        ../radlw_main.f                  \
+                        ../radsw_main.f                  \
+                        ../radiation_aerosols.f          \
+                        ../radiation_astronomy.f         \
+                        ../radiation_clouds.f            \
+                        ../radiation_gases.f             \
                         ../radiation_surface.f \
                         ../radlw_param.f \
                         ../radlw_datatb.f \
@@ -172,9 +174,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
+                        ../GFS_stochastics.F90   \
+                        ../../stochastic_physics/get_stochy_pattern.F90 \
                         ../../stochastic_physics/stochastic_physics.F90  \
                         ../../stochastic_physics/stochy_data_mod.F90 \
-                        ../GFS_stochastics.F90   \
+                        ../../compns_stochy.F90             \
+### surface perturbation
                         ../surface_perturbation.F90 \
 ### utils
                         ../funcphys.f90     \

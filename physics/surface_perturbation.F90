@@ -5,7 +5,8 @@
 
 !> This module contains routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
-!>\ingroup gfs_stoch
+!>\defgroup gfs_sfcpert GFS Surface Perturbation Module
+!! @{
 module surface_perturbation
 
       implicit none
@@ -429,5 +430,5 @@ module surface_perturbation
       end subroutine gmln
 
 ! *** mg, sfc perts
-
 end module surface_perturbation
+!! @}
