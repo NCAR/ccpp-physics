@@ -1,6 +1,60 @@
-      subroutine ozphys_2015 (ix, im, levs, ko3, dt, ozi, ozo, tin, po3,
-     &                        prsl, prdout, pl_coeff, delp, ldiag3d,
-     &                        ozp,me)
+!> \file ozphys_2015.f
+!! This file is ozone sources and sinks.
+
+
+!> This module contains the CCPP-compliant Ozone 2015 photochemistry scheme.
+      module ozphys_2015
+
+      contains
+
+!> \section arg_table_ozphys_2015_init Argument Table
+!!
+      subroutine ozphys_2015_init()
+      end subroutine ozphys_2015_init
+
+! \brief Brief description of the subroutine
+!
+!> \section arg_table_ozphys_2015_finalize Argument Table
+!!
+      subroutine ozphys_2015_finalize()
+      end subroutine ozphys_2015_finalize
+
+
+!>\defgroup GFS_ozphys_2015 GFS ozphys_2015 Main
+!! @{
+!! \brief The operational GFS currently parameterizes ozone production
+!and
+!! destruction based on monthly mean coefficients (
+!! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
+!! Research Laboratory through CHEM2D chemistry model
+!! (McCormack et al. (2006) \cite mccormack_et_al_2006).
+!! \section arg_table_ozphys_2015_run Argument Table
+!! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
+!! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   |    0 | integer   |           | in     | F        |
+!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                | number of vertical layers                         | count   |    0 | integer   |           | in     | F        |
+!! | ko3            | vertical_dimension_of_ozone_forcing_data          | number of vertical layers in ozone forcing data   | count   |    0 | integer   |           | in     | F        |
+!! | dt             | time_step_for_physics                             | physics time step                                 | s       |    0 | real      | kind_phys | in     | F        |
+!! | oz             | ozone_concentration_updated_by_physics            | ozone concentration updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | tin            | air_temperature_updated_by_physics                | updated air temperature                           | K       |    2 | real      | kind_phys | in     | F        |
+!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels | natural log of ozone forcing data pressure levels | log(Pa) |    1 | real      | kind_phys | in     | F        |
+!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | prdout         | ozone_forcing                                     | ozone forcing data                                | various |    3 | real      | kind_phys | in     | F        |
+!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data      | number of coefficients in ozone forcing data      | index   |    0 | integer   |           | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers         | difference between mid-layer pressures            | Pa      |    2 | real      | kind_phys | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
+!! | ozp            | change_in_ozone_concentration                     | change in ozone concentration                     | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
+!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
+!!
+!> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
+!! @{
+      subroutine ozphys_2015_run (                                      &
+     &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
+     &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
+     &                        ozp,me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -13,18 +67,32 @@
       implicit none
 !
       real, parameter :: gravi=1.0/grav
-      integer im, ix, levs, ko3, pl_coeff,me
-      real(kind=kind_phys) ozi(ix,levs),   ozo(ix,levs), po3(ko3),
-     &                     prsl(ix,levs),  tin(ix,levs), delp(ix,levs),
-     &                     prdout(ix,ko3,pl_coeff),
-     &                     ozp(ix,levs,4),  dt
-!
+      integer, intent(in) :: im, ix, levs, ko3, pl_coeff,me
+      real(kind=kind_phys), intent(in) :: po3(ko3),                     &
+     &                                    prsl(ix,levs), tin(ix,levs),  &
+     &                                    delp(ix,levs),                &
+     &                                    prdout(ix,ko3,pl_coeff), dt
+      real(kind=kind_phys), intent(inout) :: ozp(ix,levs,4)
+      real(kind=kind_phys), intent(inout) :: oz(ix,levs)
+
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
       integer k,kmax,kmin,l,i,j
       logical              ldiag3d, flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
-      real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,pl_coeff),
-     &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1)
+      real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
+     &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&
+     &                     ozi(ix,levs)
 !
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+!ccpp: save input oz in ozi
+      ozi = oz
+
         colo3(:,levs+1) = 0.0
         coloz(:,levs+1) = 0.0
 !
@@ -91,12 +159,14 @@
 !     if (me .eq. 0) print *,'ozphys_2015 tem=',tem,' prod=',prod(i,:)
 !    &,' ozib=',ozib(i),' l=',l,' tin=',tin(i,l),'colo3=',colo3(i,l+1)
 
-            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
+!ccpp            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
+          oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
         enddo
         if (ldiag3d) then     !     ozone change diagnostics
           do i=1,im
             ozp(i,l,1) = ozp(i,l,1) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+            ozp(i,l,2) = ozp(i,l,2) + (oz(i,l) - ozib(i))
             ozp(i,l,3) = ozp(i,l,3) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
             ozp(i,l,4) = ozp(i,l,4) + prod(i,4)
      &                              * (colo3(i,l)-coloz(i,l))*dt
@@ -105,4 +175,9 @@
       enddo                                ! vertical loop
 !
       return
-      end
+      end subroutine ozphys_2015_run
+
+!! @}
+!! @}
+
+      end module ozphys_2015
