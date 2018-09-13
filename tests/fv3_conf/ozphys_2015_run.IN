@@ -20,12 +20,7 @@ cp    @[RTPWD]/${inputdir}/INPUT/aerosol.dat .
 cp    @[RTPWD]/${inputdir}/INPUT/co2historicaldata_201*.txt .
 cp    @[RTPWD]/${inputdir}/INPUT/sfc_emissivity_idx.txt .
 cp    @[RTPWD]/${inputdir}/INPUT/solarconstant_noaa_an.txt .
-# DH*
-echo "ERROR - NEED TO UPDATE name/location of ozone input file in ccpp_ozphys_2015_run.IN"
-#cp    @[RTPWD]/${inputdir}/INPUT/global_o3prdlos.f77 .
-exit 1
-# *DH
-cp    @[RTPWD]/FV3_input_data/global_h2o_pltc.f77 ./global_h2oprdlos.f77
+cp    @[RTPWD]/${inputdir}/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 ./global_o3prdlos.f77
 cp    @[RTPWD]/${inputdir}/*grb .
 cp    @[RTPWD]/${inputdir}/*_table .
 cp    @[RTPWD]/${inputdir}/*configure .

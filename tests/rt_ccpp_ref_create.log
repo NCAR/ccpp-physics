@@ -1,0 +1,2025 @@
++ hostname
+tfe09
++ [[ 4 -eq 0 ]]
++ trap '{ echo "rt.sh interrupted"; rt_trap ; }' INT
++ trap '{ echo "rt.sh quit"; rt_trap ; }' QUIT
++ trap '{ echo "rt.sh terminated"; rt_trap ; }' TERM
++ trap '{ echo "rt.sh error on line $LINENO"; rt_trap ; }' ERR
++ trap '{ echo "rt.sh finished"; cleanup ; }' EXIT
++++ dirname ./rt.sh
+++ cd .
+++ pwd -P
++ readonly PATHRT=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests
++ PATHRT=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests
++ cd /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests
+++ cd /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/..
+++ pwd
++ readonly PATHTR=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys
++ PATHTR=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys
++ readonly LOCKDIR=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/lock
++ LOCKDIR=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/lock
++ mkdir /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/lock
+++ hostname
++ echo tfe09 137351
++ export COMPILER=intel
++ COMPILER=intel
++ source detect_machine.sh
+++ export ACCNR=gmtb
+++ ACCNR=gmtb
+++ case $(hostname -f) in
++++ hostname -f
+++ MACHINE_ID=theia
+++ '[' theia = theia ']'
+++ MACHINE_ID=theia.intel
+++ echo 'Machine: ' theia.intel '    Account: ' gmtb
+Machine:  theia.intel     Account:  gmtb
+++ [[ theia.intel = theia.* ]]
+++ AP=account_params
+++ '[' gmtb = null ']'
++++ account_params
++++ grep '^\s*Allocation: [0-9]'
++++ grep gmtb
++++ awk '{print $4}'
+++ cphr=84916.91
++++ echo 84916.91
++++ wc -w
+++ nr=1
+++ '[' 1 -eq 0 ']'
+++ echo 'Account: ' 'gmtb, available: ' 84916.91 ' CPU hrs'
+Account:  gmtb, available:  84916.91  CPU hrs
++ source rt_utils.sh
+++ set -eu
+++ [[ ./rt.sh = \.\/\r\t\_\u\t\i\l\s\.\s\h ]]
++ [[ theia.intel = wcoss ]]
++ [[ theia.intel = wcoss_cray ]]
++ [[ theia.intel = gaea ]]
++ [[ theia.intel = theia.* ]]
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/NEMS/src/conf/module-setup.sh.inc
+++ __ms_function_name=setup__test_function__137351
+++ eval 'setup__test_function__137351() { /bin/true ; }'
++++ eval '__text="text" ; if [[ $__text =~ ^(t).* ]] ; then printf "%s" ${.sh.match[1]} ; fi'
++++ cat
+++ __ms_ksh_test=
++++ eval 'if ( set | grep setup__test_function__137351 | grep -v name > /dev/null 2>&1 ) ; then echo t ; fi '
++++ cat
+++ __ms_bash_test=t
+++ [[ ! -z '' ]]
+++ [[ ! -z t ]]
+++ __ms_shell=bash
+++ [[ -d /lfs3 ]]
+++ [[ -d /scratch3 ]]
+++ eval module help
+++ module purge
++++ /apps/lmod/7.7.18/libexec/lmod bash purge
+++ eval unset 'CAIRO;' unset '__LMOD_REF_COUNT_CPATH;' unset 'CPATH;' unset 'ESMFMKFILE;' unset 'ESMF_DIR;' unset 'ESMF_INC;' unset 'ESMF_LIB;' unset 'ESMF_MOD;' unset 'GADDIR;' unset '__LMOD_REF_COUNT_GASCRP;' unset 'GASCRP;' unset 'GDB_CROSS;' unset 'GDB_SERVERMIC;' unset 'GRADS_ROOT;' unset 'IDB_HOME;' unset '__LMOD_REF_COUNT_INCLUDE;' unset 'INCLUDE;' unset '__LMOD_REF_COUNT_INCLUDE_PATH;' unset 'INCLUDE_PATH;' unset '__LMOD_REF_COUNT_INTEL_LICENSE_FILE;' unset 'INTEL_LICENSE_FILE;' unset 'IPATH_NO_BACKTRACE;' unset 'I_MPI_FABRICS;' unset 'I_MPI_HYDRA_BRANCH_COUNT;' unset 'I_MPI_HYDRA_PMI_CONNECT;' unset 'I_MPI_ROOT;' unset 'I_MPI_TMI_PROVIDER;' unset 'LANGUAGE_TERRITORY;' '__LMOD_REF_COUNT_LD_LIBRARY_PATH="/apps/slurm/default/lib:1";' export '__LMOD_REF_COUNT_LD_LIBRARY_PATH;' 'LD_LIBRARY_PATH="/apps/slurm/default/lib";' export 'LD_LIBRARY_PATH;' unset '__LMOD_REF_COUNT_LIBRARY_PATH;' unset 'LIBRARY_PATH;' unset 'LMOD_FAMILY_COMPILER;' unset 'LMOD_FAMILY_COMPILER_VERSION;' unset 'LMOD_FAMILY_MPI;' unset 'LMOD_FAMILY_MPI_VERSION;' unset '__LMOD_REF_COUNT_LOADEDMODULES;' unset 'LOADEDMODULES;' unset 'MAGICK_HOME;' '__LMOD_REF_COUNT_MANPATH="/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1;/apps/slurm/default/share/man:1;/apps/slurm/tools/sbank/share/man:1";' export '__LMOD_REF_COUNT_MANPATH;' 'MANPATH="/apps/lmod/lmod/share/man:/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man:/apps/slurm/default/share/man:/apps/slurm/tools/sbank/share/man";' export 'MANPATH;' unset '__LMOD_REF_COUNT_MIC_LD_LIBRARY_PATH;' unset 'MIC_LD_LIBRARY_PATH;' unset '__LMOD_REF_COUNT_MIC_LIBRARY_PATH;' unset 'MIC_LIBRARY_PATH;' unset 'MKLROOT;' unset 'MKL_MIC_ARCH;' unset 'MKL_TARGET_ARCH;' '__LMOD_REF_COUNT_MODULEPATH="/scratch4/BMC/dtc/MET/modulefiles:1;/apps/lmod/lmod/modulefiles/Core:1;/apps/modules/modulefiles/Linux:1;/apps/modules/modulefiles:1;/opt/cray/modulefiles:1;/opt/cray/craype/default/modulefiles:1;/scratch3/NCEPDEV/nwprod/lib/modulefiles:1;/contrib/modulefiles:1;/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia:1";' export '__LMOD_REF_COUNT_MODULEPATH;' 'MODULEPATH="/scratch4/BMC/dtc/MET/modulefiles:/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles:/scratch3/NCEPDEV/nwprod/lib/modulefiles:/contrib/modulefiles:/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia";' export 'MODULEPATH;' unset 'NCARG_BIN;' unset 'NCARG_INC;' unset 'NCARG_LIB;' unset 'NCARG_LIBPATH;' unset 'NCARG_RANGS;' unset 'NCARG_ROOT;' unset 'NETCDF;' unset '__LMOD_REF_COUNT_NLSPATH;' unset 'NLSPATH;' '__LMOD_REF_COUNT_PATH="/apps/hpss:1;.:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/moab/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1;/apps/slurm/default/slurm/tools:1;/apps/slurm/default/bin:1;/apps/slurm/default/sbin:1;/apps/slurm/tools/sbank/bin:1";' export '__LMOD_REF_COUNT_PATH;' 'PATH="/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin";' export 'PATH;' unset 'PRODUTIL;' unset '__LMOD_REF_COUNT_PYTHONPATH;' unset 'PYTHONPATH;' unset 'TBBROOT;' unset 'UDUNITS;' unset '__LMOD_REF_COUNT__LMFILES_;' unset '_LMFILES_;' '_ModuleTable001_="X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXt9LG1wYXRoQT17Ii9zY3JhdGNoNC9CTUMvZHRjL01FVC9tb2R1bGVmaWxlcyIsIi9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlIiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eCIsIi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLCIvc2NyYXRjaDMvTkNFUERFVi9ud3Byb2QvbGliL21vZHVsZWZpbGVzIiwiL2NvbnRyaWIvbW9kdWxlZmlsZXMiLCIvc2NyYXRjaDQv";' export '_ModuleTable001_;' '_ModuleTable002_="TkNFUERFVi9nbG9iYWwvc2F2ZS9nbG9wYXJhL1RVVE9SSUFML3JvY290b3dvcmtmbG93L2dmc193b3JrZmxvdy52My4wLjAvcGFyYS9leHAvY29uZi9tb2R1bGVmaWxlcy90aGVpYSIsfSxbInN5c3RlbUJhc2VNUEFUSCJdPSIvYXBwcy9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZTovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4Oi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXM6L29wdC9jcmF5L21vZHVsZWZpbGVzOi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfQ==";' export '_ModuleTable002_;' '_ModuleTable_Sz_="2";' export '_ModuleTable_Sz_;' unset '_ModuleTable004_;' unset '_ModuleTable005_;' unset '_ModuleTable006_;' unset '_ModuleTable007_;' unset '_ModuleTable008_;' unset '_ModuleTable009_;' unset '_ModuleTable010_;' unset '_ModuleTable011_;' unset '_ModuleTable012_;' unalias htar '2>' /dev/null '||' 'true;'
++++ unset CAIRO
++++ unset __LMOD_REF_COUNT_CPATH
++++ unset CPATH
++++ unset ESMFMKFILE
++++ unset ESMF_DIR
++++ unset ESMF_INC
++++ unset ESMF_LIB
++++ unset ESMF_MOD
++++ unset GADDIR
++++ unset __LMOD_REF_COUNT_GASCRP
++++ unset GASCRP
++++ unset GDB_CROSS
++++ unset GDB_SERVERMIC
++++ unset GRADS_ROOT
++++ unset IDB_HOME
++++ unset __LMOD_REF_COUNT_INCLUDE
++++ unset INCLUDE
++++ unset __LMOD_REF_COUNT_INCLUDE_PATH
++++ unset INCLUDE_PATH
++++ unset __LMOD_REF_COUNT_INTEL_LICENSE_FILE
++++ unset INTEL_LICENSE_FILE
++++ unset IPATH_NO_BACKTRACE
++++ unset I_MPI_FABRICS
++++ unset I_MPI_HYDRA_BRANCH_COUNT
++++ unset I_MPI_HYDRA_PMI_CONNECT
++++ unset I_MPI_ROOT
++++ unset I_MPI_TMI_PROVIDER
++++ unset LANGUAGE_TERRITORY
++++ __LMOD_REF_COUNT_LD_LIBRARY_PATH=/apps/slurm/default/lib:1
++++ export __LMOD_REF_COUNT_LD_LIBRARY_PATH
++++ LD_LIBRARY_PATH=/apps/slurm/default/lib
++++ export LD_LIBRARY_PATH
++++ unset __LMOD_REF_COUNT_LIBRARY_PATH
++++ unset LIBRARY_PATH
++++ unset LMOD_FAMILY_COMPILER
++++ unset LMOD_FAMILY_COMPILER_VERSION
++++ unset LMOD_FAMILY_MPI
++++ unset LMOD_FAMILY_MPI_VERSION
++++ unset __LMOD_REF_COUNT_LOADEDMODULES
++++ unset LOADEDMODULES
++++ unset MAGICK_HOME
++++ __LMOD_REF_COUNT_MANPATH='/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1;/apps/slurm/default/share/man:1;/apps/slurm/tools/sbank/share/man:1'
++++ export __LMOD_REF_COUNT_MANPATH
++++ MANPATH=/apps/lmod/lmod/share/man:/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man:/apps/slurm/default/share/man:/apps/slurm/tools/sbank/share/man
++++ export MANPATH
++++ unset __LMOD_REF_COUNT_MIC_LD_LIBRARY_PATH
++++ unset MIC_LD_LIBRARY_PATH
++++ unset __LMOD_REF_COUNT_MIC_LIBRARY_PATH
++++ unset MIC_LIBRARY_PATH
++++ unset MKLROOT
++++ unset MKL_MIC_ARCH
++++ unset MKL_TARGET_ARCH
++++ __LMOD_REF_COUNT_MODULEPATH='/scratch4/BMC/dtc/MET/modulefiles:1;/apps/lmod/lmod/modulefiles/Core:1;/apps/modules/modulefiles/Linux:1;/apps/modules/modulefiles:1;/opt/cray/modulefiles:1;/opt/cray/craype/default/modulefiles:1;/scratch3/NCEPDEV/nwprod/lib/modulefiles:1;/contrib/modulefiles:1;/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia:1'
++++ export __LMOD_REF_COUNT_MODULEPATH
++++ MODULEPATH=/scratch4/BMC/dtc/MET/modulefiles:/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles:/scratch3/NCEPDEV/nwprod/lib/modulefiles:/contrib/modulefiles:/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia
++++ export MODULEPATH
++++ unset NCARG_BIN
++++ unset NCARG_INC
++++ unset NCARG_LIB
++++ unset NCARG_LIBPATH
++++ unset NCARG_RANGS
++++ unset NCARG_ROOT
++++ unset NETCDF
++++ unset __LMOD_REF_COUNT_NLSPATH
++++ unset NLSPATH
++++ __LMOD_REF_COUNT_PATH='/apps/hpss:1;.:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/moab/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1;/apps/slurm/default/slurm/tools:1;/apps/slurm/default/bin:1;/apps/slurm/default/sbin:1;/apps/slurm/tools/sbank/bin:1'
++++ export __LMOD_REF_COUNT_PATH
++++ PATH=/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin
++++ export PATH
++++ unset PRODUTIL
++++ unset __LMOD_REF_COUNT_PYTHONPATH
++++ unset PYTHONPATH
++++ unset TBBROOT
++++ unset UDUNITS
++++ unset __LMOD_REF_COUNT__LMFILES_
++++ unset _LMFILES_
++++ _ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXt9LG1wYXRoQT17Ii9zY3JhdGNoNC9CTUMvZHRjL01FVC9tb2R1bGVmaWxlcyIsIi9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlIiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9MaW51eCIsIi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvbW9kdWxlZmlsZXMiLCIvb3B0L2NyYXkvY3JheXBlL2RlZmF1bHQvbW9kdWxlZmlsZXMiLCIvc2NyYXRjaDMvTkNFUERFVi9ud3Byb2QvbGliL21vZHVsZWZpbGVzIiwiL2NvbnRyaWIvbW9kdWxlZmlsZXMiLCIvc2NyYXRjaDQv
++++ export _ModuleTable001_
++++ _ModuleTable002_=TkNFUERFVi9nbG9iYWwvc2F2ZS9nbG9wYXJhL1RVVE9SSUFML3JvY290b3dvcmtmbG93L2dmc193b3JrZmxvdy52My4wLjAvcGFyYS9leHAvY29uZi9tb2R1bGVmaWxlcy90aGVpYSIsfSxbInN5c3RlbUJhc2VNUEFUSCJdPSIvYXBwcy9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZTovYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4Oi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXM6L29wdC9jcmF5L21vZHVsZWZpbGVzOi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsfQ==
++++ export _ModuleTable002_
++++ _ModuleTable_Sz_=2
++++ export _ModuleTable_Sz_
++++ unset _ModuleTable004_
++++ unset _ModuleTable005_
++++ unset _ModuleTable006_
++++ unset _ModuleTable007_
++++ unset _ModuleTable008_
++++ unset _ModuleTable009_
++++ unset _ModuleTable010_
++++ unset _ModuleTable011_
++++ unset _ModuleTable012_
++++ unalias htar
++++ true
++++ : -s sh
+++ eval
+++ unset __ms_shell
+++ unset __ms_ksh_test
+++ unset __ms_bash_test
+++ unset setup__test_function__137351
+++ unset __ms_function_name
++ COMPILER=intel
++ module load rocoto
+++ /apps/lmod/7.7.18/libexec/lmod bash load rocoto
++ eval '__LMOD_REF_COUNT_LOADEDMODULES="rocoto/1.2.4:1";' export '__LMOD_REF_COUNT_LOADEDMODULES;' 'LOADEDMODULES="rocoto/1.2.4";' export 'LOADEDMODULES;' '__LMOD_REF_COUNT_MANPATH="/apps/rocoto/1.2.4/man:1;/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1;/apps/slurm/default/share/man:1;/apps/slurm/tools/sbank/share/man:1";' export '__LMOD_REF_COUNT_MANPATH;' 'MANPATH="/apps/rocoto/1.2.4/man:/apps/lmod/lmod/share/man:/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man:/apps/slurm/default/share/man:/apps/slurm/tools/sbank/share/man";' export 'MANPATH;' 'MODULEPATH="/scratch4/BMC/dtc/MET/modulefiles:/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles:/scratch3/NCEPDEV/nwprod/lib/modulefiles:/contrib/modulefiles:/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia";' export 'MODULEPATH;' '__LMOD_REF_COUNT_PATH="/apps/rocoto/1.2.4/bin:1;/apps/hpss:1;.:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/moab/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1;/apps/slurm/default/slurm/tools:1;/apps/slurm/default/bin:1;/apps/slurm/default/sbin:1;/apps/slurm/tools/sbank/bin:1";' export '__LMOD_REF_COUNT_PATH;' 'PATH="/apps/rocoto/1.2.4/bin:/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin";' export 'PATH;' '__LMOD_REF_COUNT__LMFILES_="/apps/modules/modulefiles/rocoto/1.2.4:1";' export '__LMOD_REF_COUNT__LMFILES_;' '_LMFILES_="/apps/modules/modulefiles/rocoto/1.2.4";' export '_LMFILES_;' '_ModuleTable001_="X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXtyb2NvdG89e1siZm4iXT0iL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9yb2NvdG8vMS4yLjQiLFsiZnVsbE5hbWUiXT0icm9jb3RvLzEuMi40IixbImxvYWRPcmRlciJdPTEscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0icm9jb3RvIix9LH0sbXBhdGhBPXsiL3NjcmF0Y2g0L0JNQy9kdGMvTUVUL21vZHVsZWZpbGVzIiwiL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLCIvYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4";' export '_ModuleTable001_;' '_ModuleTable002_="IiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsIi9zY3JhdGNoMy9OQ0VQREVWL253cHJvZC9saWIvbW9kdWxlZmlsZXMiLCIvY29udHJpYi9tb2R1bGVmaWxlcyIsIi9zY3JhdGNoNC9OQ0VQREVWL2dsb2JhbC9zYXZlL2dsb3BhcmEvVFVUT1JJQUwvcm9jb3Rvd29ya2Zsb3cvZ2ZzX3dvcmtmbG93LnYzLjAuMC9wYXJhL2V4cC9jb25mL21vZHVsZWZpbGVzL3RoZWlhIix9LFsic3lzdGVtQmFzZU1QQVRIIl09Ii9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlOi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMvTGludXg6L2FwcHMvbW9kdWxlcy9tb2R1bGVm";' export '_ModuleTable002_;' '_ModuleTable003_="aWxlczovb3B0L2NyYXkvbW9kdWxlZmlsZXM6L29wdC9jcmF5L2NyYXlwZS9kZWZhdWx0L21vZHVsZWZpbGVzIix9";' export '_ModuleTable003_;' '_ModuleTable_Sz_="3";' export '_ModuleTable_Sz_;'
+++ __LMOD_REF_COUNT_LOADEDMODULES=rocoto/1.2.4:1
+++ export __LMOD_REF_COUNT_LOADEDMODULES
+++ LOADEDMODULES=rocoto/1.2.4
+++ export LOADEDMODULES
+++ __LMOD_REF_COUNT_MANPATH='/apps/rocoto/1.2.4/man:1;/apps/lmod/lmod/share/man:1;/apps/moab/default/share/man:1;/apps/torque/default/share/man:1;/apps/local/man:1;/apps/slurm/default/share/man:1;/apps/slurm/tools/sbank/share/man:1'
+++ export __LMOD_REF_COUNT_MANPATH
+++ MANPATH=/apps/rocoto/1.2.4/man:/apps/lmod/lmod/share/man:/apps/moab/default/share/man:/apps/torque/default/share/man:/apps/local/man:/apps/slurm/default/share/man:/apps/slurm/tools/sbank/share/man
+++ export MANPATH
+++ MODULEPATH=/scratch4/BMC/dtc/MET/modulefiles:/apps/lmod/lmod/modulefiles/Core:/apps/modules/modulefiles/Linux:/apps/modules/modulefiles:/opt/cray/modulefiles:/opt/cray/craype/default/modulefiles:/scratch3/NCEPDEV/nwprod/lib/modulefiles:/contrib/modulefiles:/scratch4/NCEPDEV/global/save/glopara/TUTORIAL/rocotoworkflow/gfs_workflow.v3.0.0/para/exp/conf/modulefiles/theia
+++ export MODULEPATH
+++ __LMOD_REF_COUNT_PATH='/apps/rocoto/1.2.4/bin:1;/apps/hpss:1;.:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/bin:1;/usr/bin:2;/usr/local/sbin:1;/usr/sbin:1;/apps/moab/default/moab/tools:1;/apps/moab/default/bin:1;/apps/moab/default/sbin:1;/apps/torque/default/bin:1;/apps/torque/default/sbin:1;/apps/mam/default/bin:1;/apps/mam/default/sbin:1;/apps/local/bin:1;/apps/local/sbin:1;/apps/slurm/default/slurm/tools:1;/apps/slurm/default/bin:1;/apps/slurm/default/sbin:1;/apps/slurm/tools/sbank/bin:1'
+++ export __LMOD_REF_COUNT_PATH
+++ PATH=/apps/rocoto/1.2.4/bin:/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin
+++ export PATH
+++ __LMOD_REF_COUNT__LMFILES_=/apps/modules/modulefiles/rocoto/1.2.4:1
+++ export __LMOD_REF_COUNT__LMFILES_
+++ _LMFILES_=/apps/modules/modulefiles/rocoto/1.2.4
+++ export _LMFILES_
+++ _ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXt9LG1UPXtyb2NvdG89e1siZm4iXT0iL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcy9yb2NvdG8vMS4yLjQiLFsiZnVsbE5hbWUiXT0icm9jb3RvLzEuMi40IixbImxvYWRPcmRlciJdPTEscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0icm9jb3RvIix9LH0sbXBhdGhBPXsiL3NjcmF0Y2g0L0JNQy9kdGMvTUVUL21vZHVsZWZpbGVzIiwiL2FwcHMvbG1vZC9sbW9kL21vZHVsZWZpbGVzL0NvcmUiLCIvYXBwcy9tb2R1bGVzL21vZHVsZWZpbGVzL0xpbnV4
+++ export _ModuleTable001_
+++ _ModuleTable002_=IiwiL2FwcHMvbW9kdWxlcy9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9tb2R1bGVmaWxlcyIsIi9vcHQvY3JheS9jcmF5cGUvZGVmYXVsdC9tb2R1bGVmaWxlcyIsIi9zY3JhdGNoMy9OQ0VQREVWL253cHJvZC9saWIvbW9kdWxlZmlsZXMiLCIvY29udHJpYi9tb2R1bGVmaWxlcyIsIi9zY3JhdGNoNC9OQ0VQREVWL2dsb2JhbC9zYXZlL2dsb3BhcmEvVFVUT1JJQUwvcm9jb3Rvd29ya2Zsb3cvZ2ZzX3dvcmtmbG93LnYzLjAuMC9wYXJhL2V4cC9jb25mL21vZHVsZWZpbGVzL3RoZWlhIix9LFsic3lzdGVtQmFzZU1QQVRIIl09Ii9hcHBzL2xtb2QvbG1vZC9tb2R1bGVmaWxlcy9Db3JlOi9hcHBzL21vZHVsZXMvbW9kdWxlZmlsZXMvTGludXg6L2FwcHMvbW9kdWxlcy9tb2R1bGVm
+++ export _ModuleTable002_
+++ _ModuleTable003_=aWxlczovb3B0L2NyYXkvbW9kdWxlZmlsZXM6L29wdC9jcmF5L2NyYXlwZS9kZWZhdWx0L21vZHVsZWZpbGVzIix9
+++ export _ModuleTable003_
+++ _ModuleTable_Sz_=3
+++ export _ModuleTable_Sz_
+++ : -s sh
++ eval
+++ which rocotorun
++ ROCOTORUN=/apps/rocoto/1.2.4/bin/rocotorun
+++ which rocotostat
++ ROCOTOSTAT=/apps/rocoto/1.2.4/bin/rocotostat
++ export PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:/apps/rocoto/1.2.4/bin:/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin
++ PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:/apps/rocoto/1.2.4/bin:/apps/hpss:.:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/apps/moab/default/moab/tools:/apps/moab/default/bin:/apps/moab/default/sbin:/apps/torque/default/bin:/apps/torque/default/sbin:/apps/mam/default/bin:/apps/mam/default/sbin:/apps/local/bin:/apps/local/sbin:/apps/slurm/default/slurm/tools:/apps/slurm/default/bin:/apps/slurm/default/sbin:/apps/slurm/tools/sbank/bin
++ export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
++ PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
++ ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
++ QUEUE=debug
++ PARTITION=
++ dprefix=/scratch4/NCEPDEV
++ DISKNM=/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT
++ dprefix0=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/
++ STMP=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4
++ PTMP=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3
++ SCHEDULER=pbs
++ MPIEXEC=mpirun
++ MPIEXECOPTS=
++ cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
++ mkdir -p /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang
++ mkdir -p /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang
++ NEW_BASELINE=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang/FV3_RT/REGRESSION_TEST
++ [[ theia.intel = theia.* ]]
++ NEW_BASELINE=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang/FV3_RT/REGRESSION_TEST_INTEL
++ RUNDIR_ROOT=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351
++ mkdir -p /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351
++ CREATE_BASELINE=false
++ ROCOTO=false
++ ECFLOW=false
++ TESTS_FILE=rt.conf
++ SET_ID=standard
++ getopts :cfsl:mreh opt
++ case $opt in
++ TESTS_FILE=rt_ccpp_ref.conf
++ SET_ID=' '
++ getopts :cfsl:mreh opt
++ case $opt in
++ CREATE_BASELINE=true
++ SET_ID=' '
++ getopts :cfsl:mreh opt
++ [[ theia.intel = cheyenne.* ]]
++ RTPWD=/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829
++ shift 3
++ [[ 1 -gt 1 ]]
++ [[ true == true ]]
++ rm -rf /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang/FV3_RT/REGRESSION_TEST_INTEL
++ mkdir -p /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang/FV3_RT/REGRESSION_TEST_INTEL
++ echo 'copy REGRESSION_TEST_baselines'
+copy REGRESSION_TEST_baselines
++ cp -rf /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_control /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_control_32bit /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_csawmg /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_csawmg3shoc127 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_csawmgshoc /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_gfdlmp /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_iau /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_input_data /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_input_data_127 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_input_data_c192 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_input_data_c384 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_input_data_c768 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_NAM_phys /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_nest_input_data /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_rasmgshoc /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_read_inc /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_regional_c768 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_regional_control /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/FV3_regional_input_data /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_regional_quilt /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_regional_restart /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_restart /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_satmedmf /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_stochy /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_stretched /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_stretched_nest /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_thompson /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wrtGauss_nemsio /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wrtGauss_nemsio_c192 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wrtGauss_nemsio_c384 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wrtGauss_nemsio_c768 /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wrtGauss_netcdf /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/RT/NEMSfv3gfs/trunk-20180829/fv3_wsm6 /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp4/Man.Zhang/FV3_RT/REGRESSION_TEST_INTEL/.
++ COMPILE_LOG=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/Compile_theia.intel.log
++ REGRESSIONTEST_LOG=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/RegressionTests_theia.intel.log
++ date
++ echo 'Start Regression test'
++ echo
++ source default_vars.sh
+++ '[' theia.intel = wcoss ']'
+++ '[' theia.intel = wcoss_cray ']'
+++ [[ theia.intel = theia.* ]]
+++ TASKS_dflt=150
+++ TPN_dflt=24
+++ INPES_dflt=3
+++ JNPES_dflt=8
+++ TASKS_thrd=84
+++ TPN_thrd=12
+++ INPES_thrd=3
+++ JNPES_thrd=4
+++ TASKS_stretch=48
+++ TPN_stretch=12
+++ INPES_stretch=2
+++ JNPES_stretch=4
+++ TASKS_strnest=96
+++ TPN_strnest=12
+++ INPES_strnest=2
+++ JNPES_strnest=4
+++ COMPILER=intel
+++ [[ intel = gnu ]]
+++ [[ intel = pgi ]]
+++ WLCLK_dflt=15
++ TEST_NR=0
++ COMPILE_NR=0
++ rm -f fail_test
++ LOG_DIR=/scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel
++ rm -rf /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel
++ mkdir /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel
++ rm -f ../fv3.exe
++ [[ false == true ]]
++ [[ false == true ]]
++ new_compile=false
++ in_metatask=false
++ read -r line
++ line='# Compile with Intel 18 instead of default Intel 15'
++ [[ 51 == 0 ]]
++ [[ # Compile with Intel 18 instead of default Intel 15 == \#* ]]
++ continue
++ read -r line
++ line='COMPILE | INTEL18=Y REPRO=Y                   | standard    | theia.intel    |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | INTEL18=Y REPRO=Y                   | standard    | theia.intel    |             | == \#* ]]
++ [[ COMPILE | INTEL18=Y REPRO=Y                   | standard    | theia.intel    |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' INTEL18=Y REPRO=Y '|' standard '|' theia.intel '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER='INTEL18=Y REPRO=Y'
+++ echo COMPILE '|' INTEL18=Y REPRO=Y '|' standard '|' theia.intel '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' INTEL18=Y REPRO=Y '|' standard '|' theia.intel '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=theia.intel
++ [[   != \  ]]
++ [[ theia.intel != \  ]]
++ [[ theia.intel != \t\h\e\i\a\.\i\n\t\e\l ]]
++ COMPILE_NR_DEP=0
++ ((  COMPILE_NR += 1  ))
++ [[ false == true ]]
++ [[ false == true ]]
++ ./compile.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/FV3 theia.intel 'INTEL18=Y REPRO=Y' 1
++ echo ' bash Compile is done'
+ bash Compile is done
++ continue
++ read -r line
++ line='COMPILE | REPRO=Y                             | standard    | theia.pgi      |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | REPRO=Y                             | standard    | theia.pgi      |             | == \#* ]]
++ [[ COMPILE | REPRO=Y                             | standard    | theia.pgi      |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.pgi '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=REPRO=Y
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.pgi '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.pgi '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=theia.pgi
++ [[   != \  ]]
++ [[ theia.pgi != \  ]]
++ [[ theia.pgi != \t\h\e\i\a\.\i\n\t\e\l ]]
++ continue
++ read -r line
++ line='COMPILE | REPRO=Y                             | standard    | theia.gnu      |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | REPRO=Y                             | standard    | theia.gnu      |             | == \#* ]]
++ [[ COMPILE | REPRO=Y                             | standard    | theia.gnu      |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.gnu '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=REPRO=Y
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.gnu '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' REPRO=Y '|' standard '|' theia.gnu '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=theia.gnu
++ [[   != \  ]]
++ [[ theia.gnu != \  ]]
++ [[ theia.gnu != \t\h\e\i\a\.\i\n\t\e\l ]]
++ continue
++ read -r line
++ line='COMPILE | REPRO=Y                             | standard    | cheyenne.intel |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.intel |             | == \#* ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.intel |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.intel '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=REPRO=Y
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.intel '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.intel '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=cheyenne.intel
++ [[   != \  ]]
++ [[ cheyenne.intel != \  ]]
++ [[ cheyenne.intel != \t\h\e\i\a\.\i\n\t\e\l ]]
++ continue
++ read -r line
++ line='COMPILE | REPRO=Y                             | standard    | cheyenne.pgi   |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.pgi   |             | == \#* ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.pgi   |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.pgi '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=REPRO=Y
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.pgi '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.pgi '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=cheyenne.pgi
++ [[   != \  ]]
++ [[ cheyenne.pgi != \  ]]
++ [[ cheyenne.pgi != \t\h\e\i\a\.\i\n\t\e\l ]]
++ continue
++ read -r line
++ line='COMPILE | REPRO=Y                             | standard    | cheyenne.gnu   |             |'
++ [[ 92 == 0 ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.gnu   |             | == \#* ]]
++ [[ COMPILE | REPRO=Y                             | standard    | cheyenne.gnu   |             | == COMPILE* ]]
++ unset APP
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.gnu '|' '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ NEMS_VER=REPRO=Y
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.gnu '|' '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo COMPILE '|' REPRO=Y '|' standard '|' cheyenne.gnu '|' '|'
+++ cut '-d|' -f4
+++ sed -e 's/^ *//' -e 's/ *$//'
++ MACHINES=cheyenne.gnu
++ [[   != \  ]]
++ [[ cheyenne.gnu != \  ]]
++ [[ cheyenne.gnu != \t\h\e\i\a\.\i\n\t\e\l ]]
++ continue
++ read -r line
++ line='# Run tests with CCPP add-on (currently gfdlmp and stochy don'\''t work with PGI)'
++ [[ 78 == 0 ]]
++ [[ # Run tests with CCPP add-on (currently gfdlmp and stochy don't work with PGI) == \#* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_control                         | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_control                         | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_control                         | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_control                         | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_control                         | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_control '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_control
+++ echo RUN '|' fv3_control '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_control '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_control '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_control '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_control ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 1
++ TEST_NR=01
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_control
+++ export 'TEST_DESCR=Compare FV3 control results with previous trunk version'
+++ TEST_DESCR='Compare FV3 control results with previous trunk version'
+++ export CNTL_DIR=fv3_control
+++ CNTL_DIR=fv3_control
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_control 01 1
++ continue
++ read -r line
++ line='RUN     | fv3_ozphys_2015                     | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_ozphys_2015                     | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_ozphys_2015                     | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_ozphys_2015                     | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_ozphys_2015                     | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_ozphys_2015 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_ozphys_2015
+++ echo RUN '|' fv3_ozphys_2015 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_ozphys_2015 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_ozphys_2015 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_ozphys_2015 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_ozphys_2015 ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 2
++ TEST_NR=02
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_ozphys_2015
+++ export 'TEST_DESCR=Compare FV3 ozone physics 2015 results with previous trunk version'
+++ TEST_DESCR='Compare FV3 ozone physics 2015 results with previous trunk version'
+++ export CNTL_DIR=fv3_ozphys_2015
+++ CNTL_DIR=fv3_ozphys_2015
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export FV3_RUN=ozphys_2015_run.IN
+++ FV3_RUN=ozphys_2015_run.IN
+++ export INPUT_NML=ozphys_2015.nml.IN
+++ INPUT_NML=ozphys_2015.nml.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_ozphys_2015 02 1
++ continue
++ read -r line
++ line='RUN     | fv3_2threads                        | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_2threads                        | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_2threads                        | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_2threads                        | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_2threads                        | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_2threads '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_2threads
+++ echo RUN '|' fv3_2threads '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_2threads '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_2threads '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_2threads '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_2threads ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 3
++ TEST_NR=03
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_2threads
+++ export 'TEST_DESCR=Compare FV3 2 threads results with previous trunk version'
+++ TEST_DESCR='Compare FV3 2 threads results with previous trunk version'
+++ export CNTL_DIR=fv3_control
+++ CNTL_DIR=fv3_control
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
+++ export THRD=2
+++ THRD=2
+++ export TASKS=84
+++ TASKS=84
+++ export TPN=12
+++ TPN=12
+++ export INPES=3
+++ INPES=3
+++ export JNPES=4
+++ JNPES=4
+++ export WRTTASK_PER_GROUP=12
+++ WRTTASK_PER_GROUP=12
++++ expr 84 / 12 + 1
+++ export NODES=8
+++ NODES=8
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_2threads 03 1
++ continue
++ read -r line
++ line='RUN     | fv3_wsm6                            | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_wsm6                            | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_wsm6                            | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_wsm6                            | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_wsm6                            | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_wsm6 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_wsm6
+++ echo RUN '|' fv3_wsm6 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_wsm6 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_wsm6 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_wsm6 '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_wsm6 ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 4
++ TEST_NR=04
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_wsm6
+++ export 'TEST_DESCR=Compare FV3 WSM6 MP results with previous trunk version'
+++ TEST_DESCR='Compare FV3 WSM6 MP results with previous trunk version'
+++ export CNTL_DIR=fv3_wsm6
+++ CNTL_DIR=fv3_wsm6
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export DT_ATMOS=1200
+++ DT_ATMOS=1200
+++ export LRADAR=.T.
+++ LRADAR=.T.
+++ export INPUT_NML=wsm6.nml.IN
+++ INPUT_NML=wsm6.nml.IN
+++ export FV3_RUN=wsm6_run.IN
+++ FV3_RUN=wsm6_run.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_wsm6 04 1
++ continue
++ read -r line
++ line='RUN     | fv3_gfdlmp                          | standard    | theia.intel    | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.intel    | fv3         | == \#* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.intel    | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.intel    | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.intel    | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_gfdlmp
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' theia.intel '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_gfdlmp ]]
++ [[   != \  ]]
++ [[  theia.intel  != \  ]]
++ [[  theia.intel  != *theia.intel* ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 5
++ TEST_NR=05
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_gfdlmp
+++ export 'TEST_DESCR=Compare FV3 GFDL-MP results with previous trunk version'
+++ TEST_DESCR='Compare FV3 GFDL-MP results with previous trunk version'
+++ export CNTL_DIR=fv3_gfdlmp
+++ CNTL_DIR=fv3_gfdlmp
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ DT_ATMOS=1200
+++ export INPUT_NML=gfdlmp.nml.IN
+++ INPUT_NML=gfdlmp.nml.IN
+++ export FV3_RUN=gfdlmp_run.IN
+++ FV3_RUN=gfdlmp_run.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_gfdlmp 05 1
++ continue
++ read -r line
++ line='RUN     | fv3_gfdlmp                          | standard    | theia.gnu      | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.gnu      | fv3         | == \#* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.gnu      | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.gnu      | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | theia.gnu      | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_gfdlmp
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' theia.gnu '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_gfdlmp ]]
++ [[   != \  ]]
++ [[  theia.gnu  != \  ]]
++ [[  theia.gnu  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_gfdlmp                          | standard    | cheyenne.intel | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.intel | fv3         | == \#* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.intel | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.intel | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.intel | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_gfdlmp
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' cheyenne.intel '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_gfdlmp ]]
++ [[   != \  ]]
++ [[  cheyenne.intel  != \  ]]
++ [[  cheyenne.intel  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_gfdlmp                          | standard    | cheyenne.gnu   | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.gnu   | fv3         | == \#* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.gnu   | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.gnu   | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_gfdlmp                          | standard    | cheyenne.gnu   | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_gfdlmp
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' cheyenne.gnu '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_gfdlmp '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_gfdlmp ]]
++ [[   != \  ]]
++ [[  cheyenne.gnu  != \  ]]
++ [[  cheyenne.gnu  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_stochy                          | standard    | theia.intel    | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.intel    | fv3         | == \#* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.intel    | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.intel    | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.intel    | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_stochy
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' theia.intel '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.intel '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_stochy ]]
++ [[   != \  ]]
++ [[  theia.intel  != \  ]]
++ [[  theia.intel  != *theia.intel* ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 6
++ TEST_NR=06
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_stochy
+++ export 'TEST_DESCR=Compare FV3 stochastic results with previous trunk version'
+++ TEST_DESCR='Compare FV3 stochastic results with previous trunk version'
+++ export CNTL_DIR=fv3_stochy
+++ CNTL_DIR=fv3_stochy
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf012.tile1.nc                    phyf012.tile2.nc                    phyf012.tile3.nc                    phyf012.tile4.nc                    phyf012.tile5.nc                    phyf012.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf012.tile1.nc                    dynf012.tile2.nc                    dynf012.tile3.nc                    dynf012.tile4.nc                    dynf012.tile5.nc                    dynf012.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf012.tile1.nc                    phyf012.tile2.nc                    phyf012.tile3.nc                    phyf012.tile4.nc                    phyf012.tile5.nc                    phyf012.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf012.tile1.nc                    dynf012.tile2.nc                    dynf012.tile3.nc                    dynf012.tile4.nc                    dynf012.tile5.nc                    dynf012.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export SKEB=0.3
+++ SKEB=0.3
+++ export SHUM=0.003
+++ SHUM=0.003
+++ export SPPT=0.2
+++ SPPT=0.2
+++ export DT_ATMOS=600
+++ DT_ATMOS=600
+++ export FHMAX=12
+++ FHMAX=12
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_stochy 06 1
++ continue
++ read -r line
++ line='RUN     | fv3_stochy                          | standard    | theia.gnu      | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.gnu      | fv3         | == \#* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.gnu      | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.gnu      | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_stochy                          | standard    | theia.gnu      | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_stochy
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' theia.gnu '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_stochy '|' standard '|' theia.gnu '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_stochy ]]
++ [[   != \  ]]
++ [[  theia.gnu  != \  ]]
++ [[  theia.gnu  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_stochy                          | standard    | cheyenne.intel | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.intel | fv3         | == \#* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.intel | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.intel | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.intel | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_stochy
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' cheyenne.intel '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.intel '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_stochy ]]
++ [[   != \  ]]
++ [[  cheyenne.intel  != \  ]]
++ [[  cheyenne.intel  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_stochy                          | standard    | cheyenne.gnu   | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.gnu   | fv3         | == \#* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.gnu   | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.gnu   | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_stochy                          | standard    | cheyenne.gnu   | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_stochy
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' cheyenne.gnu '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_stochy '|' standard '|' cheyenne.gnu '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_stochy ]]
++ [[   != \  ]]
++ [[  cheyenne.gnu  != \  ]]
++ [[  cheyenne.gnu  != *theia.intel* ]]
++ continue
++ read -r line
++ line='RUN     | fv3_satmedmf                        | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_satmedmf                        | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_satmedmf                        | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_satmedmf                        | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_satmedmf                        | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_satmedmf '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_satmedmf
+++ echo RUN '|' fv3_satmedmf '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_satmedmf '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_satmedmf '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_satmedmf '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_satmedmf ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 7
++ TEST_NR=07
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_satmedmf
+++ export 'TEST_DESCR=Compare FV3 control with satmedmf on Gaussian grid nemsio output results with previous trunk version'
+++ TEST_DESCR='Compare FV3 control with satmedmf on Gaussian grid nemsio output results with previous trunk version'
+++ export CNTL_DIR=fv3_satmedmf
+++ CNTL_DIR=fv3_satmedmf
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.nemsio                    phyf024.nemsio                    dynf000.nemsio                    dynf024.nemsio                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.nemsio                    phyf024.nemsio                    dynf000.nemsio                    dynf024.nemsio                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export SATMEDMF=.T.
+++ SATMEDMF=.T.
+++ export HYBEDMF=.F.
+++ HYBEDMF=.F.
+++ export 'OUTPUT_GRID='\''gaussian_grid'\'''
+++ OUTPUT_GRID=''\''gaussian_grid'\'''
+++ export 'OUTPUT_FILE='\''nemsio'\'''
+++ OUTPUT_FILE=''\''nemsio'\'''
+++ export WRITE_NEMSIOFLIP=.true.
+++ WRITE_NEMSIOFLIP=.true.
+++ export WRITE_FSYNCFLAG=.true.
+++ WRITE_FSYNCFLAG=.true.
+++ export FV3_RUN=satmedmf_run.IN
+++ FV3_RUN=satmedmf_run.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_satmedmf 07 1
++ continue
++ read -r line
++ line='RUN     | fv3_h2ophys                         | standard    |                | fv3         |'
++ [[ 92 == 0 ]]
++ [[ RUN     | fv3_h2ophys                         | standard    |                | fv3         | == \#* ]]
++ [[ RUN     | fv3_h2ophys                         | standard    |                | fv3         | == COMPILE* ]]
++ [[ RUN     | fv3_h2ophys                         | standard    |                | fv3         | == APPBUILD* ]]
++ [[ RUN     | fv3_h2ophys                         | standard    |                | fv3         | == RUN* ]]
+++ echo RUN '|' fv3_h2ophys '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f2
+++ sed -e 's/^ *//' -e 's/ *$//'
++ TEST_NAME=fv3_h2ophys
+++ echo RUN '|' fv3_h2ophys '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f3
++ SET=' standard '
+++ echo RUN '|' fv3_h2ophys '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f4
++ MACHINES=' '
+++ echo RUN '|' fv3_h2ophys '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f5
++ CB=' fv3 '
+++ echo RUN '|' fv3_h2ophys '|' standard '|' '|' fv3 '|'
+++ cut '-d|' -f6
+++ sed -e 's/^ *//' -e 's/ *$//'
++ DEP_RUN=
++ [[ -e tests/fv3_h2ophys ]]
++ [[   != \  ]]
++ [[   != \  ]]
++ [[ true == true ]]
++ [[  fv3  != *fv3* ]]
++ [[ false == true ]]
+++ printf %02d 8
++ TEST_NR=08
++ source /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/tests/fv3_h2ophys
+++ export 'TEST_DESCR=Compare FV3 H2O physics results with previous trunk version'
+++ TEST_DESCR='Compare FV3 H2O physics results with previous trunk version'
+++ export CNTL_DIR=fv3_h2ophys
+++ CNTL_DIR=fv3_h2ophys
+++ export 'LIST_FILES=atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ LIST_FILES='atmos_4xdaily.tile1.nc                    atmos_4xdaily.tile2.nc                    atmos_4xdaily.tile3.nc                    atmos_4xdaily.tile4.nc                    atmos_4xdaily.tile5.nc                    atmos_4xdaily.tile6.nc                    phyf000.tile1.nc                    phyf000.tile2.nc                    phyf000.tile3.nc                    phyf000.tile4.nc                    phyf000.tile5.nc                    phyf000.tile6.nc                    phyf024.tile1.nc                    phyf024.tile2.nc                    phyf024.tile3.nc                    phyf024.tile4.nc                    phyf024.tile5.nc                    phyf024.tile6.nc                    dynf000.tile1.nc                    dynf000.tile2.nc                    dynf000.tile3.nc                    dynf000.tile4.nc                    dynf000.tile5.nc                    dynf000.tile6.nc                    dynf024.tile1.nc                    dynf024.tile2.nc                    dynf024.tile3.nc                    dynf024.tile4.nc                    dynf024.tile5.nc                    dynf024.tile6.nc                    RESTART/coupler.res                    RESTART/fv_core.res.nc                    RESTART/fv_core.res.tile1.nc                    RESTART/fv_core.res.tile2.nc                    RESTART/fv_core.res.tile3.nc                    RESTART/fv_core.res.tile4.nc                    RESTART/fv_core.res.tile5.nc                    RESTART/fv_core.res.tile6.nc                    RESTART/fv_srf_wnd.res.tile1.nc                    RESTART/fv_srf_wnd.res.tile2.nc                    RESTART/fv_srf_wnd.res.tile3.nc                    RESTART/fv_srf_wnd.res.tile4.nc                    RESTART/fv_srf_wnd.res.tile5.nc                    RESTART/fv_srf_wnd.res.tile6.nc                    RESTART/fv_tracer.res.tile1.nc                    RESTART/fv_tracer.res.tile2.nc                    RESTART/fv_tracer.res.tile3.nc                    RESTART/fv_tracer.res.tile4.nc                    RESTART/fv_tracer.res.tile5.nc                    RESTART/fv_tracer.res.tile6.nc                    RESTART/phy_data.tile1.nc                    RESTART/phy_data.tile2.nc                    RESTART/phy_data.tile3.nc                    RESTART/phy_data.tile4.nc                    RESTART/phy_data.tile5.nc                    RESTART/phy_data.tile6.nc                    RESTART/sfc_data.tile1.nc                    RESTART/sfc_data.tile2.nc                    RESTART/sfc_data.tile3.nc                    RESTART/sfc_data.tile4.nc                    RESTART/sfc_data.tile5.nc                    RESTART/sfc_data.tile6.nc'
+++ export_fv3
+++ export THRD=1
+++ THRD=1
+++ export WLCLK=15
+++ WLCLK=15
+++ export INPES=3
+++ INPES=3
+++ export JNPES=8
+++ JNPES=8
+++ export TASKS=150
+++ TASKS=150
+++ export TPN=24
+++ TPN=24
+++ export QUILTING=.true.
+++ QUILTING=.true.
+++ export WRITE_GROUP=1
+++ WRITE_GROUP=1
+++ export WRTTASK_PER_GROUP=6
+++ WRTTASK_PER_GROUP=6
+++ export NUM_FILES=2
+++ NUM_FILES=2
+++ export 'FILENAME_BASE='\''dyn'\'' '\''phy'\'''
+++ FILENAME_BASE=''\''dyn'\'' '\''phy'\'''
+++ export 'OUTPUT_GRID='\''cubed_sphere_grid'\'''
+++ OUTPUT_GRID=''\''cubed_sphere_grid'\'''
+++ export 'OUTPUT_FILE='\''netcdf'\'''
+++ OUTPUT_FILE=''\''netcdf'\'''
+++ export WRITE_NEMSIOFLIP=.false.
+++ WRITE_NEMSIOFLIP=.false.
+++ export WRITE_FSYNCFLAG=.false.
+++ WRITE_FSYNCFLAG=.false.
+++ export IMO=384
+++ IMO=384
+++ export JMO=190
+++ JMO=190
+++ export WARM_START=.F.
+++ WARM_START=.F.
+++ export READ_INCREMENT=.F.
+++ READ_INCREMENT=.F.
+++ export NGGPS_IC=.T.
+++ NGGPS_IC=.T.
+++ export EXTERNAL_IC=.T.
+++ EXTERNAL_IC=.T.
+++ export MAKE_NH=.T.
+++ MAKE_NH=.T.
+++ export MOUNTAIN=.F.
+++ MOUNTAIN=.F.
+++ export SATMEDMF=.F.
+++ SATMEDMF=.F.
+++ export HYBEDMF=.T.
+++ HYBEDMF=.T.
+++ export NA_INIT=1
+++ NA_INIT=1
+++ export CPL=.F.
+++ CPL=.F.
+++ export CPLFLX=.F.
+++ CPLFLX=.F.
+++ export DAYS=1
+++ DAYS=1
+++ export NPX=97
+++ NPX=97
+++ export NPY=97
+++ NPY=97
+++ export NPZ=64
+++ NPZ=64
+++ export NPZP=65
+++ NPZP=65
+++ export NSTF_NAME=2,1,1,0,5
+++ NSTF_NAME=2,1,1,0,5
+++ export FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ FDIAG=0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24
+++ export NFHOUT=3
+++ NFHOUT=3
+++ export NFHMAX_HF=12
+++ NFHMAX_HF=12
+++ export NFHOUT_HF=1
+++ NFHOUT_HF=1
+++ export 'FNALBC='\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ FNALBC=''\''global_snowfree_albedo.bosu.t126.384.190.rg.grb'\'','
+++ export 'FNVETC='\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ FNVETC=''\''global_vegtype.igbp.t126.384.190.rg.grb'\'','
+++ export 'FNSOTC='\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ FNSOTC=''\''global_soiltype.statsgo.t126.384.190.rg.grb'\'','
+++ export 'FNSMCC='\''global_soilmgldas.t126.384.190.grb'\'','
+++ FNSMCC=''\''global_soilmgldas.t126.384.190.grb'\'','
+++ export 'FNABSC='\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ FNABSC=''\''global_mxsnoalb.uariz.t126.384.190.rg.grb'\'','
+++ export ENS_NUM=1
+++ ENS_NUM=1
+++ export SYEAR=2016
+++ SYEAR=2016
+++ export SMONTH=10
+++ SMONTH=10
+++ export SDAY=03
+++ SDAY=03
+++ export SHOUR=00
+++ SHOUR=00
++++ expr 1 '*' 24
+++ export FHMAX=24
+++ FHMAX=24
+++ export DT_ATMOS=1800
+++ DT_ATMOS=1800
+++ export DO_SPPT=.F.
+++ DO_SPPT=.F.
+++ export DO_SHUM=.F.
+++ DO_SHUM=.F.
+++ export DO_SKEB=.F.
+++ DO_SKEB=.F.
+++ export DO_SFCPERTS=.F.
+++ DO_SFCPERTS=.F.
+++ export SKEB=-999.
+++ SKEB=-999.
+++ export SPPT=-999.
+++ SPPT=-999.
+++ export SHUM=-999.
+++ SHUM=-999.
+++ export 'IAU_INC_FILES='\'''\'''
+++ IAU_INC_FILES=''\'''\'''
++++ expr 150 / 24 + 1
+++ export NODES=7
+++ NODES=7
+++ export FV3_RUN=h2ophys_run.IN
+++ FV3_RUN=h2ophys_run.IN
+++ export INPUT_NML=h2ophys.nml.IN
+++ INPUT_NML=h2ophys.nml.IN
+++ RUN_SCRIPT=rt_fv3.sh
++ cat
++ [[ false == true ]]
++ [[ false == true ]]
++ ./run_test.sh /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18//stmp3/Man.Zhang/FV3_RT/rt_137351 fv3_h2ophys 08 1
++ continue
++ read -r line
++ [[ false == true ]]
++ [[ false == true ]]
++ set +e
++ cat /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/compile_1.log
++ cat /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_01_fv3_control.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_02_fv3_ozphys_2015.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_03_fv3_2threads.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_04_fv3_wsm6.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_05_fv3_gfdlmp.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_06_fv3_stochy.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_07_fv3_satmedmf.log /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/log_theia.intel/rt_08_fv3_h2ophys.log
++ [[ -e fail_test ]]
++ echo
+
++ echo REGRESSION TEST WAS SUCCESSFUL
+REGRESSION TEST WAS SUCCESSFUL
++ echo
++ echo REGRESSION TEST WAS SUCCESSFUL
++ rm -f 'fv3_*.x' fv3_1.exe modules.fv3_1 run_test.env
++ [[ false == true ]]
++ [[ false == true ]]
++ date
++ exit
++ echo 'rt.sh finished'
+rt.sh finished
++ cleanup
++ rm -rf /scratch4/BMC/gmtb/Man.Zhang/_CCPP_DEC18/NEMSfv3gfs-climbfuji-ozphys/tests/lock
++ trap 0
++ exit
