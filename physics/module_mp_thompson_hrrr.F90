@@ -1418,7 +1418,8 @@ MODULE module_mp_thompson_hrrr
       nifa1d_out_debug = nifa1d_out_debug / real((j_end-j_start+1)*(i_end-i_start+1)*(kte-kts+1))
       call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       do impi=0,mpisize-1
-         if (impi==mpirank) then
+         !if (impi==mpirank) then
+         if (impi==mpirank .and. impi==0) then
             write(0,'(a,i3,a,l,e16.7)') "MPI rank ", mpirank, &
                      & ": is_aero, mean(nwfa1) IN:", is_aerosol_aware, nwfa1_in_debug
             write(0,'(a,i3,a,3e16.7)') "MPI rank ", mpirank, &
@@ -3191,6 +3192,7 @@ MODULE module_mp_thompson_hrrr
           nwfaten(k) = nwfaten(k) - pnc_wcd(k)
           tten(k) = tten(k) + lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)
           rc(k) = MAX(R1, (qc1d(k) + DT*qcten(k))*rho(k))
+          if (rc(k).eq.R1) L_qc(k) = .false.
           nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
           if (.NOT. is_aerosol_aware) nc(k) = Nt_c
           qv(k) = MAX(1.E-10, qv1d(k) + DT*qvten(k))
@@ -3312,6 +3314,8 @@ MODULE module_mp_thompson_hrrr
          vtck(k) = 0.
          vtnck(k) = 0.
       enddo
+
+      if (ANY(L_qr .eqv. .true.)) then
       do k = kte, kts, -1
          vtr = 0.
          rhof(k) = SQRT(RHO_NOT/rho(k))
@@ -3342,9 +3346,11 @@ MODULE module_mp_thompson_hrrr
       enddo
       if (ksed1(1) .eq. kte) ksed1(1) = kte-1
       if (nstep .gt. 0) onstep(1) = 1./REAL(nstep)
+      endif
 
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qc .eqv. .true.)) then
       hgt_agl = 0.
       do k = kts, kte-1
          if (rc(k) .gt. R2) ksed1(5) = k
@@ -3365,11 +3371,13 @@ MODULE module_mp_thompson_hrrr
           vtnck(k) = vtc
          endif
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 
       if (.not. iiwarm) then
 
+       if (ANY(L_qi .eqv. .true.)) then
        nstep = 0
        do k = kte, kts, -1
           vti = 0.
@@ -3397,9 +3405,11 @@ MODULE module_mp_thompson_hrrr
        enddo
        if (ksed1(2) .eq. kte) ksed1(2) = kte-1
        if (nstep .gt. 0) onstep(2) = 1./REAL(nstep)
+       endif
 
 !+---+-----------------------------------------------------------------+
 
+       if (ANY(L_qs .eqv. .true.)) then
        nstep = 0
        do k = kte, kts, -1
           vts = 0.
@@ -3434,9 +3444,11 @@ MODULE module_mp_thompson_hrrr
        enddo
        if (ksed1(3) .eq. kte) ksed1(3) = kte-1
        if (nstep .gt. 0) onstep(3) = 1./REAL(nstep)
+       endif
 
 !+---+-----------------------------------------------------------------+
 
+       if (ANY(L_qg .eqv. .true.)) then
        nstep = 0
        do k = kte, kts, -1
           vtg = 0.
@@ -3460,18 +3472,16 @@ MODULE module_mp_thompson_hrrr
        enddo
        if (ksed1(4) .eq. kte) ksed1(4) = kte-1
        if (nstep .gt. 0) onstep(4) = 1./REAL(nstep)
+       endif
       endif
 
 !+---+-----------------------------------------------------------------+
 !..Sedimentation of mixing ratio is the integral of v(D)*m(D)*N(D)*dD,
 !.. whereas neglect m(D) term for number concentration.  Therefore,
 !.. cloud ice has proper differential sedimentation.
-!.. New in v3.0+ is computing separate for rain, ice, snow, and
-!.. graupel species thus making code faster with credit to J. Schmidt.
-!.. Bug fix, 2013Nov01 to tendencies using rho(k+1) correction thanks to
-!.. Eric Skyllingstad.
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qr .eqv. .true.)) then
       nstep = NINT(1./onstep(1))
       do n = 1, nstep
          do k = kte, kts, -1
@@ -3498,7 +3508,7 @@ MODULE module_mp_thompson_hrrr
                                            *odzq*DT*onstep(1))
          enddo
 
-         if (rr(kts).gt.R1*10.) &
+         if (rr(kts).gt.R1*1000.) &
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
          ! DH*
          !if (pptrain.ge.1E5) then
@@ -3509,9 +3519,11 @@ MODULE module_mp_thompson_hrrr
          end if
          ! *DH
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qc .eqv. .true.)) then
       do k = kte, kts, -1
          sed_c(k) = vtck(k)*rc(k)
          sed_n(k) = vtnck(k)*nc(k)
@@ -3524,9 +3536,11 @@ MODULE module_mp_thompson_hrrr
          rc(k) = MAX(R1, rc(k) + (sed_c(k+1)-sed_c(k)) *odzq*DT)
          nc(k) = MAX(10., nc(k) + (sed_n(k+1)-sed_n(k)) *odzq*DT)
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qi .eqv. .true.)) then
       nstep = NINT(1./onstep(2))
       do n = 1, nstep
          do k = kte, kts, -1
@@ -3564,9 +3578,11 @@ MODULE module_mp_thompson_hrrr
          end if
          ! *DH
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qs .eqv. .true.)) then
       nstep = NINT(1./onstep(3))
       do n = 1, nstep
          do k = kte, kts, -1
@@ -3597,9 +3613,11 @@ MODULE module_mp_thompson_hrrr
          end if
          ! *DH
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qg .eqv. .true.)) then
       nstep = NINT(1./onstep(4))
       do n = 1, nstep
          do k = kte, kts, -1
@@ -3630,6 +3648,7 @@ MODULE module_mp_thompson_hrrr
          end if
          ! *DH
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 !.. Instantly melt any cloud ice into cloud water if above 0C and
@@ -3667,9 +3686,15 @@ MODULE module_mp_thompson_hrrr
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
+         ! DH* this was for FIM
+         !nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
+         !              (nwfa1d(k)+nwfaten(k)*DT)))
+         !nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
+         !              (nifa1d(k)+nifaten(k)*DT)))
+         ! *DH
+         nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
                        (nwfa1d(k)+nwfaten(k)*DT)))
-         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
+         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
                        (nifa1d(k)+nifaten(k)*DT)))
 
          if (qc1d(k) .le. R1) then
@@ -5335,6 +5360,7 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !..Calculate y-intercept, slope, and useful moments for snow.
 !+---+-----------------------------------------------------------------+
+      if (ANY(L_qs .eqv. .true.)) then
       do k = kts, kte
          tc0 = MIN(-0.1, temp(k)-273.15)
          smob(k) = rs(k)*oams
@@ -5384,11 +5410,13 @@ MODULE module_mp_thompson_hrrr
      &        + sb(9)*tc0*tc0*tc0 + sb(10)*cse(3)*cse(3)*cse(3)
          smoz(k) = a_ * smo2(k)**b_
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 !..Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
 
+      if (ANY(L_qg .eqv. .true.)) then
       N0_min = gonv_max
       k_0 = kts
       do k = kte, kts, -1
@@ -5411,6 +5439,7 @@ MODULE module_mp_thompson_hrrr
          ilamg(k) = 1./lamg
          N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
       enddo
+      endif
 
 !+---+-----------------------------------------------------------------+
 !..Locate K-level of start of melting (k_0 is level above).
