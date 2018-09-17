@@ -1,15 +1,15 @@
 !> \file radcons.f90
-!! This file contains module radcons
+!! This file contains module radcons.
 
 
-!> \defgroup radcons GFS RRTMG Contants
-!! \ingroup RRTMG
-!! This module contains some of the most frequently used math and physics 
-!! constants for GCM models.
+!> \defgroup radcons GFS RRTMG Constants Module
 !! @{
-!========================================!
-          module radcons                !
-!........................................!
+!> This module contains some of the most frequently used math and physics
+!! constants for RRTMG.
+
+!> This module contains some of the most frequently used math and physics
+!! constants for RRTMG.
+          module radcons                
 !
   use machine,      only : kind_phys
 !
@@ -24,13 +24,9 @@
 !    &   VTAGRAD='NCEP-Radiation_driver    v5.0  Aug 2012 '
 
 !>\name Constant values
-
-!> lower limit of saturation vapor pressure (=1.0e-10)
-      real (kind=kind_phys) :: QMIN
-!> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME5
-!> lower limit of specific humidity (=1.0e-7)
-      real (kind=kind_phys) :: QME6
+      real (kind=kind_phys) :: QMIN                     !< lower limit of saturation vapor pressure (=1.0e-10)
+      real (kind=kind_phys) :: QME5                     !< lower limit of specific humidity (=1.0e-7)
+      real (kind=kind_phys) :: QME6                     !< lower limit of specific humidity (=1.0e-7)
 !> EPSQ=1.0e-12
       real (kind=kind_phys) :: EPSQ
 !     parameter (QMIN=1.0e-10, QME5=1.0e-5,  QME6=1.0e-6,  EPSQ=1.0e-12)
@@ -72,8 +68,6 @@
   real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
   real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
  ! real(kind=kind_phys), parameter :: qmin    =    1.0e-10
-
-
 
 
 !........................................!

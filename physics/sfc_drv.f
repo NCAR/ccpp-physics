@@ -1,6 +1,7 @@
 !>  \file sfc_drv.f
 !!  This file contains the Noah land surface scheme driver.
 
+!> This module contains the CCPP-compliant Noah land surface pre interstitial codes.
       module lsm_noah_pre
       contains
 
@@ -10,9 +11,7 @@
       subroutine lsm_noah_pre_finalize
       end subroutine lsm_noah_pre_finalize
 
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_pre_run Argument Table
+!> \section arg_table_lsm_noah_pre_run Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
@@ -68,6 +67,7 @@
       end module lsm_noah_pre
 
 
+!> This module contains the CCPP-compliant Noah land surface post interstitial codes.
       module lsm_noah_post
       contains
 
@@ -77,9 +77,7 @@
       subroutine lsm_noah_post_finalize
       end subroutine lsm_noah_post_finalize
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_lsm_noah_post_run Argument Table
+!> \section arg_table_lsm_noah_post_run Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                      | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
@@ -93,10 +91,6 @@
 !! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
 !!
-!!  \section lsm_post_general General Algorithm
-!!  \section lsm_post_detailed Detailed Algorithm
-!!  @{
-
       subroutine lsm_noah_post_run                                      &
      &  (im,km, flag_lssav,dtf,drain,runof,runoff,srunoff,errmsg,errflg &
      &  )
@@ -129,18 +123,69 @@
 
       end subroutine lsm_noah_post_run
 
-!! @}
       end module lsm_noah_post
-!! @}
 
+!> This module contains the CCPP-compliant Noah land surface scheme driver.
       module lsm_noah
+
+      use set_soilveg_mod,  only: set_soilveg
+
+      implicit none
+
+      private
+
+      public :: lsm_noah_init, lsm_noah_run, lsm_noah_finalize
+
       contains
 
-      subroutine lsm_noah_init
+!! \section arg_table_lsm_noah_init Argument Table
+!! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | me             | mpi_rank                                                    | current MPI-rank                                        | index      |    0 | integer   |           | in     | F        |
+!! | isot           | soil_type_dataset_choice                                    | soil type dataset choice                                | index      |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                              | land use dataset choice                                 | index      |    0 | integer   |           | in     | F        |
+!! | nlunit         | iounit_namelist                                             | fortran unit number for file opens                      | none       |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP                | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP                   | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_init(me, isot, ivegsrc, nlunit,
+     &                         errmsg, errflg)
+
+      implicit none
+
+      integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      !--- initialize soil vegetation
+      call set_soilveg(me, isot, ivegsrc, nlunit)
+
       end subroutine lsm_noah_init
 
-      subroutine lsm_noah_finalize
+
+!! \section arg_table_lsm_noah_finalize Argument Table
+!! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | errmsg         | ccpp_error_message                                          | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                             | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!!
+      subroutine lsm_noah_finalize(errmsg, errflg)
+
+      implicit none
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
       end subroutine lsm_noah_finalize
+
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -247,14 +292,12 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 
-!-----------------------------------
-!      subroutine sfc_drv                                                &
-! \defgroup Noah_Main GFS Noah Land Surface Model 
-!> \defgroup Noah_drv GFS Noah LSM Driver
-!!  \brief This is Noah LSM driver module, with the functionality of 
+!>\defgroup Noah_LSM GFS Noah LSM Model
+!> @{
+!! \brief This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
-!! variables for return to the parent model suite including unit conversion, as well 
-!! as diagnotics calculation. 
+!! variables for return to the parent model suite including unit conversion, as well
+!! as diagnotics calculation.
 !! \section arg_table_lsm_noah_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -264,10 +307,10 @@
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                             | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                 | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | soiltyp        | cell_soil_type                                                               | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
-!! | vegtype        | cell_vegetation_type                                                         | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
-!! | sigmaf         | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | frac          |    1 | real      | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | 1st model layer specific humidity                               | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
+!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
+!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom| frac          |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                     | frac          |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | dswsfc         | surface_downwelling_shortwave_flux                                           | total sky surface downward shortwave flux                       | W m-2         |    1 | real      | kind_phys | in     | F        |
@@ -281,15 +324,15 @@
 !! | zf             | height_above_ground_at_lowest_model_layer                                    | height above ground at 1st model layer                          | m             |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | integer   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | slopetyp       | surface_slope_classification                                                 | class of sfc slope                                              | index         |    1 | integer   |           | in     | F        |
+!! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                            | index         |    1 | integer   |           | in     | F        |
 !! | shdmin         | minimum_vegetation_area_fraction                                             | min fractional coverage of green veg                            | frac          |    1 | real      | kind_phys | in     | F        |
 !! | shdmax         | maximum_vegetation_area_fraction                                             | max fractnl cover of green veg (not used)                       | frac          |    1 | real      | kind_phys | in     | F        |
 !! | snoalb         | upper_bound_on_max_albedo_over_deep_snow                                     | upper bound on max albedo over deep snow                        | frac          |    1 | real      | kind_phys | in     | F        |
 !! | sfalb          | surface_diffused_shortwave_albedo                                            | mean surface diffused shortwave albedo                          | frac          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                              | flag          |    1 | logical   |           | in     | F        |
-!! | isot           | soil_type                                                                    | soil type (not used)                                            | index         |    0 | integer   |           | in     | F        |
-!! | ivegsrc        | vegetation_type                                                              | vegetation type data source umd or igbp                         | index         |    0 | integer   |           | in     | F        |
+!! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                        | index         |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                         | index         |    0 | integer   |           | in     | F        |
 !! | bexppert       | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                         | frac          |    1 | real      | kind_phys | in     | F        |
 !! | xlaipert       | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                 | frac          |    1 | real      | kind_phys | in     | F        |
 !! | vegfpert       | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                             | frac          |    1 | real      | kind_phys | in     | F        |
@@ -328,10 +371,8 @@
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_noah_drv GFS Noah Driver General Algorithm
+!> \section general_noah_drv GFS sfc_drv General Algorithm
 !!  @{
-!  \section detailed_noah GFS Noah Driver Detailed Algorithm
-!  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
@@ -381,7 +422,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
      &       ch, prsl1, prslki, ddvel, shdmin, shdmax,                  &
-     &       snoalb, sfalb, zf,
+     &       snoalb, sfalb, zf,                                         &
      &       bexppert, xlaipert, vegfpert
 
       integer, dimension(im), intent(in) :: islimsk
@@ -435,7 +476,8 @@
 !===> ...  begin here
 !
 
-      ! Initialize CCPP error handling variables
+!> - Initialize CCPP error handling variables
+
       errmsg = ''
       errflg = 0
 
@@ -484,7 +526,7 @@
         endif
       enddo
 
-!  --- ...  initialize variables
+!> - initialize variables wind, q, and rh at level 1.
 
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
@@ -512,16 +554,15 @@
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
 
-!> - Prepare variables to run Noah LSM: 
+!> - Prepare variables to run Noah LSM:
 !!  -   1. configuration information (c):
-!!\n  ----------------------------------------
-!!\n  \a couple  - couple-uncouple flag (=1: coupled, =0: uncoupled)
-!!\n  \a ffrozp  - flag for snow-rain detection (1.=snow, 0.=rain)
-!!\n  \a ice     - sea-ice flag (=1: sea-ice, =0: land)
-!!\n  \a dt      - timestep (sec) (dt should not exceed 3600 secs) = delt
-!!\n  \a zlvl    - height (\f$m\f$) above ground of atmospheric forcing variables
-!!\n  \a nsoil   - number of soil layers (at least 2)
-!!\n  \a sldpth  - the thickness of each soil layer (\f$m\f$)
+! couple   couple-uncouple flag (=1: coupled, =0: uncoupled)
+! ffrozp   flag for snow-rain detection (1.=snow, 0.=rain)
+! ice      sea-ice flag (=1: sea-ice, =0: land)
+! dt       timestep (sec) (dt should not exceed 3600 secs) = delt
+! zlvl     height (\f$m\f$) above ground of atmospheric forcing variables
+! nsoil    number of soil layers (at least 2)
+! sldpth   the thickness of each soil layer (\f$m\f$)
 
           couple = 1                      ! run noah lsm in 'couple' mode
 
@@ -541,14 +582,13 @@
           enddo
 
 !>  -   2. forcing data (f):
-!!\n  ---------------------------------------
-!!\n  \a lwdn    - lw dw radiation flux (\f$W m^{-2}\f$)
-!!\n  \a solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
-!!\n  \a sfcprs  - pressure at height zlvl above ground (pascals)
-!!\n  \a prcp    - precip rate (\f$kg m^{-2} s^{-1}\f$)
-!!\n  \a sfctmp  - air temperature (\f$K\f$) at height zlvl above ground
-!!\n  \a th2     - air potential temperature (\f$K\f$) at height zlvl above ground
-!!\n  \a q2      - mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
+! lwdn     lw dw radiation flux (\f$W m^{-2}\f$)
+! solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
+! sfcprs  - pressure at height zlvl above ground (pascals)
+! prcp    - precip rate (\f$kg m^{-2} s^{-1}\f$)
+! sfctmp  - air temperature (\f$K\f$) at height zlvl above ground
+! th2     - air potential temperature (\f$K\f$) at height zlvl above ground
+! q2      - mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
 
           lwdn   = dlwflx(i)         !..downward lw flux at sfc in w/m2
           swdn   = dswsfc(i)         !..downward sw flux at sfc in w/m2
@@ -562,34 +602,39 @@
           q2     = q0(i)
 
 !>  -   3. other forcing (input) data (i):
-!!\n   ---------------------------------------
-!!\n  \a sfcspd  - wind speed (\f$m s^{-1}\f$) at height zlvl above ground
-!!\n  \a q2sat   - sat mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
-!!\n  \a dqsdt2  - slope of sat specific humidity curve at t=sfctmp (\f$kg kg^{-1} k^{-1}\f$)
+! sfcspd  - wind speed (\f$m s^{-1}\f$) at height zlvl above ground
+! q2sat   - sat mixing ratio at height zlvl above ground (\f$kg kg^{-1}\f$)
+! dqsdt2  - slope of sat specific humidity curve at t=sfctmp (\f$kg kg^{-1} k^{-1}\f$)
 
           sfcspd = wind(i)
           q2sat =  qs1(i)
           dqsdt2 = q2sat * a23m4/(sfctmp-a4)**2
 
 !>  -   4. canopy/soil characteristics (s):
-!!\n      ------------------------------------
-!!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
-!!\n \a soiltyp - soil type (integer index)                         -> stype
-!!\n \a slopetyp- class of sfc slope (integer index)                -> slope
-!!\n \a shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
-!!\n \a shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
-!!\n \a ptu     - photo thermal unit (plant phenology for annuals/crops)
-!!\n \a alb     - backround snow-free surface albedo (fraction)
-!!\n \a snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
-!!\n \a tbot    - bottom soil temperature (local yearly-mean sfc air temp)
+! vegtyp  - vegetation type (integer index)                   -> vtype
+! soiltyp - soil type (integer index)                         -> stype
+! slopetyp- class of sfc slope (integer index)                -> slope
+! shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
+! shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
+! ptu     - photo thermal unit (plant phenology for annuals/crops)
+! alb     - backround snow-free surface albedo (fraction)
+! snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
+! tbot    - bottom soil temperature (local yearly-mean sfc air temp)
 
           vtype = vegtype(i)
           stype = soiltyp(i)
           slope = slopetyp(i)
           shdfac= sigmaf(i)
 
+!>  - Call surface_perturbation::ppfbet() to perturb vegetation fraction that goes into gsflx().
 !  perturb vegetation fraction that goes into sflx, use the same
 !  perturbation strategy as for albedo (percentile matching)
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of vegetation
+!! fraction is added to account for the uncertainty. A percentile matching technique
+!! is applied to guarantee the perturbed vegetation fraction is bounded between 0 and
+!! 1. The standard deviation of the perturbations is 0.25 for vegetation fraction of
+!! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper 
+!! or lower bound.
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
         ! sfc perts, mgehne
         if (pertvegf(1)>0.0) then
@@ -614,18 +659,17 @@
           tbot = tg3(i)
 
 !>  -   5. history (state) variables (h):
-!!\n      ------------------------------
-!!\n \a cmc        - canopy moisture content (\f$m\f$)
-!!\n \a t1         - ground/canopy/snowpack effective skin temperature (\f$K\f$)   -> tsea
-!!\n \a stc(nsoil) - soil temp (\f$K\f$)                                         -> stsoil
-!!\n \a smc(nsoil) - total soil moisture content (volumetric fraction)     -> smsoil
-!!\n \a sh2o(nsoil)- unfrozen soil moisture content (volumetric fraction)  -> slsoil
-!!\n \a snowh      - actual snow depth (\f$m\f$)
-!!\n \a sneqv      - liquid water-equivalent snow depth (\f$m\f$)
-!!\n \a albedo     - surface albedo including snow effect (unitless fraction)
-!!\n \a ch         - surface exchange coefficient for heat and moisture (\f$m s^{-1}\f$) -> chx
-!!\n \a cm         - surface exchange coefficient for momentum (\f$m s^{-1}\f$)          -> cmx
-!!\n \a z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
+! cmc        - canopy moisture content (\f$m\f$)
+! t1         - ground/canopy/snowpack effective skin temperature (\f$K\f$)   -> tsea
+! stc(nsoil) - soil temp (\f$K\f$)                                         -> stsoil
+! smc(nsoil) - total soil moisture content (volumetric fraction)     -> smsoil
+! sh2o(nsoil)- unfrozen soil moisture content (volumetric fraction)  -> slsoil
+! snowh      - actual snow depth (\f$m\f$)
+! sneqv      - liquid water-equivalent snow depth (\f$m\f$)
+! albedo     - surface albedo including snow effect (unitless fraction)
+! ch         - surface exchange coefficient for heat and moisture (\f$m s^{-1}\f$) -> chx
+! cm         - surface exchange coefficient for momentum (\f$m s^{-1}\f$)          -> cmx
+! z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
 
           cmc = canopy(i) * 0.001            ! convert from mm to m
           tsea = tsurf(i)                    ! clu_q2m_iter
@@ -650,12 +694,12 @@
 !  ---- ... outside sflx, roughness uses cm as unit
           z0 = zorl(i)/100.
 !  ---- mgehne, sfc-perts
+!  - Apply perturbation of soil type b parameter and leave area index.
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
           xlaip  = xlaipert(i)                   ! sfc perts, mgehne
 
-!> - Call Noah LSM gfssflx(). 
+!> - Call Noah LSM gfssflx().
 
-!          call sflx                                                     &
           call gfssflx                                                  & ! ccppdox: these is sflx in mpbl
 !  ---  inputs:
      &     ( nsoil, couple, ice, ffrozp, delt, zlvl, sldpth,            &
@@ -675,14 +719,13 @@
 
 !> - Noah LSM: prepare variables for return to parent model and unit conversion.
 !>  -   6. output (o):
-!!\n  ------------------------------
-!!\n \a eta     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!!\n \a sheat   - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!!\n \a beta    - ratio of actual/potential evap (dimensionless)
-!!\n \a etp     - potential evaporation (\f$W m^{-2}\f$)
-!!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
-!!\n \a runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
-!!\n \a runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
+!!\n  eta     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n  sheat   - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n  beta    - ratio of actual/potential evap (dimensionless)
+!!\n  etp     - potential evaporation (\f$W m^{-2}\f$)
+!!\n  ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
+!!\n  runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
+!!\n  runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
 
           evap(i)  = eta
           hflx(i)  = sheat
@@ -722,44 +765,44 @@
 !  effect)
           zorl(i) = z0*100.
 
-!  --- ...  do not return the following output fields to parent model
-!    ec      - canopy water evaporation (m s-1)
-!    edir    - direct soil evaporation (m s-1)
-!    et(nsoil)-plant transpiration from a particular root layer (m s-1)
-!    ett     - total plant transpiration (m s-1)
-!    esnow   - sublimation from (or deposition to if <0) snowpack (m s-1)
-!    drip    - through-fall of precip and/or dew in excess of canopy
-!              water-holding capacity (m)
-!    dew     - dewfall (or frostfall for t<273.15) (m)
-!    beta    - ratio of actual/potential evap (dimensionless)
-!    flx1    - precip-snow sfc (w m-2)
-!    flx2    - freezing rain latent heat flux (w m-2)
-!    flx3    - phase-change heat flux from snowmelt (w m-2)
-!    snomlt  - snow melt (m) (water equivalent)
-!    sncovr  - fractional snow cover (unitless fraction, 0-1)
-!    runoff3 - numerical trunctation in excess of porosity (smcmax)
-!              for a given soil layer at the end of a time step
-!    rc      - canopy resistance (s m-1)
-!    pc      - plant coefficient (unitless fraction, 0-1) where pc*etp
-!              = actual transp
-!    xlai    - leaf area index (dimensionless)
-!    rsmin   - minimum canopy resistance (s m-1)
-!    rcs     - incoming solar rc factor (dimensionless)
-!    rct     - air temperature rc factor (dimensionless)
-!    rcq     - atmos vapor pressure deficit rc factor (dimensionless)
-!    rcsoil  - soil moisture rc factor (dimensionless)
-!    soilw   - available soil moisture in root zone (unitless fraction
-!              between smcwlt and smcmax)
-!    soilm   - total soil column moisture content (frozen+unfrozen) (m)
-!    smcwlt  - wilting point (volumetric)
-!    smcdry  - dry soil moisture threshold where direct evap frm top
-!              layer ends (volumetric)
-!    smcref  - soil moisture threshold where transpiration begins to
-!              stress (volumetric)
-!    smcmax  - porosity, i.e. saturated value of soil moisture
-!              (volumetric)
-!    nroot   - number of root layers, a function of veg type, determined
-!              in subroutine redprm.
+!>  - Do not return the following output fields to parent model:
+!!\n  ec      - canopy water evaporation (m s-1)
+!!\n  edir    - direct soil evaporation (m s-1)
+!!\n  et(nsoil)-plant transpiration from a particular root layer (m s-1)
+!!\n  ett     - total plant transpiration (m s-1)
+!!\n  esnow   - sublimation from (or deposition to if <0) snowpack (m s-1)
+!!\n  drip    - through-fall of precip and/or dew in excess of canopy
+!!              water-holding capacity (m)
+!!\n  dew     - dewfall (or frostfall for t<273.15) (m)
+!!\n  beta    - ratio of actual/potential evap (dimensionless)
+!!\n  flx1    - precip-snow sfc (w m-2)
+!!\n  flx2    - freezing rain latent heat flux (w m-2)
+!!\n  flx3    - phase-change heat flux from snowmelt (w m-2)
+!!\n  snomlt  - snow melt (m) (water equivalent)
+!!\n  sncovr  - fractional snow cover (unitless fraction, 0-1)
+!!\n  runoff3 - numerical trunctation in excess of porosity (smcmax)
+!!              for a given soil layer at the end of a time step
+!!\n  rc      - canopy resistance (s m-1)
+!!\n  pc      - plant coefficient (unitless fraction, 0-1) where pc*etp
+!!              = actual transp
+!!\n  xlai    - leaf area index (dimensionless)
+!!\n  rsmin   - minimum canopy resistance (s m-1)
+!!\n  rcs     - incoming solar rc factor (dimensionless)
+!!\n  rct     - air temperature rc factor (dimensionless)
+!!\n  rcq     - atmos vapor pressure deficit rc factor (dimensionless)
+!!\n  rcsoil  - soil moisture rc factor (dimensionless)
+!!\n  soilw   - available soil moisture in root zone (unitless fraction
+!!              between smcwlt and smcmax)
+!!\n  soilm   - total soil column moisture content (frozen+unfrozen) (m)
+!!\n  smcwlt  - wilting point (volumetric)
+!!\n  smcdry  - dry soil moisture threshold where direct evap frm top
+!!              layer ends (volumetric)
+!!\n  smcref  - soil moisture threshold where transpiration begins to
+!!              stress (volumetric)
+!!\n  smcmax  - porosity, i.e. saturated value of soil moisture
+!!              (volumetric)
+!!\n  nroot   - number of root layers, a function of veg type, determined
+!!              in subroutine redprm.
 
         endif   ! end if_flag_iter_and_flag_block
       enddo   ! end do_i_loop
@@ -774,7 +817,7 @@
       enddo
 
 !> - Compute surface upward sensible heat flux (\a hflx) and evaporation
-!! flux (\a evap). 
+!! flux (\a evap).
       do i = 1, im
         if (flag_iter(i) .and. flag(i)) then
           tem     = 1.0 / rho(i)
@@ -808,9 +851,9 @@
 !
       return
 !...................................
-!      end subroutine sfc_drv
       end subroutine lsm_noah_run
 !-----------------------------
 !! @}
+!> @}
 
       end module lsm_noah

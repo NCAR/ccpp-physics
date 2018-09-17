@@ -1,6 +1,9 @@
 !> \file GFS_stochastics.f90
-!!  Contains code previously in GFS_stochastics_driver.
+!! This file contains code previously in GFS_stochastics_driver.
 
+!>\defgroup gfs_stoch GFS Stochastics Main Module
+!! This module
+!! @ {
     module GFS_stochastics
 
       contains
@@ -21,11 +24,11 @@
 !! | do_shum        | flag_for_stochastic_shum_option                                           | flag for stochastic shum option                              | flag    |    0 | logical   |           | in     | F        |
 !! | do_skeb        | flag_for_stochastic_skeb_option                                           | flag for stochastic skeb option                              | flag    |    0 | logical   |           | in     | F        |
 !! | zmtnblck       | level_of_dividing_streamline                                              | level of the dividing streamline                             | none    |    1 | real      | kind_phys | in     | F        |
-!! | sppt_wts       | weights_for_stochastic_surface_physics_perturbation                       | weights for stochastic surface physics perturbation          | none    |    2 | real      | kind_phys | inout  | F        |
+!! | sppt_wts       | weights_for_stochastic_sppt_perturbation                                  | weights for stochastic sppt perturbation                     | none    |    2 | real      | kind_phys | inout  | F        |
 !! | skebu_wts      | weights_for_stochastic_skeb_perturbation_of_x_wind                        | weights for stochastic skeb perturbation of x wind           | none    |    2 | real      | kind_phys | in     | F        |
 !! | skebv_wts      | weights_for_stochastic_skeb_perturbation_of_y_wind                        | weights for stochastic skeb perturbation of y wind           | none    |    2 | real      | kind_phys | in     | F        |
 !! | shum_wts       | weights_for_stochastic_shum_perturbation                                  | weights for stochastic shum perturbation                     | none    |    2 | real      | kind_phys | in     | F        |
-!! | sppt_wts_inv   | weights_for_stochastic_surface_physics_perturbation_flipped               | weights for stochastic surface physics perturbation, flipped | none    |    2 | real      | kind_phys | inout  | F        |
+!! | sppt_wts_inv   | weights_for_stochastic_sppt_perturbation_flipped                          | weights for stochastic sppt perturbation, flipped            | none    |    2 | real      | kind_phys | inout  | F        |
 !! | skebu_wts_inv  | weights_for_stochastic_skeb_perturbation_of_x_wind_flipped                | weights for stochastic skeb perturbation of x wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
 !! | skebv_wts_inv  | weights_for_stochastic_skeb_perturbation_of_y_wind_flipped                | weights for stochastic skeb perturbation of y wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
 !! | shum_wts_inv   | weights_for_stochastic_shum_perturbation_flipped                          | weights for stochastic shum perturbation, flipped            | none    |    2 | real      | kind_phys | inout  | F        |
@@ -44,6 +47,8 @@
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                 | m       |    1 | real      | kind_phys | inout  | F        |
 !! | totprcp        | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                              | m       |    1 | real      | kind_phys | inout  | F        |
 !! | cnvprcp        | cumulative_lwe_thickness_of_convective_precipitation_amount               | cumulative convective precipitation                          | m       |    1 | real      | kind_phys | inout  | F        |
+!! | totprcpb       | accumulated_lwe_thickness_of_precipitation_amount_in_bucket               | accumulated total precipitation in bucket                    | m       |    1 | real      | kind_phys | inout  | F        |
+!! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket     | cumulative convective precipitation in bucket                | m       |    1 | real      | kind_phys | inout  | F        |
 !! | cplflx         | flag_for_flux_coupling                                                    | flag controlling cplflx collection (default off)             | flag    |    0 | logical   |           | in     | F        |
 !! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                        | total rain precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
 !! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                 | total snow precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
@@ -68,7 +73,8 @@
                                       shum_wts_inv, diss_est,                            &
                                       ugrs, vgrs, tgrs, qgrs, gu0, gv0, gt0, gq0, dtdtr, &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
-                                      cplflx, rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,  &
+                                      totprcpb, cnvprcpb, cplflx,                        &
+                                      rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,          &
                                       errmsg, errflg)
 
          use machine,               only: kind_phys
@@ -110,6 +116,8 @@
          real(kind_phys), dimension(1:im),      intent(inout) :: tprcp
          real(kind_phys), dimension(1:im),      intent(inout) :: totprcp
          real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcp
+         real(kind_phys), dimension(1:im),      intent(inout) :: totprcpb
+         real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcpb
          logical,                               intent(in)    :: cplflx
          ! rain_cpl, snow_cpl only allocated if cplflx == .true. or do_sppt == .true.
          real(kind_phys), dimension(:),         intent(inout) :: rain_cpl
@@ -174,6 +182,10 @@
            totprcp(:) = totprcp(:) + (sppt_wts(:,15) - 1 )*rain(:)
            ! acccumulated total and convective preciptiation
            cnvprcp(:) = cnvprcp(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+           ! bucket precipitation adjustment due to sppt
+           totprcpb(:) = totprcpb(:) + (sppt_wts(:,15) - 1 )*rain(:)
+           cnvprcpb(:) = cnvprcpb(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+
             if (cplflx) then
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
@@ -200,3 +212,4 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
+!! @}

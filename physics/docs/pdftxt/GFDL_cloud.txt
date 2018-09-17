@@ -1,0 +1,58 @@
+/**
+\page GFDL_cloud GFDL Cloud Microphysics Scheme 
+\section des_GFDL_cloud Description
+GFDL cloud microphysics (MP) scheme is a six-category MP scheme to replace Zhao-Carr MP scheme, and moves the GFS from
+a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).
+This scheme utilizes the "bulk water" microphysical parameterization technique in Lin et al. (1983) \cite lin_et_al_1983 
+and has been significantly improved over years at GFDL (Lord et al.(1984) \cite lord_et_al_1984, 
+Krueger et al.(1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
+Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain() and icloud()) and are feature with time-split between warm-rain (faster) and ice-phase (slower) processes (see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values). 
+
+\image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
+\image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
+
+Some unique attributes of GFDL cloud microphysics include:
+
+\b Fast \b Physics \b in \b FV3 \b dynamical \b solver
+\image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=10cm
+The leftmost column of Figure 1 shows the external API calls used during a typical process-split model integration procedure. First,
+the solver is called, which advances the solver a full "physics" time step. This updated state is then passed to the physical parameterization
+package, which then computes the physics tendencies over the same time interval. Finally, the tendencies are then used to update the 
+model state using a forward-in-time evaluation consistent with the dynamics.
+\n There are two levels of time-stepping inside FV3. The first is the "remapping" loop, the green column in Figure 1. This loop has three steps:
+-# Perform the Lagrangian dynamics, the loop shown in the blue column of Figure 1.
+-# Perform the subcycled tracer advection along Lagrangian surfaces, using accumulated mass fluxes from the Lagrangian dynamics. Subcycling is 
+done independently within each layer to maintain local (within each layer) stability.
+-# Remap the deformal Lagrangian surfaces on to the reference, or "Eulerian", coordinate levels. 
+
+This loop is typically performed once per call to the solver, although it is possible to improve the model's 
+stability by executing the loop (and thereby the vertical remapping) multiple times per solver call.
+
+In current fv3gfs, the fast physics (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (fast_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
+
+\b Horizontal \b Sub-grid \b Variability \b ("Scale-aware")
+\n Horizontal sub-grid variability is a function of cell area:
+- Over land:
+\f[
+h_{var}=\min \left\{0.2,\max\left[0.01, D_{land}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+\f]
+- Over Ocean:
+\f[
+h_{var}=\min \left\{0.2,\max\left[0.01, D_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}\right]\right\}
+\f]
+
+Where \f$A_{r}\f$ is cell area, \f$D_{land}\f$ and \f$D_{ocean}\f$ are base values for sub-grid variability over land 
+and ocean (larger sub-grid variability appears in larger area). Horizontal sub-grid variability is used in cloud fraction,
+relative humidity calculation, evaporation and condensation processes.  Scale-awareness is achieved by this horizontal subgrid variability and a \f$2^{nd}\f$
+order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994). 
+
+\section intro_GFDL_cloud Intraphysics Communication
+ + For GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run
+ + For GFDL Fast Physics: \ref arg_table_fv_sat_adj_run 
+ 
+\section Gen_GFDL_cloud  General Algorithm
+ + For GFDL Cloud MP:  mpdrv()
+ + For GFDL Fast Physics: fv_sat_adj_work()
+
+
+*/

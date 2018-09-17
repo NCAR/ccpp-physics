@@ -1,7 +1,7 @@
 !>\file tridi.f
 !! These subroutines are originally internal subroutines in moninedmf.f
 
-!>\ingroup GFS_edmf_main
+!>\ingroup HEDMF
 !!\brief Routine to solve the tridiagonal system to calculate
 !!temperature and moisture at \f$ t + \Delta t \f$; part of two-part
 !!process to calculate time tendencies due to vertical diffusion.
@@ -45,7 +45,7 @@ c-----------------------------------------------------------------------
       end
 
 c-----------------------------------------------------------------------
-!>  \ingroup GFS_edmf_main
+!>  \ingroup HEDMF
 !!  \brief Routine to solve the tridiagonal system to calculate u- and
 !!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
 !!  calculate time tendencies due to vertical diffusion.
