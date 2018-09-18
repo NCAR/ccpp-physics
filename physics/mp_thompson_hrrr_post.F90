@@ -118,8 +118,8 @@ contains
             mp_tend(i,k) = max( -mp_tend_lim(i)*dtp, min( mp_tend_lim(i)*dtp, mp_tend(i,k) ) )
             ! DH*
             if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
-               write(0,*) "DH DEBUG mp_thompson_hrrr_post_run: i, k, t_old, t_new, t_lim:", &
-                        & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
+               write(0,*) "DH DEBUG mp_thompson_hrrr_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
+                                  & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
             end if
             ! *DH
             tgrs(i,k) = tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)

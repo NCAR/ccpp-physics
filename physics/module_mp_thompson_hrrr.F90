@@ -393,11 +393,10 @@ MODULE module_mp_thompson_hrrr
 
       CONTAINS
 
-      SUBROUTINE thompson_init(hgt, orho, nwfa2d, nifa2d, nwfa, nifa,   &
-                          dx, dy,                                       &
-                          ids, ide, jds, jde, kds, kde,                 &
-                          ims, ime, jms, jme, kms, kme,                 &
-                          its, ite, jts, jte, kts, kte,                 &
+      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
+                          ids, ide, jds, jde, kds, kde,     &
+                          ims, ime, jms, jme, kms, kme,     &
+                          its, ite, jts, jte, kts, kte,     &
                           mpicomm, mpirank, mpiroot, threads)
 
       IMPLICIT NONE
@@ -405,14 +404,11 @@ MODULE module_mp_thompson_hrrr
       INTEGER, INTENT(IN):: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
-      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(IN):: hgt
 
 !..OPTIONAL variables that control application of aerosol-aware scheme
 
-      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), OPTIONAL, INTENT(INOUT) :: nwfa, nifa
-      REAL, DIMENSION(ims:ime,jms:jme), OPTIONAL, INTENT(INOUT) :: nwfa2d, nifa2d
-      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), OPTIONAL, INTENT(IN) :: orho
-      REAL, DIMENSION(ims:ime,jms:jme), OPTIONAL, INTENT(IN) :: DX, DY
+      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), OPTIONAL, INTENT(IN) :: nwfa, nifa
+      REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
 
@@ -3511,9 +3507,10 @@ MODULE module_mp_thompson_hrrr
          if (rr(kts).gt.R1*1000.) &
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
          ! DH*
-         !if (pptrain.ge.1E5) then
+         if (pptrain.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)", &
                      & pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)
+         end if
          if (sed_r(kts)*DT*onstep(1).ge.1E3) then
             abort = .true.
          end if
@@ -3570,9 +3567,10 @@ MODULE module_mp_thompson_hrrr
          if (ri(kts).gt.R1*1000.) &
          pptice = pptice + sed_i(kts)*DT*onstep(2)
          ! DH*
-         !if (pptice.ge.1E5) then
+         if (pptice.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)", &
                      & pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)
+         end if
          if (sed_i(kts)*DT*onstep(2).ge.1E3) then
             abort = .true.
          end if
@@ -3605,9 +3603,10 @@ MODULE module_mp_thompson_hrrr
          if (rs(kts).gt.R1*1000.) &
          pptsnow = pptsnow + sed_s(kts)*DT*onstep(3)
          ! DH*
-         !if (pptsnow.ge.1E5) then
+         if (pptsnow.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)", &
                      & pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)
+         end if
          if (sed_s(kts)*DT*onstep(3).ge.1E3) then
             abort = .true.
          end if
@@ -3640,9 +3639,10 @@ MODULE module_mp_thompson_hrrr
          if (rg(kts).gt.R1*1000.) &
          pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
          ! DH*
-         !if (pptgraul.ge.1E5) then
+         if (pptgraul.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)", &
                      & pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)
+         end if
          if (sed_g(kts)*DT*onstep(4).ge.1E5) then
             abort = .true.
          end if

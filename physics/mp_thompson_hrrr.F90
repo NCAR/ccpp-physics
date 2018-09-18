@@ -24,17 +24,11 @@ module mp_thompson_hrrr
 !! |----------------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol                 | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
 !! | nlev                 | vertical_dimension                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | con_g                | gravitational_acceleration                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | con_rd               | gas_constant_dry_air                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | phil                 | geopotential                                          | geopotential at model layer centers                      | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | prsl                 | air_pressure                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | tgrs                 | air_temperature                                       | model layer mean temperature                             | K          |    2 | real      | kind_phys | in     | F        |
 !! | is_aerosol_aware     | flag_for_aerosol_physics                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
 !! | nwfa2d               | tendency_of_water_friendly_aerosols_at_surface        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
 !! | nifa2d               | tendency_of_ice_friendly_aerosols_at_surface          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
 !! | nwfa                 | water_friendly_aerosol_number_concentration           | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
 !! | nifa                 | ice_friendly_aerosol_number_concentration             | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | area                 | cell_area                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
 !! | mpicomm              | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpirank              | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpiroot              | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
@@ -45,14 +39,11 @@ module mp_thompson_hrrr
 !! | errflg               | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_init(ncol, nlev, con_g, con_rd,  &
-                                       phil, prsl, tgrs,           &
-                                       is_aerosol_aware,           &
-                                       nwfa2d, nifa2d, nwfa, nifa, &
-                                       area,                       &
-                                       mpicomm, mpirank, mpiroot,  &
-                                       imp_physics,                &
-                                       imp_physics_thompson,       &
+      subroutine mp_thompson_hrrr_init(ncol, nlev, is_aerosol_aware, &
+                                       nwfa2d, nifa2d, nwfa, nifa,   &
+                                       mpicomm, mpirank, mpiroot,    &
+                                       imp_physics,                  &
+                                       imp_physics_thompson,         &
                                        threads, errmsg, errflg)
 
          implicit none
@@ -61,17 +52,11 @@ module mp_thompson_hrrr
          integer,                   intent(in)    :: ncol
          integer,                   intent(in)    :: nlev
 
-         real(kind_phys),           intent(in)    :: con_g
-         real(kind_phys),           intent(in)    :: con_rd
-         real(kind_phys),           intent(in)    :: phil(1:ncol,1:nlev)
-         real(kind_phys),           intent(in)    :: prsl(1:ncol,1:nlev)
-         real(kind_phys),           intent(in)    :: tgrs(1:ncol,1:nlev)
          logical,                   intent(in)    :: is_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
          real(kind_phys), optional, intent(inout) :: nifa2d(1:ncol)
          real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
          real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
-         real(kind_phys),           intent(in)    :: area(1:ncol)
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -81,12 +66,7 @@ module mp_thompson_hrrr
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 
-         ! Local variables
-         real (kind=kind_phys) :: hgt(1:ncol,1:nlev)
-         real (kind=kind_phys) :: rho(1:ncol,1:nlev)
-         real (kind=kind_phys) :: orho(1:ncol,1:nlev)
-         real(kind_phys)       :: dx(1:ncol)
-         ! Dimensions used in thompson_init
+         ! Local variables: dimensions used in thompson_init
          integer               :: ids,ide, jds,jde, kds,kde, &
                                   ims,ime, jms,jme, kms,kme, &
                                   its,ite, jts,jte, kts,kte
@@ -102,9 +82,6 @@ module mp_thompson_hrrr
             errflg = 1
             return
          end if
-
-         ! Geopotential height in m2 s-2 to height in m
-         hgt = phil/con_g
 
          ! Set internal dimensions
          ids = 1
@@ -130,47 +107,14 @@ module mp_thompson_hrrr
                               .and. present(nifa2d) &
                               .and. present(nwfa)   &
                               .and. present(nifa)   ) then
-#ifdef DEBUG_AEROSOLS
-            if (mpirank==mpiroot) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init before: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-            end if
-#endif
-            ! Grid cell size
-            dx = sqrt(area)
-
-            ! Density of air in kg m-3 and inverse density of air
-            rho = prsl/(con_rd*tgrs)
-            orho = 1.0/rho
-
             ! Call init
-            call thompson_init(hgt=hgt, orho=orho,                                   &
-                               nwfa2d=nwfa2d, nifa2d=nifa2d, nwfa=nwfa, nifa=nifa,   &
-                               dx=dx, dy=dx,                                         &
+            call thompson_init(nwfa2d=nwfa2d, nifa2d=nifa2d, nwfa=nwfa, nifa=nifa,   &
                                ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
                                ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
                                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte, &
                                mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
                                threads=threads)
             if (errflg /= 0) return
-#ifdef DEBUG_AEROSOLS
-            if (mpirank==mpiroot) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson init after: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-            end if
-#endif
          else if (is_aerosol_aware) then
             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_init:',                    &
                                        ' aerosol-aware microphysics require all of the following', &
@@ -178,8 +122,7 @@ module mp_thompson_hrrr
             errflg = 1
             return
          else
-            call thompson_init(hgt=hgt,                                              &
-                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
+            call thompson_init(ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde, &
                                ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
                                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte, &
                                mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
@@ -218,12 +161,10 @@ module mp_thompson_hrrr
 !! | phii            | geopotential_at_interface                                             | geopotential at model layer interfaces                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | omega           | omega                                                                 | layer mean vertical velocity                             | Pa s-1     |    2 | real      | kind_phys | in     | F        |
 !! | dtp             | time_step_for_physics                                                 | physics timestep                                         | s          |    0 | real      | kind_phys | in     | F        |
-!! | frain           | dynamics_to_physics_timestep_ratio                                    | ratio of dynamics timestep to physics timestep           | none       |    0 | real      | kind_phys | in     | F        |
-!! | rain            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep            | total rain at this time step                             | m          |    1 | real      | kind_phys | inout  | F        |
-!! | rainnc          | lwe_thickness_of_stratiform_precipitation_amount_on_dynamics_timestep | stratiform rainfall amount on physics timestep           | m          |    1 | real      | kind_phys | inout  | F        |
-!! | snow            | lwe_thickness_of_snow_amount_on_dynamics_timestep                     | snow fall at this time step                              | m          |    1 | real      | kind_phys | inout  | F        |
-!! | ice             | lwe_thickness_of_ice_amount_on_dynamics_timestep                      | ice fall at this time step                               | m          |    1 | real      | kind_phys | inout  | F        |
-!! | graupel         | lwe_thickness_of_graupel_amount_on_dynamics_timestep                  | graupel fall at this time step                           | m          |    1 | real      | kind_phys | inout  | F        |
+!! | rain            | lwe_thickness_of_explicit_precipitation_amount                        | explicit rainfall amount on physics timestep             | m          |    1 | real      | kind_phys | inout  | F        |
+!! | graupel         | lwe_thickness_of_graupel_amount                                       | graupel fall on physics timestep                         | m          |    1 | real      | kind_phys | inout  | F        |
+!! | ice             | lwe_thickness_of_ice_amount                                           | ice fall on physics timestep                             | m          |    1 | real      | kind_phys | inout  | F        |
+!! | snow            | lwe_thickness_of_snow_amount                                          | snow fall on physics timestep                            | m          |    1 | real      | kind_phys | inout  | F        |
 !! | sr              | ratio_of_snowfall_to_rainfall                                         | ratio of snowfall to large-scale rainfall                | frac       |    1 | real      | kind_phys | out    | F        |
 !! | refl_10cm       | radar_reflectivity_10cm                                               | instantaneous refl_10cm                                  | dBZ        |    2 | real      | kind_phys | out    | F        |
 !! | do_radar_ref    | flag_for_radar_reflectivity                                           | flag for radar reflectivity                              | flag       |    0 | logical   |           | in     | F        |
@@ -241,8 +182,8 @@ module mp_thompson_hrrr
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
                               nwfa2d, nifa2d,                            &
-                              tgrs, prsl, phii, omega, dtp, frain,       &
-                              rain, rainnc, snow, ice, graupel, sr,      &
+                              tgrs, prsl, phii, omega, dtp,              &
+                              rain, graupel, ice, snow, sr,              &
                               refl_10cm, do_radar_ref,                   &
                               re_cloud, re_ice, re_snow,                 &
                               mpicomm, mpirank, mpiroot,                 &
@@ -279,13 +220,11 @@ module mp_thompson_hrrr
          real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
          real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: dtp
-         real(kind_phys),           intent(in   ) :: frain
          ! Rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: rain(1:ncol)
-         real(kind_phys),           intent(inout) :: rainnc(1:ncol)
-         real(kind_phys),           intent(inout) :: snow(1:ncol)
-         real(kind_phys),           intent(inout) :: ice(1:ncol)
          real(kind_phys),           intent(inout) :: graupel(1:ncol)
+         real(kind_phys),           intent(inout) :: ice(1:ncol)
+         real(kind_phys),           intent(inout) :: snow(1:ncol)
          real(kind_phys),           intent(  out) :: sr(1:ncol)
          ! Radar reflectivity
          real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
@@ -318,13 +257,13 @@ module mp_thompson_hrrr
          real(kind_phys) :: dz(1:ncol,1:nlev)               ! m
          ! Rain/snow/graupel fall amounts
          real(kind_phys) :: rain_mp(1:ncol)                 ! mm, dummy, not used
-         real(kind_phys) :: snow_mp(1:ncol)                 ! mm, dummy, not used
-         real(kind_phys) :: ice_mp(1:ncol)                  ! mm, dummy, not used
          real(kind_phys) :: graupel_mp(1:ncol)              ! mm, dummy, not used
+         real(kind_phys) :: ice_mp(1:ncol)                  ! mm, dummy, not used
+         real(kind_phys) :: snow_mp(1:ncol)                 ! mm, dummy, not used
          real(kind_phys) :: delta_rain_mp(1:ncol)           ! mm
-         real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
-         real(kind_phys) :: delta_ice_mp(1:ncol)            ! mm
          real(kind_phys) :: delta_graupel_mp(1:ncol)        ! mm
+         real(kind_phys) :: delta_ice_mp(1:ncol)            ! mm
+         real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
          ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
@@ -385,13 +324,13 @@ module mp_thompson_hrrr
          ! Accumulated values inside Thompson scheme, not used;
          ! only use delta and add to inout variables (different units)
          rain_mp          = 0
-         snow_mp          = 0
-         ice_mp           = 0
          graupel_mp       = 0
+         ice_mp           = 0
+         snow_mp          = 0
          delta_rain_mp    = 0
-         delta_snow_mp    = 0
-         delta_ice_mp     = 0
          delta_graupel_mp = 0
+         delta_ice_mp     = 0
+         delta_snow_mp    = 0
 
          ! Flags for calculating radar reflectivity; diagflag is redundant
          if (do_radar_ref) then
@@ -583,12 +522,11 @@ module mp_thompson_hrrr
          end if
 #endif
 
-         ! Convert rainfall deltas from physics timestep to dynamics timestep and from mm to m; add to inout variables
-         rain    = rain    + frain*delta_rain_mp/1000.0_kind_phys
-         rainnc  = rainnc  + frain*delta_rain_mp/1000.0_kind_phys
-         snow    = snow    + frain*delta_snow_mp/1000.0_kind_phys
-         ice     = ice     + frain*delta_ice_mp/1000.0_kind_phys
-         graupel = graupel + frain*delta_graupel_mp/1000.0_kind_phys
+         ! Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
+         rain    = rain    + delta_rain_mp/1000.0_kind_phys
+         graupel = graupel + delta_graupel_mp/1000.0_kind_phys
+         ice     = ice     + delta_ice_mp/1000.0_kind_phys
+         snow    = snow    + delta_snow_mp/1000.0_kind_phys
 
          if (do_effective_radii) then
             ! Convert m to micron
