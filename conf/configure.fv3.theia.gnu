@@ -56,6 +56,7 @@ AVX2 = Y
 HYDRO = N
 CCPP = N
 HYBRID = Y
+STATIC = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -179,7 +180,12 @@ CPPDEFS += -DHYBRID
 endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
+ifeq ($(STATIC),Y)
+CPPDEFS += -DSTATIC
+LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
+else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
 endif
 
 LDFLAGS += $(LIBS)
