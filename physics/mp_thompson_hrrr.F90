@@ -1,6 +1,6 @@
 ! CCPP license goes here, as well as further documentation
 
-#define DEBUG_AEROSOLS
+!#define DEBUG_AEROSOLS
 
 module mp_thompson_hrrr
 

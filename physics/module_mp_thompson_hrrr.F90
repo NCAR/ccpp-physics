@@ -1,4 +1,4 @@
-#define DEBUG_AEROSOLS
+!#define DEBUG_AEROSOLS
 
 !+---+-----------------------------------------------------------------+
 !.. This subroutine computes the moisture tendencies of water vapor,
