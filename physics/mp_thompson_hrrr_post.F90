@@ -76,11 +76,15 @@ contains
 !! | tgrs            | air_temperature_updated_by_physics                    | model layer mean temperature                             | K          |    2 | real      | kind_phys | inout  | F        |
 !! | prslk           | dimensionless_exner_function_at_model_layers          | dimensionless Exner function at model layer centers      | none       |    2 | real      | kind_phys | in     | F        |
 !! | dtp             | time_step_for_physics                                 | physics timestep                                         | s          |    0 | real      | kind_phys | in     | F        |
+!! | mpicomm         | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
+!! | mpirank         | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
+!! | mpiroot         | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-   subroutine mp_thompson_hrrr_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, errmsg, errflg)
+   subroutine mp_thompson_hrrr_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
+                                        mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
 
@@ -91,6 +95,10 @@ contains
       real(kind_phys), dimension(1:ncol,1:nlev), intent(inout) :: tgrs
       real(kind_phys), dimension(1:ncol,1:nlev), intent(in)    :: prslk
       real(kind_phys),                           intent(in)    :: dtp
+      ! MPI information
+      integer,          intent(in   ) :: mpicomm
+      integer,          intent(in   ) :: mpirank
+      integer,          intent(in   ) :: mpiroot
       ! CCPP error handling
       character(len=*), intent(  out) :: errmsg
       integer,          intent(  out) :: errflg
@@ -117,7 +125,7 @@ contains
          do i=1,ncol
             mp_tend(i,k) = max( -mp_tend_lim(i)*dtp, min( mp_tend_lim(i)*dtp, mp_tend(i,k) ) )
             ! DH*
-            if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
+            if ( mpirank==mpiroot .and. (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) ) then
                write(0,*) "DH DEBUG mp_thompson_hrrr_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
                                   & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
             end if
