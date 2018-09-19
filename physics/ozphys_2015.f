@@ -48,6 +48,7 @@
 !! | ozp2           | cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio       | cumulative change in ozone concentration due to ozone mixing ratio         | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | ozp3           | cumulative_change_in_ozone_concentration_due_to_temperature              | cumulative change in ozone concentration due to temperature                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | ozp4           | cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column    | cumulative change in ozone concentration due to overhead ozone column      | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | con_g          | gravitational_acceleration                                               | gravitational acceleration                                                 | m s-2   |    0 | real      | kind_phys | in     | F        |
 !! | me             | mpi_rank                                                                 | rank of the current MPI task                                               | index   |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
@@ -57,7 +58,8 @@
       subroutine ozphys_2015_run (                                      &
      &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
      &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
-     &                        ozp1,ozp2,ozp3,ozp4,me, errmsg, errflg)
+     &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
+     &                        me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -66,10 +68,12 @@
 ! June 2015 - Shrinivas Moorthi
 !
       use machine , only : kind_phys
-      use physcons, only : grav => con_g
+      !use physcons, only : grav => con_g
       implicit none
 !
-      real, parameter :: gravi=1.0/grav
+      !real, parameter :: gravi=1.0/grav
+      real(kind=kind_phys),intent(in) :: con_g
+      real :: gravi
       integer, intent(in) :: im, ix, levs, ko3, pl_coeff,me
       real(kind=kind_phys), intent(in) :: po3(ko3),                     &
      &                                    prsl(ix,levs), tin(ix,levs),  &
@@ -96,6 +100,7 @@
 
 !ccpp: save input oz in ozi
       ozi = oz
+      gravi=1.0/con_g
 
         colo3(:,levs+1) = 0.0
         coloz(:,levs+1) = 0.0

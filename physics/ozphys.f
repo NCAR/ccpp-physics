@@ -96,11 +96,6 @@
 !
 !     save input oz in ozi
       ozi = oz
-
-      if (me .eq. 0) write(6,*) 'CCPP DUBUG in ozphys_run: oz_coeff, ko3&
-     &  =', oz_coeff, ko3
-      if (me .eq. 0) write(6,*) 'CCPP DUBUG in ozphys_run: po3(ko3) = ',&
-     & po3(:)
 !
 !> - Calculate vertical integrated column ozone values.
       if (oz_coeff > 2) then
