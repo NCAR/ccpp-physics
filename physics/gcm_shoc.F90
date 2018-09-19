@@ -139,7 +139,7 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
          enddo
        endif
       endif
-      else
+    else
       if (imp_physics == imp_physics_mg) then
        skip_macro = .true.
        do k=1,nzm
