@@ -163,6 +163,8 @@
        ivegsrc        = 1
        isot           = 1
        debug          = .false.
+       oz_phys        = .true.
+       oz_phys_2015   = .false.
        nstf_name      = @[NSTF_NAME]
        cplflx         = @[CPLFLX]
        iau_delthrs    = 6
