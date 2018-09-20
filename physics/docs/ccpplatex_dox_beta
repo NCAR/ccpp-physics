@@ -154,7 +154,7 @@ INPUT                  =  pdftxt/mainpage.txt            \
 ### Rayleigh Dampling
                         ../rayleigh_damp.f  \
 ### Prognostic Ozone
-                        ../ozphys.f \
+                        ../ozphys_2015.f \
 ### stratospheric h2o
                         ../h2ophys.f \
 ### Deep Convection

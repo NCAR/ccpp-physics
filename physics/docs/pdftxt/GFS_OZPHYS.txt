@@ -28,7 +28,6 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  photochemistry is then:
  \f[
   \frac{\partial r}{\partial t}=(P-L)\left[r,T,\Sigma\right]            
-                                                                   \color{red} {(1)}
  \f]
 
  Linearization of the ozone photochemical tendency above has become a standard method for NWP and climate models. The latest 
@@ -37,16 +36,16 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  using a first-order Taylor series expansion.
  \f[
  \frac{\partial r(\lambda,\phi,p,t)}{\partial t}=(P-L)_0+\frac{\partial (P-L)}{\partial r}\bracevert_0(r-r_0)+\frac{\partial (P-L)}{\partial T}\bracevert_0(T-T_0)+\frac{\partial (P-L)}{\partial \Sigma}\bracevert_0(\Sigma-\Sigma_{0})           
-                                                                   \color{red} {(2)}
  \f]
  where \f$\lambda\f$ represents longtitude, \f$\phi\f$ represents latitude, and \f$p\f$ represents pressure as the model 
  vertical coordinate. The subscript "0" attached to \f$(P-L)\f$ and its partial derivatives refers to their values
  at the reference state \f$r_0\f$,\f$T_0\f$,\f$\Sigma_0\f$, and are all zonally averaged quantities.
  The reference-state production and loss, \f$(P-L)_0\f$, and the various partial derivative terms about the state (the last 
  three terms on the right) are computed offline using CHEM2D model photochemistry. These coefficients are then stored in tabular 
- form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location (\c global_o3prdlos.f77). The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that depend on the temperature and column ozone climatology.
-
-
+ form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location. 
+The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that 
+depend on the temperature and column ozone climatology
+(\c global_o3prdlos.f77 is replaced by \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 in ozphys_2015_run).
 
 \section intra_ozone  Intraphysics Communication
 \ref arg_table_ozphys_run
