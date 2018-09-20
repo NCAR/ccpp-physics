@@ -67,11 +67,6 @@ contains
       oz_pres(:) = log(100.0*oz_pres(:))
       oz_lat(:)  = oz_lat4(:)
       oz_time(:) = oz_time4(:)
-      if (me == master) then
-        write(*,*) '      oz_pres(:) = ', oz_pres(:)
-        write(*,*) '      oz_lat(:)  = ', oz_lat(:)
-        write(*,*) '      oz_time(:) = ', oz_time(:)
-      endif
       deallocate (oz_lat4, oz_pres4, oz_time4)
 
 !--- read in ozplin which is in order of (lattitudes, ozone levels, coeff number, time)
