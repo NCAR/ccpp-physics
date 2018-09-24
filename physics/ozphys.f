@@ -64,7 +64,6 @@
 !     as are all other variables
 !
       use machine , only : kind_phys
-!      use physcons, only : grav => con_g
       implicit none
 !
       ! Interface variables
@@ -77,13 +76,13 @@
      &                     dt, po3(ko3), prdout(ix,ko3,oz_coeff),       &
      &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs),  &
      &                     con_g
+      real :: gravi
       logical, intent(in) :: ldiag3d
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
       ! Local variables
-!      real, parameter :: gravi=1.0/grav
       integer k,kmax,kmin,l,i,j
       logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
@@ -96,13 +95,14 @@
 !
 !     save input oz in ozi
       ozi = oz
+      gravi=1.0/con_g
 !
 !> - Calculate vertical integrated column ozone values.
       if (oz_coeff > 2) then
         colo3(:,levs+1) = 0.0
         do l=levs,1,-1
           do i=1,im
-            colo3(i,l) = colo3(i,l+1) + ozi(i,l) * delp(i,l) * 1.0/con_g 
+            colo3(i,l) = colo3(i,l+1) + ozi(i,l) * delp(i,l) * gravi 
           enddo
         enddo
       endif

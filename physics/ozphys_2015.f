@@ -68,10 +68,8 @@
 ! June 2015 - Shrinivas Moorthi
 !
       use machine , only : kind_phys
-      !use physcons, only : grav => con_g
       implicit none
 !
-      !real, parameter :: gravi=1.0/grav
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, ix, levs, ko3, pl_coeff,me
