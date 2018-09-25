@@ -15,32 +15,32 @@ module cs_conv_pre
   end subroutine cs_conv_pre_finalize
 
 !! \section arg_table_cs_conv_pre_run Argument Table
-!! | local_name | standard_name                                                   | long_name                                                                | units   | rank | type      |    kind   | intent | optional |
-!! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_dimension                                            | horizontal dimension                                                     | count   |    0 | integer   |           | in     | F        |
-!! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count   |    0 | integer   |           | in     | F        |
-!! | ntr        | number_of_total_tracers_CS                                      | number of total tracers convectively transported by CS scheme            | count   |    0 | integer   |           | in     | F        |
-!! | q          | water_vapor_specific_humidity_updated_by_physics                | mid-layer specific humidity of water vapor                               | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw        | convective_transportable_tracers                                | cloud water and other convective trans. tracers                          | kg kg-1 |    3 | real      | kind_phys | in     | F        |
-!! | fswtr      | fraction_of_cloud_top_water_scavenged                           | fraction of the tracer (cloud top water) that is scavenged by convection | km-1    |    1 | real      | kind_phys | out    | F        |
-!! | save_qv    | water_vapor_specific_humidity_save                              | water vapor specific humidity before entering a physics scheme           | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag    |    0 | integer   |           | out    | F        |
+!! | local_name      | standard_name                                          | long_name                                                                        | units   | rank | type      |    kind   | intent | optional |
+!! |-----------------|--------------------------------------------------------|----------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | im              | horizontal_dimension                                   | horizontal dimension                                                             | count   |    0 | integer   |           | in     | F        |
+!! | levs            | vertical_dimension                                     | number of veritcal levels                                                        | count   |    0 | integer   |           | in     | F        |
+!! | ncstrac         | number_of_tracers_for_CS                               | number of convectively transported tracers in Chikira-Sugiyama deep conv. scheme | count   |    0 | integer   |           | in     | F        |
+!! | q               | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                                 | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | clw             | convective_transportable_tracers                       | cloud water and other convective trans. tracers                                  | kg kg-1 |    3 | real      | kind_phys | in     | F        |
+!! | fswtr           | fraction_of_cloud_top_water_scavenged                  | fraction of the tracer (cloud top water) that is scavenged by convection         | km-1    |    1 | real      | kind_phys | out    | F        |
+!! | save_q          | tracer_concentration_save                              | tracer concentration before entering a physics scheme                            | kg kg-1 |    3 | real      | kind_phys | out    | F        |
+!! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
-  subroutine cs_conv_pre_run(im, kmax, ntr, q, clw, fswtr, save_qv, errmsg, errflg)
+  subroutine cs_conv_pre_run(im, levs, ncstrac, q, clw, fswtr, save_q, errmsg, errflg)
 
   use machine ,   only : r8    => kind_phys
 
   implicit none
 
 ! --- inputs
-  integer, intent(in) :: im, kmax, ntr
-  real(r8), dimension(im,kmax), intent(in) :: q
-  real(r8), dimension(im,kmax,2), intent(in) :: clw
+  integer, intent(in) :: im, levs, ncstrac
+  real(r8), dimension(im,levs), intent(in) :: q
+  real(r8), dimension(im,levs,2), intent(in) :: clw
 
 ! --- input/output
-  real(r8), dimension(ntr), intent(out) :: fswtr
-  real(r8), dimension(im,kmax,3), intent(out) :: save_qv
+  real(r8), dimension(ncstrac), intent(out) :: fswtr
+  real(r8), dimension(im,levs,3), intent(out) :: save_q
 
   character(len=*), intent(out) :: errmsg
   integer,          intent(out) :: errflg
@@ -53,11 +53,11 @@ module cs_conv_pre
   errflg = 0
 
   fswtr(:) = 0.0
-  do k=1,kmax
+  do k=1,levs
     do i=1,im
-      save_qv(i,k,1) = q(i,k)
-      save_qv(i,k,2) = max(0.0,clw(i,k,2))
-      save_qv(i,k,3) = max(0.0,clw(i,k,1))
+      save_q(i,k,1) = q(i,k)
+      save_q(i,k,2) = max(0.0,clw(i,k,2))
+      save_q(i,k,3) = max(0.0,clw(i,k,1))
     enddo
   enddo
 
@@ -87,7 +87,7 @@ module cs_conv_post
 !! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count      |    0 | integer   |           | in     | F        |
 !! | do_aw      | flag_for_Arakawa_Wu_adjustment                                  | flag for Arakawa Wu scale-aware adjustment                               | flag       |    0 | logical   |           | in     | F        |
 !! | sigmatot   | convective_updraft_area_fraction_at_model_interfaces            | convective updraft area fraction at model interfaces                     | frac       |    2 | real      | kind_phys | in     | F        |
-!! | sigmafrac  | convective_updraft_area_fraction                                | convective updraft area fraction                                         | frac       |    2 | real      | kind_phys | in     | F        |
+!! | sigmafrac  | convective_updraft_area_fraction                                | convective updraft area fraction                                         | frac       |    2 | real      | kind_phys | out    | F        |
 !! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
 !!
@@ -279,7 +279,7 @@ module cs_conv
 !! | im         | horizontal_dimension                                      | horizontal dimension                                                                                  | count      |    0 | integer   |           | in     | F        |
 !! | ijsdim     | horizontal_loop_extent                                    | horizontal loop extent                                                                                | count      |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                        | number of veritcal levels                                                                             | count      |    0 | integer   |           | in     | F        |
-!! | ntr        | number_of_total_tracers_CS                                | number of total tracers convectively transported by CS scheme                                         | count      |    0 | integer   |           | in     | F        |
+!! | ntr        | number_of_tracers_for_CS                                  | number of convectively transported tracers in Chikira-Sugiyama deep conv. scheme                      | count      |    0 | integer   |           | in     | F        |
 !! | nctp       | number_of_cloud_types_CS                                  | number of cloud types in Chikira-Sugiyama scheme                                                      | count      |    0 | integer   |           | in     | F        |
 !! | otspt      | flag_convective_tracer_transport                          | flag to enable tracer transport by updrafts/downdrafts[(:,1)] or subsidence [(:,2)]                   | flag       |    2 | logical   |           | in     | F        |
 !! | lat        | latitude_index_in_debug_printouts                         | latitude index in debug printouts                                                                     | index      |    0 | integer   |           | in     | F        |
