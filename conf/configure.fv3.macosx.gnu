@@ -56,6 +56,7 @@ AVX2 = Y
 HYDRO = N
 CCPP = N
 HYBRID = Y
+STATIC = N
 SION = N
 MEMCHECK = N
 
@@ -116,7 +117,7 @@ endif
 
 FFLAGS_OPT = -O2 -fno-range-check
 FFLAGS_REPRO = -O2 -g -fbacktrace -fno-range-check
-FFLAGS_DEBUG = -g -O0 -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
+FFLAGS_DEBUG = -g -O0 -ggdb -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
 
 TRANSCENDENTALS :=
 FFLAGS_OPENMP = -fopenmp
@@ -135,7 +136,7 @@ FFLAGS_TEST = -O3
 CFLAGS_TEST = -O2
 
 LDFLAGS :=
-LDFLAGS_OPENMP := -fopenmp -L/usr/local/Cellar/llvm/5.0.0/lib -lomp
+LDFLAGS_OPENMP := -fopenmp -L/usr/local/Cellar/llvm/lib -lomp
 LDFLAGS_VERBOSE := -Wl,-V,--verbose,-cref,-M
 
 # start with blank LIBS
@@ -179,7 +180,12 @@ CPPDEFS += -DHYBRID
 endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
+ifeq ($(STATIC),Y)
+CPPDEFS += -DSTATIC
+LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
+else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
 endif
 
 ifeq ($(SION),Y)
