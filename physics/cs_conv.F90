@@ -19,28 +19,36 @@ module cs_conv_pre
 !! |-----------------|--------------------------------------------------------|----------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im              | horizontal_dimension                                   | horizontal dimension                                                             | count   |    0 | integer   |           | in     | F        |
 !! | levs            | vertical_dimension                                     | number of veritcal levels                                                        | count   |    0 | integer   |           | in     | F        |
-!! | ncstrac         | number_of_tracers_for_CS                               | number of convectively transported tracers in Chikira-Sugiyama deep conv. scheme | count   |    0 | integer   |           | in     | F        |
+!! | ntrac           | number_of_tracers                                      | number of tracers                                                                | count   |    0 | integer   |           | in     | F        |
+!! | ncld            | number_of_hydrometeors                                 | number of hydrometeors                                                           | count   |    0 | integer   |           | in     | F        |
 !! | q               | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                                 | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw             | convective_transportable_tracers                       | cloud water and other convective trans. tracers                                  | kg kg-1 |    3 | real      | kind_phys | in     | F        |
+!! | clw1            | cloud_ice_mixing_ratio                                 | moist cloud ice mixing ratio                                                     | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | clw2            | cloud_liquid_water_mixing_ratio                        | moist cloud water mixing ratio                                                   | kg kg-1 |    2 | real      | kind_phys | in     | F        |
 !! | fswtr           | fraction_of_cloud_top_water_scavenged                  | fraction of the tracer (cloud top water) that is scavenged by convection         | km-1    |    1 | real      | kind_phys | out    | F        |
-!! | save_q          | tracer_concentration_save                              | tracer concentration before entering a physics scheme                            | kg kg-1 |    3 | real      | kind_phys | out    | F        |
+!! | save_q1         | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme                   | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | save_q2         | cloud_liquid_water_mixing_ratio_save                   | cloud liquid water mixing ratio before entering a physics scheme                 | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | save_q3         | cloud_ice_water_mixing_ratio_save                      | cloud ice water mixing ratio before entering a physics scheme                    | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
-  subroutine cs_conv_pre_run(im, levs, ncstrac, q, clw, fswtr, save_q, errmsg, errflg)
+  subroutine cs_conv_pre_run(im, levs, ntrac, ncld, q, clw1, clw2,      &
+     &                       fswtr, save_q1, save_q2, save_q3,          &
+     &                       errmsg, errflg)
+
 
   use machine ,   only : r8    => kind_phys
 
   implicit none
 
 ! --- inputs
-  integer, intent(in) :: im, levs, ncstrac
+  integer, intent(in) :: im, levs, ntrac, ncld
   real(r8), dimension(im,levs), intent(in) :: q
-  real(r8), dimension(im,levs,2), intent(in) :: clw
+  real(r8), dimension(im,levs), intent(in) :: clw1,clw2
 
 ! --- input/output
-  real(r8), dimension(ncstrac), intent(out) :: fswtr
-  real(r8), dimension(im,levs,3), intent(out) :: save_q
+  !zhang real(r8), dimension(ncstrac), intent(out) :: fswtr
+  real(r8), dimension(ntrac-ncld+2), intent(out) :: fswtr
+  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2,save_q3  
 
   character(len=*), intent(out) :: errmsg
   integer,          intent(out) :: errflg
@@ -55,9 +63,9 @@ module cs_conv_pre
   fswtr(:) = 0.0
   do k=1,levs
     do i=1,im
-      save_q(i,k,1) = q(i,k)
-      save_q(i,k,2) = max(0.0,clw(i,k,2))
-      save_q(i,k,3) = max(0.0,clw(i,k,1))
+      save_q1(i,k) = q(i,k)
+      save_q2(i,k) = max(0.0,clw2(i,k))
+      save_q3(i,k) = max(0.0,clw1(i,k))
     enddo
   enddo
 
@@ -394,7 +402,7 @@ module cs_conv
 !  updraft, downdraft, and detrainment mass flux (kg/m2/s)
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
-   real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convecctive precipitation amount (m)
+   real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
    real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd, cnv_prc3,&
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
