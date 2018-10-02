@@ -77,6 +77,14 @@ module mp_thompson_hrrr
 
          if (is_initialized) return
 
+         ! DH* temporary
+         if (mpirank==mpiroot) then
+            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
+            write(0,*) ' --- WARNING --- the CCPP Thompson MP scheme is currently under development, use at your own risk --- WARNING ---'
+            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
+         end if
+         ! *DH temporary
+
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
             errflg = 1
