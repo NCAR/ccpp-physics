@@ -155,6 +155,12 @@ if (TEMPLOG)
 endif (TEMPLOG)
 
 #------------------------------------------------------------------------------
+# Set flags for static building/linking of CCPP
+if (STATIC)
+  ADD_DEFINITIONS(-DSTATIC)
+endif (STATIC)
+
+#------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor
 ADD_DEFINITIONS(-DMOIST_CAPPA -DUSE_COND -DNEMS_GSM)
 ADD_DEFINITIONS(-DINTERNAL_FILE_NML)

@@ -17,6 +17,9 @@ function usage   {
   echo "                                   SION=Y/N   (default N)"
   echo "                                   DEBUG=Y/N  (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
+  echo "                                   HYBRID=Y/N (default Y)"
+  echo "                                   STATIC=Y/N (default N, STATIC=Y requires HYBRID=N)"
+  echo "                                   SUITE=name_of_sdf_without_path.xml (only if STATIC=Y)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
   echo "           clean_after  [optional] can be 'YES' (default) or 'NO'"
   exit 1
@@ -67,8 +70,35 @@ readonly clean_after=${5:-YES}
 
 checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
-# Generate CCPP cmake flags from MAKE_OPT
+# Run ccpp_prebuild.py from the top-level directory before building the CCPP framework and physics
+cd ..
+if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
+  if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
+    if [[ "${MAKE_OPT}" == *"SUITE="* ]]; then
+      # Extract name of suite definition file
+      TMP=${MAKE_OPT#*SUITE=}
+      SUITE=${TMP% *}
+      STATICFLAGS="--static --suite=ccpp/framework/suites/${SUITE}"
+    else
+      echo "Error, option STATIC=Y requires suite definition file as SUITE=xyz.xml (w/o path)"
+      exit 1
+    fi
+  else
+    echo "Error, option STATIC=Y requires HYBRID=N"
+    exit 1
+  fi
+else
+  STATICFLAGS=""
+fi
+if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
+  DEBUGFLAG="--debug"
+else
+  DEBUGFLAG=""
+fi
+./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3 ${STATICFLAGS} ${DEBUGFLAG}
+cd -
 
+# Generate CCPP cmake flags from MAKE_OPT
 CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
 if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
@@ -94,6 +124,15 @@ if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTEMPLOG=OFF"
 fi
+if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
+  if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
+    CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSTATIC=ON"
+  else
+    echo "Error, option STATIC=Y requires HYBRID=N"
+    exit 1
+  fi
+fi
+
 CCPP_CMAKE_FLAGS=$(trim "${CCPP_CMAKE_FLAGS}")
 CCPP_MAKE_FLAGS=$(trim "${CCPP_MAKE_FLAGS}")
 
@@ -117,8 +156,13 @@ fi
 echo "Building CCPP with options '${CCPP_CMAKE_FLAGS}' ..."
 PATH_CCPP=${PWD}
 PATH_CCPP_BUILD=${PWD}/build
+PATH_CCPP_INC=${PWD}/include
+PATH_CCPP_LIB=${PWD}/lib
+
 if [ $clean_before = YES ]; then
     rm -fr ${PATH_CCPP_BUILD}
+    rm -fr ${PATH_CCPP_INC}
+    rm -fr ${PATH_CCPP_LIB}
 fi
 mkdir -p ${PATH_CCPP_BUILD}
 cd ${PATH_CCPP_BUILD}

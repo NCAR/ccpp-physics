@@ -54,13 +54,6 @@ fi
 if [[ "${MAKE_OPT}" == *"CCPP=Y"* ]]; then
   export readonly PATH_CCPP="$PATHTR/../ccpp"
   export readonly NEMS_CCPP_CPPFLAGS="-DCCPP"
-  # Run ccpp_prebuild.py from the top-level directory before building the CCPP framework and physics
-  cd ${PATHTR}/..
-  if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
-    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3 --debug
-  else
-    ./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3
-  fi
   # Build CCPP framework and physics
   cd ${PATH_CCPP}
   ./build_ccpp.sh ${BUILD_TARGET} ${PATH_CCPP} "${MAKE_OPT}" ${clean_before} ${clean_after}
