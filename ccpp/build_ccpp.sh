@@ -156,8 +156,13 @@ fi
 echo "Building CCPP with options '${CCPP_CMAKE_FLAGS}' ..."
 PATH_CCPP=${PWD}
 PATH_CCPP_BUILD=${PWD}/build
+PATH_CCPP_INC=${PWD}/include
+PATH_CCPP_LIB=${PWD}/lib
+
 if [ $clean_before = YES ]; then
     rm -fr ${PATH_CCPP_BUILD}
+    rm -fr ${PATH_CCPP_INC}
+    rm -fr ${PATH_CCPP_LIB}
 fi
 mkdir -p ${PATH_CCPP_BUILD}
 cd ${PATH_CCPP_BUILD}
