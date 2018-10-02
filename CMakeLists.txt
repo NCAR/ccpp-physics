@@ -77,8 +77,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #------------------------------------------------------------------------------
-# By default we want a shared library
-option(BUILD_SHARED_LIBS "Build a shared library" ON)
+# By default we want a shared library (unless a static build is requested)
+if(STATIC)
+  option(BUILD_SHARED_LIBS "Build a static library" OFF)
+else(STATIC)
+  option(BUILD_SHARED_LIBS "Build a shared library" ON)
+endif(STATIC)
 
 #------------------------------------------------------------------------------
 # Add the CCPP include/module directory
@@ -190,7 +194,18 @@ endif (PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------
 
-add_library(ccppphys ${SCHEMES} ${CAPS})
+if(STATIC)
+  add_library(ccppphys STATIC ${SCHEMES} ${CAPS})
+  # Generate list of Fortran modules from defined sources
+  foreach(source_f90 ${CAPS})
+      string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${source_f90})
+      string(TOLOWER ${tmp_module_f90} module_f90)
+      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
+  endforeach()
+else(STATIC)
+  add_library(ccppphys ${SCHEMES} ${CAPS})
+endif(STATIC)
+
 if (PROJECT STREQUAL "CCPP-FV3")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
 elseif (PROJECT STREQUAL "CCPP-SCM")
@@ -230,4 +245,9 @@ if (PROJECT STREQUAL "CCPP-FV3")
           FILE ccppphys-config.cmake
           DESTINATION lib/cmake
   )
+  if(STATIC)
+    # Define where to install the C headers and Fortran modules
+    #install(FILES ${HEADERS_C} DESTINATION include)
+    install(FILES ${MODULES_F90} DESTINATION include)
+  endif(STATIC)
 endif (PROJECT STREQUAL "CCPP-FV3")
