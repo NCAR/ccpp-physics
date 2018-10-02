@@ -53,13 +53,16 @@ contains
       dx = sqrt(area)
 
       do i=1,ncol
-         if (dx(i)<=5000) then
-            mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
-         else if (dx(i)<=50000) then
-            mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
-         else
-            mp_tend_lim(i) = 0.00006 ! [K/s], guess for >50km
-         end if
+         ! DH* testing/development: no limiter on temperature tendency
+         mp_tend_lim(i) = huge(mp_tend_lim(i))
+         !if (dx(i)<=5000) then
+         !   mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
+         !else if (dx(i)<=50000) then
+         !   mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
+         !else
+         !   mp_tend_lim(i) = 0.00006 ! [K/s], guess for >50km
+         !end if
+         ! *DH
       end do
 
       is_initialized = .True.
