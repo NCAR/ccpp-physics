@@ -295,7 +295,8 @@ module cs_conv
 !! | t          | air_temperature_updated_by_physics                        | mid-layer temperature                                                                                 | K          |    2 | real      | kind_phys | inout  | F        |
 !! | q          | water_vapor_specific_humidity_updated_by_physics          | mid-layer specific humidity of water vapor                                                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
 !! | rain1      | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep                                                   | m          |    1 | real      | kind_phys | out    | F        |
-!! | clw        | convective_transportable_tracers                          | cloud water and other convective trans. tracers                                                       | kg kg-1    |    3 | real      | kind_phys | inout  | F        |
+!! | clw1       | cloud_ice_mixing_ratio                                    | moist cloud ice mixing ratio                                                                          | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | clw2       | cloud_liquid_water_mixing_ratio                           | moist cloud water mixing ratio                                                                        | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
 !! | zm         | geopotential                                              | mid-layer geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | zi         | geopotential_at_interface                                 | interface geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | pap        | air_pressure                                              | mid-layer pressure                                                                                    | Pa         |    2 | real      | kind_phys | in     | F        |
@@ -345,7 +346,7 @@ module cs_conv
 !---------------------------------------------------------------------------------
    subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , NTR     , nctp,     & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
-                          t      , q      ,  rain1    , clw     ,           &
+                          t      , q      ,  rain1    , clw1    , clw2,     &
                           zm     , zi     ,  pap      , paph    ,           &
                           delta  , delti  ,  ud_mf    , dd_mf   , dt_mf,    &
                           u      , v      ,  fscav    , fswtr,              &
@@ -378,7 +379,10 @@ module cs_conv
 
    real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
    real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,ntr-1)  ! tracer array including cloud condensate (kg/kg)
+! zhang: ntr=3?
+!   real(r8), intent(inout) :: clw(IM,KMAX,ntr-1)  ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(inout) :: clw1(IM,KMAX)
+   real(r8), intent(inout) :: clw2(IM,KMAX)
    real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
    real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
    real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
@@ -504,35 +508,37 @@ module cs_conv
    enddo
 
 !DD following adapted from ras
-   if (clw(1,1,2) <= -999.0) then  ! input ice/water are together
+   if (clw2(1,1) <= -999.0) then  ! input ice/water are together
      do k=1,kmax
        do i=1,IJSDIM
-         tem = clw(i,k,1) * MAX(ZERO, MIN(ONE, (TCR-t(i,k))*TCRF))
-         clw(i,k,2) = clw(i,k,1) - tem
-         clw(i,k,1) = tem
+         tem = clw1(i,k) * MAX(ZERO, MIN(ONE, (TCR-t(i,k))*TCRF))
+         clw2(i,k) = clw1(i,k) - tem
+         clw1(i,k) = tem
        enddo
      enddo
    endif
 !DD end ras adaptation
    do k=1,kmax
      do i=1,ijsdim
-       tem = min(clw(i,k,1), 0.0)
-       wrk = min(clw(i,k,2), 0.0)
-       clw(i,k,1) = clw(i,k,1) - tem
-       clw(i,k,2) = clw(i,k,2) - wrk
+       tem = min(clw1(i,k), 0.0)
+       wrk = min(clw2(i,k), 0.0)
+       clw1(i,k) = clw1(i,k) - tem
+       clw2(i,k) = clw2(i,k) - wrk
        gdq(i,k,1) = gdq(i,k,1) + tem + wrk
      enddo
    enddo
-!  if (lprnt) write(0,*)'in cs clw1b=',clw(ipr,:,1),' kdt=',kdt
-!  if (lprnt) write(0,*)'in cs clw2b=',clw(ipr,:,2),' kdt=',kdt
+!  if (lprnt) write(0,*)'in cs clw1b=',clw1(ipr,:),' kdt=',kdt
+!  if (lprnt) write(0,*)'in cs clw2b=',clw2(ipr,:),' kdt=',kdt
 
-   do n=2,NTR
+!   do n=2,NTR
      do k=1,KMAX
        do i=1,IJSDIM
-         GDQ(i,k,n) = clw(i,k,n-1)
+!zhang         GDQ(i,k,n) = clw(i,k,n-1)
+            GDQ(i,k,2) = clw1(i,k)
+            GDQ(i,k,3) = clw2(i,k)
        enddo
      enddo
-   enddo
+!   enddo
 !
 !***************************************************************************************
 !
@@ -590,15 +596,17 @@ module cs_conv
 !  if (lprnt) write(0,*)' aft cs_cum gtqi=',gtq(ipr,:,2)
 !  if (lprnt) write(0,*)' aft cs_cum gtql=',gtq(ipr,:,3)
 
-   do n=2,NTR
+!zhang   do n=2,NTR
      do k=1,KMAX
        do i=1,IJSDIM
-         clw(i,k,n-1) = max(zero, GDQ(i,k,n) + GTQ(i,k,n) * delta)
+!zhang         clw(i,k,n-1) = max(zero, GDQ(i,k,n) + GTQ(i,k,n) * delta)
+          clw1(i,k) = max(zero, GDQ(i,k,2) + GTQ(i,k,2) * delta)
+          clw2(i,k) = max(zero, GDQ(i,k,3) + GTQ(i,k,3) * delta)
        enddo
      enddo
-   enddo
-!  if (lprnt) write(0,*)'in cs clw1a=',clw(ipr,:,1),' kdt=',kdt
-!  if (lprnt) write(0,*)'in cs clw2a=',clw(ipr,:,2),' kdt=',kdt
+!zhang   enddo
+!  if (lprnt) write(0,*)'in cs clw1a=',clw1(ipr,:),' kdt=',kdt
+!  if (lprnt) write(0,*)'in cs clw2a=',clw2(ipr,:),' kdt=',kdt
 !
    do k=1,KMAX
      do i=1,IJSDIM
@@ -615,8 +623,8 @@ module cs_conv
        do k=1,KMAX
          kp1 = min(k+1,kmax)
          do i=1,IJSDIM
-           qicn(i,k)      = max(0.0, clw(i,k,1)-gdq(i,k,2))
-           qlcn(i,k)      = max(0.0, clw(i,k,2)-gdq(i,k,3))
+           qicn(i,k)      = max(0.0, clw1(i,k)-gdq(i,k,2))
+           qlcn(i,k)      = max(0.0, clw2(i,k)-gdq(i,k,3))
 
            
            wrk = qicn(i,k) + qlcn(i,k)
@@ -655,8 +663,8 @@ module cs_conv
      else
        do k=1,KMAX
          do i=1,IJSDIM
-           qicn(i,k)      = max(0.0, clw(i,k,1)-gdq(i,k,2))
-           qlcn(i,k)      = max(0.0, clw(i,k,2)-gdq(i,k,3))
+           qicn(i,k)      = max(0.0, clw1(i,k)-gdq(i,k,2))
+           qlcn(i,k)      = max(0.0, clw2(i,k)-gdq(i,k,3))
            cnv_fice(i,k)  = qicn(i,k) / max(1.0e-10,qicn(i,k)+qlcn(i,k))
 ! 
            CNV_MFD(i,k)   = dt_mf(i,k) * (1/delta)
@@ -704,7 +712,7 @@ module cs_conv
 !    if (do_aw) then
 !    call moist_bud(ijsdim,ijsdim,im,kmax,mype,kdt,grav,delta,delp,prec &
 !    ,              gdq(1,1,1), gdq(1,1,2), gdq(1,1,3)                  &
-!    ,              q,clw(1,1,1),clw(1,1,2),'cs_conv_aw')
+!    ,              q,clw1(1,1),clw2(1,1),'cs_conv_aw')
 !    endif
 
    end subroutine cs_conv_run
@@ -736,6 +744,8 @@ module cs_conv
 !************************************************************************
 ! cumulus main routine
 ! --------------------
+!> This subroutine includes cumulus parameterization with state-dependent
+!! entrainment rate developed by Minoru Chikira.
    SUBROUTINE CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    & !DD dimensions
                          otspt1, otspt2, lprnt , ipr   ,    &
                          GTT   , GTQ   , GTU   , GTV   ,    & ! output
