@@ -90,87 +90,98 @@
     end subroutine GFS_suite_interstitial_1_finalize
 
 !> \section arg_table_GFS_suite_interstitial_1_run Argument Table
-!! | local_name     | standard_name                                                            | long_name                                                               | units         | rank | type             |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                     | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type    |           | in     | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                                     | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore     | DDT           |    0 | GFS_statein_type |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                        | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type    |           | inout  | F        |
-!! | rhbbot         | critical_relative_humidity_at_surface                                    | critical relative humidity at the surface                               | frac          |    0 | real             | kind_phys | out    | F        |
-!! | rhpbl          | critical_relative_humidity_at_PBL_top                                    | critical relative humidity at the PBL top                               | frac          |    0 | real             | kind_phys | out    | F        |
-!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                          | critical relative humidity at the top of atmosphere                     | frac          |    0 | real             | kind_phys | out    | F        |
-!! | frain          | dynamics_to_physics_timestep_ratio                                       | ratio of dynamics timestep to physics timestep                          | none          |    0 | real             | kind_phys | out    | F        |
-!! | islmsk         | sea_land_ice_mask                                                        | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer          |           | out    | F        |
-!! | frland         | land_area_fraction                                                       | land area fraction                                                      | frac          |    1 | real             | kind_phys | out    | F        |
-!! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes            | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real             | kind_phys | out    | F        |
-!! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                     | none          |    1 | real             | kind_phys | out    | F        |
-!! | dxmin          | minimum_scaling_factor_for_critical_relative_humidity                    | minimum scaling factor for critical relative humidity                   | m2 rad-2      |    0 | real             | kind_phys | in     | F        |
-!! | dxinv          | inverse_scaling_factor_for_critical_relative_humidity                    | inverse scaling factor for critical relative humidity                   | rad2 m-2      |    0 | real             | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                                  | updated tendency of the x wind                                          | m s-2         |    2 | real             | kind_phys | out    | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                  | updated tendency of the y wind                                          | m s-2         |    2 | real             | kind_phys | out    | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                         | updated tendency of the temperature                                     | K s-1         |    2 | real             | kind_phys | out    | F        |
-!! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky  | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real             | kind_phys | out    | F        |
-!! | dqdt           | tendency_of_tracers_due_to_model_physics                                 | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real             | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                                | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                   | flag          |    0 | integer          |           | out    | F        |
+!! | local_name     | standard_name                                                             | long_name                                                               | units         | rank | type       |    kind   | intent | optional |
+!! |----------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                    | horizontal loop extent                                                  | count         |    0 | integer    |           | in     | F        |
+!! | levs           | vertical_dimension                                                        | vertical layer dimension                                                | count         |    0 | integer    |           | in     | F        |
+!! | ntrac          | number_of_tracers                                                         | number of tracers                                                       | count         |    0 | integer    |           | in     | F        |
+!! | crtrh          | critical_relative_humidity_at_sfc_pbltop_toa                              | critical relative humidity at SFC, PBL top and TOA                      | frac          |    1 | real       | kind_phys | in     | F        |
+!! | dtf            | time_step_for_dynamics                                                    | dynamics timestep                                                       | s             |    0 | real       | kind_phys | in     | F        |
+!! | dtp            | time_step_for_physics                                                     | physics timestep                                                        | s             |    0 | real       | kind_phys | in     | F        |
+!! | slmsk          | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | real       | kind_phys | in     | F        |
+!! | area           | cell_area                                                                 | area of the grid cell                                                   | m2            |    1 | real       | kind_phys | in     | F        |
+!! | dxmin          | minimum_scaling_factor_for_critical_relative_humidity                     | minimum scaling factor for critical relative humidity                   | m2 rad-2      |    0 | real       | kind_phys | in     | F        |
+!! | dxinv          | inverse_scaling_factor_for_critical_relative_humidity                     | inverse scaling factor for critical relative humidity                   | rad2 m-2      |    0 | real       | kind_phys | in     | F        |
+!! | pgr            | surface_air_pressure                                                      | surface pressure                                                        | Pa            |    1 | real       | kind_phys | in     | F        |
+!! | rhbbot         | critical_relative_humidity_at_surface                                     | critical relative humidity at the surface                               | frac          |    0 | real       | kind_phys | out    | F        |
+!! | rhpbl          | critical_relative_humidity_at_PBL_top                                     | critical relative humidity at the PBL top                               | frac          |    0 | real       | kind_phys | out    | F        |
+!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                           | critical relative humidity at the top of atmosphere                     | frac          |    0 | real       | kind_phys | out    | F        |
+!! | frain          | dynamics_to_physics_timestep_ratio                                        | ratio of dynamics timestep to physics timestep                          | none          |    0 | real       | kind_phys | out    | F        |
+!! | islmsk         | sea_land_ice_mask                                                         | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer    |           | out    | F        |
+!! | frland         | land_area_fraction                                                        | land area fraction                                                      | frac          |    1 | real       | kind_phys | out    | F        |
+!! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes             | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real       | kind_phys | out    | F        |
+!! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement  | complement to work1                                                     | none          |    1 | real       | kind_phys | out    | F        |
+!! | psurf          | surface_air_pressure_diag                                                 | surface air pressure diagnostic                                         | Pa            |    1 | real       | kind_phys | out    | F        |
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                                   | updated tendency of the x wind                                          | m s-2         |    2 | real       | kind_phys | out    | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                   | updated tendency of the y wind                                          | m s-2         |    2 | real       | kind_phys | out    | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                          | updated tendency of the temperature                                     | K s-1         |    2 | real       | kind_phys | out    | F        |
+!! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky   | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real       | kind_phys | out    | F        |
+!! | dqdt           | tendency_of_tracers_due_to_model_physics                                  | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real       | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                                | none          |    0 | character  | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                                   | flag          |    0 | integer    |           | out    | F        |
 !!
-    subroutine GFS_suite_interstitial_1_run (Model, Grid, Sfcprop, Statein, Diag, rhbbot, rhpbl, rhbtop, frain, islmsk, &
-                                             frland, work1, work2, dxmin, dxinv, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+    subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, crtrh, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
+      rhbbot, rhpbl, rhbtop, frain, islmsk, frland, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_sfcprop_type, GFS_statein_type, GFS_diag_type
 
       implicit none
 
       ! interface variables
-      type(GFS_control_type),           intent(in) :: Model
-      type(GFS_grid_type),              intent(in) :: Grid
-      type(GFS_sfcprop_type),           intent(in) :: Sfcprop
-      type(GFS_statein_type),           intent(in) :: Statein
-      type(GFS_diag_type),              intent(inout) :: Diag
+      integer,              intent(in) :: im, levs, ntrac
+      real(kind=kind_phys), intent(in) :: dtf, dtp, dxmin, dxinv
+      real(kind=kind_phys), intent(in), dimension(3) :: crtrh
+      real(kind=kind_phys), intent(in), dimension(im) :: slmsk, area, pgr
 
       real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop, frain
-      integer, dimension(size(Grid%xlon,1)), intent(out) :: islmsk
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: frland
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: work1, work2
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: dudt, dvdt, dtdt, dtdtc
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levs,Model%ntrac), intent(out) ::  dqdt
-      real(kind=kind_phys), intent(in) :: dxmin, dxinv
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,              intent(out), dimension(im) :: islmsk
+      real(kind=kind_phys), intent(out), dimension(im) :: frland, work1, work2, psurf
+      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
+      real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
       ! local variables
-      integer :: i
+      integer :: i, k, n
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      rhbbot = Model%crtrh(1)
-      rhpbl  = Model%crtrh(2)
-      rhbtop = Model%crtrh(3)
+      rhbbot = crtrh(1)
+      rhpbl  = crtrh(2)
+      rhbtop = crtrh(3)
 
-      frain = Model%dtf / Model%dtp
+      frain = dtf / dtp
 
-      do i = 1, size(Grid%xlon,1)
-        islmsk(i)   = nint(Sfcprop%slmsk(i))
+      do i = 1, im
+        islmsk(i)   = nint(slmsk(i))
         if (islmsk(i) == 1) then
           frland(i) = 1.0
         else
           frland(i) = 0.0
         endif
-        work1(i) = (log(Grid%area(i)) - dxmin) * dxinv
+        work1(i) = (log(area(i)) - dxmin) * dxinv
         work1(i) = max(0.0, min(1.0,work1(i)))
         work2(i) = 1.0 - work1(i)
-        Diag%psurf(i) = Statein%pgr(i)
+        psurf(i) = pgr(i)
       end do
 
-      dudt(:,:)   = 0.
-      dvdt(:,:)   = 0.
-      dtdt(:,:)   = 0.
-      dtdtc(:,:)  = 0.
-      dqdt(:,:,:) = 0.
+      do k=1,levs
+        do i=1,im
+          dudt(i,k)  = 0.
+          dvdt(i,k)  = 0.
+          dtdt(i,k)  = 0.
+          dtdtc(i,k) = 0.
+        enddo
+      enddo
+      do n=1,ntrac
+        do k=1,levs
+          do i=1,im
+            dqdt(i,k,n) = 0.
+          enddo
+        enddo
+      enddo
 
     end subroutine GFS_suite_interstitial_1_run
 
@@ -186,88 +197,202 @@
 
     subroutine GFS_suite_interstitial_2_finalize()
     end subroutine GFS_suite_interstitial_2_finalize
-
+#if 0
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
-!! | local_name     | standard_name                                                | long_name                                                             | units         | rank | type             |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                         | Fortran DDT containing FV3-GFS model control parameters               | DDT           |    0 | GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                            | Fortran DDT containing FV3-GFS grid and interpolation related data    | DDT           |    0 | GFS_grid_type    |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                         | Fortran DDT containing FV3-GFS prognostic state data in from dycore   | DDT           |    0 | GFS_statein_type |           | in     | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                                         | Fortran DDT containing FV3-GFS radiation tendencies needed in physics | DDT           |    0 | GFS_radtend_type |           | in     | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                         | cosine of zenith angle at current time                                | none          |    1 | real             | kind_phys | in     | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux                           | surface downwelling shortwave flux at current time                    | W m-2         |    1 | real             | kind_phys | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                            | surface downwelling longwave flux at current time                     | W m-2         |    1 | real             | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux                              | surface upwelling longwave flux at current time                       | W m-2         |    1 | real             | kind_phys | in     | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes | zenith angle temporal adjustment factor for shortwave fluxes          | none          |    1 | real             | kind_phys | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                            | Fortran DDT containing FV3-GFS fields targeted for diagnostic output  | DDT           |    0 | GFS_diag_type    |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                           | error message for error handling in CCPP                              | none          |    0 | character        | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                              | error flag for error handling in CCPP                                 | flag          |    0 | integer          |           | out    | F        |
+!! | local_name       | standard_name                                                                                 | long_name                                                                   | units         | rank | type       |    kind   | intent | optional |
+!! |------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
+!! | im               | horizontal_loop_extent                                                                        | horizontal loop extent                                                      | count         |    0 | integer    |           | in     | F        |
+!! | levs             | vertical_dimension                                                                            | vertical layer dimension                                                    | count         |    0 | integer    |           | in     | F        |
+!! | lssav            | flag_diagnostics                                                                              | logical flag for storing diagnostics                                        | flag          |    0 | logical    |           | in     | F        |
+!! | ldiag3d          | flag_diagnostics_3D                                                                           | flag for 3d diagnostic fields                                               | flag          |    0 | logical    |           | in     | F        |
+!! | lsidea           | flag_idealized_physics                                                                        | flag for idealized physics                                                  | flag          |    0 | logical    |           | in     | F        |
+!! | cplflx           | flag_for_flux_coupling                                                                        | flag controlling cplflx collection (default off)                            | flag          |    0 | logical    |           | in     | F        |
+!! | flag_cice        | flag_for_cice                                                                                 | flag for cice                                                               | flag          |    1 | logical    |           | in     | F        |
+!! | shal_cnv         | flag_for_shallow_convection                                                                   | flag for calling shallow convection                                         | flag          |    0 | logical    |           | in     | F        |
+!! | old_monin        | flag_for_old_PBL_scheme                                                                       | flag for using old PBL schemes                                              | flag          |    0 | logical    |           | in     | F        |
+!! | mstrat           | flag_for_moorthi_stratus                                                                      | flag for moorthi approach for stratus                                       | flag          |    0 | logical    |           | in     | F        |
+!! | do_shoc          | flag_for_shoc                                                                                 | flag for SHOC                                                               | flag          |    0 | logical    |           | in     | F        |
+!! | imfshalcnv       | flag_for_mass_flux_shallow_convection_scheme                                                  | flag for mass-flux shallow convection scheme                                | flag          |    0 | integer    |           | in     | F        |
+!! | dtf              | time_step_for_dynamics                                                                        | dynamics timestep                                                           | s             |    0 | real       | kind_phys | in     | F        |
+!! | xcosz            | instantaneous_cosine_of_zenith_angle                                                          | cosine of zenith angle at current time                                      | none          |    1 | real       | kind_phys | in     | F        |
+!! | adjsfcdsw        | surface_downwelling_shortwave_flux                                                            | surface downwelling shortwave flux at current time                          | W m-2         |    1 | real       | kind_phys | in     | F        |
+!! | adjsfcdlw        | surface_downwelling_longwave_flux                                                             | surface downwelling longwave flux at current time                           | W m-2         |    1 | real       | kind_phys | in     | F        |
+!! | pgr              | surface_air_pressure                                                                          | surface pressure                                                            | Pa            |    1 | real       | kind_phys | in     | F        |
+!! | ulwsfc_cice      | surface_upwelling_longwave_flux_for_cice                                                      | surface upwelling longwave flux for cice                                    | W m-2         |    1 | real       | kind_phys | in     | F        |
+!! | lwhd             | tendency_of_air_temperature_due_to_longwave_heating_for_idea                                  | idea sky lw heating rates                                                   | K s-1         |    3 | real       | kind_phys | in     | F        |
+!! | htrsw            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep                    | total sky sw heating rate                                                   | K s-1         |    2 | real       | kind_phys | in     | F        |
+!! | htrlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep                     | total sky lw heating rate                                                   | K s-1         |    2 | real       | kind_phys | in     | F        |
+!! | xmu              | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                                  | zenith angle temporal adjustment factor for shortwave fluxes                | none          |    1 | real       | kind_phys | in     | F        |
+!! | ctei_rm          | critical_cloud_top_entrainment_instability_criteria                                           | critical cloud top entrainment instability criteria                         | none          |    1 | real       | kind_phys | in     | F        |
+!! | work1            | grid_size_related_coefficient_used_in_scale-sensitive_schemes                                 | grid size related coefficient used in scale-sensitive schemes               | none          |    1 | real       | kind_phys | in     | F        |
+!! | work2            | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement                      | complement to work1                                                         | none          |    1 | real       | kind_phys | in     | F        |
+!! | prsi             | air_pressure_at_interface                                                                     | air pressure at model layer interfaces                                      | Pa            |    2 | real       | kind_phys | in     | F        |
+!! | tgrs             | air_temperature                                                                               | model layer mean temperature                                                | K             |    2 | real       | kind_phys | in     | F        |
+!! | prsl             | air_pressure                                                                                  | mean layer pressure                                                         | Pa            |    2 | real       | kind_phys | in     | F        |
+!! | qgrs_water_vapor | water_vapor_specific_humidity                                                                 | water vapor specific humidity                                               | kg kg-1       |    2 | real       | kind_phys | in     | F        |
+!! | qgrs_cloud_water | cloud_condensed_water_mixing_ratio                                                            | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)  | kg kg-1       |    2 | real       | kind_phys | in     | F        |
+!! | cp               | specific_heat_of_dry_air_at_constant_pressure                                                 | specific heat of dry air at constant pressure                               | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
+!! | hvap             | latent_heat_of_vaporization_of_water_at_0C                                                    | latent heat of evaporation/sublimation                                      | J kg-1        |    0 | real       | kind_phys | in     | F        |
+!! | prslk            | dimensionless_exner_function_at_model_layers                                                  | dimensionless Exner function at model layer centers                         | none          |    2 | real       | kind_phys | in     | F        |
+!! | suntim           | duration_of_sunshine                                                                          | sunshine duration time                                                      | s             |    1 | real       | kind_phys | inout  | F        |
+!! | adjsfculw        | surface_upwelling_longwave_flux                                                               | surface upwelling longwave flux at current time                             | W m-2         |    1 | real       | kind_phys | inout  | F        |
+!! | dlwsfc           | cumulative_surface_downwelling_longwave_flux_multiplied_by_timestep                           | cumulative surface downwelling LW flux multiplied by timestep               | W m-2 s       |    1 | real       | kind_phys | inout  | F        |
+!! | ulwsfc           | cumulative_surface_upwelling_longwave_flux_multiplied_by_timestep                             | cumulative surface upwelling LW flux multiplied by timestep                 | W m-2 s       |    1 | real       | kind_phys | inout  | F        |
+!! | psmean           | cumulative_surface_pressure_multiplied_by_timestep                                            | cumulative surface pressure multiplied by timestep                          | Pa s          |    1 | real       | kind_phys | inout  | F        |
+!! | dt3dt_lw         | cumulative_change_in_temperature_due_to_longwave_radiation                                    | cumulative change in temperature due to longwave radiation                  | K             |    2 | real       | kind_phys | inout  | F        |
+!! | dt3dt_sw         | cumulative_change_in_temperature_due_to_shortwave_radiation_and_orographic_gravity_wave_drag  | cumulative change in temperature due to SW rad and oro. GWD                 | K             |    2 | real       | kind_phys | inout  | F        |
+!! | dt3dt_pbl        | cumulative_change_in_temperature_due_to_PBL                                                   | cumulative change in temperature due to PBL                                 | K             |    2 | real       | kind_phys | inout  | F        |
+!! | dt3dt_dcnv       | cumulative_change_in_temperature_due_to_deep_convection                                       | cumulative change in temperature due to deep conv.                          | K             |    2 | real       | kind_phys | inout  | F        |
+!! | dt3dt_scnv       | cumulative_change_in_temperature_due_to_shal_convection                                       | cumulative change in temperature due to shal conv.                          | K             |    2 | real       | kind_phys | inout  | F        |
+!! | dt3dt_mp         | cumulative_change_in_temperature_due_to_microphysics                                          | cumulative change in temperature due to microphysics                        | K             |    2 | real       | kind_phys | inout  | F        |
+!! | ctei_rml         | grid_sensitive_critical_cloud_top_entrainment_instability_criteria                            | grid sensitive critical cloud top entrainment instability criteria          | none          |    1 | real       | kind_phys | inout  | F        |
+!! | ctei_r           | cloud_top_entrainment_instability_value                                                       | cloud top entrainment instability value                                     | none          |    1 | real       | kind_phys | inout  | F        |
+!! | kinver           | index_of_highest_temperature_inversion                                                        | index of highest temperature inversion                                      | index         |    1 | integer    |           | inout  | F        |
+!! | errmsg           | ccpp_error_message                                                                            | error message for error handling in CCPP                                    | none          |    0 | character  | len=*     | out    | F        |
+!! | errflg           | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                       | flag          |    0 | integer    |           | out    | F        |
 !!
-    subroutine GFS_suite_interstitial_2_run (Model, Grid, Statein, Radtend, xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu, &
-                                             Diag, errmsg, errflg)
+#endif
+    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,  &
+      do_shoc, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, work1, work2,  &
+      prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk,                                                    &
+      suntim, adjsfculw, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp, ctei_rml,     &
+      ctei_r, kinver, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, GFS_statein_type, GFS_radtend_type, GFS_diag_type
 
       implicit none
 
       ! interface variables
-      type(GFS_control_type),           intent(in)    :: Model
-      type(GFS_grid_type),              intent(in)    :: Grid
-      type(GFS_statein_type),           intent(in)    :: Statein
-      type(GFS_radtend_type),           intent(in)    :: Radtend
-      type(GFS_diag_type),              intent(inout) :: Diag
+      integer,              intent(in) :: im, levs, imfshalcnv
+      logical,              intent(in) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv, old_monin, mstrat, do_shoc
+      real(kind=kind_phys), intent(in) :: dtf, cp, hvap
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: xcosz, adjsfcdsw, adjsfcdlw, adjsfculw, xmu
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      logical,              intent(in), dimension(im) :: flag_cice
+      real(kind=kind_phys), intent(in), dimension(2) :: ctei_rm
+      real(kind=kind_phys), intent(in), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, ulwsfc_cice, work1, work2
+      real(kind=kind_phys), intent(in), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in), dimension(im, levs+1) :: prsi
+      real(kind=kind_phys), intent(in), dimension(im, levs, 6) :: lwhd
+
+      integer,              intent(inout), dimension(im) :: kinver
+      real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, adjsfculw, ctei_rml, ctei_r
+      real(kind=kind_phys), intent(inout), dimension(im, levs) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
       ! local variables
       real(kind=kind_phys), parameter :: czmin   = 0.0001      ! cos(89.994)
       integer :: i, k
-      real(kind=kind_phys) :: tem1
+      real(kind=kind_phys) :: tem1, tem2, tem, hocp
+      logical, dimension(im) :: invrsn
+      real(kind=kind_phys), dimension(im) :: tx1, tx2
+
+      real(kind=kind_phys), parameter :: qmin    = 1.0e-10
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      if (Model%lssav) then      !  --- ...  accumulate/save output variables
+      hocp = hvap/cp
+
+      if (lssav) then      !  --- ...  accumulate/save output variables
 
 !  --- ...  sunshine duration time is defined as the length of time (in mdl output
 !           interval) that solar radiation falling on a plane perpendicular to the
 !           direction of the sun >= 120 w/m2
 
-        do i = 1, size(Grid%xlon,1)
+        do i = 1, im
           if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
             tem1 = adjsfcdsw(i) / xcosz(i)
             if ( tem1 >= 120.0 ) then
-              Diag%suntim(i) = Diag%suntim(i) + Model%dtf
+              suntim(i) = suntim(i) + dtf
             endif
           endif
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
+        if (cplflx) then
+          do i=1,im
+            if (flag_cice(i)) adjsfculw(i) = ulwsfc_cice(i)
+          enddo
+        endif
+        do i=1,im
+          dlwsfc(i) = dlwsfc(i) +   adjsfcdlw(i)*dtf
+          ulwsfc(i) = ulwsfc(i) +   adjsfculw(i)*dtf
+          psmean(i) = psmean(i) +   pgr(i)*dtf        ! mean surface pressure
+        end do
 
-        Diag%dlwsfc(:) = Diag%dlwsfc(:) +   adjsfcdlw(:)*Model%dtf
-        Diag%ulwsfc(:) = Diag%ulwsfc(:) +   adjsfculw(:)*Model%dtf
-        Diag%psmean(:) = Diag%psmean(:) + Statein%pgr(:)*Model%dtf        ! mean surface pressure
-
-        if (Model%ldiag3d) then
-          if (Model%lsidea) then
-            Diag%dt3dt(:,:,1) = Diag%dt3dt(:,:,1) + Radtend%lwhd(:,:,1)*Model%dtf
-            Diag%dt3dt(:,:,2) = Diag%dt3dt(:,:,2) + Radtend%lwhd(:,:,2)*Model%dtf
-            Diag%dt3dt(:,:,3) = Diag%dt3dt(:,:,3) + Radtend%lwhd(:,:,3)*Model%dtf
-            Diag%dt3dt(:,:,4) = Diag%dt3dt(:,:,4) + Radtend%lwhd(:,:,4)*Model%dtf
-            Diag%dt3dt(:,:,5) = Diag%dt3dt(:,:,5) + Radtend%lwhd(:,:,5)*Model%dtf
-            Diag%dt3dt(:,:,6) = Diag%dt3dt(:,:,6) + Radtend%lwhd(:,:,6)*Model%dtf
+        if (ldiag3d) then
+          if (lsidea) then
+            do k=1,levs
+              do i=1,im
+                dt3dt_lw(i,k) = dt3dt_lw(i,k) + lwhd(i,k,1)*dtf
+                dt3dt_sw(i,k) = dt3dt_sw(i,k) + lwhd(i,k,2)*dtf
+                dt3dt_pbl(i,k) = dt3dt_pbl(i,k) + lwhd(i,k,3)*dtf
+                dt3dt_dcnv(i,k) = dt3dt_dcnv(i,k) + lwhd(i,k,4)*dtf
+                dt3dt_scnv(i,k) = dt3dt_scnv(i,k) + lwhd(i,k,5)*dtf
+                dt3dt_mp(i,k) = dt3dt_mp(i,k) + lwhd(i,k,6)*dtf
+              end do
+            end do
           else
-            do k = 1, Model%levs
-              Diag%dt3dt(:,k,1) = Diag%dt3dt(:,k,1) + Radtend%htrlw(:,k)*Model%dtf
-              Diag%dt3dt(:,k,2) = Diag%dt3dt(:,k,2) + Radtend%htrsw(:,k)*Model%dtf*xmu(:)
+            do k=1,levs
+              do i=1,im
+                dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
+                dt3dt_sw(i,k) = dt3dt_sw(i,k) + htrsw(i,k)*dtf*xmu(i)
+              enddo
             enddo
           endif
         endif
       endif    ! end if_lssav_block
+
+      do i=1, im
+        invrsn(i) = .false.
+        tx1(i) = 0.0
+        tx2(i) = 10.0
+        ctei_r(i) = 10.0
+      end do
+
+      if ((((imfshalcnv == 0 .and. shal_cnv) .or. old_monin) .and. mstrat) &
+         .or. do_shoc) then
+        ctei_rml(:) = ctei_rm(1)*work1(:) + ctei_rm(2)*work2(:)
+        do k=1,levs/2
+          do i=1,im
+            if (prsi(i,1)-prsi(i,k+1) < 0.35*prsi(i,1)       &
+                .and. (.not. invrsn(i))) then
+              tem = (tgrs(i,k+1) - tgrs(i,k))  &
+                  / (prsl(i,k)   - prsl(i,k+1))
+
+              if (((tem > 0.00010) .and. (tx1(i) < 0.0)) .or.  &
+                  ((tem-abs(tx1(i)) > 0.0) .and. (tx2(i) < 0.0))) then
+                invrsn(i) = .true.
+
+                if (qgrs_water_vapor(i,k) > qgrs_water_vapor(i,k+1)) then
+                  tem1 = tgrs(i,k+1) + hocp*max(qgrs_water_vapor(i,k+1),qmin)
+                  tem2 = tgrs(i,k)   + hocp*max(qgrs_water_vapor(i,k),qmin)
+
+                  tem1 = tem1 / prslk(i,k+1) - tem2 / prslk(i,k)
+
+!  --- ...  (cp/l)(deltathetae)/(deltatwater) > ctei_rm -> conditon for CTEI
+                  ctei_r(i) = (1.0/hocp)*tem1/(qgrs_water_vapor(i,k+1)-qgrs_water_vapor(i,k)  &
+                            + qgrs_cloud_water(i,k+1)-qgrs_cloud_water(i,k))
+                else
+                  ctei_r(i) = 10
+                endif
+
+                if ( ctei_rml(i) > ctei_r(i) ) then
+                  kinver(i) = k
+                else
+                  kinver(i) = levs
+                endif
+              endif
+
+              tx2(i) = tx1(i)
+              tx1(i) = tem
+            endif
+          enddo
+        enddo
+      endif
 
     end subroutine GFS_suite_interstitial_2_run
 
