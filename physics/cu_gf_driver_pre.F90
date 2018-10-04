@@ -45,21 +45,17 @@
 
       if(Model%kdt.gt.1) then
        dtdyn=3600.0*(Model%fhour)/Model%kdt   ! G. Firl's suggestion
-       !print*,'hli Model%dtp,dtdyn',Model%dtp,dtdyn
-       !print*,'hli Statein%tgrs(:,:)',Statein%tgrs(:,:)
-       !print*,'hli Tbd%phy_f3d(:,:,5)',Tbd%phy_f3d(:,:,5)
        if(Model%dtp > dtdyn) then
-        Tbd%forcet(:,:)=(Statein%tgrs(:,:)  - Tbd%phy_f3d(:,:,5))/Model%dtp
-        Tbd%forceq(:,:)=(Statein%qgrs(:,:,1)- Tbd%phy_f3d(:,:,6))/Model%dtp
+        Tbd%forcet(:,:)=(Statein%tgrs(:,:)  - Tbd%prevst(:,:))/Model%dtp
+        Tbd%forceq(:,:)=(Statein%qgrs(:,:,1)- Tbd%prevsq(:,:))/Model%dtp
        else
-        Tbd%forcet(:,:)=(Statein%tgrs(:,:)  - Tbd%phy_f3d(:,:,5))/dtdyn
-        Tbd%forceq(:,:)=(Statein%qgrs(:,:,1)- Tbd%phy_f3d(:,:,6))/dtdyn
+        Tbd%forcet(:,:)=(Statein%tgrs(:,:)  - Tbd%prevst(:,:))/dtdyn
+        Tbd%forceq(:,:)=(Statein%qgrs(:,:,1)- Tbd%prevsq(:,:))/dtdyn
        endif
       else
        Tbd%forcet(:,:)=0.0
        Tbd%forceq(:,:)=0.0
       endif
-      print*,'hli pre Tbd%forcet(1,1)',Tbd%forcet(1,1)
 
     end subroutine cu_gf_driver_pre_run
 

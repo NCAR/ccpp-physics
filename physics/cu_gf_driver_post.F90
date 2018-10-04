@@ -40,8 +40,8 @@
       errmsg = ''
       errflg = 0
 
-      Tbd%phy_f3d(:,:,5) = Stateout%gt0(:,:)
-      Tbd%phy_f3d(:,:,6) = Stateout%gq0(:,:,1)
+      Tbd%prevst(:,:) = Stateout%gt0(:,:)
+      Tbd%prevsq(:,:) = Stateout%gq0(:,:,1)
 
     end subroutine cu_gf_driver_post_run
 
