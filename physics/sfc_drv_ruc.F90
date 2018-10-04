@@ -551,7 +551,6 @@ endif
           infiltr(i,j)  = 0.0
           runoff1(i,j)  = 0.0
           runoff2(i,j)  = 0.0
-          acrunoff(i,j) = 0.0
           snfallac(i,j) = 0.0
 
         endif
@@ -925,7 +924,7 @@ endif
      &          infiltr(i,j), runoff1(i,j), runoff2(i,j), acrunoff(i,j),     &
      &          sfcexc(i,j), acceta(i,j), ssoil(i,j),                        &
      &          snfallac(i,j), acsn(i,j), snomlt(i,j),                       &
-     &          smfrsoil(i,:,j),keepfrsoil(i,:,j), .true.,                   &
+     &          smfrsoil(i,:,j),keepfrsoil(i,:,j), .false.,                  &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
      &          its,ite, jts,jte, kts,kte                                    )
