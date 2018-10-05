@@ -1112,7 +1112,7 @@ endif
 !!!!TEST use  LH to check water budget
 !          GRDFLX (I,J) = waterbudget(i,j) 
 
-!    IF (debug_print ) THEN
+    IF (debug_print ) THEN
   print *,'Smf=',smf(i,j),i,j
   print *,'Budget',budget(i,j),i,j
   print *,'RUNOFF2= ', i,j,runoff2(i,j)
@@ -1126,7 +1126,7 @@ endif
   print *,'SNOW-SNOWold',i,j,max(0.,snwe-snowold(i,j))
   print *,'CANWATold, canwat ',i,j,canwatold(i,j),canwat(i,j)
   print *,'canwat(i,j)-canwatold(i,j)',max(0.,canwat(i,j)-canwatold(i,j))
-!    ENDIF
+    ENDIF
 
 
     IF (debug_print ) THEN
@@ -2559,10 +2559,20 @@ endif
         psit=psis*fex ** (-bclh)
         psit = max(-1.e5, psit)
         alfa=min(1.,exp(G0_P*psit/r_v/SOILT))
-     print *,'alfa=',alfa, exp(G0_P*psit/r_v/SOILT)
+     ! print *,'alfa=',alfa, exp(G0_P*psit/r_v/SOILT)
 !      endif
         alfa=1.
 ! field capacity
+! 20jun18 - beta in Eq. (4) is called soilres here - it limits soil evaporation
+! when soil moisture is below field capacity.  [Lee and Pielke, 1992]
+! This formulation agrees with obsevations when top layer is < 2 cm thick.
+! Soilres = 1 for snow, glaciers and wetland.
+!        fc=ref  - suggested in the paper
+!        fc=max(qmin,ref*0.5) ! used prior to 20jun18 change
+! Switch from ref*0.5 to ref*0.25 will reduce soil resistance, increase direct
+! evaporation, effects sparsely vegetated areas--> cooler during the day
+!        fc=max(qmin,ref*0.25)  ! 
+! For now we'll go back to ref*0.5
         fc=max(qmin,ref*0.5)
         fex_fc=1.
       if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
@@ -2799,20 +2809,20 @@ endif
           S=THDIF(1)*CAP(1)*DZSTOP*(TSO(1)-TSO(2))
 ! Energy budget
           FLTOT=RNET-HFT-XLV*EETA-S-X
-!    IF (debug_print ) THEN
+    IF (debug_print ) THEN
 !    IF(i.eq.440.and.j.eq.180 .or. qfx.gt.1000..or.i.eq.417.and.j.eq.540) then
        print *,'SOIL - FLTOT,RNET,HFT,QFX,S,X=',i,j,FLTOT,RNET,HFT,XLV*EETA,s,x
        print *,'edir1,ec1,ett1,mavail,qkms,qvatm,qvg,qsg,vegfrac',&
                 edir1,ec1,ett1,mavail,qkms,qvatm,qvg,qsg,vegfrac
-!    ENDIF
+    ENDIF
     if(detal(1) .ne. 0.) then
 ! SMF - energy of phase change in the first soil layer
 !        smf=xlmelt*1.e3*(soiliqwm(1)-soiliqwmold(1))/delt
          smf=fltot
-!    IF (debug_print ) THEN
+    IF (debug_print ) THEN
      print *,'detal(1),xlmelt,soiliqwm(1),delt',detal(1),xlmelt,soiliqwm(1),delt
      print *,'Implicit phase change in the first layer - smf=',smf
-!    ENDIF
+    ENDIF
     endif
 
 
@@ -3466,13 +3476,6 @@ endif
            soilicem(k)=min(soilicem(k),                            &
                     0.5*(smfrkeep(k)+smfrkeep(k+1)))
            soiliqwm(k)=max(0.,soilmoism(k)-soilicem(k)*riw)
-       print *,'i,j,k',i,j,k
-       print *,'dqm',dqm
-       print *,'riw',riw
-       print *,'smfrkeep(k)',smfrkeep(k)
-       print *,'soilmoism(k)',smfrkeep(k)
-       print *,'soilicem(k)',soilicem(k)
-       print *,'soiliqwm(k)',soiliqwm(k)
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
        endif
@@ -4813,7 +4816,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     IF (debug_print ) THEN
         print *,'200 QVG,QSG,QCG,TSO(1)',QVG,QSG,QCG,TSO(1)
     ENDIF
-
+if(1==2) then
   if(qvatm > QSG .and. iter==0) then
 !condensation regime
     IF (debug_print ) THEN
@@ -4826,6 +4829,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
       iter=1
 !      goto 2111
   endif
+endif ! 1==2
     IF (debug_print ) THEN
      if(iter == 1) then
       print *,'QVATM,QVG,QSG,QCG,TS1',QVATM,QVG,QSG,QCG,TS1
@@ -5334,6 +5338,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
     ENDIF
   200   CONTINUE
 
+if(1==2) then
   if(qvatm > QSG .and. iter==0) then
 !condensation regime
     IF (debug_print ) THEN
@@ -5346,6 +5351,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
       iter=1
 !      goto 2211
   endif
+endif ! 1==2
+
     IF (debug_print ) THEN
      if(iter==1) then
        print *,'SNOW - QVATM,QVG,QSG,QCG,TS1',QVATM,QVG,QSG,QCG,TS1
@@ -5524,7 +5531,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 !*** From Koren et al. (1999) 13% of snow melt stays in the snow pack
         rsmfrac=min(0.18,(max(0.08,snwepr/0.10*0.13)))
        if(snhei > 0.01) then
-        rsm=rsmfrac*smelt*delt
+        rsm=min(snwe,rsmfrac*smelt*delt)
        else
 ! do not keep melted water if snow depth is less that 1 cm
         rsm=0.
@@ -5561,8 +5568,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 
       if(smelt.gt.0..and.rsm.gt.0.) then
        if(snwe.le.rsm) then
-    IF ( 1==1 ) THEN
-     print *,'SNWE<RSM snwe,rsm,smelt*delt,epot*ras*delt,beta', &
+    IF ( debug_print ) THEN
+       print *,'SNWE<RSM snwe,rsm,smelt*delt,epot*ras*delt,beta', &
                      snwe,rsm,smelt*delt,epot*ras*delt,beta
     ENDIF
        else
@@ -6509,7 +6516,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        IF(I1.NE.I) GOTO 10
        TS=T1-.05*RN
        QS=(TT(I)+(TT(I)-TT(I+1))*RN)/PP
-   print *,'in VILKA - TS,QS',ts,qs
+!   print *,'in VILKA - TS,QS',ts,qs
        GOTO 20
 !   1   PRINT *,'Crash in surface energy budget - STOP'
    1   PRINT *,'     AVOST IN VILKA     Table index= ',I
@@ -6846,7 +6853,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         LAItoday(k) = LAITBL(K) - deltalai(k) * factor
          if(IFORTBL(k) == 7) then
 !crops
-           ZNTtoday(k) = Z0TBL(K) * (1. - 0.66 * factor)
+           ZNTtoday(k) = Z0TBL(K) - 0.125 * factor
          else
            ZNTtoday(k) = Z0TBL(K)
          endif
