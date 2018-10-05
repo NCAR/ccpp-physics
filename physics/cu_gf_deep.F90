@@ -39,22 +39,8 @@ module cu_gf_deep
 !-----srf-08aug2017-----begin
  real(kind=kind_phys), parameter ::    qrc_crit= 2.e-4
 !-----srf-08aug2017-----end
+
 contains
-
-!> \brief brief description of the subroutine
-!!
-!! \section arg_table_sasas_deep_init argument table
-!!
-   subroutine cu_gf_deep_init
-   end subroutine cu_gf_deep_init
-
-
-!> \brief brief description of the subroutine
-!!
-!! \section arg_table_sasas_deep_finalize argument table
-!!
-   subroutine cu_gf_deep_finalize
-   end subroutine cu_gf_deep_finalize
 
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
