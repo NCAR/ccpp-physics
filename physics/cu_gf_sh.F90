@@ -49,23 +49,8 @@ module cu_gf_sh
     real(kind=kind_phys), parameter:: c0_shal=.001
     real(kind=kind_phys), parameter:: fluxtune=1.5
 
-
 contains
 
-!> \brief brief description of the subroutine
-!!
-!! \section arg_table_sasas_deep_init argument table
-!!
-      subroutine cu_gf_sh_init
-      end subroutine cu_gf_sh_init
-
-
-!> \brief brief description of the subroutine
-!!
-!! \section arg_table_sasas_deep_finalize argument table
-!!
-      subroutine cu_gf_sh_finalize
-      end subroutine cu_gf_sh_finalize
   subroutine cu_gf_sh_run (                                            &
 ! input variables, must be supplied
                          zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
