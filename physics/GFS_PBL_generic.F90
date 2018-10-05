@@ -160,6 +160,7 @@
 !! | ldiag3d                      | flag_diagnostics_3D                                                               | flag for 3d diagnostic fields                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | lsidea                       | flag_idealized_physics                                                            | flag for idealized physics                                                                  | flag          |    0 | logical   |           | in     | F        |
 !! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)                                                 | flag          |    0 | logical   |           | in     | F        |
+!! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | dvdftra                      | tendency_of_vertically_diffused_tracer_concentration                              | updated tendency of the tracers due to vertical diffusion in PBL scheme                     | kg kg-1 s-1   |    3 | real      | kind_phys | in     | F        |
 !! | dusfc1                       | instantaneous_surface_x_momentum_flux                                             | surface momentum flux in the x-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | dvsfc1                       | instantaneous_surface_y_momentum_flux                                             | surface momentum flux in the y-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
@@ -212,8 +213,8 @@
 !!
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac, ntoz, imp_physics, imp_physics_gfdl, imp_physics_thompson, &
-        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, &
-        dudt, dvdt, dtdt, htrsw, htrlw, xmu,&
+        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, &
+        dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,&
         dqdt, dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,&
         dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain, dqdt_snow, dqdt_graupel, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, &
@@ -225,7 +226,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntoz, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf
+      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
@@ -249,7 +250,7 @@
       errmsg = ''
       errflg = 0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
-      if (nvdiff == ntrac .and. hybedmf) then
+      if (nvdiff == ntrac .and. (hybedmf .or. do_shoc)) then
         dqdt = dvdftra
       elseif (nvdiff /= ntrac) then
         if (imp_physics == imp_physics_wsm6) then
