@@ -1,48 +1,70 @@
 !> \file cu_gf_driver_post.F90
 !!  Contains code related to GF convective schemes to be used within the GFS physics suite.
 
-      module cu_gf_driver_post
+module cu_gf_driver_post
 
-      contains
+   implicit none
 
-      subroutine cu_gf_driver_post_init ()
-      end subroutine cu_gf_driver_post_init
+   private
 
-      subroutine cu_gf_driver_post_finalize()
-      end subroutine cu_gf_driver_post_finalize
+   public :: cu_gf_driver_post_init, cu_gf_driver_post_run, cu_gf_driver_post_finalize
+
+   contains
+
+   subroutine cu_gf_driver_post_init ()
+   end subroutine cu_gf_driver_post_init
+
+   subroutine cu_gf_driver_post_finalize()
+   end subroutine cu_gf_driver_post_finalize
 
 !> \section arg_table_cu_gf_driver_post_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                                | units         | rank | type              |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|--------------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                  | DDT           |    0 | GFS_control_type  |           | in     | F        |
-!! | Stateout       | FV3-GFS_Stateout_type                                  |Fortran DDT containing FV3-GFS prognostic state to return to dycore       | DDT           |    0 | GFS_stateout_type |           | inout  | F        |
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data       | DDT           |    0 | GFS_grid_type     |           | in     | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                        | DDT           |    0 | GFS_tbd_type      |           | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                                 | none          |    0 | character         | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                                    | flag          |    0 | integer           |           | out    | F        |
+!! | local_name     | standard_name                                          | long_name                                        | units   | rank | type      |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|--------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                           | count   |    0 | integer   |           | in     | F        |
+!! | t              | air_temperature_updated_by_physics                     | temperature updated by physics                   | K       |    2 | real      | kind_phys | in     | F        |
+!! | q              | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | prevst         | temperature_from_previous_timestep                     | temperature from previous time step              | K       |    2 | real      | kind_phys | out    | F        |
+!! | prevsq         | moisture_from_previous_timestep                        | moisture from previous time step                 | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | cactiv         | conv_activity_counter                                  | convective activity memory                       | none    |    1 | integer   |           | in     | F        |
+!! | conv_act       | gf_memory_counter                                      | Memory counter for GF                            | none    |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP         | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP            | flag    |    0 | integer   |           | out    | F        |
 !!
-    subroutine cu_gf_driver_post_run (Model, Stateout, Grid, Tbd, errmsg, errflg)
+   subroutine cu_gf_driver_post_run (im, t, q, prevst, prevsq, cactiv, conv_act, errmsg, errflg)
 
-      use machine,               only: kind_phys
-      use GFS_typedefs,          only: GFS_control_type, GFS_stateout_type, GFS_grid_type, GFS_tbd_type
+      use machine, only: kind_phys
 
       implicit none
 
-      type(GFS_control_type),           intent(in) :: Model
-      type(GFS_stateout_type),       intent(inout) :: Stateout
-      type(GFS_grid_type),              intent(in) :: Grid
-      type(GFS_tbd_type),            intent(inout) :: Tbd
-
+      ! Interface variables
+      integer,          intent(in)  :: im
+      real(kind_phys),  intent(in)  :: t(:,:)
+      real(kind_phys),  intent(in)  :: q(:,:)
+      real(kind_phys),  intent(out) :: prevst(:,:)
+      real(kind_phys),  intent(out) :: prevsq(:,:)
+      integer,          intent(in)  :: cactiv(:)
+      real(kind_phys),  intent(out) :: conv_act(:)
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer, intent(out)          :: errflg
+
+      ! Local variables
+      integer :: i
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      Tbd%prevst(:,:) = Stateout%gt0(:,:)
-      Tbd%prevsq(:,:) = Stateout%gq0(:,:,1)
+      prevst(:,:) = t(:,:)
+      prevsq(:,:) = q(:,:)
 
-    end subroutine cu_gf_driver_post_run
+      do i = 1, im
+        if (cactiv(i).gt.0) then
+          conv_act(i) = conv_act(i)+1.0
+        else
+          conv_act(i)=0.0
+        endif
+      enddo
 
-    end module cu_gf_driver_post
+   end subroutine cu_gf_driver_post_run
+
+end module cu_gf_driver_post
