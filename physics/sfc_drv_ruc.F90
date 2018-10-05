@@ -386,7 +386,7 @@ module lsm_ruc
     if( kdt == 1 .and. iter ==1 ) then
 ! RUC initialization
   if (1==1) then
-     print *,'RUC LSM initialization, kdt=', kdt
+      !print *,'RUC LSM initialization, kdt=', kdt
       call rucinit            (im, lsoil_ruc, nlev,                   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tskin, tg3,                    & ! in
@@ -1392,7 +1392,7 @@ endif
                    soilh2o, smfr, soiltemp, soilm,                      &
                    ims,ime, jms,jme, kms,kme,                           &
                    its,ite, jts,jte, kts,kte                            )
-      print *,'after ruclsminit - max/min mavail',maxval(mavail),minval(mavail)
+      !print *,'after ruclsminit - max/min mavail',maxval(mavail),minval(mavail)
 
       do j=jts,jte
       do i=its,ite
