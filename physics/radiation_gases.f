@@ -109,10 +109,37 @@
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
 !! data are entered as mixing ratio by volume, except ozone which is
 !! mass mixing ratio (g/g).
+!!\image html rad_gas_AGGI.png "Figure 1: Atmospheric radiative forcing, relative to 1750, by long-lived greenhouse gases and the 2016 update of the NOAA Annual Greenhouse Gas Index (AGGI)"
+!! NOAA Annual Greenhouse Gas Index (AGGI) shows that from 1990 to 2016, 
+!! radiative forcing by long-lived greenhouse gases (LLGHGs) increased by
+!! 40%, with \f$CO_2\f$ accounting for about 80% of this increase(WMO 
+!! Greenhouse Gas Bulletin (2017) \cite wmo_greenhouse_gas_bulletin_2017).
+!!
+!! Operational GFS selection for gas distribution:
+!!\n CO2 Distribution (namelist control parameter -\b ICO2=2):
+!!\n ICO2=0: use prescribed global annual mean value (currently = 380 ppmv)  
+!!\n ICO2=1: use observed global annual mean value
+!!\n ICO2=2: use observed monthly 2-d data table in \f$15^o\f$ horizontal resolution
+!!
+!! O3 Distribution (namelist control parameter -\b NTOZ):
+!!\n NTOZ=0: use seasonal and zonal averaged climatological ozone
+!!\n NTOZ>0: use 3-D prognostic ozone
+!!
+!! Trace Gases (currently using the global mean climatology in unit of ppmv):
+!! \f$CH_4-1.50\times10^{-6}\f$;
+!! \f$N_2O-0.31\times10^{-6}\f$;
+!! \f$O_2-0.209\f$;
+!! \f$CO-1.50\times10^{-8}\f$;
+!! \f$CF12-6.36\times10^{-10}\f$;
+!! \f$CF22-1.50\times10^{-10}\f$;
+!! \f$CF113-0.82\times10^{-10}\f$;
+!! \f$CCL4-1.40\times10^{-10}\f$
+!!
 !!\version NCEP-Radiation_gases     v5.1  Nov 2012
-!========================================!
-      module module_radiation_gases      !
-!........................................!
+
+!> This module sets up ozone climatological profiles and other constant gas
+!! profiles, such as co2, ch4, n2o, o2, and those of cfc gases.
+      module module_radiation_gases      
 !
       use physparam,         only : ico2flg, ictmflg, ioznflg, ivflip,  &
      &                              co2dat_file, co2gbl_file,           &
@@ -896,15 +923,14 @@
 !!\n                    (:,:,8)           - cfc22
 !!\n                    (:,:,9)           - ccl4
 !!\n                    (:,:,10)          - cfc113
-!>\section getgases_gen getgases General Algorithm
-!! @{
+!>\section gen_getgases getgases General Algorithm
+!!@{
 !-----------------------------------
       subroutine getgases                                               &
      &     ( plvl, xlon, xlat,                                          & ! ---  inputs
      &       IMAX, LMAX,                                                &
      &       gasdat                                                     & ! ---  outputs
      &      )
-
 !  ===================================================================  !
 !                                                                       !
 !  getgases set up global distribution of radiation absorbing  gases    !
@@ -933,19 +959,19 @@
 !               (:,:,9)           - ccl4                                !
 !               (:,:,10)          - cfc113                              !
 !                                                                       !
-!  external module variables:  (in physparam)                           !
-!     ico2flg    - co2 data source control flag                         !
-!                   =0: use prescribed co2 global mean value            !
-!                   =1: use input global mean co2 value (co2_glb)       !
-!                   =2: use input 2-d monthly co2 value (co2vmr_sav)    !
-!     ivflip     - vertical profile indexing flag                       !
-!                                                                       !
-!  internal module variables used:                                      !
-!     co2vmr_sav - saved monthly co2 concentration from sub gas_update  !
-!     co2_glb    - saved global annual mean co2 value from  gas_update  !
-!     gco2cyc    - saved global seasonal variation of co2 climatology   !
-!                  in 12-month form                                     !
-!  ** note: for lower atmos co2vmr_sav may have clim monthly deviations !
+!> - External module variables:  (in physparam)
+!!\n     ico2flg    - co2 data source control flag
+!!\n                   =0: use prescribed co2 global mean value
+!!\n                   =1: use input global mean co2 value (co2_glb)
+!!\n                   =2: use input 2-d monthly co2 value (co2vmr_sav)
+!!\n     ivflip     - vertical profile indexing flag
+!!
+!> - Internal module variables :
+!!\n     co2vmr_sav - saved monthly co2 concentration from sub gas_update
+!!\n     co2_glb    - saved global annual mean co2 value from  gas_update
+!!\n     gco2cyc    - saved global seasonal variation of co2 climatology
+!!                  in 12-month form
+!note: for lower atmos co2vmr_sav may have clim monthly deviations !
 !           superimposed on init-cond co2 value, while co2_glb only     !
 !           contains the global mean value, thus needs to add the       !
 !           monthly dglobal mean deviation gco2cyc at upper atmos. for  !

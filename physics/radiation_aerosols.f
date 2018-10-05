@@ -120,6 +120,21 @@
 !! \brief This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
+!! GFS selection for Aerosol distribution (namelist control paramter - \b IAER = 111
+!! and \b IAERMDL =0; not available for the current operational GFS)
+!! \n IAERMDL=0: OPAC-climatology tropospheric model (monthly mean, \f$15^o\f$ horizontal resolution)
+!! \n IAERMDL=1: GOCART-climatology tropospheric aerosol model
+!! \n IAERMDL=2: GOCART-climatology prognostic aerosol model
+!!
+!!\n \b Stratosphere: historical recorded volcanic forcing in four zonal mean bands (1850-2000)
+!!\n \b IAER = abc of 3-digit integer flags: a-volcanic; b-LW; c-SW
+!!\n a=0: include background stratospheric volcanic aerosol effect (if both b&c /=0)
+!!\n a=1: include recorded stratospheric volcanic aerosol effect
+!!\n b=0: no LW tropospheric aerosol effect
+!!\n b=1: include LW tropospheric aerosol effect
+!!\n c=0: no SW tropospheric aerosol effect
+!!\n c=1: include SW tropospheric aerosol effect
+!!
 !!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
 !!
 !!\n This module has three externally callable subroutines:
@@ -130,12 +145,14 @@
 !! - setaer() -- mapping aeros profile, compute aeros opticals
 !!
 !!\n References:
-!! - OPAC climatological aerosols: \cite hou_et_al_2002; \cite hess_et_al_1998
-!! - GOCART interactive aerosols: \cite chin_et_al_2000
-!! - Stratospheric volcanical aerosols: \cite sato_et_al_1993
-!========================================!
-      module module_radiation_aerosols   !
-!........................................!
+!! - OPAC climatological aerosols: Hou et al. (2002) \cite hou_et_al_2002; 
+!! Hess et al. (1998) \cite hess_et_al_1998
+!! - GOCART interactive aerosols: Chin et al.(2000) \cite chin_et_al_2000
+!! - Stratospheric volcanical aerosols: Sato et al. (1993) \cite sato_et_al_1993
+
+!> This module contains climatological atmospheric aerosol schemes for
+!! radiation computations.
+      module module_radiation_aerosols   
 !
       use physparam,only : iaermdl, iaerflg, lavoflg, lalwflg, laswflg, &
      &                     lalw1bd, aeros_file, ivflip, kind_phys       &
@@ -163,11 +180,11 @@
 
 ! --- general use parameter constants:
 ! num of output fields for SW rad
-      integer, parameter, public :: NF_AESW = 3
+      integer, parameter, public :: NF_AESW = 3       !< number of output fields for SW rad
 ! num of output fields for LW rad
-      integer, parameter, public :: NF_AELW = 3
+      integer, parameter, public :: NF_AELW = 3       !< number of output fields for LW rad
 ! starting band number in ir region
-      integer, parameter, public :: NLWSTR  = 1
+      integer, parameter, public :: NLWSTR  = 1       !< starting band number in IR region
 ! num of species for output aod (opnl)
       integer, parameter, public :: NSPC    = 5
 ! total+species
@@ -589,48 +606,35 @@
 !     dimension for extrhi_grt, ssarhi_grt, and asyrhi_grt) is
 !     not needed ===> hardwired to 8-bin dust
 
-!   - index for gocart aerosol species to be included in the
-!     calculations of aerosol optical properties (ext, ssa, asy)
-      type  gocart_index_type
-! dust
-         integer :: dust1, dust2, dust3, dust4, dust5
-! sea salt
-         integer :: ssam,  sscm
-! sulfate
-         integer :: suso
-! oc
-         integer :: waso_phobic, waso_philic
-! bc
-         integer :: soot_phobic, soot_philic
+      type  gocart_index_type         !< index for gocart aerosol species to be included in the
+                                      !! calculations of aerosol optical properties (ext, ssa, asy)
+         integer :: dust1, dust2, dust3, dust4, dust5   !< dust
+         integer :: ssam,  sscm                         !< sea salt
+         integer :: suso                                !< sulfate
+         integer :: waso_phobic, waso_philic            !< oc
+         integer :: soot_phobic, soot_philic            !< bc
       endtype
-      type (gocart_index_type), save :: dm_indx
+      type (gocart_index_type), save :: dm_indx         !< index for aer spec to be included in 
+                                                        !!aeropt calculations
 
-!  index for gocart aerosols from prognostic tracer fields
-      type  tracer_index_type
-! dust
-         integer :: du001, du002, du003, du004, du005
-! sea salt
-         integer :: ss001, ss002, ss003, ss004, ss005
-! sulfate
-         integer :: so4
-! oc
-         integer :: ocphobic, ocphilic
-! bc
-         integer :: bcphobic, bcphilic
+      type  tracer_index_type         !< index for gocart aerosols from prognostic tracer fields
+         integer :: du001, du002, du003, du004, du005   !< dust
+         integer :: ss001, ss002, ss003, ss004, ss005   !< sea salt
+         integer :: so4                                 !< sulfate
+         integer :: ocphobic, ocphilic                  !< oc
+         integer :: bcphobic, bcphilic                  !< bc
       endtype
-      type (tracer_index_type), save :: dmfcs_indx
+      type (tracer_index_type), save :: dmfcs_indx      !< index for prognostic aerosol fields
 
 !   - grid components to be included in the aeropt calculations
-! number of aerosol grid components
-      integer, save                  :: num_gridcomp = 0
-! aerosol grid components
-      character, allocatable , save  :: gridcomp(:)*2
+      integer, save                  :: num_gridcomp = 0    !< number of aerosol grid components
+      character, allocatable , save  :: gridcomp(:)*2       !< aerosol grid components
 
 ! default full-package setting
-      integer, parameter          :: max_num_gridcomp = 5
+      integer, parameter          :: max_num_gridcomp = 5   !< default full-package setting
 ! data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
       character*2                 :: max_gridcomp(max_num_gridcomp)
-      data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/
+      data max_gridcomp  /'DU', 'BC', 'OC', 'SU', 'SS'/    
 
 ! GOCART code modification end here (Sarah Lu)
 ! ------------------------!
@@ -644,17 +648,15 @@
 !      idxspc (NCM)         - index conversion array
 !      lspcaod              - logical flag for aod from individual species
 !
-! index conversion array:data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
-      integer, dimension(NCM) :: idxspc
+      integer, dimension(NCM) :: idxspc       !< index conversion array
       data  idxspc / 1, 2, 1, 1, 1, 1, 3, 5, 5, 4 /
 !
 !   - wvn550 is the wavenumber (1/cm) of wavelenth 550nm for diagnostic aod output
 !     nv_aod is the sw spectral band covering wvn550 (comp in aer_init)
 !
-! the wavenumber (\f$cm^-1\f$) of wavelength 550nm for diagnostic aod output
-      real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55
-! the sw spectral band covering wvn550 (comp in aer_init)
-      integer, save      :: nv_aod = 1
+      real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55  !< the wavenumber (\f$cm^-1\f$) of 
+                                                               !! wavelength 550nm for diagnostic aod output
+      integer, save      :: nv_aod = 1     !< the SW spectral band covering wvn550 (comp in aer_init)
 
 !  ---  public interfaces
 
@@ -3209,7 +3211,7 @@
 !! bands. there are seven different vertical profile structures. in the
 !! troposphere, aerosol distribution at each grid point is composed
 !! from up to six components out of ten different substances.
-!!\section radclimaer_gen radclimaer General Algorithm
+!\section radclimaer_gen radclimaer General Algorithm
 !--------------------------------
       subroutine radclimaer
 !................................
@@ -4166,7 +4168,7 @@
 !>\ingroup module_radiation_aerosols
 !> This subroutine reads input gocart aerosol optical data from Mie
 !! code calculations.
-!>\section rd_gocart_luts_gen rd_gocart_luts General Algorithm
+!\section rd_gocart_luts_gen rd_gocart_luts General Algorithm
 !-----------------------------
       subroutine rd_gocart_luts
 !.............................
@@ -4563,29 +4565,20 @@
 !--------------------------------
 !
 !>\ingroup module_radiation_aerosols
-!> This subroutine:
-!! - 1. read in aerosol dry mass and surface pressure from GEOS3-GOCART
+!!
+!! This subroutine:
+!! - Read in aerosol dry mass and surface pressure from GEOS3-GOCART
 !! C3.1 2000 monthly dataset or aerosol mixing ratio and surface
 !! pressure from GEOS4-GOCART 2000-2007 averaged monthly data set.
-!! - 2. compute goes lat/lon array (for horizontal mapping)
-!>\section rd_gocart_clim_gen rd_gocart_clim General Algorithm
-!! @{
+!! - Compute goes lat/lon array (for horizontal mapping)
+!\section rd_gocart_clim_gen rd_gocart_clim General Algorithm
+! @{
 !-----------------------------------
       subroutine rd_gocart_clim
 !...................................
 !  ---  inputs:  (in scope variables)
 !  ---  outputs: (in scope variables)
-
-!  ==================================================================  !
-!                                                                      !
-! subprogram: rd_gocart_clim                                           !
-!                                                                      !
-!   1. read in aerosol dry mass and surface pressure from GEOS3-GOCART !
-!      C3.1 2000 monthly data set                                      !
-!      or aerosol mixing ratio and surface pressure from GEOS4-GOCART  !
-!      2000-2007 averaged monthly data set                             !
-!   2. compute goes lat/lon array (for horizontal mapping)             !
-!                                                                      !
+!
 !  ====================  defination of variables  ===================  !
 !                                                                      !
 ! inputs arguments:                                                    !
@@ -4884,7 +4877,7 @@
       return
 !...................................
       end subroutine rd_gocart_clim
-!! @}
+! @}
 !-----------------------------------
 !
 !...................................

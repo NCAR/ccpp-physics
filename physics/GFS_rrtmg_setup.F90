@@ -69,8 +69,8 @@ module GFS_rrtmg_setup
 !! | faersw                   | aerosol_optical_properties_for_shortwave_bands_01-16                          | aerosol optical properties for shortwave bands 01-16          | various       |    4 | real      | kind_phys | in     | F        |
 !! | aerodp                   | atmosphere_optical_thickness_due_to_ambient_aerosol_particles                 | vertical integrated optical depth for various aerosol species | none          |    2 | real      | kind_phys | in     | F        |
 !! | me                       | mpi_rank                                                                      | current MPI-rank                                              | index         |    0 | integer   |           | in     | F        |
-!! | errmsg                   | error_message                                                                 | error message for error handling in CCPP                      | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | error_flag                                                                    | error flag for error handling in CCPP                         | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                      | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                         | flag          |    0 | integer   |           | out    | F        |
 !!
    subroutine GFS_rrtmg_setup_init (                                    &
           si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
@@ -147,8 +147,8 @@ module GFS_rrtmg_setup
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faerlw,",        &
                " check definitions of levr, ltp, nbdlw, nf_aelw:",     &
-               " expected shape ", shape(faerlw_check(1,:,:,:)),       &
-               " but got ", shape(faerlw(1,:,:,:))
+               " expected shape ", shape(faerlw_check(:,:,:,:)),       &
+               " but got ", shape(faerlw(:,:,:,:))
          errflg = 1
          return
       end if
@@ -156,17 +156,17 @@ module GFS_rrtmg_setup
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faersw,",        &
                " check definitions of levr, ltp, nbdsw, nf_aesw:",     &
-               " expected shape ", shape(faersw_check(1,:,:,:)),       &
-               " but got ", shape(faersw(1,:,:,:))
+               " expected shape ", shape(faersw_check(:,:,:,:)),       &
+               " but got ", shape(faersw(:,:,:,:))
          errflg = 1
          return
       end if
       if (size(aerodp(1,:)).ne.size(aerodp_check(1,:))) then
-         write(errmsg,"(3a,4i4,a,4i4)") &
+         write(errmsg,"(3a,2i4,a,2i4)") &
                "Runtime error: dimension mismatch for aerodp,",        &
                " check definitions of nspc1:",                         &
-               " expected shape ", shape(aerodp_check(1,:)),           &
-               " but got ", shape(aerodp(1,:))
+               " expected shape ", shape(aerodp_check(:,:)),           &
+               " but got ", shape(aerodp(:,:))
          errflg = 1
          return
       end if
@@ -262,8 +262,8 @@ module GFS_rrtmg_setup
 !! | sdec                     | sine_of_solar_declination_angle                                               | sin of the solar declination angle                      | none          |    0 | real      | kind_phys | out    | F        |
 !! | cdec                     | cosine_of_solar_declination_angle                                             | cos of the solar declination angle                      | none          |    0 | real      | kind_phys | out    | F        |
 !! | solcon                   | solar_constant                                                                | solar constant (sun-earth distant adjusted)             | W m-2         |    0 | real      | kind_phys | out    | F        |
-!! | errmsg                   | error_message                                                                 | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | error_flag                                                                    | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
    subroutine GFS_rrtmg_setup_run (                &
           idate, jdate, deltsw, deltim, lsswr, me, &
@@ -304,8 +304,8 @@ module GFS_rrtmg_setup
 !> \section arg_table_GFS_rrtmg_setup_finalize Argument Table
 !! | local_name               | standard_name                                                                 | long_name                                               | units         | rank | type      |   kind    | intent | optional |
 !! |--------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | errmsg                   | error_message                                                                 | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | error_flag                                                                    | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
 !!
    subroutine GFS_rrtmg_setup_finalize (errmsg, errflg)
 

@@ -34,8 +34,8 @@
 !! | clouds1        | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |    2 | real              | kind_phys | in     | F        |
 !! | clouds10       | cloud_optical_depth_weighted                                  | cloud optical depth, weighted                                                 | none     |    2 | real              | kind_phys | in     | F        |
 !! | clouds11       | cloud_optical_depth_layers_678                                | cloud optical depth from bands 6,7,8                                          | none     |    2 | real              | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                 | error message for error handling in CCPP                                      | none     |    0 | character         | len=*     | out    | F        |
-!! | errflg         | error_flag                                                    | error flag for error handling in CCPP                                         | flag     |    0 | integer           |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character         | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer           |           | out    | F        |
 !!
       subroutine GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein, &
               Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &

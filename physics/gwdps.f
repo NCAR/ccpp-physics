@@ -2,7 +2,8 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.
 
-
+!> This module contains the CCPP-compliant orographic gravity wave 
+!! drag pre interstitial codes.
       module gwdps_pre
 
       contains
@@ -26,8 +27,8 @@
 !! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
 !! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
 !! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                           | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                              | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
@@ -115,8 +116,7 @@
 
       end module gwdps_pre
 
-
-
+!> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module gwdps
 
       contains
@@ -179,13 +179,13 @@
 !! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
 !! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                                 | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                    | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                            | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                               | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
 !!
 !> \section gen_gwdps GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
 !! -# Calculate orographic wave drag
-!! 
+!!
 !! The NWP model gravity wave drag (GWD) scheme in the GFS has two
 !! main components: how the surface stress is computed, and then how
 !! that stress is distributed over a vertical column where it may
@@ -835,7 +835,7 @@
 ! --- lm eq 14:
 !> - Calculate the drag coefficient to vary with the aspect ratio of
 !! the obstable as seen by the incident flow (see eq.14 in
-!! \cite lott_and_miller_1997)
+!! Lott and Miller (1997) \cite lott_and_miller_1997)
 !!\f[
 !! R=\frac{\cos^{2}\psi+\gamma\sin^{2}\psi}{\gamma\cos^{2}\psi+\sin^{2}\psi}
 !!\f]
@@ -848,7 +848,7 @@
 !> - In each model layer below the dividing streamlines, a drag from
 !! the blocked flow is exerted by the obstacle on the large scale flow.
 !! The drag per unit area and per unit height is written (eq.15 in
-!! \cite lott_and_miller_1997):
+!! Lott and Miller (1997) \cite lott_and_miller_1997):
 !!\f[
 !! D_{b}(z)=-C_{d}\max(2-\frac{1}{R},0)\rho\frac{\sigma}{2h'}ZLEN\max(\cos\psi,\gamma\sin\psi)\frac{UDS}{2}
 !!\f]
@@ -1105,7 +1105,7 @@
 !
 !> - Calculate enhancement factor (E),number of mountans (m') and
 !! aspect ratio constant.
-!!\n As in eq.(4.9),(4.10),(4.11) in
+!!\n As in eq.(4.9),(4.10),(4.11) in Kim and Arakawa (1995)
 !! \cite kim_and_arakawa_1995, we define m' and E in such a way that they
 !! depend on the geometry and location of the subgrid-scale orography
 !! through OA and the nonlinearity of flow above the orography through
@@ -1133,7 +1133,7 @@
 !! \f$C_{G}\f$ are constants.
 
 !> - Calculate the reference-level drag \f$\tau_{0}\f$ (eq.(4.8) in
-!!  \cite kim_and_arakawa_1995):
+!!  Kim and Arakawa (1995) \cite kim_and_arakawa_1995):
 !!\f[
 !! \tau_0=E\frac{m'}{\triangle x}\frac{\rho_{0}U_0^3}{N_{0}}G'
 !!\f]
@@ -1188,7 +1188,7 @@
 !
 !> - Compute the drag above the reference level (\f$k\geq kref\f$):
 !!  - Calculate the ratio of the Scorer parameter (\f$R_{scor}\f$).
-!! \n From a series of experiments,
+!! \n From a series of experiments, Kim and Arakawa (1995)
 !! \cite kim_and_arakawa_1995 found that the magnitude of drag divergence
 !! tends to be underestimated by the revised scheme in low-level
 !! downstream regions with wave breaking. Therefore, at low levels when
@@ -1239,7 +1239,7 @@
 !!\f[
 !! Ri_{m}=\frac{Ri(1-Fr_{d})}{(1+\sqrt{Ri}\cdot Fr_{d})^{2}}
 !!\f]
-!! see eq.(4.6) in \cite kim_and_arakawa_1995.
+!! see eq.(4.6) in Kim and Arakawa (1995) \cite kim_and_arakawa_1995.
 
               TEM2   = SQRT(ri_n(I,K))
               TEM    = 1. + TEM2 * FRO
@@ -1249,13 +1249,13 @@
 !    OF LINDZEN (1981) EXCEPT AT TROPOSPHERIC DOWNSTREAM REGIONS
 !
 !>  - Check stability to employ the 'saturation hypothesis' of
-!! \cite lindzen_1981 except at tropospheric downstream regions.
+!! Lindzen (1981) \cite lindzen_1981 except at tropospheric downstream regions.
 !! \n Wave breaking occurs when \f$Ri_{m}<Ri_{c}=0.25\f$. Then
 !! Lindzen's wave saturation hypothesis resets the displacement
 !! amplitude \f$h_{d}\f$ to that corresponding to \f$Ri_{m}=0.25\f$,
 !! we obtain the critical \f$h_{d}\f$(or \f$h_{c}\f$) expressed in
 !! terms of the mean values of \f$U\f$, \f$N\f$, and \f$Ri\f$ (
-!! eq.(4.7) in \cite kim_and_arakawa_1995):
+!! eq.(4.7) in Kim and Arakawa (1995) \cite kim_and_arakawa_1995):
 !!\f[
 !! h_{c}=\frac{U}{N}\left\{2(2+\frac{1}{\sqrt{Ri}})^{1/2}-(2+\frac{1}{\sqrt{Ri}})\right\}
 !!\f]
@@ -1376,7 +1376,7 @@
         DUSFC(J) = TEM * DUSFC(J)
         DVSFC(J) = TEM * DVSFC(J)
       ENDDO
-!                                                                       
+!
 !    MONITOR FOR EXCESSIVE GRAVITY WAVE DRAG TENDENCIES IF NCNT>0
 !
 !     IF(NCNT.GT.0) THEN
@@ -1430,8 +1430,8 @@
 
       end module gwdps
 
-
-
+!> This module contains the CCPP-compliant orographic gravity wave drag post
+!! interstitial codes.
       module gwdps_post
 
       contains
@@ -1442,23 +1442,23 @@
       end subroutine gwdps_post_init
 
 !! \section arg_table_gwdps_post_run Argument Table
-!! | local_name     | standard_name                                             | long_name                                                        | units | rank | type      | kind      | intent | optional |
-!! |----------------|-----------------------------------------------------------|------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                          | flag for calculating diagnostic fields                           | flag  |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                       | flag for calculating 3-D diagnostic fields                       | flag  |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                    | dynamics time step                                               | s     |    0 | real      | kind_phys | in     | F        |
-!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag           | zonal surface stress due to orographic gravity wave drag         | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag           | meridional surface stress due to orographic gravity wave drag    | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                   | zonal wind tendency due to model physics                         | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                   | meridional wind tendency due to model physics                    | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics          | air temperature tendency due to model physics                    | K s-1 |    2 | real      | kind_phys | in     | F        |
-!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag        | integral over time of zonal stress due to gravity wave drag      | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag        | integral over time of meridional stress due to gravity wave drag | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | du3dt          | cumulative_change_in_x_wind_due_to_surface_processes      | cumulative change in zonal wind due to surface processes         | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt          | cumulative_change_in_y_wind_due_to_surface_processes      | cumulative change in meridional wind due to surface processes    | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_surface_processes | cumulative change in temperature due to surface processes        | K     |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                             | error message for error handling in CCPP                         | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                | error flag for error handling in CCPP                            | flag  |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                                                 | long_name                                                                 | units | rank | type      | kind      | intent | optional |
+!! |----------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | lssav          | flag_diagnostics                                                                              | flag for calculating diagnostic fields                                    | flag  |    0 | logical   |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                                                           | flag for calculating 3-D diagnostic fields                                | flag  |    0 | logical   |           | in     | F        |
+!! | dtf            | time_step_for_dynamics                                                                        | dynamics time step                                                        | s     |    0 | real      | kind_phys | in     | F        |
+!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag                                               | zonal surface stress due to orographic gravity wave drag                  | Pa    |    1 | real      | kind_phys | in     | F        |
+!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag                                               | meridional surface stress due to orographic gravity wave drag             | Pa    |    1 | real      | kind_phys | in     | F        |
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                                                       | zonal wind tendency due to model physics                                  | m s-2 |    2 | real      | kind_phys | in     | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                                       | meridional wind tendency due to model physics                             | m s-2 |    2 | real      | kind_phys | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                              | air temperature tendency due to model physics                             | K s-1 |    2 | real      | kind_phys | in     | F        |
+!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag                                            | integral over time of zonal stress due to gravity wave drag               | Pa s  |    1 | real      | kind_phys | inout  | F        |
+!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag                                            | integral over time of meridional stress due to gravity wave drag          | Pa s  |    1 | real      | kind_phys | inout  | F        |
+!! | du3dt          | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in zonal wind due to orographic gravity wave drag       | m s-1 |    2 | real      | kind_phys | inout  | F        |
+!! | dv3dt          | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in meridional wind due to orographic gravity wave drag  | m s-1 |    2 | real      | kind_phys | inout  | F        |
+!! | dt3dt          | cumulative_change_in_temperature_due_to_shortwave_radiation_and_orographic_gravity_wave_drag  | cumulative change in temperature due to SW rad and oro. GWD               | K     |    2 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                                            | error message for error handling in CCPP                                  | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                     | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdps_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &

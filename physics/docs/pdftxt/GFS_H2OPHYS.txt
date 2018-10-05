@@ -1,0 +1,25 @@
+/**
+\page GFS_H2OPHYS GFS Stratospheric H2O Scheme
+\section des_h2o Description
+To improve the treatment of stratospheric water vapor in the global model, NCEP implemented a parameterization of photochemical production and loss (P-L) of water vapor  through methane oxidation and photolysis of H2O in the upper mesosphere due to solar Lyman alpha absorption is implemented in GFS. 
+
+The Navy Research Laboratory (NRL) linearized parameterization of stratospheric and mesospheric water vapor photochemistry (McCormack at al.(2008)
+\cite mccormack_et_al_2008) applies a linearized photochemical tendency to specific humidity q in the form
+\f[
+\frac{dq}{dt}=(P-L)_{0}+\frac{\partial (P-L)}{\partial q}\mid_{0}(q-q_{0})
+\f]
+The second term on the right-hand side quantifies the linearized sensitivity to local changes in \f$q\f$, and yields photochemical relaxation to an equilibrium specific humidity \f$q_{0}\f$
+\f[
+-[\frac{\partial (P-L)}{\partial q}]_{0}=\tau_*^{-1}
+\f]
+The \f$(P-L)_{0}\f$ and \f$\tau_*\f$ values were computed from perturbation experiments with the NRL two-dimensional photochemical model (CHEM2D). 
+The equilibrium profile \f$q_{0}\f$ is specified using a climatology based on a combination of reanalysis and satellite observations.
+
+\section intra_h2o  Intraphysics Communication
+\ref arg_table_h2ophys_run
+
+\section gen_h2o  General Algorithm
+\ref genal_h2ophys
+
+
+*/

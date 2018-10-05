@@ -1,4 +1,29 @@
-!-------------------------------------------------------------------------------
+!>\file funcphys.f90 
+!! This file includes API for basic thermodynamic physics.
+
+!>\defgroup func_phys GFS Physics Function Module
+!! @{
+!! This module provides API for computing basic thermodynamic physics
+!! functions. 
+
+!> This module provides an Application Program Interface (API) for computing
+!! basic thermodynamic physics functions, in particular:
+!! -# saturation vapor pressure as a function of temperature;
+!! -# dewpoint temperature as a function of vapor pressure;
+!! -# equivalent potential temperature as a function of temperature and 
+!! scaled pressure to the kappa power;
+!! -# temperature and specific humidity along a moist adiabat as functions
+!! of equivalent potential temperature and scaled pressure to the kappa power;
+!! -# scaled pressure to the kappa power as a function of pressure, and
+!! -# temperature at the lifting condensation level as a function of temperature
+!! and dewpoint depression.
+!!
+!! The entry points required to set up lookup tables start with a "g".
+!! All the other entry points are functions starting with an "f" or 
+!! are subroutines starting with an "s". These other functions and subroutines
+!! are elemental; that is, they return a scalar if they are passed only scalars,
+!! but they return an array if they are passed an array. These other functions
+!! and subroutines can in inlined, too.
 module funcphys
 !$$$  Module Documentation Block
 !
@@ -243,7 +268,7 @@ module funcphys
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Public Variables
 ! integer,public,parameter:: krealfp=selected_real_kind(15,45)
-  integer,public,parameter:: krealfp=kind_phys
+  integer,public,parameter:: krealfp=kind_phys          !< Integer parameter kind or length of reals
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Private Variables
   real(krealfp),parameter:: psatb=con_psat*1.e-5
@@ -286,6 +311,11 @@ module funcphys
   public gfuncphys
 contains
 !-------------------------------------------------------------------------------
+!> This subroutine computes saturation vapor pressure table as a function of
+!! temperature for the table lookup function fpval. Exact saturation vapor
+!! pressures are calculated in subprogram fpvslx(). The current implementation
+!! computes a table with a length of 7501 for temperature ranging from 180. to
+!! 330. Kelvin.
   subroutine gpvsl
 !$$$     Subprogram Documentation Block
 !
@@ -330,6 +360,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This funtion computes saturation vapor pressure from the temperature.
+!! A linear interpolation is done between values in a lookup table computed
+!! in gpvsl(). See documentation for fpvslx() for details. Input values
+!! outside table range are reset to table extrema. 
+!>\author N phillips
   elemental function fpvsl(t)
 !$$$     Subprogram Documentation Block
 !
@@ -373,7 +408,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes saturation vapor pressure from the temperature. 
+!! A quadratic interpolation is done between values in a lookup table 
+!! computed in gpvsl(). See documentaion for fpvslx() for details.
+!! Input values outside table range are reset to table extrema.
   elemental function fpvslq(t)
+!>\author N Phillips
 !$$$     Subprogram Documentation Block
 !
 ! Subprogram: fpvslq       Compute saturation vapor pressure over liquid
@@ -420,6 +460,19 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes saturation vapor pressure from temperature.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas and liquid, and neglects the volume of the liquid.
+!! The model does account for the variation of the latent heat 
+!! of condensation with temperature. The ice option is not included.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formula:
+!!\n pvsl=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n where tr is ttp/t and other values are physical constants.
+!! This function should be expanded inline in the calling routine.
+!>\author N Phillips
+!>\param[in] t       real, temperature in Kelvin
+!>\param[out] fpvslx real, saturation vapor pressure in Pascals
   elemental function fpvslx(t)
 !$$$     Subprogram Documentation Block
 !
@@ -468,6 +521,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes saturation vapor pressure table as a function of 
+!! temperature for the table lookup function fpvsi(). Exact saturation vapor
+!! pressures are calculated in subprogram fpvsix(). The current implementation
+!! computes a table with a length of 7501 for temperatures ranging from 180. 
+!! to 330. Kelvin.
+!>\author N Phillips
   subroutine gpvsi
 !$$$     Subprogram Documentation Block
 !
@@ -513,6 +572,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function computes saturation vapor pressure from the temperature.
+!! A linear interpolation is done between values in a lookup table 
+!! computed in gpvsi(). See documentation for fpvsix() for details.
+!! Input values outside table range are reset to table extrema.
+!>\author N Phillips
   elemental function fpvsi(t)
 !$$$     Subprogram Documentation Block
 !
@@ -557,6 +621,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes saturation vapor pressure from the temperature.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gpvsi(). See documentation for fpvsix() for details.
+!! Input values outside table range are reset to table extrema.
+!>\author N Phillips
   elemental function fpvsiq(t)
 !$$$     Subprogram Documentation Block
 !
@@ -605,6 +674,17 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This funtion exactly computes saturation vapor pressure from temperature.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas and ice, and neglects the volume of the ice. The model does
+!! account for the variation of the latent heat of condensation with temperature.
+!! The liquid option is not included. The Clausius- Clapeyron equation is 
+!! integrated from the triple point to get the formula:
+!!\n pvsi=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n where tr is ttp/t and other values are physical constants. 
+!! This function should be expanded inline in the calling routine.
+!>\param[in]  t        real, temperature in Kelvin
+!>\param[out] fpvsix   real, saturation vapor pressure in Pascals
   elemental function fpvsix(t)
 !$$$     Subprogram Documentation Block
 !
@@ -654,6 +734,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes saturation vapor pressure table as a function of
+!! temperature for the table lookup function fpvs().
+!! Exact saturation vapor pressures are calculated in subprogram fpvsx().
+!! The current implementation computes a table with a length
+!! of 7501 for temperatures ranging from 180. to 330. Kelvin. 
   subroutine gpvs
 !$$$     Subprogram Documentation Block
 !
@@ -699,6 +784,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function computes saturation vapor pressure from the temperature.
+!! A linear interpolation is done between values in a lookup table
+!! computed in gpvs(). See documentation for fpvsx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  t     real, temperature in Kelvin
+!>\param[out] fpvs  real, saturation vapor pressure in Pascals
   elemental function fpvs(t)
 !$$$     Subprogram Documentation Block
 !
@@ -743,6 +834,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes saturation vapor pressure from the temperature.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gpvs(). See documentation for fpvsx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  t        real, temperatue in Kelvin
+!>\param[out] fpvsq    real, saturation vapor pressure in Pascals
   elemental function fpvsq(t)
 !$$$     Subprogram Documentation Block
 !
@@ -791,6 +888,23 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes saturation vapor pressure from temperature.
+!! The saturation vapor pressure over either liquid and ice is computed
+!! over liquid for temperatures above the triple point,
+!! over ice for temperatures 20 degress below the triple point,
+!! and a linear combination of the two for temperatures in between.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas, liquid and ice, and neglects the volume of the condensate.
+!! The model does account for the variation of the latent heat
+!! of condensation and sublimation with temperature.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formula:
+!!\n     pvsl=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n where tr is ttp/t and other values are physical constants.
+!! The reference for this computation is Emanuel(1994), pages 116-117.
+!! This function should be expanded inline in the calling routine.
+!>\param[in]  t        real, temperature in Kelvin
+!>\param[out] fpvsx    real, saturation vapor pressure in Pascals
   elemental function fpvsx(t)
 !$$$     Subprogram Documentation Block
 !
@@ -860,6 +974,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes dewpoint temperature table as a function of
+!! vapor pressure for inlinable function ftdpl().
+!! Exact dewpoint temperatures are calculated in subprogram ftdplxg().
+!! The current implementation computes a table with a length
+!! of 5001 for vapor pressures ranging from 1 to 10001 Pascals
+!! giving a dewpoint temperature range of 208 to 319 Kelvin.
   subroutine gtdpl
 !$$$     Subprogram Documentation Block
 !
@@ -906,6 +1026,10 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function Compute dewpoint temperature from vapor pressure.
+!! A linear interpolation is done between values in a lookup table
+!! computed in gtdpl(). See documentation for ftdplxg() for details.
+!! Input values outside table range are reset to table extrema.
   elemental function ftdpl(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -951,6 +1075,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes dewpoint temperature from vapor pressure.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gtdpl(). See documentation for ftdplxg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  pv      real, vapor pressure in Pascals
+!>\param[out] ftdplq  real, dewpoint temperature in Kelvin
   elemental function ftdplq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1000,6 +1130,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly compute dewpoint temperature from vapor pressure.
+!! An approximate dewpoint temperature for function ftdplxg()
+!! is obtained using ftdpl() so gtdpl() must be already called.
+!! See documentation for ftdplxg() for details.
+!>\param[in]  pv      real, vapor pressure in Pascals
+!>\param[out] ftdplx  real, dewpoint temperature in Kelvin
   elemental function ftdplx(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1042,6 +1178,22 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes dewpoint temperature from vapor pressure.
+!! A guess dewpoint temperature must be provided.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas and liquid, and neglects the volume of the liquid.
+!! The model does account for the variation of the latent heat
+!! of condensation with temperature.  The ice option is not included.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formula:
+!!\n  pvs=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n  where tr is ttp/t and other values are physical constants.
+!!\n The formula is inverted by iterating Newtonian approximations
+!! for each pvs until t is found to within 1.e-6 Kelvin.
+!! This function can be expanded inline in the calling routine.
+!>\param[in]  tg       real, guess dewpoint temperature in Kelvin
+!>\param[in]  pv       real, vapor pressure in Pascals
+!>\param[out] ftdplxg  real, dewpoint temperature in Kelvin
   elemental function ftdplxg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1105,6 +1257,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes dewpoint temperature table as a function of
+!! vapor pressure for inlinable function ftdpi().
+!! Exact dewpoint temperatures are calculated in subprogram ftdpixg().
+!! The current implementation computes a table with a length
+!! of 5001 for vapor pressures ranging from 0.1 to 1000.1 Pascals
+!! giving a dewpoint temperature range of 197 to 279 Kelvin.
   subroutine gtdpi
 !$$$     Subprogram Documentation Block
 !
@@ -1152,6 +1310,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine computes dewpoint temperature from vapor pressure.
+!! A linear interpolation is done between values in a lookup table
+!! computed in gtdpi(). See documentation for ftdpixg for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  pv     real, vapor pressure in Pascals
+!>\param[out] ftdpi  real, dewpoint temperature in Kelvin
   elemental function ftdpi(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1198,6 +1362,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes dewpoint temperature from vapor pressure.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gtdpi(). see documentation for ftdpixg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  pv       real, vapor pressure in Pascals
+!>\param[out] ftdpiq   real, dewpoint temperature in Kelvin
   elemental function ftdpiq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1248,6 +1418,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes dewpoint temperature from vapor pressure.
+!! An approximate dewpoint temperature for function ftdpixg()
+!! is obtained using ftdpi() so gtdpi() must be already called.
+!! See documentation for ftdpixg() for details.
+!>\param[in]  pv   real, vapor pressure in Pascals
+!>\param[out] ftdpix   real, dewpoint temperature in Kelvin
   elemental function ftdpix(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1291,6 +1467,22 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes dewpoint temperature from vapor pressure.
+!! A guess dewpoint temperature must be provided.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas and ice, and neglects the volume of the ice.
+!! The model does account for the variation of the latent heat
+!! of sublimation with temperature.  The liquid option is not included.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formula:
+!!\n   pvs=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n  where tr is ttp/t and other values are physical constants.
+!! The formula is inverted by iterating Newtonian approximations
+!! for each pvs until t is found to within 1.e-6 Kelvin.
+!!   This function can be expanded inline in the calling routine.
+!>\param[in]  tg   real, guess dewpoint temperature in Kelvin
+!>\param[in]  pv   real, vapor pressure in Pascals
+!>\param[out] ftdpixg   real, dewpoint temperature in Kelvin
   elemental function ftdpixg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1355,6 +1547,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes dewpoint temperature table as a function of
+!! vapor pressure for inlinable function ftdp().
+!! Exact dewpoint temperatures are calculated in subprogram ftdpxg().
+!! The current implementation computes a table with a length
+!! of 5001 for vapor pressures ranging from 0.5 to 1000.5 Pascals
+!! giving a dewpoint temperature range of 208 to 319 Kelvin.
   subroutine gtdp
 !$$$     Subprogram Documentation Block
 !
@@ -1402,6 +1600,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function computes dewpoint temperature from vapor pressure.
+!! A linear interpolation is done between values in a lookup table
+!! computed in gtdp(). See documentation for ftdpxg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  pv  real, vapor pressure in Pascals
+!>\param[out] ftdp  real, dewpoint temperature in Kelvin
   elemental function ftdp(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1448,6 +1652,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes dewpoint temperature from vapor pressure.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gtdp(). See documentation for ftdpxg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  pv   real, vapor pressure in Pascals
+!>\param[out] ftdpq   real, dewpoint temperature in Kelvin
   elemental function ftdpq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1498,6 +1708,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes dewpoint temperature from vapor pressure.
+!! An approximate dewpoint temperature for function ftdpxg()
+!! is obtained using ftdp() so gtdp() must be already called.
+!! See documentation for ftdpxg() for details.
+!>\param[in]  pv   real, vapor pressure in Pascals
+!>\param[out] ftdpx    real, dewpoint temperature in Kelvin
   elemental function ftdpx(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1541,6 +1757,27 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function exactly computes dewpoint temperature from vapor pressure.
+!! A guess dewpoint temperature must be provided.
+!! The saturation vapor pressure over either liquid and ice is computed
+!! over liquid for temperatures above the triple point,
+!! over ice for temperatures 20 degress below the triple point,
+!! and a linear combination of the two for temperatures in between.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas, liquid and ice, and neglects the volume of the condensate.
+!! The model does account for the variation of the latent heat
+!! of condensation and sublimation with temperature.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formula:
+!!\n   pvsl=con_psat*(tr**xa)*exp(xb*(1.-tr))
+!!\n where tr is ttp/t and other values are physical constants.
+!!\n The reference for this decision is Emanuel(1994), pages 116-117.
+!! The formula is inverted by iterating Newtonian approximations
+!! for each pvs until t is found to within 1.e-6 Kelvin.
+!! This function can be expanded inline in the calling routine.
+!>\param[in]  tg   real, guess dewpoint temperature in Kelvin
+!>\param[in]  pv   real, vapor pressure in Pascals
+!>\param[out] ftdpxg    real, dewpoint temperature in Kelvin
   elemental function ftdpxg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1630,6 +1867,14 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes equivalent potential temperature table
+!! as a function of LCL temperature and pressure over 1e5 Pa
+!! to the kappa power for function fthe().
+!! Equivalent potential temperatures are calculated in subprogram fthex()
+!! the current implementation computes a table with a first dimension
+!! of 241 for temperatures ranging from 183.16 to 303.16 Kelvin
+!! and a second dimension of 151 for pressure over 1e5 Pa
+!! to the kappa power ranging from \f$0.04^{rocp}\f$ to \f$1.10^{rocp}\f$.
   subroutine gthe
 !$$$     Subprogram Documentation Block
 !
@@ -1685,6 +1930,15 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function computes equivalent potential temperature at the LCL
+!! from temperature and pressure over 1e5 Pa to the kappa power.
+!! A bilinear interpolation is done between values in a lookup table
+!! computed in gthe(). see documentation for fthex() for details.
+!! Input values outside table range are reset to table extrema,
+!!   except zero is returned for too cold or high LCLs.
+!>\param[in]  t  real, LCL temperature in Kelvin
+!>\param[in]  pk  real, LCL pressure over 1e5 Pa to the kappa power
+!>\param[out] fthe     real, equivalent potential temperature in Kelvin
   elemental function fthe(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -1739,6 +1993,15 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes equivalent potential temperature at the LCL
+!! from temperature and pressure over 1e5 Pa to the kappa power.
+!! A biquadratic interpolation is done between values in a lookup table
+!! computed in gthe(). see documentation for fthex() for details.
+!! Input values outside table range are reset to table extrema,
+!! except zero is returned for too cold or high LCLs.
+!>\param[in]  t    real, LCL temperature in Kelvin
+!>\param[in]  pk   real, LCL pressure over 1e5 Pa to the kappa power
+!>\param[out] ftheq       real, equivalent potential temperature in Kelvin
   elemental function ftheq(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -1808,6 +2071,22 @@ contains
   end function
 !-------------------------------------------------------------------------------
 ! elemental function fthex(t,pk)
+!> This function exactly computes equivalent potential temperature at the LCL
+!! from temperature and pressure over 1e5 Pa to the kappa power.
+!! Equivalent potential temperature is constant for a saturated parcel
+!! rising adiabatically up a moist adiabat when the heat and mass
+!! of the condensed water are neglected.  Ice is also neglected.
+!! The formula for equivalent potential temperature (Holton) is
+!!\n  the=t*(pd**(-rocp))*exp(el*eps*pv/(cp*t*pd))
+!!\n where t is the temperature, pv is the saturated vapor pressure,
+!! pd is the dry pressure p-pv, el is the temperature dependent
+!! latent heat of condensation hvap+dldt*(t-ttp), and other values
+!! are physical constants defined in parameter statements in the code.
+!! Zero is returned if the input values make saturation impossible.
+!! This function should be expanded inline in the calling routine.
+!>\param[in]  t  real, LCL temperature in Kelvin
+!>\param[in]  pk  real, LCL pressure over 1e5 Pa to the kappa power
+!>\param[out] fthex     real, equivalent potential temperature in Kelvin
             function fthex(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -1865,6 +2144,14 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes temperature and specific humidity tables
+!! as a function of equivalent potential temperature and
+!! pressure over 1e5 Pa to the kappa power for subprogram stma().
+!! Exact parcel temperatures are calculated in subprogram stmaxg().
+!! The current implementation computes a table with a first dimension
+!! of 151 for equivalent potential temperatures ranging from 200 to 500
+!! Kelvin and a second dimension of 121 for pressure over 1e5 Pa
+!! to the kappa power ranging from \f$0.01^{rocp}\f$ to \f$1.10^{rocp}\f$.
   subroutine gtma
 !$$$     Subprogram Documentation Block
 !
@@ -1924,6 +2211,16 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine computes temperature and specific humidity of a parcel
+!! lifted up a moist adiabat from equivalent potential temperature
+!! at the LCL and pressure over 1e5 Pa to the kappa power.
+!! Bilinear interpolations are done between values in a lookup table
+!! computed in gtma(). See documentation for stmaxg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  the    real, equivalent potential temperature in Kelvin
+!>\param[in]  pk     real, pressure over 1e5 Pa to the kappa power
+!>\param[out] tma    real, parcel temperature in Kelvin
+!>\param[out] qma    real, parcel specific humidity in kg/kg
   elemental subroutine stma(the,pk,tma,qma)
 !$$$     Subprogram Documentation Block
 !
@@ -1979,6 +2276,16 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine computes temperature and specific humidity of a parcel
+!! lifted up a moist adiabat from equivalent potential temperature
+!! at the LCL and pressure over 1e5 Pa to the kappa power.
+!! Biquadratic interpolations are done between values in a lookup table
+!! computed in gtma(). See documentation for stmaxg() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  the    real, equivalent potential temperature in Kelvin
+!>\param[in]  pk     real, pressure over 1e5 Pa to the kappa power
+!>\param[out] tmaq   real, parcel temperature in Kelvin
+!>\param[out] qma    real, parcel specific humidity in kg/kg
   elemental subroutine stmaq(the,pk,tma,qma)
 !$$$     Subprogram Documentation Block
 !
@@ -2059,6 +2366,16 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine exactly computes temperature and humidity of a parcel
+!! lifted up a moist adiabat from equivalent potential temperature
+!! at the LCL and pressure over 1e5 Pa to the kappa power.
+!! An approximate parcel temperature for subprogram stmaxg()
+!! is obtained using stma() so gtma() must be already called.
+!! See documentation for stmaxg() for details.
+!>\param[in]  the   real, equivalent potential temperature in Kelvin
+!>\param[in]  pk    real, pressure over 1e5 Pa to the kappa power
+!>\param[out] tma   real, parcel temperature in Kelvin
+!>\param[out] qma   real, parcel specific humidity in kg/kg
   elemental subroutine stmax(the,pk,tma,qma)
 !$$$     Subprogram Documentation Block
 !
@@ -2105,6 +2422,28 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine exactly computes temperature and humidity of a parcel
+!! lifted up a moist adiabat from equivalent potential temperature
+!! at the LCL and pressure over 1e5 Pa to the kappa power.
+!! A guess parcel temperature must be provided.
+!! Equivalent potential temperature is constant for a saturated parcel
+!! rising adiabatically up a moist adiabat when the heat and mass
+!! of the condensed water are neglected.  Ice is also neglected.
+!! The formula for equivalent potential temperature (Holton) is
+!!\n  the=t*(pd**(-rocp))*exp(el*eps*pv/(cp*t*pd))
+!!\n where t is the temperature, pv is the saturated vapor pressure,
+!! pd is the dry pressure p-pv, el is the temperature dependent
+!! latent heat of condensation hvap+dldt*(t-ttp), and other values
+!! are physical constants defined in parameter statements in the code.
+!! The formula is inverted by iterating Newtonian approximations
+!! for each the and p until t is found to within 1.e-4 Kelvin.
+!! The specific humidity is then computed from pv and pd.
+!! This subprogram can be expanded inline in the calling routine.
+!>\param[in]  tg   real, guess parcel temperature in Kelvin
+!>\param[in]  the  real, equivalent potential temperature in Kelvin
+!>\param[in]  pk   real, pressure over 1e5 Pa to the kappa power
+!>\param[out] tma  real, parcel temperature in Kelvin 
+!>\param[out] qma  real, parcel specific humidity in kg/kg
   elemental subroutine stmaxg(tg,the,pk,tma,qma)
 !$$$     Subprogram Documentation Block
 !
@@ -2178,6 +2517,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine computes pressure to the kappa table as a function of pressure
+!! for the table lookup function fpkap().
+!! Exact pressure to the kappa values are calculated in subprogram fpkapx().
+!! The current implementation computes a table with a length
+!! of 5501 for pressures ranging up to 110000 Pascals.
   subroutine gpkap
 !$$$   Subprogram  documentation  block
 !
@@ -2221,6 +2565,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine raises pressure over 1e5 Pa to the kappa power.
+!! A linear interpolation is done between values in a lookup table
+!! computed in gpkap(). See documentation for fpkapx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  p      real, pressure in Pascals
+!>\param[out] fpkap  real, p over 1e5 Pa to the kappa power
   elemental function fpkap(p)
 !$$$     Subprogram Documentation Block
 !
@@ -2267,6 +2617,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function raises pressure over 1e5 Pa to the kappa power.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in gpkap(). see documentation for fpkapx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]   p        real, pressure in Pascals
+!>\param[out]  fpkapq   real, p over 1e5 Pa to the kappa power
   elemental function fpkapq(p)
 !$$$     Subprogram Documentation Block
 !
@@ -2317,6 +2673,13 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function raises surface pressure over 1e5 Pa to the kappa power
+!! using a rational weighted chebyshev approximation.
+!! The numerator is of order 2 and the denominator is of order 4.
+!! The pressure range is 40000-110000 Pa and kappa is defined in fpkapx().
+!>\param[in]   p        real, surface pressure in Pascals p should be in the 
+!! range 40000 to 110000
+!>\param[out]  fpkapo   real, p over 1e5 Pa to the kappa power
   function fpkapo(p)
 !$$$   Subprogram  documentation  block
 !
@@ -2374,6 +2737,10 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function raises pressure over 1e5 Pa to the kappa power.
+!! Kappa is equal to rd/cp where rd and cp are physical constants.
+!>\param[in]  p        real, pressure in Pascals
+!>\param[out] fpkapx   real, p over 1e5 Pa to the kappa power
   elemental function fpkapx(p)
 !$$$   Subprogram  documentation  block
 !
@@ -2408,6 +2775,11 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes pressure to the 1/kappa table as a function of pressure
+!! for the table lookup function frkap().
+!! Exact pressure to the 1/kappa values are calculated in subprogram frkapx().
+!! The current implementation computes a table with a length
+!! of 5501 for pressures ranging up to 110000 Pascals.
   subroutine grkap
 !$$$   Subprogram  documentation  block
 !
@@ -2451,6 +2823,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This subroutine raises pressure over 1e5 Pa to the 1/kappa power.
+!! A linear interpolation is done between values in a lookup table
+!! computed in grkap(). See documentation for frkapx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]   pkap    real, p over 1e5 Pa to the kappa power
+!>\param[out]  frkap   real, pressure in Pascals
   elemental function frkap(pkap)
 !$$$     Subprogram Documentation Block
 !
@@ -2496,6 +2874,12 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function raises pressure over 1e5 Pa to the 1/kappa power.
+!! A quadratic interpolation is done between values in a lookup table
+!! computed in grkap(). see documentation for frkapx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]   pkap   real, p over 1e5 Pa to the kappa power
+!>\param[out]  frkapq real, pressure in Pascals
   elemental function frkapq(pkap)
 !$$$     Subprogram Documentation Block
 !
@@ -2545,6 +2929,10 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function raise pressure over 1e5 Pa to the 1/kappa power.
+!! Kappa is equal to rd/cp where rd and cp are physical constants.
+!>\param[in]   pkap   real, p over 1e5 Pa to the kappa power
+!>\param[out]  frkapx real, pressure in Pascals
   elemental function frkapx(pkap)
 !$$$   Subprogram  documentation  block
 !
@@ -2579,6 +2967,13 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes lifting condensation level temperature table
+!! as a function of temperature and dewpoint depression for function ftlcl().
+!! Lifting condensation level temperature is calculated in subprogram ftlclx()
+!! The current implementation computes a table with a first dimension
+!! of 151 for temperatures ranging from 180.0 to 330.0 Kelvin
+!! and a second dimension of 61 for dewpoint depression ranging from
+!! 0 to 60 Kelvin.
   subroutine gtlcl
 !$$$     Subprogram Documentation Block
 !
@@ -2631,6 +3026,14 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end subroutine
 !-------------------------------------------------------------------------------
+!> This function computes temperature at the lifting condensation level
+!! from temperature and dewpoint depression.
+!! A bilinear interpolation is done between values in a lookup table
+!! computed in gtlcl(). See documentation for ftlclx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]  t      real, LCL temperature in Kelvin
+!>\param[in]  tdpd   real, dewpoint depression in Kelvin
+!>\param[out] ftlcl  real, temperature at the LCL in Kelvin
   elemental function ftlcl(t,tdpd)
 !$$$     Subprogram Documentation Block
 !
@@ -2678,6 +3081,14 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes temperature at the lifting condensation level
+!! from temperature and dewpoint depression.
+!! A biquadratic interpolation is done between values in a lookup table
+!! computed in gtlcl(). see documentation for ftlclx() for details.
+!! Input values outside table range are reset to table extrema.
+!>\param[in]   t      real, LCL temperature in Kelvin
+!>\param[in]   tdpd   real, dowpoint depression in Kelvin
+!>\param[out]  ftlcl  real, temperature at the LCL in Kelvin
   elemental function ftlclq(t,tdpd)
 !$$$     Subprogram Documentation Block
 !
@@ -2739,6 +3150,13 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes temperature at the lifting condensation level
+!! from temperature and dewpoint depression.  the formula used is
+!! a polynomial taken from Phillips mstadb routine which empirically
+!! approximates the original exact implicit relationship.
+!>\param[in]    t    real, temperature in Kelvin
+!>\param[in]    tdpd real, dewpoint depression in Kelvin
+!>\param[out]   ftlclo   real, temperature at the LCL in Kelvin
   function ftlclo(t,tdpd)
 !$$$   Subprogram  documentation  block
 !
@@ -2781,6 +3199,28 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This function computes temperature at the lifting condensation level
+!! from temperature and dewpoint depression.  A parcel lifted
+!! adiabatically becomes saturated at the lifting condensation level.
+!! The water model assumes a perfect gas, constant specific heats
+!! for gas and liquid, and neglects the volume of the liquid.
+!! The model does account for the variation of the latent heat
+!! of condensation with temperature.  The ice option is not included.
+!! The Clausius-Clapeyron equation is integrated from the triple point
+!! to get the formulas:
+!!\n  pvlcl=con_psat*(trlcl**xa)*exp(xb*(1.-trlcl))
+!!\n  pvdew=con_psat*(trdew**xa)*exp(xb*(1.-trdew))
+!!\n where pvlcl is the saturated parcel vapor pressure at the LCL,
+!! pvdew is the unsaturated parcel vapor pressure initially,
+!! trlcl is ttp/tlcl and trdew is ttp/tdew.  The adiabatic lifting
+!! of the parcel is represented by the following formula
+!!\n    pvdew=pvlcl*(t/tlcl)**(1/kappa)
+!!\n This formula is inverted by iterating Newtonian approximations
+!! until tlcl is found to within 1.e-6 Kelvin.  Note that the minimum
+!!   returned temperature is 180 Kelvin.
+!>\param[in]  t      real, temperature in Kelvin
+!>\param[in]  tdpd   real, dewpoint depression in Kelvin
+!>\param[out] ftlclx real, temperature at the LCL in Kelvin
   elemental function ftlclx(t,tdpd)
 !$$$   Subprogram  documentation  block
 !
@@ -2847,6 +3287,10 @@ contains
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
+!> This subroutine computes all physics function tables.  Lookup tables are
+!! set up for computing saturation vapor pressure, dewpoint temperature,
+!! equivalent potential temperature, moist adiabatic temperature and humidity,
+!! pressure to the kappa, and lifting condensation level temperature.
   subroutine gfuncphys
 !$$$     Subprogram Documentation Block
 !
@@ -2897,3 +3341,4 @@ contains
   end subroutine
 !-------------------------------------------------------------------------------
 end module
+!! @}

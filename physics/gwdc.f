@@ -1,7 +1,9 @@
 !> \file gwdc.f This file is the original code for parameterization of
 !! stationary convection forced gravity wave drag based on
-!! \cite chun_and_baik_1998.
+!! Chun and Baik (1998) \cite chun_and_baik_1998.
 
+!> This module contains the CCPP-compliant convective gravity 
+!! wave drag pre interstitial codes.
       module gwdc_pre
       contains
 
@@ -32,8 +34,8 @@
 !! | gt0_init       | air_temperature_save                                                     | air temperature before entering convection scheme             | K     |    2 | real      | kind_phys | in     | F        |
 !! | del            | air_pressure_difference_between_midlayers                                | difference between mid-layer pressures                        | Pa    |    2 | real      | kind_phys | in     | F        |
 !! | cumabs         | maximum_column_heating_rate                                              | maximum heating rate in column                                | K s-1 |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                                            | error message for error handling in CCPP                      | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                               | error flag for error handling in CCPP                         | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                      | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                         | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdc_pre_run (                                         &
      &  im, cgwf, dx, work1, work2, dlength, cldf,                      &
@@ -101,6 +103,8 @@
 
       end module gwdc_pre
 
+!> This module contains the CCPP-compliant 
+!! convective gravity wave drag scheme.
       module gwdc
 
       contains
@@ -115,7 +119,7 @@
 ! \defgroup GFS_cgwd GFS Convective Gravity Wave Drag
 !> \defgroup GFS_gwdc_run GFS gwdc Main
 !! \brief This subroutine is the parameterization of convective gravity wave
-!! drag based on the theory given by 
+!! drag based on the theory given by Chun and Baik (1998)
 !! \cite chun_and_baik_1998 modified for implementation into the
 !! GFS/CFS by Ake Johansson(Aug 2005).
 !!
@@ -152,8 +156,8 @@
 !! | vtgwc          | tendency_of_y_wind_due_to_convective_gravity_wave_drag | meridional wind tendency due to convective gravity wave drag       | m s-2      |    2 | real      | kind_phys | out    | F        |
 !! | tauctx         | instantaneous_x_stress_due_to_gravity_wave_drag        | zonal stress at cloud top due to convective gravity wave drag      | Pa         |    1 | real      | kind_phys | out    | F        |
 !! | taucty         | instantaneous_y_stress_due_to_gravity_wave_drag        | meridional stress at cloud top due to convective gravity wave drag | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
 !!
 !>\section gen_gwdc GFS Convective GWD Scheme General Algorithm
 !! Parameterizing subgrid-scale convection-induced gravity wave
@@ -899,7 +903,8 @@
 !!      level just below the interface level in which cloud top wave
 !!      stress is defined.
 !! The parameter \f$\mu\f$ is the nonlinearity factor of thermally
-!! induced internal gravity waves defined by eq.(17) in \cite chun_and_baik_1998 :
+!! induced internal gravity waves defined by eq.(17) in Chun and Baik (1998) 
+!! \cite chun_and_baik_1998 :
 !! \f[
 !!  \mu=\frac{gQ_{0}a_{1}}{c_{p}T_{0}NU^{2}}
 !! \f]
@@ -908,7 +913,7 @@
 !! \f$a_{1}\f$ is the half-width of
 !! the forcing function.\f$g\f$ is gravity. \f$c_{p}\f$ is specific
 !! heat at constant pressure. \f$T_{0}\f$ is the layer mean
-!! temperature (T1). As eqs.(18) and (19) \cite chun_and_baik_1998,
+!! temperature (T1). As eqs.(18) and (19) Chun and Baik (1998) \cite chun_and_baik_1998,
 !! the zonal momentum flux is given by
 !! \f[
 !! \tau_{x}=-[\rho U^{3}/(N\triangle x)]G(\mu)
@@ -1484,6 +1489,8 @@
 
       end module gwdc
 
+!> This module contains the CCPP-compliant convective gravity wave 
+!! drag post intersititial codes.
       module gwdc_post
 
       contains
@@ -1496,7 +1503,7 @@
       end subroutine gwdc_post_init
 
 ! \brief Brief description of the subroutine
-!
+!!
 !> \section arg_table_gwdc_post_run Argument Table
 !! | local_name     | standard_name                                                   | long_name                                                                | units      | rank | type      | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -1518,8 +1525,8 @@
 !! | gu0            | x_wind_updated_by_physics                                       | updated zonal wind                                                       | m s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | gv0            | y_wind_updated_by_physics                                       | updated meridional wind                                                  | m s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | gt0            | air_temperature_updated_by_physics                              | updated air temperature                                                  | K          |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                   | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                      | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdc_post_run(                                         &
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp,                     &

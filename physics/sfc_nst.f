@@ -1,6 +1,7 @@
 !>  \file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
+!> This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
       module sfc_nst
 
       contains
@@ -31,7 +32,7 @@
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer                                      | surface layer mean specific humidity                        | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                        | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature                            | K             |    1 | real      | kind_phys | in     | F        |
 !! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                         | none          |    1 | real      | kind_phys | in     | F        |
 !! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                      | none          |    1 | real      | kind_phys | in     | F        |
@@ -39,7 +40,7 @@
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag          |    1 | integer   |           | in     | F        |
 !! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
-!! | sinlat         | sine_of_latitude                                                             | sin of latitude                                             | none          |    1 | real      | kind_phys | in     | F        |
+!! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress                                                          | wind stress                                                 | m2 s-2        |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         |    1 | real      | kind_phys | in     | F        |
@@ -83,10 +84,10 @@
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
-!! \section NSST_general_algorithm GFS Near Sea Surface Temperature Scheme General Algorithm
+!! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
@@ -391,7 +392,7 @@ cc
       zsea2 = 0.001*real(nstf_name5)
 
 !> - Call module_nst_water_prop::density() to compute sea water density.
-!> - Call module_nst_water_prop::rhocoef() to compute thermal expansion 
+!> - Call module_nst_water_prop::rhocoef() to compute thermal expansion
 !! coefficient (\a alpha) and saline contraction coefficient (\a beta).
       do i = 1, im
         if ( flag(i) ) then
@@ -415,7 +416,7 @@ cc
           qrain(i) =  (1000.*rain(i)/rho_w)*alfac*cp_w*
      &                (tsea-t1(i)+(1000.*qss(i)-1000.*q0(i))*le/cp)
 
-!  --- ...  input non solar heat flux as upward = positive to models here
+!> - Calculate input non solar heat flux as upward = positive to models here
 
           f_nsol   = hflx(i) + evap(i) + ulwflx(i) - dlwflx(i)
      &             + omg_sh*qrain(i)
@@ -436,7 +437,7 @@ cc
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
 !> - Call cool_skin(), which is the sub-layer cooling parameterization 
-!! (\cite fairall_et_al_1996).
+!! (Fairfall et al. (1996) \cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
           call cool_skin(ustar_a,f_nsol,nswsfc(i),evap(i),sss,alpha,beta
@@ -526,12 +527,12 @@ cc
               dz = min(xz(i),max(d_conv(i),delz))
 !
 !>  - Call sw_ps_9b() to compute the fraction of the solar radiation
-!! absorbed by the depth \a delz (\cite paulson_and_simpson_1981).
+!! absorbed by the depth \a delz (Paulson and Simpson (1981) \cite paulson_and_simpson_1981).
 !! And calculate the total heat absorbed in warm layer.
               call sw_ps_9b(delz,fw)
               q_warm = fw*nswsfc(i)-f_nsol    !total heat absorbed in warm layer
 
-!>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with 
+!>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with
 !! thickness of \a dz.
               if ( q_warm > 0.0 ) then
                 call cal_ttop(kdt,timestep,q_warm,rho_w,dz,
@@ -692,13 +693,13 @@ cc
 !> @}
       end module sfc_nst
 
-
-
+!> This module contains the CCPP-compliant GFS near-surface sea temperature pre
+!! interstitial codes.
       module sfc_nst_pre
 
       contains
 
-! \defgroup GFS_NSST_PRE GFS Near Sea Surface Temperature Pre
+! \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land
@@ -721,11 +722,11 @@ cc
 !! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag  |    1 | integer   |           | in     | F        |
 !! | oro            | orography                                              | orography                                      | m     |    1 | real      | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                   | unfiltered orographyo                          | m     |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K     |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K     |    1 | real      | kind_phys | inout  | F        |
 !! | tskin          | surface_skin_temperature_for_nsst                      | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
@@ -776,14 +777,13 @@ cc
 !! @}
       end module sfc_nst_pre
 
-
-
-
+!> This module contains the CCPP-compliant GFS near-surface sea temperature post
+!! interstitial codes.
       module sfc_nst_post
 
       contains
 
-! \defgroup GFS_NSST_POST GFS Near Sea Surface Temperature Post
+! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
 !! \brief Brief description of the parameterization
 !!
 
@@ -821,13 +821,13 @@ cc
 !! | xlon           | longitude                                              | longitude                                      | radians |    1 | real      | kind_phys | in     | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K       |    1 | real      | kind_phys | inout  | F        |
 !! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                | K       |    1 | real      | kind_phys | out    | F        |
-!! | tsfc           | surface_skin_temperature                               | ocean surface skin temperature                 | K       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | error_message                                          | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                             | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
+!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K       |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section NSST_general_post_algorithm General Algorithm
-!!
-!! \section NSST_detailed_post_algorithm Detailed Algorithm
+! \section NSST_general_post_algorithm General Algorithm
+!
+! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
      &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &

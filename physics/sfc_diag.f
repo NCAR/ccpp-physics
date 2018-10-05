@@ -19,11 +19,15 @@
 !! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer   |           | in     | F        |
+!! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                  | m s-2         |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure               | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                       | none          |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                 | none          |    0 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                         | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                         | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                             | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | specific_humidity_at_lowest_model_layer                                      | 1st model layer specific humidity                           | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | u1             | x_wind_at_lowest_model_layer_updated_by_physics                              | x component of 1st model layer wind                         | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | v1             | y_wind_at_lowest_model_layer_updated_by_physics                              | y component of 1st model layer wind                         | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | t1             | air_temperature_at_lowest_model_layer_updated_by_physics                     | 1st model layer air temperature                             | K             |    1 | real      | kind_phys | in     | F        |
+!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer_updated_by_physics       | 1st model layer specific humidity                           | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | tskin          | surface_skin_temperature                                                     | surface skin temperature                                    | K             |    1 | real      | kind_phys | in     | F        |
 !! | qsurf          | surface_specific_humidity                                                    | surface specific humidity                                   | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | f10m           | ratio_of_wind_at_lowest_model_layer_and_wind_at_10m                          | ratio of fm10 and fm                                        | ratio         |    1 | real      | kind_phys | out    | F        |
@@ -37,39 +41,38 @@
 !! | fh             | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                        | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
 !! | fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                             | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                                                | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                                   | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
-! DH* TODO add intent() information for variables
       subroutine sfc_diag_run                                           &
-     &                   (im,ps,u1,v1,t1,q1,                            &
+     &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,          &
      &                    tskin,qsurf,f10m,u10m,v10m,t2m,q2m,           &
      &                    prslki,evap,fm,fh,fm10,fh2,errmsg,errflg      &
      &                   )
-!!
 !
       use machine , only : kind_phys
       use funcphys, only : fpvs
-      use physcons, grav => con_g,  cp => con_cp,                       &
-     &              eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
-      integer              im
-      real, dimension(im) :: ps,   u1,   v1,   t1,  q1,  tskin,  qsurf, &
-     &                       f10m, u10m, v10m, t2m, q2m, prslki, evap,  &
-     &                       fm,   fh,   fm10, fh2
+      integer, intent(in) :: im
+      real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1
+      real(kind=kind_phys), dimension(im), intent(in) ::                &
+     &                       ps, u1, v1, t1, q1, tskin,                 &
+     &                       qsurf, prslki, evap, fm, fh, fm10, fh2
+      real(kind=kind_phys), dimension(im), intent(out) ::               &
+     &                       f10m, u10m, v10m, t2m, q2m
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
 !     locals
 !
-      real (kind=kind_phys), parameter :: qmin=1.0e-8
-      integer              k,i
+      real(kind=kind_phys), parameter :: qmin=1.0e-8
+      integer ::k,i
 !
-      real(kind=kind_phys)        fhi, qss, wrk
+      real(kind=kind_phys) :: fhi, qss, wrk
 !     real(kind=kind_phys) sig2k, fhi, qss
 !
 !     real, parameter :: g=grav

@@ -1,0 +1,66 @@
+/**
+\page subpage_overview Overview of the Code
+
+The GFS physics parameterization suite is called by GMTB-SCM or FV3 after the explicit dynamical computations. The
+physics computations are performed only in the vertical. The input information for the physics consists of the values
+of the gridbox mean prognostic variables (wind components \f$u/v\f$, temperature \f$T\f$, specific humidity \f$q\f$, cloud
+fraction \f$q_a\f$, water contents for cloud liquid \f$q_l\f$, cloud ice \f$q_i\f$, rain \f$q_r\f$, snow \f$q_s\f$, graupel 
+\f$q_r\f$, and ozone concentration), the provisional dynamical tendencies for the same variables and various surface fields,
+both fixed and variable.
+
+In CCPPv2, physics suite have separate modules for different processes. Such modularity is desirable from the model development
+and code maintenance point of view. The GFS physics routines are called in the following order as defined in  \c suite_GFS_operational_2017_scm.xml file:
+ + @ref GFS_RRTMG
+ + @ref GFS_SFCLYR
+ + @ref GFS_NSST
+ + @ref GFS_NOAH
+ + @ref GFS_SFCSICE
+ + @ref GFS_HEDMF
+ + @ref GFS_GWDPS
+ + @ref GFS_RAYLEIGH
+ + @ref GFS_OZPHYS
+ + @ref GFS_SAMFdeep
+ + @ref GFS_GWDC
+ + @ref GFS_SAMFshal
+ + Microphysics (MP) scheme option:
+   + @ref GFDL_cloud 
+   + @ref GFS_ZHAOC
+
+The time integration of the GFS physics suite is based on the following:
+- It has be to written in CCPP-compliant modern Fortran with augument table and modules.
+- The tendencies from the different physical processes are computed in separate interstitial routines; 
+  Evaluating the forcing terms resulting from the parameterizations at the departure point and at the arrival point ensures the accuracy of the coupling.
+- The value of a prognostic variable is updated with the tendency from one process and the next process starts from this updated
+value (in what is usually refered to as the sequential splitting (Beljaars(1991) \cite beljaars_1991)).
+
+While the using of sufficiently small time steps may be acceptable in the context of idealized process studies. Comparably long time steps
+are essential in operational production models for efficiency. It is obvious that the numerics of the parameterized processes has to be compatible
+with the dynamics of the model. In FV3GFS, dynamical time steps are used ranging from 225s for the deterministic C768 forecasts (~13 km
+ in grid spacing), to 450s for C384 forecasts (~25 km) and 1800s for C96 forecasts (~100 km). The default time step of GFDL cloud
+microphysics (\c mp_time) is 150s. If \c mp_time isn't divisible by physics time step or is larger than physics time step, the actual \c mp_time step
+becomes dt/NINT[dt/MIN(dt, mp_time)]. Shortwave and Longwave calling interval in GFS RRTMG is 3600s.  The accuracy of the numerical approximation
+ of the parameterized equations are often optimized for a given resolution and time step.
+
+Traditionally, the parameterization in most cases (e.g. GFS physics suite in Global Spectral Model(GSM)) is split from the dynamical part of the model. Recently,
+progress have been made towards a more consistent incorporation of the physical parameterizations to the dynamical part of the model 
+(Wedi (1999) \cite wedi_1999 ; Cullen and Salmond 2002 \cite cullen_and_salmond_2002). This is possible as processes may require 
+interaction and it may be necessary to enforce a balance, e.g. between
+dynamics and boundary layer diffusion (Beljaars(1991) \cite beljaars_1991), or between dynamics and clouds in FV3GFS:
+ + @ref fast_sat_adj
+
+The NCEP Global Ensemble Forecast System (GEFS) is under-spread near the surface, a common characteristic of ensemble prediction systems. Several
+methods for increasing the spread have been tested. Perturbation of roughness lengths for heat and momentum, soil hydraulic conductivity, vegetation
+fraction, surface albedo, and leaf area index are applied, with the amplitude and perturbation scales based on previous reseach:
+
+Results show that these surface perturbation have a modest impact on the spread of near-surface temperature and other variables in the GEFS, and
+ have been shown to impact forecasts of 2m temperature, 10m wind and precipitation.
+
+Besides scientific documentation of GFS suite physical schemes, there are three modules to define physics (or radiation) attributes and constants:
+ + @ref phy_sparam
+ + @ref physcons
+ + @ref radcons
+
+
+
+
+*/

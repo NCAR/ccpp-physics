@@ -1,6 +1,8 @@
 !>  \file samfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
+!> This module contains the CCPP-compliant scale-aware mass-flux 
+!! shallow convection scheme.
       module samfshalcnv
 
       contains
@@ -21,47 +23,12 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal Scale-Aware Mass-Flux Shallow Convection
+!> \defgroup SAMF_shal GFS samfshalcnv Main
 !! @{
-!!  \brief The scale-aware mass-flux shallow (SAMF_shal) convection scheme is an
-!!  updated version of the previous mass-flux shallow convection scheme with
-!!  scale and aerosol awareness and parameterizes the effect of shallow
-!!  convection on the environment.  The SAMF_shal scheme is similar to the SAMF
-!!  deep convection scheme but with a few key differences. First, no
-!!  quasi-equilibrium assumption is used for any grid size and the shallow cloud
-!!  base mass flux is parameterized using a mean updraft velocity. Further,
-!!  there are no convective downdrafts, the entrainment rate is greater than for
-!!  deep convection, and the shallow convection is limited to not extend over
-!!  the level where \f$p=0.7p_{sfc}\f$. The paramerization of scale and aerosol
-!!  awareness follows that of the SAMF deep convection scheme.
-!!
-!!  The previous version of the shallow convection scheme (shalcnv.f) is
-!!  described in \cite han_and_pan_2011 and differences between the shallow and
-!!  deep convection schemes are presented in \cite han_and_pan_2011 and
-!!  \cite han_et_al_2017 . Details of scale- and aerosol-aware parameterizations
-!!  are described in \cite han_et_al_2017 .
-!!
-!!  In further update for FY19 GFS implementation, interaction with turbulent
-!!  kinetic energy (TKE), which is a prognostic variable used in a scale-aware
-!!  TKE-based moist EDMF vertical turbulent mixing scheme, is included.
-!!  Entrainment rates in updrafts are proportional to sub-cloud mean TKE. TKE is
-!!  transported by cumulus convection. TKE contribution from cumulus convection
-!!  is deduced from cumulus mass flux. On the other hand, tracers such as ozone
-!!  and aerosol are also transported by cumulus convection.
-!!
-!!  To reduce too much convective cooling at the cloud top, the convection
-!!  schemes have been modified for the rain conversion rate, entrainment and
-!!  detrainment rates, overshooting layers, and maximum allowable cloudbase mass
-!!  flux (as of June 2018).
-!!
-!!  \image html SAMF_shal_Flowchart.png "Diagram depicting how the SAMF shallow
-!!  convection scheme is called from the FV3GFS physics time loop" height=2cm
-
-
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
 !!
-!!  This routine follows the \ref SAMF deep scheme quite closely, although it
+!!  This routine follows the \ref SAMFdeep quite closely, although it
 !!  can be interpreted as only having the "static" and "feedback" control
 !!  portions, since the "dynamic" control is not necessary to find the cloud
 !!  base mass flux. The algorithm is simplified from SAMF deep convection by
@@ -70,68 +37,80 @@
 !!  magnitude compared to the deep scheme.
 !!
 !! \section arg_table_samfshalcnv_run Argument Table
-!! | local_name     | standard_name                                              | long_name                                                                                                | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                     | horizontal loop extent                                                                                   | count   |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                       | horizontal dimension                                                                                     | count   |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                         | vertical layer dimension                                                                                 | count   |    0 | integer   |           | in     | F        |
-!! | delt           | time_step_for_physics                                      | physics time step                                                                                        | s       |    0 | real      | kind_phys | in     | F        |
-!! | ntk            | index_of_TKE_convective_transport_tracer                   | index of TKE in the convectively transported tracer array                                                | index   |    0 | integer   |           | in     | F        |
-!! | ntr            | number_of_tracers_for_samf                                 | number of tracers for scale-aware mass flux schemes                                                      | count   |    0 | integer   |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                  | pres(k) - pres(k+1)                                                                                      | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | prslp          | air_pressure                                               | mean layer pressure                                                                                      | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | psp            | surface_air_pressure                                       | surface pressure                                                                                         | Pa      |    1 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                               | layer geopotential                                                                                       | m2 s-2  |    2 | real      | kind_phys | in     | F        |
-!! | qtr            | convective_transportable_tracers                           | array to contain cloud water and other convective trans. tracers                                         | kg kg-1 |    3 | real      | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_updated_by_physics           | updated vapor specific humidity                                                                          | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | t1             | air_temperature_updated_by_physics                         | updated temperature                                                                                      | K       |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind_updated_by_physics                                  | updated x-direction wind                                                                                 | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | v1             | y_wind_updated_by_physics                                  | updated y-direction wind                                                                                 | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | rn             | lwe_thickness_of_shallow_convective_precipitation_amount   | shallow convective rainfall amount on physics timestep                                                   | m       |    1 | real      | kind_phys | out    | F        |
-!! | kbot           | vertical_index_at_cloud_base                               | index at cloud base                                                                                      | index   |    1 | integer   |           | out    | F        |
-!! | ktop           | vertical_index_at_cloud_top                                | index at cloud top                                                                                       | index   |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                       | deep convection: 0=no, 1=yes                                                                             | flag    |    1 | integer   |           | inout  | F        |
-!! | islimsk        | sea_land_ice_mask                                          | landmask: sea/land/ice=0/1/2                                                                             | flag    |    1 | integer   |           | in     | F        |
-!! | garea          | cell_area                                                  | grid cell area                                                                                           | m2      |    1 | real      | kind_phys | in     | F        |
-!! | dot            | omega                                                      | layer mean vertical velocity                                                                             | Pa s-1  |    2 | real      | kind_phys | in     | F        |
-!! | ncloud         | number_of_hydrometeors                                     | number of hydrometeors                                                                                   | count   |    0 | integer   |           | in     | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                        | PBL top height                                                                                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux      | (updraft mass flux) * delt                                                                               | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux  | (detrainment mass flux) * delt                                                                           | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                        | moist convective cloud water mixing ratio                                                                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                     | convective cloud cover                                                                                   | frac    |    2 | real      | kind_phys | out    | F        |
-!! | clam           | entrainment_rate_coefficient_shallow_convection            | entrainment rate coefficient for shal conv.                                                              | none    |    0 | real      | kind_phys | in     | F        |
-!! | c0s            | rain_conversion_parameter_shallow_convection               | convective rain conversion parameter for shal conv.                                                      | m-1     |    0 | real      | kind_phys | in     | F        |
-!! | c1             | detrainment_conversion_parameter_shallow_convection        | convective detrainment conversion parameter for shal conv.                                               | m-1     |    0 | real      | kind_phys | in     | F        |
-!! | pgcon          | momentum_transport_reduction_factor_pgf_shallow_convection | reduction factor in momentum transport due to shal conv. induced pressure gradient force                 | frac    |    0 | real      | kind_phys | in     | F        |
-!! | asolfac        | aerosol_aware_parameter_shallow_convection                 | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv. | none    |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | error_message                                              | error message for error handling in CCPP                                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                 | error flag for error handling in CCPP                                                                    | flag    |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                              | long_name                                                                                                | units       | rank | type      |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                     | horizontal loop extent                                                                                   | count       |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                       | horizontal dimension                                                                                     | count       |    0 | integer   |           | in     | F        |
+!! | km             | vertical_dimension                                         | vertical layer dimension                                                                                 | count       |    0 | integer   |           | in     | F        |
+!! | cliq           | specific_heat_of_liquid_water_at_constant_pressure         | specific heat of liquid water at constant pressure                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure              | specific heat of dry air at constant pressure                                                            | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | cvap           | specific_heat_of_water_vapor_at_constant_pressure          | specific heat of water vapor at constant pressure                                                        | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants              | rd/rv                                                                                                    | none        |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one    | (rd/rv) - 1                                                                                              | none        |    0 | real      | kind_phys | in     | F        |
+!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one          | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                                    | none        |    0 | real      | kind_phys | in     | F        |
+!! | grav           | gravitational_acceleration                                 | gravitational acceleration                                                                               | m s-2       |    0 | real      | kind_phys | in     | F        |
+!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                 | latent heat of evaporation/sublimation                                                                   | J kg-1      |    0 | real      | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                       | ideal gas constant for dry air                                                                           | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | rv             | gas_constant_water_vapor                                   | ideal gas constant for water vapor                                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
+!! | t0c            | temperature_at_zero_celsius                                | temperature at 0 degrees Celsius                                                                         | K           |    0 | real      | kind_phys | in     | F        |
+!! | delt           | time_step_for_physics                                      | physics time step                                                                                        | s           |    0 | real      | kind_phys | in     | F        |
+!! | ntk            | index_of_TKE_convective_transport_tracer                   | index of TKE in the convectively transported tracer array                                                | index       |    0 | integer   |           | in     | F        |
+!! | ntr            | number_of_tracers_for_samf                                 | number of tracers for scale-aware mass flux schemes                                                      | count       |    0 | integer   |           | in     | F        |
+!! | delp           | air_pressure_difference_between_midlayers                  | pres(k) - pres(k+1)                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | prslp          | air_pressure                                               | mean layer pressure                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
+!! | psp            | surface_air_pressure                                       | surface pressure                                                                                         | Pa          |    1 | real      | kind_phys | in     | F        |
+!! | phil           | geopotential                                               | layer geopotential                                                                                       | m2 s-2      |    2 | real      | kind_phys | in     | F        |
+!! | qtr            | convective_transportable_tracers                           | array to contain cloud water and other convective trans. tracers                                         | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
+!! | q1             | water_vapor_specific_humidity_updated_by_physics           | updated vapor specific humidity                                                                          | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
+!! | t1             | air_temperature_updated_by_physics                         | updated temperature                                                                                      | K           |    2 | real      | kind_phys | inout  | F        |
+!! | u1             | x_wind_updated_by_physics                                  | updated x-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | v1             | y_wind_updated_by_physics                                  | updated y-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | rn             | lwe_thickness_of_shallow_convective_precipitation_amount   | shallow convective rainfall amount on physics timestep                                                   | m           |    1 | real      | kind_phys | out    | F        |
+!! | kbot           | vertical_index_at_cloud_base                               | index at cloud base                                                                                      | index       |    1 | integer   |           | out    | F        |
+!! | ktop           | vertical_index_at_cloud_top                                | index at cloud top                                                                                       | index       |    1 | integer   |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                       | deep convection: 0=no, 1=yes                                                                             | flag        |    1 | integer   |           | inout  | F        |
+!! | islimsk        | sea_land_ice_mask                                          | landmask: sea/land/ice=0/1/2                                                                             | flag        |    1 | integer   |           | in     | F        |
+!! | garea          | cell_area                                                  | grid cell area                                                                                           | m2          |    1 | real      | kind_phys | in     | F        |
+!! | dot            | omega                                                      | layer mean vertical velocity                                                                             | Pa s-1      |    2 | real      | kind_phys | in     | F        |
+!! | ncloud         | number_of_hydrometeors                                     | number of hydrometeors                                                                                   | count       |    0 | integer   |           | in     | F        |
+!! | hpbl           | atmosphere_boundary_layer_thickness                        | PBL top height                                                                                           | m           |    1 | real      | kind_phys | in     | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux      | (updraft mass flux) * delt                                                                               | kg m-2      |    2 | real      | kind_phys | out    | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux  | (detrainment mass flux) * delt                                                                           | kg m-2      |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                        | moist convective cloud water mixing ratio                                                                | kg kg-1     |    2 | real      | kind_phys | out    | F        |
+!! | cnvc           | convective_cloud_cover                                     | convective cloud cover                                                                                   | frac        |    2 | real      | kind_phys | out    | F        |
+!! | clam           | entrainment_rate_coefficient_shallow_convection            | entrainment rate coefficient for shal conv.                                                              | none        |    0 | real      | kind_phys | in     | F        |
+!! | c0s            | rain_conversion_parameter_shallow_convection               | convective rain conversion parameter for shal conv.                                                      | m-1         |    0 | real      | kind_phys | in     | F        |
+!! | c1             | detrainment_conversion_parameter_shallow_convection        | convective detrainment conversion parameter for shal conv.                                               | m-1         |    0 | real      | kind_phys | in     | F        |
+!! | pgcon          | momentum_transport_reduction_factor_pgf_shallow_convection | reduction factor in momentum transport due to shal conv. induced pressure gradient force                 | frac        |    0 | real      | kind_phys | in     | F        |
+!! | asolfac        | aerosol_aware_parameter_shallow_convection                 | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv. | none        |    0 | real      | kind_phys | in     | F        |
+!! | errmsg         | ccpp_error_message                                         | error message for error handling in CCPP                                                                 | none        |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                            | error flag for error handling in CCPP                                                                    | flag        |    0 | integer   |           | out    | F        |
 !!
-!!  \section general General Algorithm
+!!  \section gen_samfshalcnv GFS samfshalcnv General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# The cloud base mass flux is obtained using the cumulus updraft velocity averaged ove the whole cloud depth.
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
-!!  \section detailed Detailed Algorithm
+!!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,delt,ntk,ntr,delp,
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,
-     &     rn,kbot,ktop,kcnv,islimsk,garea,
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,
+      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,                 &
+     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
+     &     t0c,delt,ntk,ntr,delp,                                       &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
+     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp, hvap => con_hvap
-     &,             rv => con_rv, fv => con_fvirt, t0c => con_t0c
-     &,             rd => con_rd, cvap => con_cvap, cliq => con_cliq
-     &,             eps => con_eps, epsm1 => con_epsm1
+
       implicit none
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap,
+     &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
      &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
@@ -155,7 +134,7 @@
 !
       real(kind=kind_phys) clamd,   tkemx,   tkemn,   dtke
 !
-      real(kind=kind_phys) dellat,  delta,
+      real(kind=kind_phys) dellat,
      &                     c0l,     d0,
      &                     desdt,   dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
@@ -167,7 +146,7 @@
      &                     es,      etah,    h1,
      &                     evef,    evfact,  evfactl, fact1,
      &                     fact2,   factor,  dthk,
-     &                     g,       gamma,   pprime,  betaw,
+     &                     gamma,   pprime,  betaw,
      &                     qlk,     qrch,    qs,
      &                     rfact,   shear,   tfac,
      &                     val,     val1,    val2,
@@ -206,12 +185,13 @@ c
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
      &                     bb1,     bb2
 !    &                     bb1,     bb2,     wucb
+
 cc
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
-      parameter(g=grav)
-      parameter(elocp=hvap/cp,
-     &          el2orc=hvap*hvap/(rv*cp))
+!     parameter(g=grav)
+!     parameter(elocp=hvap/cp,
+!    &          el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=0.002,c1=5.e-4,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
@@ -224,8 +204,8 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,delta=fv)
-      parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
+      parameter(cm=1.0)
+!     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.1,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dthk=25.)
@@ -269,6 +249,13 @@ c-----------------------------------------------------------------------
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      elocp = hvap/cp
+      el2orc = hvap*hvap/(rv*cp)
+
+      fact1 = (cvap-cliq)/rv
+      fact2 = hvap/rv-fact1*t0c
+
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
 !>  ## Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
@@ -396,7 +383,7 @@ c
 !>  - Calculate hydrostatic height at layer centers assuming a flat surface (no terrain) from the geopotential.
       do k = 1, km
         do i=1,im
-          zo(i,k) = phil(i,k) / g
+          zo(i,k) = phil(i,k) / grav
         enddo
       enddo
 !>  - Calculate interface height
@@ -482,7 +469,7 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-!           tvo(i,k)  = to(i,k) + delta * to(i,k) * qo(i,k)
+!           tvo(i,k)  = to(i,k) + fv * to(i,k) * qo(i,k)
           endif
         enddo
       enddo
@@ -493,7 +480,7 @@ c
       do k = 1, km
         do i=1,im
           if (cnvflg(i) .and. k <= kmax(i)) then
-!           tem       = g * zo(i,k) + cp * to(i,k)
+!           tem       = grav * zo(i,k) + cp * to(i,k)
             tem       = phil(i,k) + cp * to(i,k)
             heo(i,k)  = tem  + hvap * qo(i,k)
             heso(i,k) = tem  + hvap * qeso(i,k)
@@ -537,7 +524,7 @@ c
             desdt   = es * (fact1 / to(i,k+1) + fact2 / (to(i,k+1)**2))
             dqsdt   = qs * pfld(i,k+1) * desdt / (es * pprime)
             gamma   = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
-            dt      = (g * dz + hvap * dqsdp * dp) / (cp * (1. + gamma))
+            dt      = (grav*dz + hvap*dqsdp*dp) / (cp*(1. + gamma))
             dq      = dqsdt * dt + dqsdp * dp
             to(i,k) = to(i,k+1) + dt
             qo(i,k) = qo(i,k+1) + dq
@@ -557,9 +544,9 @@ c
             val2      =           1.e-10
             qo(i,k)   = max(qo(i,k), val2 )
 !           qo(i,k)   = min(qo(i,k),qeso(i,k))
-            heo(i,k)  = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heo(i,k)  = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qo(i,k)
-            heso(i,k) = .5 * g * (zo(i,k) + zo(i,k+1)) +
+            heso(i,k) = .5 * grav * (zo(i,k) + zo(i,k+1)) +
      &                  cp * to(i,k) + hvap * qeso(i,k)
             uo(i,k)   = .5 * (uo(i,k) + uo(i,k+1))
             vo(i,k)   = .5 * (vo(i,k) + vo(i,k+1))
@@ -891,17 +878,17 @@ c
             if(k > kb(i) .and. k < kbcon1(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
               val = 0.
               cina(i) = cina(i) +
-!    &                 dz1 * eta(i,k) * g * delta *
-     &                 dz1 * g * delta *
+!    &                 dz1 * eta(i,k) * grav * fv *
+     &                 dz1 * grav * fv *
      &                 max(val,(qeso(i,k) - qo(i,k)))
             endif
           endif
@@ -978,11 +965,11 @@ c
 !
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          xmbmax(i) = dp / (2. * g * dt2)
+          xmbmax(i) = dp / (2. * grav * dt2)
 !
-!         xmbmax(i) = dp / (g * dt2)
+!         xmbmax(i) = dp / (grav * dt2)
 !
-!         tem = dp / (g * dt2)
+!         tem = dp / (grav * dt2)
 !         xmbmax(i) = min(tem, xmbmax(i))
         endif
       enddo
@@ -1026,26 +1013,26 @@ c
                 if(ncloud > 0) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
-                buo(i,k) = buo(i,k) - g * qlk
+                buo(i,k) = buo(i,k) - grav * qlk
                 qcko(i,k)= qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
-                cnvwt(i,k) = etah * qlk * g / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
 !
 !  compute buoyancy and drag for updraft velocity
 !
               if(k >= kbcon(i)) then
-                rfact =  1. + delta * cp * gamma
+                rfact =  1. + fv * cp * gamma
      &                   * to(i,k) / hvap
-                buo(i,k) = buo(i,k) + (g / (cp * to(i,k)))
+                buo(i,k) = buo(i,k) + (grav / (cp * to(i,k)))
      &                   * dbyo(i,k) / (1. + gamma)
      &                   * rfact
                 val = 0.
-                buo(i,k) = buo(i,k) + g * delta *
+                buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i))
               endif
@@ -1063,17 +1050,17 @@ c
 !           if(k >= kbcon(i) .and. k < ktcon(i)) then
 !             dz1 = zo(i,k+1) - zo(i,k)
 !             gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-!             rfact =  1. + delta * cp * gamma
+!             rfact =  1. + fv * cp * gamma
 !    &                 * to(i,k) / hvap
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-!    &                 dz1 * (g / (cp * to(i,k)))
+!!   &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+!    &                 dz1 * (grav / (cp * to(i,k)))
 !    &                 * dbyo(i,k) / (1. + gamma)
 !    &                 * rfact
 !             val = 0.
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
 !           endif
 !         endif
@@ -1139,17 +1126,17 @@ c
             if(k >= ktcon(i) .and. k < kbm(i)) then
               dz1 = zo(i,k+1) - zo(i,k)
               gamma = el2orc * qeso(i,k) / (to(i,k)**2)
-              rfact =  1. + delta * cp * gamma
+              rfact =  1. + fv * cp * gamma
      &                 * to(i,k) / hvap
               aa1(i) = aa1(i) +
-!    &                 dz1 * eta(i,k) * (g / (cp * to(i,k)))
-     &                 dz1 * (g / (cp * to(i,k)))
+!    &                 dz1 * eta(i,k) * (grav / (cp * to(i,k)))
+     &                 dz1 * (grav / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact
 !             val = 0.
 !             aa1(i) = aa1(i) +
-!!   &                 dz1 * eta(i,k) * g * delta *
-!    &                 dz1 * g * delta *
+!!   &                 dz1 * eta(i,k) * grav * fv *
+!    &                 dz1 * grav * fv *
 !    &                 max(val,(qeso(i,k) - qo(i,k)))
               if(aa1(i) < 0.) then
                 ktcon1(i) = k
@@ -1190,13 +1177,13 @@ c
                 if(ncloud > 0) then
                   ptem = c0t(i,k) + c1
                   qlk = dq / (eta(i,k) + etah * ptem * dz)
-                  dellal(i,k) = etah * c1 * dz * qlk * g / dp
+                  dellal(i,k) = etah * c1 * dz * qlk * grav / dp
                 else
                   qlk = dq / (eta(i,k) + etah * c0t(i,k) * dz)
                 endif
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
-                cnvwt(i,k) = etah * qlk * g / dp
+                cnvwt(i,k) = etah * qlk * grav / dp
               endif
             endif
           endif
@@ -1222,7 +1209,7 @@ c
 !       if (cnvflg(i)) then
 !         k = kbcon1(i)
 !         tem = po(i,k) / (rd * to(i,k))
-!         wucb = -0.01 * dot(i,k) / (tem * g)
+!         wucb = -0.01 * dot(i,k) / (tem * grav)
 !         if(wucb > 0.) then
 !           wu2(i,k) = wucb * wucb
 !         else
@@ -1396,21 +1383,21 @@ cj
      &     ( eta(i,k)*dv1h - eta(i,k-1)*dv3h
      &    -  tem*eta(i,k-1)*dv2h*dz
      &    +  tem1*eta(i,k-1)*.5*(hcko(i,k)+hcko(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               dellaq(i,k) = dellaq(i,k) +
      &     ( eta(i,k)*dv1q - eta(i,k-1)*dv3q
      &    -  tem*eta(i,k-1)*dv2q*dz
      &    +  tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
-     &         ) *g/dp
+     &         ) *grav/dp
 cj
               tem1=eta(i,k)*(uo(i,k)-ucko(i,k))
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
-              dellau(i,k) = dellau(i,k) + (tem1-tem2) * g/dp
+              dellau(i,k) = dellau(i,k) + (tem1-tem2) * grav/dp
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
-              dellav(i,k) = dellav(i,k) + (tem1-tem2) * g/dp
+              dellav(i,k) = dellav(i,k) + (tem1-tem2) * grav/dp
 cj
             endif
           endif
@@ -1425,7 +1412,7 @@ cj
 cj
               tem1=eta(i,k)*(ctro(i,k,n)-ecko(i,k,n))
               tem2=eta(i,k-1)*(ctro(i,k-1,n)-ecko(i,k-1,n))
-              dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * g/dp
+              dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * grav/dp
 cj
             endif
           endif
@@ -1441,19 +1428,19 @@ c
           dp = 1000. * del(i,indx)
           dv1h = heo(i,indx-1)
           dellah(i,indx) = eta(i,indx-1) *
-     &                     (hcko(i,indx-1) - dv1h) * g / dp
+     &                     (hcko(i,indx-1) - dv1h) * grav / dp
           dv1q = qo(i,indx-1)
           dellaq(i,indx) = eta(i,indx-1) *
-     &                     (qcko(i,indx-1) - dv1q) * g / dp
+     &                     (qcko(i,indx-1) - dv1q) * grav / dp
           dellau(i,indx) = eta(i,indx-1) *
-     &             (ucko(i,indx-1) - uo(i,indx-1)) * g / dp
+     &             (ucko(i,indx-1) - uo(i,indx-1)) * grav / dp
           dellav(i,indx) = eta(i,indx-1) *
-     &             (vcko(i,indx-1) - vo(i,indx-1)) * g / dp
+     &             (vcko(i,indx-1) - vo(i,indx-1)) * grav / dp
 c
 c  cloud water
 c
           dellal(i,indx) = eta(i,indx-1) *
-     &                     qlko_ktcon(i) * g / dp
+     &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
       do n = 1, ntr
@@ -1462,7 +1449,7 @@ c
           indx = ktcon(i)
           dp = 1000. * del(i,indx)
           dellae(i,indx,n) = eta(i,indx-1) *
-     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * g / dp
+     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * grav / dp
         endif
       enddo
       enddo
@@ -1524,7 +1511,7 @@ c
         endif
       enddo
 !
-!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitus_2014.
+!> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 2.e-4), 6.e-4)
@@ -1595,11 +1582,11 @@ c
               u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
               v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
               dp = 1000. * del(i,k)
-              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/g
-              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/g
-              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/g
-              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/g
-              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/g
+              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/grav
+              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/grav
+              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/grav
+              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/grav
+              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/grav
             endif
           endif
         enddo
@@ -1611,7 +1598,7 @@ c
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
               ctr(i,k,n) = ctr(i,k,n)+dellae(i,k,n)*xmb(i)*dt2
-              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/g
+              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/grav
               qtr(i,k,kk) = ctr(i,k,n)
             endif
           endif
@@ -1676,16 +1663,16 @@ c             if(islimsk(i) == 1) evef = 0.
               dp = 1000. * del(i,k)
               if(rn(i) > 0. .and. qcond(i) < 0.) then
                 qevap(i) = -qcond(i) * (1.-exp(-.32*sqrt(dt2*rn(i))))
-                qevap(i) = min(qevap(i), rn(i)*1000.*g/dp)
-                delq2(i) = delqev(i) + .001 * qevap(i) * dp / g
+                qevap(i) = min(qevap(i), rn(i)*1000.*grav/dp)
+                delq2(i) = delqev(i) + .001 * qevap(i) * dp / grav
               endif
               if(rn(i) > 0. .and. qcond(i) < 0. .and.
      &           delq2(i) > rntot(i)) then
-                qevap(i) = 1000.* g * (rntot(i) - delqev(i)) / dp
+                qevap(i) = 1000.* grav * (rntot(i) - delqev(i)) / dp
                 flg(i) = .false.
               endif
               if(rn(i) > 0. .and. qevap(i) > 0.) then
-                tem  = .001 * dp / g
+                tem  = .001 * dp / grav
                 tem1 = qevap(i) * tem
                 if(tem1 > rn(i)) then
                   qevap(i) = rn(i) / tem
@@ -1697,10 +1684,10 @@ c             if(islimsk(i) == 1) evef = 0.
                 t1(i,k) = t1(i,k) - elocp * qevap(i)
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
-                delqev(i) = delqev(i) + .001*dp*qevap(i)/g
+                delqev(i) = delqev(i) + .001*dp*qevap(i)/grav
               endif
-              delqbar(i) = delqbar(i) + delq(i)*dp/g
-              deltbar(i) = deltbar(i) + deltv(i)*dp/g
+              delqbar(i) = delqbar(i) + delq(i)*dp/grav
+              deltbar(i) = deltbar(i) + deltv(i)*dp/grav
             endif
           endif
         enddo
@@ -1835,3 +1822,101 @@ c
 !> @}
 !! @}
       end module samfshalcnv
+
+!> This module contains the CCPP-compliant scale-aware mass-flux shallow convection
+!! post interstitial codes.
+      module samfshalcnv_post
+      contains
+
+!! \section arg_table_samfshalcnv_post_run Argument Table
+!! | local_name     | standard_name                                                         | long_name                                                            | units   | rank | type             |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------------------|----------------------------------------------------------------------|---------|------|------------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                | horizontal loop extent                                               | count   |    0 | integer          |           | in     | F        |
+!! | levs           | vertical_dimension                                                    | vertical layer dimension                                             | count   |    0 | integer          |           | in     | F        |
+!! | lssav          | flag_diagnostics                                                      | logical flag for storing diagnostics                                 | flag    |    0 | logical          |           | in     | F        |
+!! | shcnvcw        | flag_shallow_convective_cloud                                         | flag for shallow convective cloud                                    |         |    0 | logical          |           | in     | F        |
+!! | frain          | dynamics_to_physics_timestep_ratio                                    | ratio of dynamics timestep to physics timestep                       | none    |    0 | real             | kind_phys | in     | F        |
+!! | rain1          | lwe_thickness_of_shallow_convective_precipitation_amount              | shallow convective rainfall amount on physics timestep               | m       |    1 | real             | kind_phys | in     | F        |
+!! | npdf3d         | number_of_3d_arrays_associated_with_pdf-based_clouds                  | number of 3d arrays associated with pdf based clouds/mp              | count   |    0 | integer          |           | in     | F        |
+!! | num_p3d        | array_dimension_of_3d_arrays_for_microphysics                         | number of 3D arrays needed for microphysics                          | count   |    0 | integer          |           | in     | F        |
+!! | ncnvcld3d      | number_of_convective_3d_cloud_fields                                  | number of convective 3d clouds fields                                | count   |    0 | integer          |           | in     | F        |
+!! | cnvc           | convective_cloud_cover                                                | convective cloud cover                                               | frac    |    2 | real             | kind_phys | in     | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                                   | moist convective cloud water mixing ratio                            | kg kg-1 |    2 | real             | kind_phys | in     | F        |
+!! | rainc          | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep | convective rain at this time step                                    | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvprcp        | cumulative_lwe_thickness_of_convective_precipitation_amount           | cumulative convective precipitation                                  | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket | cumulative convective precipitation in bucket                        | m       |    1 | real             | kind_phys | inout  | F        |
+!! | cnvw_phy_f3d   | convective_cloud_water_mixing_ratio_in_phy_f3d                        | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1 |    2 | real             | kind_phys | inout  | F        |
+!! | cnvc_phy_f3d   | convective_cloud_cover_in_phy_f3d                                     | convective cloud cover in the phy_f3d array                          | frac    |    2 | real             | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                             | none    |    0 | character        | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                                | flag    |    0 | integer          |           | out    | F        |
+!!
+      subroutine samfshalcnv_post_run (im, levs, lssav, shcnvcw, frain,
+     &  rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,
+     &  rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,
+     &  errmsg, errflg)
+
+        use machine,               only: kind_phys
+
+        implicit none
+!
+        integer, intent(in) :: im, levs
+        integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
+        logical, intent(in) :: lssav, shcnvcw
+        real(kind=kind_phys), intent(in) :: frain
+        real(kind=kind_phys), dimension(im), intent(in) :: rain1
+        real(kind=kind_phys), dimension(im,levs), intent(in) :: cnvw,
+     &    cnvc
+
+        real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
+     &    cnvprcp, cnvprcpb
+        real(kind=kind_phys), dimension(im,levs), intent(inout) ::
+     &    cnvw_phy_f3d, cnvc_phy_f3d
+
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        real(kind=kind_phys), dimension(im) :: raincs
+        integer :: i, k
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        do i=1,im
+          raincs(i)     = frain * rain1(i)
+          rainc(i) = rainc(i) + raincs(i)
+        enddo
+        if (lssav) then
+          do i=1,im
+            cnvprcp(i)  = cnvprcp(i)  + raincs(i)
+            cnvprcpb(i) = cnvprcpb(i) + raincs(i)
+          enddo
+        endif
+! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
+        if ((shcnvcw) .and. (num_p3d == 4) .and. (npdf3d == 3)) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
+              cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
+            enddo
+          enddo
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)
+            enddo
+          enddo
+        endif
+      end subroutine samfshalcnv_post_run
+
+!! \section arg_table_sasas_shal_post_init Argument Table
+!!
+      subroutine samfshalcnv_post_init ()
+      end subroutine samfshalcnv_post_init
+
+!! \section arg_table_sasas_shal_post_finalize Argument Table
+!!
+      subroutine samfshalcnv_post_finalize ()
+      end subroutine samfshalcnv_post_finalize
+
+      end module samfshalcnv_post
