@@ -1,25 +1,55 @@
 !
 module cu_gf_driver
+
+   ! DH* TODO: replace constants with arguments to cu_gf_driver_run
    use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap
    use cu_gf_sh  , only: cu_gf_sh_run
 
+   implicit none
+
+   private
+
+   public :: cu_gf_driver_init, cu_gf_driver_run, cu_gf_driver_finalize
+
 contains
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_gf_driver_init Argument Table
+!! \section arg_table_cu_gf_driver_init Argument Table
+!! | local_name           | standard_name      | long_name                                | units | rank | type      |    kind   | intent | optional |
+!! |----------------------|--------------------|------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | mpirank              | mpi_rank           | current MPI-rank                         | index |    0 | integer   |           | in     | F        |
+!! | mpiroot              | mpi_root           | master MPI-rank                          | index |    0 | integer   |           | in     | F        |
+!! | errmsg               | ccpp_error_message | error message for error handling in CCPP | none  |    0 | character | len=*     | out    | F        |
+!! | errflg               | ccpp_error_flag    | error flag for error handling in CCPP    | flag  |    0 | integer   |           | out    | F        |
 !!
-      subroutine cu_gf_driver_init
+      subroutine cu_gf_driver_init(mpirank, mpiroot, errmsg, errflg)
+
+         implicit none
+
+         integer,                   intent(in)    :: mpirank
+         integer,                   intent(in)    :: mpiroot
+         character(len=*),          intent(  out) :: errmsg
+         integer,                   intent(  out) :: errflg
+
+         ! DH* temporary
+         if (mpirank==mpiroot) then
+            write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'
+            write(0,*) ' --- WARNING --- the CCPP Grell Freitas convection scheme is currently under development, use at your own risk --- WARNING ---'
+            write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'
+         end if
+         ! *DH temporary
+
       end subroutine cu_gf_driver_init
 
 
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_gf_driver_finalize Argument Table
+!! \section arg_table_cu_gf_driver_finalize Argument Table
 !!
-      subroutine cu_gf_driver_finalize
+      subroutine cu_gf_driver_finalize()
       end subroutine cu_gf_driver_finalize
 !
 ! t2di is temp after advection, but before physics
@@ -28,45 +58,45 @@ contains
 !
 !!
 !! \section arg_table_cu_gf_driver_run Argument Table
-!! | local_name     | standard_name                                             | long_name                                           | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | tottracer      | number_of_total_tracers                                   | number of total tracers                             | count   |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                      | number of tracers to diffuse vertically             | count   |    0 | integer   |           | in     | F        |
-!! | garea          | cell_area                                                 | grid cell area                                      | m2      |    1 | real      | kind_phys | in     | F        |
-!! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count   |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                      | horizontal dimension                                | count   |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension                            | count   |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                     | physics time step                                   | s       |    0 | real      | kind_phys | in     | F        |
-!! | cactiv         | conv_activity_counter                                     | convective activity memory                          | none    |    1 | integer   |           | none   | F        |
-!! | forcet         | temperature_tendency_due_to_dynamics                      | temperature tendency due to dynamics only           | K s-1   | 2    | real      | kind_phys | none   | F        |
-!! | forceq         | moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   | 2    | real    | kind_phys | none   | F        |
-!! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2  |    2 | real      | kind_phys | in     | F        |
-!! | raincv         | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m       |    1 | real      | kind_phys | out    | F        |
-!! | q              | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                     | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | t              | air_temperature_updated_by_physics                        | updated temperature                                 | K       |    2 | real      | kind_phys | inout  | F        |
-!! | cld1d          | cloud_work_function                                       | cloud work function                                 | m2 s-2  |    1 | real      | kind_phys | out    | F        |
-!! | us             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | vs             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | t2di           | air_temperature                                           | mid-layer temperature                               | K       |    2 | real      | kind_phys | in     | F        |
-!! | w              | omega                                                     | layer mean vertical velocity                        | Pa s-1  |    2 | real      | kind_phys | in     | F        |
-!! | q2di           | water_vapor_specific_humidity                             | mid-layer specific humidity of water vapor          | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | p2di           | air_pressure                                              | mean layer pressure                                 | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | psuri          | surface_air_pressure                                      | surface pressure                                    | Pa      |    1 | real      | kind_phys | in     | F        |
-!! | hbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index   |    1 | integer   |           | out    | F        |
-!! | htop           | vertical_index_at_cloud_top                               | index for cloud top                                 | index   |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                        | flag    |    1 | integer   |           | out    | F        |
-!! | xland          | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag    |    1 | integer   |           | in     | F        |
-!! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1 |    1 | real      | kind_phys | out    | F        |
-!! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real             | kind_phys | out    | F        |
-!! | clw            | convective_transportable_tracers                          | array to contain cloud water and other convective trans. tracers         | kg kg-1       |    3 | real        | kind_phys | none   | F        |
-!! | pbl           | atmosphere_boundary_layer_thickness    | PBL thickness     | m             |    1      | real      | kind_phys | out    | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2  |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                       | convective cloud water                              | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac    |    2 | real      | kind_phys | out    | F        |
-!! | errmsg         | error_message                                             | error message for error handling in CCPP            | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | error_flag                                                | error flag for error handling in CCPP               | flag    |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | tottracer      | number_of_total_tracers                                   | number of total tracers                             | count         |    0 | integer   |           | in     | F        |
+!! | ntrac          | number_of_vertical_diffusion_tracers                      | number of tracers to diffuse vertically             | count         |    0 | integer   |           | in     | F        |
+!! | garea          | cell_area                                                 | grid cell area                                      | m2            |    1 | real      | kind_phys | in     | F        |
+!! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count         |    0 | integer   |           | in     | F        |
+!! | ix             | horizontal_dimension                                      | horizontal dimension                                | count         |    0 | integer   |           | in     | F        |
+!! | km             | vertical_dimension                                        | vertical layer dimension                            | count         |    0 | integer   |           | in     | F        |
+!! | dt             | time_step_for_physics                                     | physics time step                                   | s             |    0 | real      | kind_phys | in     | F        |
+!! | cactiv         | conv_activity_counter                                     | convective activity memory                          | none          |    1 | integer   |           | inout  | F        |
+!! | forcet         | temperature_tendency_due_to_dynamics                      | temperature tendency due to dynamics only           | K s-1         |    2 | real      | kind_phys | in     | F        |
+!! | forceq         | moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   |    2 | real      | kind_phys | in     | F        |
+!! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2        |    2 | real      | kind_phys | in     | F        |
+!! | raincv         | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m             |    1 | real      | kind_phys | out    | F        |
+!! | q              | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                     | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | t              | air_temperature_updated_by_physics                        | updated temperature                                 | K             |    2 | real      | kind_phys | inout  | F        |
+!! | cld1d          | cloud_work_function                                       | cloud work function                                 | m2 s-2        |    1 | real      | kind_phys | out    | F        |
+!! | us             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | vs             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | t2di           | air_temperature                                           | mid-layer temperature                               | K             |    2 | real      | kind_phys | in     | F        |
+!! | w              | omega                                                     | layer mean vertical velocity                        | Pa s-1        |    2 | real      | kind_phys | in     | F        |
+!! | q2di           | water_vapor_specific_humidity                             | mid-layer specific humidity of water vapor          | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | p2di           | air_pressure                                              | mean layer pressure                                 | Pa            |    2 | real      | kind_phys | in     | F        |
+!! | psuri          | surface_air_pressure                                      | surface pressure                                    | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | hbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index         |    1 | integer   |           | out    | F        |
+!! | htop           | vertical_index_at_cloud_top                               | index for cloud top                                 | index         |    1 | integer   |           | out    | F        |
+!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                        | flag          |    1 | integer   |           | out    | F        |
+!! | xland          | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag          |    1 | integer   |           | in     | F        |
+!! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1       |    1 | real      | kind_phys | out    | F        |
+!! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
+!! | clw            | convective_transportable_tracers                          | cloud water and other convective trans. tracers     | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
+!! | pbl            | atmosphere_boundary_layer_thickness                       | PBL thickness                                       | m             |    1 | real      | kind_phys | out    | F        |
+!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2        |    2 | real      | kind_phys | out    | F        |
+!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2        |    2 | real      | kind_phys | out    | F        |
+!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
+!! | cnvw           | convective_cloud_water_mixing_ratio                       | convective cloud water                              | kg kg-1       |    2 | real      | kind_phys | out    | F        |
+!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac          |    2 | real      | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
                forcet,forceq,phil,raincv,q,t,cld1d,       &
@@ -75,7 +105,7 @@ contains
                pbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
 !              pbl,ud_mf,dd_mf,dt_mf,gdc,gdc2,cnvw,cnvc,ishal_cnv)
 !-------------------------------------------------------------
-   implicit none
+      implicit none
       integer, parameter :: maxiens=1
       integer, parameter :: maxens=1
       integer, parameter :: maxens2=1
@@ -195,7 +225,7 @@ contains
 !
 ! these should be coming in from outside
 !
-     print*,'hli in gf cactiv',cactiv
+!     print*,'hli in gf cactiv',cactiv
 !     cactiv(:)      = 0
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
