@@ -270,8 +270,8 @@
               do i=1,im
                 dqdt_water_vapor(i,k)             = dvdftra(i,k,1)
                 dqdt_liquid_cloud(i,k)            = dvdftra(i,k,2)
-                dqdt_cloud_droplet_num_conc(i,k)  = dvdftra(i,k,3)
-                dqdt_ice_cloud(i,k)               = dvdftra(i,k,4)
+                dqdt_ice_cloud(i,k)               = dvdftra(i,k,3)
+                dqdt_cloud_droplet_num_conc(i,k)  = dvdftra(i,k,4)
                 dqdt_ice_num_conc(i,k)            = dvdftra(i,k,5)
                 dqdt_ozone(i,k)                   = dvdftra(i,k,6)
                 dqdt_water_aer_num_conc(i,k)      = dvdftra(i,k,7)
