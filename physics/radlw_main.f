@@ -2,8 +2,6 @@
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
-!\defgroup RRTMG GFS RRTMG Shortwave/Longwave Radiation 
-!
 !!!!!  ==============================================================  !!!!!
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
@@ -238,9 +236,9 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!========================================!
-      module rrtmg_lw                    !
-!........................................!
+!> This module contains the CCPP-compliant NCEP's modifications of the 
+!! rrtm-lw radiation code from aer inc.
+      module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
      &                             isubclw, icldflg, iovrlw,  ivflip,   &

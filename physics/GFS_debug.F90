@@ -8,6 +8,7 @@
 
 #define PRINT_SUM
       interface print_var
+        module procedure print_logic_0d
         module procedure print_int_0d
         module procedure print_real_0d
         module procedure print_real_1d
@@ -95,7 +96,7 @@
 #ifdef MPI
          mpicomm = Model%communicator
          mpirank = Model%me
-         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
+         mpisize = Model%ntasks
 #else
          mpirank = 0
          mpisize = 1
@@ -144,6 +145,27 @@
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htswc',            Tbd%htswc)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Tbd%htsw0',            Tbd%htsw0)
                      call print_var(mpirank,omprank,Tbd%blkno, 'Model%sec',            Model%sec)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dswsfci',         Diag%dswsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%nswsfci',         Diag%nswsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%uswsfci',         Diag%uswsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dlwsfci',         Diag%dlwsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%ulwsfci',         Diag%ulwsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dusfci',          Diag%dusfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dvsfci',          Diag%dvsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dtsfci',          Diag%dtsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dqsfci',          Diag%dqsfci)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%gfluxi',          Diag%gfluxi)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%gflux',           Diag%gflux)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Sfcprop%slmsk',        Sfcprop%slmsk)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%epi'    ,         Diag%epi)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%gfluxi' ,         Diag%gfluxi)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%t1'     ,         Diag%t1)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%q1'     ,         Diag%q1)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%u1'     ,         Diag%u1)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%v1'     ,         Diag%v1)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%dlwsfc',          Diag%dlwsfc)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%ulwsfc',          Diag%ulwsfc)
+                     call print_var(mpirank,omprank,Tbd%blkno, 'Diag%psmean',          Diag%psmean)
                  end if
 #ifdef OPENMP
 !$OMP BARRIER
@@ -162,6 +184,18 @@
 #endif
 
       end subroutine GFS_diagtoscreen_run
+
+      subroutine print_logic_0d(mpirank,omprank,blkno,name,var)
+
+          implicit none
+
+          integer, intent(in) :: mpirank, omprank, blkno
+          character(len=*), intent(in) :: name
+          logical, intent(in) :: var
+
+          write(0,'(2a,3i4,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
+
+      end subroutine print_logic_0d
 
       subroutine print_int_0d(mpirank,omprank,blkno,name,var)
 

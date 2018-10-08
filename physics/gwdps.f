@@ -2,7 +2,8 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.
 
-
+!> This module contains the CCPP-compliant orographic gravity wave 
+!! drag pre interstitial codes.
       module gwdps_pre
 
       contains
@@ -115,8 +116,7 @@
 
       end module gwdps_pre
 
-
-
+!> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module gwdps
 
       contains
@@ -835,7 +835,7 @@
 ! --- lm eq 14:
 !> - Calculate the drag coefficient to vary with the aspect ratio of
 !! the obstable as seen by the incident flow (see eq.14 in
-!! \cite lott_and_miller_1997)
+!! Lott and Miller (1997) \cite lott_and_miller_1997)
 !!\f[
 !! R=\frac{\cos^{2}\psi+\gamma\sin^{2}\psi}{\gamma\cos^{2}\psi+\sin^{2}\psi}
 !!\f]
@@ -848,7 +848,7 @@
 !> - In each model layer below the dividing streamlines, a drag from
 !! the blocked flow is exerted by the obstacle on the large scale flow.
 !! The drag per unit area and per unit height is written (eq.15 in
-!! \cite lott_and_miller_1997):
+!! Lott and Miller (1997) \cite lott_and_miller_1997):
 !!\f[
 !! D_{b}(z)=-C_{d}\max(2-\frac{1}{R},0)\rho\frac{\sigma}{2h'}ZLEN\max(\cos\psi,\gamma\sin\psi)\frac{UDS}{2}
 !!\f]
@@ -1105,7 +1105,7 @@
 !
 !> - Calculate enhancement factor (E),number of mountans (m') and
 !! aspect ratio constant.
-!!\n As in eq.(4.9),(4.10),(4.11) in
+!!\n As in eq.(4.9),(4.10),(4.11) in Kim and Arakawa (1995)
 !! \cite kim_and_arakawa_1995, we define m' and E in such a way that they
 !! depend on the geometry and location of the subgrid-scale orography
 !! through OA and the nonlinearity of flow above the orography through
@@ -1133,7 +1133,7 @@
 !! \f$C_{G}\f$ are constants.
 
 !> - Calculate the reference-level drag \f$\tau_{0}\f$ (eq.(4.8) in
-!!  \cite kim_and_arakawa_1995):
+!!  Kim and Arakawa (1995) \cite kim_and_arakawa_1995):
 !!\f[
 !! \tau_0=E\frac{m'}{\triangle x}\frac{\rho_{0}U_0^3}{N_{0}}G'
 !!\f]
@@ -1188,7 +1188,7 @@
 !
 !> - Compute the drag above the reference level (\f$k\geq kref\f$):
 !!  - Calculate the ratio of the Scorer parameter (\f$R_{scor}\f$).
-!! \n From a series of experiments,
+!! \n From a series of experiments, Kim and Arakawa (1995)
 !! \cite kim_and_arakawa_1995 found that the magnitude of drag divergence
 !! tends to be underestimated by the revised scheme in low-level
 !! downstream regions with wave breaking. Therefore, at low levels when
@@ -1239,7 +1239,7 @@
 !!\f[
 !! Ri_{m}=\frac{Ri(1-Fr_{d})}{(1+\sqrt{Ri}\cdot Fr_{d})^{2}}
 !!\f]
-!! see eq.(4.6) in \cite kim_and_arakawa_1995.
+!! see eq.(4.6) in Kim and Arakawa (1995) \cite kim_and_arakawa_1995.
 
               TEM2   = SQRT(ri_n(I,K))
               TEM    = 1. + TEM2 * FRO
@@ -1249,13 +1249,13 @@
 !    OF LINDZEN (1981) EXCEPT AT TROPOSPHERIC DOWNSTREAM REGIONS
 !
 !>  - Check stability to employ the 'saturation hypothesis' of
-!! \cite lindzen_1981 except at tropospheric downstream regions.
+!! Lindzen (1981) \cite lindzen_1981 except at tropospheric downstream regions.
 !! \n Wave breaking occurs when \f$Ri_{m}<Ri_{c}=0.25\f$. Then
 !! Lindzen's wave saturation hypothesis resets the displacement
 !! amplitude \f$h_{d}\f$ to that corresponding to \f$Ri_{m}=0.25\f$,
 !! we obtain the critical \f$h_{d}\f$(or \f$h_{c}\f$) expressed in
 !! terms of the mean values of \f$U\f$, \f$N\f$, and \f$Ri\f$ (
-!! eq.(4.7) in \cite kim_and_arakawa_1995):
+!! eq.(4.7) in Kim and Arakawa (1995) \cite kim_and_arakawa_1995):
 !!\f[
 !! h_{c}=\frac{U}{N}\left\{2(2+\frac{1}{\sqrt{Ri}})^{1/2}-(2+\frac{1}{\sqrt{Ri}})\right\}
 !!\f]
@@ -1430,8 +1430,8 @@
 
       end module gwdps
 
-
-
+!> This module contains the CCPP-compliant orographic gravity wave drag post
+!! interstitial codes.
       module gwdps_post
 
       contains
