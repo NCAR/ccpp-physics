@@ -2,11 +2,15 @@ module module_soil_pre
 
 !tgs Initialize RUC LSM levels, soil temp/moisture
 
+      implicit none
+
+      private
+
+      public init_soil_depth_3, init_soil_3_real
+
 contains
 
    SUBROUTINE init_soil_depth_3 ( zs , dzs , num_soil_levels )
-
-      IMPLICIT NONE
 
       INTEGER, INTENT(IN) :: num_soil_levels
 
@@ -57,8 +61,6 @@ contains
                                  ids , ide , jds , jde , kds , kde , &
                                  ims , ime , jms , jme , kms , kme , &
                                  its , ite , jts , jte , kts , kte )
-
-      IMPLICIT NONE
 
       INTEGER , INTENT(IN) :: num_soil_layers , &
                               num_st_levels_input , num_sm_levels_input , &
