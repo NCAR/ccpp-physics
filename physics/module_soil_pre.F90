@@ -97,22 +97,14 @@ contains
 'No input soil level data (either temperature or moisture, or both are missing).  Required for RUC LSM.'
       ELSE
          IF ( flag_soil_levels == 1 ) THEN
-           write(0, FMT='(A)') ' Assume RUC LSM 6-level input'
+           write(0, FMT='(A)') ' Assume RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_sm_levels_input)  ) )
          ELSE
            write(0, FMT='(A)') ' Assume non-RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_soil_layers)  ) )
          END IF
       END IF
-
       
-!  print *,'flag_soil_layers=',flag_soil_layers
-!  print *,'flag_soil_levels=',flag_soil_levels
-!  print *,'num_st_levels_alloc',num_st_levels_alloc
-!  print *,'num_st_levels_input',num_st_levels_input
-!  print *,'st_levels_input',st_levels_input
-!  print *,'its,ite,jts,jte ', its,ite,jts,jte
-
       !  Sort the levels for temperature.
 
       outert : DO lout = 1 , num_st_levels_input-1
@@ -123,7 +115,6 @@ contains
                st_levels_input(lin) = NINT(temp)
                DO j = jts , jte
                   DO i = its ,ite
-! if(j==9960)  print *,'st_input(1,:,9960)',st_input(1,:,9960),num_st_levels_input+2
                      temp = st_input(i,lout,j)
                      st_input(i,lout,j) = st_input(i,lin,j)
                      st_input(i,lin,j) = temp
@@ -138,7 +129,6 @@ contains
          DO i = its , ite
             st_input(i,1,j) = tsk(i,j)
             st_input(i,num_st_levels_input+2,j) = tmn(i,j)
-! if(j==9960)  print *,'2 - st_input(1,:,9960)',st_input(1,:,9960),num_st_levels_input+2
          END DO
       END DO
       END IF
@@ -170,7 +160,6 @@ contains
                               sm_input(i,2,j)
 
             sm_input(i,num_sm_levels_input+2,j) = sm_input(i,num_sm_levels_input+1,j)
-! if(j==9960)  print *,'sm_input(1,:,9960)',sm_input(1,:,9960),num_st_levels_input+2
          END DO
       END DO
       END IF
@@ -182,7 +171,6 @@ contains
             zhave(l) = st_levels_input(l) / 100.
          END DO
 
-!  print *,'zhave=',zhave
       
       !  Interpolate between the layers we have (zhave) and those that we want
       !  (zs).
@@ -210,7 +198,6 @@ contains
             zhave(l+1) = st_levels_input(l) / 100.
          END DO
          zhave(num_st_levels_input+2) = 300. / 100.
-!  print *,'zhave=',zhave
 
       !  Interpolate between the layers we have (zhave) and those that we want
       !  (zs).      
@@ -224,7 +211,6 @@ contains
                      tslb(i,lwant,j)= ( st_input(i,lhave,j ) * ( zhave(lhave+1) - zs   (lwant) ) + &
                                         st_input(i,lhave+1,j) * ( zs   (lwant  ) - zhave(lhave) ) ) / &
                                                                 ( zhave(lhave+1) - zhave(lhave) )
-! if(j==9960)  print *,'tslb(1,:,9960)',tslb(1,:,9960),num_st_levels_input+2
                   END DO
                END DO
                EXIT z_havet_2
@@ -274,11 +260,9 @@ contains
                  ( zs(lwant) .LE. zhave(lhave+1) ) ) THEN
                DO j = jts , jte
                   DO i = its , ite
-!                     IF ( skip_middle_points_t ( ids , ide , jds , jde , i , j , em_width , hold_ups ) ) CYCLE 
                      smois(i,lwant,j)= ( sm_input(i,lhave,j ) * ( zhave(lhave+1) - zs   (lwant) ) + &
                                          sm_input(i,lhave+1,j) * ( zs   (lwant  ) - zhave(lhave) ) ) / &
                                                                  ( zhave(lhave+1) - zhave(lhave) )
-! if(j==9960)  print *,'smois(1,:,9960)',smois(1,:,9960),num_st_levels_input+2
                   END DO
                END DO
                EXIT z_havem_2

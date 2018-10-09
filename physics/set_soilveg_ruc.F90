@@ -1,16 +1,16 @@
       module set_soilveg_ruc_mod
 
+      use namelist_soilveg_ruc
+
       implicit none
 
       private
 
-      public set_soilveg_ruc
+      public :: set_soilveg_ruc
 
       contains
 
       subroutine set_soilveg_ruc(me,isot,ivet,nlunit)
-      use namelist_soilveg_ruc
-      implicit none
 
       integer, intent(in) :: isot,ivet,nlunit
       integer me
