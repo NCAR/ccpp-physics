@@ -1,20 +1,23 @@
 MODULE module_sf_ruclsm
 
+   use machine ,   only : kind_phys
+   use namelist_soilveg_ruc
+
+   implicit none
+
+   private
+   !private qsn
+
+   public :: lsmruc, ruclsminit, rslf 
+
 !\file module_sf_ruclsm.F
-!! This file is the entity of RUC LSM Model(Version 4.0).
+!! This file is the entity of RUC LSM Model(WRF version 4.0).
 
 !>\defgroup RUC_LSM RUC LSM Model
 !!\brief This is the entity of RUC LSM model of physics subroutines.
 !! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
 !! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance,
-
-   use machine ,   only : kind_phys
-   use namelist_soilveg_ruc
-
-!-----------------------------------------------------------------
-   IMPLICIT NONE
-!-----------------------------------------------------------------
 
 !  ---  constant parameters:
       real (kind=kind_phys), parameter :: P1000mb = 100000.
@@ -23,8 +26,6 @@ MODULE module_sf_ruclsm
       real (kind=kind_phys), parameter :: piconst = 3.1415926535897931
       real (kind=kind_phys), parameter :: r_v     = 4.6150e+2
 !
-      private :: qsn
-
 ! VEGETATION PARAMETERS
         INTEGER :: LUCATS 
         integer, PARAMETER :: NLUS=50
@@ -47,7 +48,6 @@ CONTAINS
 
 !-----------------------------------------------------------------
     SUBROUTINE LSMRUC(                           &
-!    SUBROUTINE LSMRUC( flag_iter, flag,                          &
                    DT,KTAU,iter,NSL,                             &
 !                   lakemodel,lakemask,                           &
                    graupelncv,snowncv,rainncv,raincv,            &
