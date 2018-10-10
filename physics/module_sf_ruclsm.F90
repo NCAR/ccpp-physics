@@ -861,11 +861,9 @@ CONTAINS
               keepfr  (k) = keepfr3dflag(i,k,j)
            enddo
 
-              LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/(REF-QMIN)))
-!              LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/dqm))
+              LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/(ref-qmin)))
 
 !     if(ktau.gt.1) then
-
 ! extract dew from the cloud water at the surface
 !30july13              QCG(I,J)=QCG(I,J)-DEW(I,J)/QKMS
 !     endif
@@ -7101,7 +7099,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ELSE
        if(isltyp(i,j).ne.14 ) then
 !-- land
-           mavail(i,j) = max(0.00001,min(1.,smois(i,1,j)/(ref-qmin)))
+           mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/(ref-qmin)))
          DO L=1,NZS
 !-- for land points initialize soil ice
          tln=log(TSLB(i,l,j)/273.15)
