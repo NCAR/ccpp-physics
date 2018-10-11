@@ -352,6 +352,84 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
      &, 3e-5, 0.1  , 1.0   , 150./
 
 ! Initialize CCPP error handling variables
+    write(0,*) 'IN m_micro_run'
+    write(0,*) 'im = ',im
+    write(0,*) 'ix = ',ix
+    write(0,*) 'lm = ',lm
+    write(0,*) 'flipv = ',flipv
+    write(0,*) 'dt_i = ',dt_i
+    write(0,*) 'grav = ',grav
+    write(0,*) 'pi = ',pi
+    write(0,*) 'rgas = ',rgas
+    write(0,*) 'cp = ',cp
+    write(0,*) 'hvap = ',hvap
+    write(0,*) 'hfus = ',hfus
+    write(0,*) 'ttp = ',ttp
+    write(0,*) 'tice = ',tice
+    write(0,*) 'eps = ',eps
+    write(0,*) 'epsm1 = ',epsm1
+    write(0,*) 'vireps = ',vireps
+    write(0,*) 'prsl = ',prsl_i(1,1:10)
+    write(0,*) 'prsi = ',prsi_i(1,1:10)
+    write(0,*) 'phil = ',phil(1,1:10)
+    write(0,*) 'phii = ',phii(1,1:10)
+    write(0,*) 'omega = ',omega_i(1,1:10)
+    write(0,*) 'qlls = ',qlls_i(1,1:10)
+    write(0,*) 'qlcn = ',qlcn_i(1,1:10)
+    write(0,*) 'qils = ',qils_i(1,1:10)
+    write(0,*) 'qicn = ',qicn_i(1,1:10)
+    write(0,*) 'lwheat = ',lwheat_i(1,1:10)
+    write(0,*) 'swheat = ',swheat_i(1,1:10)
+    write(0,*) 'w_upi = ',w_upi(1,1:10)
+    write(0,*) 'cf_upi = ',cf_upi(1,1:10)
+    write(0,*) 'frland = ',frland(1)
+    write(0,*) 'zpbl = ',zpbl(1)
+    write(0,*) 'cnv_mfd = ',cnv_mfd_i(1,1:10)
+    write(0,*) 'cnv_prc3 = ',cnv_prc3_i(1,1:10)
+    write(0,*) 'cnv_dqldt = ',cnv_dqldt_i(1,1:10)
+    write(0,*) 'clcn = ',clcn_i(1,1:10)
+    write(0,*) 'u = ',u_i(1,1:10)
+    write(0,*) 'v = ',v_i(1,1:10)
+    write(0,*) 'taugwx = ',taugwx(1)
+    write(0,*) 'taugwy = ',taugwy(1)
+    write(0,*) 'tauorox = ',tauorox(1)
+    write(0,*) 'tauoroy = ',tauoroy(1)
+    write(0,*) 'cnv_fice = ',cnv_fice_i(1,1:10)
+    write(0,*) 'cnv_drop = ',cnv_ndrop_i(1,1:10)
+    write(0,*) 'cnv_nice = ',cnv_nice_i(1,1:10)
+    write(0,*) 'q = ',q_io(1,1:10)
+    write(0,*) 'lwm = ',lwm_o(1,1:10)
+    write(0,*) 'qi = ',qi_o(1,1:10)
+    write(0,*) 't = ',t_io(1,1:10)
+    write(0,*) 'rn = ',rn_o(1)
+    write(0,*) 'sr = ',sr_o(1)
+    write(0,*) 'ncpl = ',ncpl_io(1,1:10)
+    write(0,*) 'ncpi = ',ncpi_io(1,1:10)
+    write(0,*) 'fprcp = ',fprcp
+    write(0,*) 'rnw = ',rnw_io(1,1:10)
+    write(0,*) 'snw = ',snw_io(1,1:10)
+    write(0,*) 'gl = ',qgl_io(1,1:10)
+    write(0,*) 'ncpr = ',ncpr_io(1,1:10)
+    write(0,*) 'ncps = ',ncps_io(1,1:10)
+    write(0,*) 'ncgl = ',ncgl_io(1,1:10)
+    write(0,*) 'clls = ',clls_io(1,1:10)
+    write(0,*) 'kcbl = ',kcbl(1)
+    write(0,*) 'cldreffl = ',cldreffl(1,1:10)
+    write(0,*) 'cldreffi = ',cldreffi(1,1:10)
+    write(0,*) 'cldreffr = ',cldreffr(1,1:10)
+    write(0,*) 'cldreffs = ',cldreffs(1,1:10)
+    write(0,*) 'cldreffg = ',cldreffg(1,1:10)
+    write(0,*) 'aero_in = ',aero_in
+    write(0,*) 'skip_macro',skip_macro
+    write(0,*) 'cn_prc = ',cn_prc2(1)
+    write(0,*) 'cn_snr = ',cn_snr(1)
+    write(0,*) 'lprnt = ',lprnt
+    write(0,*) 'ipr = ',ipr
+    write(0,*) 'kdt = ',kdt
+    write(0,*) 'xlat = ',xlat(i)
+    write(0,*) 'xlon = ',xlon(i)
+    write(0,*) 'rhc = ',rhc_i(1,1:10)
+
        errmsg = ''
        errflg = 0
 
