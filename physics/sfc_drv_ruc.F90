@@ -201,8 +201,6 @@ module lsm_ruc
 !! | vegtype         | vegetation_type_classification                                               | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
 !! | soiltyp         | soil_type_classification                                                     | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
 !! | isot            | soil_type_dataset_choice                                                     | soil type dataset choice                                        | index         |    0 | integer   |           | in     | F        |
-!! | nscat           | number_of_soil_categories                                                    | number of soil categories                                       | index         |    0 | integer   |           | in     | F        |
-!! | nlcat           | number_of_land_categories                                                    | number of landuse categories                                    | index         |    0 | integer   |           | in     | F        |
 !! | ivegsrc         | vegetation_type_dataset_choice                                               | land use dataset choice                                         | index         |    0 | integer   |           | in     | F        |
 !! | fice            | sea_ice_concentration                                                        | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
 !! | keepfr          | flag_for_frozen_soil_physics                                                 | flag for frozen soil physics (RUC)                              | flag          |    2 | real      | kind_phys | inout  | F        |
@@ -240,7 +238,7 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            &
 ! --- inputs
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
-     &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf, nscat, nlcat,&
+     &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, zf, islmsk, shdmin, shdmax, albedo,                 &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
@@ -271,7 +269,6 @@ module lsm_ruc
       integer, intent(in) :: me
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
-      integer, intent(in) :: nscat, nlcat
 
       real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: smc,stc,slc
 
@@ -346,8 +343,9 @@ module lsm_ruc
                                       ! "USGS" (USGS 24/27 category dataset) and
                                       ! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
 
-      real (kind=kind_phys), dimension(im,nlcat,1) :: landusef ! fractional landuse
-      real (kind=kind_phys), dimension(im,nscat,1) ::  soilctop ! fractional soil type
+      integer :: nscat, nlcat
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef ! fractional landuse
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop ! fractional soil type
 
       integer :: nsoil, iswater, isice
       integer, dimension (1:im,1:1) :: stype, vtype
@@ -367,24 +365,37 @@ module lsm_ruc
 
       ipr = 10
 
-           debug_print=.false.
+      debug_print=.false.
 
-           chklowq = 1.
+      chklowq = 1.
 
-  if(debug_print) then
-    print *,'RUC LSM run'
-    print *,'noah soil temp',ipr,stc(ipr,:)
-    print *,'noah soil mois',ipr,smc(ipr,:)
-    print *,'soiltyp=',ipr,soiltyp(ipr)
-    print *,'vegtype=',ipr,vegtype(ipr)
+      if (isot == 1) then
+        nscat = 19 ! stasgo
+      else
+        nscat = 9  ! zobler
+      endif
+      allocate(soilctop(im,nscat,1))
 
-    print *,'kdt, iter =',kdt,iter
-  endif
+      if(ivegsrc == 1) then
+        nlcat = 20  ! IGBP - "MODI-RUC"
+      else
+        nlcat = 13
+      endif
+      allocate(landusef(im,nlcat,1))
+
+      if(debug_print) then
+        print *,'RUC LSM run'
+        print *,'noah soil temp',ipr,stc(ipr,:)
+        print *,'noah soil mois',ipr,smc(ipr,:)
+        print *,'soiltyp=',ipr,soiltyp(ipr)
+        print *,'vegtype=',ipr,vegtype(ipr)
+        print *,'kdt, iter =',kdt,iter
+      endif
  
 ! RUC initialization
-    if( kdt == 1 .and. iter ==1 ) then
-      !print *,'RUC LSM initialization, kdt=', kdt
-      call rucinit            (im, lsoil_ruc, lsoil, nlev,            & ! in
+      if( kdt == 1 .and. iter ==1 ) then
+        !print *,'RUC LSM initialization, kdt=', kdt
+        call rucinit          (im, lsoil_ruc, lsoil, nlev,            & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tskin, tg3,                    & ! in
                                smc, slc, stc,                         & ! in
@@ -392,68 +403,67 @@ module lsm_ruc
                                zs, sh2o, smfrkeep, tslb, smois, wet1, & ! out
                                errmsg, errflg)
 
-      do i  = 1, im ! n - horizontal loop
-         ! overwrite Noah soil fields with initialized RUC soil fields for output
-         do k = 1, lsoil
-           smc(i,k)   = smois(i,k)
-           slc(i,k)   = sh2o(i,k)
-           stc(i,k)   = tslb(i,k)
-         enddo
+        do i  = 1, im ! n - horizontal loop
+          ! overwrite Noah soil fields with initialized RUC soil fields for output
+          do k = 1, lsoil
+            smc(i,k)   = smois(i,k)
+            slc(i,k)   = sh2o(i,k)
+            stc(i,k)   = tslb(i,k)
+          enddo
+          ! initialize albedo
+          if(weasd(i) > 0.) then
+            alb(i,1) = snoalb(i)
+          else
+            alb(i,1) = sfalb(i)
+          endif
+        enddo ! i
 
-        ! initialize albedo
-        if(weasd(i) > 0.) then
-          alb(i,1) = snoalb(i)
-        else
-          alb(i,1) = sfalb(i)
-        endif
-      enddo ! i
-
-    endif ! kdt=iter=1
+      endif ! kdt=iter=1
 !-- end of initialization
 
-         ims = 1
-         its = 1
-         ime = 1
-         ite = 1
-         jms = 1
-         jts = 1
-         jme = 1
-         jte = 1
-         kms = 1
-         kts = 1
-         kme = 1
-         kte = 1
+      ims = 1
+      its = 1
+      ime = 1
+      ite = 1
+      jms = 1
+      jts = 1
+      jme = 1
+      jte = 1
+      kms = 1
+      kts = 1
+      kme = 1
+      kte = 1
  
-         ! mosaic_lu=mosaic_soil=0, set in set_soilveg_ruc.F90
-         ! set mosaic_lu=mosaic_soil=1 when fractional land and soil 
-         ! categories available
-         ! for now set fractions of differnet landuse and soil types 
-         ! in the grid cell to zero
-      
-          landusef (:,:,:) = 0.0
-          soilctop (:,:,:) = 0.0
+      ! mosaic_lu=mosaic_soil=0, set in set_soilveg_ruc.F90
+      ! set mosaic_lu=mosaic_soil=1 when fractional land and soil 
+      ! categories available
+      ! for now set fractions of differnet landuse and soil types 
+      ! in the grid cell to zero
 
-          !> -- number of soil categories          
-          !if(isot == 1) then
-          !nscat = 19 ! stasgo
-          !else
-          !nscat = 9  ! zobler
-          !endif
-          !> -- set parameters for IGBP land-use data
-          if(ivegsrc == 1) then
-            llanduse = 'MODI-RUC'  ! IGBP
-            iswater = 17
-            isice = 15
-          endif
+      landusef (:,:,:) = 0.0
+      soilctop (:,:,:) = 0.0
 
-          fractional_seaice = 1
-        if ( fractional_seaice == 0 ) then
-          xice_threshold = 0.5
-        else if ( fractional_seaice == 1 ) then
-          xice_threshold = 0.02
-        endif
+      !> -- number of soil categories          
+      !if(isot == 1) then
+      !nscat = 19 ! stasgo
+      !else
+      !nscat = 9  ! zobler
+      !endif
+      !> -- set parameters for IGBP land-use data
+      if(ivegsrc == 1) then
+        llanduse = 'MODI-RUC'  ! IGBP
+        iswater = 17
+        isice = 15
+      endif
 
-          nsoil = lsoil_ruc
+      fractional_seaice = 1
+      if ( fractional_seaice == 0 ) then
+        xice_threshold = 0.5
+      else if ( fractional_seaice == 1 ) then
+        xice_threshold = 0.02
+      endif
+
+      nsoil = lsoil_ruc
 
       do i  = 1, im ! i - horizontal loop
         !> - Set flag for land and ice points.
@@ -462,7 +472,7 @@ module lsm_ruc
 
       do i  = 1, im ! i - horizontal loop
         if (flag(i) .and. flag_guess(i)) then
-         if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
+          if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
           weasd_old(i)  = weasd(i)
           snwdph_old(i) = snwdph(i)
           tskin_old(i)  = tskin(i)
@@ -480,7 +490,7 @@ module lsm_ruc
             smfrkeep_old(i,k) = smfrkeep(i,k)
           enddo
         endif
-       enddo
+      enddo
 
 !  --- ...  initialization block
 
@@ -1046,6 +1056,9 @@ module lsm_ruc
         endif
       enddo  ! i
       enddo  ! j
+!
+      deallocate(soilctop)
+      deallocate(landusef)
 !
       return
 !...................................
