@@ -97,8 +97,7 @@ module lsm_ruc
 !     shdmin   - real, min fractional coverage of green veg        im   !
 !     shdmax   - real, max fractnl cover of green veg (not used)   im   !
 !     snoalb   - real, upper bound on max albedo over deep snow    im   !
-!     sfalb    - real, mean sfc diffused sw albedo (fractional)    im   !
-!     albedo   - real, sfc sw albedo with effect of snow           im   !
+!     sfalb    - real, mean sfc diffused sw albedo with effect of snow (fractional)    im   !
 !     flag_iter- logical,                                          im   !
 !     flag_guess-logical,                                          im   !
 !     isot     - integer, sfc soil type data source zobler or statsgo   !
@@ -186,9 +185,10 @@ module lsm_ruc
 !! | wet1            | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | canopy          | canopy_water_amount                                                          | canopy water amount                                             | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | sigmaf          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | frac          |    1 | real      | kind_phys | in     | F        |
-!! | sfalb           | surface_diffused_shortwave_albedo                                            | mean surface diffused sw albedo                                 | frac          |    1 | real      | kind_phys | in     | F        |
+!! | sfalb           | surface_diffused_shortwave_albedo                                            | mean surface diffused sw albedo                                 | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | alvwf           | mean_vis_albedo_with_weak_cosz_dependency                                    | mean vis albedo with weak cosz dependency                       | frac          |    1 | real      | kind_phys | in     | F        |
+!! | alnwf           | mean_nir_albedo_with_weak_cosz_dependency                                    | mean nir albedo with weak cosz dependency                       | frac          |    1 | real      | kind_phys | in     | F        |
 !! | snoalb          | upper_bound_on_max_albedo_over_deep_snow                                     | maximum snow albedo                                             | frac          |    1 | real      | kind_phys | in     | F        |
-!! | albedo          | surface_albedo_including_snow_effect                                         | surface albedo including snow effect                            | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | zorl            | surface_roughness_length                                                     | surface roughness length                                        | cm            |    1 | real      | kind_phys | inout  | F        |
 !! | qsurf           | surface_specific_humidity                                                    | surface air saturation specific humidity                        | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | sfcqc           | cloud_condensed_water_mixing_ratio_at_surface                                | moist cloud water mixing ratio at surface                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
@@ -242,7 +242,7 @@ module lsm_ruc
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
      &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf, nscat, nlcat,&
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
-     &       prsl1, zf, islmsk, shdmin, shdmax, albedo,                 &
+     &       prsl1, zf, islmsk, shdmin, shdmax, alvwf, alnwf,           &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
      &       smc, stc, slc, lsm_ruc, lsm,                               &
 ! --- constants
@@ -277,8 +277,8 @@ module lsm_ruc
 
       real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,&
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,        &
-     &       ch, prsl1, shdmin, shdmax, albedo,                         &
-     &       snoalb, sfalb, zf, qc, q1 
+     &       ch, prsl1, shdmin, shdmax,                                 &
+     &       snoalb, alvwf, alnwf, zf, qc, q1 
 
       integer, dimension(im), intent(in) :: islmsk
       real (kind=kind_phys),  intent(in) :: delt
@@ -295,7 +295,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
              srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
-             sfcqc, sfcqv, sfcdew, fice, tice
+             sfcqc, sfcqv, sfcdew, fice, tice, sfalb
 
 !  --- on RUC levels
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) ::         &
@@ -400,12 +400,6 @@ module lsm_ruc
            stc(i,k)   = tslb(i,k)
          enddo
 
-        ! initialize albedo
-        if(weasd(i) > 0.) then
-          alb(i,1) = snoalb(i)
-        else
-          alb(i,1) = sfalb(i)
-        endif
       enddo ! i
 
     endif ! kdt=iter=1
@@ -599,7 +593,7 @@ module lsm_ruc
 
           lwdn(i,j)   = dlwflx(i)         !..downward lw flux at sfc in w/m2
           swdn(i,j)   = dswsfc(i)         !..downward sw flux at sfc in w/m2
-          solnet(i,j) = snet(i)           !..net sw rad flx (dn-up) at sfc in w/m2
+          solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
 
           prcp(i,j)       = rhoh2o * tprcp(i) ! tprcp in [m]
           raincv(i,j)     = rhoh2o * rainc(i)
@@ -621,9 +615,9 @@ module lsm_ruc
 !!\n \a shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
 !!\n \a shdmax  - maximum areal fractional coverage of green vegetation -> shdmax1d
 !!\n \a sfcems  -  surface emmisivity                                   -> sfcemis
-!!\n \a sfalb   - backround snow-free surface albedo (fraction)         -> albbck
+!!\n \a 0.5*(alvwf + alnwf) - backround snow-free surface albedo (fraction)         -> albbck
 !!\n \a snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
-!!\n \a albedo  - surface albedo including snow effect (unitless fraction) -> alb
+!!\n \a sfalb  - surface albedo including snow effect (unitless fraction) -> alb
 !!\n \a tbot    - bottom soil temperature (local yearly-mean sfc air temp)
 
       if(ivegsrc == 1) then   ! IGBP - MODIS
@@ -661,8 +655,8 @@ module lsm_ruc
           sfcems(i,j) = sfcemis(i)
 
           snoalb1d(i,j) = snoalb(i)
-          albbck(i,j)   = sfalb(i)
-          alb(i,j)      = albedo(i)
+          albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
+          alb(i,j)      = sfalb(i)
 
           tbot(i,j) = tg3(i)
 
@@ -979,6 +973,7 @@ module lsm_ruc
           !  ---- ... outside RUC LSM, roughness uses cm as unit 
           !  (update after snow's effect)
           zorl(i) = znt(i,j)*100.
+          sfalb(i)= alb(i,j)
 
          do k = 1, lsoil_ruc
            smois(i,k)  = smsoil(i,k,j)
