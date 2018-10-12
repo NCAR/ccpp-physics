@@ -96,7 +96,7 @@
 #ifdef MPI
          mpicomm = Model%communicator
          mpirank = Model%me
-         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
+         mpisize = Model%ntasks
 #else
          mpirank = 0
          mpisize = 1
