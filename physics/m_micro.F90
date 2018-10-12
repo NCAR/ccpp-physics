@@ -3,20 +3,126 @@
 !! \cite Morrison and Gettelman.
 
 !> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG2 and MG3) scheme.
-      module m_micro
-      contains
+module m_micro
 
+  implicit none
+  public :: m_micro_init, m_micro_run, m_micro_finalize
+  private
+  logical :: is_initialized = .False.
 
-! \brief Brief description of the subroutine
-!
+contains
+
 !> \section arg_table_m_micro_init  Argument Table
+!! | local_name             | standard_name                                   | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
+!! |------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
+!! | imp_physics            | flag_for_microphysics_scheme                    | choice of microphysics scheme                                                               | flag        |    0 | integer    |           | in     | F        |
+!! | imp_physics_mg         | flag_for_morrison_gettelman_microphysics_scheme | choice of Morrison-Gettelman rmicrophysics scheme                                           | flag        |    0 | integer    |           | in     | F        |
+!! | fprcp                  | number_of_frozen_precipitation_species          | number of frozen precipitation species                                                      | count       |    0 | integer    |           | in     | F        |
+!! | gravit                 | gravitational_acceleration                      | gravitational acceleration                                                                  | m s-2       |    0 | real       | kind_phys | in     | F        |
+!! | rair                   | gas_constant_dry_air                            | ideal gas constant for dry air                                                              | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
+!! | rh2o                   | gas_constant_water_vapor                        | ideal gas constant for water vapor                                                          | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
+!! | cpair                  | specific_heat_of_dry_air_at_constant_pressure   | specific heat of dry air at constant pressure                                               | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
+!! | tmelt                  | triple_point_temperature_of_water               | triple point temperature of water                                                           | K           |    0 | real       | kind_phys | in     | F        |
+!! | latvap                 | latent_heat_of_vaporization_of_water_at_0C      | latent heat of evaporation/sublimation                                                      | J kg-1      |    0 | real       | kind_phys | in     | F        |
+!! | latice                 | latent_heat_of_fusion_of_water_at_0C            | latent heat of fusion                                                                       | J kg-1      |    0 | real       | kind_phys | in     | F        |
+!! | mg_dcs                 | mg_autoconversion_size_threshold_ice_snow       | autoconversion size threshold for cloud ice to snow for MG microphysics                     | um          |    0 | real       | kind_phys | in     | F        |
+!! | mg_qcvar               | mg_cloud_water_variance                         | cloud water relative variance for MG microphysics                                           |             |    0 | real       | kind_phys | in     | F        |
+!! | mg_ts_auto_ice         | mg_time_scale_for_autoconversion_of_ice         | autoconversion time scale for ice for MG microphysics                                       | s           |    0 | real       | kind_phys | in     | F        |
+!! | mg_rhmini              | mg_minimum_rh_for_ice                           | relative humidity threshold parameter for nucleating ice for MG microphysics                | none        |    0 | real       | kind_phys | in     | F        |
+!! | microp_uniform         | mg_flag_for_uniform_subcolumns                  | flag for uniform subcolumns for MG microphysics                                             | flag        |    0 | logical    |           | in     | F        |
+!! | do_cldice              | mg_flag_for_cloud_ice_processes                 | flag for cloud ice processes for MG microphysics                                            | flag        |    0 | logical    |           | in     | F        |
+!! | hetfrz_classnuc        | mg_flag_for_heterogeneous_freezing              | flag for heterogeneous freezing for MG microphysics                                         | flag        |    0 | logical    |           | in     | F        |
+!! | mg_precip_frac_method  | mg_type_of_precip_fraction_method               | type of precip fraction method for MG microphysics (in_cloud or max_overlap)                | none        |    0 | character  | len=16    | in     | F        |
+!! | mg_berg_eff_factor     | mg_bergeron_efficiency_factor                   | bergeron efficiency factor for MG microphysics                                              | frac        |    0 | real       | kind_phys | in     | F        |
+!! | sed_supersat           | mg_allow_supersat_after_sed                     | allow supersaturation after sedimentation for MG microphysics                               | flag        |    0 | logical    |           | in     | F        |
+!! | do_sb_physics          | mg_flag_for_sb2001_autoconversion               | flag for SB 2001 autoconversion or accretion for MG microphysics                            | flag        |    0 | logical    |           | in     | F        |
+!! | mg_do_hail             | mg_flag_for_hail                                | flag for hail for MG microphysics (graupel possible if false)                               | flag        |    0 | logical    |           | in     | F        |
+!! | mg_do_graupel          | mg_flag_for_graupel                             | flag for graupel for MG microphysics (hail possible if false)                               | flag        |    0 | logical    |           | in     | F        |
+!! | mg_nccons              | mg_flag_drop_concentration_constant             | flag for constant droplet concentration for MG microphysics                                 | flag        |    0 | logical    |           | in     | F        |
+!! | mg_nicons              | mg_flag_ice_concentration_constant              | flag for constant ice concentration for MG microphysics                                     | flag        |    0 | logical    |           | in     | F        |
+!! | mg_ngcons              | mg_flag_graupel_concentration_constant          | flag for constant graupel concentration for MG microphysics                                 | flag        |    0 | logical    |           | in     | F        |
+!! | mg_ncnst               | mg_drop_concentration_constant                  | droplet concentration constant for MG microphysics                                          | m-3         |    0 | real       | kind_phys | in     | F        |
+!! | mg_ninst               | mg_ice_concentration_constant                   | ice concentration constant for MG microphysics                                              | m-3         |    0 | real       | kind_phys | in     | F        |
+!! | mg_ngnst               | mg_graupel_concentration_constant               | graupel concentration constant for MG microphysics                                          | m-3         |    0 | real       | kind_phys | in     | F        |
+!! | errmsg                 | ccpp_error_message                              | error message for error handling in CCPP                                                    | none        |    0 | character  | len=*     | out    | F        |
+!! | errflg                 | ccpp_error_flag                                 | error flag for error handling in CCPP                                                       | flag        |    0 | integer    |           | out    | F        |
 !!
-       subroutine m_micro_init
-       end subroutine m_micro_init
+subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
+                        tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,      &
+                        mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
+                        mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
+                        do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
+                        mg_nicons, mg_ngcons, mg_ncnst, mg_ninst, mg_ngnst, errmsg, errflg)
+
+    use machine,            only: kind_phys
+    use cldwat2m_micro,     only: ini_micro
+    use micro_mg2_0,        only: micro_mg_init2_0 => micro_mg_init
+    use micro_mg3_0,        only: micro_mg_init3_0 => micro_mg_init
+    use aer_cloud,          only: aer_cloud_init
+
+    integer,              intent(in) :: imp_physics, imp_physics_mg, fprcp
+    logical,              intent(in) :: microp_uniform, do_cldice, hetfrz_classnuc,   &
+                                        sed_supersat, do_sb_physics, mg_do_hail,      &
+                                        mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons
+    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, tmelt, latvap, latice
+    real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice, mg_rhmini,  &
+                                        mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
+    character(len=16),    intent(in) :: mg_precip_frac_method
+    character(len=*),     intent(out) :: errmsg
+    integer,              intent(out) :: errflg
+
+    errmsg = ''
+    errflg = 0
+
+    if (is_initialized) return
+
+    if (imp_physics/=imp_physics_mg) then
+       write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Morrison-Gettelman MP"
+       errflg = 1
+       return
+    end if
+
+    if (fprcp <= 0) then
+      call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice)
+    elseif (fprcp == 1) then
+      call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair, &
+                            tmelt, latvap, latice, mg_rhmini,     &
+                            mg_dcs, mg_ts_auto_ice,               &
+                            mg_qcvar,                             &
+                            microp_uniform, do_cldice,            &
+                            hetfrz_classnuc,                      &
+                            mg_precip_frac_method,                &
+                            mg_berg_eff_factor,                   &
+                            sed_supersat, do_sb_physics,          &
+                            mg_nccons, mg_nicons,                 &
+                            mg_ncnst, mg_ninst)
+    elseif (fprcp == 2) then
+      call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair, &
+                            tmelt, latvap, latice, mg_rhmini,     &
+                            mg_dcs, mg_ts_auto_ice,               &
+                            mg_qcvar,                             &
+                            mg_do_hail,       mg_do_graupel,      &
+                            microp_uniform,   do_cldice,          &
+                            hetfrz_classnuc,                      &
+                            mg_precip_frac_method,                &
+                            mg_berg_eff_factor,                   &
+                            sed_supersat, do_sb_physics,          &
+                            mg_nccons,    mg_nicons,              &
+                            mg_ncnst,     mg_ninst,               &
+                            mg_ngcons,    mg_ngnst)
+    else
+      write(0,*)' fprcp = ',fprcp,' is not a valid option - aborting'
+      stop
+    endif
+    call aer_cloud_init ()
+
+    is_initialized = .true.
+
+end subroutine m_micro_init
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_finalize  Argument Table
+!> \section arg_table_m_micro_finalize  Argument Table
 !!
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
