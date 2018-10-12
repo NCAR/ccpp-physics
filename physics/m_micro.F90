@@ -105,7 +105,6 @@
 !! | rhc_i          | critical_relative_humidity                                                  | critical relative humidity                                                                  | frac        |    2 | real       | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none    |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag    |    0 | integer    |           | out    | F        |
-
 !!
 #endif
 subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
@@ -426,8 +425,8 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
     write(0,*) 'lprnt = ',lprnt
     write(0,*) 'ipr = ',ipr
     write(0,*) 'kdt = ',kdt
-    write(0,*) 'xlat = ',xlat(i)
-    write(0,*) 'xlon = ',xlon(i)
+    write(0,*) 'xlat = ',xlat(1)
+    write(0,*) 'xlon = ',xlon(1)
     write(0,*) 'rhc = ',rhc_i(1,1:10)
 
        errmsg = ''
