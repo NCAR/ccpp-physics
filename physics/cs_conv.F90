@@ -57,7 +57,7 @@ module cs_conv_pre
 ! --- input/output
   real(r8), dimension(ntrac-ncld+2), intent(out) :: fswtr, fscav
   real(r8), dimension(im), intent(out) :: wcbmax
-  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2,save_q3  
+  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2,save_q3
 
   character(len=*), intent(out) :: errmsg
   integer,          intent(out) :: errflg
@@ -301,6 +301,8 @@ module cs_conv
 !! | im         | horizontal_dimension                                      | horizontal dimension                                                                                  | count      |    0 | integer   |           | in     | F        |
 !! | ijsdim     | horizontal_loop_extent                                    | horizontal loop extent                                                                                | count      |    0 | integer   |           | in     | F        |
 !! | kmax       | vertical_dimension                                        | number of veritcal levels                                                                             | count      |    0 | integer   |           | in     | F        |
+!! | ntracp1    | number_of_tracers_plus_one                                | number of tracers plus one                                                                            | count      |    0 | integer   |           | in     | F        |
+!! | nn         | number_of_tracers_for_convective_transport                | number of tracers for convective transport (used to dimension clw)                                    | count      |    0 | integer   |           | in     | F        |
 !! | ntr        | number_of_tracers_for_CS                                  | number of convectively transported tracers in Chikira-Sugiyama deep conv. scheme                      | count      |    0 | integer   |           | in     | F        |
 !! | nctp       | number_of_cloud_types_CS                                  | number of cloud types in Chikira-Sugiyama scheme                                                      | count      |    0 | integer   |           | in     | F        |
 !! | otspt      | flag_convective_tracer_transport                          | flag to enable tracer transport by updrafts/downdrafts[(:,1)] or subsidence [(:,2)]                   | flag       |    2 | logical   |           | in     | F        |
@@ -357,16 +359,18 @@ module cs_conv
 !!  @{
 
 !---------------------------------------------------------------------------------
-   subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , NTR     , nctp,     & !DD dimensions
+   subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , ntracp1 , NN,       &
+                          NTR    , nctp   ,                                 & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
-                          t      , q      ,  rain1    , clw,                &
+                          t      , q      ,  rain1    , clw     ,           &
                           zm     , zi     ,  pap      , paph    ,           &
                           delta  , delti  ,  ud_mf    , dd_mf   , dt_mf,    &
                           u      , v      ,  fscav    , fswtr,              &
                           cbmfx  , mype   ,  wcbmaxm  , precz0in, preczhin, &
                           sigma  , do_aw  , do_awdd,    flx_form,           &
                           lprnt  , ipr, kcnv,                               &
-                          QLCN, QICN, w_upi, cf_upi, CNV_MFD, CNV_PRC3,     &  !for coupling to Morrison microphysics
+!for coupling to Morrison microphysics
+                          QLCN, QICN, w_upi, cf_upi, CNV_MFD, CNV_PRC3,     &
                           CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,&
                           errmsg,errflg)
 
@@ -383,16 +387,15 @@ module cs_conv
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(ntr,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
-                                             !              downdraft. should not include subgrid PDF and turbulence
-                                             ! otspt(:,2) - on/off switch for tracer transport by subsidence
-                                             !              should include subgrid PDF and turbulence
+   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, NN, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
+   logical, intent(in)     :: otspt(ntracp1,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
+                                                 !              downdraft. should not include subgrid PDF and turbulence
+                                                 ! otspt(:,2) - on/off switch for tracer transport by subsidence
+                                                 !              should include subgrid PDF and turbulence
 
    real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
    real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-! ccpp: ntr=6
-   real(r8), intent(inout) :: clw(IM,KMAX,ntr-1)  ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(inout) :: clw(IM,KMAX,NN)     ! tracer array including cloud condensate (kg/kg)
    real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
    real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
    real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
@@ -723,7 +726,6 @@ module cs_conv
 !    ,              gdq(1,1,1), gdq(1,1,2), gdq(1,1,3)                  &
 !    ,              q,clw(1,1,1),clw(1,1,2),'cs_conv_aw')
 !    endif
-
 
    end subroutine cs_conv_run
 
@@ -2118,7 +2120,7 @@ module cs_conv
                    DELZ, ELADZ, DCTM , CPGMI, DELC, FICE, ELARM2,GCCMZ, &
                    PRECR, GTPRIZ, DELZL, GCCT, DCT, WCVX, PRCZH, wrk
       INTEGER      K, I, kk, km1, kp1, n
-      CHARACTER    CTNUM*2
+!      CHARACTER    CTNUM*2
 !
 !DD#ifdef OPT_CUMBGT
 !DD   REAL(r8)     HBGT  (IJSDIM)           ! heat budget
@@ -2150,14 +2152,14 @@ module cs_conv
 !     REAL(r8) ::  esat, tem, rhs_h, rhs_q
 !
 !   [INTERNAL FUNC]
-      REAL(r8)     FPREC   ! precipitation ratio in condensate
-      REAL(r8)     FRICE   ! ice ratio in cloud water
+!      REAL(r8)     FPREC   ! precipitation ratio in condensate
+!      REAL(r8)     FRICE   ! ice ratio in cloud water
       REAL(r8)     Z       ! altitude
       REAL(r8)     ZH      ! scale height
       REAL(r8)     T       ! temperature
 !
-      FPREC(Z,ZH) = MIN(MAX(one-EXP(-(Z-PRECZ0)/ZH), zero), one)
-      FRICE(T)    = MIN(MAX((TSICE-T)/(TSICE-TWICE), zero), one)
+!      FPREC(Z,ZH) = MIN(MAX(one-EXP(-(Z-PRECZ0)/ZH), zero), one)
+!      FRICE(T)    = MIN(MAX((TSICE-T)/(TSICE-TWICE), zero), one)
 !
 ! Note: iteration is not made to diagnose cloud ice for simplicity
 !
@@ -2602,6 +2604,24 @@ module cs_conv
 !
 !      WRITE( CTNUM, '(I2.2)' ) CTP
 !
+
+contains
+
+    pure function FPREC(Z,ZH)
+        implicit none
+        real(r8), intent(in) :: Z
+        real(r8), intent(in) :: ZH
+        real(r8) :: FPREC
+        FPREC = MIN(MAX(one-EXP(-(Z-PRECZ0)/ZH), zero), one)
+    end function FPREC
+
+    pure function FRICE(T)
+        implicit none
+        real(r8), intent(in) :: T
+        real(r8) :: FRICE
+        FRICE = MIN(MAX((TSICE-T)/(TSICE-TWICE), zero), one)
+    end function FRICE
+
       END SUBROUTINE CUMUP
 !***********************************************************************
       SUBROUTINE CUMBMX                    & !! cloud base mass flux
@@ -3996,8 +4016,8 @@ module cs_conv
       REAL(r8) :: CLWMAX  = 1.e-3_r8
       REAL(r8) :: TPRPMAX = 1.e-2_r8
       REAL(r8) :: GTQIMAX = 1.e-5_r8
-      REAL(r8) :: GTM2MAX = 1._r8
-      REAL(r8) :: GTM3MAX = 1._r8
+      !REAL(r8) :: GTM2MAX = 1._r8
+      !REAL(r8) :: GTM3MAX = 1._r8
 !
       DO K=1,KMAX
         DO I=ISTS, IENS
