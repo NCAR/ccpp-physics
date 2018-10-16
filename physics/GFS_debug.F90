@@ -231,7 +231,6 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f2d'         , Tbd%phy_f2d)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f3d'         , Tbd%phy_f3d)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%blkno'           , Tbd%blkno)
-                     call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dpos'            , Tbd%dpos)
                      ! Diag (incomplete)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Diag%topfsw%upfxc',    Diag%topfsw%upfxc)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Diag%topfsw%dnfxc',    Diag%topfsw%dnfxc)
