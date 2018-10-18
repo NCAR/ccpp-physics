@@ -39,9 +39,10 @@
 !          inputs:                                                         !
 !           (plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                         !
 !            clouds,icseed,aerosols,sfemis,sfgtmp,                         !
+!            dzlyr,delpin,de_lgth,                                         !
 !            npts, nlay, nlp1, lprnt,                                      !
 !          outputs:                                                        !
-!            hlwc,topflx,sfcflx,                                           !
+!            hlwc,topflx,sfcflx,cldtau,                                    !
 !!         optional outputs:                                               !
 !            HLW0,HLWB,FLXPRF)                                             !
 !                                                                          !
@@ -230,7 +231,8 @@
 !       nov 2012,  yu-tai hou        -- modified control parameters thru   !
 !                     module 'physparam'.                                  !  
 !       FEB 2017    A.Cheng   - add odpth output, effective radius input   !
-!                                                                          !
+!       jun 2018,  h-m lin/y-t hou   -- added new option of cloud overlap  !
+!                     method 'de-correlation-length' for mcica application !
 !                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
@@ -400,6 +402,9 @@
 !! | aerssa          | aerosol_single_scattering_albedo_for_longwave_bands_01-16                                     | aerosol single scattering albedo for longwave bands 01-16 | frac    |    3 | real        | kind_phys | in     | F        |
 !! | sfemis          | surface_longwave_emissivity                                                                   | surface emissivity                                        | frac    |    1 | real        | kind_phys | in     | F        |
 !! | sfgtmp          | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                  | K       |    1 | real        | kind_phys | in     | F        |
+!! | dzlyr           | layer_thickness_for_radiation                                                                 | layer thickness                                           | km      |    2 | real        | kind_phys | in     | F        |
+!! | delpin          | layer_pressure_thickness_for_radiation                                                        | layer pressure thickness                                  | hPa     |    2 | real        | kind_phys | in     | F        | 
+!! | de_lgth         | cloud_decorrelation_length                                                                    | cloud decorrelation length                                | km      |    1 | real        | kind_phys | in     | F        | 
 !! | npts            | horizontal_loop_extent                                                                        | horizontal dimension                                      | count   |    0 | integer     |           | in     | F        |
 !! | nlay            | adjusted_vertical_layer_dimension_for_radiation                                               | number of vertical layers for radiation                   | count   |    0 | integer     |           | in     | F        |
 !! | nlp1            | adjusted_vertical_level_dimension_for_radiation                                               | number of vertical levels for radiation                   | count   |    0 | integer     |           | in     | F        |
@@ -409,6 +414,7 @@
 !! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | longwave total sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | F        |
 !! | topflx          | lw_fluxes_top_atmosphere                                                                      | longwave total sky fluxes at the top of the atm           | W m-2   |    1 | topflw_type |           | inout  | F        |
 !! | sfcflx          | lw_fluxes_sfc                                                                                 | longwave total sky fluxes at the Earth surface            | W m-2   |    1 | sfcflw_type |           | inout  | F        |
+!! | cldtau          | cloud_optical_depth_layers_at_10mu_band                                                       | approx 10mu band layer cloud optical depth                | none    |    2 | real        | kind_phys | inout  | F        |
 !! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | T        |
 !! | hlwb            | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                | K s-1   |    3 | real        | kind_phys | inout  | T        |
 !! | flxprf          | lw_fluxes                                                                                     | lw fluxes total sky / csk and up / down at levels         | W m-2   |    2 | proflw_type |           | inout  | T        |
@@ -420,8 +426,6 @@
 !! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                           | mean effective radius for rain drop                       | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_total    | cloud_optical_depth_weighted                                                                  | cloud optical depth, weighted                             | none    |    2 | real        | kind_phys | in     | T        |
-!! | cld_od_layer    | cloud_optical_depth_layers_678                                                                | cloud optical depth, from bands 6,7,8                     | none    |    2 | real        | kind_phys | out    | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
 !! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
@@ -433,12 +437,12 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
+     &       dzlyr,delpin,de_lgth,                                      &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
-     &       hlwc,topflx,sfcflx,                                        &   !  ---  outputs
+     &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od_total, cld_od_layer,                                &
      &       cld_od, errmsg, errflg                                     &
      &     )
 
@@ -464,7 +468,6 @@
 !       gasvmr(:,:,9)  -   ccl4  volume mixing ratio                    !
 !     clouds(npts,nlay,:): layer cloud profiles:                        !
 !                       (check module_radiation_clouds for definition)  !
-!                ---  for  ilwcliq > 0  ---                             !
 !       clouds(:,:,1)  -   layer total cloud fraction                   !
 !       clouds(:,:,2)  -   layer in-cloud liq water path   (g/m**2)     !
 !       clouds(:,:,3)  -   mean eff radius for liq cloud   (micron)     !
@@ -474,11 +477,6 @@
 !       clouds(:,:,7)  -   mean eff radius for rain drop   (micron)     !
 !       clouds(:,:,8)  -   layer snow flake water path     (g/m**2)     !
 !       clouds(:,:,9)  -   mean eff radius for snow flake  (micron)     !
-!                ---  for  ilwcliq = 0  ---                             !
-!       clouds(:,:,1)  -   layer total cloud fraction                   !
-!       clouds(:,:,2)  -   layer cloud optical depth                    !
-!       clouds(:,:,3)  -   layer cloud single scattering albedo         !
-!       clouds(:,:,4)  -   layer cloud asymmetry factor                 !
 !     icseed(npts)   : auxiliary special cloud related array            !
 !                      when module variable isubclw=2, it provides      !
 !                      permutation seed for each column profile that    !
@@ -491,6 +489,9 @@
 !        (:,:,:,3)     - asymmetry parameter                            !
 !     sfemis (npts)  : surface emissivity                               !
 !     sfgtmp (npts)  : surface ground temperature (k)                   !
+!     dzlyr(npts,nlay) : layer thickness (km)                           !
+!     delpin(npts,nlay): layer pressure thickness (mb)                  !
+!     de_lgth(npts)    : cloud decorrelation length (km)                !
 !     npts           : total number of horizontal points                !
 !     nlay, nlp1     : total number of vertical layers, levels          !
 !     lprnt          : cntl flag for diagnostic print out               !
@@ -507,6 +508,7 @@
 !        upfx0           - clear sky upward flux at sfc (w/m2)          !
 !        dnfxc           - total sky downward flux at sfc (w/m2)        !
 !        dnfx0           - clear sky downward flux at sfc (w/m2)        !
+!     cldtau(npts,nlay): approx 10mu band layer cloud optical depth     !
 !                                                                       !
 !! optional output variables:                                           !
 !     hlwb(npts,nlay,nbands): spectral band total sky heating rates     !
@@ -518,16 +520,14 @@
 !        upfx0           - clear sky upward flux                        !
 !        dnfx0           - clear sky dnward flux                        !
 !                                                                       !
-!  external module variables:  (in physparam)                            !
+!  external module variables:  (in physparam)                           !
 !   ilwrgas - control flag for rare gases (ch4,n2o,o2,cfcs, etc.)       !
 !           =0: do not include rare gases                               !
 !           >0: include all rare gases                                  !
 !   ilwcliq - control flag for liq-cloud optical properties             !
-!           =0: input cloud optical depth, ignor ilwcice                !
 !           =1: input cld liqp & reliq, hu & stamnes (1993)             !
 !           =2: not used                                                !
 !   ilwcice - control flag for ice-cloud optical properties             !
-!           *** if ilwcliq==0, ilwcice is ignored                       !
 !           =1: input cld icep & reice, ebert & curry (1997)            !
 !           =2: input cld icep & reice, streamer (1996)                 !
 !           =3: input cld icep & reice, fu (1998)                       !
@@ -539,6 +539,7 @@
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (used for isubclw>0 only)         !
+!           =3: decorrelation-length overlap (for isubclw>0 only)       !
 !   ivflip  - control flag for vertical index direction                 !
 !           =0: vertical index from toa to surface                      !
 !           =1: vertical index from surface to toa                      !
@@ -622,7 +623,7 @@
       real (kind=kind_phys), dimension(npts,nlp1), intent(in) :: plvl,  &
      &       tlvl
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: plyr,  &
-     &       tlyr, qlyr, olyr
+     &       tlyr, qlyr, olyr, dzlyr, delpin
 
       real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2,&
      &     gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,  &
@@ -632,20 +633,18 @@
       real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
-     &       cld_od_total, cld_od
-      ! Note: as of 06/18/2018, cld_od_total is not used in radlw_main.f
-      ! thus set intent to intent(in).
-      real (kind=kind_phys), dimension(npts,nlay),intent(out),optional::&
-     &       cld_od_layer
+     &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
-     &       sfgtmp
+     &       sfgtmp, de_lgth
 
       real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
      &       aeraod, aerssa
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hlwc
+      real (kind=kind_phys), dimension(npts,nlay), intent(inout) ::     &
+     &       cldtau
 
       type (topflw_type),    dimension(npts), intent(inout) :: topflx
       type (sfcflw_type),    dimension(npts), intent(inout) :: sfcflx
@@ -674,7 +673,7 @@
      &       clwp, ciwp, relw, reiw, cda1, cda2, cda3, cda4,            &
      &       coldry, colbrd, h2ovmr, o3vmr, fac00, fac01, fac10, fac11, &
      &       selffac, selffrac, forfac, forfrac, minorfrac, scaleminor, &
-     &       scaleminorn2, temcol
+     &       scaleminorn2, temcol, dz
 
       real (kind=kind_phys), dimension(nbands,0:nlay) :: pklev, pklay
 
@@ -697,7 +696,8 @@
 !       (:,m,:) m = 1-h2o/co2, 2-h2o/o3, 3-h2o/n2o, 4-h2o/ch4, 5-n2o/co2, 6-o3/co2
       real (kind=kind_phys) :: rfrate(nlay,nrates,2)
 
-      real (kind=kind_phys) :: tem0, tem1, tem2, pwvcm, summol, stemp
+      real (kind=kind_phys) :: tem0, tem1, tem2, pwvcm, summol, stemp,  &
+     &                         delgth
 
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: jp, jt, jt1, indself, indfor, indminor
@@ -720,21 +720,19 @@
       lflxprf= present ( flxprf )
 
       colamt(:,:) = f_zero
+      cldtau(:,:) = f_zero
 
 !! --- check for optional input arguments, depending on cloud method
       if (ilwcliq > 0) then    ! use prognostic cloud method
         if ( .not.present(cld_lwp) .or. .not.present(cld_ref_liq) .or.  &
      &       .not.present(cld_iwp) .or. .not.present(cld_ref_ice) .or.  &
      &       .not.present(cld_rwp) .or. .not.present(cld_ref_rain) .or. &
-     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow) .or. &
-     &       .not.present(cld_od_total) .or.                            &
-     &       .not.present(cld_od_layer)) then
+     &       .not.present(cld_swp) .or. .not.present(cld_ref_snow)) then
           write(errmsg,'(*(a))')                                        &
      &               'Logic error: ilwcliq>0 requires the following',   &
      &               ' optional arguments to be present:',              &
      &               ' cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,',    &
-     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow',   &
-     &               ' cld_od_total, cld_od_layer'                    
+     &               ' cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow'
           errflg = 1
           return
         end if
@@ -782,6 +780,7 @@
         endif
 
         stemp = sfgtmp(iplon)          ! surface ground temp
+        if (iovrlw == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -801,9 +800,10 @@
           do k = 1, nlay
             k1 = nlp1 - k
             pavel(k)= plyr(iplon,k1)
-            delp(k) = plvl(iplon,k1+1) - plvl(iplon,k1)
+            delp(k) = delpin(iplon,k1)
             tavel(k)= tlyr(iplon,k1)
             tz(k)   = tlvl(iplon,k1)
+            dz(k)   = dzlyr(iplon,k1)
 
 !> -# Set absorber amount for h2o, co2, and o3.
 
@@ -835,10 +835,10 @@
               k1 = nlp1 - k
               colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k1))  ! n2o
               colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k1))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k1))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k1))  ! co
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k1))   ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k1))   ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k1) )   ! ccl4
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k1) )    ! ccl4
               wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k1) )   ! cf11
               wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k1) )   ! cf12
               wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k1) )   ! cf22
@@ -912,9 +912,10 @@
 
           do k = 1, nlay
             pavel(k)= plyr(iplon,k)
-            delp(k) = plvl(iplon,k) - plvl(iplon,k+1)
+            delp(k) = delpin(iplon,k)
             tavel(k)= tlyr(iplon,k)
             tz(k)   = tlvl(iplon,k+1)
+            dz(k)   = dzlyr(iplon,k)
 
 !  --- ...  set absorber amount
 !test use
@@ -932,7 +933,7 @@
             temcol(k) = 1.0e-12 * coldry(k)
 
             colamt(k,1) = max(f_zero,    coldry(k)*h2ovmr(k))          ! h2o
-            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k))  ! co2
+            colamt(k,2) = max(temcol(k), coldry(k)*gasvmr_co2(iplon,k))! co2
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
@@ -943,10 +944,10 @@
             do k = 1, nlay
               colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k))  ! n2o
               colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k))  ! ch4
-              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k))  ! o2
-              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k))  ! co
+              colamt(k,6)=max(f_zero,    coldry(k)*gasvmr_o2(iplon,k))   ! o2
+              colamt(k,7)=max(f_zero,    coldry(k)*gasvmr_co(iplon,k))   ! co
 
-              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k) )   ! ccl4
+              wx(k,1) = max( f_zero, coldry(k)*gasvmr_ccl4(iplon,k) )    ! ccl4
               wx(k,2) = max( f_zero, coldry(k)*gasvmr_cfc11(iplon,k) )   ! cf11
               wx(k,3) = max( f_zero, coldry(k)*gasvmr_cfc12(iplon,k) )   ! cf12
               wx(k,4) = max( f_zero, coldry(k)*gasvmr_cfc22(iplon,k) )   ! cf22
@@ -1064,20 +1065,28 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon),                                 &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth,                     &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
 
+!  --- ...  save computed layer cloud optical depth for output
+!           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
+
+          if (ivflip == 0) then       ! input from toa to sfc
+            do k = 1, nlay
+              k1 = nlp1 - k
+              cldtau(iplon,k1) = taucld( 7,k)
+            enddo
+          else                        ! input from sfc to toa
+            do k = 1, nlay
+              cldtau(iplon,k) = taucld( 7,k)
+            enddo
+          endif                       ! end if_ivflip_block
+
         else
           cldfmc = f_zero
           taucld = f_zero
-        endif
-        if (ilwcliq > 0) then
-          do k = 1, nlay
-            cld_od_layer(iplon,k) = taucld(6,k)                         &
-     &                            + taucld(7,k) + taucld(8,k)
-          enddo
         endif
 
 !     if (lprnt) then
@@ -1339,6 +1348,7 @@
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (isubcol>0 only)                  !
+!           =3: decorrelation-length overlap (for isubclw>0 only)       !
 !                                                                       !
 !  *******************************************************************  !
 !  original code description                                            !
@@ -1382,14 +1392,14 @@
 !
 !===> ... begin here
 !
-      if ( iovrlw<0 .or. iovrlw>2 ) then
+      if ( iovrlw<0 .or. iovrlw>3 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVRLW=',iovrlw,' in RLWINIT !!'
         stop
-      elseif ( iovrlw==2 .and. isubclw==0 ) then
+      elseif ( iovrlw>=2 .and. isubclw==0 ) then
         if (me == 0) then
-          print *,'  *** IOVRLW=2 - maximum cloud overlap, is not yet', &
-     &          ' available for ISUBCLW=0 setting!!'
+          print *,'  *** IOVRLW=',iovrlw,' is not available for',       &
+     &          ' ISUBCLW=0 setting!!'
           print *,'      The program uses maximum/random overlap',      &
      &          ' instead.'
         endif
@@ -1510,6 +1520,7 @@
 !!\param cdat2           effective radius for rain drop (micron)
 !!\param cdat3           layer snow flake water path(\f$g/m^2\f$)
 !!\param cdat4           mean effective radius for snow flake(micron)
+!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
 !!\param cliqp           not used
 !!\param cicep           not used
 !!\param reliq           not used
@@ -1527,7 +1538,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed,                                        &
+     &       nlay, nlp1, ipseed, dz, de_lgth,                           &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1561,6 +1572,8 @@
 !    cicep - not used                                              nlay !
 !    reice - not used                                              nlay !
 !                                                                       !
+!    dz     - real, layer thickness (km)                           nlay !
+!    de_lgth- real, layer cloud decorrelation length (km)             1 !
 !    nlay  - integer, number of vertical layers                      1  !
 !    nlp1  - integer, number of vertical levels                      1  !
 !    ipseed- permutation seed for generating random numbers (isubclw>0) !
@@ -1629,7 +1642,8 @@
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
-     &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4
+     &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, dz
+      real (kind=kind_phys),                    intent(in) :: de_lgth
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(ngptlw,nlay),intent(out):: cldfmc
@@ -1804,7 +1818,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed,                                        &
+     &     ( cldf, nlay, ipseed, dz, de_lgth,                           &
 !  ---  output:
      &       lcloudy                                                    &
      &     )
@@ -1836,7 +1850,7 @@
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed,                                         &!  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth,                            & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
      &    )
 
@@ -1849,13 +1863,15 @@
 !    ** note : if the cloud generator is called multiple times, need    !
 !              to permute the seed between each call; if between calls  !
 !              for lw and sw, use values differ by the number of g-pts. !
+!   dz      - real, layer thickness (km)                           nlay !
+!   de_lgth - real, layer cloud decorrelation length (km)            1  !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    ngptlw*nlay!
 !                                                                       !
 !  other control flags from module variables:                           !
 !     iovrlw    : control flag for cloud overlapping method             !
-!                 =0:random; =1:maximum/random: =2:maximum              !
+!                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
 
@@ -1864,14 +1880,16 @@
 !  ---  inputs:
       integer, intent(in) :: nlay, ipseed
 
-      real (kind=kind_phys), dimension(nlay), intent(in) :: cldf
+      real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
+      real (kind=kind_phys),                  intent(in) :: de_lgth
 
 !  ---  outputs:
       logical, dimension(ngptlw,nlay), intent(out) :: lcloudy
 
 !  ---  locals:
       real (kind=kind_phys) :: cdfunc(ngptlw,nlay), rand1d(ngptlw),     &
-     &       rand2d(nlay*ngptlw), tem1
+     &       rand2d(nlay*ngptlw), tem1, fac_lcf(nlay),                  &
+     &       cdfun2(ngptlw,nlay)
 
       type (random_stat) :: stat          ! for thread safe random generator
 
@@ -1974,6 +1992,52 @@
 
             do k = 1, nlay
               cdfunc(n,k) = tem1
+            enddo
+          enddo
+
+        case( 3 )        ! decorrelation length overlap
+
+!  ---  compute overlapping factors based on layer midpoint distances
+!       and decorrelation depths
+
+          do k = nlay, 2, -1
+            fac_lcf(k) = exp( -0.5 * (dz(k)+dz(k-1)) / de_lgth )
+          enddo
+
+!  ---  setup 2 sets of random numbers
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfunc(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfun2(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+!  ---  then working from the top down:
+!       if a random number (from an independent set -cdfun2) is smaller then the
+!       scale factor: use the upper layer's number,  otherwise use a new random
+!       number (keep the original assigned one).
+
+          do k = nlay-1, 1, -1
+            k1 = k + 1
+
+            do n = 1, ngptlw
+              if ( cdfun2(n,k) <= fac_lcf(k1) ) then
+                cdfunc(n,k) = cdfunc(n,k1)
+              endif
             enddo
           enddo
 
