@@ -97,6 +97,9 @@
 !      Aug     2013  --- s. moorthi - merge sarah's gocart changes with!
 !                                     yutai's changes                  !
 !      13Feb2014  --- Sarah lu - compute aod at 550nm                  !
+!      jun     2018  --- h-m lin and y-t hou   updated spectral band   !
+!        mapping method for aerosol optical properties. controled by   !
+!        internal variable lmap_new through namelist variable iaer.    !
 !                                                                      !
 !   references for opac climatological aerosols:                       !
 !     hou et al. 2002  (ncep office note 441)                          !
@@ -154,9 +157,8 @@
 !! radiation computations.
       module module_radiation_aerosols   
 !
-      use physparam,only : iaermdl, iaerflg, lavoflg, lalwflg, laswflg, &
-     &                     lalw1bd, aeros_file, ivflip, kind_phys       &
-     &,                    kind_io4, kind_io8
+      use physparam,only : iaermdl, iaerflg, lalw1bd, aeros_file,       &
+     &                     ivflip, kind_phys, kind_io4, kind_io8
       use physcons, only : con_pi, con_rd, con_g, con_t0c, con_c,       &
      &                     con_boltz, con_plnk, con_amd
 
@@ -202,6 +204,21 @@
       integer, save :: NLWBND  = NBDLW
 ! total number of bands for sw+lw aerosols
       integer, save :: NSWLWBD = NBDSW+NBDLW
+!  LW aerosols effect control flag
+!    =.true.:aerosol effect is included in LW radiation
+!    =.false.:aerosol effect is not included in LW radiation
+      logical, save :: lalwflg = .true.
+!  SW aerosols effect control flag
+!    =.true.:aerosol effect is included in SW radiation
+!    =.false.:aerosol effect is not included in SW radiation
+      logical, save :: laswflg = .true.
+!  stratospheric volcanic aerosol effect flag
+!    =.true.:historical events of stratosphere volcanic aerosol effect
+!            is included radiation (limited by data availability)
+!    =.false.:volcanic aerosol effect is not included in radiation
+      logical, save :: lavoflg = .true.
+
+      logical, save :: lmap_new = .true.  ! use new mapping method (set in aer_init)
 
 ! --------------------------------------------------------------------- !
 !   section-1 : module variables for spectral band interpolation        !
@@ -270,6 +287,8 @@
      &     6.52736E-3, 4.99410E-3, 4.39350E-3, 2.21676E-3, 1.33812E-3,  &
      &     1.12320E-3, 5.59000E-4, 3.60000E-4, 2.98080E-4, 7.46294E-5  /
 
+      real (kind=kind_phys), dimension(NBDSW), save :: wvn_sw1, wvn_sw2
+      real (kind=kind_phys), dimension(NBDLW), save :: wvn_lw1, wvn_lw2
 ! --------------------------------------------------------------------- !
 !   section-2 : module variables for stratospheric volcanic aerosols    !
 !               from historical data (sato et al. 1993)                 !
@@ -694,6 +713,7 @@
 !  external module variables: (in physparam)                           !
 !     iaermdl - tropospheric aerosol model scheme flag                 !
 !               =0 opac-clim; =1 gocart-clim, =2 gocart-prognostic     !
+!               =5 opac-clim new spectral mapping                      !
 !     lalwflg - logical lw aerosols effect control flag                !
 !               =t compute lw aerosol optical prop                     !
 !     laswflg - logical sw aerosols effect control flag                !
@@ -734,6 +754,10 @@
       kyrsav  = 1
       kmonsav = 1
 
+      laswflg= (mod(iaerflg,10) > 0)    ! control flag for sw tropospheric aerosol
+      lalwflg= (mod(iaerflg/10,10) > 0) ! control flag for lw tropospheric aerosol
+      lavoflg= (iaerflg >= 100)         ! control flag for stratospheric volcanic aeros
+
 !> -# Call wrt_aerlog() to write aerosol parameter configuration to output logs.
 
       if ( me == 0 ) then
@@ -768,6 +792,23 @@
 
       NSWLWBD = NSWBND + NLWBND
 
+      wvn_sw1(:) = wvnsw1(:)
+      wvn_sw2(:) = wvnsw2(:)
+      wvn_lw1(:) = wvnlw1(:)
+      wvn_lw2(:) = wvnlw2(:)
+
+! note: for result consistency, the defalt opac-clim aeros setting still use
+!       old spectral band mapping. use iaermdl=5 to use new mapping method
+
+      if ( iaermdl == 0 ) then                    ! opac-climatology scheme
+        lmap_new = .false.
+
+        wvn_sw1(2:NBDSW-1) = wvn_sw1(2:NBDSW-1) + 1
+        wvn_lw1(2:NBDLW) = wvn_lw1(2:NBDLW) + 1
+      else
+        lmap_new = .true.
+      endif
+
       if ( iaerflg /= 100 ) then
 
 !> -# Call set_spectrum() to set up spectral one wavenumber solar/IR
@@ -779,7 +820,7 @@
 
 !> -# Call clim_aerinit() to invoke tropospheric aerosol initialization.
 
-        if ( iaermdl == 0 ) then                    ! opac-climatology scheme
+        if ( iaermdl==0 .or. iaermdl==5 ) then      ! opac-climatology scheme
 
           call clim_aerinit                                             &
 !  ---  inputs:
@@ -842,7 +883,7 @@
 !                                                                      !
 !  external module variables:  (in physparam)                          !
 !   iaermdl  - aerosol scheme flag: 0:opac-clm; 1:gocart-clim;         !
-!                                   2:gocart-prog                      !
+!              2:gocart-prog; 5:opac-clim+new mapping                  !
 !   iaerflg  - aerosol effect control flag: 3-digits (volc,lw,sw)      !
 !   lalwflg  - toposphere lw aerosol effect: =f:no; =t:yes             !
 !   laswflg  - toposphere sw aerosol effect: =f:no; =t:yes             !
@@ -865,7 +906,7 @@
 !
       print *, VTAGAER    ! print out version tag
 
-      if ( iaermdl == 0 ) then
+      if ( iaermdl==0 .or. iaermdl==5 ) then
         print *,' - Using OPAC-seasonal climatology for tropospheric',  &
      &          ' aerosol effect'
       elseif ( iaermdl == 1 ) then
@@ -1255,9 +1296,9 @@
 !  ---  locals:
       integer, dimension(NAERBND) :: iendwv
 
-      integer :: i, j, k, m, mb, ib, ii, id, iw, iw1, iw2
+      integer :: i, j, k, m, mb, ib, ii, id, iw, iw1, iw2, ik, ibs, ibe
 
-      real (kind=kind_phys) :: sumsol, sumir
+      real (kind=kind_phys) :: sumsol, sumir, fac, tmp, wvs, wve
 
       logical :: file_exist
       character :: cline*80
@@ -1380,23 +1421,54 @@
           enddo
         enddo
 
-!$omp parallel do private(ib,mb,ii,iw1,iw2,iw,nv_aod,sumsol)
+        ibs = 1
+        ibe = 1
+        wvs = wvn_sw1(1)
+        wve = wvn_sw1(1)
+        nv_aod = 1
+        do ib = 2, NSWBND
+          mb = ib + NSWSTR - 1
+          if ( wvn_sw2(mb) >= wvn550 .and. wvn550 >= wvn_sw1(mb) ) then
+            nv_aod = ib                  ! sw band number covering 550nm wavelenth
+          endif
+
+          if ( wvn_sw1(mb) < wvs ) then
+            wvs = wvn_sw1(mb)
+            ibs = ib
+          endif
+          if ( wvn_sw1(mb) > wve ) then
+            wve = wvn_sw1(mb)
+            ibe = ib
+          endif
+        enddo
+
+!$omp parallel do private(ib,mb,ii,iw1,iw2,iw,sumsol,fac,tmp,ibs,ibe)
         do ib = 1, NSWBND
           mb = ib + NSWSTR - 1
           ii = 1
-          iw1 = nint(wvnsw1(mb))
-          iw2 = nint(wvnsw2(mb))
-
-          if ( wvnsw2(mb) >= wvn550 .and. wvn550 >= wvnsw1(mb) ) then
-            nv_aod = ib                  ! sw band number covering 550nm wavelenth
-          endif
+          iw1 = nint(wvn_sw1(mb))
+          iw2 = nint(wvn_sw2(mb))
 
           Lab_swdowhile : do while ( iw1 > iendwv(ii) )
             if ( ii == NAERBND ) exit Lab_swdowhile
             ii = ii + 1
           enddo  Lab_swdowhile
 
+          if ( lmap_new ) then
+            if (ib == ibs) then
           sumsol = f_zero
+            else
+              sumsol = -0.5 * solfwv(iw1)
+            endif
+            if (ib == ibe) then
+              fac = f_zero
+            else
+              fac = -0.5
+            endif
+            solbnd(ib) = sumsol
+          else
+            sumsol = f_zero
+          endif
           nv1(ib) = ii
 
           do iw = iw1, iw2
@@ -1417,6 +1489,12 @@
             solwaer(ib,ii) = sumsol
           endif
 
+          if ( lmap_new ) then
+            tmp = fac * solfwv(iw2)
+            solwaer(ib,ii) = solwaer(ib,ii) + tmp
+            solbnd(ib) = solbnd(ib) + tmp
+          endif
+
           nv2(ib) = ii
 !         frcbnd(ib) = solbnd(ib) / soltot
         enddo     ! end do_ib_block for sw
@@ -1434,7 +1512,25 @@
           enddo
         enddo
 
-!$omp parallel do private(ib,ii,iw1,iw2,iw,mb,sumir)
+        ibs = 1
+        ibe = 1
+        if (NLWBND > 1 ) then
+          wvs = wvn_lw1(1)
+          wve = wvn_lw1(1)
+          do ib = 2, NLWBND
+            mb = ib + NLWSTR - 1
+            if ( wvn_lw1(mb) < wvs ) then
+              wvs = wvn_lw1(mb)
+              ibs = ib
+            endif
+            if ( wvn_lw1(mb) > wve ) then
+              wve = wvn_lw1(mb)
+              ibe = ib
+            endif
+          enddo
+        endif
+
+!$omp parallel do private(ib,ii,iw1,iw2,iw,mb,sumir,fac,tmp,ibs,ibe)
         do ib = 1, NLWBND
           ii = 1
           if ( NLWBND == 1 ) then
@@ -1443,8 +1539,8 @@
             iw2 = 2500                  ! corresponding 4  mu
           else
             mb = ib + NLWSTR - 1
-            iw1 = nint(wvnlw1(mb))
-            iw2 = nint(wvnlw2(mb))
+            iw1 = nint(wvn_lw1(mb))
+            iw2 = nint(wvn_lw2(mb))
           endif
 
           Lab_lwdowhile : do while ( iw1 > iendwv(ii) )
@@ -1452,7 +1548,21 @@
             ii = ii + 1
           enddo  Lab_lwdowhile
 
+          if ( lmap_new ) then
+            if (ib == ibs) then
           sumir = f_zero
+            else
+              sumir = -0.5 * eirfwv(iw1)
+            endif
+            if (ib == ibe) then
+              fac = f_zero
+            else
+              fac = -0.5
+            endif
+            eirbnd(ib) = sumir
+          else
+            sumir = f_zero
+          endif
           nr1(ib) = ii
 
           do iw = iw1, iw2
@@ -1471,6 +1581,12 @@
 
           if ( iw2 /= iendwv(ii) ) then
             eirwaer(ib,ii) = sumir
+          endif
+
+          if ( lmap_new ) then
+            tmp = fac * eirfwv(iw2)
+            eirwaer(ib,ii) = eirwaer(ib,ii) + tmp
+            eirbnd(ib) = eirbnd(ib) + tmp
           endif
 
           nr2(ib) = ii
@@ -2397,7 +2513,7 @@
 
 !SARAH
 !         if ( iaerflg == 1 ) then      ! use opac aerosol climatology
-          if ( iaermdl == 0 ) then      ! use opac aerosol climatology
+          if ( iaermdl==0 .or. iaermdl==5 ) then  ! use opac aerosol climatology
 
           call aer_property                                               &
 !  ---  inputs:
@@ -2547,14 +2663,14 @@
             do m = 1, NBDSW
               mb = NSWSTR + m - 1
 
-              if     ( wvnsw1(mb) > 20000 ) then   ! range of wvlth < 0.5mu
+              if     ( wvn_sw1(mb) > 20000 ) then  ! range of wvlth < 0.5mu
                 tmp2 = 0.74
-              elseif ( wvnsw2(mb) < 20000 ) then   ! range of wvlth > 0.5mu
+              elseif ( wvn_sw2(mb) < 20000 ) then  ! range of wvlth > 0.5mu
                 tmp2 = 1.14
               else                                 ! range of wvlth in btwn
                 tmp2 = 0.94
               endif
-              tmp1 = (0.275e-4 * (wvnsw2(mb)+wvnsw1(mb))) ** tmp2
+              tmp1 = (0.275e-4 * (wvn_sw2(mb)+wvn_sw1(mb))) ** tmp2
 
               do i = 1, IMAX
                 kh = kcuth(i)
@@ -2609,7 +2725,7 @@
             else
 
               do m = 1, NBDLW
-                tmp1 = (0.275e-4 * (wvnlw2(m) + wvnlw1(m))) ** 1.2
+                tmp1 = (0.275e-4 * (wvn_lw2(m) + wvn_lw1(m))) ** 1.2
 
                 do i = 1, IMAX
                   kh = kcuth(i)
@@ -2665,14 +2781,14 @@
             do m = 1, NBDSW
               mb = NSWSTR + m - 1
 
-              if     ( wvnsw1(mb) > 20000 ) then   ! range of wvlth < 0.5mu
+              if     ( wvn_sw1(mb) > 20000 ) then  ! range of wvlth < 0.5mu
                 tmp2 = 0.74
-              elseif ( wvnsw2(mb) < 20000 ) then   ! range of wvlth > 0.5mu
+              elseif ( wvn_sw2(mb) < 20000 ) then  ! range of wvlth > 0.5mu
                 tmp2 = 1.14
               else                                 ! range of wvlth in btwn
                 tmp2 = 0.94
               endif
-              tmp1 = (0.275e-4 * (wvnsw2(mb)+wvnsw1(mb))) ** tmp2
+              tmp1 = (0.275e-4 * (wvn_sw2(mb)+wvn_sw1(mb))) ** tmp2
 
               do i = 1, IMAX
                 kh = kcuth(i)
@@ -2726,7 +2842,7 @@
             else
 
               do m = 1, NBDLW
-                tmp1 = (0.275e-4 * (wvnlw2(m) + wvnlw1(m))) ** 1.2
+                tmp1 = (0.275e-4 * (wvn_lw2(m) + wvn_lw1(m))) ** 1.2
 
                 do i = 1, IMAX
                   kh = kcuth(i)
@@ -3625,12 +3741,12 @@
       real (kind=kind_phys), dimension(NBDSW)          :: solbnd
       real (kind=kind_phys), dimension(NLWBND,KAERBND) :: eirwaer
       real (kind=kind_phys), dimension(NLWBND)         :: eirbnd
-      real (kind=kind_phys) :: sumsol, sumir
+      real (kind=kind_phys) :: sumsol, sumir, fac, tmp, wvs, wve
 
       integer, dimension(NBDSW)  :: nv1, nv2
       integer, dimension(NLWBND) :: nr1, nr2
 
-      integer :: i, mb, ib, ii, iw, iw1, iw2
+      integer :: i, mb, ib, ii, iw, iw1, iw2, ik, ibs, ibe
 
 !===>  ...  begin here
 
@@ -3700,25 +3816,52 @@
 
         nv_aod = 1
 
+        ibs = 1
+        ibe = 1
+        wvs = wvn_sw1(1)
+        wve = wvn_sw1(1)
+        do ib = 2, NBDSW
+          mb = ib + NSWSTR - 1
+          if ( wvn_sw2(mb) >= wvn550 .and. wvn550 >= wvn_sw1(mb) ) then
+            nv_aod = ib                  ! sw band number covering 550nm wavelenth
+          endif
+
+          if ( wvn_sw1(mb) < wvs ) then
+            wvs = wvn_sw1(mb)
+            ibs = ib
+          endif
+          if ( wvn_sw1(mb) > wve ) then
+            wve = wvn_sw1(mb)
+            ibe = ib
+          endif
+        enddo
+
         do ib = 1, NBDSW
           mb = ib + NSWSTR - 1
           ii = 1
-          iw1 = nint(wvnsw1(mb))
-          iw2 = nint(wvnsw2(mb))
-!
-! ---  locate the spectral band for 550nm (for aod diag)
-!
-          if (10000./iw1 >= 0.55 .and.                                  &
-     &        10000./iw2 <= 0.55 )  then
-              nv_aod =  ib
-          endif
+          iw1 = nint(wvn_sw1(mb))
+          iw2 = nint(wvn_sw2(mb))
 
           Lab_swdowhile : do while ( iw1 > iendwv_grt(ii) )
             if ( ii == KAERBND ) exit Lab_swdowhile
             ii = ii + 1
           enddo  Lab_swdowhile
 
+          if ( lmap_new ) then
+            if (ib == ibs) then
           sumsol = f_zero
+            else
+              sumsol = -0.5 * solfwv(iw1)
+            endif
+            if (ib == ibe) then
+              fac = f_zero
+            else
+              fac = -0.5
+            endif
+            solbnd(ib) = sumsol
+          else
+            sumsol = f_zero
+          endif
           nv1(ib) = ii
 
           do iw = iw1, iw2
@@ -3739,6 +3882,12 @@
             solwaer(ib,ii) = sumsol
           endif
 
+          if ( lmap_new ) then
+            tmp = fac * solfwv(iw2)
+            solwaer(ib,ii) = solwaer(ib,ii) + tmp
+            solbnd(ib) = solbnd(ib) + tmp
+          endif
+
           nv2(ib) = ii
 
           if((me==0) .and. lckprnt) print *,'RAD-nv1,nv2:',             &
@@ -3750,8 +3899,8 @@
 ! --- check the spectral range for the nv_550 band
         if((me==0) .and. lckprnt) then
           mb = nv_aod + NSWSTR - 1
-          iw1 = nint(wvnsw1(mb))
-          iw2 = nint(wvnsw2(mb))
+          iw1 = nint(wvn_sw1(mb))
+          iw2 = nint(wvn_sw2(mb))
            print *,'RAD-nv_aod:',                                       &
      &       nv_aod, iw1, iw2, 10000./iw1, 10000./iw2
         endif
@@ -3762,14 +3911,31 @@
         eirbnd (:)   = f_zero
         eirwaer(:,:) = f_zero
 
+        ibs = 1
+        ibe = 1
+        if (NLWBND > 1 ) then
+          wvs = wvn_lw1(1)
+          wve = wvn_lw1(1)
+          do ib = 2, NLWBND
+            if ( wvn_lw1(ib) < wvs ) then
+              wvs = wvn_lw1(ib)
+              ibs = ib
+            endif
+            if ( wvn_lw1(ib) > wve ) then
+              wve = wvn_lw1(ib)
+              ibe = ib
+            endif
+          enddo
+        endif
+
         do ib = 1, NLWBND
           ii = 1
           if ( NLWBND == 1 ) then
             iw1 = 400                   ! corresponding 25 mu
             iw2 = 2500                  ! corresponding 4  mu
           else
-            iw1 = nint(wvnlw1(ib))
-            iw2 = nint(wvnlw2(ib))
+            iw1 = nint(wvn_lw1(ib))
+            iw2 = nint(wvn_lw2(ib))
           endif
 
           Lab_lwdowhile : do while ( iw1 > iendwv_grt(ii) )
@@ -3777,7 +3943,21 @@
             ii = ii + 1
           enddo  Lab_lwdowhile
 
+          if ( lmap_new ) then
+            if (ib == ibs) then
           sumir = f_zero
+            else
+              sumir = -0.5 * eirfwv(iw1)
+            endif
+            if (ib == ibe) then
+              fac = f_zero
+            else
+              fac = -0.5
+            endif
+            eirbnd(ib) = sumir
+          else
+            sumir = f_zero
+          endif
           nr1(ib) = ii
 
           do iw = iw1, iw2
@@ -3800,6 +3980,12 @@
 
           nr2(ib) = ii
 
+          if ( lmap_new ) then
+            tmp = fac * eirfwv(iw2)
+            eirwaer(ib,ii) = eirwaer(ib,ii) + tmp
+            eirbnd(ib) = eirbnd(ib) + tmp
+          endif
+
           if(me==0 .and. lckprnt) print *,'RAD-nr1,nr2:',                &
      &        ib,iw1,iw2,nr1(ib),iendwv_grt(nr1(ib)),                    &
      &        nr2(ib),iendwv_grt(nr2(ib)),                               &
@@ -3816,9 +4002,9 @@
           print *, 'RAD -After optavg_grt, sw band info'
           do ib = 1, NBDSW
            mb = ib + NSWSTR - 1
-           print *,'RAD -wvnsw1,wvnsw2: ',ib,wvnsw1(mb),wvnsw2(mb)
-           print *,'RAD -lamda1,lamda2: ',ib,10000./wvnsw1(mb),         &
-     &                                   10000./wvnsw2(mb)
+           print *,'RAD -wvnsw1,wvnsw2: ',ib,wvn_sw1(mb),wvn_sw2(mb)
+           print *,'RAD -lamda1,lamda2: ',ib,10000./wvn_sw1(mb),        &
+     &                                   10000./wvn_sw2(mb)
            print *,'RAD -extrhi_grt:', extrhi_grt(:,ib)
 !          do i = 1, KRHLEV
            do i = 1, KRHLEV, 10
@@ -3829,9 +4015,9 @@
           print *, 'RAD -After optavg_grt, lw band info'
           do ib = 1, NLWBND
            ii = NBDSW + ib
-           print *,'RAD -wvnlw1,wvnlw2: ',ib,wvnlw1(ib),wvnlw2(ib)
-           print *,'RAD -lamda1,lamda2: ',ib,10000./wvnlw1(ib),         &
-     &                                   10000./wvnlw2(ib)
+           print *,'RAD -wvnlw1,wvnlw2: ',ib,wvn_lw1(ib),wvn_lw2(ib)
+           print *,'RAD -lamda1,lamda2: ',ib,10000./wvn_lw1(ib),        &
+     &                                   10000./wvn_lw2(ib)
            print *,'RAD -extrhi_grt:', extrhi_grt(:,ii)
 !          do i = 1, KRHLEV
            do i = 1, KRHLEV, 10
@@ -4578,7 +4764,17 @@
 !...................................
 !  ---  inputs:  (in scope variables)
 !  ---  outputs: (in scope variables)
-!
+
+!  ==================================================================  !
+!                                                                      !
+! subprogram: rd_gocart_clim                                           !
+!                                                                      !
+!   1. read in aerosol dry mass and surface pressure from GEOS3-GOCART !
+!      C3.1 2000 monthly data set                                      !
+!      or aerosol mixing ratio and surface pressure from GEOS4-GOCART  !
+!      2000-2007 averaged monthly data set                             !
+!   2. compute goes lat/lon array (for horizontal mapping)             !
+!                                                                      !
 !  ====================  defination of variables  ===================  !
 !                                                                      !
 ! inputs arguments:                                                    !
