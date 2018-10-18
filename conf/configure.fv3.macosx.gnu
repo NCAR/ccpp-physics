@@ -190,9 +190,9 @@ endif
 
 ifeq ($(SION),Y)
 CPPDEFS += -DSION
-CFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
-FFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
-LDFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --libs --f90`
+CFLAGS += $(SIONLIB_INC)
+FFLAGS += $(SIONLIB_INC)
+LDFLAGS += $(SIONLIB_LIB)
 endif
 
 ifeq ($(MEMCHECK),Y)
