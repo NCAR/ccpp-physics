@@ -90,7 +90,7 @@
         Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
 
       endif                                ! end_if_lslwr
-       
+
       end subroutine rrtmg_lw_post_run
 
 !> \section arg_table_rrtmg_lw_post_finalize Argument Table
