@@ -437,7 +437,7 @@ module cs_conv
 !
 ! output arguments of CS_CUMLUS
 !
-   real(r8),  dimension(IM,KMAX,nctp)  :: vverti
+   real(r8), dimension(IM,KMAX,nctp)  :: vverti
 
    real(r8) GTT(IJSDIM,KMAX)           ! temperature tendency [K/s]
    real(r8) GTQ(IJSDIM,KMAX,NTR)       ! tracer tendency [kg/kg/s]
@@ -586,7 +586,8 @@ module cs_conv
 !
 !***************************************************************************************
    call CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    &  !DD dimensions
-                   otspt(1,1), otspt(1,2), lprnt, ipr,&
+                   otspt(1:ntr,1), otspt(1:ntr,2),    &
+                   lprnt , ipr   ,                    &
                    GTT   , GTQ   , GTU   , GTV   ,    & ! output
                    dt_mf ,                            & ! output
                    GTPRP , GSNWP , ud_mf ,            & ! output
@@ -1177,6 +1178,10 @@ module cs_conv
 
 !! CUMUP computes In-cloud Properties
 
+! DH* GNU crashes - check all arguments to CUMUP for their dimensions
+! before and after CUMUP (i.e. here), and inside the routine, in
+! particular: gctm, gcqm, gcwm, gchm, gcwt, gclm, gcim,gctrm
+! also, inside, check that no reads/writes out of bounds occur *DH
      CALL CUMUP(IJSDIM, KMAX, NTR,   ntrq,                          & !DD dimensions
                 ACWF        ,                                       & ! output
                 GCLZ        , GCIZ        , GPRCIZ      , GSNWIZ,   & ! output
@@ -2151,15 +2156,10 @@ module cs_conv
       REAL(r8) ::  esat, tem
 !     REAL(r8) ::  esat, tem, rhs_h, rhs_q
 !
-!   [INTERNAL FUNC]
-!      REAL(r8)     FPREC   ! precipitation ratio in condensate
-!      REAL(r8)     FRICE   ! ice ratio in cloud water
       REAL(r8)     Z       ! altitude
       REAL(r8)     ZH      ! scale height
       REAL(r8)     T       ! temperature
 !
-!      FPREC(Z,ZH) = MIN(MAX(one-EXP(-(Z-PRECZ0)/ZH), zero), one)
-!      FRICE(T)    = MIN(MAX((TSICE-T)/(TSICE-TWICE), zero), one)
 !
 ! Note: iteration is not made to diagnose cloud ice for simplicity
 !
