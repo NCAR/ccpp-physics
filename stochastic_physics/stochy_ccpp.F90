@@ -229,9 +229,8 @@ contains
       integer              :: len_thread
       integer              :: i1_t
       integer              :: i2_t
-      integer, pointer     :: num_threads => ompthreads
 !
-      len_thread_m  = (len+num_threads-1) / num_threads
+      len_thread_m  = (len+ompthreads-1) / ompthreads
 !
       !$omp parallel do default(none)                                       &
       !$omp private(i1_t,i2_t,len_thread,it,i,ii,i1,i2)                     &
@@ -242,8 +241,8 @@ contains
       !$omp shared(imxin,jmxin)                                             &
       !$omp shared(outlon,outlat,wrk,iindx1,rinlon,jindx1,rinlat,ddx,ddy)   &
       !$omp shared(rlon,rlat,regin,gauout)                                  &
-      !$omp shared(num_threads,len_thread_m,len,iindx2,jindx2,rslmsk)
-      do it=1,num_threads ! start of threaded loop
+      !$omp shared(ompthreads,len_thread_m,len,iindx2,jindx2,rslmsk)
+      do it=1,ompthreads ! start of threaded loop
         i1_t       = (it-1)*len_thread_m+1
         i2_t       = min(i1_t+len_thread_m-1,len)
         len_thread = i2_t-i1_t+1
