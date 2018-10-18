@@ -1,5 +1,5 @@
 /**
-\page GFDL_cloud GFDL Cloud Microphysics Scheme 
+\page GFDL_cloud FV3GFS GFDL Cloud Microphysics Scheme 
 \section des_GFDL_cloud Description
 GFDL cloud microphysics (MP) scheme is a six-category MP scheme to replace Zhao-Carr MP scheme, and moves the GFS from
 a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).

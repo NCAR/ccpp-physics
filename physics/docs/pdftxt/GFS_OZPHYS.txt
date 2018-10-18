@@ -1,5 +1,5 @@
 /**
-\page GFS_OZPHYS GFS Ozone Photochemistry Scheme
+\page GFS_OZPHYS FV3GFS Ozone Photochemistry Scheme
 \section des_ozone  Description
  In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems
  from the surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some
@@ -21,11 +21,13 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  feasible to implement full ozone photochemistry within a high-resolution operational global NWP system. Instead, 
  the operational GFS currently parameterizes photochemical production and destruction based on 
  monthly mean coefficients provided by Naval Research Laboratory CHEM2D chemistry model through an ozone photochemistry parameterization (OPP),
- known as CHEM2D-OPP (Mccormack et al.(2006) \cite mccormack_et_al_2006). CHEM2D-OPP consists of four coefficients describing
+ known as CHEM2D-OPP (Mccormack et al.(2006) \cite mccormack_et_al_2006). CHEM2D is a global model extending from the surface to ~120 km
+ that solves 280 chemical reactions for 100 different species within a transformed Eulerian mean framework with fully interactive 
+ raditative heating and dynamics. CHEM2D-OPP consists of four coefficients describing
  the residual ozone photochemical tendency as the difference between the production and loss rates \f$(P-L)\f$
- and its sensitivity to local changes in ozone mixing ratio \f$r\f$, temperature \f$T\f$, and overhead ozone column amount \f$\Sigma\f$ (see Figs. 1, 2, 
- 5, and 6 in Mccormack et al.(2006) \cite mccormack_et_al_2006). The local time rate of change of ozone mixing ratio due to 
- photochemistry is then:
+ and its sensitivity to local changes in ozone mixing ratio \f$r\f$, temperature \f$T\f$, and overhead ozone column 
+ amount \f$\Sigma\f$ (see Figs. 1, 2, 5, and 6 in Mccormack et al.(2006) \cite mccormack_et_al_2006). 
+ The local time rate of change of ozone mixing ratio due to photochemistry is then:
  \f[
   \frac{\partial r}{\partial t}=(P-L)\left[r,T,\Sigma\right]            
  \f]
@@ -41,7 +43,8 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  vertical coordinate. The subscript "0" attached to \f$(P-L)\f$ and its partial derivatives refers to their values
  at the reference state \f$r_0\f$,\f$T_0\f$,\f$\Sigma_0\f$, and are all zonally averaged quantities.
  The reference-state production and loss, \f$(P-L)_0\f$, and the various partial derivative terms about the state (the last 
- three terms on the right) are computed offline using CHEM2D model photochemistry. These coefficients are then stored in tabular 
+ three terms on the right) are computed from odd oxygen (\f$O_X\equiv O_3+O\f$) reaction rates in the CHEM2D photochemical 
+ transport model. These coefficients are then stored in tabular 
  form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location. 
 The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that 
 depend on the temperature and column ozone climatology

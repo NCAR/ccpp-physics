@@ -1,5 +1,5 @@
 /**
-\page GFS_RAYLEIGH GFS Rayleigh Damping Calculation
+\page GFS_RAYLEIGH FV3GFS Rayleigh Damping Calculation
 \section des_rayleigh  Description
 This is the Rayleigh friction calculation with total energy conservation.
 \n Role of Rayleigh friction, it attempts to resolve two issues:

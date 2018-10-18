@@ -26,6 +26,8 @@ is currently being integrated with FV3GFS and is available for use by those work
 NOAA in the development of the Unified Forecast System (UFS). Future direction for the CCPP includes broad support 
 for use with FV3 and addition of new parameterizations for potential transition to operations. 
 
+nomenclatures: ops GFS, NEMSGFS or GSM referred in this documentation are the same spectral model.
+
 You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/"> GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
 
 */

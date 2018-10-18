@@ -1,5 +1,5 @@
 /**
-\page GFS_GWDC GFS Convective Gravity Wave Drag Scheme
+\page GFS_GWDC FV3GFS Convective Gravity Wave Drag Scheme
 \section des_gwdc  Description
  GFS physics includes parameterizations of gravity waves from two
  important sources: mountains and convection. This parameterization
