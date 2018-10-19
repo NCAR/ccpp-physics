@@ -158,11 +158,11 @@
      &              28,28,28,28,28,28,                                  & ! band 28
      &              29,29,29,29,29,29,29,29,29,29,29,29 /                 ! band 29
 
-! \name Starting/ending wavenumber for each of the SW bands
-      real (kind=kind_phys), dimension(NBANDS):: wvnum1, wvnum2 !< Starting/ending wavenumber for each of the SW bands
+!> \name Starting/ending wavenumber for each of the SW bands
+      real (kind=kind_phys), dimension(NBANDS):: wvnum1, wvnum2
       data wvnum1(:)    /                                               &
-     &         2600.0, 3251.0, 4001.0, 4651.0, 5151.0, 6151.0, 7701.0,  &
-     &         8051.0,12851.0,16001.0,22651.0,29001.0,38001.0,  820.0 /
+     &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
+     &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
       data wvnum2(:)    /                                               &
      &         3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
      &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /

@@ -2072,7 +2072,7 @@
 
                  if (.false.) then
                     vaux = ts_auto_ice * 10.0_r8
-  
+ 
                     nprci(k) = (niic(i, k)/vaux)*exp(-lami(k)*dcs)
                     tx1 = one / lami(k)
                     tx2 = tx1 * tx1
@@ -3177,7 +3177,7 @@ checked up to here moorthi
                    tx2    = 9.1_r8*rhof(i,k)
                    unr(k) = min(tx1*cons4, tx2)
                    umr(k) = min(tx1*(cons5/6._r8),tx2)
-  
+ 
                  else
                    lamr(k) = zero
                    n0r(k)  = zero
