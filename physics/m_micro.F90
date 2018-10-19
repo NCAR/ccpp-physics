@@ -138,17 +138,6 @@ end subroutine m_micro_init
 !! | lm             | vertical_dimension                                                          | vertical layer dimension                                                                    | count       |    0 | integer    |           | in     | F        |
 !! | flipv          | flag_flip                                                                   | vertical flip logical                                                                       | flag        |    0 | logical    |           | in     | F        |
 !! | dt_i           | time_step_for_physics                                                       | physics time step                                                                           | s           |    0 | real       | kind_phys | in     | F        |
-!! | grav           | gravitational_acceleration                                                  | gravitational acceleration                                                                  | m s-2       |    0 | real       | kind_phys | in     | F        |
-!! | pi             | pi                                                                          | ratio of a circle's circumference to its diameter                                           | radians     |    0 | real       | kind_phys | in     | F        |
-!! | rgas           | gas_constant_dry_air                                                        | ideal gas constant for dry air                                                              | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure                                               | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                                                      | J kg-1      |    0 | real       | kind_phys | in     | F        |
-!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                        | latent heat of fusion                                                                       | J kg-1      |    0 | real       | kind_phys | in     | F        |
-!! | ttp            | triple_point_temperature_of_water                                           | triple point temperature of water                                                           | K           |    0 | real       | kind_phys | in     | F        |
-!! | tice           | temperature_at_zero_celsius                                                 | temperature at 0 degrees Celsius                                                            | K           |    0 | real       | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                                                       | none        |    0 | real       | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                     | (rd/rv) - 1                                                                                 | none        |    0 | real       | kind_phys | in     | F        |
-!! | vireps         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                       | none        |    0 | real       | kind_phys | in     | F        |
 !! | prsl_i         | air_pressure                                                                | layer mean pressure                                                                         | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | prsi_i         | air_pressure_at_interface                                                   | air pressure at model layer interfaces                                                      | Pa          |    2 | real       | kind_phys | in     | F        |
 !! | phil           | geopotential                                                                | geopotential at model layer centers                                                         | m2 s-2      |    2 | real       | kind_phys | in     | F        |
@@ -214,8 +203,6 @@ end subroutine m_micro_init
 !!
 #endif
 subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
-     &,                         grav, pi, rgas, cp, hvap, hfus, ttp     &
-     &,                         tice, eps, epsm1, vireps                &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
      &,                         lwheat_i, swheat_i, w_upi, cf_upi       &
@@ -235,6 +222,13 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
      &                          errmsg, errflg)
 
        use machine ,      only: kind_phys
+       use physcons,           grav   => con_g,    pi     => con_pi,    &
+     &                         rgas   => con_rd,   cp     => con_cp,    &
+     &                         hvap   => con_hvap, hfus   => con_hfus,  &
+     &                         ttp    => con_ttp,  tice   => con_t0c,   &
+     &                         eps    => con_eps,  epsm1  => con_epsm1, &
+     &                         VIREPS => con_fvirt,                     &
+     &                         latvap => con_hvap, latice => con_hfus
 
        use funcphys,      only: fpvs                ! saturation vapor pressure for water-ice mixed
 !      use funcphys,      only: fpvsl, fpvsi, fpvs  ! saturation vapor pressure for water,ice & mixed
@@ -260,14 +254,15 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
 !------------------------------------
 !   input
 !      real,   parameter  :: r_air = 3.47d-3
-       real,   parameter  :: one=1.0, oneb3=one/3.0, qsmall=1.e-14
+       real,   parameter  :: one=1.0, oneb3=one/3.0, onebcp=one/cp,      &
+     &                       kapa=rgas*onebcp,  cpbg=cp/grav,            &
+     &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,&
+                             qsmall=1.e-14
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp
        logical,intent(in) :: flipv, aero_in, skip_macro, lprnt
        real (kind=kind_phys), intent(in):: dt_i
-       real (kind=kind_phys), intent(in) :: grav, pi, rgas, cp, hvap,   &
-     &       hfus, ttp, tice, eps, epsm1, vireps
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
@@ -304,8 +299,7 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
        integer, dimension(im) :: kct
        real (kind=kind_phys) T_ICE_ALL, USE_AV_V,BKGTAU,LCCIRRUS,       &
      &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8,      &
-     &    TMAXLL, USURF,LTS_UP, LTS_LOW, MIN_EXP, fracover, c2_gw, est3,&
-     &    latvap, latice, onebcp, kapa, cpbg, lvbcp, lsbcp
+     &    TMAXLL, USURF,LTS_UP, LTS_LOW, MIN_EXP, fracover, c2_gw, est3
 
        real(kind=kind_phys), allocatable, dimension(:,:) ::             &
      &            CNV_MFD,CNV_PRC3,CNV_FICE,CNV_NDROP,CNV_NICE
@@ -537,14 +531,6 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
 
        errmsg = ''
        errflg = 0
-
-       latvap = hvap
-       latice = hfus
-       onebcp = one/cp
-       kapa   = rgas*onebcp
-       cpbg   = cp/grav
-       lvbcp  = hvap*onebcp
-       lsbcp  = (hvap+hfus)*onebcp
 
 !      rhr8 = 1.0
        if(flipv) then
