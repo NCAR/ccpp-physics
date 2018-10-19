@@ -279,13 +279,16 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(ix,lm) :: lwm_o, qi_o,           &
+       real (kind=kind_phys),dimension(ix,lm), intent(out) :: lwm_o, qi_o,  &
                         cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
-       real (kind=kind_phys),dimension(im)    :: rn_o,  sr_o
+       real (kind=kind_phys),dimension(im), intent(out) :: rn_o,  sr_o
+       real(kind=kind_phys), dimension(IM), intent(out) :: CN_PRC2,CN_SNR
        character(len=*),                         intent(out) :: errmsg
        integer,                                  intent(out) :: errflg
 
 !   input and output
+!      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
+       integer, dimension(IM), intent(inout) :: KCBL
        real (kind=kind_phys),dimension(ix,lm),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
        real (kind=kind_phys),dimension(im,lm),intent(inout):: rnw_io,snw_io,&
@@ -351,11 +354,9 @@ subroutine m_micro_run(im,       ix,     lm,     flipv, dt_i            &
 
        real(kind=kind_phys), dimension(1:LM,10) :: rndstr8,naconr8
 
-       real(kind=kind_phys), dimension(IM)      :: CN_PRC2,CN_SNR,CN_ARFX,&
+       real(kind=kind_phys), dimension(IM)      :: CN_ARFX,&
      &                                             LS_SNR,LS_PRC2, TPREC
 !    &                                             VMIP, twat
-!      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
-       integer, dimension(IM)                   :: KCBL
 
        real(kind=kind_phys), dimension (LM) :: uwind_gw,vwind_gw,       &
      &   tm_gw, pm_gw, nm_gw, h_gw, rho_gw, khaux, qcaux,               &
