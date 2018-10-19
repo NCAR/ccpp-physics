@@ -10,3 +10,7 @@
 [submodule "ccpp/physics"]
 	path = ccpp/physics
 	url = https://github.com/mzhangw/ccpp-physics
+[submodule "FMS"]
+	path = FMS
+	url = git://github.com/NOAA-EMC/FMS
+	branch = GFS-FMS
