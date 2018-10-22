@@ -42,15 +42,15 @@
 !! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
 !! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        | 
 !! | nthm           | number_of_tracers_for_cloud_condensate                                      | number of tracers for cloud condensate                | count         |    0 | integer   |           | in     | F        |
-!! | ntke           | index_for_turbulence_kinetic_energy                                         | tracer index for turbulence kinetic energy            | index         |    0 | integer   |           | in     | F        |
+!! | ntke           | index_of_TKE_vertical_diffusion_tracer                                      | index of TKE in the vertically diffused tracer array  | index         |    0 | integer   |           | in     | F        |
 !! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | du             | tendency_of_x_wind_due_to_model_physicsi                                    | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
+!! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | tdt            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F       |
+!! | rtg            | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers due to model physics  | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F       |
 !! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
+!! | q1             | tracer_concentration                                                        | model layer mean tracer concentration                 | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real      | kind_phys | in     | F        |
@@ -98,9 +98,9 @@
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, rd => con_rd, cp => con_cp
-     &,             rv => con_rv, hvap => con_hvap
-     &,             fv => con_fvirt
+      use physcons, grav => con_g, rd => con_rd, cp => con_cp           &
+     &,             rv => con_rv, hvap => con_hvap                      &
+     &,             fv => con_fvirt                                     &
      &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
@@ -126,7 +126,7 @@
      &                     stress(im),    spd1(im),                     &
      &                     prsi(ix,km+1), del(ix,km),                   &
      &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km),
+     &                     phii(ix,km+1), phil(ix,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -538,7 +538,7 @@
       do i = 1, im
          rdz  = rdzt(i,k)
          bf(i,k) = gotvx(i,k)*(thvx(i,k+1)-thvx(i,k))*rdz
-         dw2  = (u1(i,k)-u1(i,k+1))**2
+         dw2  = (u1(i,k)-u1(i,k+1))**2                                  &
      &        + (v1(i,k)-v1(i,k+1))**2
          shr2(i,k) = max(dw2,dw2min)*rdz*rdz
       enddo
@@ -559,7 +559,7 @@
           spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
 !         rbup(i) = (thvx(i,k)-thermal(i))*
 !    &              (g*zl(i,k)/thvx(i,1))/spdk2
-          rbup(i) = (thlvx(i,k)-thermal(i))*
+          rbup(i) = (thlvx(i,k)-thermal(i))*                            &
      &              (g*zl(i,k)/thlvx(i,1))/spdk2
           kpblx(i) = k
           flg(i)  = rbup(i) > crb(i)
@@ -650,7 +650,7 @@
         if(.not.flg(i)) then
           rbdn(i) = rbup(i)
           spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
-          rbup(i) = (thlvx(i,k)-thermal(i))*
+          rbup(i) = (thlvx(i,k)-thermal(i))*                            &
      &              (g*zl(i,k)/thlvx(i,1))/spdk2
           kpbl(i) = k
           flg(i)  = rbup(i) > crb(i)
@@ -762,15 +762,15 @@
       enddo
       enddo
 !
-      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
-     &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
-     &    gdx,hpbl,kpbl,vpert,buou,xmf,
+      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,                       &
+     &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                 &
+     &    gdx,hpbl,kpbl,vpert,buou,xmf,                                 &
      &    tcko,qcko,ucko,vcko,xlamue)
 !
-      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
-     &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
-     &    thlx,thvx,thlvx,gdx,thetae,radj,
-     &    krad,mrad,radmin,buod,xmfd,
+      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,                        &
+     &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,                            &
+     &    thlx,thvx,thlvx,gdx,thetae,radj,                              &
+     &    krad,mrad,radmin,buod,xmfd,                                   &
      &    tcdo,qcdo,ucdo,vcdo,xlamde)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1111,7 +1111,7 @@
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamue(i,k-1) * dz
              factor = 1. + tem
-             qcko(i,k,ntke)=((1.-tem)*qcko(i,k-1,ntke)+tem*
+             qcko(i,k,ntke)=((1.-tem)*qcko(i,k-1,ntke)+tem*             &
      &                (tke(i,k)+tke(i,k-1)))/factor
           endif
         enddo
@@ -1123,7 +1123,7 @@
               dz = zl(i,k+1) - zl(i,k)
               tem  = 0.5 * xlamde(i,k) * dz
               factor = 1. + tem
-              qcdo(i,k,ntke)=((1.-tem)*qcdo(i,k+1,ntke)+tem*
+              qcdo(i,k,ntke)=((1.-tem)*qcdo(i,k+1,ntke)+tem*            &
      &                 (tke(i,k)+tke(i,k+1)))/factor
             endif
           endif
@@ -1178,13 +1178,13 @@
 !
         enddo
       enddo
-c
-c     solve tridiagonal problem for tke
-c
+!
+!     solve tridiagonal problem for tke
+!
       call tridit(im,km,1,al,ad,au,f1,au,f1)
-c
-c     recover tendency of tke
-c
+!
+!     recover tendency of tke
+!
       do k = 1,km
          do i = 1,im
 !           f1(i,k) = max(f1(i,k), tkmin)
@@ -1192,9 +1192,9 @@ c
             rtg(i,k,ntke) = rtg(i,k,ntke)+qtend
          enddo
       enddo
-c
-c     compute tridiagonal matrix elements for heat and moisture
-c
+!
+!     compute tridiagonal matrix elements for heat and moisture
+!
       do i=1,im
          ad(i,1) = 1.
          f1(i,1) = t1(i,1)   + dtdz1(i) * heat(i)
@@ -1208,7 +1208,7 @@ c
           enddo
         enddo
       endif
-c
+!
       do k = 1,km1
         do i = 1,im
           dtodsd  = dt2/del(i,k)
@@ -1301,13 +1301,13 @@ c
           enddo
         enddo
       endif
-c
-c     solve tridiagonal problem for heat and moisture
-c
+!
+!     solve tridiagonal problem for heat and moisture
+!
       call tridin(im,km,ntrac1,al,ad,au,f1,f2,au,f1,f2)
-c
-c     recover tendencies of heat and moisture
-c
+!
+!     recover tendencies of heat and moisture
+!
       do  k = 1,km
          do i = 1,im
             ttend      = (f1(i,k)-t1(i,k))*rdt
@@ -1343,15 +1343,15 @@ c
         enddo
       enddo
       endif
-c
-c     compute tridiagonal matrix elements for momentum
-c
+!
+!     compute tridiagonal matrix elements for momentum
+!
       do i=1,im
          ad(i,1) = 1.0 + dtdz1(i) * stress(i) / spd1(i)
          f1(i,1) = u1(i,1)
          f2(i,1) = v1(i,1)
       enddo
-c
+!
       do k = 1,km1
         do i=1,im
           dtodsd  = dt2/del(i,k)
@@ -1401,13 +1401,13 @@ c
 !
         enddo
       enddo
-c
-c     solve tridiagonal problem for momentum
-c
+!
+!     solve tridiagonal problem for momentum
+!
       call tridi2(im,km,al,ad,au,f1,f2,au,f1,f2)
-c
-c     recover tendencies of momentum
-c
+!
+!     recover tendencies of momentum
+!
       do k = 1,km
          do i = 1,im
             utend = (f1(i,k)-u1(i,k))*rdt
@@ -1435,17 +1435,17 @@ c
 !-----------------------------------------------------------------------
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------
-cc
+!!
       use machine     , only : kind_phys
       implicit none
       integer             is,k,kk,n,nt,l,i
       real(kind=kind_phys) fk(l)
-cc
-      real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),
-     &                     rt(l,n*nt),
-     &                     au(l,n-1), at(l,n*nt),
+!!
+      real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
+     &                     rt(l,n*nt),                                  &
+     &                     au(l,n-1), at(l,n*nt),                       &
      &                     fkk(l,2:n-1)
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
       do i=1,l
         fk(i)   = 1./cm(i,1)
         au(i,1) = fk(i)*cu(i,1)
@@ -1487,6 +1487,8 @@ c-----------------------------------------------------------------------
           enddo
         enddo
       enddo
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
       return
       end
+
+      end module satmedmfvdif
