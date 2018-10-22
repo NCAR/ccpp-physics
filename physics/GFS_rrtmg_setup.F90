@@ -3,10 +3,12 @@
 module GFS_rrtmg_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
-                iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
-                iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
-                ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
-                kind_phys
+!  &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
+   &             iaermdl,                            icldflg,         &
+   &             iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
+   &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
+   &             iswcliq,                                             &
+   &             kind_phys
 
    use radcons, only: ltp, lextop
 
@@ -58,6 +60,7 @@ module GFS_rrtmg_setup
 !! | iovr_lw                  | flag_for_max-random_overlap_clouds_for_longwave_radiation                     | lw: max-random overlap clouds                                 | flag          |    0 | integer   |           | in     | F        |
 !! | isubc_sw                 | flag_for_sw_clouds_without_sub-grid_approximation                             | flag for sw clouds without sub-grid approximation             | flag          |    0 | integer   |           | in     | F        |
 !! | isubc_lw                 | flag_for_lw_clouds_without_sub-grid_approximation                             | flag for lw clouds without sub-grid approximation             | flag          |    0 | integer   |           | in     | F        |
+!! | icliq_sw                 | flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation           | sw optical property for liquid clouds                         | flag          |    0 | integer   |           | in     | F        |
 !! | crick_proof              | flag_for_CRICK-proof_cloud_water                                              | flag for CRICK-Proof cloud water                              | flag          |    0 | logical   |           | in     | F        |
 !! | ccnorm                   | flag_for_cloud_condensate_normalized_by_cloud_cover                           | flag for cloud condensate normalized by cloud cover           | flag          |    0 | logical   |           | in     | F        |
 !! | imp_physics              | flag_for_microphysics_scheme                                                  | choice of microphysics scheme                                 | flag          |    0 | integer   |           | in     | F        |
@@ -75,20 +78,120 @@ module GFS_rrtmg_setup
    subroutine GFS_rrtmg_setup_init (                                    &
           si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
           num_p3d, npdf3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,  &
-          crick_proof, ccnorm,                                          &
+          icliq_sw, crick_proof, ccnorm,                                &
           imp_physics,                                                  &
           norad_precip, idate, iflip,                                   &
           im, faerlw, faersw, aerodp,                                   & ! for consistency checks
           me, errmsg, errflg)
-
+! =================   subprogram documentation block   ================ !
+!                                                                       !
+! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
+!                                                                       !
+! usage:        call GFS_rrtmg_setup_init                               !
+!                                                                       !
+! attributes:                                                           !
+!   language:  fortran 90                                               !
+!                                                                       !
+! program history:                                                      !
+!   mar 2012  - yu-tai hou   create the program to initialize fixed     !
+!                 control variables for radiaion processes.  this       !
+!                 subroutine is called at the start of model run.       !
+!   nov 2012  - yu-tai hou   modified control parameter through         !
+!                 module 'physparam'.                                   !
+!   mar 2014  - sarah lu  iaermdl is determined from iaer               !
+!   jul 2014  - s moorthi add npdf3d for pdf clouds                     !
+!                                                                       !
+!  ====================  defination of variables  ====================  !
+!                                                                       !
+! input parameters:                                                     !
+!   si               : model vertical sigma interface or equivalence    !
+!   levr             : number of model vertical layers                  !
+!   ictm             :=yyyy#, external data time/date control flag      !
+!                     =   -2: same as 0, but superimpose seasonal cycle !
+!                             from climatology data set.                !
+!                     =   -1: use user provided external data for the   !
+!                             forecast time, no extrapolation.          !
+!                     =    0: use data at initial cond time, if not     !
+!                             available, use latest, no extrapolation.  !
+!                     =    1: use data at the forecast time, if not     !
+!                             available, use latest and extrapolation.  !
+!                     =yyyy0: use yyyy data for the forecast time,      !
+!                             no further data extrapolation.            !
+!                     =yyyy1: use yyyy data for the fcst. if needed, do !
+!                             extrapolation to match the fcst time.     !
+!   isol             := 0: use the old fixed solar constant in "physcon"!
+!                     =10: use the new fixed solar constant in "physcon"!
+!                     = 1: use noaa ann-mean tsi tbl abs-scale data tabl!
+!                     = 2: use noaa ann-mean tsi tbl tim-scale data tabl!
+!                     = 3: use cmip5 ann-mean tsi tbl tim-scale data tbl!
+!                     = 4: use cmip5 mon-mean tsi tbl tim-scale data tbl!
+!   ico2             :=0: use prescribed global mean co2 (old  oper)    !
+!                     =1: use observed co2 annual mean value only       !
+!                     =2: use obs co2 monthly data with 2-d variation   !
+!   iaer             : 4-digit aerosol flag (dabc for aermdl,volc,lw,sw)!
+!                     d: =0 or none, opac-climatology aerosol scheme    !
+!                        =1 use gocart climatology aerosol scheme       !
+!                        =2 use gocart progostic aerosol scheme         !
+!                     a: =0 use background stratospheric aerosol        !
+!                        =1 incl stratospheric vocanic aeros            !
+!                     b: =0 no topospheric aerosol in lw radiation      !
+!                        =1 include tropspheric aerosols for lw         !
+!                     c: =0 no topospheric aerosol in sw radiation      !
+!                        =1 include tropspheric aerosols for sw         !
+!   ialb             : control flag for surface albedo schemes          !
+!                     =0: climatology, based on surface veg types       !
+!                     =1: modis retrieval based surface albedo scheme   !
+!   iems             : ab 2-digit control flag                          !
+!                     a: =0 set sfc air/ground t same for lw radiation  !
+!                        =1 set sfc air/ground t diff for lw radiation  !
+!                     b: =0 use fixed sfc emissivity=1.0 (black-body)   !
+!                        =1 use varying climtology sfc emiss (veg based)!
+!                        =2 future development (not yet)                !
+!   ntcw             :=0 no cloud condensate calculated                 !
+!                     >0 array index location for cloud condensate      !
+!   num_p3d          :=3: ferrier's microphysics cloud scheme           !
+!                     =4: zhao/carr/sundqvist microphysics cloud        !
+!   npdf3d            =0 no pdf clouds                                  !
+!                     =3 (when num_p3d=4) pdf clouds with zhao/carr/    !
+!                        sundqvist scheme                               !
+!   ntoz             : ozone data control flag                          !
+!                     =0: use climatological ozone profile              !
+!                     >0: use interactive ozone profile                 !
+!   icliq_sw         : sw optical property for liquid clouds            !
+!                     =0:input cld opt depth, ignoring iswcice setting  !
+!                     =1:cloud optical property scheme based on Hu and  !
+!                        Stamnes(1993) \cite hu_and_stamnes_1993 method !
+!                     =2:cloud optical property scheme based on Hu and  !
+!                        Stamnes(1993) -updated                         !
+!   iovr_sw/iovr_lw  : control flag for cloud overlap (sw/lw rad)       !
+!                     =0: random overlapping clouds                     !
+!                     =1: max/ran overlapping clouds                    !
+!                     =2: maximum overlap clouds       (mcica only)     !
+!                     =3: decorrelation-length overlap (mcica only)     !
+!   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
+!                     =0: with out sub-column cloud approximation       !
+!                     =1: mcica sub-col approx. prescribed random seed  !
+!                     =2: mcica sub-col approx. provided random seed    !
+!   crick_proof      : control flag for eliminating CRICK               !
+!   ccnorm           : control flag for in-cloud condensate mixing ratio!
+!   norad_precip     : control flag for not using precip in radiation   !
+!   idate(4)         : ncep absolute date and time of initial condition !
+!                      (hour, month, day, year)                         !
+!   iflip            : control flag for direction of vertical index     !
+!                     =0: index from toa to surface                     !
+!                     =1: index from surface to toa                     !
+!   me               : print control flag                               !
+!                                                                       !
+!  subroutines called: radinit                                          !
+!                                                                       !
+!  ===================================================================  !
+!
       use module_radsw_parameters,  only: NBDSW
       use module_radlw_parameters,  only: NBDLW
       use module_radiation_aerosols,only: NF_AELW, NF_AESW, NSPC1
       use module_radiation_clouds,  only: NF_CLDS
       use module_radiation_gases,   only: NF_VGAS
       use module_radiation_surface, only: NF_ALBD
-      ! DH* ? use ozne_def,                 only: levozp, oz_coeff, oz_pres
-      ! DH* ? use h2o_def,                  only: levh2o, h2o_coeff
 
       implicit none
 
@@ -110,6 +213,7 @@ module GFS_rrtmg_setup
       integer, intent(in) :: iovr_lw
       integer, intent(in) :: isubc_sw
       integer, intent(in) :: isubc_lw
+      integer, intent(in) :: icliq_sw
       logical, intent(in) :: crick_proof
       logical, intent(in) :: ccnorm
       integer, intent(in) :: imp_physics
@@ -126,8 +230,6 @@ module GFS_rrtmg_setup
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      ! local variables
-      integer :: icld
       ! For consistency checks
       real(kind_phys), dimension(im,levr+ltp,NBDLW,NF_AELW) :: faerlw_check
       real(kind_phys), dimension(im,levr+ltp,NBDSW,NF_AESW) :: faersw_check
@@ -184,20 +286,19 @@ module GFS_rrtmg_setup
       else
         iaerflg = mod(iaer, 1000)   
       endif
-      laswflg= (mod(iaerflg,10) > 0)    ! control flag for sw tropospheric aerosol
-      lalwflg= (mod(iaerflg/10,10) > 0) ! control flag for lw tropospheric aerosol
-      lavoflg= (iaerflg >= 100)         ! control flag for stratospheric volcanic aeros
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
-      if ( iaermdl < 0 .or.  iaermdl > 2) then
+      if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
          print *, ' Error -- IAER flag is incorrect, Abort'
          stop 7777
       endif
 
-      if ( ntcw > 0 ) then
+!     if ( ntcw > 0 ) then
         icldflg = 1                     ! prognostic cloud optical prop scheme
-      else
-        icldflg = 0                     ! diagnostic cloud optical prop scheme
-      endif
+!     else
+!       icldflg = 0                     ! no support for diag cloud opt prop scheme
+!     endif
+
+      iswcliq = icliq_sw                ! optical property for liquid clouds for sw
 
       iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
       iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
@@ -226,7 +327,8 @@ module GFS_rrtmg_setup
      &          ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
         print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr_sw=',iovr_sw,     &
      &          ' iovr_lw=',iovr_lw,' isubc_sw=',isubc_sw,              &
-     &          ' isubc_lw=',isubc_lw,' iflip=',iflip,'  me=',me
+     &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
+     &          ' iflip=',iflip,'  me=',me
         print *,' crick_proof=',crick_proof,                            &
      &          ' ccnorm=',ccnorm,' norad_precip=',norad_precip
       endif

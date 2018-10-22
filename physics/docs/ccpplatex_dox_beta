@@ -186,7 +186,12 @@ INPUT                  =  pdftxt/mainpage.txt            \
                         ../physparam.f      \
                         ../physcons.f90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f
+                        ../mersenne_twister.f  \
+### CPT
+                        ../cs_conv.F90      \
+### GSD
+                        ../cu_gf_deep.F90   \
+                        ../cu_gf_sh.F90     \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F90 \

@@ -32,14 +32,14 @@
 !! | mtopa          | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer           |           | in     | F        |
 !! | mbota          | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer           |           | in     | F        |
 !! | clouds1        | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |    2 | real              | kind_phys | in     | F        |
-!! | clouds10       | cloud_optical_depth_weighted                                  | cloud optical depth, weighted                                                 | none     |    2 | real              | kind_phys | in     | F        |
-!! | clouds11       | cloud_optical_depth_layers_678                                | cloud optical depth from bands 6,7,8                                          | none     |    2 | real              | kind_phys | in     | F        |
+!! | cldtaulw       | cloud_optical_depth_layers_at_10mu_band                       | approx 10mu band layer cloud optical depth                                    | none     |    2 | real              | kind_phys | in     | F        |
+!! | cldtausw       | cloud_optical_depth_layers_at_0.55mu_band                     | approx .55mu band layer cloud optical depth                                   | none     |    2 | real              | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character         | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer           |           | out    | F        |
 !!
       subroutine GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein, &
               Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &
-              cldsa, mtopa, mbota, clouds1, clouds10, clouds11,           &
+              cldsa, mtopa, mbota, clouds1, cldtaulw, cldtausw,           &
               errmsg, errflg)
 
       use machine,                             only: kind_phys
@@ -72,8 +72,8 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5),              intent(in) :: cldsa
       integer,              dimension(size(Grid%xlon,1),3),              intent(in) :: mbota, mtopa
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds10
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds11
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cldtausw
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cldtaulw
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -85,6 +85,8 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if (.not. (Model%lsswr .or. Model%lslwr)) return
 
 !>  - For time averaged output quantities (including total-sky and
 !!    clear-sky SW and LW fluxes at TOA and surface; conventional
@@ -178,9 +180,9 @@
 !       Anning adds optical depth and emissivity output
               tem1 = 0.
               tem2 = 0.
-              do k=ibtc+kb,itop+kt
-                 tem1 = tem1 + clouds10(i,k)
-                 tem2 = tem2 + clouds11(i,k)
+              do k=ibtc,itop
+                 tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
+                 tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
               end do
               Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
               Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))

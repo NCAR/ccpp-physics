@@ -57,7 +57,7 @@
                       Radtend%semis)                              !  ---  outputs
       endif
 
-       end subroutine rrtmg_lw_pre_run
+      end subroutine rrtmg_lw_pre_run
 
 !> \section arg_table_rrtmg_lw_pre_finalize Argument Table
 !!
