@@ -32,7 +32,7 @@
 !! \brief This subroutine contains all of the logic for the 
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
 !!
-!> \section arg_table_hedmf_run Argument Table^M
+!> \section arg_table_satmedmfvdif_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
@@ -87,8 +87,6 @@
 !! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
-!!
-!!  \section general_edmf Hybrid EDMF General Algorithm
 !!
       subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,nthm,ntke,   &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
