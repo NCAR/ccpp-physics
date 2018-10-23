@@ -2,20 +2,20 @@
 !! This file  contains the CCPP-compliant SATMEDMF scheme which computes
 !! subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (EDMF) parameterization (by Jongil Han).
-!!!!! ==================================================================  !!!!!
-! subroutine 'satmedmfvdif.f' computes subgrid vertical turbulence mixing
-!   using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
-!      (by Jongil Han)
-!
-!  For the convective boundary layer, the scheme adopts
-!  EDMF parameterization (Siebesma et al., 2007) to take
-!  into account nonlocal transport by large eddies (mfpblt.f).
-!
-!  A new mass-flux parameterization for stratocumulus-top-induced turbulence
-!  mixing has been introduced (previously, it was eddy diffusion form)
-!  [mfscu.f].
-!
-!  For local turbulence mixing, a TKE closure model is used.
+!!
+!! Subroutine 'satmedmfvdif.F90' computes subgrid vertical turbulence mixing
+!! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
+!! (by Jongil Han).
+!!
+!! - For the convective boundary layer, the scheme adopts
+!! EDMF parameterization (Siebesma et al., 2007) to take
+!! into account nonlocal transport by large eddies (mfpblt.f).
+!!
+!! - A new mass-flux parameterization for stratocumulus-top-induced turbulence
+!! mixing has been introduced (previously, it was eddy diffusion form)
+!! [mfscu.f].
+!!
+!! - For local turbulence mixing, a TKE closure model is used.
 !
 !----------------------------------------------------------------------
 
@@ -43,10 +43,18 @@
 !! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        | 
 !! | nthm           | number_of_tracers_for_cloud_condensate                                      | number of tracers for cloud condensate                | count         |    0 | integer   |           | in     | F        |
 !! | ntke           | index_of_TKE_vertical_diffusion_tracer                                      | index of TKE in the vertically diffused tracer array  | index         |    0 | integer   |           | in     | F        |
+!! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | rv             | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                    | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor) | none          |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                 | none          |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                     | (rd/rv) - 1                                           | none          |    0 | real      | kind_phys | in     | F        |
 !! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | tdt            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers due to model physics  | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F       |
+!! | rtg            | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers due to model physics  | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
 !! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
@@ -89,6 +97,7 @@
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,nthm,ntke,   &
+     &     grav,rd,cp,rv,hvap,fv,eps,epsm1,                             &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -97,11 +106,6 @@
      &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
 !
       use machine  , only : kind_phys
-      use funcphys , only : fpvs
-      use physcons, grav => con_g, rd => con_rd, cp => con_cp           &
-     &,             rv => con_rv, hvap => con_hvap                      &
-     &,             fv => con_fvirt                                     &
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -110,6 +114,8 @@
      &                       kinver(im)
       integer, intent(out) :: kpbl(im)
 !
+      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,fv,eps,    &
+     &                                    epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
@@ -237,12 +243,6 @@
 !
       real(kind=kind_phys) h1 
 !!
-      parameter(gravi=1.0/grav)
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(cont=cp/g,conq=hvap/g,conw=1.0/g)  ! for del in pa
-!     parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(wfac=7.0,cfac=4.0)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
       parameter(vk=0.4,rimin=-100.)
@@ -260,6 +260,17 @@
       parameter(h1=0.33333333)
       parameter(ck0=0.4,ch0=0.4,ch1=0.2,ce0=0.7)
       parameter(rchck=1.5,cdtn=25.)
+
+      gravi=1.0/grav
+      g=grav
+      gocp=g/cp
+      cont=cp/g
+      conq=hvap/g
+      conw=1.0/g  ! for del in pa
+!     parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
 !
 !************************************************************************
 ! Initialize CCPP error handling variables
