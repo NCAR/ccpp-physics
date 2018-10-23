@@ -1,15 +1,15 @@
 [submodule "FV3"]
 	path = FV3
-	url = https://github.com/mzhangw/FV3
+	url = https://github.com/NCAR/FV3
 [submodule "NEMS"]
 	path = NEMS
 	url = https://github.com/NCAR/NEMS
 [submodule "ccpp/framework"]
 	path = ccpp/framework
-	url = https://github.com/mzhangw/ccpp-framework
+	url = https://github.com/NCAR/ccpp-framework
 [submodule "ccpp/physics"]
 	path = ccpp/physics
-	url = https://github.com/mzhangw/ccpp-physics
+	url = https://github.com/NCAR/ccpp-physics
 [submodule "FMS"]
 	path = FMS
 	url = git://github.com/NOAA-EMC/FMS
