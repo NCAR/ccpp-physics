@@ -1,4 +1,4 @@
-!>  \file cs_conv.f90
+!>  \file cs_conv.F90
 !!  This file contains the Chikira-Sugiyama Convection scheme.
 
 module cs_conv_pre
@@ -229,15 +229,15 @@ module cs_conv
 ! Tuning parameters set from namelist
 !
 !  real(r8), save, public :: CLMD = 0.6,    & ! entrainment efficiency
-   real(r8), parameter, public :: CLMD = 0.7,    & ! entrainment efficiency
-                                  PA=0.15,       & ! factor for buoyancy to affect updraft velocity
-                                  CPRES = 0.55,  & ! pressure factor for momentum transport
-                                  ALP0 = 8.0e7,  & ! alpha parameter in prognostic closure
+   real(r8), parameter, public :: CLMD = 0.7,    & !< entrainment efficiency
+                                  PA=0.15,       & !< factor for buoyancy to affect updraft velocity
+                                  CPRES = 0.55,  & !< pressure factor for momentum transport
+                                  ALP0 = 8.0e7,  & !< alpha parameter in prognostic closure
                                   CLMP = (one-CLMD)*(PA+PA), &
-                                  spblcrit=0.05, & ! minimum cloudbase height in p/ps
-!                                 spblcrit=0.03, & ! minimum cloudbase height in p/ps
-!                                 spblcrit=0.035,& ! minimum cloudbase height in p/ps
-!                                 spblcrit=0.025,& ! minimum cloudbase height in p/ps
+                                  spblcrit=0.05, & !< minimum cloudbase height in p/ps
+!                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
+!                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
+!                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
                                   cincrit=-150.0
 !                                 cincrit=-120.0
 !                                 cincrit=-100.0
@@ -256,18 +256,18 @@ module cs_conv
 !
 ! Shared variables
 !
-  integer, parameter :: ITI = 2, ITL = 3  ! index of ice and liquid water
+  integer, parameter :: ITI = 2, ITL = 3  !< index of ice and liquid water
 
-  integer, save, dimension(50) :: IMFXR   ! 0: mass fixer is not applied
-                                          !    tracers which may become negative
-                                          !    values e.g. subgrid-PDFs
-                                          ! 1: mass fixer is applied, total mass
-                                          !    may change through cumulus scheme
-                                          !    e.g. moisture, liquid cloud, ice
-                                          !    cloud, aerosols
-                                          ! 2: mass fixer is applied, total mass
-                                          !    never change through cumulus scheme
-                                          !    e.g. CO2
+  integer, save, dimension(50) :: IMFXR   !< 0: mass fixer is not applied
+                                          !!    tracers which may become negative
+                                          !!    values e.g. subgrid-PDFs
+                                          !! 1: mass fixer is applied, total mass
+                                          !!    may change through cumulus scheme
+                                          !!    e.g. moisture, liquid cloud, ice
+                                          !!    cloud, aerosols
+                                          !! 2: mass fixer is applied, total mass
+                                          !!    never change through cumulus scheme
+                                          !!    e.g. CO2
 
 !  PUBLIC: interfaces
 !
@@ -285,15 +285,14 @@ module cs_conv
    subroutine cs_conv_finalize()
    end subroutine cs_conv_finalize
 
-! \defgroup CS Convection
-!>\defgroup CS Convection Main
+!>\defgroup cs_scheme CPT cs_conv Main
 !! @{
 !> \brief The subroutine contains the entirety of the CS convection scheme.
-!!
-!! JLS NOTE:  The convective mass fluxes (dt_mf, dd_mf and ud_mf) passed in and out of cs_conv have not been multiplied by
-!!            the timestep (kg/m2/sec) as they are in all other convective schemes.  EMC is aware of this problem, 
-!!            and in the future will be fixing this discrepancy.  In the meantime, CCPP will use the same mass flux standard_name
-!!            and long_name as the other convective schemes, where the units are in kg/m2. (Aug 2018)
+!! This is the main driver for Chikira-Sugiyama convective scheme.
+! JLS NOTE:  The convective mass fluxes (dt_mf, dd_mf and ud_mf) passed in and out of cs_conv have not been multiplied by
+!            the timestep (kg/m2/sec) as they are in all other convective schemes.  EMC is aware of this problem, 
+!            and in the future will be fixing this discrepancy.  In the meantime, CCPP will use the same mass flux standard_name
+!            and long_name as the other convective schemes, where the units are in kg/m2. (Aug 2018)
 !!
 !! \section arg_table_cs_conv_run Argument Table
 !! | local_name | standard_name                                             | long_name                                                                                             | units      | rank | type      |    kind   | intent | optional |
@@ -388,35 +387,35 @@ module cs_conv
 ! input arguments
 !
    INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, NN, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(ntracp1,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
-                                                 !              downdraft. should not include subgrid PDF and turbulence
-                                                 ! otspt(:,2) - on/off switch for tracer transport by subsidence
-                                                 !              should include subgrid PDF and turbulence
+   logical, intent(in)     :: otspt(ntracp1,2)   !< otspt(:,1) - on/off switch for tracer transport by updraft and
+                                                 !!              downdraft. should not include subgrid PDF and turbulence
+                                                 !! otspt(:,2) - on/off switch for tracer transport by subsidence
+                                                 !!              should include subgrid PDF and turbulence
 
-   real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
-   real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,NN)     ! tracer array including cloud condensate (kg/kg)
-   real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
-   real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
-   real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
-   real(r8), intent(in)    :: zi(IM,KMAX+1)       ! geopotential at boundaries (m)
+   real(r8), intent(inout) :: t(IM,KMAX)          !< temperature at mid-layer (K)
+   real(r8), intent(inout) :: q(IM,KMAX)          !< water vapor array including moisture (kg/kg)
+   real(r8), intent(inout) :: clw(IM,KMAX,NN)     !< tracer array including cloud condensate (kg/kg)
+   real(r8), intent(in)    :: pap(IM,KMAX)        !< pressure at mid-layer (Pa)
+   real(r8), intent(in)    :: paph(IM,KMAX+1)     !< pressure at boundaries (Pa)
+   real(r8), intent(in)    :: zm(IM,KMAX)         !< geopotential at mid-layer (m)
+   real(r8), intent(in)    :: zi(IM,KMAX+1)       !< geopotential at boundaries (m)
    real(r8), intent(in)    :: fscav(ntr), fswtr(ntr), wcbmaxm(ijsdim)
    real(r8), intent(in)    :: precz0in, preczhin
 ! added for cs_convr
-   real(r8), intent(inout) :: u(IM,KMAX)          ! zonal wind at mid-layer (m/s)
-   real(r8), intent(inout) :: v(IM,KMAX)          ! meridional wind at mid-layer (m/s)
+   real(r8), intent(inout) :: u(IM,KMAX)          !< zonal wind at mid-layer (m/s)
+   real(r8), intent(inout) :: v(IM,KMAX)          !< meridional wind at mid-layer (m/s)
    
-   real(r8), intent(in)    :: DELTA               ! physics time step
-   real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
+   real(r8), intent(in)    :: DELTA               !< physics time step
+   real(r8), intent(in)    :: DELTI               !< dynamics time step (model time increment in seconds)
    logical,  intent(in)    :: do_aw, do_awdd, flx_form
 !
 ! modified arguments
 !
-   real(r8), intent(inout) :: CBMFX(IM,nctp)      ! cloud base mass flux (kg/m2/s)
+   real(r8), intent(inout) :: CBMFX(IM,nctp)      !< cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
-!  updraft, downdraft, and detrainment mass flux (kg/m2/s)
+!>  updraft, downdraft, and detrainment mass flux (kg/m2/s)
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
@@ -777,20 +776,20 @@ module cs_conv
 !
    IMPLICIT NONE
       
-   Integer, parameter    :: ntrq=4                    ! starting index for tracers
+   Integer, parameter    :: ntrq=4                    !< starting index for tracers
    INTEGER, INTENT(IN)   :: im, IJSDIM, KMAX, NTR, mype, nctp, ipr !! DD, for GFS, pass in
-   logical, intent(in)   :: do_aw, do_awdd, flx_form  ! switch to apply Arakawa-Wu to the tendencies
+   logical, intent(in)   :: do_aw, do_awdd, flx_form  !< switch to apply Arakawa-Wu to the tendencies
    logical, intent(in)   :: otspt1(ntr), otspt2(ntr), lprnt
 !
 ! [OUTPUT]
-   REAL(r8), INTENT(OUT) :: GTT   (IJSDIM, KMAX     ) !! heating rate
-   REAL(r8), INTENT(OUT) :: GTQ   (IJSDIM, KMAX, NTR) !! change in q
-   REAL(r8), INTENT(OUT) :: GTU   (IJSDIM, KMAX     ) !! tendency of u
-   REAL(r8), INTENT(OUT) :: GTV   (IJSDIM, KMAX     ) !! tendency of v
-   REAL(r8), INTENT(OUT) :: CMDET (IJSDIM, KMAX     ) !! detrainment mass flux
+   REAL(r8), INTENT(OUT) :: GTT   (IJSDIM, KMAX     ) !< heating rate
+   REAL(r8), INTENT(OUT) :: GTQ   (IJSDIM, KMAX, NTR) !< change in q
+   REAL(r8), INTENT(OUT) :: GTU   (IJSDIM, KMAX     ) !< tendency of u
+   REAL(r8), INTENT(OUT) :: GTV   (IJSDIM, KMAX     ) !< tendency of v
+   REAL(r8), INTENT(OUT) :: CMDET (IJSDIM, KMAX     ) !< detrainment mass flux
 
 ! assuming there is no flux  at the top of the atmospherea - Moorthi
-   REAL(r8), INTENT(OUT) :: GTPRP (IJSDIM, KMAX     ) !! rain+snow flux
+   REAL(r8), INTENT(OUT) :: GTPRP (IJSDIM, KMAX     ) !< rain+snow flux
    REAL(r8), INTENT(OUT) :: GSNWP (IJSDIM, KMAX     ) !! snowfall flux
    REAL(r8), INTENT(OUT) :: GMFX0 (IJSDIM, KMAX     ) !! updraft mass flux
    REAL(r8), INTENT(OUT) :: GMFX1 (IJSDIM, KMAX     ) !! downdraft mass flux
@@ -1783,6 +1782,7 @@ module cs_conv
 !
       END SUBROUTINE CS_CUMLUS
 !***********************************************************************
+!> This subroutine calculates cloud base properties.
       SUBROUTINE CUMBAS                            & !! cloud base
                ( IJSDIM, KMAX  ,                   & !DD dimensions
                  KB    , GCYM  , KBMX  ,           & ! output
@@ -2010,6 +2010,7 @@ module cs_conv
 !
       END SUBROUTINE CUMBAS
 !***********************************************************************
+!> This subroutine calculates in-cloud properties.
       SUBROUTINE CUMUP                              & !! in-cloud properties
                ( IJSDIM, KMAX  , NTR   , ntrq  ,    & !DD dimensions
                  ACWF  ,                            & ! output
