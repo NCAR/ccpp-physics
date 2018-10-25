@@ -17,6 +17,7 @@ cp    @[RTPWD]/FV3_input_data/*_table .
 cp    @[RTPWD]/FV3_input_data/diag_table_thompson diag_table
 cp    @[RTPWD]/FV3_input_data/field_table_thompson field_table
 cp    @[RTPWD]/FV3_input_data/*configure .
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/CCN_ACTIVATE.BIN .
 
 cp ${PATHRT}/../${CCPP_SDF}                      ccpp_suite.xml
 
