@@ -332,10 +332,24 @@ CONTAINS
 
       INTEGER ::  I,J,K,itf,jtf,ktf
 !-----------------------------------------------------------
+!joe -test printing of constants:
+!     print*,"cp=", cp   
+!     print*,"g=",     g    
+!     print*,"Rd=",    r_d  
+!     print*,"Rv=",    r_v  
+!     print*,"cpc=",   cpv  
+!     print*,"cliq=",  cliq 
+!     print*,"cice=",  Cice 
+!     print*,"rcp=",   rcp  
+!     print*,"xlv=",   XLV  
+!     print*,"xlf=",   XLF  
+!     print*,"ep1=",   EP_1 
+!     print*,"ep2=",   EP_2 
 
-      itf=MIN0(ite,ide-1)
-      jtf=MIN0(jte,jde-1)
-      ktf=MIN0(kte,kde-1)
+
+      itf=ite !MIN0(ite,ide-1)
+      jtf=jte !MIN0(jte,jde-1)
+      ktf=kte !MIN0(kte,kde-1)
 
       DO J=jts,jte
         DO i=its,ite

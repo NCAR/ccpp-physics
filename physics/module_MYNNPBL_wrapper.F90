@@ -53,6 +53,7 @@
 !! | QFX                 | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
 !! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | rb                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
+!! | recmol              | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        | 
 !! | qke                 | tke_at_mass_points                                                          | 2 x tke at mass points                                | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
 !! | qke_adv             | tke_at_mass_points_advected                                                 | 2 x tke at mass points advected                       | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
 !! | tsq                 | t_prime_squared                                                             | temperature fluctuation squared                       | K2            |    2 | real      | kind_phys | inout  | F        |
@@ -98,6 +99,7 @@
 !! | bl_mynn_cloudmix    | cloud_specie_mix_switch                                                     | switch to activate mixing of cloud species            | switch        |    0 | integer   |           | in     | F        |
 !! | bl_mynn_mixqt       | mix_total_water_switch                                                      | switch to mix total water or individual species       | switch        |    0 | integer   |           | in     | F        |
 !! | icloud_bl           | couple_sgs_clouds_to_radiation_switch                                       | switch for coupling sgs clouds to radiation           | switch        |    0 | integer   |           | in     | F        |
+!! | do_mynnsfclay       | do_mynnsfclay                                                               | switch to activate MYNN surface layer                 | switch        |    0 | logical   |           | in     | F        |
 !! | imp_physics         | flag_for_microphysics_scheme                                                | choice of microphysics scheme                         | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_gfdl    | flag_for_gfdl_microphysics_scheme                                           | choice of GFDL microphysics scheme                    | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                                      | choice of Thompson microphysics scheme                | flag          |    0 | integer   |           | in     | F        |
@@ -123,7 +125,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  xland,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qfx,wspd,rb,        &
+     &  ust,ch,hflx,qfx,wspd,rb,recmol, &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
      &  el_pbl,sh3d,exch_h,             &
      &  Pblh,kpbl,                      &
@@ -132,7 +134,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  nupdraft,maxMF,ktop_shallow,    &
      &  RTHRATEN,                       &
-     &  dudt, dvdt, dtdt,                           &
+     &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor, dqdt_liquid_cloud,               &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
@@ -141,7 +143,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
      &  bl_mynn_edmf_part, bl_mynn_cloudmix, bl_mynn_mixqt,&
-     &  icloud_bl, imp_physics, imp_physics_gfdl,          &
+     &  icloud_bl, do_mynnsfclay,                          &
+     &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
      &  ltaerosol, errmsg, errflg  )
 
@@ -177,14 +180,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !      real(kind=kind_phys), parameter :: SVP3    = 29.65
 !      real(kind=kind_phys), parameter :: SVPT0   = 273.15
 
-   INTEGER , PARAMETER :: param_first_scalar = 1, &
-       &                  p_qc = 2, &
-       &                  p_qr = 0, &
-       &                  p_qi = 2, &
-       &                  p_qs = 0, &
-       &                  p_qg = 0, &
-       &                  p_qnc= 0, &
-       &                  p_qni= 0
+!   INTEGER , PARAMETER :: param_first_scalar = 1, &
+!       &                  p_qc = 2, &
+!       &                  p_qr = 0, &
+!       &                  p_qi = 2, &
+!       &                  p_qs = 0, &
+!       &                  p_qg = 0, &
+!       &                  p_qnc= 0, &
+!       &                  p_qni= 0
 
 !-------------------------------------------------------------------
 !For WRF:
@@ -227,13 +230,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
   REAL, PARAMETER :: tref=300.0     ! reference temperature (K)
   REAL, PARAMETER :: TKmin=253.0    ! for total water conversion, Tripoli and Cotton (1981)
-  REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, ginv+1./g
+  REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
 
 ! NAMELIST OPTIONS (INPUT):
-      LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol
+      LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol, do_mynnsfclay
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -252,9 +255,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
      &       spp_pbl=0
-      LOGICAL, PARAMETER ::                                 &
-     &       FLAG_QI=.true.,FLAG_QNI=.false.,               &
-     &       FLAG_QC=.true.,FLAG_QNC=.false.
+      LOGICAL ::                                            &
+     &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC
+      INTEGER, PARAMETER :: param_first_scalar = 1
+      INTEGER ::                                            &
+       &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
       REAL    :: delt
@@ -308,7 +313,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MYNN-2D                                                                  
       real(kind=kind_phys), dimension(im) ::                             &
      &        dx,maxMF,pblh,xland,tsurf,qsfc,ps,                         &
-     &        zorl,ust,hflx,qfx,rb,wspd
+     &        zorl,ust,hflx,qfx,rb,wspd,recmol
      !LOCAL
       real, dimension(im) ::                                             &
      &        WSTAR,DELTA,qcg,ch,hfx,rmol,                               &
@@ -335,7 +340,18 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
-          do k=1,levs
+         FLAG_QI = .true.
+         FLAG_QNI= .false.
+         FLAG_QC = .true.
+         FLAG_QNC= .false.
+         p_qc = 2
+         p_qr = 0
+         p_qi = 2 
+         p_qs = 0 
+         p_qg = 0
+         p_qnc= 0 
+         p_qni= 0 
+         do k=1,levs
             do i=1,im
               qvsh(i,k)  = qgrs_water_vapor(i,k)
               qc(i,k)    = qgrs_liquid_cloud(i,k)
@@ -350,6 +366,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
+            FLAG_QI = .true.
+            FLAG_QNI= .false.
+            FLAG_QC = .true.
+            FLAG_QNC= .false.
+            p_qc = 2
+            p_qr = 0
+            p_qi = 2
+            p_qs = 0
+            p_qg = 0
+            p_qnc= 0
+            p_qni= 0
             do k=1,levs
               do i=1,im
                 qvsh(i,k)  = qgrs_water_vapor(i,k)
@@ -363,6 +390,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               enddo
             enddo
           else
+            FLAG_QI = .true.
+            FLAG_QNI= .false.
+            FLAG_QC = .true.
+            FLAG_QNC= .false.
+            p_qc = 2
+            p_qr = 0
+            p_qi = 2
+            p_qs = 0
+            p_qg = 0
+            p_qnc= 0
+            p_qni= 0
             do k=1,levs
               do i=1,im
                 qvsh(i,k)  = qgrs_water_vapor(i,k)
@@ -378,6 +416,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           endif
         elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
+          FLAG_QI = .true.
+          FLAG_QNI= .false.
+          FLAG_QC = .true.
+          FLAG_QNC= .false.
+          p_qc = 2
+          p_qr = 0
+          p_qi = 2
+          p_qs = 0
+          p_qg = 0
+          p_qnc= 0
+          p_qni= 0
           do k=1,levs
             do i=1,im
                 qvsh(i,k)  = qgrs_water_vapor(i,k)
@@ -385,9 +434,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qi(i,k)    = qgrs_ice_cloud(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = 0.
-                !vdftra(i,k,4) = qgrs_rain(i,k)
-                !vdftra(i,k,5) = qgrs_snow(i,k)
-                !vdftra(i,k,6) = qgrs_graupel(i,k)
                 qnwfa(i,k) = 0.
                 qnifa(i,k) = 0.
             enddo
@@ -399,12 +445,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        write(0,*)"prepping MYNN variables..."
        do k=1,levs
           do i=1,im
-             dz(i,k)=(phii(i,k+1) - phii(i,k))*ginv
+             dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
              th(i,k)=t3d(i,k)/exner(i,k)
              w(i,k) = 0.0
-             !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
              qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
-             rho(i,k)=prsl(i,k)/(r_d*t3d(i,k)) !gt0(i,k))
+             rho(i,k)=prsl(i,k)/(r_d*t3d(i,k))
              pattern_spp_pbl(i,k)=0.0
          enddo
       enddo
@@ -419,16 +464,20 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !vdfg(i)=0.0
          !ust(i) = sqrt(stress(i))
          ch(i)=0.0
-         HFX(i)=hflx(i)*rho(i,1)*cp
+         hfx(i)=hflx(i)*rho(i,1)*cp
          !QFX(i)=evap(i)
          wstar(i)=0.0
          delta(i)=0.0
          qcg(i)=0.0
          znt(i)=zorl(i)*0.01 !cm -> m?
-         if (hfx(i) .ge. 0.)then
-             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
+         if (do_mynnsfclay .eq. .true.) then
+           rmol(i)=recmol(i)
          else
+           if (hfx(i) .ge. 0.)then
+             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
+           else
              rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
+           endif
          endif
          ts(i)=tsurf(i)/exner(1,1)  !theta
 !        qsfc(i)=qss(i)

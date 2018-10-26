@@ -161,7 +161,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 !
 
   REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
-       &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
+       &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2, g_inv=1/g
 
 
   character(len=*), intent(out) :: errmsg
@@ -188,8 +188,9 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &            ITS,ITE,JTS,JTE,KTS,KTE
 
 !MYNN-3D
+      real(kind=kind_phys), dimension(im,levs+1) :: phii
       real(kind=kind_phys), dimension(im,levs) ::           &
-     &        phii, exner, PRSL,                            &
+     &        exner, PRSL,                                  &
      &        u, v, t3d, qvsh, qc,                          &
      &        Sh3D, EL_PBL, EXCH_H,                         &
      &        qc_bl, cldfra_bl,                             &
@@ -231,7 +232,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
       !prep MYNN-only variables
             do k=1,levs
               do i=1,im
-                 dz(i,k)=(phii(i,min(k+1,levs))-phii(i,k))/g
+                 dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
                  th(i,k)=t3d(i,k)/exner(i,k)
                  !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
                  qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
@@ -277,12 +278,11 @@ SUBROUTINE mynnsfc_wrapper_run(         &
         print*,"qsfc:",qsfc(1)," ps:",ps(1)
         print*,"wspd:",wspd(1),"brb=",br(1)
         print*,"znt:",znt(1)," delt=",delt
-        print*,"ime=",ime," ite=",ite," levs=",levs
+        print*,"im=",im," levs=",levs
         print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
         !print*,"ncld=",ncld," ntrac(gq0)=",ntrac
-        print*,"zlvl(1)=",dz(i,1)*0.5
+        print*,"zlvl(1)=",dz(1,1)*0.5
         print*,"PBLH=",pblh(1)," xland=",xland(1)
-        print*," ch=",ch(1)
 
 
         CALL SFCLAY_mynn(                                                 &
