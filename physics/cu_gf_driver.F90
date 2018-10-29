@@ -72,24 +72,24 @@ contains
 !! | forceq         | moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   |    2 | real      | kind_phys | in     | F        |
 !! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2        |    2 | real      | kind_phys | in     | F        |
 !! | raincv         | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m             |    1 | real      | kind_phys | out    | F        |
-!! | q              | water_vapor_specific_humidity_updated_by_physics          | updated vapor specific humidity                     | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | q              | tracer_concentration_updated_by_physics                   | tracer concentration updated by physics             | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
 !! | t              | air_temperature_updated_by_physics                        | updated temperature                                 | K             |    2 | real      | kind_phys | inout  | F        |
 !! | cld1d          | cloud_work_function                                       | cloud work function                                 | m2 s-2        |    1 | real      | kind_phys | out    | F        |
 !! | us             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | vs             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | t2di           | air_temperature                                           | mid-layer temperature                               | K             |    2 | real      | kind_phys | in     | F        |
 !! | w              | omega                                                     | layer mean vertical velocity                        | Pa s-1        |    2 | real      | kind_phys | in     | F        |
-!! | q2di           | water_vapor_specific_humidity                             | mid-layer specific humidity of water vapor          | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | q2di           | tracer_concentration                                      | water vapor specific humidity                       | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | p2di           | air_pressure                                              | mean layer pressure                                 | Pa            |    2 | real      | kind_phys | in     | F        |
 !! | psuri          | surface_air_pressure                                      | surface pressure                                    | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | hbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index         |    1 | integer   |           | out    | F        |
 !! | htop           | vertical_index_at_cloud_top                               | index for cloud top                                 | index         |    1 | integer   |           | out    | F        |
 !! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                        | flag          |    1 | integer   |           | out    | F        |
 !! | xland          | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag          |    1 | integer   |           | in     | F        |
-!! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1       |    1 | real      | kind_phys | out    | F        |
-!! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real      | kind_phys | out    | F        |
+!! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1       |    1 | real      | kind_phys | in     | F        |
+!! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
 !! | clw            | convective_transportable_tracers                          | cloud water and other convective trans. tracers     | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
-!! | pbl            | atmosphere_boundary_layer_thickness                       | PBL thickness                                       | m             |    1 | real      | kind_phys | out    | F        |
+!! | pbl            | atmosphere_boundary_layer_thickness                       | PBL thickness                                       | m             |    1 | real      | kind_phys | in     | F        |
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
@@ -120,8 +120,8 @@ contains
       integer, parameter :: ichoice_s=3	! 0 1 2 3
       real(kind=kind_phys), parameter :: aodccn=0.1
       real(kind=kind_phys) :: dts,fpi,fp
-      integer, parameter :: dicycle=1 ! diurnal cycle flag
-      integer, parameter :: dicycle_m=1 !- diurnal cycle flag
+      integer, parameter :: dicycle=0 ! diurnal cycle flag
+      integer, parameter :: dicycle_m=0 !- diurnal cycle flag
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntrac,tottracer
