@@ -29,18 +29,18 @@
 !! | zorl                | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
 !! | phii                | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
 !! | phil                | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | U                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | V                   | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
+!! | U                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | V                   | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | omega               | omega                                                                       | layer mean vertical velocity                          | Pa s-1        |    2 | real      | kind_phys | in     | F        |
-!! | T3D                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_water_vapor    | water_vapor_specific_humidity                                               | water vapor specific humidity                                                       | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_liquid_cloud   | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)          | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ice_cloud      | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                         | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                                 | number concentration of cloud droplets (liquid)                                     | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                                           | number concentration of ice                                                         | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ozone                   | ozone_mixing_ratio                                                 | ozone mixing ratio                                                                  | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration                        | number concentration of water-friendly aerosols                                     | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration                          | number concentration of ice-friendly aerosols                                       | kg-1          |    2 | real      | kind_phys | in     | F        | 
+!! | T3D                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_water_vapor    | water_vapor_specific_humidity                                               | water vapor specific humidity                                                       | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_liquid_cloud   | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ice_cloud      | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                         | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                                 | number concentration of cloud droplets (liquid)                                     | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                                           | number concentration of ice                                                         | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ozone                   | ozone_mixing_ratio                                                 | ozone mixing ratio                                                                  | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration                        | number concentration of water-friendly aerosols                                     | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration                          | number concentration of ice-friendly aerosols                                       | kg-1          |    2 | real      | kind_phys | inout  | F        | 
 !! | prsl                | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
 !! | exner               | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
 !! | xland               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
@@ -459,9 +459,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !else
          !   xland(i)=2.0
          !endif
-         !uoce(i)=0.0
-         !voce(i)=0.0
-         !vdfg(i)=0.0
+         uoce(i)=0.0
+         voce(i)=0.0
+         vdfg(i)=0.0
          !ust(i) = sqrt(stress(i))
          ch(i)=0.0
          hfx(i)=hflx(i)*rho(i,1)*cp
@@ -583,57 +583,106 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               dvdt(i,k) = dvdt(i,k) + RVBLTEN(i,k)
            enddo
         enddo
+        !Update T, U and V:
+        do k = 1, levs
+           do i = 1, im
+              T3D(i,k) = T3D(i,k) + RTHBLTEN(i,k)*exner(i,k)*delt
+              u(i,k)   = u(i,k) + RUBLTEN(i,k)*delt
+              v(i,k)   = v(i,k) + RVBLTEN(i,k)*delt
+           enddo
+        enddo
 
-      !DO moist/scalar/tracer tendencies:
+        !DO moist/scalar/tracer tendencies:
         if (imp_physics == imp_physics_wsm6) then
-  ! WSM6
-          do k=1,levs
-            do i=1,im
-              dqdt_water_vapor(i,k)  = RQVBLTEN(i,k)
-              dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k)
-              dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k)
-              !dqdt_ozone(i,k)        = 0.0
-            enddo
-          enddo
+           ! WSM6
+           do k=1,levs
+             do i=1,im
+               dqdt_water_vapor(i,k)  = RQVBLTEN(i,k)
+               dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k)
+               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k)
+               !dqdt_ozone(i,k)        = 0.0
+             enddo
+           enddo
+           !Update moist species:
+           do k=1,levs
+             do i=1,im
+               qgrs_water_vapor(i,k)  = qgrs_water_vapor(i,k)  + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
+               qgrs_liquid_cloud(i,k) = qgrs_liquid_cloud(i,k) + RQCBLTEN(i,k)*delt
+               qgrs_ice_cloud(i,k)    = qgrs_ice_cloud(i,k)    + RQIBLTEN(i,k)*delt
+               !dqdt_ozone(i,k)        = 0.0
+             enddo
+           enddo
         elseif (imp_physics == imp_physics_thompson) then
-          ! Thompson
-          if(ltaerosol) then
-            do k=1,levs
-              do i=1,im
-                dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)
-                dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)
-                dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)
-                dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                !dqdt_ozone(i,k)                   = 0.0
-                dqdt_water_aer_num_conc(i,k)      = 0.0
-                dqdt_ice_aer_num_conc(i,k)        = 0.0
-              enddo
-            enddo
-          else
-            do k=1,levs
-              do i=1,im
-                dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
-                dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
-                dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
-                dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
-                !dqdt_ozone(i,k)         = 0.0
-              enddo
-            enddo
-          endif
+           ! Thompson-Aerosol
+           if(ltaerosol) then
+             do k=1,levs
+               do i=1,im
+                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)
+                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)
+                 dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
+                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)
+                 dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
+                 !dqdt_ozone(i,k)                   = 0.0
+                 dqdt_water_aer_num_conc(i,k)      = 0.0
+                 dqdt_ice_aer_num_conc(i,k)        = 0.0
+               enddo
+             enddo
+             do k=1,levs
+               do i=1,im
+                 qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
+                 qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
+                 qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+                 qgrs_cloud_droplet_num_conc(i,k) = qgrs_cloud_droplet_num_conc(i,k) + RQNCBLTEN(i,k)*delt
+                 qgrs_cloud_ice_num_conc(i,k)     = qgrs_cloud_ice_num_conc(i,k)     + RQNIBLTEN(i,k)*delt
+                 !dqdt_ozone(i,k)        = 0.0
+                 !qgrs_water_aer_num_conc(i,k)     = qgrs_water_aer_num_conc(i,k)     + RQNWFABLTEN(i,k)*delt
+                 !qgrs_ice_aer_num_conc(i,k)       = qgrs_ice_aer_num_conc(i,k)       + RQNIFABLTEN(i,k)*delt
+               enddo
+             enddo
+           else
+             !Thompson (2008)
+             do k=1,levs
+               do i=1,im
+                 dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
+                 dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
+                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
+                 dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
+                 !dqdt_ozone(i,k)         = 0.0
+               enddo
+             enddo
+             do k=1,levs
+               do i=1,im
+                 qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
+                 qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
+                 qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+                 qgrs_cloud_ice_num_conc(i,k)     = qgrs_cloud_ice_num_conc(i,k)     + RQNIBLTEN(i,k)*delt
+                 !dqdt_ozone(i,k)        = 0.0
+               enddo
+             enddo
+           endif !end thompson choice
         elseif (imp_physics == imp_physics_gfdl) then
-          ! GFDL MP
-          do k=1,levs
-            do i=1,im
-              dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
-              dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
-              dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
-              !dqdt_rain(i,k)          = 0.0
-              !dqdt_snow(i,k)          = 0.0
-              !dqdt_graupel(i,k)       = 0.0
-              !dqdt_ozone(i,k)         = 0.0
-            enddo
-          enddo
+           ! GFDL MP
+           do k=1,levs
+             do i=1,im
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
+               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
+               !dqdt_rain(i,k)          = 0.0
+               !dqdt_snow(i,k)          = 0.0
+               !dqdt_graupel(i,k)       = 0.0
+               !dqdt_ozone(i,k)         = 0.0
+             enddo
+           enddo
+           do k=1,levs
+             do i=1,im
+               qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
+               qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
+               qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+               !dqdt_ozone(i,k)        = 0.0
+             enddo
+           enddo
+        else
+          print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
         endif
 
         print*
