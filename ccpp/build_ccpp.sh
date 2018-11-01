@@ -78,7 +78,7 @@ if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
       # Extract name of suite definition file
       TMP=${MAKE_OPT#*SUITE=}
       SUITE=${TMP% *}
-      STATICFLAGS="--static --suite=ccpp/framework/suites/${SUITE}"
+      STATICFLAGS="--static --suite=ccpp/suites/${SUITE}"
     else
       echo "Error, option STATIC=Y requires suite definition file as SUITE=xyz.xml (w/o path)"
       exit 1
