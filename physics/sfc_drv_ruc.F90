@@ -982,8 +982,8 @@ module lsm_ruc
           rhosnf(i) = rhosnfr(i,j)
 
           ! --- ... accumulated total runoff and surface runoff
-          runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 1000. ! kg m-2
-          srunoff(i) = srunoff(i) + runof(i) * delt * 1000.            ! kg m-2
+          runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
+          srunoff(i) = srunoff(i) + runof(i) * delt * 0.001            ! kg m-2
 
           !  --- ...  unit conversion (from m to mm)
           snwdph(i)  = snowh(i,j) * 1000.0
