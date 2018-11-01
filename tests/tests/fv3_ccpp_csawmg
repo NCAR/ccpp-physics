@@ -64,7 +64,7 @@ DT_ATMOS="600"
 
 export INPUT_NML=ccpp_csawmg.nml.IN
 export FV3_RUN=ccpp_csawmg_run.IN
-export CCPP_SDF=ccpp/framework/suites/suite_FV3_GFS_2017_updated_csawmg.xml
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_csawmg.xml
 export CCPP_LIB_DIR=ccpp/lib
 export OUTPUT_GRID="'gaussian_grid'"
 export OUTPUT_FILE="'nemsio'"
