@@ -57,7 +57,7 @@
 !! | ch                  | surface_drag_wind_speed_for_momentum_in_air                                 | momentum exchange coefficient                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | hflx                | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | QFX                 | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | lh                  | instantaneous_surface_upward_latent_heat_flux_for_coupling                  | instantaneous sfc latent heat flux                    | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | lh                  | surface_latent_heat                                                         | latent heating at the surface (pos = up)              | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | flhc                | surface_exchange_coefficient_for_heat                                       | surface exchange coefficient for heat                 | W/m-2 K-1     |    1 | real      | kind_phys | inout  | F        |
 !! | flqc                | surface_exchange_coefficient_for_moisture                                   | surface exchange coefficient for moisture             | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | u10                 | x_wind_at_10m                                                               | 10 meter u wind speed                                 | m s-1         |    1 | real      | kind_phys | inout  | F        |
@@ -67,6 +67,9 @@
 !! | q2                  | specific_humidity_at_2m                                                     | 2 meter specific humidity                             | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | chs2                | surface_exchange_coefficient_for_heat_at_2m                                 | exchange coefficient for heat at 2 meters             | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cqs2                | surface_exchange_coefficient_for_moisture_at_2m                             | exchange coefficient for moisture at 2 meters         | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | cda                 | surface_drag_coefficient_for_momentum_in_air                                | surface exchange coeff for momentum                   | none          |    1 | real      | kind_phys | inout  | F        |
+!! | cka                 | surface_drag_coefficient_for_heat_and_moisture_in_air                       | surface exchange coeff heat & moisture                | none          |    1 | real      | kind_phys | inout  | F        |
+!! | stress              | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | inout  | F        |
 !! | bl_mynn_cloudpdf    | cloudpdf                                                                    | switch to determine which cloud PDF to use            | switch        |    0 | integer   |           | in     | F        |
 !! | icloud_bl           | couple_sgs_clouds_to_radiation_switch                                       | switch for coupling sgs clouds to radiation           | switch        |    0 | integer   |           | in     | F        |
 !! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
@@ -87,6 +90,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &  HFLX, QFX, LH, FLHC, FLQC,      &
      &  U10, V10, TH2, T2, Q2,          &
      &  CHS2, CQS2,                     &
+     &  cda, cka, stress,               &
 !     &  CP, G, ROVCP, R, XLV,           &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
 !     &  EP1,EP2,KARMAN,                 &
@@ -158,7 +162,6 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 !   REAL    , PARAMETER :: SVPT0        = 273.15
 !   REAL    , PARAMETER :: EP_1         = R_v/R_d-1.
 !   REAL    , PARAMETER :: EP_2         = R_d/R_v
-!
 
   REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
        &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2, g_inv=1/g
@@ -202,16 +205,15 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 
 !MYNN-2D                                                                  
       real(kind=kind_phys), dimension(im) ::                &
-     &        dx, pblh, xland, tsurf, qsfc, ps,             &
+     &        dx, pblh, xland, tsk, qsfc, ps,               &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch, psih, psim,   &
-     &        lh, tsk
+     &        lh, cda, cka, stress
      !LOCAL
       real, dimension(im) ::                                &
      &        WSTAR, qcg, hfx, znt, ts, snowh,              &
-     &        chs, ck, cka, cd, cda, mavail, regime,        &
-     &        GZ1OZ0       
+     &        chs, ck, cd, mavail, regime, GZ1OZ0       
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -240,7 +242,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                  pattern_spp_pbl(i,k)=0.0
               enddo
             enddo
-            print*,"middle of initializing variables"
+            print*,"in MYNNSFC wrapper: initializing/manipulating input variables"
             do i=1,im
  !               if (frland(i)==1.)then !sea/land/ice mask (=0/1/2)
  !                 xland(i)=1.0
@@ -251,18 +253,18 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                 !ch(i)=0.0
                 HFX(i)=hflx(i)*rho(i,1)*cp
                 !QFX(i)=evap(i)
-                wstar(i)=0.0
+                !wstar(i)=0.0
                 qcg(i)=0.0
                 snowh(i)=snowd(i)*800. !mm -> m
-                znt(i)=zorl(i)*0.01 !cm -> m?
-                ts(i)=tsurf(i)/exner(1,1)  !theta
+                znt(i)=zorl(i)*0.01    !cm -> m?
+                ts(i)=tsk(i)/exner(i,1)  !theta
 !                qsfc(i)=qss(i)
 !                ps(i)=pgr(i)
 !                wspd(i)=wind(i)
-                mavail(i)=1.0
+                mavail(i)=1.0  !????
             enddo
 
-        write(0,*)"CALLING mynn_bl_driver; input:"
+        write(0,*)"CALLING SFCLAY_mynn; input:"
         print*,"T:",t3d(1,1),t3d(1,2),t3d(1,3)
         print*,"TH:",th(1,1),th(1,2),th(1,3)
         print*,"rho:",rho(1,1),rho(1,2),rho(1,3)
@@ -273,10 +275,10 @@ SUBROUTINE mynnsfc_wrapper_run(         &
         !print*,"ex:",prslk(1,:)
 !        print*,"dz:",dz(1,:)
         print*,"rmol:",rmol(1)," ust:",ust(1)
-        print*,"Tsurf:",tsurf(1)," Thetasurf:",ts(1)
+        print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
         print*,"HFX:",hfx(1)," qfx",qfx(1)
         print*,"qsfc:",qsfc(1)," ps:",ps(1)
-        print*,"wspd:",wspd(1),"brb=",br(1)
+        print*,"wspd:",wspd(1),"br=",br(1)
         print*,"znt:",znt(1)," delt=",delt
         print*,"im=",im," levs=",levs
         print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
@@ -315,14 +317,15 @@ SUBROUTINE mynnsfc_wrapper_run(         &
         do i = 1, im
            hflx(i)=hfx(i)/rho(i,1)*cp
            !QFX(i)=evap(i)                                                                                                                                                                                                      
-           zorl(i)=znt(i)*100.             !cm -> m
+           zorl(i)=znt(i)*100.             !m -> cm
+           stress(i) = ust(i)**2
         enddo
 
 
         print*
         print*,"finished with mynn_surface layer; output:"
         print*,"rmol:",rmol(1)," ust:",ust(1)
-        print*,"Tsurf:",tsurf(1)," Thetasurf:",ts(1)
+        print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
         print*,"HFX:",hfx(1)," qfx",qfx(1)
         print*,"qsfc:",qsfc(1)," ps:",ps(1)
         print*,"wspd:",wspd(1)," br=",br(1)

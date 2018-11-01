@@ -447,9 +447,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           do i=1,im
              dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
              th(i,k)=t3d(i,k)/exner(i,k)
-             w(i,k) = 0.0
              qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
              rho(i,k)=prsl(i,k)/(r_d*t3d(i,k))
+             w(i,k) = -omega(i,k)/(rho(i,k)*g)
              pattern_spp_pbl(i,k)=0.0
          enddo
       enddo
@@ -479,7 +479,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
            endif
          endif
-         ts(i)=tsurf(i)/exner(1,1)  !theta
+         ts(i)=tsurf(i)/exner(i,1)  !theta
 !        qsfc(i)=qss(i)
 !        ps(i)=pgr(i)
 !        wspd(i)=wind(i)
