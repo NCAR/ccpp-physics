@@ -100,6 +100,10 @@ else
 CPPDEFS += -DMOIST_CAPPA -DUSE_COND
 endif
 
+ifeq ($(NAM_phys),Y)
+CPPDEFS += -DNAM_phys
+endif
+
 ifeq ($(32BIT),Y)
 CPPDEFS += -DOVERLOAD_R4 -DOVERLOAD_R8
 FFLAGS +=
@@ -143,10 +147,12 @@ LDFLAGS_VERBOSE := -Wl,-V,--verbose,-cref,-M
 LIBS :=
 
 ifeq ($(REPRO),Y)
+CPPDEFS += -DREPRO
 CFLAGS += $(CFLAGS_REPRO)
 FFLAGS += $(FFLAGS_REPRO)
 FAST :=
 else ifeq ($(DEBUG),Y)
+CPPDEFS += -DDEBUG
 CFLAGS += $(CFLAGS_DEBUG)
 FFLAGS += $(FFLAGS_DEBUG)
 FAST :=
