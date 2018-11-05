@@ -6,7 +6,11 @@
  
       public GFS_diagtoscreen_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
 
-#define PRINT_SUM
+      public print_my_stuff, chksum_int, chksum_real
+
+#define PRINT_CHKSUM
+!#define PRINT_SUM
+
       interface print_var
         module procedure print_logic_0d
         module procedure print_int_0d
@@ -18,10 +22,10 @@
       end interface
 
       integer, parameter :: ISTART = 1
-      integer, parameter :: IEND = 11
+      integer, parameter :: IEND = 9999999
 
       integer, parameter :: KSTART = 1
-      integer, parameter :: KEND = 11
+      integer, parameter :: KEND = 9999999
 
       contains
 
@@ -86,7 +90,7 @@
          integer,                    intent(out) :: errflg
 
          !--- local variables
-         integer :: impi, iomp, ierr
+         integer :: impi, iomp, ierr, n
          integer :: mpirank, mpisize, mpicomm
          integer :: omprank, ompsize
 
@@ -115,7 +119,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -230,6 +234,9 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_fctd'        , Tbd%phy_fctd)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f2d'         , Tbd%phy_f2d)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f3d'         , Tbd%phy_f3d)
+                     do n=1,size(Tbd%phy_f3d(1,1,:))
+                         call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f3d_n'   , Tbd%phy_f3d(:,:,n))
+                     end do
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%blkno'           , Tbd%blkno)
                      ! Diag (incomplete)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Diag%topfsw%upfxc',    Diag%topfsw%upfxc)
@@ -410,7 +417,7 @@
 #endif
              end do
 #ifdef MPI
-             call MPI_BARRIER(mpicomm,ierr)
+!             call MPI_BARRIER(mpicomm,ierr)
 #endif
          end do
 
@@ -418,7 +425,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
       end subroutine GFS_diagtoscreen_run
@@ -431,7 +438,7 @@
           character(len=*), intent(in) :: name
           logical, intent(in) :: var
 
-          write(0,'(2a,3i4,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
+          write(0,'(2a,3i6,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
 
       end subroutine print_logic_0d
 
@@ -443,7 +450,7 @@
           character(len=*), intent(in) :: name
           integer, intent(in) :: var
 
-          write(0,'(2a,3i4,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
+          write(0,'(2a,3i6,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
 
       end subroutine print_int_0d
 
@@ -460,10 +467,12 @@
           integer :: i
 
 #ifdef PRINT_SUM
-          write(0,'(2a,3i4,3i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+          write(0,'(2a,3i6,3i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,i20,2i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, chksum_int(size(var),var), minval(var), maxval(var)
 #else
           do i=ISTART,min(IEND,size(var(:)))
-              write(0,'(2a,3i4,i6,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
+              write(0,'(2a,3i6,i6,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
           end do
 #endif
 
@@ -479,7 +488,7 @@
           character(len=*), intent(in) :: name
           real(kind_phys), intent(in) :: var
 
-          write(0,'(2a,3i4,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
+          write(0,'(2a,3i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
 
       end subroutine print_real_0d
 
@@ -496,10 +505,12 @@
           integer :: i
 
 #ifdef PRINT_SUM
-          write(0,'(2a,3i4,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+          write(0,'(2a,3i6,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,i20,2e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, chksum_real(size(var),var), minval(var), maxval(var)
 #else
           do i=ISTART,min(IEND,size(var(:)))
-              write(0,'(2a,3i4,i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
+              write(0,'(2a,3i6,i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
           end do
 #endif
 
@@ -518,11 +529,13 @@
           integer :: k, i
 
 #ifdef PRINT_SUM
-          write(0,'(2a,3i4,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+          write(0,'(2a,3i6,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,i20,2e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, chksum_real(size(var),reshape(var,(/size(var)/))), minval(var), maxval(var)
 #else
           do i=ISTART,min(IEND,size(var(:,1)))
               do k=KSTART,min(KEND,size(var(1,:)))
-                  write(0,'(2a,3i4,2i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, var(i,k)
+                  write(0,'(2a,3i6,2i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, var(i,k)
               end do
           end do
 #endif
@@ -542,18 +555,96 @@
           integer :: k, i, l
 
 #ifdef PRINT_SUM
-          write(0,'(2a,3i4,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+          write(0,'(2a,3i6,3e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, sum(var), minval(var), maxval(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,i20,2e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, chksum_real(size(var),reshape(var,(/size(var)/))), minval(var), maxval(var)
 #else
           do i=ISTART,min(IEND,size(var(:,1,1)))
               do k=KSTART,min(KEND,size(var(1,:,1)))
                   do l=1,size(var(1,1,:))
-                      write(0,'(2a,3i4,3i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, l, var(i,k,l)
+                      write(0,'(2a,3i6,3i6,e35.25)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, l, var(i,k,l)
                   end do
               end do
           end do
 #endif
 
       end subroutine print_real_3d
+
+      function chksum_int(N, var) result(hash)
+          implicit none
+          integer, intent(in) :: N
+          integer, dimension(1:N), intent(in) :: var
+          integer*8, dimension(1:N) :: int_var
+          integer*8 :: a, b, i, hash
+          integer*8, parameter :: mod_adler=65521
+
+          a=1
+          b=0
+          i=1
+          hash = 0
+          int_var = TRANSFER(var, a, N)
+
+          do i= 1, N
+              a = MOD(a + int_var(i), mod_adler)
+              b = MOD(b+a, mod_adler)
+          end do
+
+          hash = ior(b * 65536, a)
+
+     end function chksum_int
+
+      function chksum_real(N, var) result(hash)
+          use machine,               only: kind_phys
+          implicit none
+          integer, intent(in) :: N
+          real(kind_phys), dimension(1:N), intent(in) :: var
+          integer*8, dimension(1:N) :: int_var
+          integer*8 :: a, b, i, hash
+          integer*8, parameter :: mod_adler=65521
+
+          a=1
+          b=0
+          i=1
+          hash = 0
+          int_var = TRANSFER(var, a, N)
+
+          do i= 1, N
+              a = MOD(a + int_var(i), mod_adler)
+              b = MOD(b+a, mod_adler)
+          end do
+
+          hash = ior(b * 65536, a)
+
+     end function chksum_real
+
+     function print_my_stuff(mpitoprint,omptoprint) result(flag)
+#ifdef MPI
+         use mpi
+#endif
+#ifdef OPENMP
+         use omp_lib
+#endif
+         implicit none
+         integer, intent(in) :: mpitoprint, omptoprint
+         logical :: flag
+         integer :: ompthread, mpirank, ierr
+#ifdef MPI
+         call MPI_COMM_RANK(MPI_COMM_WORLD, mpirank, ierr)
+#else
+         mpirank = 0
+#endif
+#ifdef OPENMP
+         ompthread = OMP_GET_THREAD_NUM()
+#else
+         ompthread = 0
+#endif
+
+         if (mpitoprint==mpirank .and. omptoprint==ompthread) then
+             flag = .true.
+         else
+             flag = .false.
+         end if
+     end function print_my_stuff
 
     end module GFS_diagtoscreen
 
