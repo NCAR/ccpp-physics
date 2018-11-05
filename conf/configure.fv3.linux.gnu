@@ -84,8 +84,6 @@ else
   NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
 
-INCLUDE += $(MKL_INC)
-
 FPPFLAGS := -cpp -Wp,-w $(INCLUDE)
 CFLAGS := $(INCLUDE)
 
@@ -98,6 +96,10 @@ ifeq ($(HYDRO),Y)
 CPPDEFS +=
 else
 CPPDEFS += -DMOIST_CAPPA -DUSE_COND
+endif
+
+ifeq ($(NAM_phys),Y)
+CPPDEFS += -DNAM_phys
 endif
 
 ifeq ($(32BIT),Y)
@@ -117,7 +119,7 @@ endif
 
 FFLAGS_OPT = -O2 -fno-range-check
 FFLAGS_REPRO = -O2 -g -fbacktrace -fno-range-check
-FFLAGS_DEBUG = -g -O0 -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
+FFLAGS_DEBUG = -g -O0 -ggdb -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
 
 TRANSCENDENTALS :=
 FFLAGS_OPENMP = -fopenmp
@@ -143,10 +145,12 @@ LDFLAGS_VERBOSE := -Wl,-V,--verbose,-cref,-M
 LIBS :=
 
 ifeq ($(REPRO),Y)
+CPPDEFS += -DREPRO
 CFLAGS += $(CFLAGS_REPRO)
 FFLAGS += $(FFLAGS_REPRO)
 FAST :=
 else ifeq ($(DEBUG),Y)
+CPPDEFS += -DDEBUG
 CFLAGS += $(CFLAGS_DEBUG)
 FFLAGS += $(FFLAGS_DEBUG)
 FAST :=
@@ -190,9 +194,9 @@ endif
 
 ifeq ($(SION),Y)
 CPPDEFS += -DSION
-CFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
-FFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --cflags --f90`
-LDFLAGS += `$(SIONLIB)/bin/sionconfig --mpi --libs --f90`
+CFLAGS += $(SIONLIB_INC)
+FFLAGS += $(SIONLIB_INC)
+LDFLAGS += $(SIONLIB_LIB)
 endif
 
 ifeq ($(MEMCHECK),Y)
@@ -207,5 +211,5 @@ LDFLAGS += $(LIBS)
 ifdef InNemsMakefile
 FFLAGS += $(ESMF_INC)
 CPPFLAGS += -cpp -traditional
-EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB) $(MKL_LIB)
+EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
 endif
