@@ -1,6 +1,6 @@
-# Dom Heinzeller (dom.heinzeller@noaa.gov), 08/02/2018
+# Dom Heinzeller (dom.heinzeller@noaa.gov), 11/05/2018
 
-In order to build and run the FV3 trunk (August 2018) with possible CCPP extensions by GMTB on Mac OS X,
+In order to build and run the FV3 trunk (November 2018) with possible CCPP extensions by GMTB on Mac OS X,
 the following installation steps are recommended. The version numbers for the "brew" correspond to the default versions
 in April/May 2018 and will change to newer versions in the future. Unless problems occur during the manual builds in
 steps 12-15, these differences can be ignored. It is also assumed that the bash shell is used in the following.
@@ -142,13 +142,13 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
     export -n NETCDF
     export -n LDFLAGS
 
-13. Build external NCEP libraries (use date tag 20180401 to allow for different versions in the future)
+13. Build external NCEP libraries (use date tag 20181105 to allow for different versions in the future)
 
     # Obtain source code from gitub and build in /usr/local/src
     cd /usr/local/src
     git clone https://github.com/climbfuji/NCEPlibs.git
     cd NCEPlibs
-    ./make_ncep_libs.sh -s macosx -c gnu -d /usr/local/NCEPlibs-20180401 -o 1 2>&1 | tee log.make
+    ./make_ncep_libs.sh -s macosx -c gnu -d /usr/local/NCEPlibs-20181105 -o 1 2>&1 | tee log.make
 
 14. Download and install Intel Math Kernel Library MKL to /usr/local/mkl using the installer script
 
