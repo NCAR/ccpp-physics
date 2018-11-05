@@ -40,7 +40,7 @@
 !! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                | frac          |    2 | real      | kind_phys | in     | F        |
 !! | ps                  | surface_air_pressure                                                        | surface pressure                                      | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | PBLH                | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | in     | F        |
-!! | xland               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
+!! | slmsk               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
 !! | tsk                 | surface_skin_temperature                                                    | surface temperature                                   | K             |    1 | real      | kind_phys | in     | F        |
 !! | qsfc                | surface_specific_humidity                                                   | surface air saturation specific humidity              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | snowd               | surface_snow_thickness_water_equivalent                                     | water equivalent snow depth over land                 | mm            |    1 | real      | kind_phys | in     | F        |
@@ -72,6 +72,7 @@
 !! | stress              | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | inout  | F        |
 !! | bl_mynn_cloudpdf    | cloudpdf                                                                    | switch to determine which cloud PDF to use            | switch        |    0 | integer   |           | in     | F        |
 !! | icloud_bl           | couple_sgs_clouds_to_radiation_switch                                       | switch for coupling sgs clouds to radiation           | switch        |    0 | integer   |           | in     | F        |
+!! | lprnt               | flag_print                                                                  | control flag for diagnostic print out                 | flag          |    0 | logical   |           | none   | F        |
 !! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -83,7 +84,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &  u, v, t3d, qvsh, qc, prsl, phii,&
      &  exner, tsq, qsq, cov, sh3d,     &
      &  el_pbl, qc_bl, cldfra_bl,       &
-     &  ps, PBLH, XLAND, TSK,           &
+     &  ps, PBLH, slmsk, TSK,           &
      &  QSFC, snowd,                    &
      &  zorl,UST,USTM, ZOL,MOL,RMOL,    &
      &  PSIM, PSIH, WSPD, br, ch,       &
@@ -95,8 +96,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
 !     &  EP1,EP2,KARMAN,                 &
      &  icloud_bl, bl_mynn_cloudpdf,    &
-     &  errmsg, errflg                 )
-
+     &  lprnt, errmsg, errflg           )
 
 
 ! should be moved to inside the mynn:
@@ -186,6 +186,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
       REAL    :: delt
       INTEGER :: im, ix, levs
       INTEGER :: initflag, kdt, k, i
+      LOGICAL :: lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
@@ -205,7 +206,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 
 !MYNN-2D                                                                  
       real(kind=kind_phys), dimension(im) ::                &
-     &        dx, pblh, xland, tsk, qsfc, ps,               &
+     &        dx, pblh, slmsk, tsk, qsfc, ps,               &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch, psih, psim,   &
@@ -213,20 +214,20 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      !LOCAL
       real, dimension(im) ::                                &
      &        WSTAR, qcg, hfx, znt, ts, snowh,              &
-     &        chs, ck, cd, mavail, regime, GZ1OZ0       
+     &        chs, ck, cd, mavail, regime, xland, GZ1OZ0       
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      write(0,*)"=============================================="
-      write(0,*)"in mynn surface layer wrapper..."
-      write(0,*)"kdt=",kdt
+      if (lprnt) then
+         write(0,*)"=============================================="
+         write(0,*)"in mynn surface layer wrapper..."
+         write(0,*)"kdt=",kdt
+      endif
 
       if (kdt .eq. 1) then
          initflag=1
-         !el_pbl(:,:)=0.
-         !cldfra_bl(:,:)=0.
       else
          initflag=0
       endif
@@ -242,13 +243,12 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                  pattern_spp_pbl(i,k)=0.0
               enddo
             enddo
-            print*,"in MYNNSFC wrapper: initializing/manipulating input variables"
             do i=1,im
- !               if (frland(i)==1.)then !sea/land/ice mask (=0/1/2)
- !                 xland(i)=1.0
- !               else
- !                 xland(i)=2.0
- !               endif
+                if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
+                  xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
+                else
+                  xland(i)=2.0
+                endif
 !                ust(i) = sqrt(stress(i))
                 !ch(i)=0.0
                 HFX(i)=hflx(i)*rho(i,1)*cp
@@ -264,27 +264,27 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                 mavail(i)=1.0  !????
             enddo
 
-        write(0,*)"CALLING SFCLAY_mynn; input:"
-        print*,"T:",t3d(1,1),t3d(1,2),t3d(1,3)
-        print*,"TH:",th(1,1),th(1,2),th(1,3)
-        print*,"rho:",rho(1,1),rho(1,2),rho(1,3)
-!        print*,"u:",ugrs(1,1:3)
-!        print*,"qv:",qv(1,1:3,1)
-        !print*,"qc:",clw(1,:,2) !clouds(1,:,1) !clw(1,:,2) !gq0(i,k,ntcw)
-!        print*,"p:",prsl(1,:)
-        !print*,"ex:",prslk(1,:)
-!        print*,"dz:",dz(1,:)
-        print*,"rmol:",rmol(1)," ust:",ust(1)
-        print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
-        print*,"HFX:",hfx(1)," qfx",qfx(1)
-        print*,"qsfc:",qsfc(1)," ps:",ps(1)
-        print*,"wspd:",wspd(1),"br=",br(1)
-        print*,"znt:",znt(1)," delt=",delt
-        print*,"im=",im," levs=",levs
-        print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
-        !print*,"ncld=",ncld," ntrac(gq0)=",ntrac
-        print*,"zlvl(1)=",dz(1,1)*0.5
-        print*,"PBLH=",pblh(1)," xland=",xland(1)
+      if (lprnt) then
+          write(0,*)"CALLING SFCLAY_mynn; input:"
+          print*,"T:",t3d(1,1),t3d(1,2),t3d(1,3)
+          print*,"TH:",th(1,1),th(1,2),th(1,3)
+          print*,"rho:",rho(1,1),rho(1,2),rho(1,3)
+          print*,"u:",u(1,1:3)
+          !print*,"qv:",qv(1,1:3,1)
+          print*,"p:",prsl(1,1)," snowh=",snowh(1)
+          print*,"dz:",dz(1,1)," qsfc=",qsfc(1)
+          print*,"rmol:",rmol(1)," ust:",ust(1)
+          print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
+          print*,"HFX:",hfx(1)," qfx",qfx(1)
+          print*,"qsfc:",qsfc(1)," ps:",ps(1)
+          print*,"wspd:",wspd(1),"br=",br(1)
+          print*,"znt:",znt(1)," delt=",delt
+          print*,"im=",im," levs=",levs
+          print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
+          !print*,"ncld=",ncld," ntrac(gq0)=",ntrac
+          print*,"zlvl(1)=",dz(1,1)*0.5
+          print*,"PBLH=",pblh(1)," xland=",xland(1)
+       endif
 
 
         CALL SFCLAY_mynn(                                                 &
@@ -315,26 +315,27 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 
      ! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
         do i = 1, im
-           hflx(i)=hfx(i)/rho(i,1)*cp
+           hflx(i)=hfx(i)/(rho(i,1)*cp)
            !QFX(i)=evap(i)                                                                                                                                                                                                      
            zorl(i)=znt(i)*100.             !m -> cm
            stress(i) = ust(i)**2
         enddo
 
 
-        print*
-        print*,"finished with mynn_surface layer; output:"
-        print*,"rmol:",rmol(1)," ust:",ust(1)
-        print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
-        print*,"HFX:",hfx(1)," qfx",qfx(1)
-        print*,"qsfc:",qsfc(1)," ps:",ps(1)
-        print*,"wspd:",wspd(1)," br=",br(1)
-        print*,"znt:",znt(1),"pblh:",pblh(1)
-        print*
-        !if (kdt==3) then
-        !    write(*,*) 'Stopping model.'
-        !    stop
-        !end if
+      if (lprnt) then
+         print*
+         print*,"finished with mynn_surface layer; output:"
+         print*,"xland=",xland(1)," cda=",cda(1)
+         print*,"rmol:",rmol(1)," ust:",ust(1)
+         print*,"Tsk:",tsk(1)," Thetasurf:",ts(1)
+         print*,"HFX:",hfx(1)," qfx",qfx(1)
+         print*,"qsfc:",qsfc(1)," ps:",ps(1)
+         print*,"wspd:",wspd(1)," br=",br(1)
+         print*,"znt:",znt(1),"pblh:",pblh(1)
+         print*,"FLHC=",FLHC(1)," CHS=",CHS(1)
+         print*
+      endif
+
 
   END SUBROUTINE mynnsfc_wrapper_run
 
