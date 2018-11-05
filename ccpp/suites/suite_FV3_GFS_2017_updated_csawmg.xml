@@ -79,6 +79,10 @@
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
+      <scheme>m_micro_pre</scheme>
+      <scheme>m_micro</scheme>
+      <scheme>m_micro_post</scheme>
+      <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
     </subcycle>
