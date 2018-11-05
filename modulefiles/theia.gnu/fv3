@@ -48,7 +48,7 @@ prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/gnu-6.2.0/mpich-3.2.
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
 ##
-set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-gnu-20180420
+set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-gnu-20181105
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
 setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a

@@ -37,7 +37,7 @@ prepend-path LD_LIBRARY_PATH ${ESMF_DIR}/lib/libO/Linux.pgi.64.mpi.default
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
 ##
-set NCEPLIBS_DIR /glade/p/ral/jntp/GMTB/tools/NCEPlibs/20180717/pgi-17.9
+set NCEPLIBS_DIR /glade/p/ral/jntp/GMTB/tools/NCEPlibs/20181105/pgi-17.9
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
 setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
