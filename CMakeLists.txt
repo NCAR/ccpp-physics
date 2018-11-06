@@ -37,7 +37,7 @@ if (PROJECT STREQUAL "CCPP-SCM")
   #------------------------------------------------------------------------------
   # CMake Modules
   # Set the CMake module path
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../framework/cmake")
 endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
@@ -178,9 +178,9 @@ endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)
 elseif (PROJECT STREQUAL "CCPP-SCM")
-  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
-  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
-  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
+  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
+  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
+  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
 
   #add "sibling" directories (must specify the build directory too)
   ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
@@ -191,7 +191,7 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/sp)
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp-framework/src)
+  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
 endif (PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------

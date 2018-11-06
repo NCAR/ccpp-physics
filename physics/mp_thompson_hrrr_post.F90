@@ -62,7 +62,7 @@ contains
          else
             ! no limit for grid spacings >50km
             !mp_tend_lim(i) = 0.00006 ! [K/s], guess for >50km
-            mp_tend_lim(i) = huge(mp_tend_lim(i))
+            mp_tend_lim(i) = 1.0E+08
          end if
       end do
 
