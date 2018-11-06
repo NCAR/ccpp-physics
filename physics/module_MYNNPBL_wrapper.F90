@@ -475,7 +475,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          delta(i)=0.0
          qcg(i)=0.0
          znt(i)=zorl(i)*0.01 !cm -> m?
-         if (do_mynnsfclay .eq. .true.) then
+         if (do_mynnsfclay) then
            rmol(i)=recmol(i)
          else
            if (hfx(i) .ge. 0.)then
