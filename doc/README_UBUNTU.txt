@@ -1,6 +1,6 @@
-# Dom Heinzeller (dom.heinzeller@noaa.gov), 08/30/2018
+# Dom Heinzeller (dom.heinzeller@noaa.gov), 11/05/2018
 
-In order to build and run the FV3 trunk (August 2018) with possible CCPP extensions by GMTB on Ubuntu Linux,
+In order to build and run the FV3 trunk (November 2018) with possible CCPP extensions by GMTB on Ubuntu Linux,
 the following installation steps are recommended. The version numbers correspond to the default versions in
 August 2018 and will change to newer versions in the future. Unless problems occur during the manual builds in
 step 4, these differences can be ignored. It is also assumed that the bash shell is used in the following.
@@ -160,12 +160,12 @@ step 4, these differences can be ignored. It is also assumed that the bash shell
 
     # NCEP libraries
     git clone https://github.com/climbfuji/NCEPlibs.git
-    mv NCEPlibs NCEPlibs-20180828
-    cd NCEPlibs-20180828
-    mkdir /usr/local/NCEPlibs-gnu-20180828
-    ./make_ncep_libs.sh -s linux -c gnu -d /usr/local/NCEPlibs-gnu-20180828 -o 1
+    mv NCEPlibs NCEPlibs-20181105
+    cd NCEPlibs-20181105
+    mkdir /usr/local/NCEPlibs-gnu-20181105
+    ./make_ncep_libs.sh -s linux -c gnu -d /usr/local/NCEPlibs-gnu-20181105 -o 1
     cd ..
-    rm -fr NCEPlibs-20180828
+    rm -fr NCEPlibs-20181105
 
     # Download esmf-7.1.0r to /usr/local/src
     tar -xvzf esmf_7_1_0r_src.tar.gz

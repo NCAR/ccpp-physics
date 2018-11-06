@@ -57,7 +57,7 @@ export DYLD_LIBRARY_PATH="/usr/local/${ESMF_VERSION}/lib/libO/Darwin.gfortrancla
 ##
 ## NCEP libraries (need to download and build manually, see doc/README_MACOSX.txt and https://github.com/climbfuji/NCEPlibs)
 ##
-NCEPLIBS_DIR=/usr/local/NCEPlibs-20180401
+NCEPLIBS_DIR=/usr/local/NCEPlibs-20181105
 export NCEPLIBS_DIR=${NCEPLIBS_DIR}
 export NEMSIO_INC=${NCEPLIBS_DIR}/include
 export BACIO_LIB4=${NCEPLIBS_DIR}/lib/libbacio_4.a
