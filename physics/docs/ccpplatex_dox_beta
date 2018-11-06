@@ -120,6 +120,7 @@ INPUT                  =  pdftxt/mainpage.txt            \
                           pdftxt/rad_cld.txt             \
                           pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/GFS_SURFACE_PERT.txt    \
+                          pdftxt/CPT_CSAW.txt            \
 ### Radiation
                         ../radlw_main.f                  \
                         ../radsw_main.f                  \
@@ -189,6 +190,11 @@ INPUT                  =  pdftxt/mainpage.txt            \
                         ../mersenne_twister.f  \
 ### CPT
                         ../cs_conv.F90      \
+### satmedmf
+                        ../satmedmfvdif.F90 \
+                        ../mfpblt.f         \
+                        ../mfscu.f          \
+                        ../tridi2t3.f       \
 ### GSD
                         ../cu_gf_driver.F90 \
                         ../cu_gf_deep.F90   \

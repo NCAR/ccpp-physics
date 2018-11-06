@@ -16,8 +16,6 @@
 !! [mfscu.f].
 !!
 !! - For local turbulence mixing, a TKE closure model is used.
-!
-!----------------------------------------------------------------------
 
       module satmedmfvdif
       contains

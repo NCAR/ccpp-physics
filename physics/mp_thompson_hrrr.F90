@@ -1,3 +1,5 @@
+!>\file mp_thompson_hrrr.F90
+!! This file contains NOAA/GSD's Thompson MP scheme.
 ! CCPP license goes here, as well as further documentation
 
 !#define DEBUG_AEROSOLS
@@ -143,6 +145,7 @@ module mp_thompson_hrrr
       end subroutine mp_thompson_hrrr_init
 
 #if 0
+!>\defgroup thompson_mp  GSD Thompson MP Module
 !! \section arg_table_mp_thompson_hrrr_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -186,6 +189,7 @@ module mp_thompson_hrrr
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
+!>\section thompson_gen GSD Thompson MP General Algorithm
       subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
