@@ -142,7 +142,7 @@ module lsm_ruc
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
 !! | me              | mpi_rank                                                                     | current MPI-rank                                                | index         |    0 | integer   |           | in     | F        |
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
-!! | iter            | iteration_number                                                             | number of iteration                                             | index         |    0 | integer   |           | in     | F        |
+!! | iter            | ccpp_loop_counter                                                            | loop counter for subcycling loops in CCPP                       | index         |    0 | integer   |           | in     | F        |
 !! | im              | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
 !! | nlev            | vertical_dimension                                                           | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
 !! | lsm_ruc         | flag_for_ruc_land_surface_scheme                                             | flag for RUC land surface model                                 | flag          |    0 | integer   |           | in     | F        |
@@ -1154,7 +1154,7 @@ module lsm_ruc
           errflg = 1
           return
         else
-        !write(0,*) 'Start of RUC LSM initialization'
+          write(0,*) 'Start of RUC LSM initialization'
         endif
 
        debug_print = .false.
