@@ -1598,12 +1598,12 @@ MODULE module_mp_thompson_hrrr
       LOGICAL, DIMENSION(kts:kte):: L_qc, L_qi, L_qr, L_qs, L_qg
       LOGICAL:: debug_flag
       INTEGER:: nu_c
-      ! DH*
+#ifdef DEBUG_AEROSOLS
       INTEGER :: mpirank, ierr
       LOGICAL :: abort = .false.
 
       call MPI_COMM_RANK(MPI_COMM_WORLD,mpirank,ierr)
-      ! *DH
+#endif
 
 !+---+
 
@@ -3506,7 +3506,7 @@ MODULE module_mp_thompson_hrrr
 
          if (rr(kts).gt.R1*1000.) &
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
-         ! DH*
+#ifdef DEBUG_AEROSOLS
          if (pptrain.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)", &
                      & pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)
@@ -3514,7 +3514,7 @@ MODULE module_mp_thompson_hrrr
          if (sed_r(kts)*DT*onstep(1).ge.1E3) then
             abort = .true.
          end if
-         ! *DH
+#endif
       enddo
       endif
 
@@ -3566,7 +3566,7 @@ MODULE module_mp_thompson_hrrr
 
          if (ri(kts).gt.R1*1000.) &
          pptice = pptice + sed_i(kts)*DT*onstep(2)
-         ! DH*
+#ifdef DEBUG_AEROSOLS
          if (pptice.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)", &
                      & pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)
@@ -3574,7 +3574,7 @@ MODULE module_mp_thompson_hrrr
          if (sed_i(kts)*DT*onstep(2).ge.1E3) then
             abort = .true.
          end if
-         ! *DH
+#endif
       enddo
       endif
 
@@ -3602,7 +3602,7 @@ MODULE module_mp_thompson_hrrr
 
          if (rs(kts).gt.R1*1000.) &
          pptsnow = pptsnow + sed_s(kts)*DT*onstep(3)
-         ! DH*
+#ifdef DEBUG_AEROSOLS
          if (pptsnow.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)", &
                      & pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)
@@ -3610,7 +3610,7 @@ MODULE module_mp_thompson_hrrr
          if (sed_s(kts)*DT*onstep(3).ge.1E3) then
             abort = .true.
          end if
-         ! *DH
+#endif
       enddo
       endif
 
@@ -3638,7 +3638,7 @@ MODULE module_mp_thompson_hrrr
 
          if (rg(kts).gt.R1*1000.) &
          pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
-         ! DH*
+#ifdef DEBUG_AEROSOLS
          if (pptgraul.ge.1E5) then
             write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)", &
                      & pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)
@@ -3646,7 +3646,7 @@ MODULE module_mp_thompson_hrrr
          if (sed_g(kts)*DT*onstep(4).ge.1E5) then
             abort = .true.
          end if
-         ! *DH
+#endif
       enddo
       endif
 
@@ -3752,14 +3752,14 @@ MODULE module_mp_thompson_hrrr
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
       enddo
 
-      ! DH*
+#ifdef DEBUG_AEROSOLS
       if (abort) then
          write(0,*) "DH DEBUG: abort for debugging (inside mp_thompson)"
          call sleep(1)
          call MPI_BARRIER(MPI_COMM_WORLD, ierr)
          stop
       end if
-      ! *DH
+#endif
 
       end subroutine mp_thompson
 !+---+-----------------------------------------------------------------+

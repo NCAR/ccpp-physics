@@ -17,21 +17,21 @@
 !> \brief This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
 #if 0
 !! \section arg_table_mynnrad_pre_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)          | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qi                  | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                         | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | T3D                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | inout  | F        |
-!! | CLDFRA              | total_cloud_fraction                                                        | layer total cloud fraction                            | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | qc_save             | saved_qc                                                                    | saved liquid cloud water                              | kg kg-1       |    2 | real      | kind_phys | out    | F        |
-!! | qi_save             | saved_qi                                                                    | saved cloud ice                                       | kg kg-1       |    2 | real      | kind_phys | out    | F        |
-!! | QC_BL               | subgrid_cloud_mixing ratio_pbl                                              | subgrid cloud cloud mixing ratio from PBL scheme      | kg kg-1       |    2 | real      | kind_phys | out    | F        |
-!! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                | frac          |    2 | real      | kind_phys | out    | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
+!! |---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
+!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
+!! | levs                | vertical_dimension                                                          | vertical layer dimension                                                   | count   |    0 | integer   |           | in     | F        |
+!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | qi                  | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | T3D                 | air_temperature                                                             | layer mean air temperature                                                 | K       |    2 | real      | kind_phys | in     | F        |
+!! | CLDFRA              | total_cloud_fraction                                                        | layer total cloud fraction                                                 | frac    |    2 | real      | kind_phys | inout  | F        |
+!! | qc_save             | cloud_liquid_water_mixing_ratio_save                                        | cloud liquid water mixing ratio before entering a physics scheme           | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | qi_save             | cloud_ice_water_mixing_ratio_save                                           | cloud ice water mixing ratio before entering a physics scheme              | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | QC_BL               | subgrid_cloud_mixing ratio_pbl                                              | subgrid cloud cloud mixing ratio from PBL scheme                           | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                                     | frac    |    2 | real      | kind_phys | in     | F        |
+!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
+!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 #endif
 !###===================================================================
@@ -48,13 +48,17 @@ SUBROUTINE mynnrad_pre_run(                &
 !------------------------------------------------------------------- 
       implicit none
 !------------------------------------------------------------------- 
-
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      ! Interface variables
       integer, intent(in)  :: ix, im, levs
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: cldfra
+      real(kind=kind_phys), dimension(im,levs), intent(out)   :: qc_save, qi_save
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_bl, cldfra_bl
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+      ! Local variables
       integer              :: i, k
-      real(kind=kind_phys), dimension(im,levs) ::                        &
-     &        qc, qi, T3D, cldfra, qc_save, qi_save, qc_bl, cldfra_bl
 
       ! Initialize CCPP error handling variables
       errmsg = ''

@@ -33,14 +33,14 @@
 !! | V                   | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | omega               | omega                                                                       | layer mean vertical velocity                          | Pa s-1        |    2 | real      | kind_phys | in     | F        |
 !! | T3D                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_water_vapor    | water_vapor_specific_humidity                                               | water vapor specific humidity                                                       | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_liquid_cloud   | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ice_cloud      | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                         | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                                 | number concentration of cloud droplets (liquid)                                     | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                                           | number concentration of ice                                                         | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ozone                   | ozone_mixing_ratio                                                 | ozone mixing ratio                                                                  | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration                        | number concentration of water-friendly aerosols                                     | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration                          | number concentration of ice-friendly aerosols                                       | kg-1          |    2 | real      | kind_phys | inout  | F        | 
+!! | qgrs_water_vapor    | water_vapor_specific_humidity                                               | water vapor specific humidity                                              | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_liquid_cloud   | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ice_cloud      | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                                 | number concentration of cloud droplets (liquid)                            | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                                           | number concentration of ice                                                | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ozone                   | ozone_mixing_ratio                                                 | ozone mixing ratio                                                         | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration                        | number concentration of water-friendly aerosols                            | kg-1          |    2 | real      | kind_phys | inout  | F        |
+!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration                          | number concentration of ice-friendly aerosols                              | kg-1          |    2 | real      | kind_phys | inout  | F        | 
 !! | prsl                | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
 !! | exner               | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
 !! | slmsk               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
@@ -72,9 +72,9 @@
 !! | edmf_thl            | emdf_updraft_theta_l                                                        | updraft theta-l from mass flux scheme                 | K             |    2 | real      | kind_phys | inout  | F        |
 !! | edmf_ent            | emdf_updraft_entrainment_rate                                               | updraft entrainment rate from mass flux scheme        | s-1           |    2 | real      | kind_phys | inout  | F        |
 !! | edmf_qc             | emdf_updraft_cloud_water                                                    | updraft cloud water from mass flux scheme             | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | nupdraft            | number_of_plumes                                                            | number of plumes per grid column                      | #             |    1 | integer   |           | inout  | F        |
+!! | nupdraft            | number_of_plumes                                                            | number of plumes per grid column                      | count         |    1 | integer   |           | inout  | F        |
 !! | maxMF               | maximum_mass_flux                                                           | maximum mass flux within a column                     | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | ktop_shallow        | k_level_of_highest_reaching_plume                                           | k-level of highest reaching plume                     | #             |    1 | integer   |           | inout  | F        |
+!! | ktop_shallow        | k_level_of_highest_reaching_plume                                           | k-level of highest reaching plume                     | count         |    1 | integer   |           | inout  | F        |
 !! | RTHRATEN            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | dudt                | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | dvdt                | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
@@ -475,7 +475,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          delta(i)=0.0
          qcg(i)=0.0
          znt(i)=zorl(i)*0.01 !cm -> m?
-         if (do_mynnsfclay .eq. .true.) then
+         if (do_mynnsfclay) then
            rmol(i)=recmol(i)
          else
            if (hfx(i) .ge. 0.)then
