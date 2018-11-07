@@ -127,6 +127,12 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/surface_perturbation.F90
                                 ./physics/cu_gf_deep.F90
                                 ./physics/cu_gf_sh.F90
+                                ./physics/module_bl_mynn.F90
+                                ./physics/module_MYNNPBL_wrapper.F90
+                                ./physics/module_sf_mynn.F90
+                                ./physics/module_MYNNSFC_wrapper.F90
+                                ./physics/module_MYNNrad_pre.F90
+                                ./physics/module_MYNNrad_post.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
     # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
