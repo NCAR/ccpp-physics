@@ -27,6 +27,7 @@
       end subroutine satmedmfvdif_finalize
 
 !> \defgroup SATMEDMF FV3GFS satmedmfvdif_run Main
+!! @{
 !! \brief This subroutine contains all of the logic for the 
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
 !!
@@ -1439,9 +1440,11 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine satmedmfvdif_run
+!! @}
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
+!> This subroutine solves tridiagonal problem for TKE.
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------
 !!

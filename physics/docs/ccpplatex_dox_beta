@@ -201,7 +201,6 @@ INPUT                  =  pdftxt/mainpage.txt            \
                         ../cu_gf_sh.F90     \
                         ../mp_thompson_hrrr.F90    \
                         ../module_mp_thompson_hrrr.F90 \
-                        ../module_mp_thompson_hrrr_radar.F90 \
                         ../sfc_drv_ruc.F90   \
                         ../module_sf_ruclsm.F90    \
                         ../namelist_soilveg_ruc.F90 \

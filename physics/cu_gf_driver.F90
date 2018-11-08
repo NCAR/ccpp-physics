@@ -1,4 +1,6 @@
-!
+!>\file cu_gf_driver.F90
+!! This file is Grell-Freitas cumulus scheme driver.
+
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
@@ -55,8 +57,9 @@ contains
 ! t2di is temp after advection, but before physics
 ! t = current temp (t2di + physics up to now)
 !===================
-!
-!!
+
+!> \defgroup cu_gf_driver_group GSD Grell-Freitas Scheme Module
+!! @{
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -813,4 +816,5 @@ contains
 
 
    end subroutine cu_gf_driver_run
+!! @}
 end module cu_gf_driver

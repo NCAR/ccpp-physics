@@ -2,19 +2,19 @@
 \page CSAW_scheme Scale-Aware CS-AW Cumulus Scheme
 \section cs_descrip  Description
 
-Chikira-Sugiyama cumulus scheme (Chikira and Sugiyama 2010 \cite chikira_and_sugiyama_2010) with prognostic closure and
+Chikira-Sugiyama cumulus scheme (Chikira and Sugiyama (2010) \cite Chikira_2010) with prognostic closure and
 Arakawa-Wu Scale-Aware extension is an offshoot of the prognostic Arakawa-Schubert scheme. It is characterized by lateral
 entrainment rates that vertically varies depending on buoyancy and vertical velocity of updraft air parcel following
-Gregory (2001) and spectral representation of cloud types according to updraft velocity at cloud base. Cloud base mass 
+Gregory (2001) \cite Gregory_2001 and spectral representation of cloud types according to updraft velocity at cloud base. Cloud base mass 
 flux is determined by convective kinetic energy closure ()
 
 
 Chikira-Sugiyama convection with Arakawa-Wu extension (CSAW)
 - A community R2O project via CPO/CTB/CPT
-- Based on Chikira-Sugiyama(2010) and Arakawa-Wu (2013) \cite arakawa_and_wu_2013
+- Based on Chikira-Sugiyama (2010) \cite Chikira_2010 and Arakawa-Wu (2013) \cite Arakawa_2013
 - A Generalization of the Unified parameterization - Chikira, Randall and Dazlich
 - "What matters in generalizing the conventional cumulus parameterization is the dependence on the fractional convective
-cloudiness, not directly on the grid spacing" - Arakawa and Wu (2013)
+cloudiness, not directly on the grid spacing" - Arakawa and Wu (2013) \cite Arakawa_2013
 
 CSAW follows the above in applying unified parameterization to CS (i.e. the updraft fraction is not directly determined
 by grid spacing).
@@ -22,8 +22,8 @@ by grid spacing).
 CSAW in IPDv4
 - Based on entraining plume model
 - Spectral representation of updraft ensemble - cloud types represented by cloud base updraft velocity
-- Entrainment rate changes vertically depending on buoyancy and vertical velocity (Gregory, 2001)
-- Cloud base mass flux determined using prognostic Arakawa-Schubert approach (Pan and Randall, 1998 \cite pan_and_randall_1998)
+- Entrainment rate changes vertically depending on buoyancy and vertical velocity (Gregory (2001) \cite Gregory_2001)
+- Cloud base mass flux determined using prognostic Arakawa-Schubert approach (Pan and Randall (1998) \cite Pan_1998)
 - Generalized unified parameterization convective contributions through eddy flux convergence and local condensation/evaporation
 - Downdraft in CSAW is very simple (non-spectral)
 - CSAW has been tested with NEMS/FV3 at C96L127, C384L127, C768L127
@@ -32,9 +32,9 @@ CSAW in IPDv4
 
 
 \section intra_rough Intraphysics Communication
-\ref arg_table_sfc_ex_coef_run
+\ref arg_table_cs_conv_run
 
-\section gen_rough  General Algorithm
-\ref general_diff
+\section gen_cs_conv CSAW General Algorithm
+\ref general_cs_conv
 
 */

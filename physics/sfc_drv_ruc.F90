@@ -135,7 +135,9 @@ module lsm_ruc
 !                                                                       !
 !  ====================    end of description    =====================  !
 
+!> \defgroup lsm_ruc_group GSD RUC LSM Model
 #if 0
+!! @{
 !! \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !|-------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -1401,5 +1403,7 @@ module lsm_ruc
 
           if (errflg /= 0) return
       end subroutine rucinit
+
+!! @}
 
 end module lsm_ruc
