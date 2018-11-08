@@ -144,7 +144,7 @@ module lsm_ruc
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
 !! | me              | mpi_rank                                                                     | current MPI-rank                                                | index         |    0 | integer   |           | in     | F        |
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
-!! | iter            | iteration_number                                                             | number of iteration                                             | index         |    0 | integer   |           | in     | F        |
+!! | iter            | ccpp_loop_counter                                                            | loop counter for subcycling loops in CCPP                       | index         |    0 | integer   |           | in     | F        |
 !! | im              | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
 !! | nlev            | vertical_dimension                                                           | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
 !! | lsm_ruc         | flag_for_ruc_land_surface_scheme                                             | flag for RUC land surface model                                 | flag          |    0 | integer   |           | in     | F        |
@@ -176,6 +176,7 @@ module lsm_ruc
 !! | u1              | x_wind_at_lowest_model_layer                                                 | zonal wind at lowest model layer                                | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1              | y_wind_at_lowest_model_layer                                                 | meridional wind at lowest model layer                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | prsl1           | air_pressure_at_lowest_model_layer                                           | mean pressure at lowest model layer                             | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | ddvel           | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                      | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1              | air_temperature_at_lowest_model_layer                                        | mean temperature at lowest model layer                          | K             |    1 | real      | kind_phys | in     | F        |
 !! | q1              | water_vapor_specific_humidity_at_lowest_model_layer                          | water vapor specific humidity at lowest model layer             | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | qc              | cloud_condensed_water_mixing_ratio_at_lowest_model_layer | moist (dry+vapor, no condensates) mixing ratio of cloud water at lowest model layer | kg kg-1       |    1 | real      | kind_phys | in     | F        |
@@ -185,6 +186,8 @@ module lsm_ruc
 !! | sfcemis         | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                               | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | cm              | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                             | none          |    1 | real      | kind_phys | in     | F        |
 !! | ch              | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | none          |    1 | real      | kind_phys | in     | F        |
+!! | chh             | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | cmm             | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | wet1            | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | canopy          | canopy_water_amount                                                          | canopy water amount                                             | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | sigmaf          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | frac          |    1 | real      | kind_phys | in     | F        |
@@ -243,7 +246,7 @@ module lsm_ruc
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
      &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
-     &       prsl1, zf, islmsk, shdmin, shdmax, alvwf, alnwf,           &
+     &       prsl1, zf, islmsk, ddvel, shdmin, shdmax, alvwf, alnwf,    &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
      &       smc, stc, slc, lsm_ruc, lsm,                               &
 ! --- constants
@@ -257,7 +260,7 @@ module lsm_ruc
 ! --- outputs
      &       sncovr1, qsurf, gflux, drain, evap, hflx,                  &
      &       rhosnf, runof, runoff, srunoff,                            &
-     &       evbs, evcw, sbsno, snowc, stm, wet1,                       &
+     &       chh, cmm, evbs, evcw, sbsno, snowc, stm, wet1,             &
      &       acsnow, snowfallac,                                        &
      &       errmsg, errflg                                             &
      &     )
@@ -277,7 +280,7 @@ module lsm_ruc
 
       real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,&
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,        &
-     &       ch, prsl1, shdmin, shdmax,                                 &
+     &       ch, prsl1, ddvel, shdmin, shdmax,                          &
      &       snoalb, alvwf, alnwf, zf, qc, q1 
 
       integer, dimension(im), intent(in) :: islmsk
@@ -303,8 +306,8 @@ module lsm_ruc
 
 !  ---  output:
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
-     &       qsurf , gflux , evap , runof , drain ,                    &
-     &       runoff, srunoff, hflx,                                     &
+     &       qsurf , gflux , evap , runof , drain ,                     &
+     &       runoff, srunoff, hflx, cmm, chh,                           &
      &       rhosnf, evbs, evcw, sbsno, snowc, stm, wet1,               &
      &       acsnow, snowfallac
 
@@ -313,7 +316,7 @@ module lsm_ruc
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
-     &       q0, qs1,  weasd_old, snwdph_old,                           &
+     &       q0, qs1, wind, weasd_old, snwdph_old,                      &
      &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old
 
       real (kind=kind_phys), dimension(lsoil_ruc) :: et
@@ -532,6 +535,9 @@ module lsm_ruc
 
       do i  = 1, im
         if (flag_iter(i) .and. flag(i)) then
+          wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
+                  + max(0.0, min(ddvel(i), 30.0)), 1.0)
+
           q0(i)   = max(q1(i)/(1.-q1(i)), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
 
           rho(i) = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0(i)))
@@ -745,9 +751,13 @@ module lsm_ruc
           !sncovr(i,j) = snowc(i)
           sncovr(i,j) = sncovr1(i)
 
-          chs(i,j)    = ch(i)  
-          flhc(i,j)   = ch(i) * rho(i) * con_cp * (1. + 0.84*q2(i,1,j))
-          flqc(i,j)   = ch(i) * rho(i) * wet(i,j)
+          chs(i,j)    = ch(i) * wind(i) ! compute conductance 
+          flhc(i,j)   = chs(i,j) * rho(i) * con_cp * (1. + 0.84*q2(i,1,j))
+          flqc(i,j)   = chs(i,j) * rho(i) * wet(i,j)
+          ! for output
+          cmm(i)      = cm(i) * wind(i)
+          chh(i)      = chs(i,j) * rho(i)
+          !
 
           !  ---- ... outside sflx, roughness uses cm as unit
           z0(i,j)  = zorl(i)/100.
@@ -974,8 +984,8 @@ module lsm_ruc
           rhosnf(i) = rhosnfr(i,j)
 
           ! --- ... accumulated total runoff and surface runoff
-          runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 1000. ! kg m-2
-          srunoff(i) = srunoff(i) + runof(i) * delt * 1000.            ! kg m-2
+          runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
+          srunoff(i) = srunoff(i) + runof(i) * delt * 0.001            ! kg m-2
 
           !  --- ...  unit conversion (from m to mm)
           snwdph(i)  = snowh(i,j) * 1000.0
@@ -1146,7 +1156,7 @@ module lsm_ruc
           errflg = 1
           return
         else
-        !write(0,*) 'Start of RUC LSM initialization'
+          write(0,*) 'Start of RUC LSM initialization'
         endif
 
        debug_print = .false.

@@ -127,17 +127,39 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/surface_perturbation.F90
                                 ./physics/cu_gf_deep.F90
                                 ./physics/cu_gf_sh.F90
+                                ./physics/module_bl_mynn.F90
+                                ./physics/module_MYNNPBL_wrapper.F90
+                                ./physics/module_sf_mynn.F90
+                                ./physics/module_MYNNSFC_wrapper.F90
+                                ./physics/module_MYNNrad_pre.F90
+                                ./physics/module_MYNNrad_post.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
+    # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
+    # is fully accepted.
     set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
-    string(REPLACE "xHost" "xCORE-AVX-I"
+    string(REPLACE "-xHOST" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
-    string(REPLACE "xCORE-AVX2" "xCORE-AVX-I"
+    string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
+    # Force consistent results of math calculations for MG microphysics;
+    # in Debug/Bitforbit) mode; without this flag, the results of the
+    # intrinsic gamma function are different for the non-CCPP and CCPP
+    # version (on Theia with Intel 18). Note this is only required with
+    # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
+    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
+                                  ./physics/micro_mg3_0.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
+    elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
+      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
+                                  ./physics/micro_mg3_0.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
+    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
