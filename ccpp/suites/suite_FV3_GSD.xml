@@ -57,7 +57,8 @@
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys</scheme>
+      <scheme>ozphys_2015</scheme>
+      <scheme>h2ophys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
