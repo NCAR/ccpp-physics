@@ -135,7 +135,7 @@ module mp_thompson_hrrr_pre
 
 !.. CCN
          if (MAXVAL(nwfa) .lt. eps) then
-            write(*,*) ' Apparently there are no initial CCN aerosols.'
+            if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -153,21 +153,21 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            write(*,*) ' Apparently initial CCN aerosols are present.' 
+            if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosols are present.' 
             if (MAXVAL(nwfa2d) .lt. eps) then
-               write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
                do i = 1, ncol
                   airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
             else
-               write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
             endif
          endif
 
 !.. IN
          if (MAXVAL(nifa) .lt. eps) then
-            write(*,*) ' Apparently there are no initial IN aerosols.'
+            if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial IN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -184,13 +184,13 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            write(*,*) ' Apparently initial IN aerosols are present.' 
+            if (mpirank==mpiroot) write(*,*) ' Apparently initial IN aerosols are present.' 
             if (MAXVAL(nifa2d) .lt. eps) then
-               write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
+               if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
                ! calculate IN surface flux here, right now just set to zero
                nifa2d = 0.
             else
-               write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot) write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
             endif
          endif
 

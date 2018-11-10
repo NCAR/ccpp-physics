@@ -97,10 +97,10 @@ contains
 'No input soil level data (either temperature or moisture, or both are missing).  Required for RUC LSM.'
       ELSE
          IF ( flag_soil_levels == 1 ) THEN
-           write(0, FMT='(A)') ' Assume RUC LSM input'
+           !write(0, FMT='(A)') ' Assume RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_sm_levels_input)  ) )
          ELSE
-           write(0, FMT='(A)') ' Assume non-RUC LSM input'
+           !write(0, FMT='(A)') ' Assume non-RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_soil_layers)  ) )
          END IF
       END IF

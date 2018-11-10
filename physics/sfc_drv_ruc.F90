@@ -1153,8 +1153,8 @@ module lsm_ruc
                 lsm, ' incompatible with RUC LSM, please set to ', lsm_ruc
           errflg = 1
           return
-        else
-          write(0,*) 'Start of RUC LSM initialization'
+        !else
+        !  write(0,*) 'Start of RUC LSM initialization'
         endif
 
        debug_print = .false.
