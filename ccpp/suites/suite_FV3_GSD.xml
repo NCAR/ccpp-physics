@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_mynn" lib="ccppphys" ver="2">
+<suite name="FV3_GSD" lib="ccppphys" ver="2">
   <!-- <init></init> -->
-  <group name="fast_physics">
-    <subcycle loop="1">
-      <scheme>fv_sat_adj</scheme>
-    </subcycle>
-  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
@@ -47,8 +42,7 @@
       <scheme>sfc_nst_pre</scheme>
       <scheme>sfc_nst</scheme>
       <scheme>sfc_nst_post</scheme>
-      <scheme>lsm_noah</scheme>
-      <scheme>sfc_sice</scheme>
+      <scheme>lsm_ruc</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->
@@ -67,21 +61,22 @@
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
-      <scheme>samfdeepcnv</scheme>
+      <scheme>cu_gf_driver_pre</scheme>
+      <scheme>cu_gf_driver</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
       <scheme>gwdc_pre</scheme>
       <scheme>gwdc</scheme>
       <scheme>gwdc_post</scheme>
       <scheme>GFS_SCNV_generic_pre</scheme>
-      <scheme>samfshalcnv</scheme>
-      <scheme>samfshalcnv_post</scheme>
       <scheme>GFS_SCNV_generic_post</scheme>
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
-      <scheme>gfdl_cloud_microphys</scheme>
+      <scheme>mp_thompson_hrrr_pre</scheme>
+      <scheme>mp_thompson_hrrr</scheme>
+      <scheme>mp_thompson_hrrr_post</scheme>
       <scheme>GFS_MP_generic_post</scheme>
-      <scheme>sfc_sice_post</scheme>
+      <scheme>cu_gf_driver_post</scheme>
     </subcycle>
   </group>
   <group name="stochastics">
