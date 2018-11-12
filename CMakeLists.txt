@@ -134,6 +134,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
+     # Compile fv_sat_adj routines with 32-bit reals, if dynamics is compiled this way
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
     # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
     # is fully accepted.
