@@ -12,6 +12,7 @@
 #endif
      &,                     kind_rad  = 8                               &
      &,                     kind_phys = 8     ,kind_taum=8              &
+     &,                     kind_grid = 8                               &
      &,                     kind_REAL = 8                               &! used in cmp_comm
      &,                     kind_INTEGER = 4                             ! -,,-
 
@@ -25,17 +26,16 @@
 #endif
      &,                     kind_rad  = 4                               &
      &,                     kind_phys = 4     ,kind_taum=4              &
+     &,                     kind_grid = 4                               &
      &,                     kind_REAL = 4                               &! used in cmp_comm
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #endif
 
 #ifdef OVERLOAD_R4
-      integer, parameter :: kind_dyn  = 4                               &
-     &,                     kind_grid = 4                               &
+      integer, parameter :: kind_dyn  = 4
 #else
-      integer, parameter :: kind_dyn  = 8                               &
-     &,                     kind_grid = 8                               &
+      integer, parameter :: kind_dyn  = 8
 #endif
 !
       real(kind=kind_evod), parameter :: mprec = 1.e-12           ! machine precision to restrict dep
