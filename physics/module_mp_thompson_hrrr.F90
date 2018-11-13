@@ -1497,7 +1497,9 @@ MODULE module_mp_thompson_hrrr
 #endif
                           kts, kte, dt, ii, jj)
       ! DH*
+#ifdef MPI
       use mpi
+#endif
       ! *DH
       implicit none
 
