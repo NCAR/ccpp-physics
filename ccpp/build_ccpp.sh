@@ -95,7 +95,7 @@ if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
 else
   DEBUGFLAG=""
 fi
-./ccpp/framework/scripts/ccpp_prebuild.py --model=FV3 ${STATICFLAGS} ${DEBUGFLAG}
+./ccpp/framework/scripts/ccpp_prebuild.py --config=./ccpp/config/ccpp_prebuild_config.py ${STATICFLAGS} ${DEBUGFLAG}
 cd -
 
 # Generate CCPP cmake flags from MAKE_OPT
