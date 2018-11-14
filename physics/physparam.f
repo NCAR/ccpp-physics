@@ -73,6 +73,7 @@
 !!\n =0:input cld opt depth, ignoring iswcice setting
 !!\n =1:cloud optical property scheme based on Hu and Stamnes(1993) \cite
 !!      hu_and_stamnes_1993 method
+!!\n =2:cloud optical property scheme based on Hu and Stamnes(1993) -updated
       integer,save      :: iswcliq = 1
 
 !> SW optical property for ice clouds (only iswcliq>0)
@@ -162,8 +163,10 @@
 !!\n =0:seasonal global distributed OPAC aerosol climatology
 !!\n =1:monthly global distributed GOCART aerosol climatology
 !!\n =2: GOCART prognostic aerosol model
+!!\n =5: OPAC climatoloy with new band mapping
 !!\n Opr GFS=0; Opr CFS=n/a
       integer, save :: iaermdl = 0
+
 !> aerosol effect control flag
 !!\n 3-digit flag 'abc':
 !!\n a-stratospheric volcanic aerols
@@ -172,19 +175,7 @@
 !!\n =0:aerosol effect is not included; =1:aerosol effect is included
 !!\n Opr GFS/CFS =111; see IAER in run scripts
       integer, save :: iaerflg = 0
-!> LW aerosols effect control flag
-!!\n =.true.:aerosol effect is included in LW radiation
-!!\n =.false.:aerosol effect is not included in LW radiation
-      logical, save :: lalwflg = .true.
-!> SW aerosols effect control flag
-!!\n =.true.:aerosol effect is included in SW radiation
-!!\n =.false.:aerosol effect is not included in SW radiation
-      logical, save :: laswflg = .true.
-!> stratospheric volcanic aerosol effect flag
-!!\n =.true.:historical events of stratosphere volcanic aerosol effect
-!!           is included radiation (limited by data availability)
-!!\n =.false.:volcanic aerosol effect is not included in radiation
-      logical, save :: lavoflg = .true.
+
 !> external aerosols data file: aerosol.dat
       character, save :: aeros_file*26
 !     data aeros_file   / 'climaeropac_global.txt    ' /
@@ -200,6 +191,7 @@
 !!\n =2:monthly 15 degree horizontal resolution from observations
 !!\n Opr GFS/CFS=2; see ICO2 in run scripts
       integer, save :: ico2flg = 0
+
 !> controls external data at initial time and data usage during
 !! forecast time
 !!\n =-2:as in 0,but superimpose with seasonal climatology cycle
@@ -210,11 +202,13 @@
 !!\n =yyyy1:use yyyy year of data, extrapolate when necessary
 !!\n Opr GFS/CFS=1; see ICTM in run scripts
       integer, save :: ictmflg = 0
+
 !> ozone data source control flag
 !!\n =0:use seasonal climatology ozone data
 !!\n >0:use prognostic ozone scheme (also depend on other model control
 !!      variable at initial time)
       integer, save :: ioznflg = 1
+
 !> external co2 2d monthly obsv data table: co2historicaldata_2004.txt
       character, save :: co2dat_file*26
 !> external co2 global annual mean data tb: co2historicaldata_glob.txt
@@ -236,21 +230,35 @@
 !!\n =0:use diagnostic cloud scheme for cloud cover and mean optical properties
 !!\n =1:use prognostic cloud scheme for cloud cover and cloud properties
       integer, save :: icldflg = 1
-!> cloud micorphysics scheme control flag
-!!\n =1:modified Zhao/Carr/Sundqvist scheme (Moorthi, 2001)
-!!\n =2:Ferrier microphysics scheme (Ferrier et al. 2002)
-!!\n =3:as in 1 but with pdf method defined cloud cover
-!      integer, save :: icmphys = 1
+
 !> cloud overlapping control flag for SW
 !!\n =0:use random cloud overlapping method
 !!\n =1:use maximum-random cloud overlapping method
+!!\n =2:use maximum cloud overlapping method
+!!\n =3:use decorrelation length overlapping method
 !!\n Opr GFS/CFS=1; see IOVR_SW in run scripts
       integer, save :: iovrsw  = 1
 !> cloud overlapping control flag for LW
 !!\n =0:use random cloud overlapping method
 !!\n =1:use maximum-random cloud overlapping method
+!!\n =2:use maximum cloud overlapping method
+!!\n =3:use decorrelation length overlapping method
 !!\n Opr GFS/CFS=1; see IOVR_LW in run scripts
       integer, save :: iovrlw  = 1
+
+!> sub-column cloud approx flag in SW radiation
+!!\n =0:no McICA approximation in SW radiation
+!!\n =1:use McICA with precribed permutation seeds (test mode)
+!!\n =2:use McICA with randomly generated permutation seeds
+!!\n Opr GFS/CFS=2; see ISUBC_SW in run scripts
+      integer, save :: isubcsw = 0
+!> sub-column cloud approx flag in LW radiation
+!!\n =0:no McICA approximation in LW radiation
+!!\n =1:use McICA with prescribed permutation seeds (test mode)
+!!\n =2:use McICA with randomly generatedo
+!!\n Opr GFS/CFS=2; see ISUBC_LW in run scripts
+      integer, save :: isubclw = 0
+
 !> eliminating CRICK control flag
       logical, save :: lcrick  =.false.
 !> in-cld condensate control flag
@@ -268,6 +276,7 @@
 !!\n =0:vegetation type based climatological albedo scheme
 !!\n =1:seasonal albedo derived from MODIS measurements
       integer, save :: ialbflg = 0
+
 !> surface emissivity scheme control flag
 !!\n =0:black-body surface emissivity(=1.0)
 !!\n =1:vegetation type based climatology emissivity(<1.0)
@@ -284,18 +293,7 @@
 
 !> vertical profile indexing flag
       integer, save :: ivflip  = 1
-!> sub-column cloud approx flag in SW radiation
-!!\n =0:no McICA approximation in SW radiation
-!!\n =1:use McICA with precribed permutation seeds (test mode)
-!!\n =2:use McICA with randomly generated permutation seeds
-!!\n Opr GFS/CFS=2; see ISUBC_SW in run scripts
-      integer, save :: isubcsw = 0
-!> sub-column cloud approx flag in LW radiation
-!!\n =0:no McICA approximation in LW radiation
-!!\n =1:use McICA with prescribed permutation seeds (test mode)
-!!\n =2:use McICA with randomly generated
-!!\n Opr GFS/CFS=2; see ISUBC_LW in run scripts
-      integer, save :: isubclw = 0
+
 !> initial permutaion seed for mcica radiation
       integer, save :: ipsd0   = 0
       integer, save :: ipsdlim = 1e8

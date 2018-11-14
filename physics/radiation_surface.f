@@ -68,6 +68,8 @@
 !                                 subr 'sfc_init'.                     !
 !      nov  2012   y. hou       - modified control parameters through  !
 !                    module 'physparam'.                               !
+!      jun  2018   h-m lin/y-t hou - correct error in clim-scheme of   !
+!                    weak/strong factor and restore to the orig form   !
 !                                                                      !
 !!!!!  ==========================================================  !!!!!
 !!!!!                       end descriptions                       !!!!!
@@ -478,10 +480,8 @@
 !>  - Calculate direct sea surface albedo.
 
          if (coszf(i) > 0.0001) then
-!           rfcs = 1.4 / (f_one + 0.8*coszf(i))
-!           rfcw = 1.3 / (f_one + 0.6*coszf(i))
-            rfcs = 2.14 / (f_one + 1.48*coszf(i))
-            rfcw = rfcs
+            rfcs = 1.4 / (f_one + 0.8*coszf(i))
+            rfcw = 1.1 / (f_one + 0.2*coszf(i))
 
             if (tsknf(i) >= con_t0c) then
               asevb = max(asevd, 0.026/(coszf(i)**1.7+0.065)            &

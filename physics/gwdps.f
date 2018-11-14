@@ -477,8 +477,8 @@
       real(kind=kind_phys) wk(IM)
       real(kind=kind_phys) bnv2lm(IM,KM),PE(IM),EK(IM),ZBK(IM),UP(IM)
       real(kind=kind_phys) DB(IM,KM),ANG(IM,KM),UDS(IM,KM)
-      real(kind=kind_phys) ZLEN, DBTMP, R, PHIANG, CDmb, DBIM
-      real(kind=kind_phys) ENG0, ENG1
+      real(kind=kind_phys) ZLEN, DBTMP, R, PHIANG, CDmb, DBIM, ZR
+      real(kind=kind_phys) ENG0, ENG1, COSANG2, SINANG2
 !
 !     Some constants
 !
@@ -842,8 +842,16 @@
 !! where \f$\psi\f$, which is derived from THETA, is the angle between
 !! the incident flow direction and the normal ridge direcion.
 !! \f$\gamma\f$ is the orographic anisotropy (GAMMA).
-                R = (cos(ANG(I,K))**2 + GAMMA(J) * sin(ANG(I,K))**2) /
-     &              (gamma(J) * cos(ANG(I,K))**2 + sin(ANG(I,K))**2)
+               COSANG2 = cos(ANG(I,K))*cos(ANG(I,K))
+               SINANG2 = sin(ANG(I,K))*sin(ANG(I,K))
+               if ( abs(GAMMA(J) * COSANG2 + SINANG2) 
+     &              .lt. 1.e-06 ) then
+                 ZR = 2.0
+               else
+                 R = (COSANG2 + GAMMA(J) * SINANG2) /
+     &              (GAMMA(J) * COSANG2 + SINANG2)
+                 ZR =  MAX( 2. - 1. / R, 0. )
+               endif
 ! --- (negitive of DB -- see sign at tendency)
 !> - In each model layer below the dividing streamlines, a drag from
 !! the blocked flow is exerted by the obstacle on the large scale flow.
@@ -855,8 +863,7 @@
 !! where \f$C_{d}\f$ is a specified constant, \f$\sigma\f$ is the
 !! orographic slope.
 
-                DBTMP = 0.25 *  CDmb *
-     &                  MAX( 2. - 1. / R, 0. ) * sigma(J) *
+                DBTMP = 0.25 *  CDmb * ZR * sigma(J) *
      &                  MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K))) *
      &                  ZLEN / hprime(J)
                 DB(I,K) =  DBTMP * UDS(I,K)
@@ -872,6 +879,7 @@
 !         if(lprnt) print *,' @K=1,ZLEN,DBTMP=',K,ZLEN,DBTMP
           endif
         ENDDO
+! 
 !.............................
 !.............................
 ! end  mtn blocking section

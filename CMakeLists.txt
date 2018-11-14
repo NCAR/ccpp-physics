@@ -37,7 +37,7 @@ if (PROJECT STREQUAL "CCPP-SCM")
   #------------------------------------------------------------------------------
   # CMake Modules
   # Set the CMake module path
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ccpp-framework/cmake")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../framework/cmake")
 endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
@@ -77,8 +77,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #------------------------------------------------------------------------------
-# By default we want a shared library
-option(BUILD_SHARED_LIBS "Build a shared library" ON)
+# By default we want a shared library (unless a static build is requested)
+if(STATIC)
+  option(BUILD_SHARED_LIBS "Build a static library" OFF)
+else(STATIC)
+  option(BUILD_SHARED_LIBS "Build a shared library" ON)
+endif(STATIC)
 
 #------------------------------------------------------------------------------
 # Add the CCPP include/module directory
@@ -121,17 +125,41 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/wv_saturation.F
                                 ./physics/cldwat2m_micro.F
                                 ./physics/surface_perturbation.F90
+                                ./physics/cu_gf_deep.F90
+                                ./physics/cu_gf_sh.F90
+                                ./physics/module_bl_mynn.F90
+                                ./physics/module_MYNNPBL_wrapper.F90
+                                ./physics/module_sf_mynn.F90
+                                ./physics/module_MYNNSFC_wrapper.F90
+                                ./physics/module_MYNNrad_pre.F90
+                                ./physics/module_MYNNrad_post.F90
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
+    # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
+    # is fully accepted.
     set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
-    string(REPLACE "xHost" "xCORE-AVX-I"
+    string(REPLACE "-xHOST" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
-    string(REPLACE "xCORE-AVX2" "xCORE-AVX-I"
+    string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
+    # Force consistent results of math calculations for MG microphysics;
+    # in Debug/Bitforbit) mode; without this flag, the results of the
+    # intrinsic gamma function are different for the non-CCPP and CCPP
+    # version (on Theia with Intel 18). Note this is only required with
+    # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
+    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
+                                  ./physics/micro_mg3_0.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
+    elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
+      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
+                                  ./physics/micro_mg3_0.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
+    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
@@ -172,9 +200,9 @@ endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 if (PROJECT STREQUAL "CCPP-FV3")
   link_directories(${NCEPLIBS_DIR}/lib)
 elseif (PROJECT STREQUAL "CCPP-SCM")
-  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/w3nco/v2.0.6/src)
-  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/bacio/v2.0.1/src)
-  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../external/sp/v2.0.2/src)
+  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
+  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
+  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
 
   #add "sibling" directories (must specify the build directory too)
   ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
@@ -185,12 +213,23 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/sp)
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp-framework/src)
+  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
 endif (PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------
 
-add_library(ccppphys ${SCHEMES} ${CAPS})
+if(STATIC)
+  add_library(ccppphys STATIC ${SCHEMES} ${CAPS})
+  # Generate list of Fortran modules from defined sources
+  foreach(source_f90 ${CAPS})
+      string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${source_f90})
+      string(TOLOWER ${tmp_module_f90} module_f90)
+      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
+  endforeach()
+else(STATIC)
+  add_library(ccppphys ${SCHEMES} ${CAPS})
+endif(STATIC)
+
 if (PROJECT STREQUAL "CCPP-FV3")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
 elseif (PROJECT STREQUAL "CCPP-SCM")
@@ -230,4 +269,9 @@ if (PROJECT STREQUAL "CCPP-FV3")
           FILE ccppphys-config.cmake
           DESTINATION lib/cmake
   )
+  if(STATIC)
+    # Define where to install the C headers and Fortran modules
+    #install(FILES ${HEADERS_C} DESTINATION include)
+    install(FILES ${MODULES_F90} DESTINATION include)
+  endif(STATIC)
 endif (PROJECT STREQUAL "CCPP-FV3")
