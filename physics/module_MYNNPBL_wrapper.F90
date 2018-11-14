@@ -256,9 +256,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
-     &       spp_pbl=0
+     &       spp_pbl=0,                                     &
+     &       bl_mynn_mixscalars=1
       LOGICAL ::                                            &
-     &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC
+     &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
+     &       FLAG_QNWFA, FLAG_QNIFA
       INTEGER, PARAMETER :: param_first_scalar = 1
       INTEGER ::                                            &
        &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
@@ -300,8 +302,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        qvsh,qc,qi,qnc,qni,ozone,qnwfa,qnifa,                      &
      &        dz, w, p, rho, th, qv, exch_m, tke_pbl,                    &
-     &        RUBLTEN, RVBLTEN, RTHBLTEN,RQVBLTEN,                       &
+     &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN,                  &
+     &        RQNWFABLTEN, RQNIFABLTEN,                                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS,                               &
      &        pattern_spp_pbl
 
@@ -348,6 +351,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          FLAG_QNI= .false.
          FLAG_QC = .true.
          FLAG_QNC= .false.
+         FLAG_QNWFA= .false.
+         FLAG_QNIFA= .false.
          p_qc = 2
          p_qr = 0
          p_qi = 2 
@@ -371,9 +376,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   ! Thompson
           if(ltaerosol) then
             FLAG_QI = .true.
-            FLAG_QNI= .false.
+            FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QNC= .false.
+            FLAG_QNC= .true.
+            FLAG_QNWFA= .true.
+            FLAG_QNIFA= .true.
             p_qc = 2
             p_qr = 0
             p_qi = 2
@@ -395,9 +402,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             enddo
           else
             FLAG_QI = .true.
-            FLAG_QNI= .false.
+            FLAG_QNI= .true.
             FLAG_QC = .true.
             FLAG_QNC= .false.
+            FLAG_QNWFA= .false.
+            FLAG_QNIFA= .false.
             p_qc = 2
             p_qr = 0
             p_qi = 2
@@ -424,6 +433,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           FLAG_QNI= .false.
           FLAG_QC = .true.
           FLAG_QNC= .false.
+          FLAG_QNWFA= .false.
+          FLAG_QNIFA= .false.
           p_qc = 2
           p_qr = 0
           p_qi = 2
@@ -528,6 +539,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             delt=delt,dz=dz,dx=dx,znt=znt,                      &
      &             u=u,v=v,w=w,th=th,qv=qv,qc=qc,                      &
      &             qi=qi,qni=qni,qnc=qnc,                              &
+     &             qnwfa=qnwfa,qnifa=qnifa,                            &
      &             p=prsl,exner=exner,rho=rho,T3D=t3d,                 &
      &             xland=xland,ts=ts,qsfc=qsfc,qcg=qcg,ps=ps,          &
      &             ust=ust,ch=ch,hfx=hfx,qfx=qfx,rmol=rmol,            &
@@ -542,8 +554,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             Tsq=tsq,Qsq=qsq,Cov=cov,                            & !output
      &             RUBLTEN=RUBLTEN,RVBLTEN=RVBLTEN,RTHBLTEN=RTHBLTEN,  & !output
      &             RQVBLTEN=RQVBLTEN,RQCBLTEN=rqcblten,                &
-     &             RQIBLTEN=rqiblten,                                  & !output
-     &             RQNIBLTEN=rqniblten,                                & !output
+     &             RQIBLTEN=rqiblten,RQNCBLTEN=rqncblten,              & !output
+     &             RQNIBLTEN=rqniblten,RQNWFABLTEN=RQNWFABLTEN,        & !output
+     &             RQNIFABLTEN=RQNIFABLTEN,                            & !output
      &             EXCH_H=exch_h,EXCH_M=exch_m,                        & !output
      &             pblh=pblh,KPBL=KPBL                                 & !output
      &             ,el_pbl=el_pbl                                      & !output
@@ -558,7 +571,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,bl_mynn_edmf=bl_mynn_edmf                          & !input parameter
      &             ,bl_mynn_edmf_mom=bl_mynn_edmf_mom                  & !input parameter
      &             ,bl_mynn_edmf_tke=bl_mynn_edmf_tke                  & !input parameter
-     &             ,bl_mynn_edmf_part=bl_mynn_edmf_part                & !input parameter
+     &             ,bl_mynn_mixscalars=bl_mynn_mixscalars              & !input parameter
      &             ,bl_mynn_cloudmix=bl_mynn_cloudmix                  & !input parameter
      &             ,bl_mynn_mixqt=bl_mynn_mixqt                        & !input parameter
      &             ,edmf_a=edmf_a,edmf_w=edmf_w,edmf_qt=edmf_qt        & !output
@@ -569,6 +582,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,RTHRATEN=RTHRATEN                                  & !input
      &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
      &             ,FLAG_QC=flag_qc,FLAG_QNC=flag_qnc                  & !input
+     &             ,FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA        & !input
      &             ,IDS=1,IDE=im,JDS=1,JDE=1,KDS=1,KDE=levs            & !input
      &             ,IMS=1,IME=im,JMS=1,JME=1,KMS=1,KME=levs            & !input
      &             ,ITS=1,ITE=im,JTS=1,JTE=1,KTS=1,KTE=levs)             !input
@@ -630,8 +644,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)                   = 0.0
-                 dqdt_water_aer_num_conc(i,k)      = 0.0
-                 dqdt_ice_aer_num_conc(i,k)        = 0.0
+                 dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
+                 dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
                enddo
              enddo
              !do k=1,levs
