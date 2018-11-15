@@ -105,7 +105,7 @@
 #&coupler_nml
 #       months   = 0
 #       days     = 1
-#       hours    = 0 
+#       hours    = 0
 #       dt_atmos = 225
 #       dt_ocean = 225
 #       current_date =  2016,10,03,00,0,0
@@ -218,7 +218,7 @@
        FNTG3C   = "global_tg3clim.2.6x1.5.grb",
        FNVEGC   = "global_vegfrac.0.144.decpercent.grb",
        FNVETC   = @[FNVETC]
-       FNSOTC   = @[FNSOTC] 
+       FNSOTC   = @[FNSOTC]
        FNSMCC   = @[FNSMCC]
        FNMSKH   = "seaice_newland.grb",
        FNTSFA   = "",
@@ -249,7 +249,7 @@
 /
 &nam_stochy
   lon_s=768,
-  lat_s=384, 
+  lat_s=384,
   ntrunc=382,
   SKEBNORM=1,
   SKEB_NPASS=30,
