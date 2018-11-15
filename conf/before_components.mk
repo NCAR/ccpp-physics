@@ -16,6 +16,9 @@
 
 CHOSEN_MODULE=$(BUILD_TARGET)/fv3
 
+### DH* TODO
+### ifneq (,$(or $(findstring CCPP=Y,$(COMPONENTS)),$(findstring CCPP=Y,$(FV3_MAKEOPT)),$(findstring CCPP=Y,$(FV3_MAKEOPT)))) 
+### *DH
 ifneq (,$(findstring INTEL18=Y,$(FV3_MAKEOPT)))
   ifeq ($(CHOSEN_MODULE),theia.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.1.163
