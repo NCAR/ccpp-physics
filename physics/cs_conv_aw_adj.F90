@@ -103,23 +103,6 @@ module cs_conv_aw_adj
           temrain1(i) = temrain1(i) - (prsi(i,k)-prsi(i,k+1)) * tem2 * onebg
         enddo
       enddo
-! add convective clouds
-      if (do_shoc) then
-        do k = 1,levs
-          do i = 1,im
-            subcldfrac(i,k) = min(1.0, subcldfrac(i,k) + sigmafrac(i,k))
-          enddo
-        enddo
-        if (ncld == 5) then
-          gq0(:,:,ntclamt) = subcldfrac(:,:)
-        endif
-      elseif (ncld == 2) then
-        do k = 1,levs
-          do i = 1,im
-            cldfrac(i,k) = min(1.0, cldfrac(i,k) + sigmafrac(i,k))
-          enddo
-        enddo
-      endif
       !
       do n=ntcw,ntcw+nncl-1
         do k = 1,levs

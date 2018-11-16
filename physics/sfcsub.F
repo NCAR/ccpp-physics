@@ -1997,7 +1997,7 @@
 !     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
-      if (fh -deltsfc > 0.001) then
+      if (fh-deltsfc > -0.001 ) then
         do i=1,len
           if(slianl(i) == 0.0) then
             tsffcs(i) = tsffcs(i) + (tsfclm(i) - tsfcl2(i))

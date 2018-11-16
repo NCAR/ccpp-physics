@@ -1893,14 +1893,14 @@ c
           enddo
         endif
 ! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
-        if ((shcnvcw) .and. (num_p3d == 4) .and. (npdf3d == 3)) then
+        if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
               cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
+        elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)

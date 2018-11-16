@@ -25,6 +25,7 @@ end subroutine shoc_finalize
 !! | ix                         | horizontal_dimension                                                        | horizontal dimension                                                                        | count         |    0 | integer    |           | in     | F        |
 !! | nx                         | horizontal_loop_extent                                                      | horizontal loop extent                                                                      | count         |    0 | integer    |           | in     | F        |
 !! | nzm                        | vertical_dimension                                                          | vertical layer dimension                                                                    | count         |    0 | integer    |           | in     | F        |
+!! | do_shoc                    | flag_for_shoc                                                               | flag for SHOC                                                                               | flag          |    0 | logical    |           | in     | F        |
 !! | shocaftcnv                 | flag_for_shoc_after_convection                                              | flag to execute SHOC after convection                                                       | flag          |    0 | logical    |           | in     | F        |
 !! | mg3_as_mg2                 | flag_mg3_as_mg2                                                             | flag for controlling prep for Morrison-Gettelman microphysics                               | flag          |    0 | logical    |           | in     | F        |
 !! | imp_physics                | flag_for_microphysics_scheme                                                | choice of microphysics scheme                                                               | flag          |    0 | integer    |           | in     | F        |
@@ -80,7 +81,7 @@ end subroutine shoc_finalize
 !! | errmsg                     | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none          |    0 | character  | len=*     | out    | F        |
 !! | errflg                     | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag          |    0 | integer    |           | out    | F        |
 !!
-subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,              &
+subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,     &
     imp_physics_zhao_carr_pdf, imp_physics_mg, fprcp, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi,  &
     con_fvirt, gq0_cloud_ice, gq0_rain, gq0_snow, gq0_graupel, dtp, me, prsl, phii, phil, u, v, omega, rhc, supice, pcrit,   &
     cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                                                                        &
@@ -91,7 +92,7 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
 
     integer, intent(in) :: ix, nx, nzm, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, &
      imp_physics_mg, fprcp, me
-    logical, intent(in) :: shocaftcnv, mg3_as_mg2
+    logical, intent(in) :: do_shoc, shocaftcnv, mg3_as_mg2
     real(kind=kind_phys), intent(in) :: tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt, &
       dtp, supice, pcrit, cefac, cesfac, tkef1, dis_opt
   !
@@ -121,7 +122,7 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
 
     if (shocaftcnv) then
       if (imp_physics == imp_physics_mg) then
-       skip_macro = .true.
+       skip_macro = do_shoc
        if (abs(fprcp) == 1 .or. mg3_as_mg2) then
          do k=1,nzm
            do i=1,nx
@@ -141,11 +142,11 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
       endif
     else
       if (imp_physics == imp_physics_mg) then
-       skip_macro = .true.
+       skip_macro = do_shoc
        do k=1,nzm
          do i=1,nx
-           clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
-           clw_liquid(i,k) = gq0_cloud_liquid(i,k)                    ! water
+           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
+           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_liquid(i,k) = gq0_cloud_liquid(i,k)              ! water
            !GF - since gq0(ntlnc/ntinc) are passed in directly, no need to copy
            !ncpl(i,k)  = Stateout%gq0(i,k,ntlnc)
            !ncpi(i,k)  = Stateout%gq0(i,k,ntinc)
@@ -162,8 +163,9 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
        elseif (fprcp > 1) then
          do k=1,nzm
            do i=1,nx
-             !qrn(i,k)  = gq0_rain(i,k)
-             qsnw(i,k) = gq0_snow(i,k) + gq0_graupel(i,k)
+             !qrn(i,k)    = gq0_rain(i,k)
+             qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k)
+             clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
            enddo
          enddo
        endif
@@ -197,12 +199,27 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
     !GFDL lat has no meaning inside of shoc - changed to "1"
 
 
+    ! DH* can we pass in gq0_graupel? is that zero? the original code
+    ! passes in qgl which is zero (always? sometimes?), in shoc_work
+    ! this qgl gets added to qpi, qpi = qpi_i + qgl with qpi_i = qsnw;
+    ! - with the above qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k),
+    ! would that be double counting? *DH
     call shoc_work (ix, nx, 1, nzm, nzm+1, dtp, me, 1, prsl,  &
               phii, phil, u, v, omega, gt0,  &
               gq0_water_vapor, clw_ice, clw_liquid, qsnw, gq0_rain,  &
-              rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
+              gq0_graupel, rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
               cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec, .false., 1, ncpl, ncpi, &
               con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
+
+    if (.not.shocaftcnv) then
+      if (imp_physics == imp_physics_mg .and. fprcp > 1) then
+        do k=1,nzm
+          do i=1,nx
+            clw_ice(i,k) = clw_ice(i,k) - gq0_graupel(i,k)
+          enddo
+        enddo
+      endif
+    endif ! .not. shocaftcnv
 
     !GF since gq0(ntlnc/ntinc) are passed in directly, no need to copy back
     !  if (ntlnc > 0 .and. ntinc > 0 .and. ncld >= 2) then
@@ -213,7 +230,6 @@ subroutine shoc_run (ix, nx, nzm, shocaftcnv, mg3_as_mg2, imp_physics, imp_physi
     !      enddo
     !    enddo
     !  endif
-
 
 end subroutine shoc_run
 
@@ -230,9 +246,11 @@ end subroutine shoc_run
  !                        pressures below a critical value pcrit
  ! S Moorthi - 04-12-17 - fixed a bug in the definition of hl on input
  !                        replacing fac_fus by fac_sub
+ ! S.Moorthi - 00-00-17 - added an alternate option for near boundary cek following
+ !                        Scipion et. al., from U. Oklahoma.
  subroutine shoc_work (ix, nx, ny, nzm, nz, dtn, me, lat,        &
                  prsl, phii, phil, u, v, omega, tabs,            &
-                 qwv, qi, qc, qpi, qpl, rhc, supice,             &
+                 qwv, qi, qc, qpi_i, qpl, qgl, rhc, supice,      &
                  pcrit, cefac, cesfac, tkef1, dis_opt,           &
                  cld_sgs, tke, hflx, evap, prnum, tkh,           &
                  wthv_sec, lprnt, ipr, ncpl, ncpi,               &
@@ -277,8 +295,9 @@ end subroutine shoc_run
 ! Anning Cheng 03/11/2016 SHOC feedback to number concentration
   real, intent(inout) :: ncpl   (nx,ny,nzm)   ! cloud water number concentration,/m^3
   real, intent(inout) :: ncpi   (nx,ny,nzm)   ! cloud ice   number concentration,/m^3
-  real, intent(in)    :: qpl    (nx,ny,nzm)   ! rain mixing ratio, kg/kg
-  real, intent(in)    :: qpi    (nx,ny,nzm)   ! snow mixing ratio, kg/kg
+  real, intent(in)    :: qpl    (nx,ny,nzm)   ! rain    mixing ratio, kg/kg    - not used at this time
+  real, intent(in)    :: qpi_i  (nx,ny,nzm)   ! snow    mixing ratio, kg/kg    - not used at this time
+  real, intent(in)    :: qgl    (nx,ny,nzm)   ! graupel mixing ratio, kg/kg    - not used at this time
   real, intent(in)    :: rhc    (nx,ny,nzm)   ! critical relative humidity
   real, intent(in)    :: supice               ! ice supersaturation parameter
   real, intent(inout) :: cld_sgs(ix,ny,nzm)   ! sgs cloud fraction
@@ -293,27 +312,9 @@ end subroutine shoc_run
                      three=3.0, oneb3=one/three, twoby3=two/three
   real, parameter :: sqrt2 = sqrt(two), twoby15 = two / 15.0,                        &
                      skew_facw=1.2, skew_fact=0.0,                                   &
-                     tkhmax=300.0, scrit=2.0e-6
+                     tkhmax=300.0
   real :: lsub, fac_cond, fac_fus, cpolv, fac_sub, ggri, kapa, gocp, rog, sqrtpii,   &
                      epsterm, onebeps, onebrvcp
-!                    onebrvcp= 1.0/(rv*cp), skew_facw=1.2, skew_fact=1.0,            &
-!                    tkef1=0.5, tkef2=1.0-tkef1, tkhmax=1000.0, cefac=3.0,           &
-!                    tkef1=0.5, tkef2=1.0-tkef1, tkhmax=1000.0, cefac=1.5,           &
-!                    tkef1=0.5, tkef2=1.0-tkef1, tkhmax=200.0,  cefac=1.5,           &
-!                    tkef1=0.7, tkef2=1.0-tkef1, tkhmax=1000.0, cefac=1.5,           &
-!                    tkef1=0.7, tkef2=1.0-tkef1, tkhmax=300.0,  cefac=1.0,           &
-!                    tkef1=0.7, tkef2=1.0-tkef1, tkhmax=300.0,  cefac=1.5,           &
-!                    tkef1=1.1, tkef2=1.0-tkef1, tkhmax=200.0,  cefac=1.5,           &
-!                    tkef1=0.7, tkef2=1.0-tkef1, tkhmax=1000.0, cefac=1.5,           &
-
-!                    scrit=5.0e-8
-!                    scrit=3.0e-6
-!                    scrit=1.0e-5
-!                    scrit=5.0e-6
-!                    scrit=1.0e-5
-!                    scrit=1.0e-6
-
-! real, parameter :: supice=1.05
 
 ! SHOC tunable parameters
 
@@ -330,7 +331,7 @@ end subroutine shoc_run
   real, parameter :: Pr    = 1.0             ! Prandtl number
 
 ! Constants for the TKE dissipation term based on Deardorff (1980)
-  real, parameter :: pt19=0.19, pt51=0.51, pt01=0.01, atmin=0.10, atmax=one-atmin
+  real, parameter :: pt19=0.19, pt51=0.51, pt01=0.01, atmin=0.01, atmax=one-atmin
   real, parameter :: Cs  = 0.15, epsln=1.0e-6
   real, parameter :: Ck  = 0.1     ! Coeff in the eddy diffusivity - TKE relationship, see Eq. 7 in BK13
 
@@ -351,11 +352,13 @@ end subroutine shoc_run
   real, parameter :: w_tol_sqd = 4.0e-04   ! Min vlaue of second moment of w
 ! real, parameter :: w_tol_sqd = 1.0e-04   ! Min vlaue of second moment of w
   real, parameter :: w_thresh  = 0.0, thresh = 0.0
+  real, parameter :: w3_tol    = 1.0e-20   ! Min vlaue of third moment of w
 
 
 ! These parameters are a tie-in with a microphysical scheme
 ! Double check their values for the Zhao-Carr scheme.
-  real, parameter :: tbgmin = 258.16    ! Minimum temperature for cloud water., K (ZC)
+  real, parameter :: tbgmin = 233.16    ! Minimum temperature for cloud water., K (ZC)
+! real, parameter :: tbgmin = 258.16    ! Minimum temperature for cloud water., K (ZC)
 ! real, parameter :: tbgmin = 253.16    ! Minimum temperature for cloud water., K
   real, parameter :: tbgmax = 273.16    ! Maximum temperature for cloud ice, K
   real, parameter :: a_bg   = one/(tbgmax-tbgmin)
@@ -369,6 +372,7 @@ end subroutine shoc_run
   integer, parameter :: nitr=6
 
 ! Local variables. Note that pressure is in millibars in the SHOC code.
+
   logical lprnt
   integer ipr
 
@@ -384,6 +388,8 @@ end subroutine shoc_run
   real w       (nx,ny,nzm)  ! z-wind, m/s
   real bet     (nx,ny,nzm)  ! ggr/tv0
   real gamaz   (nx,ny,nzm)  ! ggr/cp*z
+  real qpi     (nx,ny,nzm)  ! snow + graupel mixing ratio, kg/kg
+! real qpl     (nx,ny,nzm)  ! rain           mixing ratio, kg/kg
 
 ! Moments of the trivariate double Gaussian PDF for the SGS total water mixing ratio
 ! SGS liquid/ice static energy, and vertical velocity
@@ -446,7 +452,7 @@ end subroutine shoc_run
        lstarn1,   lstarn2,   sqrtw2,     sqrtthl,    sqrtqt,                                &
        sqrtstd1,  sqrtstd2,  tsign,      tvar,       sqrtw2t, wqls, wqis,                   &
        sqrtqw2_1, sqrtqw2_2, sqrtthl2_1, sqrtthl2_2, sm,   prespot,                         &
-       corrtest1, corrtest2, wrk,  wrk1, wrk2,       wrk3, onema, pfac, sfac, sfaci
+       corrtest1, corrtest2, wrk,  wrk1, wrk2,       wrk3, onema, pfac
 
 
   integer i,j,k,km1,ku,kd,ka,kb
@@ -476,6 +482,13 @@ end subroutine shoc_run
       enddo
     enddo
   enddo
+
+! if (lprnt) write(0,*)' tabsin=',tabs(ipr,1,1:40)
+! if (lprnt) write(0,*)' qcin=',qc(ipr,1,1:40)
+! if (lprnt) write(0,*)' qwvin=',qwv(ipr,1,1:40)
+! if (lprnt) write(0,*)' qiin=',qi(ipr,1,1:40)
+! if (lprnt) write(0,*)' qplin=',qpl(ipr,1,1:40)
+! if (lprnt) write(0,*)' qpiin=',qpi(ipr,1,1:40)
 !
 ! move water from vapor to condensate if the condensate is negative
 !
@@ -510,6 +523,7 @@ end subroutine shoc_run
     enddo
   enddo
 
+! if (lprnt) write(0,*)' tabsin2=',tabs(ipr,1,1:40)
 
   do k=1,nzm
     do j=1,ny
@@ -521,9 +535,11 @@ end subroutine shoc_run
         w(i,j,k)     = - rog * omega(i,j,k) * thv(i,j,k) * wrk
         qcl(i,j,k)   = max(qc(i,j,k), zero)
         qci(i,j,k)   = max(qi(i,j,k), zero)
+        qpi(i,j,k)   = qpi_i(i,j,k) + qgl(i,j,k)       ! add snow and graupel together
 !
 !       qpl(i,j,k)     = zero  ! comment or remove when using with prognostic rain/snow
 !       qpi(i,j,k)     = zero  ! comment or remove when using with prognostic rain/snow
+
         wqp_sec(i,j,k) = zero  ! Turbulent flux of precipiation
 !
         total_water(i,j,k) = qcl(i,j,k) + qci(i,j,k) + qv(i,j,k)
@@ -543,6 +559,7 @@ end subroutine shoc_run
     enddo
   enddo
 
+! if (lprnt) write(0,*)' hlin=',hl(ipr,1,1:40)
 
 ! Define vertical grid increments for later use in the vertical differentiation
 
@@ -595,10 +612,13 @@ end subroutine shoc_run
     do j=1,ny
       do i=1,nx
         if (tke(i,j,k) > zero) then
-          wrk  = half*(tkh(i,j,ka)+tkh(i,j,kb))*(w(i,j,ku) - w(i,j,kd)) &
+!         wrk  = half*(tkh(i,j,ka)+tkh(i,j,kb))*(w(i,j,ku) - w(i,j,kd)) &
+          wrk  = half*(tkh(i,j,ka)*prnum(i,j,ka)+tkh(i,j,kb)*prnum(i,j,kb))*(w(i,j,ku) - w(i,j,kd)) &
                * sqrt(tke(i,j,k)) / (zl(i,j,ku) - zl(i,j,kd))
-!              / (sqrt(tke(i,j,k)) * (zl(i,j,ku) - zl(i,j,kd)))
           w_sec(i,j,k) = max(twoby3 * tke(i,j,k) - twoby15 * wrk, zero)
+!         w_sec(i,j,k) = max(twoby3 * tke(i,j,k), zero)
+!     if(lprnt .and. i == ipr .and. k <40) write(0,*)' w_sec=',w_sec(i,j,k),' tke=r',tke(i,j,k),&
+!    ' tkh=',tkh(i,j,ka),tkh(i,j,kb),' w=',w(i,j,ku),w(i,j,kd),' prnum=',prnum(i,j,ka),prnum(i,j,kb)
         else
           w_sec(i,j,k) = zero
         endif
@@ -622,8 +642,11 @@ end subroutine shoc_run
         sm   = half*(isotropy(i,j,k)+isotropy(i,j,km1))*wrk1*wrk3 ! Tau*Kh/dz^2
 
 ! SGS vertical flux liquid/ice water static energy. Eq 1 in BK13
+!               No rain, snow or graupel in pdf (Annig, 08/29/2018)
 
-        wrk1            = hl(i,j,k) - hl(i,j,km1)
+        wrk1            =  hl(i,j,k)  - hl(i,j,km1)              &
+                        + (qpl(i,j,k) - qpl(i,j,km1)) * fac_cond &
+                        + (qpi(i,j,k) - qpi(i,j,km1)) * fac_sub
         wthl_sec(i,j,k) = - wrk3 * wrk1
 
 ! SGS vertical flux of total water. Eq 2 in BK13
@@ -780,7 +803,7 @@ contains
           wrk  = (dtn*Cee) / smixt(i,j,k)
           wrk1 = wtke + dtn*(a_prod_sh+a_prod_bu)
 
-!     if (lprnt .and. i == ipr .and. k<20) write(0,*)' wtke=',wtke,' wrk1=',wrk1,&
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' wtke=',wtke,' wrk1=',wrk1,&
 !       ' a_prod_sh=',a_prod_sh,' a_prod_bu=',a_prod_bu,' dtn=',dtn,' smixt=',&
 !         smixt(i,j,k),' tkh=',tkh(i,j,ku),tkh(i,j,kd),' def2=',def2(i,j,ku),def2(i,j,kd)&
 !       ,' prnum=',prnum(i,j,ku),prnum(i,j,kd),' wthv_sec=',wthv_sec(i,j,k),' thv=',thv(i,j,k)
@@ -791,7 +814,7 @@ contains
             wtke   = wrk1 / (one+a_diss)
             wtke   = tkef1*wtke + tkef2*wtk2   ! tkef1+tkef2 = 1.0
 
-!     if (lprnt .and. i == ipr .and. k<20) write(0,*)' wtke=',wtke,' wtk2=',wtk2,&
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' wtke=',wtke,' wtk2=',wtk2,&
 !        ' a_diss=',a_diss,' a_prod_sh=',a_prod_sh,' a_prod_bu=',a_prod_bu,&
 !        ' wrk1=',wrk1,' itr=',itr,' k=',k
 
@@ -800,8 +823,9 @@ contains
           enddo
 
           tke(i,j,k) = min(max(min_tke, wtke), max_tke)
+          a_diss = wrk*sqrt(tke(i,j,k))
 
-          tscale1 = (dtn+dtn) / a_diss        ! See Eq 8 in BK13
+          tscale1 = (dtn+dtn) / a_diss              ! corrected Eq 8 in BK13 --  tau = 2*tke/eps
 
           tkesbdiss(i,j,k) = rdtn*a_diss*tke(i,j,k) ! TKE dissipation term, epsilon
 
@@ -1061,20 +1085,20 @@ contains
 
 !   call conv_scale()           ! inlining the relevant code
 
-    do j=1,ny
-      do i=1,nx
-        conv_vel2(i,j,1) = zero ! Convective velocity scale cubed
-      enddo
-    enddo
+!   do j=1,ny
+!     do i=1,nx
+!       conv_vel2(i,j,1) = zero ! Convective velocity scale cubed
+!     enddo
+!   enddo
                                 ! Integrate velocity scale in the vertical
-    do k=2,nzm
-      do j=1,ny
-        do i=1,nx
-          conv_vel2(i,j,k) = conv_vel2(i,j,k-1)                               &
-                           + 2.5*adzi(i,j,k)*bet(i,j,k)*wthv_sec(i,j,k)
-        enddo
-      enddo
-    enddo
+!   do k=2,nzm
+!     do j=1,ny
+!       do i=1,nx
+!         conv_vel2(i,j,k) = conv_vel2(i,j,k-1)                               &
+!                          + 2.5*adzi(i,j,k)*bet(i,j,k)*wthv_sec(i,j,k)
+!       enddo
+!     enddo
+!   enddo
 
     do j=1,ny
       do i=1,nx
@@ -1097,11 +1121,19 @@ contains
               ku = k
 ! conv_vel2 (Cubed convective velocity scale) is calculated in conv_scale()
 ! Use the value of conv_vel2 at the top of the cloud.
-              conv_var = conv_vel2(i,j,k)**(oneb3)
+!             conv_var = conv_vel2(i,j,k)**(oneb3)
             endif
 
 ! Compute the mixing length scale for the cloud layer that we just found
-            if (kl > 0 .and. ku > 0 .and. ku-kl > 1) then
+!           if (kl > 0 .and. ku > 0 .and. ku-kl > 1) then
+            if (kl > 0 .and. ku > 0 .and. ku-kl > 0) then
+
+! The calculation below finds the integral in the Eq. 10 in BK13 for the current cloud
+               conv_var = zero
+               do kk=kl,ku
+                  conv_var = conv_var+ 2.5*adzi(i,j,kk)*bet(i,j,kk)*wthv_sec(i,j,kk)
+               enddo
+               conv_var = conv_var ** oneb3
 
               if (conv_var > 0) then ! If convective vertical velocity scale > 0
 
@@ -1111,8 +1143,11 @@ contains
                 do kk=kl,ku
 ! in-cloud turbulence length scale, Eq. 13 in BK13 (Eq. 4.18)
 
-                  wrk = conv_var/(depth*sqrt(tke(i,j,kk)))
-                  wrk = wrk * wrk + pt01*brunt2(i,j,kk)/tke(i,j,kk)
+!                 wrk = conv_var/(depth*sqrt(tke(i,j,kk)))
+!                 wrk = wrk * wrk + pt01*brunt2(i,j,kk)/tke(i,j,kk)
+
+                  wrk = conv_var/(depth*depth*sqrt(tke(i,j,kk)))  &
+                      + pt01*brunt2(i,j,kk)/tke(i,j,kk)
 
                   smixt(i,j,kk) = min(max_eddy_length_scale, (one/0.3)*sqrt(one/wrk))
 
@@ -1229,7 +1264,8 @@ contains
 
     real bet2,   f0,     f1,     f2,  f3,    f4,   f5,  iso, isosqr,         &
          omega0, omega1, omega2, X0,  Y0,    X1,   Y1,  AA0, AA1, buoy_sgs2, &
-         cond,   wrk, wrk1,  wrk2, wrk3, avew
+                 wrk, wrk1,  wrk2, wrk3, avew
+!        cond,   wrk, wrk1,  wrk2, wrk3, avew
 !
 ! See Eq. 7 in C01 (B.7 in Pete's dissertation)
     real, parameter :: c=7.0, a0=0.52/(c*c*(c-2.)), a1=0.87/(c*c),      &
@@ -1243,28 +1279,29 @@ contains
       kb = k-1
       kc = k+1
 
-      if(k == 1) then
-        kb = 1
-        kc = 2
-        do j=1,ny
-          do i=1,nx
-            thedz(i,j)  = one / adzl(i,j,kc)
-            thedz2(i,j) = thedz(i,j)
-          enddo
-        enddo
-      elseif(k == nzm) then
+!     if(k == 1) then
+!       kb = 1
+!       kc = 2
+!       do j=1,ny
+!         do i=1,nx
+!           thedz(i,j)  = one / adzl(i,j,kc)
+!           thedz2(i,j) = thedz(i,j)
+!         enddo
+!       enddo
+!     elseif(k == nzm) then
+      if (k == nzm) then
         kb = nzm-1
         kc = nzm
         do j=1,ny
           do i=1,nx
-            thedz(i,j)  = one / adzl(i,j,k)
-            thedz2(i,j) = thedz(i,j)
+            thedz(i,j)  = one / adzi(i,j,k)
+            thedz2(i,j) = one / adzl(i,j,kb)
           enddo
         enddo
       else
         do j=1,ny
           do i=1,nx
-            thedz(i,j)  = one / adzl(i,j,k)
+            thedz(i,j)  = one / adzi(i,j,k)
             thedz2(i,j) = one / (adzl(i,j,k)+adzl(i,j,kb))
           enddo
         enddo
@@ -1284,7 +1321,27 @@ contains
 
 
           avew = half*(w_sec(i,j,k)+w_sec(i,j,kb))
-          cond = 1.2*sqrt(max(1.0e-20,2.*avew*avew*avew))
+!<aab
+! This is not a bug, but an algorithmical change.
+! The line below calculates cond ,an estimate of the maximum allowed value of the third moment.
+! It is used at the end of this subroutine to limit the value of w3.
+! Here the second moment is interpolated from the layer centers to the interface, where w3 is
+! defined.
+! In the presence of strong vertical gradients of w2, the value interpolated to the interface can
+! be as much as twice as as large (or as small) as the value on in layer center. When the skewness
+! of W PDF is calculated in assumed_pdf(), the code there uses w2 on the layer center, and the value
+! of w3 interpolated from the interfaces to the layer center. The errors introduced due to dual
+! interpolation are amplified by exponentiation during the calculation of skewness
+! and result in (ususally negative) values
+! of skewness of W PDF that are too large ( < -10). The resulting PDF consists of two delta
+! functions set far apart from each other on the W axis, and produces unrealistically
+! high values of diagnosed SGS fluxes.
+
+! The solution is to move clipping of the third moment from canuto() to right before the
+! calculation of skewness in assumed_pdf()
+!          cond = 1.2*sqrt(max(1.0e-20,2.*avew*avew*avew))
+!>aab
+!
           wrk1 = bet2*iso
           wrk2 = thedz2(i,j)*wrk1*wrk1*iso
           wrk3 = thl_sec(i,j,kc) - thl_sec(i,j,kb)
@@ -1331,7 +1388,11 @@ contains
 ! cond is an estimate of third moment from second oment - If the third moment is larger
 ! than the estimate - limit w3.
 
-           w3(i,j,k) = max(-cond, min(cond, (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)))
+!<aab
+! Move clipping of w3 to assumed_pdf()
+!          w3(i,j,k) = max(-cond, min(cond, (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)))
+           w3(i,j,k) = (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)
+!>aab
 
 ! Implemetation of the C01 approach in this subroutine is nearly complete
 ! (the missing part are Eqs. 5c and 5e which are very simple)
@@ -1361,7 +1422,7 @@ contains
 ! Local variables
 
     integer i,j,k,ku,kd
-    real wrk, wrk1, wrk2, wrk3, wrk4, bastoeps, eps_ss1, eps_ss2
+    real wrk, wrk1, wrk2, wrk3, wrk4, bastoeps, eps_ss1, eps_ss2, cond_w
 
 !   bastoeps = basetemp / epsterm
 
@@ -1371,9 +1432,6 @@ contains
       wqlsb(k) = zero
       wqisb(k) = zero
     enddo
-
-!   sfac  = scrit
-!   sfaci = one / sfac
 
     DO k=1,nzm
 
@@ -1394,14 +1452,12 @@ contains
           pfac  = pval * 1.0e-5
           pkap  = pfac ** kapa
 
-!         sfac  = scrit * sqrt(pfac)
-!         sfac  = scrit
-          sfac  = scrit * pfac * pfac
-          sfaci = one / sfac
-
 ! Read in liquid/ice static energy, total water mixing ratio,
 ! and vertical velocity to variables PDF needs
-          thl_first = hl(i,j,k)
+
+          thl_first = hl(i,j,k) + fac_cond*qpl(i,j,k) &
+                                + fac_sub*qpi(i,j,k)
+
           qw_first  = total_water(i,j,k)
 !         w_first   = half*(w(i,j,kd)+w(i,j,ku))
           w_first   = w(i,j,k)
@@ -1435,6 +1491,7 @@ contains
 !         wthlsec  = wthl_sec(i,j,k)
 
 ! Compute square roots of some variables so we don't have to do it again
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' w_sec=',w_sec(i,j,k),' k=',k
           if (w_sec(i,j,k) > zero) then
             sqrtw2  = sqrt(w_sec(i,j,k))
           else
@@ -1469,6 +1526,12 @@ contains
             onema  = half
           ELSE
 
+!<aab
+! Clip w3
+             cond_w = 1.2*sqrt2*max(w3_tol, sqrtw2*sqrtw2*sqrtw2)
+             w3var  = max(-cond_w, min(cond_w, w3var))
+!>aab
+                
             Skew_w = w3var / (sqrtw2*sqrtw2*sqrtw2)     ! Moorthi
 ! Proportionality coefficients between widths of each vertical velocity
 ! gaussian and the sqrt of the second moment of w
@@ -1496,6 +1559,8 @@ contains
 
 !  Find parameters of the  PDF of liquid/ice static energy
 
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' thlsec=',thlsec,' w1_2=',w1_2,' w1_1=',w1_1,&
+!             ' thl_first=',thl_first,' k=',k,' wthlsec=',wthlsec,sqrtw2,sqrtthl
           IF (thlsec <= thl_tol*thl_tol .or. abs(w1_2-w1_1) <= w_thresh) THEN
             thl1_1     = thl_first
             thl1_2     = thl_first
@@ -1513,7 +1578,8 @@ contains
             wrk1   = thl1_1 * thl1_1
             wrk2   = thl1_2 * thl1_2
             wrk3   = three * (one - aterm*wrk1 - onema*wrk2)
-            wrk4   = -skew_fact*Skew_w - aterm*wrk1*thl1_1 - onema*wrk2*thl1_2  ! testing - Moorthi
+            wrk4   = -skew_facw*Skew_w - aterm*wrk1*thl1_1 - onema*wrk2*thl1_2  ! testing - Moorthi
+!           wrk4   = -skew_fact*Skew_w - aterm*wrk1*thl1_1 - onema*wrk2*thl1_2  ! testing - Moorthi
 !           wrk4   =     - aterm*wrk1*thl1_1 - onema*wrk2*thl1_2
             wrk    = three * (thl1_2-thl1_1)
             if (wrk /= zero) then
@@ -1524,8 +1590,13 @@ contains
               thl2_2 = zero
             endif
 !
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' thl1_1=',thl1_1,' sqrtthl=',sqrtthl,' thl_first=',thl_first,&
+!           ' thl1_2=',thl1_2,' corrtest1=',corrtest1,' w1_2=',w1_2,' w1_1=',w1_1
+
             thl1_1 = thl1_1*sqrtthl + thl_first
             thl1_2 = thl1_2*sqrtthl + thl_first
+
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' thl1_1=',thl1_1,' thl1_2=',thl1_2
 
             sqrtthl2_1 = sqrt(thl2_1)
             sqrtthl2_2 = sqrt(thl2_2)
@@ -1600,41 +1671,47 @@ contains
 
 !  BEGIN TO COMPUTE CLOUD PROPERTY STATISTICS
 
-          wrk1  = gamaz(i,j,k) - fac_cond*qpl(i,j,k) - fac_sub*qpi(i,j,k)
-          Tl1_1 = thl1_1 - wrk1
-          Tl1_2 = thl1_2 - wrk1
+!         wrk1  = gamaz(i,j,k) - fac_cond * qpl(i,j,k) - fac_sub * qpi(i,j,k)
+!         Tl1_1 = thl1_1 - wrk1
+!         Tl1_2 = thl1_2 - wrk1
+
+          Tl1_1 = thl1_1 - gamaz(i,j,k)
+          Tl1_2 = thl1_2 - gamaz(i,j,k)
+
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' Tl1_1=',Tl1_1,' Tl1_2=',Tl1_2,&
+!         ' wrk1=',wrk1,' thl1_1=',thl1_1,' thl1_2=',thl1_2,' qpl=',qpl(i,j,k),' qpi=',qpi(i,j,k)
 
 ! Now compute qs
 
           esval1_1 = zero
           esval2_1 = zero
-          om1      = one
           eps_ss1  = eps
           eps_ss2  = eps
+          om1      = one
 
 ! Partition based on temperature for the first plume
 
           IF (Tl1_1 >= tbgmax) THEN
-            esval1_1 = fpvsl(Tl1_1)
+            esval1_1 = min(fpvsl(Tl1_1), pval)
 !           esval1_1 = esatw(Tl1_1)
             lstarn1  = lcond
-          ELSE IF (Tl1_1 < tbgmin) THEN
-            esval1_1 = fpvsi(Tl1_1)
+          ELSE IF (Tl1_1 <= tbgmin) THEN
+            esval1_1 = min(fpvsi(Tl1_1), pval)
 !           esval1_1 = esati(Tl1_1)
             lstarn1  = lsub
             eps_ss1   = eps * supice
           ELSE
-            esval1_1 = fpvsl(Tl1_1)
-            esval2_1 = fpvsi(Tl1_1)
+            esval1_1 = min(fpvsl(Tl1_1), pval)
+            esval2_1 = min(fpvsi(Tl1_1), pval)
 !           esval1_1 = esatw(Tl1_1)
 !           esval2_1 = esati(Tl1_1)
             om1      = max(zero, min(one, a_bg*(Tl1_1-tbgmin)))
             lstarn1  = lcond + (one-om1)*lfus
             eps_ss2   = eps * supice
-          ENDIF
 
-          qs1   =      om1  * (eps_ss1*esval1_1/max(esval1_1,pval-0.378*esval1_1))      &
-                + (one-om1) * (eps_ss2*esval2_1/max(esval2_1,pval-0.378*esval2_1))
+          ENDIF
+          qs1   =      om1  * eps_ss1*esval1_1/(pval-0.378*esval1_1)      &
+                + (one-om1) * eps_ss2*esval2_1/(pval-0.378*esval2_1)
 
 !         beta1 = (rgas/rv)*(lstarn1/(rgas*Tl1_1))*(lstarn1/(cp*Tl1_1))
           beta1 = (lstarn1*lstarn1*onebrvcp) / (Tl1_1*Tl1_1)              ! A.18
@@ -1649,22 +1726,22 @@ contains
 
             esval1_2 = zero
             esval2_2 = zero
-            om2      = one
             eps_ss1  = eps
             eps_ss2  = eps
+            om2      = one
 
-            IF (Tl1_2 < tbgmin) THEN
-              esval1_2 = fpvsi(Tl1_2)
+            IF (Tl1_2 >= tbgmax) THEN
+              esval1_2 = min(fpvsl(Tl1_2), pval)
+!             esval1_2 = esatw(Tl1_2)
+              lstarn2  = lcond
+            ELSE IF (Tl1_2 <= tbgmin) THEN
+              esval1_2 = min(fpvsi(Tl1_2), pval)
 !             esval1_2 = esati(Tl1_2)
               lstarn2  = lsub
               eps_ss1   = eps * supice
-            ELSE IF (Tl1_2 >= tbgmax) THEN
-              esval1_2 = fpvsl(Tl1_2)
-!             esval1_2 = esatw(Tl1_2)
-              lstarn2  = lcond
             ELSE
-              esval1_2 = fpvsl(Tl1_2)
-              esval2_2 = fpvsi(Tl1_2)
+              esval1_2 = min(fpvsl(Tl1_2), pval)
+              esval2_2 = min(fpvsi(Tl1_2), pval)
 !             esval1_2 = esatw(Tl1_2)
 !             esval2_2 = esati(Tl1_2)
               om2      = max(zero, min(one, a_bg*(Tl1_2-tbgmin)))
@@ -1672,8 +1749,8 @@ contains
               eps_ss2  = eps * supice
             ENDIF
 
-            qs2   =      om2  * (eps_ss1*esval1_2/max(esval1_2,pval-0.378*esval1_2))    &
-                  + (one-om2) * (eps_ss2*esval2_2/max(esval2_2,pval-0.378*esval2_2))
+            qs2   =      om2  * eps_ss1*esval1_2/(pval-0.378*esval1_2)    &
+                  + (one-om2) * eps_ss2*esval2_2/(pval-0.378*esval2_2)
 
 !           beta2 = (rgas/rv)*(lstarn2/(rgas*Tl1_2))*(lstarn2/(cp*Tl1_2))   ! A.18
             beta2 = (lstarn2*lstarn2*onebrvcp) / (Tl1_2*Tl1_2)              ! A.18
@@ -1702,15 +1779,14 @@ contains
           IF (std_s1 > zero) THEN
             wrk = s1 / (std_s1*sqrt2)
             C1 = max(zero, min(one, half*(one+erf(wrk))))                   ! A.15
-!     if (lprnt .and. i == ipr) write(0,*)' in shoc wrk=',wrk,' s1=','std=',std_s1,&
-!         ' c1=',c1*100,' qs1=',qs1,' qw1_1=',qw1_1
 
-            IF (C1 > zero) qn1 = s1*C1 + (std_s1*sqrtpii)*exp(-wrk*wrk)     ! A.16
-            if (qn1 < sfac) then
-              c1  = min(c1, qn1*sfaci)
-            endif
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' in shoc wrk=',wrk,' s1=','std=',std_s1,&
+!         ' c1=',c1*100,' qs1=',qs1,' qw1_1=',qw1_1,' k=',k
+
+!           IF (C1 > zero) qn1 = s1*C1 + (std_s1*sqrtpii)*exp(-wrk*wrk)     ! A.16
+            qn1 = max(zero, s1*C1 + (std_s1*sqrtpii)*exp(-wrk*wrk))         ! A.16
           ELSEIF (s1 > zero) THEN
-            C1  = min(one, max(zero,s1*sfaci))
+            C1  = one
             qn1 = s1
           ENDIF
 
@@ -1743,12 +1819,10 @@ contains
             IF (std_s2 > zero) THEN
               wrk = s2 / (std_s2*sqrt2)
               C2  = max(zero, min(one, half*(one+erf(wrk))))
-              IF (C2 > zero) qn2 = s2*C2 + (std_s2*sqrtpii)*exp(-wrk*wrk)
-              if (qn2 < sfac) then
-                c2  = min(c2, qn2*sfaci)
-              endif
+!             IF (C2 > zero) qn2 = s2*C2 + (std_s2*sqrtpii)*exp(-wrk*wrk)
+              qn2 = max(zero, s2*C2 + (std_s2*sqrtpii)*exp(-wrk*wrk))
             ELSEIF (s2 > zero) THEN
-              C2  = min(one, max(zero,s2*sfaci))
+              C2  = one
               qn2 = s2
             ENDIF
 
@@ -1769,8 +1843,10 @@ contains
           qi1 = qn1 - ql1
           qi2 = qn2 - ql2
 
-!     if (lprnt .and. i == ipr) write(0,*)' in shoc qi=',qi1,qi2,' ql=',ql1,ql2,&
-!        ' c1=',c1,' c2=',c2,' s1=',s1,' s2=',s2,' k=',k
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' in shoc qi=',qi1,qi2,' ql=',ql1,ql2,&
+!        ' c1=',c1,' c2=',c2,' s1=',s1,' s2=',s2,' k=',k,' tl1=',tl1_1,tl1_2,' om1=',om1,'om2=',om2&
+!       ,' tbgmin=',tbgmin,'a_bg=',a_bg
+
 
           diag_qn = min(max(zero, aterm*qn1 + onema*qn2), total_water(i,j,k))
           diag_ql = min(max(zero, aterm*ql1 + onema*ql2), diag_qn)
@@ -1784,6 +1860,10 @@ contains
                                                  + fac_sub *(diag_qi+qpi(i,j,k)) &
                       + tkesbdiss(i,j,k) * (dtn/cp)      ! tke dissipative heating
 
+! if (lprnt .and. i == ipr .and. k < 40) write(0,*)' tabsout=',tabs(ipr,1,k),' k=',k&
+!    ,' hl=',hl(i,j,k),' gamaz=',gamaz(i,j,k),' diag_ql=',diag_ql,' qpl=',qpl(i,j,k)&
+!    ,' diag_qi=',diag_qi,' qpi=',qpi(i,j,k),' diag_qn =',diag_qn ,' aterm=',aterm,' onema=',onema&
+!    ,' qn1=',qn1 ,' qn2=',qn2,' ql1=',ql1,' ql2=',ql2
 ! Update moisture fields
 
 ! Update ncpl and ncpi Anning Cheng 03/11/2016

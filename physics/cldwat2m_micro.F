@@ -18,7 +18,8 @@
        use physcons, gravit => con_g,    rair    => con_rd,             &
      &               rh2o   => con_rv,   epsilon => con_eps,            &
      &               tmelt  => con_tice, cpair   => con_cp,             &
-     &               latvap => con_hvap, latice  => con_hfus
+     &               latvap => con_hvap, latice  => con_hfus,           &
+     &               pi => con_pi
        use wv_saturation, only : estblf, hlatv, tmin, hlatf, rgasv, pcf,&
      &                           epsqs, ttrice, vqsatd2,cp,             &
      &                           vqsatd2_single,polysvp,gestbl
@@ -145,7 +146,7 @@
       real(r8), private:: mi0
       real(r8), private:: rin
       real(r8), private:: qcvar
-      real(r8), private:: pi
+!     real(r8), private:: pi
 
 ! Additional constants to help speed up code
 
@@ -342,7 +343,7 @@
 !      pi= 3.1415927_r8
 !      pi= 3.1415926535897931_r8
 
-       pi = four*atan(one)
+!      pi = four*atan(one)
 
        pirhow  = pi * rhow
        pirhosn = pi * rhosn
