@@ -162,6 +162,13 @@ if (STATIC)
 endif (STATIC)
 
 #------------------------------------------------------------------------------
+# Set flag for 32bit dynamics build
+if (DYN32)
+  message(STATUS "Dynamics compiled with 32-bit option, adjust fv_sat_adj types")
+  ADD_DEFINITIONS(-DOVERLOAD_R4)
+endif (DYN32)
+
+#------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor
 ADD_DEFINITIONS(-DMOIST_CAPPA -DUSE_COND -DNEMS_GSM)
 ADD_DEFINITIONS(-DINTERNAL_FILE_NML)

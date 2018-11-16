@@ -312,7 +312,7 @@ use ccpp_api, only: ccpp_error
 # in the physics scheme cap (e.g. derived data types)
 MODULE_USE_TEMPLATE_SCHEME_CAP = \
 '''
-   use machine, only: kind_grid, kind_phys
+   use machine, only: kind_grid, kind_phys, kind_dyn
    use module_radlw_parameters, only: sfcflw_type, topflw_type
    use module_radsw_parameters, only: cmpfsw_type, sfcfsw_type, topfsw_type
    use CCPP_typedefs, only: CCPP_interstitial_type
