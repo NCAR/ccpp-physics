@@ -63,7 +63,8 @@ module fv_sat_adj
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
-    use machine,              only: kind_grid, kind_dyn
+    use machine,              only: kind_grid
+    use CCPP_typedefs,        only: kind_dyn
     use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
     use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
     use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
