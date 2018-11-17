@@ -9,6 +9,12 @@
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
 
+      use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol
+
+      use iccn_def,   only : ciplin, ccnin, ci_pres
+      use iccninterp, only : read_cidata, setindxci, ciinterpol
+
       implicit none
 
       private
@@ -93,7 +99,36 @@
             return
          end if
 
-         ! DH* OpenMP parallel region with OpenMP do loops for the three do loops?
+         if (Model%aero_in) then
+            ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
+            ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
+            if (size(Data(1)%Tbd%aer_nm, dim=3).ne.ntrcaerm) then
+               write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+                     "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
+                     ntrcaerm, " /= ", size(Data(1)%Tbd%aer_nm, dim=3)
+               errflg = 1
+               return
+            end if
+            ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+            ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
+            ! Read aerosol climatology
+            call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+         else
+            ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! If Model%aero_in is .false., then ntrcaer == 1
+            ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
+         endif
+
+         if (Model%iccn) then
+           call read_cidata  ( Model%me, Model%master)
+           ! No consistency check needed for in/ccn data, all values are
+           ! hardcoded in module iccn_def.F and GFS_typedefs.F90
+         endif
+
+         ! DH* OpenMP parallel region with OpenMP do loops for the do loops?
          ! there is no threading on the outside, i.e. can use CCPP's omp_threads here
 
          ! Update values of oz_pres in Interstitial data type for all threads
@@ -110,7 +145,7 @@
             end do
          end if
 
-         !--- read in and initialize ozone and water
+         !--- read in and initialize ozone
          if (Model%ntoz > 0) then
            do nb = 1, nblks
              call setindxoz (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_o3, &
@@ -118,10 +153,30 @@
            enddo
          endif
 
+         !--- read in and initialize stratospheric water
          if (Model%h2o_phys) then
            do nb = 1, nblks
              call setindxh2o (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_h, &
                               Data(nb)%Grid%jindx2_h, Data(nb)%Grid%ddy_h)
+           enddo
+         endif
+
+         !--- read in and initialize aerosols
+         if (Model%aero_in) then
+           do nb = 1, nblks
+             call setindxaer (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_aer,           &
+                              Data(nb)%Grid%jindx2_aer, Data(nb)%Grid%ddy_aer, Data(nb)%Grid%xlon_d,     &
+                              Data(nb)%Grid%iindx1_aer, Data(nb)%Grid%iindx2_aer, Data(nb)%Grid%ddx_aer, &
+                              Model%me, Model%master)
+           enddo
+         endif
+
+         !--- read in and initialize IN and CCN
+         if (Model%iccn) then
+           do nb = 1, nblks
+             call setindxci (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_ci,       &
+                             Data(nb)%Grid%jindx2_ci, Data(nb)%Grid%ddy_ci, Data(nb)%Grid%xlon_d,  &
+                             Data(nb)%Grid%iindx1_ci, Data(nb)%Grid%iindx2_ci, Data(nb)%Grid%ddx_ci)
            enddo
          endif
 
@@ -163,6 +218,15 @@
          if (allocated(h2o_pres)) deallocate(h2o_pres)
          if (allocated(h2o_time)) deallocate(h2o_time)
          if (allocated(h2oplin) ) deallocate(h2oplin)
+
+         ! Deallocate aerosol arrays
+         if (allocated(aerin)   ) deallocate(aerin)
+         if (allocated(aer_pres)) deallocate(aer_pres)
+
+         ! Deallocate IN and CCN arrays
+         if (allocated(ciplin)  ) deallocate(ciplin)
+         if (allocated(ccnin)   ) deallocate(ccnin)
+         if (allocated(ci_pres) ) deallocate(ci_pres)
 
          is_initialized = .false.
 
@@ -231,12 +295,13 @@
         endif
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-        if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
+        !    Model%imfdeepcnv < 0 when Model%ras = .true.
+        if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
           iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
           call random_setseed(iseed)
           call random_number(wrk)
           do i = 1,Model%cnx*Model%nrcm
-            iseed = iseed + nint(wrk(1)) * i
+            iseed = iseed + nint(wrk(1)*1000.0) * i
             call random_setseed(iseed)
             call random_number(rannie)
             rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
@@ -279,6 +344,31 @@
             call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
                               Data(nb)%Grid%jindx1_h, Data(nb)%Grid%jindx2_h,                &
                               Data(nb)%Tbd%h2opl, Data(nb)%Grid%ddy_h)
+          enddo
+        endif
+
+        !--- aerosol interpolation
+        if (Model%aero_in) then
+         do nb = 1, nblks
+           call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
+                             Model%idate, Model%fhour,                            &
+                             Data(nb)%Grid%jindx1_aer, Data(nb)%Grid%jindx2_aer,  &
+                             Data(nb)%Grid%ddy_aer,Data(nb)%Grid%iindx1_aer,      &
+                             Data(nb)%Grid%iindx2_aer,Data(nb)%Grid%ddx_aer,      &
+                             Model%levs,Data(nb)%Statein%prsl,                    &
+                             Data(nb)%Tbd%aer_nm)
+         enddo
+        endif
+
+        !--- ICCN interpolation
+        if (Model%iccn) then
+          do nb = 1, nblks
+            call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
+                             Data(nb)%Grid%jindx1_ci, Data(nb)%Grid%jindx2_ci,    &
+                             Data(nb)%Grid%ddy_ci,Data(nb)%Grid%iindx1_ci,        &
+                             Data(nb)%Grid%iindx2_ci,Data(nb)%Grid%ddx_ci,        &
+                             Model%levs,Data(nb)%Statein%prsl,                    &
+                             Data(nb)%Tbd%in_nm, Data(nb)%Tbd%ccn_nm)
           enddo
         endif
 

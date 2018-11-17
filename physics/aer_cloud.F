@@ -4,8 +4,8 @@
        use MAPL_ConstantsMod, r8 => MAPL_R8
 #endif
 #ifdef NEMS_GSM
-       use physcons, only: MAPL_PI=>con_pi
-       use machine, only : r8 => kind_phys
+       use physcons, only : MAPL_PI => con_pi
+       use machine,  only : r8      => kind_phys
 #endif
 
 ! according to the models of Nenes & Seinfeld (2003), Fountoukis and Nenes (2005) and Barahona and Nenes (2008, 2009).
@@ -82,7 +82,8 @@
      &,                   grav_par=9.81d0,    rgas_par=8.31d0
      &,                   accom_par=1.0d0,    eps_par=1d-6
      &,                   zero_par=1.0e-20,   great_par=1d20
-     &,                   pi_par=3.1415927d0, sq2pi_par=sqrt(pi_par)
+     &,                   pi_par=mapl_pi,     sq2pi_par=sqrt(pi_par)
+!    &,                   pi_par=3.1415927d0, sq2pi_par=sqrt(pi_par)
      &,                   sq2_par=1.41421356237d0
 !
      &,                   wmw_ice=018d0,      amw_ice=0.029d0
@@ -176,6 +177,7 @@
      & dINimmr8, Ncdepr8, Ncdhfr8, sc_icer8, fdust_immr8, fdust_depr8,
      & fdust_dhfr8, nlimr8, use_average_v, CCN_param, IN_param, fd_dust,
      & fd_soot, pfrz_inc_r8, sigma_nuc, rhi_cell,nccn)
+!    & fd_soot, pfrz_inc_r8, sigma_nuc, rhi_cell,nccn, lprnt)
 
 
 
@@ -183,6 +185,7 @@
        type(AerProps), intent(in) :: Aer_Props
 
        logical :: use_average_v
+!      logical :: use_average_v, lprnt
 
        real(r8), intent(in) :: tparc_in, pparc_in, sigwparc_in,
      & wparc_ls, npre_in, dpre_in, Ndropr8,  fd_soot, fd_dust,
@@ -314,12 +317,25 @@
 
        call init_Aer(Aeraux)
 
+!     if (lprnt) write(0,*)' in aero Aer_Props%num='
+!    &,Aer_Props%num,' nmodes=',nmodes,' air_den=',air_den
+!     if (lprnt) write(0,*)' in aero Aer_Props%kap='
+!    &,Aer_Props%kap
+
+       antot = 0.0
+
        do n=1,nmodes
-         tp_par(n)    = DBLE(Aer_Props%num(n))*air_den
-         dpg_par(n)   = max(DBLE(Aer_Props%dpg(n)), 1.0e-10)
-         sig_par(n)   = DBLE(Aer_Props%sig(n))
-         kappa_par(n) = max(DBLE(Aer_Props%kap(n)), 0.001)
-         dens_par(n)  = DBLE(Aer_Props%den(n))
+!        tp_par(n)    = DBLE(Aer_Props%num(n))*air_den
+!        dpg_par(n)   = max(DBLE(Aer_Props%dpg(n)), 1.0e-10)
+!        sig_par(n)   = DBLE(Aer_Props%sig(n))
+!        kappa_par(n) = max(DBLE(Aer_Props%kap(n)), 0.001)
+!        dens_par(n)  = DBLE(Aer_Props%den(n))
+
+         tp_par(n)    = Aer_Props%num(n) * air_den
+         dpg_par(n)   = max(Aer_Props%dpg(n), 1.0e-10)
+         sig_par(n)   = Aer_Props%sig(n)
+         kappa_par(n) = max(Aer_Props%kap(n), 0.001)
+         dens_par(n)  = Aer_Props%den(n)
          vhf_par(n)   = 3.0
          if (kappa_par(n) > 0.01) then
            ams_par(n) = 18.0e-3*1.7*3.0/kappa_par(n)
@@ -328,15 +344,20 @@
            tp_par(n)  = 0.0
          endif
          amfs_par(n)  = 1.0
-         deni_par(n) = dens_par(n)
+         deni_par(n)  = dens_par(n)
+         antot        = antot + tp_par(n)
+
+!     if (lprnt) write(0,*)' n=',n,' tp_par=',tp_par(n),' antot=',antot
+!    &,' Aer_Props%num=',Aer_Props%num(n),' kappa_par=',kappa_par(n)
+!    &,' air_den=',air_den
        enddo
 
-       kappa_par = max(kappa_par, 0.001)
-       dpg_par   = max(dpg_par, 1.0e-10)
+!      kappa_par = max(kappa_par, 0.001)
+!      dpg_par   = max(dpg_par, 1.0e-10)
        temp_par  = max(tparc, 245.0)
        pres_par  = max(pparc, 34000.0)
 
-       antot = sum(tp_par)
+!      antot = sum(tp_par)
        ntot  = antot
 
        wparc = max(max(0.8d0*sigwparc, 0.01)+ wparc_ls, 0.01)
@@ -345,6 +366,9 @@
        act_param = CCN_param
 
 !============== Calculate cloud droplet number concentration===================
+
+!     if (lprnt) write(0,*)' in aero tparc=',tparc,' antot=',antot
+!     if (lprnt) write(0,*)' in aero tp_par=',tp_par(1:nmodes)
 
        if (tparc > 245.0) then
          if (antot > 1.0) then
@@ -374,16 +398,18 @@
            cdncr8    = max(nact/air_den, zero_par)
            smaxliqr8 = max(smax, zero_par)
 
+!     if (lprnt) write(0,*)' in aero cdncr8=',cdncr8,' nact=',nact,
+!    &' air_den=',air_den,' wparc=',wparc,' act_param=',act_param
 !============ Calculate diagnostic CCN number concentration==================
 
-           smax_diag = ccn_diagr8
+!          smax_diag = ccn_diagr8
 
 !          do k =1, size (smax_diag)
-           do k =1, nccn
-             call ccn_at_super (smax_diag(k), ccn_at_s,nmodes,
-     &                          sig_par,sg_par,tp_par)
-             ccn_diagr8 (k) = ccn_at_s
-           end do
+!          do k =1, nccn
+!            call ccn_at_super (smax_diag(k), ccn_at_s,nmodes,
+!    &                          sig_par,sg_par,tp_par)
+!            ccn_diagr8 (k) = ccn_at_s
+!          end do
 
          end if
        end if
@@ -1321,7 +1347,7 @@
        integer act_param
 
 
-       ntot=zero_par
+       ntot     = zero_par
        temp_par = max(tparc, 245.0)
        pres_par = max(pparc, 34000.0)
 !
@@ -1347,7 +1373,7 @@
        par1 = par1/vlfs
        par2 = sqrt(max(par1*akoh_par*akoh_par*akoh_par, zero_par))
        sg_par(k)= max(exp(par2) - 1d0, zero_par)
-       ntot=ntot+tp_par(k)
+       ntot = ntot + tp_par(k)
        enddo
 !
 

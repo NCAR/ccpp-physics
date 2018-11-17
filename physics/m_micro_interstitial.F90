@@ -1,15 +1,18 @@
 !> \file m_micro_interstitial.F90
 !! This file contains subroutines that prepare data for and from the Morrison-Gettelman microphysics scheme
 !! as part of the GFS physics suite.
-module m_micro_pre
-contains
+      module m_micro_pre
+
+      implicit none
+
+      contains
 
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_m_micro_pre_init Argument Table
 !!
-subroutine m_micro_pre_init()
-end subroutine m_micro_pre_init
+      subroutine m_micro_pre_init()
+      end subroutine m_micro_pre_init
 
 ! \brief Brief description of the subroutine
 !!
@@ -50,187 +53,144 @@ end subroutine m_micro_pre_init
 !! | cf_upi         | convective_cloud_fraction_for_microphysics            | convective cloud fraction for microphysics                                                                                       | frac    |    2 | real       | kind_phys | inout  | F        |
 !! | clw_water      | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 |    2 | real       | kind_phys | out    | F        |
 !! | clw_ice        | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 |    2 | real       | kind_phys | out    | F        |
+!! | clcn           | convective_cloud_volume_fraction                      | convective cloud volume fraction                                                                                                 | frac    |    2 | real       | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP                                                                                         | none    |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                                                            | flag    |    0 | integer    |           | out    | F        |
 !!
 #endif
-subroutine m_micro_pre_run (im, levs, do_shoc, fprcp, mg3_as_mg2, imfdeepcnv, imfshalcnv, gq0_ice, gq0_water,       &
-  gq0_rain, gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,  &
-  qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, qlcn, qicn, cf_upi, clw_water, clw_ice, errmsg, errflg )
+      subroutine m_micro_pre_run (im, levs, do_shoc, fprcp, mg3_as_mg2, imfdeepcnv, imfshalcnv, gq0_ice, gq0_water,       &
+        gq0_rain, gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,  &
+        qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, qlcn, qicn, cf_upi, clw_water, clw_ice, clcn, errmsg, errflg )
 
-use machine, only : kind_phys
-implicit none
+      use machine, only : kind_phys
+      implicit none
 
-integer, intent(in) :: im, levs, imfdeepcnv, imfshalcnv, fprcp
-logical, intent(in) :: do_shoc, mg3_as_mg2
-real(kind=kind_phys), intent(in) :: tcr, tcrf
+      integer, intent(in) :: im, levs, imfdeepcnv, imfshalcnv, fprcp
+      logical, intent(in) :: do_shoc, mg3_as_mg2
+      real(kind=kind_phys), intent(in) :: tcr, tcrf
 
-real(kind=kind_phys), intent(in) ::                               &
-    gq0_ice(:,:), gq0_water(:,:), gq0_rain(:,:), gq0_snow(:,:),   &
-    gq0_graupel(:,:), gq0_rain_nc(:,:), gq0_snow_nc(:,:),         &
-    gq0_graupel_nc(:,:), cld_shoc(:,:), cnvc(:,:), cnvw(:,:),     &
-    gt0(:,:)
+      real(kind=kind_phys), intent(in) ::                               &
+          gq0_ice(:,:), gq0_water(:,:), gq0_rain(:,:), gq0_snow(:,:),   &
+          gq0_graupel(:,:), gq0_rain_nc(:,:), gq0_snow_nc(:,:),         &
+          gq0_graupel_nc(:,:), cld_shoc(:,:), cnvc(:,:), cnvw(:,:),     &
+          gt0(:,:)
 
-real(kind=kind_phys), intent(inout) ::                              &
-    qrn(:,:), qsnw(:,:), qgl(:,:), ncpr(:,:), ncps(:,:), ncgl(:,:), &
-    cld_frc_MG(:,:), cf_upi(:,:), qlcn(:,:), qicn(:,:)
+      real(kind=kind_phys), intent(inout) ::                              &
+          qrn(:,:), qsnw(:,:), qgl(:,:), ncpr(:,:), ncps(:,:), ncgl(:,:), &
+          cld_frc_MG(:,:), cf_upi(:,:), qlcn(:,:), qicn(:,:)
 
-real(kind=kind_phys), intent(out) :: clw_ice(:,:), clw_water(:,:)
+      real(kind=kind_phys), intent(out) :: clw_ice(:,:), clw_water(:,:)
 
-character(len=*), intent(out) :: errmsg
-integer,          intent(out) :: errflg
+      real(kind=kind_phys), intent(in) :: clcn(:,:)
 
-integer :: i, k
-real(kind=kind_phys) :: tem
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
-! Initialize CCPP error handling variables
-errmsg = ''
-errflg = 0
+      integer :: i, k
+      real(kind=kind_phys) :: tem
 
-!       Acheng used clw here for other code to run smoothly and minimum change
-!       to make the code work. However, the nc and clw should be treated
-!       in other procceses too.  August 28/2015; Hope that can be done next
-!       year. I believe this will make the physical interaction more reasonable
-!       Anning 12/5/2015 changed ntcw hold liquid only
-if (do_shoc) then
-  if (fprcp == 0) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        cld_frc_MG(i,k) = cld_shoc(i,k)
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      !       Acheng used clw here for other code to run smoothly and minimum change
+      !       to make the code work. However, the nc and clw should be treated
+      !       in other procceses too.  August 28/2015; Hope that can be done next
+      !       year. I believe this will make the physical interaction more reasonable
+      !       Anning 12/5/2015 changed ntcw hold liquid only
+      if (do_shoc) then
+        if (fprcp == 0) then
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+              cld_frc_MG(i,k) = cld_shoc(i,k)
+            enddo
+          enddo
+        else if ((abs(fprcp) == 1) .or. mg3_as_mg2) then
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+              qrn(i,k)   = gq0_rain(i,k)
+              qsnw(i,k)  = gq0_snow(i,k)
+              ncpr(i,k)  = gq0_rain_nc(i,k)
+              ncps(i,k)  = gq0_snow_nc(i,k)
+              cld_frc_MG(i,k) = cld_shoc(i,k)
+            enddo
+          enddo
+        else
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+              qrn(i,k)   = gq0_rain(i,k)
+              qsnw(i,k)  = gq0_snow(i,k)
+              qgl(i,k)   = gq0_graupel(i,k)
+              ncpr(i,k)  = gq0_rain_nc(i,k)
+              ncps(i,k)  = gq0_snow_nc(i,k)
+              ncgl(i,k)  = gq0_graupel_nc(i,k)
+              cld_frc_MG(i,k) = cld_shoc(i,k)
+            enddo
+          enddo
+        end if
+        if (fprcp == 0 ) then
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+            enddo
+          enddo
+        elseif (abs(fprcp) == 1 .or. mg3_as_mg2) then
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+              qrn(i,k)   = gq0_rain(i,k)
+              qsnw(i,k)  = gq0_snow(i,k)
+              ncpr(i,k)  = gq0_rain_nc(i,k)
+              ncps(i,k)  = gq0_snow_nc(i,k)
+            enddo
+          enddo
+        else
+          do k=1,levs
+            do i=1,im
+              clw_ice(i,k) = gq0_ice(i,k)
+              clw_water(i,k) = gq0_water(i,k)
+              qrn(i,k)   = gq0_rain(i,k)
+              qsnw(i,k)  = gq0_snow(i,k)
+              qgl(i,k)   = gq0_graupel(i,k)
+              ncpr(i,k)  = gq0_rain_nc(i,k)
+              ncps(i,k)  = gq0_snow_nc(i,k)
+              ncgl(i,k)  = gq0_graupel_nc(i,k)
+            enddo
+          enddo
+        endif
+      end if
+
+      ! add convective cloud fraction
+      do k = 1,levs
+        do i = 1,im
+          cld_frc_MG(i,k) = min(1.0, cld_frc_MG(i,k) + clcn(i,k))
+        enddo
       enddo
-    enddo
-  else if ((abs(fprcp) == 1) .or. mg3_as_mg2) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-        cld_frc_MG(i,k) = cld_shoc(i,k)
-      enddo
-    enddo
-  else
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        qgl(i,k)   = gq0_graupel(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-        ncgl(i,k)  = gq0_graupel_nc(i,k)
-        cld_frc_MG(i,k) = cld_shoc(i,k)
-      enddo
-    enddo
-  end if
-else if ((imfdeepcnv >= 0) .or. (imfshalcnv > 0)) then
-  if (fprcp == 0) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        cld_frc_MG(i,k) = max(0.0, min(1.0,cld_frc_MG(i,k)+cnvc(i,k)))
-                                               ! clouds from t-dt and cnvc
-        tem = cnvw(i,k)* max(0.0, MIN(1.0, (TCR-gt0(i,k))*TCRF))
-        qlcn(i,k)   = qlcn(i,k)   +  cnvw(i,k) - tem
-        qicn(i,k)   = qicn(i,k)   + tem
-        cf_upi(i,k) = cf_upi(i,k) + cnvc(i,k)
-      enddo
-    enddo
-  else if (abs(fprcp) == 1 .or. mg3_as_mg2) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        cld_frc_MG(i,k) = max(0.0, min(1.0,cld_frc_MG(i,k)+cnvc(i,k)))
-                                               ! clouds from t-dt and cnvc
-        tem = cnvw(i,k)* max(0.0, MIN(1.0, (TCR-gt0(i,k))*TCRF))
-        qlcn(i,k)   = qlcn(i,k)   +  cnvw(i,k) - tem
-        qicn(i,k)   = qicn(i,k)   + tem
-        cf_upi(i,k) = cf_upi(i,k) + cnvc(i,k)
 
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-      enddo
-    enddo
-  else
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        cld_frc_MG(i,k) = max(0.0, min(1.0,cld_frc_MG(i,k)+cnvc(i,k)))
-                                               ! clouds from t-dt and cnvc
-        tem = cnvw(i,k)* max(0.0, MIN(1.0, (TCR-gt0(i,k))*TCRF))
-        qlcn(i,k)   = qlcn(i,k)   +  cnvw(i,k) - tem
-        qicn(i,k)   = qicn(i,k)   + tem
-        cf_upi(i,k) = cf_upi(i,k) + cnvc(i,k)
-
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        qgl(i,k)   = gq0_graupel(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-        ncgl(i,k)  = gq0_graupel_nc(i,k)
-      enddo
-    enddo
-  end if
-else
-  if (fprcp == 0 ) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-      enddo
-    enddo
-  elseif (abs(fprcp) == 1 .or. mg3_as_mg2) then
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-      enddo
-    enddo
-  else
-    do k=1,levs
-      do i=1,im
-        clw_ice(i,k) = gq0_ice(i,k)
-        clw_water(i,k) = gq0_water(i,k)
-        qrn(i,k)   = gq0_rain(i,k)
-        qsnw(i,k)  = gq0_snow(i,k)
-        qgl(i,k)   = gq0_graupel(i,k)
-        ncpr(i,k)  = gq0_rain_nc(i,k)
-        ncps(i,k)  = gq0_snow_nc(i,k)
-        ncgl(i,k)  = gq0_graupel_nc(i,k)
-      enddo
-    enddo
-  endif
-end if
-
-
-end subroutine m_micro_pre_run
+      end subroutine m_micro_pre_run
 
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_m_micro_pre_finalize Argument Table
 !!
-subroutine m_micro_pre_finalize ()
-end subroutine m_micro_pre_finalize
+      subroutine m_micro_pre_finalize ()
+      end subroutine m_micro_pre_finalize
 
-end module m_micro_pre
+      end module m_micro_pre
 
 !> This module contains the CCPP-compliant MG microphysics
 !! post intersititial codes.
       module m_micro_post
+
+      implicit none
 
       contains
 

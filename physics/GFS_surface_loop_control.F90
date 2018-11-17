@@ -128,7 +128,7 @@
         flag_guess(i) = .false.
 
         if (iter == 1 .and. wind(i) < 2.0) then
-          if ( (islmsk(i) == 1) .or. ((islmsk(i) == 0) .and. (nstf_name1 > 0)) ) then
+          if ( islmsk(i) == 1 .or. (islmsk(i) == 0 .and. nstf_name1 > 0) ) then
             flag_iter(i) = .true.
           endif
         endif
