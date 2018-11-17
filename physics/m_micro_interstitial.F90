@@ -134,6 +134,7 @@
             enddo
           enddo
         end if
+      else
         if (fprcp == 0 ) then
           do k=1,levs
             do i=1,im
