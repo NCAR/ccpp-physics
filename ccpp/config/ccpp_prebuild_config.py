@@ -33,7 +33,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/h2o_def.f',
     'ccpp/physics/physics/h2ointerp.f90',
     'ccpp/physics/physics/iounitdef.f',
-    'ccpp/physics/physics/machine.F', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/machine.F',
     'ccpp/physics/physics/mersenne_twister.f',
     'ccpp/physics/physics/mfpbl.f',
     'ccpp/physics/physics/micro_mg_utils.F90',
@@ -54,7 +54,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/ozne_def.f',
     'ccpp/physics/physics/ozinterp.f90',
     'ccpp/physics/physics/physcons.F90',
-    'ccpp/physics/physics/physparam.f', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/physparam.f',
     'ccpp/physics/physics/radcons.f90',
     'ccpp/physics/physics/radiation_aerosols.f',
     'ccpp/physics/physics/radiation_astronomy.f',
@@ -312,10 +312,10 @@ use ccpp_api, only: ccpp_error
 # in the physics scheme cap (e.g. derived data types)
 MODULE_USE_TEMPLATE_SCHEME_CAP = \
 '''
-   use machine, only: kind_grid, kind_phys, kind_dyn
+   use machine, only: kind_grid, kind_phys
    use module_radlw_parameters, only: sfcflw_type, topflw_type
    use module_radsw_parameters, only: cmpfsw_type, sfcfsw_type, topfsw_type
-   use CCPP_typedefs, only: CCPP_interstitial_type
+   use CCPP_typedefs, only: CCPP_interstitial_type, kind_dyn
    use GFS_typedefs, only: GFS_statein_type,  GFS_stateout_type,    &
                            GFS_sfcprop_type,  GFS_coupling_type,    &
                            GFS_control_type,  GFS_grid_type,        &
