@@ -54,12 +54,12 @@ module fv_sat_adj
 ! </table>
     ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
     !use constants_mod, only: rvgas, rdgas, grav, hlv, hlf, cp_air
-    use physcons, only : rdgas => con_rd, &
-                         rvgas => con_rv, &
-                         grav => con_g,   &
-                         hlv => con_hvap, &
-                         hlf => con_hfus, &
-                         cp_air => con_cp
+    use physcons, only : rdgas => con_rd_dyn, &
+                         rvgas => con_rv_dyn, &
+                         grav => con_g_dyn,   &
+                         hlv => con_hvap_dyn, &
+                         hlf => con_hfus_dyn, &
+                         cp_air => con_cp_dyn
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
@@ -1147,7 +1147,7 @@ subroutine qs_table (n)
     ! compute es over ice between - 160 deg c and 0 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1600
-        tem = tmin + delt * real (i - 1)
+        tem = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * li2
         fac2 = (d2ice * log (tem / tice) + fac1) / rvgas
@@ -1157,7 +1157,7 @@ subroutine qs_table (n)
     ! compute es over water between - 20 deg c and 102 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1221
-        tem = 253.16 + delt * real (i - 1)
+        tem = 253.16 + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1172,7 +1172,7 @@ subroutine qs_table (n)
     ! derive blended es over ice and supercooled water between - 20 deg c and 0 deg c
     ! -----------------------------------------------------------------------
     do i = 1, 200
-        tem = 253.16 + delt * real (i - 1)
+        tem = 253.16 + delt * real (i - 1, kind=kind_dyn)
         wice = 0.05 * (tice - tem)
         wh2o = 0.05 * (tem - 253.16)
         table (i + 1400) = wice * table (i + 1400) + wh2o * esupc (i)
@@ -1193,7 +1193,7 @@ subroutine qs_tablew (n)
     ! compute es over water
     ! -----------------------------------------------------------------------
     do i = 1, n
-        tem = tmin + delt * real (i - 1)
+        tem = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1212,7 +1212,7 @@ subroutine qs_table2 (n)
     integer :: i, i0, i1
     tmin = tice - 160.
     do i = 1, n
-        tem0 = tmin + delt * real (i - 1)
+        tem0 = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem0 - tice) / (tem0 * tice)
         if (i <= 1600) then
             ! -----------------------------------------------------------------------
