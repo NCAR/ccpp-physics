@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 CSAWMG3 test
+#  FV3 CCPP CSAWMGSHOC test
 #
 ###############################################################################
 
-export TEST_DESCR="Compare FV3 csawmg3 results with previous trunk version"
+export TEST_DESCR="Compare FV3 CCPP csawmgshoc results with previous trunk version"
 
-export CNTL_DIR=fv3_csawmg3
+export CNTL_DIR=fv3_csawmgshoc
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -49,13 +49,7 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
                    RESTART/sfc_data.tile3.nc \
                    RESTART/sfc_data.tile4.nc \
                    RESTART/sfc_data.tile5.nc \
-                   RESTART/sfc_data.tile6.nc \
-                   RESTART/phy_data.tile1.nc \
-                   RESTART/phy_data.tile2.nc \
-                   RESTART/phy_data.tile3.nc \
-                   RESTART/phy_data.tile4.nc \
-                   RESTART/phy_data.tile5.nc \
-                   RESTART/phy_data.tile6.nc"
+                   RESTART/sfc_data.tile6.nc"
 
 
 export_fv3
@@ -77,12 +71,14 @@ export JNPES='8'
 export NPZ='127'
 export NPZP='128'
 
-
-export INPUT_NML=csawmg3.nml.IN
-export FV3_RUN=csawmg3_run.IN
+export INPUT_NML=ccpp_csawmg3shoc127.nml.IN
+export FV3_RUN=ccpp_csawmg3shoc127_run.IN
 export OUTPUT_GRID="'gaussian_grid'"
 export OUTPUT_FILE="'nemsio'"
 export WRITE_NEMSIOFLIP=.true.
 export WRITE_FSYNCFLAG=.true.
+
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_csawmgshoc.xml
+export CCPP_LIB_DIR=ccpp/lib
 
 RUN_SCRIPT=rt_fv3.sh

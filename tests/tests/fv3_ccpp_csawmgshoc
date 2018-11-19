@@ -49,13 +49,7 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
                    RESTART/sfc_data.tile3.nc \
                    RESTART/sfc_data.tile4.nc \
                    RESTART/sfc_data.tile5.nc \
-                   RESTART/sfc_data.tile6.nc \
-                   RESTART/phy_data.tile1.nc \
-                   RESTART/phy_data.tile2.nc \
-                   RESTART/phy_data.tile3.nc \
-                   RESTART/phy_data.tile4.nc \
-                   RESTART/phy_data.tile5.nc \
-                   RESTART/phy_data.tile6.nc"
+                   RESTART/sfc_data.tile6.nc"
 
 
 export_fv3
@@ -69,7 +63,7 @@ export OUTPUT_FILE="'nemsio'"
 export WRITE_NEMSIOFLIP=.true.
 export WRITE_FSYNCFLAG=.true.
 
-export CCPP_SDF=ccpp/suites/suite_FV3_CPT_advanced.xml
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_csawmgshoc.xml
 export CCPP_LIB_DIR=ccpp/lib
 
 export NODES=$(expr $TASKS / $TPN + 1)
