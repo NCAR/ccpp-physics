@@ -51,7 +51,8 @@
         STCFC1 (Model%nx*Model%ny*Model%lsoil), &
         SLCFC1 (Model%nx*Model%ny*Model%lsoil)
 
-    real(kind=kind_phys)    :: sig1t, pifac
+    real(kind=kind_phys), parameter :: pifac=180.0/pi
+    real(kind=kind_phys)            :: sig1t
     integer :: npts, len, nb, ix, ls, ios
     logical :: exists
 !
@@ -63,7 +64,6 @@
       sig1t = 0.0
       npts  = Model%nx*Model%ny
 !
-      pifac = 180.0 / pi
       len = 0
       do nb = 1,nblks
         do ix = 1,size(Grid(nb)%xlat,1)
@@ -74,9 +74,9 @@
           OROG_UF (len)          = Sfcprop(nb)%oro_uf (ix)
           SLIFCS  (len)          = Sfcprop(nb)%slmsk  (ix)
           if ( Model%nstf_name(1) > 0 ) then
-             TSFFCS(len)         = Sfcprop(nb)%tref   (ix)
+            TSFFCS(len)          = Sfcprop(nb)%tref   (ix)
           else
-          TSFFCS  (len)          = Sfcprop(nb)%tsfc   (ix)
+            TSFFCS(len)          = Sfcprop(nb)%tsfc   (ix)
           endif
           SNOFCS  (len)          = Sfcprop(nb)%weasd  (ix)
           ZORFCS  (len)          = Sfcprop(nb)%zorl   (ix)
@@ -146,7 +146,8 @@
       CALL SFCCYCLE (9998, npts, Model%lsoil, SIG1T, Model%fhcyc, &
                      Model%idate(4), Model%idate(2),              &
                      Model%idate(3), Model%idate(1),              &
-                     Model%fhour, RLA, RLO, SLMASK,               &
+                     Model%phour, RLA, RLO, SLMASK,               &
+!                    Model%fhour, RLA, RLO, SLMASK,               &
                      OROG, OROG_UF, Model%USE_UFO, Model%nst_anl, &
                      SIHFCS, SICFCS, SITFCS, SWDFCS, SLCFC1,      &
                      VMNFCS, VMXFCS, SLPFCS, ABSFCS, TSFFCS,      &
@@ -169,7 +170,7 @@
           if ( Model%nstf_name(1) > 0 ) then
              Sfcprop(nb)%tref(ix) = TSFFCS  (len)
           else
-          Sfcprop(nb)%tsfc   (ix) = TSFFCS  (len)
+             Sfcprop(nb)%tsfc(ix) = TSFFCS  (len)
           endif
           Sfcprop(nb)%weasd  (ix) = SNOFCS  (len)
           Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)

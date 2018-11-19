@@ -71,12 +71,13 @@
         if (nday > 0) then
           do k = 1, LM
             k1 = k + kd
-            Radtend%htrsw(:,k) = htswc(:,k1)
+            Radtend%htrsw(1:im,k) = htswc(1:im,k1)
           enddo
-          ! --- repopulate the points above levr
-          if (Model%levr < Model%levs) then
-            do k = LM,Model%levs
-              Radtend%htrsw (:,k) = Radtend%htrsw (:,LM)
+          ! We are assuming that radiative tendencies are from bottom to top 
+          ! --- repopulate the points above levr i.e. LM
+          if (lm < Model%levs) then
+            do k = lm,Model%levs
+              Radtend%htrsw (1:im,k) = Radtend%htrsw (1:im,LM)
             enddo
           endif
 
@@ -85,10 +86,10 @@
                k1 = k + kd
                Radtend%swhc(1:im,k) = htsw0(1:im,k1)
              enddo
-             ! --- repopulate the points above levr
-             if (Model%levr < Model%levs) then
-               do k = LM,Model%levs
-                 Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM) 
+             ! --- repopulate the points above levr i.e. LM
+             if (lm < Model%levs) then
+               do k = lm,Model%levs
+                 Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM)
                enddo
              endif
           endif

@@ -91,6 +91,18 @@
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2      |    2 | real      | kind_phys | out    | F        |
 !! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
 !! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac        |    2 | real      | kind_phys | inout  | F        |
+!! | qlcn           | mass_fraction_of_convective_cloud_liquid_water                 | mass fraction of convective cloud liquid water          | kg kg-1       |    2 | real      | kind_phys | inout   | F        |
+!! | qicn           | mass_fraction_of_convective_cloud_ice                          | mass fraction of convective cloud ice water             | kg kg-1       |    2 | real      | kind_phys | inout   | F        |
+!! | w_upi          | vertical_velocity_for_updraft                                  | vertical velocity for updraft                           | m s-1         |    2 | real      | kind_phys | inout   | F        |
+!! | cf_upi         | convective_cloud_fraction_for_microphysics                     | convective cloud fraction for microphysics              | frac          |    2 | real      | kind_phys | inout   | F        |
+!! | cnv_mfd        | detrained_mass_flux                                            | detrained mass flux                                     | kg m-2 s-1    |    2 | real      | kind_phys | inout   | F        |
+!! | cnv_dqldt      | tendency_of_cloud_water_due_to_convective_microphysics         | tendency of cloud water due to convective microphysics  | kg m-2 s-1    |    2 | real      | kind_phys | inout   | F        |
+!! | clcn           | convective_cloud_volume_fraction                               | convective cloud volume fraction                        | frac          |    2 | real      | kind_phys | inout   | F        |
+!! | cnv_fice       | ice_fraction_in_convective_tower                               | ice fraction in convective tower                        | frac          |    2 | real      | kind_phys | inout   | F        |
+!! | cnv_ndrop      | number_concentration_of_cloud_liquid_water_particles_for_detrainment | droplet number concentration in convective detrainment  | m-3           |    2 | real      | kind_phys | inout   | F        |
+!! | cnv_nice       | number_concentration_of_ice_crystals_for_detrainment           | crystal number concentration in convective detrainment  | m-3           |    2 | real      | kind_phys | inout   | F        |
+!! | mp_phys        | flag_for_microphysics_scheme                                   | choice of microphysics scheme                           | flag          |    0 | integer   |           | in      | F        |
+!! | mp_phys_mg     | flag_for_morrison_gettelman_microphysics_scheme                | choice of Morrison-Gettelman rmicrophysics scheme       | flag          |    0 | integer   |           | in      | F        |
 !! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none        |    0 | real      | kind_phys | in     | F        |
 !! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1         |    0 | real      | kind_phys | in     | F        |
 !! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1         |    0 | real      | kind_phys | in     | F        |
@@ -119,13 +131,15 @@
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
       subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,                &
-     &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
-     &     t0c,delt,ntk,ntr,delp,                                       &
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
-     &     cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                      &
-     &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                      &
-     &     clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,        &
-     &     errmsg,errflg)
+     &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
+     &    t0c,delt,ntk,ntr,delp,                                        &
+     &    prslp,psp,phil,qtr,q1,t1,u1,v1,                               &
+     &    cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                       &
+     &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
+     &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
+     &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
+     &    clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,         &
+     &    errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -149,6 +163,11 @@
       real(kind=kind_phys), intent(out) :: cldwrk(im),
      &   rn(im),
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
+
+      real(kind=kind_phys), dimension(im,km), intent(inout) :: 
+     &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn
+     &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
+      integer :: mp_phys, mp_phys_mg
 
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,
      &                     betal,   betas,   asolfac,
@@ -394,6 +413,23 @@ c
           dt_mf(i,k) = 0.
         enddo
       enddo
+      if(mp_phys == mp_phys_mg) then
+        do k = 1, km
+          do i = 1, im
+            QLCN(i,k)      = qtr(i,k,2)
+            QICN(i,k)      = qtr(i,k,1)
+            w_upi(i,k)     = 0.0
+            cf_upi(i,k)    = 0.0
+            CNV_MFD(i,k)   = 0.0
+
+            CNV_DQLDT(i,k) = 0.0
+            CLCN(i,k)      = 0.0
+            CNV_FICE(i,k)  = 0.0
+            CNV_NDROP(i,k) = 0.0
+            CNV_NICE(i,k)  = 0.0
+          enddo
+        enddo
+      endif
 c
 !     do k = 1, 15
 !       acrit(k) = acritt(k) * (975. - pcrit(k))
@@ -406,7 +442,7 @@ c
 !     val   =         5400.
       val   =         10800.
       dtmax = max(dt2, val )
-c  model tunable parameters are all here
+!  model tunable parameters are all here
       edtmaxl = .3
       edtmaxs = .3
 !     clam    = .1
@@ -2763,6 +2799,21 @@ c
 !
       endif
 !!
+      if(mp_phys == mp_phys_mg) then
+        do k=1,km
+          do i=1,im
+            QLCN(i,k)     = qtr(i,k,2) - qlcn(i,k)
+            QICN(i,k)     = qtr(i,k,1) - qicn(i,k)
+            cf_upi(i,k)   = cnvc(i,k)
+            w_upi(i,k)    = ud_mf(i,k)*t1(i,k)*rd /
+     &                     (dt2*max(sigmagfm(i),1.e-12)*prslp(i,k))
+            CNV_MFD(i,k)  = ud_mf(i,k)/dt2
+            CLCN(i,k)     = cnvc(i,k)
+            CNV_FICE(i,k) = QICN(i,k)
+     &                    / max(1.e-10,QLCN(i,k)+QICN(i,k))
+          enddo
+        enddo
+      endif
       return
       end subroutine samfdeepcnv_run
 

@@ -1,9 +1,9 @@
-!> \file satmedmfvdif.F90
+!> \file satmedmfvdif.F
 !! This file  contains the CCPP-compliant SATMEDMF scheme which computes
 !! subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (EDMF) parameterization (by Jongil Han).
 !!
-!! Subroutine 'satmedmfvdif.F90' computes subgrid vertical turbulence mixing
+!! Subroutine 'satmedmfvdif_run' computes subgrid vertical turbulence mixing
 !! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
 !! (by Jongil Han).
 !!
@@ -40,14 +40,14 @@
 !! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
 !! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
-!! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        | 
-!! | nthm           | number_of_tracers_for_cloud_condensate                                      | number of tracers for cloud condensate                | count         |    0 | integer   |           | in     | F        |
+!! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        |
 !! | ntke           | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array | index   |    0 | integer   |           | in     | F        |
 !! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | rv             | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                    | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                        | latent heat of fusion                                 | J kg-1        |    0 | real      | kind_phys | in     | F        |
 !! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor) | none          |    0 | real      | kind_phys | in     | F        |
 !! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                 | none          |    0 | real      | kind_phys | in     | F        |
 !! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                     | (rd/rv) - 1                                           | none          |    0 | real      | kind_phys | in     | F        |
@@ -96,46 +96,47 @@
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,nthm,ntke,   &
-     &     grav,rd,cp,rv,hvap,fv,eps,epsm1,                             &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
-     &     tsea,heat,evap,stress,spd1,kpbl,                             &
-     &     prsi,del,prsl,prslk,phii,phil,delt,                          &
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
+      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,
+     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
+     &     tsea,heat,evap,stress,spd1,kpbl,
+     &     prsi,del,prsl,prslk,phii,phil,delt,
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,
      &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
 !
       use machine  , only : kind_phys
+      use funcphys , only : fpvs
 !
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in) :: ix, im, km, ntrac, ntcw, ntiw, nthm, ntke, &
-     &                       kinver(im)
+      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
+      integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,fv,eps,    &
-     &                                    epsm1
+      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,
+     &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
+      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),
      &                     tdt(im,km),    rtg(im,km,ntrac)
-      real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
-     &                     xmu(im),       garea(im),                    &
-     &                     psk(ix),       rbsoil(im),                   &
-     &                     zorl(im),      tsea(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     evap(im),      heat(im),                     &
-     &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
+      real(kind=kind_phys), intent(in) ::
+     &                     u1(ix,km),     v1(ix,km),
+     &                     t1(ix,km),     q1(ix,km,ntrac),
+     &                     swh(ix,km),    hlw(ix,km),
+     &                     xmu(im),       garea(im),
+     &                     psk(ix),       rbsoil(im),
+     &                     zorl(im),      tsea(im),
+     &                     u10m(im),      v10m(im),
+     &                     fm(im),        fh(im),
+     &                     evap(im),      heat(im),
+     &                     stress(im),    spd1(im),
+     &                     prsi(ix,km+1), del(ix,km),
+     &                     prsl(ix,km),   prslk(ix,km),
      &                     phii(ix,km+1), phil(ix,km)
-      real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
+      real(kind=kind_phys), intent(out) ::
+     &                     dusfc(im),     dvsfc(im),
+     &                     dtsfc(im),     dqsfc(im),
      &                     hpbl(im) 
 !
       logical, intent(out)  :: dspheat
@@ -154,53 +155,53 @@
 !
       real(kind=kind_phys) tke(im,km),  tkeh(im,km-1)
 !
-      real(kind=kind_phys) theta(im,km),thvx(im,km),  thlvx(im,km),     &
-     &                     qlx(im,km),  thetae(im,km),thlx(im,km),      &
-!    &                     slx(im,km),  svx(im,km),   qtx(im,km),       &
-     &                     tvx(im,km),  pix(im,km),   radx(im,km-1),    &
-     &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),     &
+      real(kind=kind_phys) theta(im,km),thvx(im,km),  thlvx(im,km),
+     &                     qlx(im,km),  thetae(im,km),thlx(im,km),
+     &                     slx(im,km),  svx(im,km),   qtx(im,km),
+     &                     tvx(im,km),  pix(im,km),   radx(im,km-1),
+     &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),
      &                     cku(im,km-1),ckt(im,km-1)
 !
-!     real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
-!    &                     qstl(im,km)
-      real(kind=kind_phys) plyr(im,km)
+      real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
+     &                     qstl(im,km)
 !
-      real(kind=kind_phys) dtdz1(im), gdx(im),                          &
-     &                     phih(im),  phim(im),    prn(im),             &
-     &                     rbdn(im),  rbup(im),    thermal(im),         &
-     &                     ustar(im), wstar(im),   hpblx(im),           &
-     &                     ust3(im),  wst3(im),                         &
-     &                     z0(im),    crb(im),                          &
-     &                     hgamt(im), hgamq(im),                        &
-     &                     wscale(im),vpert(im),                        &
-     &                     zol(im),   sflux(im),   radj(im),            &
+      real(kind=kind_phys) dtdz1(im), gdx(im),
+     &                     phih(im),  phim(im),    prn(im,km-1),
+     &                     rbdn(im),  rbup(im),    thermal(im),
+     &                     ustar(im), wstar(im),   hpblx(im),
+     &                     ust3(im),  wst3(im),
+     &                     z0(im),    crb(im),
+     &                     hgamt(im), hgamq(im),
+     &                     wscale(im),vpert(im),
+     &                     zol(im),   sflux(im),   radj(im),
      &                     tx1(im),   tx2(im)
 !
       real(kind=kind_phys) radmin(im)
 !
-      real(kind=kind_phys) zi(im,km+1),  zl(im,km),   zm(im,km),        &
-     &                     xkzo(im,km-1),xkzmo(im,km-1),                &
-     &                     xkzm_hx(im),  xkzm_mx(im),                   &
-     &                     rdzt(im,km-1),                               &
-     &                     al(im,km-1),  ad(im,km),   au(im,km-1),      &
+      real(kind=kind_phys) zi(im,km+1),  zl(im,km),   zm(im,km),
+     &                     xkzo(im,km-1),xkzmo(im,km-1),
+     &                     xkzm_hx(im),  xkzm_mx(im),
+     &                     rdzt(im,km-1),
+     &                     al(im,km-1),  ad(im,km),   au(im,km-1),
      &                     f1(im,km),    f2(im,km*(ntrac-1))
 !
-      real(kind=kind_phys) elm(im,km),   ele(im,km),  rle(im,km-1),     &
-     &                     diss(im,km-1),prod(im,km-1),                 &
-     &                     bf(im,km-1),  shr2(im,km-1),                 &
-     &                     xlamue(im,km-1), xlamde(im,km-1),            &
+      real(kind=kind_phys) elm(im,km),   ele(im,km),  rle(im,km-1),
+     &                     ckz(im,km),   chz(im,km),
+     &                     diss(im,km-1),prod(im,km-1),
+     &                     bf(im,km-1),  shr2(im,km-1),
+     &                     xlamue(im,km-1), xlamde(im,km-1),
      &                     gotvx(im,km), rlam(im,km-1)
 !
 !   variables for updrafts (thermals)
 !
-      real(kind=kind_phys) tcko(im,km),  qcko(im,km,ntrac),             &
-     &                     ucko(im,km),  vcko(im,km),                   &
+      real(kind=kind_phys) tcko(im,km),  qcko(im,km,ntrac),
+     &                     ucko(im,km),  vcko(im,km),
      &                     buou(im,km),  xmf(im,km)
 !
 !   variables for stratocumulus-top induced downdrafts
 !
-      real(kind=kind_phys) tcdo(im,km),  qcdo(im,km,ntrac),             &
-     &                     ucdo(im,km),  vcdo(im,km),                   &
+      real(kind=kind_phys) tcdo(im,km),  qcdo(im,km,ntrac),
+     &                     ucdo(im,km),  vcdo(im,km),
      &                     buod(im,km),  xmfd(im,km)
 !
       logical  pblflg(im), sfcflg(im), flg(im)
@@ -209,48 +210,47 @@
 !
 !  pcnvflg: true for unstable pbl
 !
-      real(kind=kind_phys) aphi16,  aphi5,                              &
-     &                     wfac,    cfac,                               &
-     &                     gamcrt,  gamcrq, sfcfrac,                    &
-     &                     conq,    cont,   conw,                       &
-     &                     dsdz2,   dsdzt,  dkmax,                      &
-     &                     dsig,    dt2,    dtodsd,                     &
-     &                     dtodsu,  g,      factor, dz,                 &
-     &                     gocp,    gravi,  zol1,   zolcru,             &
-     &                     buop,    shrp,   dtn,    cdtn,               &
-     &                     prnum,   prmax,  prmin,  prtke,              &
-     &                     prscu,   dw2,    dw2min, zk,                 &
-     &                     elmfac,  elefac, dspmax,                     &
-     &                     alp,     clwt,   cql,                        &
-     &                     f0,      robn,   crbmin, crbmax,             &
-     &                     es,      qs,     value,  onemrh,             &
-     &                     cfh,     gamma,  elocp,  el2orc,             &
-     &                     epsi,    beta,   chx,    cqx,                &
-     &                     rdt,     rdz,    qmin,   qlmin,              &
-     &                     ri,      rimin,                              &
-     &                     rbcr,    rbint,  tdzmin,                     &
-     &                     rlmn,    rlmx,   elmx,                       &
-     &                     ttend,   utend,  vtend,  qtend,              &
-     &                     zfac,    zfmin,  vk,     spdk2,              &
-     &                     tkmin,   xkzinv, dspfac, xkgdx,              &
-     &                     zlup,    zldn,   bsum,                       &
-     &                     tem,     tem1,   tem2,                       &
+      real(kind=kind_phys) aphi16,  aphi5,
+     &                     wfac,    cfac,
+     &                     gamcrt,  gamcrq, sfcfrac,
+     &                     conq,    cont,   conw,
+     &                     dsdz2,   dsdzt,  dkmax,
+     &                     dsig,    dt2,    dtodsd,
+     &                     dtodsu,  g,      factor, dz,
+     &                     gocp,    gravi,  zol1,   zolcru,
+     &                     buop,    shrp,   dtn,    cdtn,
+     &                     prnum,   prmax,  prmin,  prtke,
+     &                     prscu,   dw2,    dw2min, zk,
+     &                     elmfac,  elefac, dspmax,
+     &                     alp,     clwt,   cql,
+     &                     f0,      robn,   crbmin, crbmax,
+     &                     es,      qs,     value,  onemrh,
+     &                     cfh,     gamma,  elocp,  el2orc,
+     &                     epsi,    beta,   chx,    cqx,
+     &                     rdt,     rdz,    qmin,   qlmin,
+     &                     ri,      rimin,
+     &                     rbcr,    rbint,  tdzmin,
+     &                     rlmn,    rlmx,   elmx,
+     &                     ttend,   utend,  vtend,  qtend,
+     &                     zfac,    zfmin,  vk,     spdk2,
+     &                     tkmin,   xkzinv, dspfac, xkgdx,
+     &                     zlup,    zldn,   bsum,
+     &                     tem,     tem1,   tem2,
      &                     ptem,    ptem0,  ptem1,  ptem2
 !
-      real(kind=kind_phys) ck0, ch0, ch1, ce0, rchck
+      real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
       real(kind=kind_phys) qlcr, zstblmax
 !
       real(kind=kind_phys) h1 
 !!
-      parameter(wfac=7.0,cfac=4.0)
+      parameter(wfac=7.0,cfac=4.5)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
       parameter(vk=0.4,rimin=-100.)
       parameter(rbcr=0.25,zolcru=-0.02,tdzmin=1.e-3)
-      parameter(rlmn=30.,rlmx=300.,elmx=300.)
+      parameter(rlmn=30.,rlmx=500.,elmx=500.)
       parameter(prmin=0.25,prmax=4.0,prtke=1.0,prscu=0.67)
       parameter(f0=1.e-4,crbmin=0.15,crbmax=0.35)
-!     parameter(tkmin=5.e-5,dspfac=0.5,dspmax=10.0)
       parameter(tkmin=1.e-9,dspfac=0.5,dspmax=10.0)
       parameter(qmin=1.e-8,qlmin=1.e-12,zfmin=1.e-8)
       parameter(aphi5=5.,aphi16=16.)
@@ -258,7 +258,7 @@
       parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=25000.)
       parameter(qlcr=3.5e-5,zstblmax=2500.,xkzinv=0.15)
       parameter(h1=0.33333333)
-      parameter(ck0=0.4,ch0=0.4,ch1=0.2,ce0=0.7)
+      parameter(ck0=0.4,ck1=0.15,ch0=0.4,ch1=0.15,ce0=0.4)
       parameter(rchck=1.5,cdtn=25.)
 
       gravi=1.0/grav
@@ -296,6 +296,8 @@
           xmfd(i,k) = 0.
           buou(i,k) = 0.
           buod(i,k) = 0.
+          ckz(i,k) = ck1
+          chz(i,k) = ch1
         enddo
       enddo
       do i=1,im
@@ -325,6 +327,7 @@
       do k = 1,km1
         do i=1,im
           rdzt(i,k) = 1.0 / (zl(i,k+1) - zl(i,k))
+          prn(i,k)  = 1.0
         enddo
       enddo
 !
@@ -398,37 +401,27 @@
          endif
       enddo
 !
-      do k = 1,km
-        do i=1,im
-          tx1(i) = 0.0
-        enddo
-        do kk=1,nthm
-          do i=1,im
-            tx1(i) = tx1(i) + max(q1(i,k,ntcw+kk-1), qlmin)
-          enddo
-        enddo
-        do i = 1,im
-          pix(i,k)   = psk(i) / prslk(i,k)
-          theta(i,k) = t1(i,k) * pix(i,k)
-          tem        = 1.+fv*max(q1(i,k,1),qmin)-tx1(i)
-          thvx(i,k)  = theta(i,k) * tem
-          tvx(i,k)   = t1(i,k) * tem
-        enddo
-      enddo
-!
       do k=1,km
         do i=1,im
+          pix(i,k)   = psk(i) / prslk(i,k)
+          theta(i,k) = t1(i,k) * pix(i,k)
           if(ntiw > 0) then
-            qlx(i,k) = max((q1(i,k,ntcw)+q1(i,k,ntiw)),qlmin)
+            tem = max(q1(i,k,ntcw),qlmin)
+            tem1 = max(q1(i,k,ntiw),qlmin)
+            qlx(i,k) = tem + tem1
+            ptem = hvap*tem + (hvap+hfus)*tem1
+            slx(i,k)   = cp * t1(i,k) + phil(i,k) - ptem
           else
             qlx(i,k) = max(q1(i,k,ntcw),qlmin)
+            slx(i,k)   = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
           endif
-!         qtx(i,k) = max(q1(i,k,1),qmin)+qlx(i,k)
-          ptem = max(q1(i,k,1),qmin) + qlx(i,k)
-!         slx(i,k)   = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
+          tem2       = 1.+fv*max(q1(i,k,1),qmin)-qlx(i,k)
+          thvx(i,k)  = theta(i,k) * tem2
+          tvx(i,k)   = t1(i,k) * tem2
+          qtx(i,k) = max(q1(i,k,1),qmin)+qlx(i,k)
           thlx(i,k)  = theta(i,k) - pix(i,k)*elocp*qlx(i,k)
-          thlvx(i,k) = thlx(i,k) * (1. + fv * ptem)
-!         svx(i,k)   = cp * tvx(i,k) + phil(i,k)
+          thlvx(i,k) = thlx(i,k) * (1. + fv * qtx(i,k))
+          svx(i,k)   = cp * tvx(i,k)
           ptem1      = elocp * pix(i,k) * max(q1(i,k,1),qmin)
           thetae(i,k)= theta(i,k) +  ptem1
           gotvx(i,k) = g / tvx(i,k)
@@ -455,48 +448,48 @@
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)
 !  --- ...  compute relative humidity
-!         es  = 0.01 * fpvs(t1(i,k))       ! fpvs in pa
-!         qs  = max(qmin, eps * es / (plyr(i,k) + epsm1*es))
-!         rhly(i,k) = max(0.0, min(1.0, max(qmin, q1(i,k,1))/qs))
-!         qstl(i,k) = qs
+          es  = 0.01 * fpvs(t1(i,k))       ! fpvs in pa
+          qs  = max(qmin, eps * es / (plyr(i,k) + epsm1*es))
+          rhly(i,k) = max(0.0, min(1.0, max(qmin, q1(i,k,1))/qs))
+          qstl(i,k) = qs
         enddo
       enddo
 !
-!     do k = 1, km
-!       do i = 1, im
-!         cfly(i,k) = 0.
-!         clwt = 1.0e-6 * (plyr(i,k)*0.001)
-!         if (qlx(i,k) > clwt) then
-!           onemrh= max(1.e-10, 1.0-rhly(i,k))
-!           tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)
-!           tem1  = cql / tem1
-!           value = max(min( tem1*qlx(i,k), 50.0), 0.0)
-!           tem2  = sqrt(sqrt(rhly(i,k)))
-!           cfly(i,k) = max(tem2*(1.0-exp(-value)), 0.0)
-!         endif
-!       enddo
-!     enddo
+      do k = 1, km
+        do i = 1, im
+          cfly(i,k) = 0.
+          clwt = 1.0e-6 * (plyr(i,k)*0.001)
+          if (qlx(i,k) > clwt) then
+            onemrh= max(1.e-10, 1.0-rhly(i,k))
+            tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)
+            tem1  = cql / tem1
+            value = max(min( tem1*qlx(i,k), 50.0), 0.0)
+            tem2  = sqrt(sqrt(rhly(i,k)))
+            cfly(i,k) = min(max(tem2*(1.0-exp(-value)), 0.0), 1.0)
+          endif
+        enddo
+      enddo
 !
 !  compute buoyancy modified by clouds
 !
-!     do k = 1, km1
-!       do i = 1, im
-!         tem  = 0.5 * (svx(i,k) + svx(i,k+1))
-!         tem1 = 0.5 * (t1(i,k) + t1(i,k+1))
-!         tem2 = 0.5 * (qstl(i,k) + qstl(i,k+1))
-!         cfh  = min(cfly(i,k+1),0.5*(cfly(i,k)+cfly(i,k+1)))
-!         alp  = g / tem
-!         gamma = el2orc * tem2 / (tem1**2)
-!         epsi  = tem1 / elocp
-!         beta  = (1. + gamma*epsi*(1.+fv)) / (1. + gamma)
-!         chx   = cfh * alp * beta + (1. - cfh) * alp
-!         cqx   = cfh * alp * hvap * (beta - epsi)
-!         cqx   = cqx + (1. - cfh) * fv * g
-!         ptem1 = (slx(i,k+1)-slx(i,k))*rdzt(i,k)
-!         ptem2 = (qtx(i,k+1)-qtx(i,k))*rdzt(i,k)
-!         bf(i,k) = chx * ptem1 + cqx * ptem2
-!       enddo
-!     enddo
+      do k = 1, km1
+        do i = 1, im
+          tem  = 0.5 * (svx(i,k) + svx(i,k+1))
+          tem1 = 0.5 * (t1(i,k) + t1(i,k+1))
+          tem2 = 0.5 * (qstl(i,k) + qstl(i,k+1))
+          cfh  = min(cfly(i,k+1),0.5*(cfly(i,k)+cfly(i,k+1)))
+          alp  = g / tem
+          gamma = el2orc * tem2 / (tem1**2)
+          epsi  = tem1 / elocp
+          beta  = (1. + gamma*epsi*(1.+fv)) / (1. + gamma)
+          chx   = cfh * alp * beta + (1. - cfh) * alp
+          cqx   = cfh * alp * hvap * (beta - epsi)
+          cqx   = cqx + (1. - cfh) * fv * g
+          ptem1 = (slx(i,k+1)-slx(i,k))*rdzt(i,k)
+          ptem2 = (qtx(i,k+1)-qtx(i,k))*rdzt(i,k)
+          bf(i,k) = chx * ptem1 + cqx * ptem2
+        enddo
+      enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -548,8 +541,8 @@
       do k = 1, km1
       do i = 1, im
          rdz  = rdzt(i,k)
-         bf(i,k) = gotvx(i,k)*(thvx(i,k+1)-thvx(i,k))*rdz
-         dw2  = (u1(i,k)-u1(i,k+1))**2                                  &
+!        bf(i,k) = gotvx(i,k)*(thvx(i,k+1)-thvx(i,k))*rdz
+         dw2  = (u1(i,k)-u1(i,k+1))**2
      &        + (v1(i,k)-v1(i,k+1))**2
          shr2(i,k) = max(dw2,dw2min)*rdz*rdz
       enddo
@@ -570,7 +563,7 @@
           spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
 !         rbup(i) = (thvx(i,k)-thermal(i))*
 !    &              (g*zl(i,k)/thvx(i,1))/spdk2
-          rbup(i) = (thlvx(i,k)-thermal(i))*                            &
+          rbup(i) = (thlvx(i,k)-thermal(i))*
      &              (g*zl(i,k)/thlvx(i,1))/spdk2
           kpblx(i) = k
           flg(i)  = rbup(i) > crb(i)
@@ -661,7 +654,7 @@
         if(.not.flg(i)) then
           rbdn(i) = rbup(i)
           spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
-          rbup(i) = (thlvx(i,k)-thermal(i))*                            &
+          rbup(i) = (thlvx(i,k)-thermal(i))*
      &              (g*zl(i,k)/thlvx(i,1))/spdk2
           kpbl(i) = k
           flg(i)  = rbup(i) > crb(i)
@@ -773,25 +766,44 @@
       enddo
       enddo
 !
-      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,                       &
-     &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                 &
-     &    gdx,hpbl,kpbl,vpert,buou,xmf,                                 &
+      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+     &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
+     &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue)
 !
-      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,                        &
-     &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,                            &
-     &    thlx,thvx,thlvx,gdx,thetae,radj,                              &
-     &    krad,mrad,radmin,buod,xmfd,                                   &
+      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+     &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
+     &    thlx,thvx,thlvx,gdx,thetae,radj,
+     &    krad,mrad,radmin,buod,xmfd,
      &    tcdo,qcdo,ucdo,vcdo,xlamde)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!    compute prandtl number
+!   compute prandtl number and exchange coefficient varying with height
 !
-      do i = 1, im
-        prn(i) = phih(i)/phim(i)
-        prn(i) = min(prn(i),prmax)
-        prn(i) = max(prn(i),prmin)
+      do k = 1, kmpbl
+        do i = 1, im
+          if(k < kpbl(i)) then
+            tem = phih(i)/phim(i)
+            ptem = -3.*(max(zi(i,k+1)-sfcfrac*hpbl(i),0.))**2.
+     &               /hpbl(i)**2.
+            if(pcnvflg(i)) then
+              prn(i,k) =  1. + (tem-1.)*exp(ptem)
+            else
+              prn(i,k) = tem
+            endif
+            prn(i,k) = min(prn(i,k),prmax)
+            prn(i,k) = max(prn(i,k),prmin)
+!
+            ckz(i,k) = ck1 + (ck0-ck1)*exp(ptem)
+            ckz(i,k) = min(ckz(i,k),ck0)
+            ckz(i,k) = max(ckz(i,k),ck1)
+            chz(i,k) = ch1 + (ch0-ch1)*exp(ptem)
+            chz(i,k) = min(chz(i,k),ch0)
+            chz(i,k) = max(chz(i,k),ch1)
+          endif
+        enddo
       enddo
+
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute an asymtotic mixing length
@@ -905,16 +917,16 @@
            tem = tem * sqrt(tkeh(i,k))
            if(k < kpbl(i)) then
              if(pblflg(i)) then
-               dku(i,k) = ck0 * tem
-               dkt(i,k) = dku(i,k) / prn(i)
+               dku(i,k) = ckz(i,k) * tem
+               dkt(i,k) = dku(i,k) / prn(i,k)
              else
-               dkt(i,k) = ch0 * tem
-               dku(i,k) = dkt(i,k) * prn(i)
+               dkt(i,k) = chz(i,k) * tem
+               dku(i,k) = dkt(i,k) * prn(i,k)
              endif
            else
               ri = max(bf(i,k)/shr2(i,k),rimin)
               if(ri < 0.) then ! unstable regime
-                dku(i,k) = ck0 * tem
+                dku(i,k) = ck1 * tem
                 dkt(i,k) = rchck * dku(i,k)
               else             ! stable regime
                 dkt(i,k) = ch1 * tem
@@ -924,14 +936,14 @@
               endif
            endif
 !
-!          if(scuflg(i)) then
-!            if(k >= mrad(i) .and. k < krad(i)) then
-!               tem1 = ck0 * tem
-!               ptem1 = tem1 / prscu
-!               dku(i,k) = max(dku(i,k), tem1)
-!               dkt(i,k) = max(dkt(i,k), ptem1)
-!            endif
-!          endif
+           if(scuflg(i)) then
+             if(k >= mrad(i) .and. k < krad(i)) then
+                tem1 = ckz(i,k) * tem
+                ptem1 = tem1 / prscu
+                dku(i,k) = max(dku(i,k), tem1)
+                dkt(i,k) = max(dkt(i,k), ptem1)
+             endif
+           endif
 !
            dkq(i,k) = prtke * dkt(i,k)
 !
@@ -1122,7 +1134,7 @@
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamue(i,k-1) * dz
              factor = 1. + tem
-             qcko(i,k,ntke)=((1.-tem)*qcko(i,k-1,ntke)+tem*             &
+             qcko(i,k,ntke)=((1.-tem)*qcko(i,k-1,ntke)+tem*
      &                (tke(i,k)+tke(i,k-1)))/factor
           endif
         enddo
@@ -1134,7 +1146,7 @@
               dz = zl(i,k+1) - zl(i,k)
               tem  = 0.5 * xlamde(i,k) * dz
               factor = 1. + tem
-              qcdo(i,k,ntke)=((1.-tem)*qcdo(i,k+1,ntke)+tem*            &
+              qcdo(i,k,ntke)=((1.-tem)*qcdo(i,k+1,ntke)+tem*
      &                 (tke(i,k)+tke(i,k+1)))/factor
             endif
           endif

@@ -129,7 +129,7 @@
             if (Radtend%coszen(i) > 0.) then
 !  ---                                  sw total-sky fluxes
 !                                       -------------------
-              tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
+              tem0d = Model%fhswr * Radtend%coszdg(i) / Radtend%coszen(i)
               Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
               Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
               Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
@@ -181,9 +181,9 @@
               tem1 = 0.
               tem2 = 0.
               do k=ibtc,itop
-                 tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
-                 tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
-              end do
+                tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
+                tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
+              enddo
               Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
               Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
             enddo
