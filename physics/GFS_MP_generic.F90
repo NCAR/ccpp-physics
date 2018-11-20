@@ -104,6 +104,7 @@
 !! | ntrac            | number_of_tracers                                                       | number of tracers                                                       | count       |    0 | integer    |           | in     | F        |
 !! | imp_physics      | flag_for_microphysics_scheme                                            | choice of microphysics scheme                                           | flag        |    0 | integer    |           | in     | F        |
 !! | imp_physics_gfdl | flag_for_gfdl_microphysics_scheme                                       | choice of GFDL microphysics scheme                                      | flag        |    0 | integer    |           | in     | F        |
+!! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                               | choice of Thompson microphysics scheme                                  | flag        |    0 | integer    |           | in     | F        |
 !! | cal_pre          | flag_for_precipitation_type_algorithm                                   | flag controls precip type algorithm                                     | flag        |    0 | logical    |           | in     | F        |
 !! | lssav            | flag_diagnostics                                                        | logical flag for storing diagnostics                                    | flag        |    0 | logical    |           | in     | F        |
 !! | ldiag3d          | flag_diagnostics_3D                                                     | flag for 3d diagnostic fields                                           | flag        |    0 | logical    |           | in     | F        |
@@ -164,8 +165,8 @@
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !! @{
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
-        cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0,             &
-        prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                          &
+        imp_physics_thompson, cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, &
+        gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                &
         rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                       &
         totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                   &
         do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, errmsg, errflg)
@@ -174,7 +175,7 @@
 
       implicit none
 
-      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl
+      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson
       logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
@@ -232,6 +233,11 @@
         graupel = graupel0
         ice     = ice0
         snow    = snow0
+      ! Do it right from the beginning for Thompson
+      else if (imp_physics == imp_physics_thompson) then
+        graupel = frain*graupel0
+        ice     = frain*ice0
+        snow    = frain*snow0
       end if
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
