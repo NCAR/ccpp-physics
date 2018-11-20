@@ -54,6 +54,7 @@ CCPP = N
 HYBRID = Y
 STATIC = N
 MEMCHECK = N
+SION = N
 DYN32 = N
 
 include       $(ESMFMKFILE)
@@ -199,6 +200,13 @@ LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
 else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
 endif
+endif
+
+ifeq ($(SION),Y)
+CPPDEFS += -DSION
+CFLAGS += $(SIONLIB_INC)
+FFLAGS += $(SIONLIB_INC)
+LDFLAGS += $(SIONLIB_LIB)
 endif
 
 ifeq ($(MEMCHECK),Y)
