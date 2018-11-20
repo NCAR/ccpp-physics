@@ -643,12 +643,12 @@ module lsm_ruc
           solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
 
           ! all precip input to RUC LSM is in [mm]
-          prcp(i,j)       = rhoh2o * tprcp(i) ! tprcp in [m]
-          raincv(i,j)     = rhoh2o * rainc(i)
-          rainncv(i,j)    = rhoh2o * rain(i) 
+          prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
+          raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
+          rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
           graupelncv(i,j) = rhoh2o * graupel(i)
           snowncv(i,j)    = rhoh2o * snow(i)
-          precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
+          ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
           qvg(i,j)    = sfcqv(i)
           qsfc(i,j)   = sfcqv(i)/(1.+sfcqv(i))

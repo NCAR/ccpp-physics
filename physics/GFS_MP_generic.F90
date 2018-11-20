@@ -215,7 +215,7 @@
       onebg = 1.0d0/con_g
 
       do i = 1, im
-          rain(i) = rainc(i) + frain * rain1(i)
+          rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
 
 !> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
@@ -235,9 +235,10 @@
         snow    = snow0
       ! Do it right from the beginning for Thompson
       else if (imp_physics == imp_physics_thompson) then
-        graupel = frain*graupel0
-        ice     = frain*ice0
-        snow    = frain*snow0
+        tprcp= max (0.,rainc + frain * rain1) ! time-step convective and explicit precip
+        graupel = frain*graupel0              ! time-step graupel
+        ice     = frain*ice0                  ! time-step ice
+        snow    = frain*snow0                 ! time-step snow
       end if
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
