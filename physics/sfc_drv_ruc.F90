@@ -160,11 +160,11 @@ module lsm_ruc
 !! | con_rv          | gas_constant_water_vapor                                                     | ideal gas constant for water vapor                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | con_hvap        | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of vaporization/sublimation (hvap)                  | J kg-1        |    0 | real      | kind_phys | in     | F        |
 !! | con_fvirt       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | rv/rd - 1 (rv = ideal gas constant for water vapor)             | none          |    0 | real      | kind_phys | in     | F        |
-!! | tprcp           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | total precipitation amount in each time step                    | m             |    1 | real      | kind_phys | in     | F        |
-!! | rain            | lwe_thickness_of_precipitation_amount_on_dynamics_timestep                   | total rain at this time step                                    | m             |    1 | real      | kind_phys | in     | F        |
-!! | rainc           | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep        | convective rain at this time step                               | m             |    1 | real      | kind_phys | in     | F        |
-!! | graupel         | lwe_thickness_of_graupel_amount_on_dynamics_timestep                         | graupel fall at this time step                                  | m             |    1 | real      | kind_phys | in     | F        |
-!! | snow            | lwe_thickness_of_snow_amount_on_dynamics_timestep                            | snow fall at this time step                                     | m             |    1 | real      | kind_phys | in     | F        |
+!! | rainnc          | lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep             | explicit rainfall from previous timestep                        | m            |    1 | real       | kind_phys | in     | F        |
+!! | rainc           | lwe_thickness_of_convective_precipitation_amount_from_previous_timestep      | convective_precipitation_amount from previous timestep          | m            |    1 | real       | kind_phys | in     | F        |
+!! | ice             | lwe_thickness_of_ice_amount_from_previous_timestep                           | ice amount from previous timestep                               | m            |    1 | real       | kind_phys | in     | F        |
+!! | snow            | lwe_thickness_of_snow_amount_from_previous_timestep                          | snow amount from previous timestep                              | m            |    1 | real       | kind_phys | in     | F        |
+!! | graupel         | lwe_thickness_of_graupel_amount_from_previous_timestep                       | graupel amount from previous timestep                           | m            |    1 | real       | kind_phys | in     | F        |
 !! | srflag          | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | real      | kind_phys | in     | F        |
 !! | sncovr1         | surface_snow_area_fraction_for_diagnostics                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | snowc           | surface_snow_area_fraction                                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
@@ -256,8 +256,13 @@ module lsm_ruc
 ! --- constants
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,&
 ! --- in/outs
-     &       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
-     &       graupel, srflag, sr,                                       &
+     !&       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
+     &       weasd, snwdph, tskin,                                      &
+! --- in
+     &       rainnc, rainc, ice, snow, graupel,                         &
+! --- in/outs
+     &       srflag, sr,                                                &
+     !&       graupel, srflag, sr,                                       &
      &       smois, tslb, sh2o, keepfr, smfrkeep,                       & ! on RUC levels
      &       canopy, trans, tsurf, tsnow, zorl,                         &
      &       sfcqc, sfcdew, tice, sfcqv,                                &
@@ -301,10 +306,14 @@ module lsm_ruc
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
+!     &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
+     &       snwdph, tskin,                                             &
              srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
              sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
-
+!  ---  in
+      real (kind=kind_phys), dimension(im), intent(in) ::               &
+     &       rainnc, rainc, ice, snow, graupel
+!  ---  in/out:
 !  --- on RUC levels
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) ::         &
      &       smois, tslb, sh2o, keepfr, smfrkeep
@@ -339,8 +348,8 @@ module lsm_ruc
      &     dew, drip,  ec, edir, ett, lh, esnow, etp, qfx,              &
      &     acceta, ffrozp, lwdn, prcp, xland, xice,                 &
      &     graupelncv, snowncv, rainncv, raincv,                        &
-     &     solnet, sfcexc,                               &
-     &     runoff1, runoff2, acrunoff,                   &
+     &     solnet, sfcexc,                                              &
+     &     runoff1, runoff2, acrunoff,                                  &
      &     sfcems, hfx, shdfac, shdmin1d, shdmax1d,                     &
      &     sneqv, snoalb1d, snowh, snoh, tsnav,                         &
      &     snomlt, sncovr, soilw, soilm, ssoil, soilt, tbot,            &
@@ -502,7 +511,7 @@ module lsm_ruc
           snwdph_old(i) = snwdph(i)
           tskin_old(i)  = tskin(i)
           canopy_old(i) = canopy(i)
-          tprcp_old(i)  = tprcp(i)
+          !tprcp_old(i)  = tprcp(i)
           srflag_old(i) = srflag(i)
           sr_old(i)     = sr(i)
 
@@ -643,11 +652,17 @@ module lsm_ruc
           solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
 
           ! all precip input to RUC LSM is in [mm]
-          prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
-          raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
-          rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
+          !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
+          !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
+          !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
+          !graupelncv(i,j) = rhoh2o * graupel(i)
+          !snowncv(i,j)    = rhoh2o * snow(i)
+          prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
+          raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
+          rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
           graupelncv(i,j) = rhoh2o * graupel(i)
           snowncv(i,j)    = rhoh2o * snow(i)
+          ! ice not used
           ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
           qvg(i,j)    = sfcqv(i)
@@ -1075,7 +1090,7 @@ module lsm_ruc
             snwdph(i) = snwdph_old(i)
             tskin(i)  = tskin_old(i)
             canopy(i) = canopy_old(i)
-            tprcp(i)  = tprcp_old(i)
+            !tprcp(i)  = tprcp_old(i)
             srflag(i) = srflag_old(i)
 
             do k = 1, lsoil_ruc
