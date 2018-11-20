@@ -159,6 +159,13 @@
 !! | dtdtc            | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1       |    2 | real       | kind_phys | in     | F        |
 !! | drain_cpl        | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling          | change in rain_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | dsnow_cpl        | tendency_of_lwe_thickness_of_snow_amount_for_coupling                   | change in show_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
+!! | lsm              | flag_for_land_surface_scheme                                            | flag for land surface model                                             | flag        |    0 | integer    |           | in     | F        |
+!! | lsm_ruc          | flag_for_ruc_land_surface_scheme                                        | flag for RUC land surface model                                         | flag        |    0 | integer    |           | in     | F        |
+!! | raincprv         | lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep        | explicit rainfall from previous timestep                                | m           |    1 | real       | kind_phys | inout  | F        |
+!! | rainncprv        | lwe_thickness_of_convective_precipitation_amount_from_previous_timestep | convective_precipitation_amount from previous timestep                  | m           |    1 | real       | kind_phys | inout  | F        |
+!! | iceprv           | lwe_thickness_of_ice_amount_from_previous_timestep                      | ice amount from previous timestep                                       | m           |    1 | real       | kind_phys | inout  | F        |
+!! | snowprv          | lwe_thickness_of_snow_amount_from_previous_timestep                     | snow amount from previous timestep                                      | m           |    1 | real       | kind_phys | inout  | F        |
+!! | graupelprv       | lwe_thickness_of_graupel_amount_from_previous_timestep                  | graupel amount from previous timestep                                   | m           |    1 | real       | kind_phys | inout  | F        |
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
@@ -169,9 +176,10 @@
         gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                &
         rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                       &
         totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                   &
-        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, errmsg, errflg)
+        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv,      &
+        errmsg, errflg)
 !
-      use machine,               only: kind_phys
+      use machine, only: kind_phys
 
       implicit none
 
@@ -197,6 +205,14 @@
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: dtdtc
       real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
       real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+
+      ! Rainfall variables previous time step (update for RUC LSM)
+      integer, intent(in) :: lsm, lsm_ruc
+      real(kind=kind_phys), dimension(im),      intent(inout) :: raincprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: rainncprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: iceprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -239,6 +255,16 @@
         graupel = frain*graupel0              ! time-step graupel
         ice     = frain*ice0                  ! time-step ice
         snow    = frain*snow0                 ! time-step snow
+      end if
+
+      if (lsm==lsm_ruc) then
+        if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
+            raincprv(:)   = rainc(:)
+            rainncprv(:)  = frain * rain1(:)
+            iceprv(:)     = ice(:)
+            snowprv(:)    = snow(:)
+            graupelprv(:) = graupel(:)
+        end if
       end if
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
