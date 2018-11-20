@@ -4,6 +4,7 @@ module lsm_ruc
 
         use machine,           only: kind_phys
 
+        use namelist_soilveg_ruc
         use set_soilveg_ruc_mod,  only: set_soilveg_ruc
         use module_soil_pre
         use module_sf_ruclsm
@@ -147,6 +148,7 @@ module lsm_ruc
 !! | nlev            | vertical_dimension                                                           | number of vertical levels                                       | count         |    0 | integer   |           | in     | F        |
 !! | lsm_ruc         | flag_for_ruc_land_surface_scheme                                             | flag for RUC land surface model                                 | flag          |    0 | integer   |           | in     | F        |
 !! | lsm             | flag_for_land_surface_scheme                                                 | flag for land surface model                                     | flag          |    0 | integer   |           | in     | F        |
+!! | do_mynnsfclay   | do_mynnsfclay                                                                | flag to activate MYNN surface layer                             | flag          |    0 | logical   |           | none   | F        |
 !! | lsoil_ruc       | soil_vertical_dimension_for_land_surface_model                               | number of soil layers internal to land surface model            | count         |    0 | integer   |           | in     | F        |
 !! | lsoil           | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
 !! | zs              | depth_of_soil_levels_for_land_surface_model                                  | depth of soil levels for land surface model                     | m             |    1 | real      | kind_phys | inout  | F        |
@@ -182,6 +184,7 @@ module lsm_ruc
 !! | dswsfc          | surface_downwelling_shortwave_flux                                           | surface downwelling shortwave flux at current time              | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | snet            | surface_net_downwelling_shortwave_flux                                       | surface net downwelling shortwave flux at current time          | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis         | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                               | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | wspd            | wind_speed_at_lowest_model_layer                                             | wind speed at lowest model level                                | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cm              | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                             | none          |    1 | real      | kind_phys | in     | F        |
 !! | ch              | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | none          |    1 | real      | kind_phys | in     | F        |
 !! | chh             | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
@@ -202,6 +205,8 @@ module lsm_ruc
 !! | smc             | volume_fraction_of_soil_moisture                                             | total soil moisture                                             | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | slc             | volume_fraction_of_unfrozen_soil_moisture                                    | liquid soil moisture                                            | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | stc             | soil_temperature                                                             | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
+!! | smcwlt2         | volume_fraction_of_condensed_water_in_soil_at_wilting_point                  | soil water fraction at wilting point                            | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | smcref2         | threshold_volume_fraction_of_condensed_water_in_soil                         | soil moisture threshold                                         | frac          |    1 | real      | kind_phys | inout  | F        | 
 !! | vegtype         | vegetation_type_classification                                               | vegetation type at each grid cell                               | index         |    1 | integer   |           | in     | F        |
 !! | soiltyp         | soil_type_classification                                                     | soil type at each grid cell                                     | index         |    1 | integer   |           | in     | F        |
 !! | isot            | soil_type_dataset_choice                                                     | soil type dataset choice                                        | index         |    0 | integer   |           | in     | F        |
@@ -247,6 +252,7 @@ module lsm_ruc
      &       prsl1, zf, islmsk, ddvel, shdmin, shdmax, alvwf, alnwf,    &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
      &       smc, stc, slc, lsm_ruc, lsm,                               &
+     &       smcwlt2, smcref2, wspd, do_mynnsfclay,                     &
 ! --- constants
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,&
 ! --- in/outs
@@ -279,7 +285,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,&
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,        &
      &       ch, prsl1, ddvel, shdmin, shdmax,                          &
-     &       snoalb, alvwf, alnwf, zf, qc, q1 
+     &       snoalb, alvwf, alnwf, zf, qc, q1, wspd
 
       integer, dimension(im), intent(in) :: islmsk
       real (kind=kind_phys),  intent(in) :: delt
@@ -288,6 +294,7 @@ module lsm_ruc
                                             con_hvap, con_fvirt
 
       logical, dimension(im), intent(in) :: flag_iter, flag_guess
+      logical,                intent(in) :: do_mynnsfclay
 
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
@@ -296,7 +303,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
              srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
-             sfcqc, sfcqv, sfcdew, fice, tice, sfalb
+             sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 
 !  --- on RUC levels
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) ::         &
@@ -395,14 +402,21 @@ module lsm_ruc
         print *,'vegtype=',ipr,vegtype(ipr)
         print *,'kdt, iter =',kdt,iter
       endif
- 
+
 ! RUC initialization
       if( kdt == 1 .and. iter ==1 ) then
         !print *,'RUC LSM initialization, kdt=', kdt
+
+        !--- initialize smcwlt2 and smcref2 with Noah values
+        do i  = 1, im ! n - horizontal loop
+          smcref2 (i) = REFSMCnoah(soiltyp(i))
+          smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
+        enddo
+ 
         call rucinit          (im, lsoil_ruc, lsoil, nlev,            & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tskin, tg3,                    & ! in
-                               smc, slc, stc,                         & ! in
+                               smc, slc, stc, smcref2, smcwlt2,       & ! in
                                lsm_ruc, lsm,                          & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wet1, & ! out
                                errmsg, errflg)
@@ -464,6 +478,19 @@ module lsm_ruc
       nsoil = lsoil_ruc
 
       do i  = 1, im ! i - horizontal loop
+        ! reassign smcref2 and smcwlt2 to RUC values
+        if(islmsk(i) == 0 .or. islmsk(i) == 2) then
+          !water and sea ice
+          smcref2 (i) = 1.
+          smcwlt2 (i) = 0.
+        else
+          !land 
+          smcref2 (i) = REFSMC(soiltyp(i))
+          smcwlt2 (i) = WLTSMC(soiltyp(i))
+        endif
+      enddo
+
+      do i  = 1, im ! i - horizontal loop
         !> - Set flag for land and ice points.
         flag(i) = (islmsk(i) == 1 .or. islmsk(i) == 2)
       enddo
@@ -495,7 +522,7 @@ module lsm_ruc
       do j  = 1, 1
       do i  = 1, im ! i - horizontal loop
         if (flag_iter(i) .and. flag(i)) then
-          if(me==0 .and. i==ipr) print *,'iter run', iter, i, flag_iter(i),flag_guess(i)
+          !if(me==0 .and. i==ipr) print *,'iter run', iter, i, flag_iter(i),flag_guess(i)
           evap (i)  = 0.0
           hflx (i)  = 0.0
           gflux(i)  = 0.0
@@ -533,9 +560,12 @@ module lsm_ruc
 
       do i  = 1, im
         if (flag_iter(i) .and. flag(i)) then
-          wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
-                  + max(0.0, min(ddvel(i), 30.0)), 1.0)
-
+          if (do_mynnsfclay) then
+            wind(i) = wspd(i)
+          else
+            wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
+                    + max(0.0, min(ddvel(i), 30.0)), 1.0)
+          endif
           q0(i)   = max(q1(i)/(1.-q1(i)), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
 
           rho(i) = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0(i)))
@@ -612,6 +642,7 @@ module lsm_ruc
           swdn(i,j)   = dswsfc(i)         !..downward sw flux at sfc in w/m2
           solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
 
+          ! all precip input to RUC LSM is in [mm]
           prcp(i,j)       = rhoh2o * tprcp(i) ! tprcp in [m]
           raincv(i,j)     = rhoh2o * rainc(i)
           rainncv(i,j)    = rhoh2o * rain(i) 
@@ -1073,7 +1104,7 @@ module lsm_ruc
       subroutine rucinit      (im, lsoil_ruc, lsoil, nlev,            & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tsurf, tg3,                    & ! in
-                               smc, slc, stc,                         & ! in
+                               smc, slc, stc, smcrefnoah, smcwltnoah, & ! in
                                lsm_ruc, lsm,                          & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wet1, & ! out
                                errmsg, errflg)
@@ -1088,6 +1119,8 @@ module lsm_ruc
       integer,                                 intent(in   ) :: lsoil
       integer,               dimension(im),    intent(in   ) :: islmsk
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: smcrefnoah
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: smcwltnoah
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
       real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: smc !  Noah
       real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: stc !  Noah
@@ -1110,6 +1143,7 @@ module lsm_ruc
 !> local
       logical :: debug_print
       logical :: smadj ! for soil mosture adjustment
+      logical :: swi_init ! for initialization in terms of SWI (soil wetness index)
 
       integer :: flag_soil_layers, flag_soil_levels, flag_sst
       real (kind=kind_phys),    dimension(1:lsoil_ruc) :: factorsm
@@ -1153,14 +1187,15 @@ module lsm_ruc
                 lsm, ' incompatible with RUC LSM, please set to ', lsm_ruc
           errflg = 1
           return
-        !else
-        !  write(0,*) 'Start of RUC LSM initialization'
+        else
+          write(0,*) 'Start of RUC LSM initialization'
         endif
 
        debug_print = .false.
 
        ! for Noah input set smadj to .true.
        smadj = .true.
+       swi_init = .true.
 
        if(lsoil == 4 ) then ! for Noah input
          st_levels_input = (/ 5, 25, 70, 150/)    ! Noah soil levels
@@ -1257,7 +1292,13 @@ module lsm_ruc
          ! Noah lsm input
            do k=1,lsoil
               st_input(i,k+1,j)=stc(i,k)
-              sm_input(i,k+1,j)=smc(i,k)
+              ! convert volumetric soil moisture to SWI (soil wetness index)
+              if(swi_init) then
+                sm_input(i,k+1,j)=min(1.,max(0.,(smc(i,k) - smcwltnoah(i))/  &
+                                  (smcrefnoah(i) - smcwltnoah(i))))
+              else
+                sm_input(i,k+1,j)=smc(i,k)
+              endif
            enddo
            do k=lsoil+2,lsoil_ruc * 3
               st_input(i,k,j)=0.
@@ -1305,8 +1346,20 @@ module lsm_ruc
       do j=jts,jte
       do i=its,ite
          do k=1,lsoil_ruc
-          soilm(i,k,j)= dumsm(i,k,j)
-          soiltemp(i,k,j) = dumt(i,k,j)
+          ! convert from SWI to RUC volumetric soil moisture
+          if(swi_init) then
+            if(islmsk(i) == 1) then
+              !land 
+              soilm(i,k,j)= dumsm(i,k,j) *                                  &
+                (refsmc(isltyp(i,j))-drysmc(isltyp(i,j)))                   &
+                + drysmc(isltyp(i,j))
+            else
+              soilm(i,k,j)= 1.
+            endif
+          else
+            soilm(i,k,j)= dumsm(i,k,j)
+          endif
+            soiltemp(i,k,j) = dumt(i,k,j)
          enddo
       enddo
       enddo
@@ -1342,8 +1395,7 @@ module lsm_ruc
           smtotr(i,j)=smtotr(i,j) + soilm(i,k,j) *dzs(k)
         enddo
        ! Noah soil moisture bucket 
-          smtotn(i,j)=sm_input(i,2,j)*0.1 + sm_input(i,3,j)*0.2  &
-                + sm_input(i,4,j)*0.7 + sm_input(i,5,j)*1.
+          smtotn(i,j)=smc(i,1)*0.1 + smc(i,2)*0.2 + smc(i,3)*0.7 + smc(i,4)*1.
 
         if(debug_print) then
           if(i==ipr) then

@@ -30,7 +30,7 @@ contains
      IF ( num_soil_levels .EQ. 6) THEN
       zs  = (/ 0.00 , 0.05 , 0.20 , 0.40 , 1.60 , 3.00 /)
      ELSEIF ( num_soil_levels .EQ. 9) THEN
-!      zs  = (/ 0.00 , 0.01 , 0.04 , 0.10 , 0.30, 0.60, 1.00 , 1.60, 3.00 /)
+      !zs  = (/ 0.00 , 0.01 , 0.04 , 0.10 , 0.30, 0.60, 1.00 , 1.60, 3.00 /)
       zs  = (/ 0.00 , 0.05 , 0.20 , 0.40 , 0.60, 1.00, 1.60 , 2.20, 3.00 /)
      ENDIF
 
@@ -97,10 +97,10 @@ contains
 'No input soil level data (either temperature or moisture, or both are missing).  Required for RUC LSM.'
       ELSE
          IF ( flag_soil_levels == 1 ) THEN
-           !write(0, FMT='(A)') ' Assume RUC LSM input'
+           write(0, FMT='(A)') ' Assume RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_sm_levels_input)  ) )
          ELSE
-           !write(0, FMT='(A)') ' Assume non-RUC LSM input'
+           write(0, FMT='(A)') ' Assume non-RUC LSM input'
            ALLOCATE ( zhave( MAX(num_st_levels_input,num_soil_layers)  ) )
          END IF
       END IF
