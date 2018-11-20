@@ -159,7 +159,7 @@
        satmedmf       = .false.
        do_mynnedmf    = .true.
        do_mynnsfclay  = .true.
-       random_clds    = .false.
+       random_clds    = .true.
        trans_trac     = .false.
        cnvcld         = .true.
        imfshalcnv     = 3
