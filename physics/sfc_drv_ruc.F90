@@ -506,7 +506,7 @@ module lsm_ruc
 
       do i  = 1, im ! i - horizontal loop
         if (flag(i) .and. flag_guess(i)) then
-          if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
+          !if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
           weasd_old(i)  = weasd(i)
           snwdph_old(i) = snwdph(i)
           tskin_old(i)  = tskin(i)
@@ -1197,17 +1197,17 @@ module lsm_ruc
          errmsg = ''
          errflg = 0
 
+       debug_print = .false.
+
         if (lsm/=lsm_ruc) then
           write(errmsg,'(a,i0,a,i0)')                                &
                 'ERROR in lsm_ruc_init: namelist variable lsm=',     &
                 lsm, ' incompatible with RUC LSM, please set to ', lsm_ruc
           errflg = 1
           return
-        else
+        else if (debug_print) then
           write(0,*) 'Start of RUC LSM initialization'
         endif
-
-       debug_print = .false.
 
        ! for Noah input set smadj to .true.
        smadj = .true.

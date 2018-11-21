@@ -41,6 +41,7 @@ module mp_thompson_hrrr_pre
 !! | mpicomm         | mpi_comm                                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
+!! | blkno           | block_number                                                          | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
@@ -48,7 +49,8 @@ module mp_thompson_hrrr_pre
       subroutine mp_thompson_hrrr_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
                                   is_aerosol_aware, nwfa, nifa, nwfa2d,      &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
-                                  mpicomm, mpirank, mpiroot, errmsg, errflg)
+                                  mpicomm, mpirank, mpiroot, blkno,          &
+                                  errmsg, errflg)
 
          implicit none
 
@@ -75,6 +77,8 @@ module mp_thompson_hrrr_pre
          integer,                   intent(in   ) :: mpicomm
          integer,                   intent(in   ) :: mpirank
          integer,                   intent(in   ) :: mpiroot
+         ! Blocking information
+         integer,                   intent(in   ) :: blkno
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
@@ -135,7 +139,7 @@ module mp_thompson_hrrr_pre
 
 !.. CCN
          if (MAXVAL(nwfa) .lt. eps) then
-            if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosols.'
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -153,21 +157,21 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosols are present.' 
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosols are present.'
             if (MAXVAL(nwfa2d) .lt. eps) then
-               if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
                do i = 1, ncol
                   airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
             else
-               if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
             endif
          endif
 
 !.. IN
          if (MAXVAL(nifa) .lt. eps) then
-            if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial IN aerosols.'
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -184,13 +188,13 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            if (mpirank==mpiroot) write(*,*) ' Apparently initial IN aerosols are present.' 
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial IN aerosols are present.' 
             if (MAXVAL(nifa2d) .lt. eps) then
-               if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
                ! calculate IN surface flux here, right now just set to zero
                nifa2d = 0.
             else
-               if (mpirank==mpiroot) write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
             endif
          endif
 
