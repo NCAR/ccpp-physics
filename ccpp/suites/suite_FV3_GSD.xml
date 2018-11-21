@@ -17,10 +17,12 @@
       <scheme>GFS_suite_interstitial_rad_reset</scheme>
       <scheme>GFS_rrtmg_pre</scheme>
       <scheme>rrtmg_sw_pre</scheme>
+      <scheme>mynnrad_pre</scheme>
       <scheme>rrtmg_sw</scheme>
       <scheme>rrtmg_sw_post</scheme>
       <scheme>rrtmg_lw_pre</scheme>
       <scheme>rrtmg_lw</scheme>
+      <scheme>mynnrad_post</scheme>
       <scheme>rrtmg_lw_post</scheme>
       <scheme>GFS_rrtmg_post</scheme>
     </subcycle>
