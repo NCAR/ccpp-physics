@@ -158,11 +158,11 @@
        hybedmf        = .false.
        satmedmf       = .false.
        do_mynnedmf    = .true.
-       do_mynnsfclay  = .true.
+       do_mynnsfclay  = .false.
        random_clds    = .true.
        trans_trac     = .false.
        cnvcld         = .true.
-       imfshalcnv     = 3
+       imfshalcnv     = -1
        imfdeepcnv     = 3
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
