@@ -279,6 +279,17 @@
 "gfs_phys",    "cleffr",       "cleffr",        "fv3_history",    "all",  .false.,  "none",  2
 "gfs_phys",    "cieffr",       "cieffr",        "fv3_history",    "all",  .false.,  "none",  2
 "gfs_phys",    "cseffr",       "cseffr",        "fv3_history",    "all",  .false.,  "none",  2
+# Prognostic/diagnostic variables from MYNN
+"gfs_phys",    "QC_BL",        "qc_bl",         "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "CLDFRA_BL",    "cldfra_bl",     "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "EL_PBL",       "el_pbl",        "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "QKE",          "qke",           "fv3_history",    "all",  .false.,  "none",  2
+"gfs_sfc",     "maxmf",        "maxmf",         "fv3_history2d",  "all",  .false.,  "none",  2
+#"gfs_sfc",     "nupdraft",     "nupdrafts",     "fv3_history2d",  "all",  .false.,  "none",  2
+#"gfs_sfc",     "ktop_shallow", "ktop_shallow",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "zol",          "zol",           "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "flhc",         "flhc",          "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "flqc",         "flqc",          "fv3_history2d",  "all",  .false.,  "none",  2
 
 #=============================================================================================
 #
