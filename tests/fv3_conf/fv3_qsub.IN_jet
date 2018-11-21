@@ -30,6 +30,8 @@ export LD_BIND_NOW=1
 # Avoid job errors because of filesystem synchronization delays
 sync && sleep 1
 
+ulimit -s 12000000
+
 mpirun -prepend-rank -np $PBS_NP ./fv3.exe
 
 echo "Model ended:    " `date`
