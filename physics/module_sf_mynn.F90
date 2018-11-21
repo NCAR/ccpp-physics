@@ -120,7 +120,7 @@ CONTAINS
                      GZ1OZ0,WSPD,BR,ISFFLX,DX,                     &
                      SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
                      KARMAN,itimestep,ch,th3d,pi3d,qc3d,rho3d,     &
-                     tsq,qsq,cov,sh3d,el_pbl,qcg,                  &
+                     tsq,qsq,cov,sh3d,el_pbl,qcg,wstar,            &
                      icloud_bl,qc_bl,cldfra_bl,                    &
                      spp_pbl,pattern_spp_pbl,                      &
                      ids,ide, jds,jde, kds,kde,                    &
@@ -271,9 +271,9 @@ CONTAINS
                                                             XLAND, &
                                                               TSK, &
                                                               QCG, &
-                                                           PSFCPA ,&
-                                                            SNOWH, DX
-
+                                                           PSFCPA, &
+                                                            SNOWH, &
+                                                               DX
 
       REAL,     DIMENSION( ims:ime, jms:jme )                    , &
                 INTENT(OUT  )               ::            U10,V10, &
@@ -298,12 +298,13 @@ CONTAINS
                                                                CH, &
                                                         FLHC,FLQC, &
                                                    GZ1OZ0,WSPD,BR, &
-                                                        PSIM,PSIH
+                                                        PSIM,PSIH, &
+                                                            WSTAR
 
 !ADDITIONAL OUTPUT
 !JOE-begin
       REAL,     DIMENSION( ims:ime, jms:jme )    ::    z0zt_ratio, &
-                                 BulkRi,wstar,qstar,resist,logres
+                                 BulkRi,qstar,resist,logres
 !JOE-end 
 !===================================
 ! 1D LOCAL ARRAYS

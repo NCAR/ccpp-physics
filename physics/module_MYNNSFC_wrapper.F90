@@ -65,6 +65,7 @@
 !! | th2                 | potential_temperature_at_2m                                                 | 2 meter potential temperature                         | K             |    1 | real      | kind_phys | inout  | F        |
 !! | t2                  | temperature_at_2m                                                           | 2 meter temperature                                   | K             |    1 | real      | kind_phys | inout  | F        |
 !! | q2                  | specific_humidity_at_2m                                                     | 2 meter specific humidity                             | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | wstar               | surface_wind_enhancement_due_to_convection                                  | surface wind enhancement due to convection            | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | chs2                | surface_exchange_coefficient_for_heat_at_2m                                 | exchange coefficient for heat at 2 meters             | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cqs2                | surface_exchange_coefficient_for_moisture_at_2m                             | exchange coefficient for moisture at 2 meters         | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cda                 | surface_drag_coefficient_for_momentum_in_air                                | surface exchange coeff for momentum                   | none          |    1 | real      | kind_phys | inout  | F        |
@@ -90,7 +91,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &  PSIM, PSIH, WSPD, br, ch,       &
      &  HFLX, QFX, LH, FLHC, FLQC,      &
      &  U10, V10, TH2, T2, Q2,          &
-     &  CHS2, CQS2,                     &
+     &  wstar, CHS2, CQS2,              &
      &  cda, cka, stress,               &
 !     &  CP, G, ROVCP, R, XLV,           &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
@@ -210,10 +211,10 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch, psih, psim,   &
-     &        lh, cda, cka, stress
+     &        lh, cda, cka, stress, wstar
      !LOCAL
       real, dimension(im) ::                                &
-     &        WSTAR, qcg, hfx, znt, ts, snowh,              &
+     &        qcg, hfx, znt, ts, snowh,                     &
      &        chs, ck, cd, mavail, regime, xland, GZ1OZ0       
 
       ! Initialize CCPP error handling variables
@@ -302,7 +303,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                      itimestep=kdt,ch=ch,                                 &
                      th3d=th,pi3d=exner,qc3d=qc,rho3d=rho,                &
                      tsq=tsq,qsq=qsq,cov=cov,sh3d=sh3d,el_pbl=el_pbl,     &
-                     qcg=qcg,                                             &
+                     qcg=qcg,wstar=wstar,                                 &
                      icloud_bl=icloud_bl,qc_bl=qc_bl,cldfra_bl=cldfra_bl, &
                      spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,     &
                      ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,           &

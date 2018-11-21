@@ -53,6 +53,12 @@
 !! | QFX                 | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
 !! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | rb                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
+!! | dtsfc1              | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux valid for current call  | W m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | dqsfc1              | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux valid for current call    | W m-2     |    1 | real      | kind_phys | inout  | F        |
+!! | dtsfci_diag         | instantaneous_surface_upward_sensible_heat_flux_for_diag                    | instantaneous sfc sensible heat flux multiplied by timestep  | W m-2   |   1 | real      | kind_phys | inout  | F        |
+!! | dqsfci_diag         | instantaneous_surface_upward_latent_heat_flux_for_diag                      | instantaneous sfc latent heat flux multiplied by timestep    | W m-2   |   1 | real      | kind_phys | inout  | F        |
+!! | dtsfc_diag          | cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep | cumulative sfc sensible heat flux multiplied by timestep    | W m-2 s |   1 | real      | kind_phys | inout  | F        |
+!! | dqsfc_diag          | cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep   | cumulative sfc latent heat flux multiplied by timestep      | W m-2 s |   1 | real      | kind_phys | inout  | F        |
 !! | recmol              | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        | 
 !! | qke                 | tke_at_mass_points                                                          | 2 x tke at mass points                                | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
 !! | qke_adv             | tke_at_mass_points_advected                                                 | 2 x tke at mass points advected                       | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
@@ -126,7 +132,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qfx,wspd,rb,recmol, &
+     &  ust,ch,hflx,qfx,wspd,rb,        &
+     &  dtsfc1,dqsfc1,                  &
+     &  dtsfci_diag,dqsfci_diag,        &
+     &  dtsfc_diag,dqsfc_diag,          &
+     &  recmol,                         &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
      &  el_pbl,sh3d,exch_h,             &
      &  Pblh,kpbl,                      &
@@ -318,7 +328,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MYNN-2D                                                                  
       real(kind=kind_phys), dimension(im) ::                             &
      &        dx,maxMF,pblh,slmsk,tsurf,qsfc,ps,                         &
-     &        zorl,ust,hflx,qfx,rb,wspd,recmol
+     &        zorl,ust,hflx,qfx,rb,wspd,recmol,dtsfc1,dqsfc1,            &
+     &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag
      !LOCAL
       real, dimension(im) ::                                             &
      &        WSTAR,DELTA,qcg,ch,hfx,rmol,xland,                         &
@@ -455,6 +466,31 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           enddo
         else
           print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
+          print*,"Defaulting to qc and qv species only..."
+          FLAG_QI = .false.
+          FLAG_QNI= .false.
+          FLAG_QC = .true.
+          FLAG_QNC= .false.
+          FLAG_QNWFA= .false.
+          FLAG_QNIFA= .false.
+          p_qc = 2
+          p_qr = 0
+          p_qi = 0
+          p_qs = 0
+          p_qg = 0
+          p_qnc= 0
+          p_qni= 0
+          do k=1,levs
+            do i=1,im
+                qvsh(i,k)  = qgrs_water_vapor(i,k)
+                qc(i,k)    = qgrs_liquid_cloud(i,k)
+                qi(i,k)    = 0.
+                qnc(i,k)   = 0.
+                qni(i,k)   = 0.
+                qnwfa(i,k) = 0.
+                qnifa(i,k) = 0.
+            enddo
+          enddo
         endif
 
        if (lprnt)write(0,*)"prepping MYNN-EDMF variables..."
@@ -485,14 +521,27 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          wstar(i)=0.0
          delta(i)=0.0
          qcg(i)=0.0
+
+         dtsfc1(i)=hfx(i)
+         dqsfc1(i)=qfx(i)*XLV
+         dtsfci_diag(i)=dtsfc1(i)
+         dqsfci_diag(i)=dqsfc1(i)
+         dtsfc_diag(i)=dtsfc1(i)*delt
+         dqsfc_diag(i)=dqsfc1(i)*delt
+
          znt(i)=zorl(i)*0.01 !cm -> m?
          if (do_mynnsfclay) then
            rmol(i)=recmol(i)
          else
-           if (hfx(i) .ge. 0.)then
-             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
+           !if (hfx(i) .ge. 0.)then
+           !  rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
+           !else
+           !  rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
+           !endif
+           if (rb(i) .ge. 0.)then
+             rmol(i)=rb(i)*8./(dz(i,1)*0.5)
            else
-             rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
+             rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
            endif
          endif
          ts(i)=tsurf(i)/exner(i,1)  !theta
@@ -703,7 +752,18 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            !  enddo
            !enddo
        else
-          print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
+!          print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
+           do k=1,levs
+             do i=1,im
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
+               dqdt_ice_cloud(i,k)     = 0.0
+               !dqdt_rain(i,k)          = 0.0
+               !dqdt_snow(i,k)          = 0.0
+               !dqdt_graupel(i,k)       = 0.0
+               !dqdt_ozone(i,k)         = 0.0
+             enddo
+           enddo
        endif
 
        if (lprnt) then

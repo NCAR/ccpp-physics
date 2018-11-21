@@ -569,12 +569,13 @@ module lsm_ruc
 
       do i  = 1, im
         if (flag_iter(i) .and. flag(i)) then
-          if (do_mynnsfclay) then
-            wind(i) = wspd(i)
-          else
+          !if (do_mynnsfclay) then
+          ! WARNING - used of wspd computed in MYNN sfc leads to massive cooling.
+          !  wind(i) = wspd(i)
+          !else
             wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
                     + max(0.0, min(ddvel(i), 30.0)), 1.0)
-          endif
+          !endif
           q0(i)   = max(q1(i)/(1.-q1(i)), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
 
           rho(i) = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0(i)))

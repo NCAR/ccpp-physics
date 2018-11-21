@@ -724,7 +724,8 @@ CONTAINS
             alp2,  &   ! for buoyancy length scale (elb)
             alp3,  &   ! for buoyancy enhancement factor of elb
             alp4,  &   ! for surface layer (els) in unstable conditions
-            alp5       ! for BouLac mixing length
+            alp5,  &   ! for BouLac mixing length or above PBLH
+            alp6       ! for mass-flux/
 
     !THE FOLLOWING LIMITS DO NOT DIRECTLY AFFECT THE ACTUAL PBLH.
     !THEY ONLY IMPOSE LIMITS ON THE CALCULATION OF THE MIXING LENGTH 
@@ -933,7 +934,8 @@ CONTAINS
         alp2 = 0.3
         alp3 = 3.0
         alp4 = 10.
-        alp5 = 10.0 !now used for MF mixing length instead of BouLac (x times MF)
+        alp5 = 0.4 !like alp2, but for free atmosphere
+        alp6 = 10.0 !used for MF mixing length instead of BouLac (x times MF)
 
         ! Impose limits on the height integration for elt and the transition layer depth
         !zi2=MAX(zi,minzi)
@@ -985,9 +987,9 @@ CONTAINS
               bv  = SQRT( gtr*dtv(k) )
               !elb_mf = alp2*qkw(k) / bv  &
               elb_mf = MAX(alp2*qkw(k),  &
-                  &MAX(1.-2.0*cldavg,0.0)**0.5*alp5*edmf_a1(k)*edmf_w1(k)) / bv  &
+                  &MAX(1.-2.0*cldavg,0.0)**0.5*alp6*edmf_a1(k)*edmf_w1(k)) / bv  &
                   &  *( 1.0 + alp3*SQRT( vsc/( bv*elt ) ) )
-              elb = MIN(alp2*qkw(k)/bv, zwk)
+              elb = MIN(alp5*qkw(k)/bv, zwk)
               elf = elb/(1. + (elb/600.))  !bound free-atmos mixing length to < 600 m.
               !IF (zwk > zi .AND. elf > 400.) THEN
               !   ! COMPUTE BouLac mixing length
@@ -3779,9 +3781,10 @@ ENDIF
     REAL, INTENT(in) :: delt
 !WRF
 !    REAL, INTENT(in) :: dx
+!END WRF
 !FV3
     REAL, DIMENSION(IMS:IME,JMS:JME), INTENT(in) :: dx
-
+!END FV3
     REAL, DIMENSION(IMS:IME,KMS:KME,JMS:JME), INTENT(in) :: dz,&
          &u,v,w,th,qv,p,exner,rho,T3D
     REAL, DIMENSION(IMS:IME,KMS:KME,JMS:JME), OPTIONAL, INTENT(in)::&
@@ -5000,8 +5003,10 @@ ENDIF
      REAL,DIMENSION(KTS:KTE), INTENT(INOUT) :: qc_bl1d,cldfra_bl1d
 
     INTEGER, PARAMETER :: NUP=10, debug_mf=0
-  ! local variables
-  ! updraft properties
+
+  !------------- local variables -------------------
+  ! updraft properties defined on interfaces (k=1 is the top of the
+  ! first model layer
      REAL,DIMENSION(KTS:KTE+1,1:NUP) :: UPW,UPTHL,UPQT,UPQC,UPQV,  &
                                         UPA,UPU,UPV,UPTHV,UPQKE,UPQNC, &
                                         UPQNI,UPQNWFA,UPQNIFA
@@ -5013,7 +5018,7 @@ ENDIF
      REAL :: fltv,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,z0,    &
              pwmin,pwmax,wmin,wmax,wlv,wtv,Psig_w,maxw,maxqc,wpbl
      REAL :: B,QTn,THLn,THVn,QCn,Un,Vn,QKEn,QNCn,QNIn,QNWFAn,QNIFAn, &
-             Wn2,Wn,EntEXP,EntW,BCOEFF
+             Wn2,Wn,EntEXP,EntW,BCOEFF,THVkm1,THVk,Pk
 
   ! w parameters
      REAL,PARAMETER :: &
@@ -5255,7 +5260,7 @@ ENDIF
        acfac = .5*tanh((fltv - 0.03)/0.09) + .5
        UPA(1,I)=UPA(1,I)*acfac
        An2 = An2 + UPA(1,I)                 ! total fractional area of all plumes
-       !print*," plume size=",l,"; area=",An,"; total=",An2
+       !print*," plume size=",l,"; area=",UPA(1,I),"; total=",An2
     end do
 
     ! get entrainment coefficient
@@ -5298,7 +5303,7 @@ ENDIF
     !recompute acfac for plume excess
     acfac = .5*tanh((fltv - 0.08)/0.07) + .5
 
-    !SPECIFY SURFACE UPDRAFT PROPERTIES
+    !SPECIFY SURFACE UPDRAFT PROPERTIES AT MODEL INTERFACE BETWEEN K = 1 & 2
     DO I=1,NUP !NUP2
        IF(I > NUP2) exit
        wlv=wmin+(wmax-wmin)/NUP2*(i-1)
@@ -5313,34 +5318,26 @@ ENDIF
        !UPA(1,I)=0.5*ERF(wtv/(sqrt(2.)*sigmaW)) - 0.5*ERF(wlv/(sqrt(2.)*sigmaW))
        !UPA(1,I)=0.25*ERF(wtv/(sqrt(2.)*sigmaW)) - 0.25*ERF(wlv/(sqrt(2.)*sigmaW))  !12.0
 
-       UPU(1,I)=U(1)
-       UPV(1,I)=V(1)
-       UPQC(1,I)=0.
-       !UPQT(1,I) =QT(1) +0.58*UPW(1,I)*sigmaQT/sigmaW       
-       !UPTHV(1,I)=THV(1)+0.58*UPW(1,I)*sigmaTH/sigmaW
-       !Alternatively, initialize parcel over lowest 50m
-       UPQT(1,I) = 0.
-       UPTHV(1,I)= 0.
-       UPTHL(1,I)= 0.
-       k50=1 !for now, keep at lowest model layer...
-       DO k=1,k50
-         UPQT(1,I) = UPQT(1,I) +QT(k) +0.58*UPW(1,I)*sigmaQT/sigmaW *acfac
-         UPTHV(1,I)= UPTHV(1,I)+THV(k)+0.58*UPW(1,I)*sigmaTH/sigmaW *acfac
-         UPTHL(1,I)= UPTHL(1,I)+THL(k)+0.58*UPW(1,I)*sigmaTH/sigmaW *acfac
-       ENDDO
-       UPQT(1,I) = UPQT(1,I)/REAL(k50)
-       UPTHV(1,I)= UPTHV(1,I)/REAL(k50)
+       UPU(1,I)=(U(KTS)*DZ(KTS+1)+U(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPV(1,I)=(V(KTS)*DZ(KTS+1)+V(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQC(1,I)=0
+       !UPQC(1,I)=(QC(KTS)*DZ(KTS+1)+QC(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQT(1,I)=(QT(KTS)*DZ(KTS+1)+QT(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))&
+           &     +0.58*UPW(1,I)*sigmaQT/sigmaW       
+       UPTHV(1,I)=(THV(KTS)*DZ(KTS+1)+THV(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1)) &
+           &     +0.58*UPW(1,I)*sigmaTH/sigmaW
 !was       UPTHL(1,I)= UPTHV(1,I)/(1.+svp1*UPQT(1,I))  !assume no saturated parcel at surface
-       UPTHL(1,I)= UPTHL(1,I)/REAL(k50)             ! now, if the lowest layer is saturated, it will be counted for.
-       UPQKE(1,I)= QKE(1)
-       UPQNC(1,I)= QNC(1)
-       UPQNI(1,I)= QNI(1)
-       UPQNWFA(1,I)=QNWFA(1)
-       UPQNIFA(1,I)=QNIFA(1)
+       UPTHL(1,I)=(THL(KTS)*DZ(KTS+1)+THL(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1)) &
+           &     +0.58*UPW(1,I)*sigmaTH/sigmaW
+       UPQKE(1,I)=(QKE(KTS)*DZ(KTS+1)+QKE(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQNC(1,I)=(QNC(KTS)*DZ(KTS+1)+QNC(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQNI(1,I)=(QNI(KTS)*DZ(KTS+1)+QNI(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQNWFA(1,I)=(QNWFA(KTS)*DZ(KTS+1)+QNWFA(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
+       UPQNIFA(1,I)=(QNIFA(KTS)*DZ(KTS+1)+QNIFA(KTS+1)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
 #if (WRF_CHEM == 1)
     IF (bl_mynn_mixchem == 1) THEN
        do ic = 1,nchem
-          UPCHEM(1,I,ic)= CHEM(1,ic)
+          UPCHEM(1,I,ic)= (CHEM(KTS,ic)*DZ(KTS+1)+CHEM(KTS+1,ic)*DZ(KTS))/(DZ(KTS)+DZ(KTS+1))
        enddo
     ENDIF
 #endif
@@ -5363,9 +5360,10 @@ ENDIF
        QCn = 0.
        overshoot = 0
        l  = dl*I                            ! diameter of plume
-       DO k=KTS+1,KTE
+       DO k=KTS+1,KTE-1
           !w-dependency for entrainment a la Tian and Kuang (2016)
-          ENT(k,i) = 0.5/(MIN(MAX(UPW(K-1,I),0.75),1.5)*l)
+          !ENT(k,i) = 0.5/(MIN(MAX(UPW(K-1,I),0.75),1.5)*l)
+          ENT(k,i) = 0.35/(MIN(MAX(UPW(K-1,I),0.75),1.5)*l)
           !Entrainment from Negggers (2015, JAMES)
           !ENT(k,i) = 0.02*l**-0.35 - 0.0009
           !JOE - implement minimum background entrainment 
@@ -5380,19 +5378,19 @@ ENDIF
           !SPP
           ENT(k,i) = ENT(k,i) * (1.0 - rstoch_col(k))
 
-          ENT(k,i) = min(ENT(k,i),0.9/(ZW(k)-ZW(k-1)))
+          ENT(k,i) = min(ENT(k,i),0.9/(ZW(k+1)-ZW(k)))
 
           ! Linear entrainment:
-          EntExp= ENT(K,I)*(ZW(k)-ZW(k-1))
-          QTn =UPQT(k-1,I) *(1.-EntExp) + QT(k-1)*EntExp
-          THLn=UPTHL(k-1,I)*(1.-EntExp) + THL(k-1)*EntExp
-          Un  =UPU(k-1,I)  *(1.-EntExp) + U(k-1)*EntExp
-          Vn  =UPV(k-1,I)  *(1.-EntExp) + V(k-1)*EntExp
-          QKEn=UPQKE(k-1,I)*(1.-EntExp) + QKE(k-1)*EntExp
-          QNCn=UPQNC(k-1,I)*(1.-EntExp) + QNC(k-1)*EntExp
-          QNIn=UPQNI(k-1,I)*(1.-EntExp) + QNI(k-1)*EntExp
-          QNWFAn=UPQNWFA(k-1,I)*(1.-EntExp) + QNWFA(k-1)*EntExp
-          QNIFAn=UPQNIFA(k-1,I)*(1.-EntExp) + QNIFA(k-1)*EntExp
+          EntExp= ENT(K,I)*(ZW(k+1)-ZW(k))
+          QTn =UPQT(k-1,I) *(1.-EntExp) + QT(k)*EntExp
+          THLn=UPTHL(k-1,I)*(1.-EntExp) + THL(k)*EntExp
+          Un  =UPU(k-1,I)  *(1.-EntExp) + U(k)*EntExp
+          Vn  =UPV(k-1,I)  *(1.-EntExp) + V(k)*EntExp
+          QKEn=UPQKE(k-1,I)*(1.-EntExp) + QKE(k)*EntExp
+          QNCn=UPQNC(k-1,I)*(1.-EntExp) + QNC(k)*EntExp
+          QNIn=UPQNI(k-1,I)*(1.-EntExp) + QNI(k)*EntExp
+          QNWFAn=UPQNWFA(k-1,I)*(1.-EntExp) + QNWFA(k)*EntExp
+          QNIFAn=UPQNIFA(k-1,I)*(1.-EntExp) + QNIFA(k)*EntExp
 
           ! Exponential Entrainment:
           !EntExp= exp(-ENT(K,I)*(ZW(k)-ZW(k-1)))
@@ -5408,15 +5406,22 @@ ENDIF
              ! Exponential Entrainment:
              !chemn(ic) = chem(k,ic)*(1-EntExp)+UPCHEM(K-1,I,ic)*EntExp
              ! Linear entrainment:
-             chemn(ic)=UPCHEM(k-1,I,ic)*(1.-EntExp) + chem(k-1,ic)*EntExp
+             chemn(ic)=UPCHEM(k-1,i,ic)*(1.-EntExp) + chem(k,ic)*EntExp
          enddo
     ENDIF
 #endif
 
-          ! get thvn,qcn
-          call condensation_edmf(QTn,THLn,(P(K)+P(K-1))/2.,ZW(k),THVn,QCn)
+          ! Define pressure at model interface
+          Pk    =(P(k)*DZ(k+1)+P(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
+          ! Compute plume properties thvn and qcn
+          call condensation_edmf(QTn,THLn,Pk,ZW(k+1),THVn,QCn)
 
-          B=g*(0.5*(THVn+UPTHV(k-1,I))/THV(k-1) - 1.0)
+          ! Define THV at the model interface levels
+          THVk  =(THV(k)*DZ(k+1)+THV(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
+          THVkm1=(THV(k)*DZ(k-1)+THV(k-1)*DZ(k))/(DZ(k-1)+DZ(k))
+
+!          B=g*(0.5*(THVn+UPTHV(k-1,I))/THV(k-1) - 1.0)
+          B=g*(THVn/THVk - 1.0)
           IF(B>0.)THEN
             BCOEFF = 0.15        !w typically stays < 2.5, so doesnt hit the limits nearly as much
           ELSE
@@ -5456,10 +5461,10 @@ ENDIF
           !Allow strongly forced plumes to overshoot if KE is sufficient
           IF (fltv > 0.05 .AND. Wn <= 0 .AND. overshoot == 0) THEN
              overshoot = 1
-             IF ( THV(k)-THV(k-1) .GT. 0.0 ) THEN
-                bvf = SQRT( gtr*(THV(k)-THV(k-1))/(0.5*(dz(k)+dz(k-1))) )
+             IF ( THVk-THVkm1 .GT. 0.0 ) THEN
+                bvf = SQRT( gtr*(THVk-THVkm1)/dz(k) )
                 !vertical Froude number
-                Frz = UPW(K-1,I)/(bvf*0.5*(dz(k)+dz(k-1)))
+                Frz = UPW(K-1,I)/(bvf*0.5*dz(k))
                 IF ( Frz >= 0.5 ) Wn =  MIN(Frz,1.0)*UPW(K-1,I)
              ENDIF
           ELSEIF (fltv > 0.05 .AND. overshoot == 1) THEN
@@ -5470,12 +5475,12 @@ ENDIF
           !Limit very tall plumes
 !          Wn2=Wn2*EXP(-MAX(ZW(k)-(pblh+2000.),0.0)/1000.)
 !          IF(ZW(k) >= pblh+3000.)Wn2=0.
-          Wn=Wn*EXP(-MAX(ZW(k)-MIN(pblh+2000.,3000.),0.0)/1000.)
-          IF(ZW(k) >= MIN(pblh+3000.,4500.))Wn=0.
+          Wn=Wn*EXP(-MAX(ZW(k+1)-MIN(pblh+2000.,3000.),0.0)/1000.)
+          IF(ZW(k+1) >= MIN(pblh+3000.,4500.))Wn=0.
 
           !JOE- minimize the plume penetratration in stratocu-topped PBL
           IF (fltv < 0.06) THEN
-             IF(ZW(k) >= pblh-200. .AND. qc(k) > 1e-5 .AND. I > 4) Wn=0.
+             IF(ZW(k+1) >= pblh-200. .AND. qc(k) > 1e-5 .AND. I > 4) Wn=0.
           ENDIF
 
           IF (Wn > 0.) THEN
@@ -5532,7 +5537,7 @@ ENDIF
   IF (ktop == 0) THEN
      ztop = 0.0
   ELSE
-     ztop=zw(ktop)
+     ztop=zw(ktop+1)
   ENDIF
 
   IF(nup2 > 0) THEN
@@ -5540,44 +5545,54 @@ ENDIF
     !Calculate the fluxes for each variable
     DO k=KTS,KTE
       IF(k > KTOP) exit
-      DO I=1,NUP !NUP2
+      DO i=1,NUP !NUP2
         IF(I > NUP2) exit
-        s_aw(k)   = s_aw(K)    + UPA(K,I)*UPW(K,I)*Psig_w
-        s_awthl(k)= s_awthl(K) + UPA(K,i)*UPW(K,I)*UPTHL(K,I)*Psig_w
-        s_awqt(k) = s_awqt(K)  + UPA(K,i)*UPW(K,I)*UPQT(K,I)*Psig_w
-        s_awqc(k) = s_awqc(K)  + UPA(K,i)*UPW(K,I)*UPQC(K,I)*Psig_w
+        s_aw(k+1)   = s_aw(k+1)    + UPA(K,i)*UPW(K,i)*Psig_w
+        s_awthl(k+1)= s_awthl(k+1) + UPA(K,i)*UPW(K,i)*UPTHL(K,i)*Psig_w
+        s_awqt(k+1) = s_awqt(k+1)  + UPA(K,i)*UPW(K,i)*UPQT(K,i)*Psig_w
+        s_awqc(k+1) = s_awqc(k+1)  + UPA(K,i)*UPW(K,i)*UPQC(K,i)*Psig_w
         IF (momentum_opt > 0) THEN
-          s_awu(k)  = s_awu(K)   + UPA(K,i)*UPW(K,I)*UPU(K,I)*Psig_w
-          s_awv(k)  = s_awv(K)   + UPA(K,i)*UPW(K,I)*UPV(K,I)*Psig_w
+          s_awu(k+1)  = s_awu(k+1)   + UPA(K,i)*UPW(K,i)*UPU(K,i)*Psig_w
+          s_awv(k+1)  = s_awv(k+1)   + UPA(K,i)*UPW(K,i)*UPV(K,i)*Psig_w
         ENDIF
         IF (tke_opt > 0) THEN
-          s_awqke(k)= s_awqke(K) + UPA(K,i)*UPW(K,I)*UPQKE(K,I)*Psig_w
+          s_awqke(k+1)= s_awqke(k+1) + UPA(K,i)*UPW(K,i)*UPQKE(K,i)*Psig_w
         ENDIF
 #if (WRF_CHEM == 1)
     IF (bl_mynn_mixchem == 1) THEN
         do ic = 1,nchem
-          s_awchem(k,ic) = s_awchem(k,ic) + UPA(K,i)*UPW(K,I)*UPCHEM(K,I,ic)*Psig_w
+          s_awchem(k+1,ic) = s_awchem(k+1,ic) + UPA(K,i)*UPW(K,i)*UPCHEM(K,i,ic)*Psig_w
         enddo
     ENDIF
 #endif
       ENDDO
-      s_awqv(k) = s_awqt(k)  - s_awqc(k)
+      s_awqv(k+1) = s_awqt(k+1)  - s_awqc(k+1)
     ENDDO
     IF (scalar_opt > 0) THEN
       DO k=KTS,KTE
         IF(k > KTOP) exit
         DO I=1,NUP !NUP2
           IF (I > NUP2) exit
-          s_awqnc(k)= s_awqnc(K) + UPA(K,i)*UPW(K,I)*UPQNC(K,I)*Psig_w
-          s_awqni(k)= s_awqni(K) + UPA(K,i)*UPW(K,I)*UPQNI(K,I)*Psig_w
-          s_awqnwfa(k)= s_awqnwfa(K) + UPA(K,i)*UPW(K,I)*UPQNWFA(K,I)*Psig_w
-          s_awqnifa(k)= s_awqnifa(K) + UPA(K,i)*UPW(K,I)*UPQNIFA(K,I)*Psig_w
+          s_awqnc(k+1)= s_awqnc(K+1) + UPA(K,i)*UPW(K,i)*UPQNC(K,i)*Psig_w
+          s_awqni(k+1)= s_awqni(K+1) + UPA(K,i)*UPW(K,i)*UPQNI(K,i)*Psig_w
+          s_awqnwfa(k+1)= s_awqnwfa(K+1) + UPA(K,i)*UPW(K,i)*UPQNWFA(K,i)*Psig_w
+          s_awqnifa(k+1)= s_awqnifa(K+1) + UPA(K,i)*UPW(K,i)*UPQNIFA(K,i)*Psig_w
         ENDDO
       ENDDO
     ENDIF
 
-    !Flux limiter: Check for too large heat flux at first model level
-    flx1 = (s_awthl(kts+1)-s_awthl(kts))!/(0.5*(dz(k)+dz(k-1)))
+    !Flux limiter: Check for too large heat flux at top of first model layer
+    ! Given that the temperature profile is calculated as:
+    !     d(k)=thl(k) + dtz(k)*flt + tcd(k)*delt &
+    !        & -dtz(k)*s_awthl(kts+1) + diss_heat(k)*delt*dheat_opt
+    ! So, s_awthl(kts+1) must be less than flt
+    THVk = (THL(kts)*DZ(kts+1)+THL(kts+1)*DZ(kts))/(DZ(kts+1)+DZ(kts))
+    flx1 = MAX(s_aw(kts+1)*(s_awthl(kts+1)/s_aw(kts+1) - THVk),0.0)
+    !flx1 = -dt/dz(kts)*s_awthl(kts+1)
+    !flx1 = (s_awthl(kts+1)-s_awthl(kts))!/(0.5*(dz(k)+dz(k-1)))
+    adjustment=1.0
+    !Print*,"Flux limiter in MYNN-EDMF:"
+    !Print*,"flx1=",flx1," s_awthl(kts+1)=",s_awthl(kts+1)," s_awthl(kts)=",s_awthl(kts)
     IF (flx1 > fluxportion*flt .AND. flx1>0.0) THEN
        adjustment= fluxportion*flt/flx1
        s_aw   = s_aw*adjustment
@@ -5603,22 +5618,23 @@ ENDIF
 #endif
        UPA = UPA*adjustment
     ENDIF
+    !Print*,"adjustment=",adjustment," fluxportion=",fluxportion," flt=",flt
 
     !Calculate mean updraft properties for output:
     DO k=KTS,KTE-1
       IF(k > KTOP) exit
       DO I=1,NUP !NUP2
         IF(I > NUP2) exit
-        edmf_a(K)=edmf_a(K)+UPA(K+1,I)
-        edmf_w(K)=edmf_w(K)+UPA(K+1,I)*UPW(K+1,I)
-        edmf_qt(K)=edmf_qt(K)+UPA(K+1,I)*UPQT(K+1,I)
-        edmf_thl(K)=edmf_thl(K)+UPA(K+1,I)*UPTHL(K+1,I)
-        edmf_ent(K)=edmf_ent(K)+UPA(K+1,I)*ENT(K+1,I)
-        edmf_qc(K)=edmf_qc(K)+UPA(K+1,I)*UPQC(K+1,I)
+        edmf_a(K)  =edmf_a(K)  +UPA(K,i)
+        edmf_w(K)  =edmf_w(K)  +UPA(K,i)*UPW(K,i)
+        edmf_qt(K) =edmf_qt(K) +UPA(K,i)*UPQT(K,i)
+        edmf_thl(K)=edmf_thl(K)+UPA(K,i)*UPTHL(K,i)
+        edmf_ent(K)=edmf_ent(K)+UPA(K,i)*ENT(K,i)
+        edmf_qc(K) =edmf_qc(K) +UPA(K,i)*UPQC(K,i)
 #if (WRF_CHEM == 1)
     IF (bl_mynn_mixchem == 1) THEN
         do ic = 1,nchem
-          edmf_chem(k,ic) = edmf_chem(k,ic) + UPA(K+1,I)*UPCHEM(k,I,ic)
+          edmf_chem(k,ic) = edmf_chem(k,ic) + UPA(K,I)*UPCHEM(k,i,ic)
         enddo
     ENDIF
 #endif
@@ -5646,9 +5662,9 @@ ENDIF
 
 !JOE: ADD CLDFRA_bl1d, qc_bl1d. Note that they have already been defined in
 !     mym_condensation. Here, a shallow-cu component is added.  
-     DO K=KTS,KTE
+     DO K=KTS,KTE-1
         IF(k > KTOP) exit
-        IF(edmf_qc(k)>0.0)THEN
+        IF(0.5*(edmf_qc(k)+edmf_qc(k+1))>0.0)THEN
             satvp = 3.80*exp(17.27*(th(k)-273.)/ &
                    (th(k)-36.))/(.01*p(k))
             rhgrid = max(.01,MIN( 1., qv(k) /satvp))
@@ -5685,7 +5701,8 @@ ENDIF
             else
                f = 1.0
             endif
-            sigq = 9.E-3 * edmf_a(k) * edmf_w(k) * f ! convective component of sigma (CB2005)
+            sigq = 9.E-3 * 0.5*(edmf_a(k)+edmf_a(k+1)) * &
+               &           0.5*(edmf_w(k)+edmf_w(k+1)) * f       ! convective component of sigma (CB2005)
             !sigq = MAX(sigq, 1.0E-4)         
             sigq = SQRT(sigq**2 + sgm(k)**2)    ! combined conv + stratus components
 
@@ -5700,12 +5717,16 @@ ENDIF
             ENDIF
 
             IF (cldfra_bl1d(k) < 0.5) THEN
-               IF (mf_cf > edmf_a(k)) THEN
+               IF (mf_cf > 0.5*(edmf_a(k)+edmf_a(k+1))) THEN
                   cldfra_bl1d(k) = mf_cf
-                  qc_bl1d(k) = edmf_qc(k)*edmf_a(k)/mf_cf
+                  !qc_bl1d(k) = edmf_qc(k)*edmf_a(k)/mf_cf
+                  qc_bl1d(k) = 0.5*(edmf_qc(k)+edmf_qc(k+1))* &
+                       &       0.5*(edmf_a(k)+edmf_a(k+1))/mf_cf
                ELSE
-                  cldfra_bl1d(k)=edmf_a(k)
-                  qc_bl1d(k) = edmf_qc(k)
+                  !cldfra_bl1d(k)=edmf_a(k)
+                  !qc_bl1d(k) = edmf_qc(k)
+                  cldfra_bl1d(k)=0.5*(edmf_a(k)+edmf_a(k+1))
+                  qc_bl1d(k) = 0.5*(edmf_qc(k)+edmf_qc(k+1))
                ENDIF
             ENDIF
             !Now recalculate the terms for the buoyancy flux for mass-flux clouds:
