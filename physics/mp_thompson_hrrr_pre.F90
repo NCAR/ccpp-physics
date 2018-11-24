@@ -159,11 +159,47 @@ module mp_thompson_hrrr_pre
          else
             if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosols are present.'
             if (MAXVAL(nwfa2d) .lt. eps) then
+! Hard-coded switch between new (from WRFv4.0, top) and old (until WRFv3.9.1.1, bottom) surface emission rate calculations
+#if 0
+               !+---+-----------------------------------------------------------------+
+               !..Scale the lowest level aerosol data into an emissions rate.  This is
+               !.. very far from ideal, but need higher emissions where larger amount
+               !.. of (climo) existing and lesser emissions where there exists fewer to
+               !.. begin as a first-order simplistic approach.  Later, proper connection to
+               !.. emission inventory would be better, but, for now, scale like this:
+               !.. where: Nwfa=50 per cc, emit 0.875E4 aerosols per second per grid box unit
+               !..        that was tested as ~(20kmx20kmx50m = 2.E10 m**-3)
+               !+---+-----------------------------------------------------------------+
                if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Use new (WRFv4+) formula to calculate CCN surface emission rates.'
                do i = 1, ncol
                   airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
+#else
+               !+---+-----------------------------------------------------------------+
+               !..Scale the lowest level aerosol data into an emissions rate.  This is
+               !.. very far from ideal, but need higher emissions where larger amount
+               !.. of existing and lesser emissions where not already lots of aerosols
+               !.. for first-order simplistic approach.  Later, proper connection to
+               !.. emission inventory would be better, but, for now, scale like this:
+               !.. where: Nwfa=50 per cc, emit 0.875E4 aerosols per kg per second
+               !..        Nwfa=500 per cc, emit 0.875E5 aerosols per kg per second
+               !..        Nwfa=5000 per cc, emit 0.875E6 aerosols per kg per second
+               !.. for a grid with 20km spacing and scale accordingly for other spacings.
+               !+---+-----------------------------------------------------------------+
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Use old (pre WRFv4) formula to calculate CCN surface emission rates.'
+               do i = 1, ncol
+                  if (SQRT(area(i))/20000.0 .ge. 1.0) then
+                     h_01 = 0.875
+                  else
+                     h_01 = (0.875 + 0.125*((20000.-SQRT(area(i)))/16000.)) * SQRT(area(i))/20000.
+                  endif
+                  nwfa2d(i) = 10.0**(LOG10(nwfa(i,1)*1.E-6)-3.69897)
+                  nwfa2d(i) = nwfa2d(i)*h_01 * 1.E6
+               enddo
+#endif
             else
                if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
             endif
