@@ -61,7 +61,7 @@
 !! | dqsfc_diag          | cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep   | cumulative sfc latent heat flux multiplied by timestep      | W m-2 s |   1 | real      | kind_phys | inout  | F        |
 !! | recmol              | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        | 
 !! | qke                 | tke_at_mass_points                                                          | 2 x tke at mass points                                | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
-!! | qke_adv             | tke_at_mass_points_advected                                                 | 2 x tke at mass points advected                       | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
+!! | qke_adv             | turbulent_kinetic_energy                                                    | turbulent kinetic energy                              | J             |    2 | real      | kind_phys | inout  | F        |
 !! | tsq                 | t_prime_squared                                                             | temperature fluctuation squared                       | K2            |    2 | real      | kind_phys | inout  | F        |
 !! | qsq                 | q_prime_squared                                                             | water vapor fluctuation squared                       | kg2 kg-2      |    2 | real      | kind_phys | inout  | F        |
 !! | cov                 | t_prime_q_prime                                                             | covariance of temperature and moisture                | K kg kg-1     |    2 | real      | kind_phys | inout  | F        |
@@ -267,7 +267,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
      &       spp_pbl=0,                                     &
-     &       bl_mynn_mixscalars=1
+     &       bl_mynn_mixscalars=1,                          &
+     &       levflag=2
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
      &       FLAG_QNWFA, FLAG_QNIFA
@@ -351,8 +352,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
       if (kdt .eq. 1) then
          initflag=1
+         !print*,"in MYNN, initflag=",initflag," kdt=",kdt
       else
          initflag=0
+         !print*,"in MYNN, initflag=",initflag," kdt=",kdt
       endif
 
   ! Assign variables for each microphysics scheme
@@ -533,16 +536,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          if (do_mynnsfclay) then
            rmol(i)=recmol(i)
          else
-           !if (hfx(i) .ge. 0.)then
-           !  rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
-           !else
-           !  rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
-           !endif
-           if (rb(i) .ge. 0.)then
-             rmol(i)=rb(i)*8./(dz(i,1)*0.5)
+           if (hfx(i) .ge. 0.)then
+             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
            else
-             rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
+             rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
            endif
+           !if (rb(i) .ge. 0.)then
+           !  rmol(i)=rb(i)*8./(dz(i,1)*0.5)
+           !else
+           !  rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
+           !endif
          endif
          ts(i)=tsurf(i)/exner(i,1)  !theta
 !        qsfc(i)=qss(i)
@@ -553,6 +556,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       if (lprnt) then
          print*
          write(0,*)"===CALLING mynn_bl_driver; input:"
+         print*,"bl_mynn_tkebudget=",bl_mynn_tkebudget," bl_mynn_tkeadvect=",bl_mynn_tkeadvect
+         print*,"bl_mynn_cloudpdf=",bl_mynn_cloudpdf," bl_mynn_mixlength=",bl_mynn_mixlength
+         print*,"bl_mynn_edmf=",bl_mynn_edmf," bl_mynn_edmf_mom=",bl_mynn_edmf_mom
+         print*,"bl_mynn_edmf_tke=",bl_mynn_edmf_tke," bl_mynn_edmf_part=",bl_mynn_edmf_part
+         print*,"bl_mynn_cloudmix=",bl_mynn_cloudmix," bl_mynn_mixqt=",bl_mynn_mixqt
+         print*,"icloud_bl=",icloud_bl
          print*,"T:",t3d(1,1),t3d(1,2),t3d(1,levs)
          print*,"TH:",th(1,1),th(1,2),th(1,levs)
          print*,"rho:",rho(1,1),rho(1,2),rho(1,levs)
@@ -617,7 +626,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,bl_mynn_mixlength=bl_mynn_mixlength                & !input parameter
      &             ,icloud_bl=icloud_bl                                & !input parameter
      &             ,qc_bl=qc_bl,cldfra_bl=cldfra_bl                    & !output
-     &             ,bl_mynn_edmf=bl_mynn_edmf                          & !input parameter
+     &             ,levflag=levflag,bl_mynn_edmf=bl_mynn_edmf          & !input parameter
      &             ,bl_mynn_edmf_mom=bl_mynn_edmf_mom                  & !input parameter
      &             ,bl_mynn_edmf_tke=bl_mynn_edmf_tke                  & !input parameter
      &             ,bl_mynn_mixscalars=bl_mynn_mixscalars              & !input parameter
@@ -781,7 +790,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"qc:",qc(1,1),qc(1,2),qc(1,levs)
           print*,"qi:",qi(1,1),qi(1,2),qi(1,levs)
           print*,"rmol:",rmol(1)," ust:",ust(1)
-          print*," dx=",dx(1),"initflag=",initflag
+          print*,"dx(1)=",dx(1),"initflag=",initflag
           print*,"Tsurf:",tsurf(1)," Thetasurf:",ts(1)
           print*,"HFX:",hfx(1)," qfx",qfx(1)
           print*,"qsfc:",qsfc(1)," ps:",ps(1)
@@ -796,6 +805,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"Sh3d:",Sh3d(1,1),sh3d(1,2),sh3d(1,levs)
           print*,"exch_h:",exch_h(1,1),exch_h(1,2),exch_h(1,levs)
           print*,"max cf_bl:",maxval(cldfra_bl(1,:))
+          print*,"max qc_bl:",maxval(qc_bl(1,:))
           print*,"dtdt:",dtdt(1,1),dtdt(1,2),dtdt(1,levs)
           print*,"dudt:",dudt(1,1),dudt(1,2),dudt(1,levs)
           print*,"dvdt:",dvdt(1,1),dvdt(1,2),dvdt(1,levs)

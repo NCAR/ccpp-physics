@@ -931,10 +931,10 @@ CONTAINS
 
         cns  = 3.5
         alp1 = 0.23
-        alp2 = 0.3
+        alp2 = 0.6  !0.3
         alp3 = 3.0
         alp4 = 10.
-        alp5 = 0.4 !like alp2, but for free atmosphere
+        alp5 = 0.6  !0.4 !like alp2, but for free atmosphere
         alp6 = 10.0 !used for MF mixing length instead of BouLac (x times MF)
 
         ! Impose limits on the height integration for elt and the transition layer depth
@@ -2457,16 +2457,16 @@ CONTAINS
 
            zagl = zagl + dz(k)
 
-           ls_min = 400. + MIN(3.*MAX(HFX1,0.),500.)
+           ls_min = 300. + MIN(3.*MAX(HFX1,0.),300.)
            ls_min = MIN(MAX(zagl,25.),ls_min) ! Let this be the minimum possible length scale:
-           if (zagl > PBLH1+2000.) ls_min = MAX(ls_min + 0.5*(PBLH1+2000.-zagl),400.)
+           if (zagl > PBLH1+2000.) ls_min = MAX(ls_min + 0.5*(PBLH1+2000.-zagl),300.)
                                         !   25 m < ls_min(=zagl) < 300 m
            lfac=MIN(4.25+dx/4000.,6.)   ! A dx-dependent multiplier for the master length scale:
                                         !   lfac(750 m) = 4.4
                                         !   lfac(3 km)  = 5.0
                                         !   lfac(13 km) = 6.0
 
-           ls = MAX(MIN(lfac*el(k),900.),ls_min)  ! Bounded:  ls_min < ls < 900 m
+           ls = MAX(MIN(lfac*el(k),600.),ls_min)  ! Bounded:  ls_min < ls < 600 m
                    ! Note: CB02 use 900 m as a constant free-atmosphere length scale. 
 
                    ! Above 300 m AGL, ls_min remains 300 m.  For dx = 3 km, the 
@@ -3425,8 +3425,8 @@ ENDIF
     !===================
     IF (FLAG_QI) THEN
       DO k=kts,kte
-         Dth(k)=(thl(k) + xlvcp/exner(k)*sqc2(k) &
-           &            + xlscp/exner(k)*sqi2(k) &
+         Dth(k)=(thl(k) + xlvcp/exner(k)*sqc(k) &
+           &            + xlscp/exner(k)*sqi(k) &
            &            - th(k))/delt
          !Use form from Tripoli and Cotton (1981) with their
          !suggested min temperature to improve accuracy:
@@ -3726,7 +3726,7 @@ ENDIF
        &bl_mynn_cloudpdf,Sh3D,          &
        &bl_mynn_mixlength,              &
        &icloud_bl,qc_bl,cldfra_bl,      &
-       &bl_mynn_edmf,                   &
+       &levflag,bl_mynn_edmf,           &
        &bl_mynn_edmf_mom,bl_mynn_edmf_tke, &
        &bl_mynn_mixscalars,             &
        &bl_mynn_cloudmix,bl_mynn_mixqt, &
@@ -3745,6 +3745,7 @@ ENDIF
 
     INTEGER, INTENT(in) :: initflag
     !INPUT NAMELIST OPTIONS:
+    INTEGER, INTENT(in) :: levflag
     INTEGER, INTENT(in) :: grav_settling
     INTEGER, INTENT(in) :: bl_mynn_tkebudget
     INTEGER, INTENT(in) :: bl_mynn_cloudpdf
@@ -3887,7 +3888,7 @@ ENDIF
    logical :: cloudflg
 !JOE-end top down
 
-    INTEGER, SAVE :: levflag
+!    INTEGER, SAVE :: levflag
 
 ! Stochastic fields 
      INTEGER,  INTENT(IN)                                               ::spp_pbl
@@ -3913,7 +3914,8 @@ ENDIF
     ITF=ITE
     KTF=KTE
 
-    levflag=mynn_level
+!WRF
+!    levflag=mynn_level
 
     IF (bl_mynn_edmf > 0) THEN
       ! setup random seed
@@ -4489,8 +4491,8 @@ ENDIF
                &s_aw1, s_awqke1, bl_mynn_edmf_tke)
 
           DO k=kts,kte-1
-             ! Set max dissipative heating rate close to 0.1 K per hour (=0.000027...)                                                                                                                                                                                                                   
-             diss_heat(k) = MIN(MAX(0.5*(qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.00002)                                                                                                                                                                                                
+             ! Set max dissipative heating rate close to 0.1 K per hour (=0.000027...)
+             diss_heat(k) = MIN(MAX((qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.000025)
           ENDDO
           diss_heat(kte) = 0.
 
