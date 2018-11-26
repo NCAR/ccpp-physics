@@ -95,7 +95,6 @@ contains
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | cnvw           | convective_cloud_water_mixing_ratio                       | convective cloud water                              | kg kg-1       |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac          |    2 | real      | kind_phys | out    | F        |
-!! | imfshalcnv     | flag_for_mass_flux_shallow_convection_scheme              | flag for mass-flux shallow convection scheme        | flag          |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -103,7 +102,8 @@ contains
                forcet,forceq,phil,raincv,q,t,cld1d,       &
                us,vs,t2di,w,q2di,p2di,psuri,              &
                hbot,htop,kcnv,xland,hfx2,qfx2,clw,          &
-               pbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,imfshalcnv,errmsg,errflg)
+               pbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
+!              pbl,ud_mf,dd_mf,dt_mf,gdc,gdc2,cnvw,cnvc,ishal_cnv)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -111,16 +111,18 @@ contains
       integer, parameter :: maxens2=1
       integer, parameter :: maxens3=16
       integer, parameter :: ensdim=16
+      integer, parameter :: ishal_cnv=3
+      integer            :: ishallow_g3=1 ! depend on ishal_cnv
       integer, parameter :: imid_gf=1    ! testgf2 turn on middle gf conv.
       integer, parameter :: ideep=1
       integer, parameter :: ichoice=0	! 0 2 5 13 8
-      integer, parameter :: ichoicem=5	! 0 2 5 13
+     !integer, parameter :: ichoicem=5	! 0 2 5 13
+      integer, parameter :: ichoicem=13	! 0 2 5 13
       integer, parameter :: ichoice_s=3	! 0 1 2 3
       real(kind=kind_phys), parameter :: aodccn=0.1
       real(kind=kind_phys) :: dts,fpi,fp
       integer, parameter :: dicycle=0 ! diurnal cycle flag
       integer, parameter :: dicycle_m=0 !- diurnal cycle flag
-      integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntrac,tottracer
@@ -147,7 +149,7 @@ contains
    real(kind=kind_phys), dimension (ix,km,ntrac) :: q2di,q
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
-   integer, intent(in   ) :: imfshalcnv
+!  integer, intent(in   ) :: ishal_cnv
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 !hj define locally for now.
@@ -216,7 +218,9 @@ contains
      real(kind=kind_phys), dimension (im)  :: hfx,qfx
      real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
 
-     parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
+     parameter (tf=243.16, tcr=270.16, tcrf=1.0/(tcr-tf))
+     !parameter (tf=263.16, tcr=273.16, tcrf=1.0/(tcr-tf))
+     !parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
      !parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf)) ! as fim
      ! initialize ccpp error handling variables
      errmsg = ''
@@ -255,7 +259,7 @@ contains
 !hj   tscl_kf=dx/25000.
    ccn(its:ite)=150.
   !
-   if (imfshalcnv == 3) ishallow_g3 = 1
+   if (ishal_cnv == 2 .or. ishal_cnv == 3) ishallow_g3 = 1
    high_resolution=0
    subcenter=0.
    iens=1
@@ -508,6 +512,7 @@ contains
 !
 !> if ishallow_g3=1, call shallow: cup_gf_sh()
 !
+    ! print*,'hli bf shallow t2d',t2d
           call cu_gf_sh_run (                                              &
 ! input variables, must be supplied
                          zo,t2d,q2d,ter11,tshall,qshall,p2d,psur,dhdt,kpbli,     &
@@ -690,23 +695,47 @@ contains
                       outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 !
       endif
+!            do i=its,itf
+!              kcnv(i)=0  
+!              if(pret(i).gt.0.)then
+!                 cuten(i)=1.
+!                 kcnv(i)= 1 !jmin(i) 
+!              else 
+!                 kbcon(i)=0
+!                 ktop(i)=0
+!                 cuten(i)=0.
+!              endif   ! pret > 0
+!              if(pretm(i).gt.0.)then
+!                 kcnv(i)= 1 !jmin(i)  
+!                 cutenm(i)=1.
+!              else 
+!                 kbconm(i)=0
+!                 ktopm(i)=0
+!                 cutenm(i)=0.
+!              endif   ! pret > 0
+!            enddo
             do i=its,itf
-              kcnv(i)=0  
-              if(pret(i).gt.0.)then
-                 cuten(i)=1.
-                 kcnv(i)= 1 !jmin(i) 
-              else 
-                 kbcon(i)=0
-                 ktop(i)=0
-                 cuten(i)=0.
-              endif   ! pret > 0
+              kcnv(i)=0
               if(pretm(i).gt.0.)then
                  kcnv(i)= 1 !jmin(i)  
                  cutenm(i)=1.
-              else 
+              else
                  kbconm(i)=0
                  ktopm(i)=0
                  cutenm(i)=0.
+              endif   ! pret > 0
+
+              if(pret(i).gt.0.)then
+                 cuten(i)=1.
+                 cutenm(i)=0.
+                 pretm(i)=0.
+                 kcnv(i)= 1 !jmin(i) 
+                 ktopm(i)=0
+                 kbconm(i)=0
+              else
+                 kbcon(i)=0
+                 ktop(i)=0
+                 cuten(i)=0.
               endif   ! pret > 0
             enddo
 !
