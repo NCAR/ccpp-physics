@@ -243,6 +243,7 @@
       ! physics timestep, while Diag%{rain,rainc} and all totprecip etc
       ! are on the dynamics timestep. Totally confusing and wrong. *DH
       if (imp_physics == imp_physics_gfdl) then
+        tprcp   = max(0., rain)               ! clu: rain -> tprcp
         !graupel = frain*graupel0
         !ice     = frain*ice0
         !snow    = frain*snow0
@@ -251,7 +252,7 @@
         snow    = snow0
       ! Do it right from the beginning for Thompson
       else if (imp_physics == imp_physics_thompson) then
-        tprcp= max (0.,rainc + frain * rain1) ! time-step convective and explicit precip
+        tprcp   = max (0.,rainc + frain * rain1) ! time-step convective and explicit precip
         graupel = frain*graupel0              ! time-step graupel
         ice     = frain*ice0                  ! time-step ice
         snow    = frain*snow0                 ! time-step snow
@@ -285,7 +286,7 @@
 !       end do
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
-        if (imp_physics /= imp_physics_gfdl) then
+        if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson) then
           do i=1,im
             tprcp(i)  = max(0.0, rain(i) )
             if(doms(i) > 0.0 .or. domip(i) > 0.0) then
@@ -342,15 +343,15 @@
         enddo
       enddo
 
-!> - For GFDL cloud MP scheme, determine convective snow by surface temperature;
+!> - For GFDL and Thompson MP scheme, determine convective snow by surface temperature;
 !! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
 !! and convective rainfall from the cumulus scheme if the surface temperature is below
 !! \f$0^oC\f$.
-      if (imp_physics == imp_physics_gfdl) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
         do i = 1, im
-          tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp
+          !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
           srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
           if (tsfc(i) >= 273.15) then
             crain = rainc(i)
