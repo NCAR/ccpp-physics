@@ -50,8 +50,10 @@
 !! | zol                 | surface_stability_parameter                                                 | monin obukhov surface stability parameter             | none          |    1 | real      | kind_phys | inout  | F        |
 !! | mol                 | theta_star                                                                  | temperature flux divided by ustar (temperature scale) | K             |    1 | real      | kind_phys | inout  | F        |
 !! | rmol                | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        |
-!! | psim                | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | inout  | F        |
-!! | psih                | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fm                  | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fh                  | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fm10                | Monin-Obukhov_similarity_function_for_momentum_at_10m                       | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fh2                 | Monin-Obukhov_similarity_function_for_heat_at_2m                            | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
 !! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | br                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | inout  | F        |
 !! | ch                  | surface_drag_wind_speed_for_momentum_in_air                                 | momentum exchange coefficient                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
@@ -88,7 +90,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &  ps, PBLH, slmsk, TSK,           &
      &  QSFC, snowd,                    &
      &  zorl,UST,USTM, ZOL,MOL,RMOL,    &
-     &  PSIM, PSIH, WSPD, br, ch,       &
+     &  fm, fh, fm10, fh2, WSPD, br, ch,&
      &  HFLX, QFX, LH, FLHC, FLQC,      &
      &  U10, V10, TH2, T2, Q2,          &
      &  wstar, CHS2, CQS2,              &
@@ -210,11 +212,12 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &        dx, pblh, slmsk, tsk, qsfc, ps,               &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
-     &        CHS2, CQS2, rmol, zol, mol, ch, psih, psim,   &
+     &        CHS2, CQS2, rmol, zol, mol, ch,               &
+     &        fm, fh, fm10, fh2,                            &
      &        lh, cda, cka, stress, wstar
      !LOCAL
       real, dimension(im) ::                                &
-     &        qcg, hfx, znt, ts, snowh,                     &
+     &        qcg, hfx, znt, ts, snowh, psim, psih,         &
      &        chs, ck, cd, mavail, regime, xland, GZ1OZ0       
 
       ! Initialize CCPP error handling variables
@@ -293,7 +296,9 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                      CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                   &
                      PSFCPA=ps,CHS=chs,CHS2=chs2,CQS2=cqs2,               &
                      ZNT=znt,UST=ust,PBLH=pblh,MAVAIL=mavail,             &
-                     ZOL=zol,MOL=mol,REGIME=regime,PSIM=psim,PSIH=psih,   &
+                     ZOL=zol,MOL=mol,REGIME=regime,psim=psim,psih=psih,   &
+                     psix=fm,psit=fh,psix10=fm10,psit2=fh2,               &
+!                     fm=psix,fh=psit,fm10=psix10,fh2=psit2,               &
                      XLAND=xland,HFX=hfx,QFX=qfx,LH=lh,TSK=tsk,           &
                      FLHC=flhc,FLQC=flqc,QSFC=qsfc,RMOL=rmol,             &
                      U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,SNOWH=snowh,     &
