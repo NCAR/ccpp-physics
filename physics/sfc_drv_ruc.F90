@@ -418,8 +418,15 @@ module lsm_ruc
 
         !--- initialize smcwlt2 and smcref2 with Noah values
         do i  = 1, im ! n - horizontal loop
-          smcref2 (i) = REFSMCnoah(soiltyp(i))
-          smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
+          if(islmsk(i) == 0 .or. islmsk(i) == 2) then
+            !water and sea ice
+            smcref2 (i) = 1.
+            smcwlt2 (i) = 0.
+          else
+            !land 
+            smcref2 (i) = REFSMCnoah(soiltyp(i))
+            smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
+        endif
         enddo
  
         call rucinit          (im, lsoil_ruc, lsoil, nlev,            & ! in
