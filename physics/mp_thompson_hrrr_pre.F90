@@ -177,6 +177,7 @@ module mp_thompson_hrrr_pre
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
 #else
+#if 0
                !+---+-----------------------------------------------------------------+
                !..Scale the lowest level aerosol data into an emissions rate.  This is
                !.. very far from ideal, but need higher emissions where larger amount
@@ -199,6 +200,11 @@ module mp_thompson_hrrr_pre
                   nwfa2d(i) = 10.0**(LOG10(nwfa(i,1)*1.E-6)-3.69897)
                   nwfa2d(i) = nwfa2d(i)*h_01 * 1.E6
                enddo
+#else
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates, set to zero.'
+               ! calculate CCN surface flux here, right now just set to zero
+               nwfa2d = 0.
+#endif
 #endif
             else
                if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
@@ -226,7 +232,7 @@ module mp_thompson_hrrr_pre
          else
             if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial IN aerosols are present.' 
             if (MAXVAL(nifa2d) .lt. eps) then
-               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates, set to zero.'
                ! calculate IN surface flux here, right now just set to zero
                nifa2d = 0.
             else
