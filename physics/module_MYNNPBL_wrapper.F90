@@ -503,6 +503,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
              th(i,k)=t3d(i,k)/exner(i,k)
              qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
+             qc(i,k)=qc(i,k)/(1.0 - qvsh(i,k))
+             qi(i,k)=qi(i,k)/(1.0 - qvsh(i,k))
              rho(i,k)=prsl(i,k)/(r_d*t3d(i,k))
              w(i,k) = -omega(i,k)/(rho(i,k)*g)
              pattern_spp_pbl(i,k)=0.0
@@ -520,7 +522,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !ust(i) = sqrt(stress(i))
          ch(i)=0.0
          hfx(i)=hflx(i)*rho(i,1)*cp
-         !QFX(i)=evap(i)
+         qfx(i)=qfx(i)*rho(i,1)
          wstar(i)=0.0
          delta(i)=0.0
          qcg(i)=0.0
@@ -647,7 +649,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 
      ! POST MYNN (INTERSTITIAL) WORK:
-
+        do i = 1, im
+           qfx(i)=qfx(i)/rho(i,1)
+        enddo
         !update/save MYNN-only variables
         !do k=1,levs
         !   do i=1,im
@@ -676,9 +680,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            ! WSM6
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)  = RQVBLTEN(i,k)
-               dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k)
-               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k)
+               dqdt_water_vapor(i,k)  = RQVBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k)/(1.0 + qv(i,k))
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
@@ -696,10 +700,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            if(ltaerosol) then
              do k=1,levs
                do i=1,im
-                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)
-                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)
+                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)/(1.0 + qv(i,k))
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)
+                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)                   = 0.0
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
@@ -722,9 +726,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !Thompson (2008)
              do k=1,levs
                do i=1,im
-                 dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
-                 dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
+                 dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)         = 0.0
                enddo
@@ -743,9 +747,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            ! GFDL MP
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
-               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
-               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)/(1.0 + qv(i,k))
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0
                !dqdt_graupel(i,k)       = 0.0
@@ -764,8 +768,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !          print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)
-               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
                dqdt_ice_cloud(i,k)     = 0.0
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0

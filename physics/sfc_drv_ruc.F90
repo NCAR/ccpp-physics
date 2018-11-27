@@ -1007,7 +1007,7 @@ module lsm_ruc
    endif
 
           ! Interstitial
-          evap(i)   = qfx(i,j)                    ! kinematic
+          evap(i)   = qfx(i,j) / rho(i)           ! kinematic
           hflx(i)   = hfx(i,j) / (con_cp*rho(i))  ! kinematic
           gflux(i)  = ssoil(i,j)
 

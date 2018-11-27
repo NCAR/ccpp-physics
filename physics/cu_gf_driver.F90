@@ -69,17 +69,17 @@ contains
 !! | dt             | time_step_for_physics                                     | physics time step                                   | s             |    0 | real      | kind_phys | in     | F        |
 !! | cactiv         | conv_activity_counter                                     | convective activity memory                          | none          |    1 | integer   |           | inout  | F        |
 !! | forcet         | temperature_tendency_due_to_dynamics                      | temperature tendency due to dynamics only           | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | forceq         | moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   |    2 | real      | kind_phys | in     | F        |
+!! | forceqv_spechum| moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   |    2 | real      | kind_phys | in     | F        |
 !! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2        |    2 | real      | kind_phys | in     | F        |
 !! | raincv         | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m             |    1 | real      | kind_phys | out    | F        |
-!! | q              | tracer_concentration_updated_by_physics                   | tracer concentration updated by physics             | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
+!! | qv_spechum     | water_vapor_specific_humidity_updated_by_physics          | water vapor specific humidity updated by physics    | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | t              | air_temperature_updated_by_physics                        | updated temperature                                 | K             |    2 | real      | kind_phys | inout  | F        |
 !! | cld1d          | cloud_work_function                                       | cloud work function                                 | m2 s-2        |    1 | real      | kind_phys | out    | F        |
 !! | us             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | vs             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | t2di           | air_temperature                                           | mid-layer temperature                               | K             |    2 | real      | kind_phys | in     | F        |
 !! | w              | omega                                                     | layer mean vertical velocity                        | Pa s-1        |    2 | real      | kind_phys | in     | F        |
-!! | q2di           | tracer_concentration                                      | water vapor specific humidity                       | kg kg-1       |    3 | real      | kind_phys | in     | F        |
+!! | qv2di_spechum  | water_vapor_specific_humidity                             | water vapor specific humidity                       | kg kg-1       |    2 | real      | kind_phys | in     | F        |
 !! | p2di           | air_pressure                                              | mean layer pressure                                 | Pa            |    2 | real      | kind_phys | in     | F        |
 !! | psuri          | surface_air_pressure                                      | surface pressure                                    | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | hbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index         |    1 | integer   |           | out    | F        |
@@ -93,16 +93,16 @@ contains
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                       | convective cloud water                              | kg kg-1       |    2 | real      | kind_phys | out    | F        |
+!! | cnvw_moist     | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio           | kg kg-1       |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac          |    2 | real      | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
       subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
-               forcet,forceq,phil,raincv,q,t,cld1d,       &
-               us,vs,t2di,w,q2di,p2di,psuri,              &
-               hbot,htop,kcnv,xland,hfx2,qfx2,clw,          &
-               pbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
+               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,       &
+               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                       &
+               hbot,htop,kcnv,xland,hfx2,qfx2,clw,                          &
+               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,errmsg,errflg)
 !              pbl,ud_mf,dd_mf,dt_mf,gdc,gdc2,cnvw,cnvc,ishal_cnv)
 !-------------------------------------------------------------
       implicit none
@@ -127,12 +127,12 @@ contains
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntrac,tottracer
 
-   real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceq,w,phil
+   real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( ix )   :: rand_mom,rand_vmas
    real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
-   real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: cnvw,cnvc
+   real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
    real(kind=kind_phys),  dimension( ix , km,tottracer+2 ), intent(inout ) :: clw
 
 !hj change from ix to im
@@ -146,7 +146,12 @@ contains
    real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
 !hj end change ix to im
    real(kind=kind_phys), dimension (ix,km) :: t2di,p2di
-   real(kind=kind_phys), dimension (ix,km,ntrac) :: q2di,q
+   ! Specific humidity from FV3
+   real(kind=kind_phys), dimension (ix,km), intent(in) :: qv2di_spechum
+   real(kind=kind_phys), dimension (ix,km), intent(inout) :: qv_spechum
+   ! Local water vapor mixing ratios and cloud water mixing ratios
+   real(kind=kind_phys), dimension (ix,km) :: qv2di, qv, forceqv, cnvw
+   !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
 !  integer, intent(in   ) :: ishal_cnv
@@ -225,6 +230,16 @@ contains
      ! initialize ccpp error handling variables
      errmsg = ''
      errflg = 0
+!
+! Scale specific humidity to dry mixing ratio
+!
+     ! state in before physics
+     qv2di = qv2di_spechum/(1.0_kind_phys-qv2di_spechum)
+     ! forcing by dynamics, based on state in
+     forceqv = forceqv_spechum/(1.0_kind_phys-qv2di_spechum)
+     ! current state (updated by preceeding physics)
+     qv = qv_spechum/(1.0_kind_phys-qv_spechum)
+!
 !
 ! these should be coming in from outside
 !
@@ -430,13 +445,13 @@ contains
      do i=its,itf
          p2d(i,k)=0.01*p2di(i,k)
          po(i,k)=p2d(i,k) !*.01
-         rhoi(i,k) = 100.*p2d(i,k)/(287.04*(t2di(i,k)*(1.+0.608*q2di(i,k,1))))
-         qcheck(i,k)=q(i,k,1)
+         rhoi(i,k) = 100.*p2d(i,k)/(287.04*(t2di(i,k)*(1.+0.608*qv2di(i,k))))
+         qcheck(i,k)=qv(i,k)
          tn(i,k)=t(i,k)!+forcet(i,k)*dt
-         qo(i,k)=max(1.e-16,q(i,k,1))!+forceq(i,k)*dt
+         qo(i,k)=max(1.e-16,qv(i,k))!+forceqv(i,k)*dt
          t2d(i,k)=t2di(i,k)-forcet(i,k)*dt
          !print*,'hli t2di(i,k),forcet(i,k),dt,t2d(i,k)',t2di(i,k),forcet(i,k),dt,t2d(i,k)
-         q2d(i,k)=max(1.e-16,q2di(i,k,1)-forceq(i,k)*dt)
+         q2d(i,k)=max(1.e-16,qv2di(i,k)-forceqv(i,k)*dt)
          if(qo(i,k).lt.1.e-16)qo(i,k)=1.e-16
          tshall(i,k)=t2d(i,k)
          qshall(i,k)=q2d(i,k)
@@ -449,7 +464,7 @@ contains
      do i=its,itf
      do k=kts,kpbli(i)
          tshall(i,k)=t(i,k)
-         qshall(i,k)=max(1.e-16,q(i,k,1))
+         qshall(i,k)=max(1.e-16,qv(i,k))
      enddo
      enddo
 !
@@ -458,7 +473,7 @@ contains
 !hj qfx=xlv*qfx2
      do i=its,itf
          hfx(i)=hfx2(i)*cp*rhoi(i,1)
-         qfx(i)=qfx2(i)*xlv
+         qfx(i)=qfx2(i)*xlv*rhoi(i,1)
          dx(i) = sqrt(garea(i))
          !print*,'hli dx', dx(i)
      enddo
@@ -467,7 +482,7 @@ contains
      do i=its,itf
      do k=kts,kpbli(i)
          tn(i,k)=t(i,k) 
-         qo(i,k)=max(1.e-16,q(i,k,1))
+         qo(i,k)=max(1.e-16,qv(i,k))
      enddo
      enddo
      nbegin=0
@@ -475,9 +490,9 @@ contains
          do i=its,itf
          do k=kts,kpbli(i)
          dhdt(i,k)=cp*(forcet(i,k)+(t(i,k)-t2di(i,k))/dt) +  & 
-                   xlv*(forceq(i,k)+(q(i,k,1)-q2di(i,k,1))/dt) 
+                   xlv*(forceqv(i,k)+(qv(i,k)-qv2di(i,k))/dt) 
 !         tshall(i,k)=t(i,k) 
-!         qshall(i,k)=q(i,k,1) 
+!         qshall(i,k)=qv(i,k) 
         enddo
         enddo
       do k=  kts+1,ktf-1
@@ -607,7 +622,7 @@ contains
 
             do i=its,itf
             do k=kts,ktf
-              qcheck(i,k)=q(i,k,1) +outqs(i,k)*dt
+              qcheck(i,k)=qv(i,k) +outqs(i,k)*dt
             enddo
             enddo
       call neg_check('mid',ipn,dt,qcheck,outqm,outtm,outum,outvm,   &
@@ -688,7 +703,7 @@ contains
         ipr=0
             do i=its,itf
             do k=kts,ktf
-              qcheck(i,k)=q(i,k,1) +(outqs(i,k)+outqm(i,k))*dt
+              qcheck(i,k)=qv(i,k) +(outqs(i,k)+outqm(i,k))*dt
             enddo
             enddo
       call neg_check('deep',ipn,dt,qcheck,outq,outt,outu,outv,   &
@@ -759,7 +774,7 @@ contains
                ud_mf(i,k)=cuten(i)*zu(i,k)*xmb(i)*dt
                dd_mf(i,k)=cuten(i)*zd(i,k)*edt(i)*xmb(i)*dt
                t(i,k)=t(i,k)+dt*(cutens(i)*outts(i,k)+cutenm(i)*outtm(i,k)+outt(i,k)*cuten(i))
-               q(i,k,1)=max(1.e-16,q(i,k,1)+dt*(cutens(i)*outqs(i,k)+cutenm(i)*outqm(i,k)+outq(i,k)*cuten(i)))
+               qv(i,k)=max(1.e-16,qv(i,k)+dt*(cutens(i)*outqs(i,k)+cutenm(i)*outqm(i,k)+outq(i,k)*cuten(i)))
                gdc(i,k,7)=sqrt(us(i,k)**2 +vs(i,k)**2)
                us(i,k)=us(i,k)+outu(i,k)*cuten(i)*dt +outum(i,k)*cutenm(i)*dt
                vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt
@@ -837,7 +852,11 @@ contains
               endif   ! pret > 0
             enddo
  100    continue
-
-
+!
+! Scale dry mixing ratios for water wapor and cloud water to specific humidy / moist mixing ratios
+!
+        qv_spechum = qv/(1.0_kind_phys+qv)
+        cnvw_moist = cnvw/(1.0_kind_phys+qv)
+!
    end subroutine cu_gf_driver_run
 end module cu_gf_driver
