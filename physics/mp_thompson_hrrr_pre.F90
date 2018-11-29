@@ -177,7 +177,7 @@ module mp_thompson_hrrr_pre
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
 #else
-#if 0
+#if 1
                !+---+-----------------------------------------------------------------+
                !..Scale the lowest level aerosol data into an emissions rate.  This is
                !.. very far from ideal, but need higher emissions where larger amount
