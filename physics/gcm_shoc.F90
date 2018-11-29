@@ -113,7 +113,8 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
    integer :: i, k
 
    real(kind=kind_phys) :: tem
-   real(kind=kind_phys), dimension(nx,nzm) :: qsnw !qsnw can be local to this routine
+   real(kind=kind_phys), dimension(nx,nzm) :: qsnw ! qsnw can be local to this routine
+   real(kind=kind_phys), dimension(nx,nzm) :: qgl  ! qgl  can be local to this routine
 
 ! Initialize CCPP error handling variables
 
@@ -129,6 +130,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !GF - gq0(ntrw) is passed in directly, no need to copy
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        elseif (fprcp > 1) then
@@ -136,6 +138,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            do i=1,nx
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k) + gq0_graupel(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        endif
@@ -158,6 +161,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !GF - gq0(ntrw) is passed in directly, no need to copy
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        elseif (fprcp > 1) then
@@ -165,6 +169,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            do i=1,nx
              !qrn(i,k)    = gq0_rain(i,k)
              qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k)
+             qgl(i,k)     = 0.0
              clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
            enddo
          enddo
@@ -174,8 +179,9 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
          do i=1,nx
            clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
            clw_liquid(i,k) = gq0_cloud_liquid(i,k)                    ! water
-           !qrn(i,k)   = gq0_rain(i,k)
-           qsnw(i,k)  = gq0_snow(i,k)
+           !qrn(i,k)  = gq0_rain(i,k)
+           qsnw(i,k) = gq0_snow(i,k)
+           qgl(i,k)  = 0.0
          enddo
        enddo
       elseif (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_zhao_carr_pdf) then
@@ -187,6 +193,8 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            tem = gq0_cloud_liquid(i,k) * max(0.0, MIN(1.0, (tcr-gt0(i,k))*tcrf))
            clw_ice(i,k) = tem                              ! ice
            clw_liquid(i,k) = gq0_cloud_liquid(i,k) - tem              ! water
+           qsnw(i,k) = 0.0
+           qgl(i,k)  = 0.0
          enddo
        enddo
       endif
@@ -207,7 +215,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
     call shoc_work (ix, nx, 1, nzm, nzm+1, dtp, me, 1, prsl,  &
               phii, phil, u, v, omega, gt0,  &
               gq0_water_vapor, clw_ice, clw_liquid, qsnw, gq0_rain,  &
-              gq0_graupel, rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
+              qgl, rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
               cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec, .false., 1, ncpl, ncpi, &
               con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
 
