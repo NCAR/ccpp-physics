@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_csawmg" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_2017_updated_csawmgshoc" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -73,6 +73,8 @@
       <scheme>gwdc_pre</scheme>
       <scheme>gwdc</scheme>
       <scheme>gwdc_post</scheme>
+      <scheme>GFS_SCNV_generic_pre</scheme>
+      <scheme>GFS_SCNV_generic_post</scheme>
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
