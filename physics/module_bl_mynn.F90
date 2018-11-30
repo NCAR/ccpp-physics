@@ -203,7 +203,7 @@ MODULE module_bl_mynn
   INTEGER, PARAMETER :: bl_mynn_mixchem = 0
 
   !Adding top-down diffusion driven by cloud-top radiative cooling
-  INTEGER, PARAMETER :: bl_mynn_topdown = 0
+  INTEGER, PARAMETER :: bl_mynn_topdown = 1
 
   !Option to activate heating due to dissipation of TKE (to activate, set to 1.0)
   REAL, PARAMETER :: dheat_opt = 1.
@@ -932,7 +932,7 @@ CONTAINS
         cns  = 3.5
         alp1 = 0.23
         alp2 = 0.6  !0.3
-        alp3 = 3.0
+        alp3 = 4.0
         alp4 = 10.
         alp5 = 0.6  !0.4 !like alp2, but for free atmosphere
         alp6 = 10.0 !used for MF mixing length instead of BouLac (x times MF)
@@ -3353,7 +3353,7 @@ ENDIF
       !print*,"FLAG_QC:",FLAG_QC
       IF (FLAG_QC) THEN
          DO k=kts,kte
-            Dqc(k)=(sqc2(k)/(1.-sqc2(k)) - qc(k))/delt
+            Dqc(k)=(sqc2(k)/(1.-sqv2(k)) - qc(k))/delt
             IF(Dqc(k)*delt + qc(k) < 0.) THEN
               !print*,'  neg qc:',qsl,sqw2(k),sqi2(k),sqc2(k),qc(k),tk(k)
               Dqc(k)=-qc(k)/delt 
@@ -3385,7 +3385,7 @@ ENDIF
       !===================
       IF (FLAG_QI) THEN
          DO k=kts,kte
-           Dqi(k)=(sqi2(k)/(1.-sqi2(k)) - qi(k))/delt
+           Dqi(k)=(sqi2(k)/(1.-sqv2(k)) - qi(k))/delt
            IF(Dqi(k)*delt + qi(k) < 0.) THEN
            !   !print*,' neg qi;',qsl,sqw2(k),sqi2(k),sqc2(k),qi(k),tk(k)
               Dqi(k)=-qi(k)/delt
@@ -3991,11 +3991,11 @@ ENDIF
                 th1(k)=th(i,k,j)
                 tk1(k)=T3D(i,k,j)
                 rho1(k)=rho(i,k,j)
-                sqc(k)=qc(i,k,j)/(1.+qc(i,k,j))
+                sqc(k)=qc(i,k,j)/(1.+qv(i,k,j))
                 sqv(k)=qv(i,k,j)/(1.+qv(i,k,j))
                 thetav(k)=th(i,k,j)*(1.+0.61*sqv(k))
                 IF (PRESENT(qi) .AND. FLAG_QI ) THEN
-                   sqi(k)=qi(i,k,j)/(1.+qi(i,k,j))
+                   sqi(k)=qi(i,k,j)/(1.+qv(i,k,j))
                    sqw(k)=sqv(k)+sqc(k)+sqi(k)
                    thl(k)=th(i,k,j)- xlvcp/exner(i,k,j)*sqc(k) &
                        &           - xlscp/exner(i,k,j)*sqi(k)
@@ -4108,7 +4108,7 @@ ENDIF
              qv1(k)= qv(i,k,j)
              qc1(k)= qc(i,k,j)
              sqv(k)= qv(i,k,j)/(1.+qv(i,k,j))
-             sqc(k)= qc(i,k,j)/(1.+qc(i,k,j))
+             sqc(k)= qc(i,k,j)/(1.+qv(i,k,j))
              IF(icloud_bl > 0)cldfra_bl1D_old(k)=cldfra_bl(i,k,j)
              IF(icloud_bl > 0)qc_bl1D_old(k)=qc_bl(i,k,j)
              dqc1(k)=0.0
@@ -4119,7 +4119,7 @@ ENDIF
              dqnifa1(k)=0.0
              IF(PRESENT(qi) .AND. FLAG_QI)THEN
                 qi1(k)= qi(i,k,j)
-                sqi(k)= qi(i,k,j)/(1.+qi(i,k,j))
+                sqi(k)= qi(i,k,j)/(1.+qv(i,k,j))
                 sqw(k)= sqv(k)+sqc(k)+sqi(k)
                 thl(k)= th(i,k,j) - xlvcp/exner(i,k,j)*sqc(k) &
                      &            - xlscp/exner(i,k,j)*sqi(k)
@@ -4492,7 +4492,7 @@ ENDIF
 
           DO k=kts,kte-1
              ! Set max dissipative heating rate close to 0.1 K per hour (=0.000027...)
-             diss_heat(k) = MIN(MAX((qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.000025)
+             diss_heat(k) = MIN(MAX(0.5*(qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.000025)
           ENDDO
           diss_heat(kte) = 0.
 
@@ -5035,7 +5035,7 @@ ENDIF
          & ENT0=0.1
 
   ! Implement ideas from Neggers (2016, JAMES):
-     REAL, PARAMETER :: Atot = 0.10 ! Maximum total fractional area of all updrafts
+     REAL, PARAMETER :: Atot = 0.12 ! Maximum total fractional area of all updrafts
      REAL, PARAMETER :: lmax = 1000.! diameter of largest plume
      REAL, PARAMETER :: dl   = 100. ! diff size of each plume - the differential multiplied by the integrand
      REAL, PARAMETER :: dcut = 1.0  ! max diameter of plume to parameterize relative to dx (km)
@@ -5062,7 +5062,7 @@ ENDIF
   ! VARIABLES FOR CHABOUREAU-BECHTOLD CLOUD FRACTION
    REAL,DIMENSION(KTS:KTE), INTENT(INOUT) :: vt, vq, sgm
    REAL :: sigq,xl,tlk,qsat_tl,rsl,cpm,a,qmq,mf_cf,diffqt,&
-           Fng,qww,alpha,beta,bb,f,pt,t,q2p,b9,satvp,rhgrid
+           Q1,Fng,qww,alpha,beta,bb,f,pt,t,q2p,b9,satvp,rhgrid
 
    ! WA TEST 11/9/15 for consistent reduction of updraft params
    REAL :: csigma,acfac,EntThrottle
@@ -5735,9 +5735,20 @@ ENDIF
             !See mym_condensation for details on these formulations.  The
             !cloud-fraction bounding was added to improve cloud retention,
             !following RAP and HRRR testing.
-            Fng = 2.05 ! the non-Gaussian transport factor (assumed constant)
-            vt(k) = qww   - MIN(0.20,cldfra_bl1D(k))*beta*bb*Fng - 1.
-            vq(k) = alpha + MIN(0.20,cldfra_bl1D(k))*beta*a*Fng  - tv0
+            !Fng = 2.05 ! the non-Gaussian transport factor (assumed constant)
+            !Use Bechtold and Siebesma (1998) piecewise estimation of Fng:
+            Q1 = qmq/MAX(sigq,1E-10)
+            IF (Q1 .GE. 1.0) THEN
+               Fng = 1.0
+            ELSEIF (Q1 .GE. -1.7 .AND. Q1 < 1.0) THEN
+               Fng = EXP(-0.4*(Q1-1.0))
+            ELSEIF (Q1 .GE. -2.5 .AND. Q1 .LE. -1.7) THEN
+               Fng = 3.0 + EXP(-3.8*(Q1+1.7))
+            ELSE
+               Fng = MIN(23.9 + EXP(-1.6*(Q1+2.5)), 80.)
+            ENDIF
+            vt(k) = qww   - MIN(0.30,cldfra_bl1D(k))*beta*bb*Fng - 1.
+            vq(k) = alpha + MIN(0.30,cldfra_bl1D(k))*beta*a*Fng  - tv0
          ENDIF
 
       ENDDO
