@@ -95,6 +95,7 @@ contains
 !! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | cnvw_moist     | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio           | kg kg-1       |    2 | real      | kind_phys | out    | F        |
 !! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac          |    2 | real      | kind_phys | out    | F        |
+!! | imfshalcnv     | flag_for_mass_flux_shallow_convection_scheme              | flag for mass-flux shallow convection scheme        | flag          |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -102,8 +103,7 @@ contains
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,       &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                       &
                hbot,htop,kcnv,xland,hfx2,qfx2,clw,                          &
-               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,errmsg,errflg)
-!              pbl,ud_mf,dd_mf,dt_mf,gdc,gdc2,cnvw,cnvc,ishal_cnv)
+               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -111,8 +111,6 @@ contains
       integer, parameter :: maxens2=1
       integer, parameter :: maxens3=16
       integer, parameter :: ensdim=16
-      integer, parameter :: ishal_cnv=3
-      integer            :: ishallow_g3=1 ! depend on ishal_cnv
       integer, parameter :: imid_gf=1    ! testgf2 turn on middle gf conv.
       integer, parameter :: ideep=1
       integer, parameter :: ichoice=0	! 0 2 5 13 8
@@ -123,6 +121,7 @@ contains
       real(kind=kind_phys) :: dts,fpi,fp
       integer, parameter :: dicycle=0 ! diurnal cycle flag
       integer, parameter :: dicycle_m=0 !- diurnal cycle flag
+      integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntrac,tottracer
@@ -154,7 +153,7 @@ contains
    !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
-!  integer, intent(in   ) :: ishal_cnv
+   integer, intent(in   ) :: imfshalcnv
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 !hj define locally for now.
@@ -274,7 +273,11 @@ contains
 !hj   tscl_kf=dx/25000.
    ccn(its:ite)=150.
   !
-   if (ishal_cnv == 2 .or. ishal_cnv == 3) ishallow_g3 = 1
+   if (imfshalcnv == 3) then
+     ishallow_g3 = 1
+   else
+     ishallow_g3 = 0
+   end if
    high_resolution=0
    subcenter=0.
    iens=1
