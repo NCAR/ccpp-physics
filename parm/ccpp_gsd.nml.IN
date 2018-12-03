@@ -68,9 +68,9 @@
        n_split  = 6
        nwat = 6
        na_init = 1
-       d_ext = 0.0
+       d_ext = 0.
        dnats = 0
-       fv_sg_adj = 225
+       fv_sg_adj = 450
        d2_bg = 0.
        nord =  2
        dddmp = 0.1
@@ -134,7 +134,7 @@
        nst_anl        = .true.
        use_ufo        = .true.
        pre_rad        = .false.
-       ncld           = 2
+       ncld           = 5
        imp_physics    = 8
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
@@ -143,7 +143,7 @@
        fhlwr          = 3600.
        ialb           = 1
        iems           = 1
-       IAER           = 111
+       iaer           = 111
        ico2           = 2
        isubc_sw       = 2
        isubc_lw       = 2
@@ -160,7 +160,7 @@
        do_mynnedmf    = .true.
        do_mynnsfclay  = .false.
        random_clds    = .false.
-       trans_trac     = .false.
+       trans_trac     = .true.
        cnvcld         = .true.
        imfshalcnv     = -1
        imfdeepcnv     = 3
@@ -182,6 +182,11 @@
        do_sfcperts    = @[DO_SFCPERTS]
        lsm            = 2
        lsoil_lsm      = 9
+       icloud_bl         = 1
+       bl_mynn_tkeadvect = .true.
+       bl_mynn_edmf      = 1
+       bl_mynn_edmf_mom  = 1
+
 /
 
 &interpolator_nml
