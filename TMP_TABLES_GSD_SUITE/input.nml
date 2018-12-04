@@ -154,7 +154,7 @@
   do_mynnedmf    = .true.
   do_mynnsfclay  = .false.
   random_clds  = .false.
-  trans_trac   = .false.
+  trans_trac   = .true.
   cnvcld    = .true.
   imfshalcnv   = 3
   imfdeepcnv   = 3
