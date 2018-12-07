@@ -108,6 +108,7 @@ export HYBEDMF=.T.
 export NA_INIT=1
 export CPL=.F.
 export CPLFLX=.F.
+export CPLWAV=.F.
 export DAYS=1
 export NPX=97
 export NPY=97

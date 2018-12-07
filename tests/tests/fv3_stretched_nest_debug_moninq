@@ -28,6 +28,9 @@ export MOUNTAIN='.F.'
 export WARM_START='.F.'
 export FDIAG='3'
 
+export HYBEDMF='.F.'
+export SATMEDMF='.F.'
+
 export SYEAR="2017"
 export SMONTH="03"
 export SDAY="28"
