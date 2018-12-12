@@ -21,6 +21,11 @@ ifneq (,$(findstring INTEL18=Y,$(FV3_MAKEOPT)))
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.1.163
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   endif
+else ifneq (,$(findstring CCPP=Y,$(FV3_MAKEOPT)))
+  ifeq ($(CHOSEN_MODULE),theia.intel/fv3)
+    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-15.1.133
+    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
+  endif
 endif
 
 CONFIGURE_NEMS_FILE=configure.fv3.$(BUILD_TARGET)
