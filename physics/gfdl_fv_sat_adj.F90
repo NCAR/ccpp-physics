@@ -54,16 +54,17 @@ module fv_sat_adj
 ! </table>
     ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
     !use constants_mod, only: rvgas, rdgas, grav, hlv, hlf, cp_air
-    use physcons, only : rdgas => con_rd, &
-                         rvgas => con_rv, &
-                         grav => con_g,   &
-                         hlv => con_hvap, &
-                         hlf => con_hfus, &
-                         cp_air => con_cp
+    use physcons, only : rdgas => con_rd_dyn, &
+                         rvgas => con_rv_dyn, &
+                         grav => con_g_dyn,   &
+                         hlv => con_hvap_dyn, &
+                         hlf => con_hfus_dyn, &
+                         cp_air => con_cp_dyn
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
     use machine,              only: kind_grid
+    use CCPP_typedefs,        only: kind_dyn
     use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
     use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
     use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
@@ -73,11 +74,11 @@ module fv_sat_adj
 
     public fv_sat_adj_init, fv_sat_adj_run, fv_sat_adj_finalize
 
-    real, parameter :: rrg = -rdgas/grav
+    real(kind=kind_dyn), parameter :: rrg = -rdgas/grav
     ! real, parameter :: cp_air = cp_air           ! 1004.6, heat capacity of dry air at constant pressure, come from constants_mod
-    real, parameter :: cp_vap = 4.0 * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
-    real, parameter :: cv_air = cp_air - rdgas     !< 717.55, heat capacity of dry air at constant volume
-    real, parameter :: cv_vap = 3.0 * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
+    real(kind=kind_dyn), parameter :: cp_vap = 4.0 * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
+    real(kind=kind_dyn), parameter :: cv_air = cp_air - rdgas     !< 717.55, heat capacity of dry air at constant volume
+    real(kind=kind_dyn), parameter :: cv_vap = 3.0 * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
     ! http: / / www.engineeringtoolbox.com / ice - thermal - properties - d_576.html
     ! c_ice = 2050.0 at 0 deg c
     ! c_ice = 1972.0 at - 15 deg c
@@ -88,22 +89,22 @@ module fv_sat_adj
     ! c_liq = 4178.0 at 30 deg c
     ! real, parameter :: c_ice = 2106.0            ! ifs: heat capacity of ice at 0 deg c
     ! real, parameter :: c_liq = 4218.0            ! ifs: heat capacity of liquid at 0 deg c
-    real, parameter :: c_ice = 1972.0              !< gfdl: heat capacity of ice at - 15 deg c
-    real, parameter :: c_liq = 4185.5              !< gfdl: heat capacity of liquid at 15 deg c
-    real, parameter :: dc_vap = cp_vap - c_liq     !< - 2339.5, isobaric heating / cooling
-    real, parameter :: dc_ice = c_liq - c_ice      !< 2213.5, isobaric heating / colling
-    real, parameter :: tice = 273.16               !< freezing temperature
-    real, parameter :: t_wfr = tice - 40.          !< homogeneous freezing temperature
-    real, parameter :: lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
-    real, parameter :: li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
+    real(kind=kind_dyn), parameter :: c_ice = 1972.0              !< gfdl: heat capacity of ice at - 15 deg c
+    real(kind=kind_dyn), parameter :: c_liq = 4185.5              !< gfdl: heat capacity of liquid at 15 deg c
+    real(kind=kind_dyn), parameter :: dc_vap = cp_vap - c_liq     !< - 2339.5, isobaric heating / cooling
+    real(kind=kind_dyn), parameter :: dc_ice = c_liq - c_ice      !< 2213.5, isobaric heating / colling
+    real(kind=kind_dyn), parameter :: tice = 273.16               !< freezing temperature
+    real(kind=kind_dyn), parameter :: t_wfr = tice - 40.          !< homogeneous freezing temperature
+    real(kind=kind_dyn), parameter :: lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
+    real(kind=kind_dyn), parameter :: li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
     ! real (kind_grid), parameter :: e00 = 610.71  ! gfdl: saturation vapor pressure at 0 deg c
     real (kind_grid), parameter :: e00 = 611.21    !< ifs: saturation vapor pressure at 0 deg c
     real (kind_grid), parameter :: d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
     real (kind_grid), parameter :: li2 = lv0 + li00        !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
-    real, parameter :: lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
-    real :: d0_vap                                 !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
-    real :: lv00                                   !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
-    real, allocatable :: table (:), table2 (:), tablew (:), des2 (:), desw (:)
+    real(kind=kind_dyn), parameter :: lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
+    real(kind=kind_dyn) :: d0_vap                                 !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
+    real(kind=kind_dyn) :: lv00                                   !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
+    real(kind=kind_dyn), allocatable :: table (:), table2 (:), tablew (:), des2 (:), desw (:)
 
 contains
 
@@ -195,8 +196,8 @@ end subroutine fv_sat_adj_finalize
 !! \section arg_table_fv_sat_adj_run Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units     | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|-----------|------|-----------|-----------|--------|----------|
-!! | mdt            | time_step_for_remapping_for_fast_physics                      | remapping time step for fast physics                                                   | s         |    0 | real      |           | in     | F        |
-!! | zvir           | ratio_of_vapor_to_dry_air_gas_constants_minus_one_default_kind| zvir=rv/rd-1.0                                                                         | none      |    0 | real      |           | in     | F        |
+!! | mdt            | time_step_for_remapping_for_fast_physics                      | remapping time step for fast physics                                                   | s         |    0 | real      | kind_dyn  | in     | F        |
+!! | zvir           | ratio_of_vapor_to_dry_air_gas_constants_minus_one_default_kind| zvir=rv/rd-1.0                                                                         | none      |    0 | real      | kind_dyn  | in     | F        |
 !! | is             | starting_x_direction_index                                    | starting X direction index                                                             | count     |    0 | integer   |           | in     | F        |
 !! | ie             | ending_x_direction_index                                      | ending X direction index                                                               | count     |    0 | integer   |           | in     | F        |
 !! | isd            | starting_x_direction_index_domain                             | starting X direction index for domain                                                  | count     |    0 | integer   |           | in     | F        |
@@ -211,29 +212,29 @@ end subroutine fv_sat_adj_finalize
 !! | ng             | number_of_ghost_zones                                         | number of ghost zones defined in fv_mp                                                 | count     |    0 | integer   |           | in     | F        |
 !! | hydrostatic    | flag_for_hydrostatic_solver                                   | flag for use the hydrostatic or nonhydrostatic solver                                  | flag      |    0 | logical   |           | in     | F        |
 !! | fast_mp_consv  | flag_for_fast_microphysics_energy_conservation                | flag for fast microphysics energy conservation                                         | flag      |    0 | logical   |           | in     | F        |
-!! | te0_2d         | atmosphere_energy_content_in_column                           | atmosphere total energy in columns                                                     | J m-2     |    2 | real      |           | inout  | F        |
-!! | te0            | atmosphere_energy_content_at_Lagrangian_surface               | atmosphere total energy at Lagrangian surface                                          | J m-2     |    3 | real      |           | out    | F        |
-!! | qv             | water_vapor_specific_humidity_at_Lagrangian_surface           | water vapor specific humidity updated by fast physics at Lagrangian surface            | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | ql             | cloud_liquid_water_specific_humidity_at_Lagrangian_surface    | cloud liquid water specific humidity updated by fast physics at Lagrangian surface     | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | qi             | cloud_ice_specific_humidity_at_Lagrangian_surface             | cloud ice specific humidity updated by fast physics at Lagrangian surface              | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | qr             | cloud_rain_specific_humidity_at_Lagrangian_surface            | cloud rain specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | qs             | cloud_snow_specific_humidity_at_Lagrangian_surface            | cloud snow specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | qg             | cloud_graupel_specific_humidity_at_Lagrangian_surface         | cloud graupel specific humidity updated by fast physics at Lagrangian surface          | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | hs             | surface_geopotential_at_Lagrangian_surface                    | surface geopotential  at Lagrangian surface                                            | m2 s-2    |    2 | real      |           | in     | F        |
-!! | peln           | log_pressure_at_Lagrangian_surface                            | logarithm of pressure at Lagrangian surface                                            | Pa        |    3 | real      |           | in     | F        |
-!! | delz           | thickness_at_Lagrangian_surface                               | thickness at Lagrangian_surface                                                        | m         |    3 | real      |           | in     | F        |
-!! | delp           | pressure_thickness_at_Lagrangian_surface                      | pressure thickness at Lagrangian surface                                               | Pa        |    3 | real      |           | in     | F        |
-!! | pt             | virtual_temperature_at_Lagrangian_surface                     | virtual temperature at Lagrangian surface                                              | K         |    3 | real      |           | inout  | F        |
-!! | pkz            | finite-volume_mean_edge_pressure_raised_to_the_power_of_kappa | finite-volume mean edge pressure raised to the power of kappa                          | Pa**kappa |    3 | real      |           | inout  | F        |
-!! | q_con          | cloud_condensed_water_specific_humidity_at_Lagrangian_surface | cloud condensed water specific humidity updated by fast physics at Lagrangian surface  | kg kg-1   |    3 | real      |           | inout  | F        |
-!! | akap           | kappa_dry_for_fast_physics                                    | modified kappa for dry air, fast physics                                               | none      |    0 | real      |           | in     | F        |
-!! | cappa          | cappa_moist_gas_constant_at_Lagrangian_surface                | cappa(i,j,k) = rdgas / ( rdgas +  cvm(i)/(1.+r_vir*q(i,j,k,sphum)) )                   | none      |    3 | real      |           | inout  | F        |
+!! | te0_2d         | atmosphere_energy_content_in_column                           | atmosphere total energy in columns                                                     | J m-2     |    2 | real      | kind_dyn  | inout  | F        |
+!! | te0            | atmosphere_energy_content_at_Lagrangian_surface               | atmosphere total energy at Lagrangian surface                                          | J m-2     |    3 | real      | kind_dyn  | out    | F        |
+!! | qv             | water_vapor_specific_humidity_at_Lagrangian_surface           | water vapor specific humidity updated by fast physics at Lagrangian surface            | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | ql             | cloud_liquid_water_specific_humidity_at_Lagrangian_surface    | cloud liquid water specific humidity updated by fast physics at Lagrangian surface     | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | qi             | cloud_ice_specific_humidity_at_Lagrangian_surface             | cloud ice specific humidity updated by fast physics at Lagrangian surface              | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | qr             | cloud_rain_specific_humidity_at_Lagrangian_surface            | cloud rain specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | qs             | cloud_snow_specific_humidity_at_Lagrangian_surface            | cloud snow specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | qg             | cloud_graupel_specific_humidity_at_Lagrangian_surface         | cloud graupel specific humidity updated by fast physics at Lagrangian surface          | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | hs             | surface_geopotential_at_Lagrangian_surface                    | surface geopotential  at Lagrangian surface                                            | m2 s-2    |    2 | real      | kind_dyn  | in     | F        |
+!! | peln           | log_pressure_at_Lagrangian_surface                            | logarithm of pressure at Lagrangian surface                                            | Pa        |    3 | real      | kind_dyn  | in     | F        |
+!! | delz           | thickness_at_Lagrangian_surface                               | thickness at Lagrangian_surface                                                        | m         |    3 | real      | kind_dyn  | in     | F        |
+!! | delp           | pressure_thickness_at_Lagrangian_surface                      | pressure thickness at Lagrangian surface                                               | Pa        |    3 | real      | kind_dyn  | in     | F        |
+!! | pt             | virtual_temperature_at_Lagrangian_surface                     | virtual temperature at Lagrangian surface                                              | K         |    3 | real      | kind_dyn  | inout  | F        |
+!! | pkz            | finite-volume_mean_edge_pressure_raised_to_the_power_of_kappa | finite-volume mean edge pressure raised to the power of kappa                          | Pa**kappa |    3 | real      | kind_dyn  | inout  | F        |
+!! | q_con          | cloud_condensed_water_specific_humidity_at_Lagrangian_surface | cloud condensed water specific humidity updated by fast physics at Lagrangian surface  | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
+!! | akap           | kappa_dry_for_fast_physics                                    | modified kappa for dry air, fast physics                                               | none      |    0 | real      | kind_dyn  | in     | F        |
+!! | cappa          | cappa_moist_gas_constant_at_Lagrangian_surface                | cappa(i,j,k) = rdgas / ( rdgas +  cvm(i)/(1.+r_vir*q(i,j,k,sphum)) )                   | none      |    3 | real      | kind_dyn  | inout  | F        |
 !! | area           | cell_area_for_fast_physics                                    | area of the grid cell for fast physics                                                 | m2        |    2 | real      | kind_grid | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_at_Lagrangian_surface             | air temperature tendency due to fast physics at Lagrangian surface                     | K s-1     |    3 | real      |           | inout  | F        |
+!! | dtdt           | tendency_of_air_temperature_at_Lagrangian_surface             | air temperature tendency due to fast physics at Lagrangian surface                     | K s-1     |    3 | real      | kind_dyn  | inout  | F        |
 !! | out_dt         | flag_for_tendency_of_air_temperature_at_Lagrangian_surface    | flag for calculating tendency of air temperature due to fast physics                   | flag      |    0 | logical   |           | in     | F        |
 !! | last_step      | flag_for_the_last_step_of_k_split_remapping                   | flag for the last step of k-split remapping                                            | flag      |    0 | logical   |           | in     | F        |
 !! | do_qa          | flag_for_inline_cloud_fraction_calculation                    | flag for the inline cloud fraction calculation                                         | flag      |    0 | logical   |           | in     | F        |
-!! | qa             | cloud_fraction_at_Lagrangian_surface                          | cloud fraction at Lagrangian surface                                                   | none      |    3 | real      |           | out    | F        |
+!! | qa             | cloud_fraction_at_Lagrangian_surface                          | cloud fraction at Lagrangian surface                                                   | none      |    3 | real      | kind_dyn  | out    | F        |
 !! | nthreads       | omp_threads                                                   | number of OpenMP threads available for fast physics schemes                            | count     |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none      |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag      |    0 | integer   |           | out    | F        |
@@ -246,8 +247,8 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     implicit none
 
     ! Interface variables
-    real,             intent(in)    :: mdt
-    real,             intent(in)    :: zvir
+    real(kind=kind_dyn),             intent(in)    :: mdt
+    real(kind=kind_dyn),             intent(in)    :: zvir
     integer,          intent(in)    :: is
     integer,          intent(in)    :: ie
     integer,          intent(in)    :: isd
@@ -262,31 +263,31 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,          intent(in)    :: ng
     logical,          intent(in)    :: hydrostatic
     logical,          intent(in)    :: fast_mp_consv
-    real,             intent(inout) :: te0_2d(is:ie, js:je)
-    real,             intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
-    real,             intent(in)    :: hs(isd:ied, jsd:jed)
-    real,             intent(in)    :: peln(is:ie, 1:km+1, js:je)
+    real(kind=kind_dyn),             intent(inout) :: te0_2d(is:ie, js:je)
+    real(kind=kind_dyn),             intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(in)    :: hs(isd:ied, jsd:jed)
+    real(kind=kind_dyn),             intent(in)    :: peln(is:ie, 1:km+1, js:je)
     ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
-    real,             intent(in)    :: delz(isd:ied, jsd:jed, 1:kmdelz)
-    real,             intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
-    real,             intent(inout) :: pkz(is:ie, js:je, 1:km)
+    real(kind=kind_dyn),             intent(in)    :: delz(isd:ied, jsd:jed, 1:kmdelz)
+    real(kind=kind_dyn),             intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: pkz(is:ie, js:je, 1:km)
 #ifdef USE_COND
-    real,             intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
 #else
-    real,             intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
+    real(kind=kind_dyn),             intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
 #endif
-    real,             intent(in)    :: akap
+    real(kind=kind_dyn),             intent(in)    :: akap
 #ifdef MOIST_CAPPA
-    real,             intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
 #else
-    real,             intent(inout) :: cappa(isd:ied, jsd:jed, 1)
+    real(kind=kind_dyn),             intent(inout) :: cappa(isd:ied, jsd:jed, 1)
 #endif
     ! DH* WARNING, allocation in fv_arrays.F90 is area(isd_2d:ied_2d, jsd_2d:jed_2d),
     ! where normally isd_2d = isd etc, but for memory optimization, these can be set
@@ -294,17 +295,17 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
     real(kind_grid),  intent(in)    :: area(isd:ied, jsd:jed)
-    real,             intent(inout) :: dtdt(is:ie, js:je, 1:km)
+    real(kind=kind_dyn),             intent(inout) :: dtdt(is:ie, js:je, 1:km)
     logical,          intent(in)    :: out_dt
     logical,          intent(in)    :: last_step
     logical,          intent(in)    :: do_qa
-    real,             intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn),             intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
     integer,          intent(in)    :: nthreads
     character(len=*), intent(  out) :: errmsg
     integer,          intent(  out) :: errflg
 
     ! Local variables
-    real, dimension(is:ie,js:je) :: dpln
+    real(kind=kind_dyn), dimension(is:ie,js:je) :: dpln
     integer :: kdelz
     integer :: k, j, i
 
@@ -390,26 +391,26 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     ! Interface variables
     integer, intent (in) :: is, ie, js, je, ng
     logical, intent (in) :: hydrostatic, consv_te, out_dt, last_step, do_qa
-    real, intent (in) :: zvir, mdt ! remapping time step
-    real, intent (in), dimension (is - ng:ie + ng, js - ng:je + ng) :: dp, delz, hs
-    real, intent (in), dimension (is:ie, js:je) :: dpln
-    real, intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng) :: pt, qv, ql, qi, qr, qs, qg
-    real, intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng) :: q_con, cappa
-    real, intent (inout), dimension (is:ie, js:je) :: dtdt
-    real, intent (out), dimension (is - ng:ie + ng, js - ng:je + ng) :: qa, te0
+    real(kind=kind_dyn), intent (in) :: zvir, mdt ! remapping time step
+    real(kind=kind_dyn), intent (in), dimension (is - ng:ie + ng, js - ng:je + ng) :: dp, delz, hs
+    real(kind=kind_dyn), intent (in), dimension (is:ie, js:je) :: dpln
+    real(kind=kind_dyn), intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng) :: pt, qv, ql, qi, qr, qs, qg
+    real(kind=kind_dyn), intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng) :: q_con, cappa
+    real(kind=kind_dyn), intent (inout), dimension (is:ie, js:je) :: dtdt
+    real(kind=kind_dyn), intent (out), dimension (is - ng:ie + ng, js - ng:je + ng) :: qa, te0
     real (kind_grid), intent (in), dimension (is - ng:ie + ng, js - ng:je + ng) :: area
 
     ! Local variables
-    real, dimension (is:ie) :: wqsat, dq2dt, qpz, cvm, t0, pt1, qstar
-    real, dimension (is:ie) :: icp2, lcp2, tcp2, tcp3
-    real, dimension (is:ie) :: den, q_liq, q_sol, q_cond, src, sink, hvar
-    real, dimension (is:ie) :: mc_air, lhl, lhi
-    real :: qsw, rh
-    real :: tc, qsi, dqsdt, dq, dq0, pidep, qi_crt, tmp, dtmp
-    real :: tin, rqi, q_plus, q_minus
-    real :: sdt, dt_bigg, adj_fac
-    real :: fac_smlt, fac_r2g, fac_i2s, fac_imlt, fac_l2r, fac_v2l, fac_l2v
-    real :: factor, qim, tice0, c_air, c_vap, dw
+    real(kind=kind_dyn), dimension (is:ie) :: wqsat, dq2dt, qpz, cvm, t0, pt1, qstar
+    real(kind=kind_dyn), dimension (is:ie) :: icp2, lcp2, tcp2, tcp3
+    real(kind=kind_dyn), dimension (is:ie) :: den, q_liq, q_sol, q_cond, src, sink, hvar
+    real(kind=kind_dyn), dimension (is:ie) :: mc_air, lhl, lhi
+    real(kind=kind_dyn) :: qsw, rh
+    real(kind=kind_dyn) :: tc, qsi, dqsdt, dq, dq0, pidep, qi_crt, tmp, dtmp
+    real(kind=kind_dyn) :: tin, rqi, q_plus, q_minus
+    real(kind=kind_dyn) :: sdt, dt_bigg, adj_fac
+    real(kind=kind_dyn) :: fac_smlt, fac_r2g, fac_i2s, fac_imlt, fac_l2r, fac_v2l, fac_l2v
+    real(kind=kind_dyn) :: factor, qim, tice0, c_air, c_vap, dw
     integer :: i, j
 
     sdt = 0.5 * mdt                   ! half remapping time step
@@ -979,16 +980,16 @@ end subroutine fv_sat_adj_work
 !>@brief the function 'wqs1' computes the 
 !! saturated specific humidity for table ii.
 ! =======================================================================
-real function wqs1 (ta, den)
+real(kind=kind_dyn) function wqs1 (ta, den)
 
     implicit none
 
     ! pure water phase; universal dry / moist formular using air density
     ! input "den" can be either dry or moist air density
 
-    real, intent (in) :: ta, den
+    real(kind=kind_dyn), intent (in) :: ta, den
 
-    real :: es, ap1, tmin
+    real(kind=kind_dyn) :: es, ap1, tmin
 
     integer :: it
 
@@ -1006,16 +1007,16 @@ end function wqs1
 !>@brief the function 'wqs1' computes the  saturated specific humidity 
 !! for table iii
 ! =======================================================================
-real function iqs1 (ta, den)
+real(kind=kind_dyn) function iqs1 (ta, den)
 
     implicit none
 
     ! water - ice phase; universal dry / moist formular using air density
     ! input "den" can be either dry or moist air density
 
-    real, intent (in) :: ta, den
+    real(kind=kind_dyn), intent (in) :: ta, den
 
-    real :: es, ap1, tmin
+    real(kind=kind_dyn) :: es, ap1, tmin
 
     integer :: it
 
@@ -1033,18 +1034,18 @@ end function iqs1
 !>@brief The function 'wqs2'computes the gradient of saturated specific 
 !! humidity for table ii
 ! =======================================================================
-real function wqs2 (ta, den, dqdt)
+real(kind=kind_dyn) function wqs2 (ta, den, dqdt)
 
     implicit none
 
     ! pure water phase; universal dry / moist formular using air density
     ! input "den" can be either dry or moist air density
 
-    real, intent (in) :: ta, den
+    real(kind=kind_dyn), intent (in) :: ta, den
 
-    real, intent (out) :: dqdt
+    real(kind=kind_dyn), intent (out) :: dqdt
 
-    real :: es, ap1, tmin
+    real(kind=kind_dyn) :: es, ap1, tmin
 
     integer :: it
 
@@ -1075,11 +1076,11 @@ subroutine wqs2_vect (is, ie, ta, den, wqsat, dqdt)
 
     integer, intent (in) :: is, ie
 
-    real, intent (in), dimension (is:ie) :: ta, den
+    real(kind=kind_dyn), intent (in), dimension (is:ie) :: ta, den
 
-    real, intent (out), dimension (is:ie) :: wqsat, dqdt
+    real(kind=kind_dyn), intent (out), dimension (is:ie) :: wqsat, dqdt
 
-    real :: es, ap1, tmin
+    real(kind=kind_dyn) :: es, ap1, tmin
 
     integer :: i, it
 
@@ -1103,18 +1104,18 @@ end subroutine wqs2_vect
 !>@brief The function 'iqs2' computes the gradient of saturated specific 
 !! humidity for table iii.
 ! =======================================================================
-real function iqs2 (ta, den, dqdt)
+real(kind=kind_dyn) function iqs2 (ta, den, dqdt)
 
     implicit none
 
     ! water - ice phase; universal dry / moist formular using air density
     ! input "den" can be either dry or moist air density
 
-    real, intent (in) :: ta, den
+    real(kind=kind_dyn), intent (in) :: ta, den
 
-    real, intent (out) :: dqdt
+    real(kind=kind_dyn), intent (out) :: dqdt
 
-    real :: es, ap1, tmin
+    real(kind=kind_dyn) :: es, ap1, tmin
 
     integer :: it
 
@@ -1146,7 +1147,7 @@ subroutine qs_table (n)
     ! compute es over ice between - 160 deg c and 0 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1600
-        tem = tmin + delt * real (i - 1)
+        tem = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * li2
         fac2 = (d2ice * log (tem / tice) + fac1) / rvgas
@@ -1156,7 +1157,7 @@ subroutine qs_table (n)
     ! compute es over water between - 20 deg c and 102 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1221
-        tem = 253.16 + delt * real (i - 1)
+        tem = 253.16 + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1171,7 +1172,7 @@ subroutine qs_table (n)
     ! derive blended es over ice and supercooled water between - 20 deg c and 0 deg c
     ! -----------------------------------------------------------------------
     do i = 1, 200
-        tem = 253.16 + delt * real (i - 1)
+        tem = 253.16 + delt * real (i - 1, kind=kind_dyn)
         wice = 0.05 * (tice - tem)
         wh2o = 0.05 * (tem - 253.16)
         table (i + 1400) = wice * table (i + 1400) + wh2o * esupc (i)
@@ -1192,7 +1193,7 @@ subroutine qs_tablew (n)
     ! compute es over water
     ! -----------------------------------------------------------------------
     do i = 1, n
-        tem = tmin + delt * real (i - 1)
+        tem = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1211,7 +1212,7 @@ subroutine qs_table2 (n)
     integer :: i, i0, i1
     tmin = tice - 160.
     do i = 1, n
-        tem0 = tmin + delt * real (i - 1)
+        tem0 = tmin + delt * real (i - 1, kind=kind_dyn)
         fac0 = (tem0 - tice) / (tem0 * tice)
         if (i <= 1600) then
             ! -----------------------------------------------------------------------
