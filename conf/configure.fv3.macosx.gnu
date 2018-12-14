@@ -58,6 +58,7 @@ CCPP = N
 HYBRID = Y
 STATIC = N
 SION = N
+DYN32 = N
 MEMCHECK = N
 
 include       $(ESMFMKFILE)
@@ -102,6 +103,10 @@ endif
 
 ifeq ($(NAM_phys),Y)
 CPPDEFS += -DNAM_phys
+endif
+
+ifeq ($(DYN32),Y)
+CPPDEFS += -DOVERLOAD_R4
 endif
 
 ifeq ($(32BIT),Y)

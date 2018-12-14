@@ -18,6 +18,7 @@ function usage   {
   echo "                                   DEBUG=Y/N  (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
   echo "                                   HYBRID=Y/N (default Y)"
+  echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"
   echo "                                   STATIC=Y/N (default N, STATIC=Y requires HYBRID=N)"
   echo "                                   SUITE=name_of_sdf_without_path.xml (only if STATIC=Y)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
@@ -97,6 +98,11 @@ if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTEMPLOG=ON"
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTEMPLOG=OFF"
+fi
+if [[ "${MAKE_OPT}" == *"32BIT=Y"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=ON"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=OFF"
 fi
 if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
   if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
