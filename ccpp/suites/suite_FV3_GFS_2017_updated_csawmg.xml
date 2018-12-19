@@ -53,7 +53,7 @@
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
       <scheme>GFS_PBL_generic_pre</scheme>
-      <!-- Hybrid mode only: call to non-CCPP compliant version of moninq -->
+      <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>gwdps_pre</scheme>
       <scheme>gwdps</scheme>
