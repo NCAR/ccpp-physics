@@ -7,6 +7,10 @@
 
       use h2ointerp, only : setindxh2o, h2ointerpol
 
+      use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
+
+      use iccn_def,   only : ciplin, ccnin, ci_pres
+
       implicit none
 
       private
@@ -47,16 +51,61 @@
 
          nb = Tbd%blkno
 
-         !--- initialize ozone and water
+         if (Model%aero_in) then
+            ! ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
+            ! ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
+            ! if (size(Tbd%aer_nm, dim=3).ne.ntrcaerm) then
+            !    write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+            !          "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
+            !          ntrcaerm, " /= ", size(Tbd%aer_nm, dim=3)
+            !    errflg = 1
+            !    return
+            ! end if
+            ! ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+            ! ntrcaer = size(Tbd%aer_nm, dim=3)
+            ! ! Read aerosol climatology
+            ! call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+         else
+            ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! If Model%aero_in is .false., then ntrcaer == 1
+            ntrcaer = size(Tbd%aer_nm, dim=3)
+         endif
+         if (Model%iccn) then
+          !  call read_cidata  ( Model%me, Model%master)
+          !  ! No consistency check needed for in/ccn data, all values are
+          !  ! hardcoded in module iccn_def.F and GFS_typedefs.F90
+         endif
+
+         !--- read in and initialize ozone
          if (Model%ntoz > 0) then
             call setindxoz (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_o3, &
                             Grid%jindx2_o3, Grid%ddy_o3)
          endif
 
+         !--- read in and initialize stratospheric water
          if (Model%h2o_phys) then
             call setindxh2o (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_h, &
                              Grid%jindx2_h, Grid%ddy_h)
          endif
+
+         !--- read in and initialize aerosols
+        !  if (Model%aero_in) then
+        !    call setindxaer (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_aer,           &
+        !                       Grid%jindx2_aer, Grid%ddy_aer, Grid%xlon_d,     &
+        !                       Grid%iindx1_aer, Grid%iindx2_aer, Grid%ddx_aer, &
+        !                       Model%me, Model%master)
+        !  endif
+        !   !--- read in and initialize IN and CCN
+        !  if (Model%iccn) then
+        !      call setindxci (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_ci,       &
+        !                      Grid%jindx2_ci, Grid%ddy_ci, Grid%xlon_d,  &
+        !                      Grid%iindx1_ci, Grid%iindx2_ci, Grid%ddx_ci)
+        !  endif
+
+
 
       end subroutine GFS_phys_time_vary_init
 
@@ -67,6 +116,7 @@
 !! | local_name     | standard_name                                          | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
 !! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Statein        | FV3-GFS_Statein_type                                   | derived type GFS_statein_type in FV3                                    | DDT           |    0 | GFS_statein_type              |           | in     | F        |
 !! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
 !! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
 !! | Sfcprop        | FV3-GFS_Sfcprop_type                                   | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
@@ -75,17 +125,19 @@
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_run (Grid, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
+      subroutine GFS_phys_time_vary_run (Grid, Statein, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
         use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
                                          GFS_Tbd_type, GFS_sfcprop_type,  &
-                                         GFS_cldprop_type, GFS_diag_type
+                                         GFS_cldprop_type, GFS_diag_type, &
+                                         GFS_statein_type
 
         implicit none
 
         type(GFS_grid_type),              intent(in)    :: Grid
+        type(GFS_statein_type),           intent(in)    :: Statein
         type(GFS_control_type),           intent(inout) :: Model
         type(GFS_tbd_type),               intent(inout) :: Tbd
         type(GFS_sfcprop_type),           intent(inout) :: Sfcprop
@@ -126,12 +178,12 @@
         endif
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-        if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
+        if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
           iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
           call random_setseed(iseed)
           call random_number(wrk)
           do i = 1,Model%cnx*Model%nrcm
-            iseed = iseed + nint(wrk(1)) * i
+            iseed = iseed + nint(wrk(1)*1000.0) * i
             call random_setseed(iseed)
             call random_number(rannie)
             rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
@@ -170,6 +222,26 @@
           call h2ointerpol (Model%me, Model%blksz(Tbd%blkno), Model%idate, Model%fhour, &
                             Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
         endif
+
+        !--- aerosol interpolation
+        ! if (Model%aero_in) then
+        !   call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
+        !                      Model%idate, Model%fhour,                            &
+        !                      Grid%jindx1_aer, Grid%jindx2_aer,  &
+        !                      Grid%ddy_aer,Grid%iindx1_aer,      &
+        !                      Grid%iindx2_aer,Grid%ddx_aer,      &
+        !                      Model%levs,Statein%prsl,                    &
+        !                      Tbd%aer_nm)
+        ! endif
+        !  !--- ICCN interpolation
+        ! if (Model%iccn) then
+        !     call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
+        !                      Grid%jindx1_ci, Grid%jindx2_ci,    &
+        !                      Grid%ddy_ci,Grid%iindx1_ci,        &
+        !                      Grid%iindx2_ci,Grid%ddx_ci,        &
+        !                      Model%levs,Statein%prsl,                    &
+        !                      Tbd%in_nm, Tbd%ccn_nm)
+        ! endif
 
         !--- original FV3 code, not needed for SCM; also not compatible with the way
         !    the time vary steps are run (over each block) --> cannot use
