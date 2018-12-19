@@ -65,10 +65,10 @@ module fv_sat_adj
     !use fv_arrays_mod, only: r_grid
     use machine,              only: kind_grid
     use CCPP_typedefs,        only: kind_dyn
-    use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
-    use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
-    use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
-    use gfdl_cloud_microphys, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
+    use gfdl_cloud_microphys_mod, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
+    use gfdl_cloud_microphys_mod, only: icloud_f, sat_adj0, t_sub, cld_min
+    use gfdl_cloud_microphys_mod, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
+    use gfdl_cloud_microphys_mod, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
     implicit none
     private
 
@@ -112,15 +112,17 @@ contains
 !! \section arg_table_fv_sat_adj_init Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | do_sat_adj     | flag_for_saturation_adjustment_for_microphysics_in_dynamics   | flag for saturation adjustment for microphysics in dynamics                            | none    |    0 | logical   |           | in     | F        |
 !! | kmp            | top_layer_index_for_fast_physics                              | top_layer_inder_for_gfdl_mp                                                            | index   |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
 !!
-subroutine fv_sat_adj_init(kmp, errmsg, errflg)
+subroutine fv_sat_adj_init(do_sat_adj, kmp, errmsg, errflg)
 
     implicit none
 
     ! Interface variables
+    logical,          intent (in) :: do_sat_adj
     integer,          intent (in) :: kmp
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -132,6 +134,13 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
     ! Initialize the CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    ! If saturation adjustment is not used, return immediately
+    if (.not.do_sat_adj) then
+      write(errmsg,'(a)') 'Logic error: fv_sat_adj_init is called but do_sat_adj is set to false'
+      errflg = 1
+      return
+    end if
 
     if (allocated(table)) return
 
