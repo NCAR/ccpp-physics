@@ -18,110 +18,109 @@
 !> \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 #if 0
 !! \section arg_table_mynnedmf_wrapper_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | kdt                 | index_of_time_step                                                          | current forecast iteration                            | index         |    0 | integer   |           | in     | F        |
-!! | delt                | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | dx                  | cell_size                                                                   | size of the grid cell                                 | m             |    1 | real      | kind_phys | in     | F        |
-!! | zorl                | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
-!! | phii                | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | phil                | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | U                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | V                   | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | omega               | omega                                                                       | layer mean vertical velocity                          | Pa s-1        |    2 | real      | kind_phys | in     | F        |
-!! | T3D                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_water_vapor    | water_vapor_specific_humidity                                               | water vapor specific humidity                                              | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_liquid_cloud   | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ice_cloud      | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                                 | number concentration of cloud droplets (liquid)                            | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                                           | number concentration of ice                                                | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ozone                   | ozone_mixing_ratio                                                 | ozone mixing ratio                                                         | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration                        | number concentration of water-friendly aerosols                            | kg-1          |    2 | real      | kind_phys | inout  | F        |
-!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration                          | number concentration of ice-friendly aerosols                              | kg-1          |    2 | real      | kind_phys | inout  | F        | 
-!! | prsl                | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | exner               | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | slmsk               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
-!! | tsurf               | surface_skin_temperature                                                    | surface temperature                                   | K             |    1 | real      | kind_phys | in     | F        |
-!! | qsfc                | surface_specific_humidity                                                   | surface air saturation specific humidity              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | ps                  | surface_air_pressure                                                        | surface pressure                                      | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | ust                 | surface_friction_velocity                                                   | boundary layer parameter                              | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | ch                  | surface_drag_wind_speed_for_momentum_in_air                                 | momentum exchange coefficient                         | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | hflx                | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | QFX                 | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | rb                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | dtsfc1              | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux valid for current call  | W m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | dqsfc1              | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux valid for current call    | W m-2     |    1 | real      | kind_phys | inout  | F        |
-!! | dtsfci_diag         | instantaneous_surface_upward_sensible_heat_flux_for_diag                    | instantaneous sfc sensible heat flux multiplied by timestep  | W m-2   |   1 | real      | kind_phys | inout  | F        |
-!! | dqsfci_diag         | instantaneous_surface_upward_latent_heat_flux_for_diag                      | instantaneous sfc latent heat flux multiplied by timestep    | W m-2   |   1 | real      | kind_phys | inout  | F        |
-!! | dtsfc_diag          | cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep | cumulative sfc sensible heat flux multiplied by timestep    | W m-2 s |   1 | real      | kind_phys | inout  | F        |
-!! | dqsfc_diag          | cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep   | cumulative sfc latent heat flux multiplied by timestep      | W m-2 s |   1 | real      | kind_phys | inout  | F        |
-!! | recmol              | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        | 
-!! | qke                 | tke_at_mass_points                                                          | 2 x tke at mass points                                | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
-!! | qke_adv             | turbulent_kinetic_energy                                                    | turbulent kinetic energy                              | J             |    2 | real      | kind_phys | inout  | F        |
-!! | tsq                 | t_prime_squared                                                             | temperature fluctuation squared                       | K2            |    2 | real      | kind_phys | inout  | F        |
-!! | qsq                 | q_prime_squared                                                             | water vapor fluctuation squared                       | kg2 kg-2      |    2 | real      | kind_phys | inout  | F        |
-!! | cov                 | t_prime_q_prime                                                             | covariance of temperature and moisture                | K kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | el_pbl              | mixing_length                                                               | mixing length in meters                               | m             |    2 | real      | kind_phys | inout  | F        |
-!! | Sh3D                | stability_function_for_heat                                                 | stability function for heat                           | none          |    2 | real      | kind_phys | inout  | F        |
-!! | exch_h              | atmosphere_heat_diffusivity                                                 | diffusivity for heat                                  | m2 s-1        |    2 | real      | kind_phys | inout  | F        |
-!! | PBLH                | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | inout  | F        |
-!! | kpbl                | vertical_index_at_top_of_atmosphere_boundary_layer                          | PBL top model level index                             | index         |    1 | integer   |           | inout  | F        |
-!! | QC_BL               | subgrid_cloud_mixing_ratio_pbl                                              | subgrid cloud cloud mixing ratio from PBL scheme      | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_a              | emdf_updraft_area                                                           | updraft area from mass flux scheme                    | frac          |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_w              | emdf_updraft_vertical_velocity                                              | updraft vertical velocity from mass flux scheme       | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_qt             | emdf_updraft_total_water                                                    | updraft total water from mass flux scheme             | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_thl            | emdf_updraft_theta_l                                                        | updraft theta-l from mass flux scheme                 | K             |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_ent            | emdf_updraft_entrainment_rate                                               | updraft entrainment rate from mass flux scheme        | s-1           |    2 | real      | kind_phys | inout  | F        |
-!! | edmf_qc             | emdf_updraft_cloud_water                                                    | updraft cloud water from mass flux scheme             | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | nupdraft            | number_of_plumes                                                            | number of plumes per grid column                      | count         |    1 | integer   |           | inout  | F        |
-!! | maxMF               | maximum_mass_flux                                                           | maximum mass flux within a column                     | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | ktop_shallow        | k_level_of_highest_reaching_plume                                           | k-level of highest reaching plume                     | count         |    1 | integer   |           | inout  | F        |
-!! | RTHRATEN            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | dudt                | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | dvdt                | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | dtdt                | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_water_vapor    | tendency_of_water_vapor_specific_humidity_due_to_model_physics              | water vapor specific humidity tendency due to model physics           | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_liquid_cloud   | tendency_of_liquid_cloud_water_mixing_ratio_due_to_model_physics            | cloud condensed water mixing ratio tendency due to model physics      | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_cloud      | tendency_of_ice_cloud_water_mixing_ratio_due_to_model_physics               | cloud condensed water mixing ratio tendency due to model physics      | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ozone          | tendency_of_ozone_mixing_ratio_due_to_model_physics                         | ozone mixing ratio tendency due to model physics                      | kg kg-1 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_cloud_droplet_num_conc  | tendency_of_cloud_droplet_number_concentration_due_to_model_physics          | number concentration of cloud droplets (liquid) tendency due to model physics | kg-1 s-1    |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_num_conc            | tendency_of_ice_number_concentration_due_to_model_physics                    | number concentration of ice tendency due to model physics                     | kg-1 s-1    |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_water_aer_num_conc      | tendency_of_water_friendly_aerosol_number_concentration_due_to_model_physics | number concentration of water-friendly aerosols tendency due to model physics | kg-1 s-1    |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_aer_num_conc        | tendency_of_ice_friendly_aerosol_number_concentration_due_to_model_physics   | number concentration of ice-friendly aerosols tendency due to model physics   | kg-1 s-1    |    2 | real      | kind_phys | inout  | F        |
-!! | grav_settling       | grav_settling                                                               | flag to activate gravitational setting of fog         | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_tkebudget   | tke_budget                                                                  | flag for activating TKE budget                        | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_tkeadvect   | tke_advect                                                                  | flag for activating TKE advect                        | flag          |    0 | logical   |           | in     | F        |
-!! | bl_mynn_cloudpdf    | cloudpdf                                                                    | flag to determine which cloud PDF to use              | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_mixlength   | mixing_length_flag                                                          | flag to determine which mixing length form to use     | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_edmf        | edmf_flag                                                                   | flag to activate the mass-flux scheme                 | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_edmf_mom    | edmf_momentum_transport_flag                                                | flag to activate the transport of momentum            | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_edmf_tke    | edmf_tke_transport_flag                                                     | flag to activate the transport of TKE                 | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_edmf_part   | edmf_partition_flag                                                         | flag to partitioning of the MF and ED areas           | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_cloudmix    | cloud_specie_mix_flag                                                       | flag to activate mixing of cloud species              | flag          |    0 | integer   |           | in     | F        |
-!! | bl_mynn_mixqt       | mix_total_water_flag                                                        | flag to mix total water or individual species         | flag          |    0 | integer   |           | in     | F        |
-!! | icloud_bl           | couple_sgs_clouds_to_radiation_flag                                         | flag for coupling sgs clouds to radiation             | flag          |    0 | integer   |           | in     | F        |
-!! | do_mynnsfclay       | do_mynnsfclay                                                               | flag to activate MYNN surface layer                   | flag          |    0 | logical   |           | in     | F        |
-!! | imp_physics         | flag_for_microphysics_scheme                                                | choice of microphysics scheme                         | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_gfdl    | flag_for_gfdl_microphysics_scheme                                           | choice of GFDL microphysics scheme                    | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                                      | choice of Thompson microphysics scheme                | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_wsm6    | flag_for_wsm6_microphysics_scheme                                           | choice of WSM6 microphysics scheme                    | flag          |    0 | integer   |           | in     | F        |
-!! | ltaerosol           | flag_for_aerosol_physics                                                    | flag for aerosol physics                              | flag          |    0 | logical   |           | in     | F        |
-!! | lprnt               | flag_print                                                                  | control flag for diagnostic print out                 | flag          |    0 | logical   |           | in     | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! | local_name                  | standard_name                                                                | long_name                                                                  | units         | rank | type      |    kind   | intent | optional |
+!! |-----------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | ix                          | horizontal_dimension                                                         | horizontal dimension                                                       | count         |    0 | integer   |           | in     | F        |
+!! | im                          | horizontal_loop_extent                                                       | horizontal loop extent                                                     | count         |    0 | integer   |           | in     | F        |
+!! | levs                        | vertical_dimension                                                           | vertical layer dimension                                                   | count         |    0 | integer   |           | in     | F        |
+!! | kdt                         | index_of_time_step                                                           | current forecast iteration                                                 | index         |    0 | integer   |           | in     | F        |
+!! | delt                        | time_step_for_physics                                                        | time step for physics                                                      | s             |    0 | real      | kind_phys | in     | F        |
+!! | dx                          | cell_size                                                                    | size of the grid cell                                                      | m             |    1 | real      | kind_phys | in     | F        |
+!! | zorl                        | surface_roughness_length                                                     | surface roughness length in cm                                             | cm            |    1 | real      | kind_phys | in     | F        |
+!! | phii                        | geopotential_at_interface                                                    | geopotential at model layer interfaces                                     | m2 s-2        |    2 | real      | kind_phys | in     | F        |
+!! | U                           | x_wind                                                                       | x component of layer wind                                                  | m s-1         |    2 | real      | kind_phys | in     | F        |
+!! | V                           | y_wind                                                                       | y component of layer wind                                                  | m s-1         |    2 | real      | kind_phys | in     | F        |
+!! | omega                       | omega                                                                        | layer mean vertical velocity                                               | Pa s-1        |    2 | real      | kind_phys | in     | F        |
+!! | T3D                         | air_temperature                                                              | layer mean air temperature                                                 | K             |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_water_vapor            | water_vapor_specific_humidity                                                | water vapor specific humidity                                              | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_liquid_cloud           | cloud_condensed_water_mixing_ratio                                           | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_ice_cloud              | ice_water_mixing_ratio                                                       | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_cloud_droplet_num_conc | cloud_droplet_number_concentration                                           | number concentration of cloud droplets (liquid)                            | kg-1          |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_cloud_ice_num_conc     | ice_number_concentration                                                     | number concentration of ice                                                | kg-1          |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_ozone                  | ozone_mixing_ratio                                                           | ozone mixing ratio                                                         | kg kg-1       |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_water_aer_num_conc     | water_friendly_aerosol_number_concentration                                  | number concentration of water-friendly aerosols                            | kg-1          |    2 | real      | kind_phys | in     | F        |
+!! | qgrs_ice_aer_num_conc       | ice_friendly_aerosol_number_concentration                                    | number concentration of ice-friendly aerosols                              | kg-1          |    2 | real      | kind_phys | in     | F        |
+!! | prsl                        | air_pressure                                                                 | mean layer pressure                                                        | Pa            |    2 | real      | kind_phys | in     | F        |
+!! | exner                       | dimensionless_exner_function_at_model_layers                                 | Exner function at layers                                                   | none          |    2 | real      | kind_phys | in     | F        |
+!! | slmsk                       | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                                               | flag          |    1 | real      | kind_phys | in     | F        |
+!! | tsurf                       | surface_skin_temperature                                                     | surface temperature                                                        | K             |    1 | real      | kind_phys | in     | F        |
+!! | qsfc                        | surface_specific_humidity                                                    | surface air saturation specific humidity                                   | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | ps                          | surface_air_pressure                                                         | surface pressure                                                           | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | ust                         | surface_friction_velocity                                                    | boundary layer parameter                                                   | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | ch                          | surface_drag_wind_speed_for_momentum_in_air                                  | momentum exchange coefficient                                              | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | hflx                        | kinematic_surface_upward_sensible_heat_flux                                  | kinematic surface upward sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | in     | F        |
+!! | qflx                        | kinematic_surface_upward_latent_heat_flux                                    | kinematic surface upward latent heat flux                                  | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
+!! | wspd                        | wind_speed_at_lowest_model_layer                                             | wind speed at lowest model level                                           | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | rb                          | bulk_richardson_number_at_lowest_model_level                                 | bulk Richardson number at the surface                                      | none          |    1 | real      | kind_phys | in     | F        |
+!! | dtsfc1                      | instantaneous_surface_upward_sensible_heat_flux                              | surface upward sensible heat flux valid for current call                   | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | dqsfc1                      | instantaneous_surface_upward_latent_heat_flux                                | surface upward latent heat flux valid for current call                     | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | dtsfci_diag                 | instantaneous_surface_upward_sensible_heat_flux_for_diag                     | instantaneous sfc sensible heat flux multiplied by timestep                | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | dqsfci_diag                 | instantaneous_surface_upward_latent_heat_flux_for_diag                       | instantaneous sfc latent heat flux multiplied by timestep                  | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | dtsfc_diag                  | cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep | cumulative sfc sensible heat flux multiplied by timestep                   | W m-2 s       |    1 | real      | kind_phys | out    | F        |
+!! | dqsfc_diag                  | cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep   | cumulative sfc latent heat flux multiplied by timestep                     | W m-2 s       |    1 | real      | kind_phys | out    | F        |
+!! | recmol                      | reciprocal_of_obukhov_length                                                 | one over obukhov length                                                    | m-1           |    1 | real      | kind_phys | in     | F        | 
+!! | qke                         | tke_at_mass_points                                                           | 2 x tke at mass points                                                     | m2 s-2        |    2 | real      | kind_phys | inout  | F        |
+!! | qke_adv                     | turbulent_kinetic_energy                                                     | turbulent kinetic energy                                                   | J             |    2 | real      | kind_phys | inout  | F        |
+!! | tsq                         | t_prime_squared                                                              | temperature fluctuation squared                                            | K2            |    2 | real      | kind_phys | out    | F        |
+!! | qsq                         | q_prime_squared                                                              | water vapor fluctuation squared                                            | kg2 kg-2      |    2 | real      | kind_phys | out    | F        |
+!! | cov                         | t_prime_q_prime                                                              | covariance of temperature and moisture                                     | K kg kg-1     |    2 | real      | kind_phys | out    | F        |
+!! | el_pbl                      | mixing_length                                                                | mixing length in meters                                                    | m             |    2 | real      | kind_phys | inout  | F        |
+!! | Sh3D                        | stability_function_for_heat                                                  | stability function for heat                                                | none          |    2 | real      | kind_phys | inout  | F        |
+!! | exch_h                      | atmosphere_heat_diffusivity_for_mynnpbl                                      | diffusivity for heat for MYNN PBL (defined for all mass levels)            | m2 s-1        |    2 | real      | kind_phys | out    | F        |
+!! | exch_m                      | atmosphere_momentum_diffusivity_for_mynnpbl                                  | diffusivity for momentum for MYNN PBL (defined for all mass levels)        | m2 s-1        |    2 | real      | kind_phys | out    | F        |
+!! | PBLH                        | atmosphere_boundary_layer_thickness                                          | PBL thickness                                                              | m             |    1 | real      | kind_phys | inout  | F        |
+!! | kpbl                        | vertical_index_at_top_of_atmosphere_boundary_layer                           | PBL top model level index                                                  | index         |    1 | integer   |           | inout  | F        |
+!! | QC_BL                       | subgrid_cloud_mixing_ratio_pbl                                               | subgrid cloud cloud mixing ratio from PBL scheme                           | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | CLDFRA_BL                   | subgrid_cloud_fraction_pbl                                                   | subgrid cloud fraction from PBL scheme                                     | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_a                      | emdf_updraft_area                                                            | updraft area from mass flux scheme                                         | frac          |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_w                      | emdf_updraft_vertical_velocity                                               | updraft vertical velocity from mass flux scheme                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_qt                     | emdf_updraft_total_water                                                     | updraft total water from mass flux scheme                                  | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_thl                    | emdf_updraft_theta_l                                                         | updraft theta-l from mass flux scheme                                      | K             |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_ent                    | emdf_updraft_entrainment_rate                                                | updraft entrainment rate from mass flux scheme                             | s-1           |    2 | real      | kind_phys | inout  | F        |
+!! | edmf_qc                     | emdf_updraft_cloud_water                                                     | updraft cloud water from mass flux scheme                                  | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | nupdraft                    | number_of_plumes                                                             | number of plumes per grid column                                           | count         |    1 | integer   |           | inout  | F        |
+!! | maxMF                       | maximum_mass_flux                                                            | maximum mass flux within a column                                          | m s-1         |    1 | real      | kind_phys | out    | F        |
+!! | ktop_shallow                | k_level_of_highest_reaching_plume                                            | k-level of highest reaching plume                                          | count         |    1 | integer   |           | inout  | F        |
+!! | RTHRATEN                    | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step   | total sky longwave heating rate                                            | K s-1         |    2 | real      | kind_phys | in     | F        |
+!! | dudt                        | tendency_of_x_wind_due_to_model_physics                                      | updated tendency of the x wind                                             | m s-2         |    2 | real      | kind_phys | inout  | F        |
+!! | dvdt                        | tendency_of_y_wind_due_to_model_physics                                      | updated tendency of the y wind                                             | m s-2         |    2 | real      | kind_phys | inout  | F        |
+!! | dtdt                        | tendency_of_air_temperature_due_to_model_physics                             | updated tendency of the temperature                                        | K s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_water_vapor            | tendency_of_water_vapor_specific_humidity_due_to_model_physics               | water vapor specific humidity tendency due to model physics                | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_liquid_cloud           | tendency_of_liquid_cloud_water_mixing_ratio_due_to_model_physics             | cloud condensed water mixing ratio tendency due to model physics           | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_ice_cloud              | tendency_of_ice_cloud_water_mixing_ratio_due_to_model_physics                | cloud condensed water mixing ratio tendency due to model physics           | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_ozone                  | tendency_of_ozone_mixing_ratio_due_to_model_physics                          | ozone mixing ratio tendency due to model physics                           | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_cloud_droplet_num_conc | tendency_of_cloud_droplet_number_concentration_due_to_model_physics          | number conc. of cloud droplets (liquid) tendency due to model physics      | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_ice_num_conc           | tendency_of_ice_number_concentration_due_to_model_physics                    | number conc. of ice tendency due to model physics                          | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_water_aer_num_conc     | tendency_of_water_friendly_aerosol_number_concentration_due_to_model_physics | number conc. of water-friendly aerosols tendency due to model physics      | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | dqdt_ice_aer_num_conc       | tendency_of_ice_friendly_aerosol_number_concentration_due_to_model_physics   | number conc. of ice-friendly aerosols tendency due to model physics        | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | grav_settling               | grav_settling                                                                | flag to activate gravitational setting of fog                              | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_tkebudget           | tke_budget                                                                   | flag for activating TKE budget                                             | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_tkeadvect           | tke_advect                                                                   | flag for activating TKE advect                                             | flag          |    0 | logical   |           | in     | F        |
+!! | bl_mynn_cloudpdf            | cloudpdf                                                                     | flag to determine which cloud PDF to use                                   | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_mixlength           | mixing_length_flag                                                           | flag to determine which mixing length form to use                          | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_edmf                | edmf_flag                                                                    | flag to activate the mass-flux scheme                                      | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_edmf_mom            | edmf_momentum_transport_flag                                                 | flag to activate the transport of momentum                                 | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_edmf_tke            | edmf_tke_transport_flag                                                      | flag to activate the transport of TKE                                      | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_edmf_part           | edmf_partition_flag                                                          | flag to partitioning of the MF and ED areas                                | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_cloudmix            | cloud_specie_mix_flag                                                        | flag to activate mixing of cloud species                                   | flag          |    0 | integer   |           | in     | F        |
+!! | bl_mynn_mixqt               | mix_total_water_flag                                                         | flag to mix total water or individual species                              | flag          |    0 | integer   |           | in     | F        |
+!! | icloud_bl                   | couple_sgs_clouds_to_radiation_flag                                          | flag for coupling sgs clouds to radiation                                  | flag          |    0 | integer   |           | in     | F        |
+!! | do_mynnsfclay               | do_mynnsfclay                                                                | flag to activate MYNN surface layer                                        | flag          |    0 | logical   |           | in     | F        |
+!! | imp_physics                 | flag_for_microphysics_scheme                                                 | choice of microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_gfdl            | flag_for_gfdl_microphysics_scheme                                            | choice of GFDL microphysics scheme                                         | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_thompson        | flag_for_thompson_microphysics_scheme                                        | choice of Thompson microphysics scheme                                     | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_wsm6            | flag_for_wsm6_microphysics_scheme                                            | choice of WSM6 microphysics scheme                                         | flag          |    0 | integer   |           | in     | F        |
+!! | ltaerosol                   | flag_for_aerosol_physics                                                     | flag for aerosol physics                                                   | flag          |    0 | logical   |           | in     | F        |
+!! | lprnt                       | flag_print                                                                   | control flag for diagnostic print out                                      | flag          |    0 | logical   |           | in     | F        |
+!! | errmsg                      | ccpp_error_message                                                           | error message for error handling in CCPP                                   | none          |    0 | character | len=*     | out    | F        |
+!! | errflg                      | ccpp_error_flag                                                              | error flag for error handling in CCPP                                      | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
 !###===================================================================
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
      &  kdt,delt,dx,zorl,               &
-     &  phii,phil,                      &
-     &  u,v,omega,t3d,                  &
+     &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
      &  qgrs_liquid_cloud,              &
      &  qgrs_ice_cloud,                 &
@@ -132,13 +131,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qfx,wspd,rb,        &
+     &  ust,ch,hflx,qflx,wspd,rb,       &
      &  dtsfc1,dqsfc1,                  &
      &  dtsfci_diag,dqsfci_diag,        &
      &  dtsfc_diag,dqsfc_diag,          &
      &  recmol,                         &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
-     &  el_pbl,sh3d,exch_h,             &
+     &  el_pbl,sh3d,exch_h,exch_m,      &
      &  Pblh,kpbl,                      &
      &  qc_bl,cldfra_bl,                &
      &  edmf_a,edmf_w,edmf_qt,          &
@@ -277,9 +276,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
-      REAL    :: delt
-      INTEGER :: im, ix, levs
-      INTEGER :: initflag, kdt, k, i
+      REAL(kind=kind_phys), intent(in) :: delt
+      INTEGER, intent(in) :: im, ix, levs, kdt
+      INTEGER :: initflag, k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                                &
      &            IMS,IME,JMS,JME,KMS,KME,                               &
      &            ITS,ITE,JTS,JTE,KTS,KTE
@@ -287,58 +286,67 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       INTEGER, PARAMETER :: nchem=1, ndvel=1
 
 !MYNN-3D
-      real(kind=kind_phys), dimension(im,levs+1) :: phii
-      real(kind=kind_phys), dimension(im,levs  ) ::                      &
-     &        phil,exner,PRSL,RTHRATEN, dtdt, dudt, dvdt,                &
+      real(kind=kind_phys), dimension(im,levs+1), intent(in) :: phii
+      real(kind=kind_phys), dimension(im,levs  ), intent(inout) ::       &
+     &        dtdt, dudt, dvdt,                                          &
      &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud,       &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
-      real(kind=kind_phys), dimension(im,levs) ::                        &
-     &        u,v,omega,t3d,                                             &
-     &        qgrs_water_vapor,               &
-     &        qgrs_liquid_cloud,              &
-     &        qgrs_ice_cloud,                 &
-     &        qgrs_cloud_droplet_num_conc,    &
-     &        qgrs_cloud_ice_num_conc,        &
-     &        qgrs_ozone,                     &
-     &        qgrs_water_aer_num_conc,        &
-     &        qgrs_ice_aer_num_conc,          &
-     &        qke, qke_adv, Sh3D, EL_PBL, EXCH_H,                        &
-     &        qc_bl, cldfra_bl,                                          &
-     &        Tsq, Qsq, Cov,                                             &
+      real(kind=kind_phys), dimension(im,levs), intent(inout) ::         &
+     &        qke, qke_adv, EL_PBL, Sh3D,                                &
+     &        qc_bl, cldfra_bl
+      real(kind=kind_phys), dimension(im,levs), intent(inout) ::         &
      &        edmf_a,edmf_w,edmf_qt,                                     &
      &        edmf_thl,edmf_ent,edmf_qc
+     real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
+    &        u,v,omega,t3d,                                              &
+    &        exner,prsl,                                                 &
+    &        qgrs_water_vapor,                                           &
+    &        qgrs_liquid_cloud,                                          &
+    &        qgrs_ice_cloud,                                             &
+    &        qgrs_cloud_droplet_num_conc,                                &
+    &        qgrs_cloud_ice_num_conc,                                    &
+    &        qgrs_ozone,                                                 &
+    &        qgrs_water_aer_num_conc,                                    &
+    &        qgrs_ice_aer_num_conc,                                      &
+    &        RTHRATEN
+     real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
+    &        Tsq, Qsq, Cov, exch_h, exch_m
 
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        qvsh,qc,qi,qnc,qni,ozone,qnwfa,qnifa,                      &
-     &        dz, w, p, rho, th, qv, exch_m, tke_pbl,                    &
+     &        dz, w, p, rho, th, qv, tke_pbl,                            &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN,                  &
      &        RQNWFABLTEN, RQNIFABLTEN,                                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS,                               &
      &        pattern_spp_pbl
 
-!MYNN-CHEM arrays                                                         
+!MYNN-CHEM arrays
       real(kind=kind_phys), dimension(im,nchem) :: chem3d
       real(kind=kind_phys), dimension(im,ndvel) :: vd3d
       REAL(kind=kind_phys), DIMENSION( levs, nchem ) :: chem1
       REAL(kind=kind_phys), DIMENSION( levs+1, nchem ) :: s_awchem1
       REAL(kind=kind_phys), DIMENSION( ndvel ) :: vd1
 
-!MYNN-2D                                                                  
-      real(kind=kind_phys), dimension(im) ::                             &
-     &        dx,maxMF,pblh,slmsk,tsurf,qsfc,ps,                         &
-     &        zorl,ust,hflx,qfx,rb,wspd,recmol,dtsfc1,dqsfc1,            &
-     &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag
+!MYNN-2D
+      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+     &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
+     &        hflx,qflx,ust,wspd,rb,recmol
+      real(kind=kind_phys), dimension(im), intent(inout) ::              &
+     &        pblh
+      real(kind=kind_phys), dimension(im), intent(out) ::                &
+     &        ch,dtsfc1,dqsfc1,                                          &
+     &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
+     &        maxMF
+     integer, dimension(im), intent(inout) ::                           &
+    &        kpbl,nupdraft,ktop_shallow
+
      !LOCAL
       real, dimension(im) ::                                             &
-     &        WSTAR,DELTA,qcg,ch,hfx,rmol,xland,                         &
+     &        WSTAR,DELTA,qcg,hfx,qfx,rmol,xland,                        &
      &        uoce,voce,vdfg,znt,ts
-
-      integer, dimension(im) ::                                          &
-     &        nupdraft,ktop_shallow,kpbl
-
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -522,7 +530,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !ust(i) = sqrt(stress(i))
          ch(i)=0.0
          hfx(i)=hflx(i)*rho(i,1)*cp
-         qfx(i)=qfx(i)*rho(i,1)
+         qfx(i)=qflx(i)*rho(i,1)
          wstar(i)=0.0
          delta(i)=0.0
          qcg(i)=0.0
@@ -589,7 +597,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          print*,"qke:",qke(1,1),qke(1,2),qke(1,levs)
          print*,"el_pbl:",el_pbl(1,1),el_pbl(1,2),el_pbl(1,levs)
          print*,"Sh3d:",Sh3d(1,1),sh3d(1,2),sh3d(1,levs)
-         print*,"exch_h:",exch_h(1,1),exch_h(1,2),exch_h(1,levs)
+         !print*,"exch_h:",exch_h(1,1),exch_h(1,2),exch_h(1,levs) ! - intent(out)
+         !print*,"exch_m:",exch_m(1,1),exch_m(1,2),exch_m(1,levs) ! - intent(out)
          print*,"max cf_bl:",maxval(cldfra_bl(1,:))
       endif
 
@@ -649,9 +658,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 
      ! POST MYNN (INTERSTITIAL) WORK:
-        do i = 1, im
-           qfx(i)=qfx(i)/rho(i,1)
-        enddo
         !update/save MYNN-only variables
         !do k=1,levs
         !   do i=1,im
@@ -808,6 +814,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"el_pbl:",el_pbl(1,1),el_pbl(1,2),el_pbl(1,levs)
           print*,"Sh3d:",Sh3d(1,1),sh3d(1,2),sh3d(1,levs)
           print*,"exch_h:",exch_h(1,1),exch_h(1,2),exch_h(1,levs)
+          print*,"exch_m:",exch_m(1,1),exch_m(1,2),exch_m(1,levs)
           print*,"max cf_bl:",maxval(cldfra_bl(1,:))
           print*,"max qc_bl:",maxval(qc_bl(1,:))
           print*,"dtdt:",dtdt(1,1),dtdt(1,2),dtdt(1,levs)
