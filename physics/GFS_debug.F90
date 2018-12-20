@@ -8,8 +8,13 @@
 
       public print_my_stuff, chksum_int, chksum_real
 
+! Calculating the checksum leads to segmentation faults on MacOSX (bug in malloc?),
+! thus print the sum of the array instead of the checksum.
+#ifdef MACOSX
+#define PRINT_SUM
+#else
 #define PRINT_CHKSUM
-!#define PRINT_SUM
+#endif
 
       interface print_var
         module procedure print_logic_0d
@@ -187,15 +192,17 @@
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%qrain   ', Sfcprop%qrain)
                      end if
                      ! CCPP/RUC only
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%smois',       Sfcprop%smois)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%zs',          Sfcprop%zs)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
-                     !call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                     if (Model%lsm == Model%lsm_ruc) then
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%smois',       Sfcprop%smois)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%zs',          Sfcprop%zs)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                     end if
                      ! Radtend
                      call print_var(mpirank,omprank, Tbd%blkno, 'Radtend%sfcfsw%upfxc', Radtend%sfcfsw(:)%upfxc)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Radtend%sfcfsw%dnfxc', Radtend%sfcfsw(:)%dnfxc)
@@ -280,10 +287,9 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%vvl'     ,     Statein%vvl)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%tgrs'    ,     Statein%tgrs)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%qgrs'    ,     Statein%qgrs)
-                     call print_var(mpirank,omprank, Tbd%blkno, 'Statein%qgrs-qv' ,     Statein%qgrs(:,:,1))
-                     if (Model%ntoz>0) then
-                        call print_var(mpirank,omprank, Tbd%blkno, 'Statein%qgrs-o3' ,     Statein%qgrs(:,:,Model%ntoz))
-                     end if
+                     do n=1,size(Statein%qgrs(1,1,:))
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Statein%qgrs_n',    Statein%qgrs(:,:,n))
+                     end do
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%diss_est',     Statein%diss_est)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%smc'     ,     Statein%smc)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Statein%stc'     ,     Statein%stc)
@@ -293,10 +299,9 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gv0',         Stateout%gv0)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gt0',         Stateout%gt0)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gq0',         Stateout%gq0)
-                     call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gq0-qv' ,     Stateout%gq0(:,:,1))
-                     if (Model%ntoz>0) then
-                        call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gq0-o3' ,     Stateout%gq0(:,:,Model%ntoz))
-                     end if
+                     do n=1,size(Stateout%gq0(1,1,:))
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Stateout%gq0_n',    Stateout%gq0(:,:,n))
+                     end do
                      ! Coupling
                      call print_var(mpirank,omprank, Tbd%blkno, 'Coupling%nirbmdi', Coupling%nirbmdi)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Coupling%nirdfdi', Coupling%nirdfdi)
@@ -751,7 +756,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -764,7 +769,7 @@
 #endif
              end do
 #ifdef MPI
-             call MPI_BARRIER(mpicomm,ierr)
+!             call MPI_BARRIER(mpicomm,ierr)
 #endif
          end do
 
@@ -772,9 +777,56 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(mpicomm,ierr)
 #endif
 
       end subroutine GFS_interstitialtoscreen_run
 
     end module GFS_interstitialtoscreen
+
+    module GFS_abort
+
+      private
+ 
+      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
+
+      contains
+
+      subroutine GFS_abort_init ()
+      end subroutine GFS_abort_init
+
+      subroutine GFS_abort_finalize ()
+      end subroutine GFS_abort_finalize
+
+!> \section arg_table_GFS_abort_run Argument Table
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_abort_run (Model, errmsg, errflg)
+
+         use machine,               only: kind_phys
+         use GFS_typedefs,          only: GFS_control_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),   intent(in   ) :: Model
+         character(len=*),           intent(out) :: errmsg
+         integer,                    intent(out) :: errflg
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         !if (Model%kdt==3) then
+             if (Model%me==0) write(0,*) "GFS_abort_run: ABORTING MODEL"
+             call sleep(10)
+             stop
+         !end if
+
+      end subroutine GFS_abort_run
+
+    end module GFS_abort
