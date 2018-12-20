@@ -44,16 +44,6 @@
            "longname",     "rain number concentration"
            "units",        "/kg"
        "profile_type", "fixed", "surface_value=1.e30" /
-# prognostic snow number concentration
- "TRACER", "atmos_mod", "snow_nc"
-           "longname",     "snow number concentration"
-           "units",        "/kg"
-       "profile_type", "fixed", "surface_value=1.e30" /
-# prognostic graupel number concentration
- "TRACER", "atmos_mod", "graupel_nc"
-           "longname",     "graupel number concentration"
-           "units",        "/kg"
-       "profile_type", "fixed", "surface_value=1.e30" /
 # prognostic ozone mixing ratio tracer
  "TRACER", "atmos_mod", "o3mr"
            "longname",     "ozone mixing ratio"
