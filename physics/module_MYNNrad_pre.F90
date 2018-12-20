@@ -81,6 +81,7 @@ SUBROUTINE mynnrad_pre_run(                &
       integer,          intent(out) :: errflg
       ! Local variables
       integer              :: i, k
+      real                 :: Tc, iwc
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -104,15 +105,23 @@ SUBROUTINE mynnrad_pre_run(                &
 !               Wh2o = 1. - Wice
                 clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
                 clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
-                qc(i,k)=qc(i,k) + QC_BL(i,k)*(MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
-                qi(i,k)=qi(i,k) + QC_BL(i,k)*(1. - MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
+                qc(i,k) = QC_BL(i,k)*(MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
+                qi(i,k) = QC_BL(i,k)*(1. - MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
+
+                Tc = T3D(i,k) - 273.15
+                !iwc = qi(i,k)*1.0e6*rho(i,k)
 
                 IF (nint(slmsk(i)) == 1) then !land
-                  IF(qc(i,k)>1.E-8)clouds3(i,k)=5.4    !eff radius cloud water (microns)
-                  IF(qi(i,k)>1.E-8)clouds5(i,k)=10.    !eff radius cloud ice (microns)
+                  IF(qc(i,k)>1.E-8)clouds3(i,k)=5.4                !eff radius cloud water (microns)
+                  !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos)
+                  IF(qi(i,k)>1.E-8)clouds5(i,k)=MAX(173.45 + 2.14*Tc, 20.)
                 ELSE
-                  IF(qc(i,k)>1.E-8)clouds3(i,k)=9.6    !eff radius cloud water (microns)
-                  IF(qi(i,k)>1.E-8)clouds5(i,k)=10.    !eff radius cloud ice (microns)
+                  !eff radius cloud water (microns), from Miles et al. 
+                  IF(qc(i,k)>1.E-8)clouds3(i,k)=9.6
+                  !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b)
+                  IF(qi(i,k)>1.E-8)clouds5(i,k)=MAX(173.45 + 2.14*Tc, 20.)
+                  !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 8b)
+                  !IF(qi(i,k)>1.E-8)clouds5(i,k)=MAX(139.7 + 1.76*Tc + 13.49*LOG(iwc), 20.)
                 ENDIF
 
                 !water and ice paths
