@@ -1763,12 +1763,20 @@ CONTAINS
 !
 !      Add min background stability function (diffusivity) within model levels
 !      with active plumes and low cloud fractions.
-       IF (edmf_a1(k) > 0.001 ) THEN
            cldavg = 0.5*(cldfra_bl1D(k-1) + cldfra_bl1D(k))
-           sm(k) = MAX(sm(k), MAX(1.0 - 2.0*cldavg, 0.0)**0.33 * 0.03 * &                           
-             &     MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
-           sh(k) = MAX(sh(k), MAX(1.0 - 2.0*cldavg, 0.0)**0.33 * 0.03 * &                           
-             &     MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
+       IF (edmf_a1(k) > 0.001 .OR. cldavg > 0.02) THEN
+           !cldavg = 0.5*(cldfra_bl1D(k-1) + cldfra_bl1D(k))
+           !sm(k) = MAX(sm(k), MAX(1.0 - 2.0*cldavg, 0.0)**0.33 * 0.03 * &
+           !  &     MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
+           !sh(k) = MAX(sh(k), MAX(1.0 - 2.0*cldavg, 0.0)**0.33 * 0.03 * &
+           !  &     MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
+
+           ! for mass-flux columns
+           sm(k) = MAX(sm(k), 0.03*MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
+           sh(k) = MAX(sh(k), 0.03*MIN(10.*edmf_a1(k)*edmf_w1(k),1.0) )
+          ! for clouds
+           sm(k) = MAX(sm(k), 0.03*MIN(cldavg,1.0) )
+           sh(k) = MAX(sh(k), 0.03*MIN(cldavg,1.0) )
        ENDIF
 !
        elq = el(k)*qkw(k)
@@ -2611,7 +2619,17 @@ CONTAINS
            !  Fng = 1.-1.5*q1k
            !ENDIF
            ! For purposes of the buoyancy flux in stratus, we will use Fng = 1
-           Fng = 1.
+           !Fng = 1.
+           IF (Q1(k) .GE. 1.0) THEN
+              Fng = 1.0
+           ELSEIF (Q1(k) .GE. -1.7 .AND. Q1(k) < 1.0) THEN
+              Fng = EXP(-0.4*(Q1(k)-1.0))
+           ELSEIF (Q1(k) .GE. -2.5 .AND. Q1(k) .LE. -1.7) THEN
+              Fng = 3.0 + EXP(-3.8*(Q1(k)+1.7))
+           ELSE
+              Fng = MIN(23.9 + EXP(-1.6*(Q1(k)+2.5)), 60.)
+           ENDIF
+           Fng = MIN(Fng, 20.)
        
            xl    = xl_blend(t)
            bb = b(k)*t/th(k) ! bb is "b" in BCMT95.  Their "b" differs from 
@@ -2624,8 +2642,8 @@ CONTAINS
            alpha = 0.61*th(k)
            beta  = (th(k)/t)*(xl/cp) - 1.61*th(k)
        
-           vt(k) = qww   - MIN(cld(k),0.5)*beta*bb*Fng   - 1.
-           vq(k) = alpha + MIN(cld(k),0.5)*beta*a(k)*Fng - tv0
+           vt(k) = qww   - MIN(cld(k),0.75)*beta*bb*Fng   - 1.
+           vq(k) = alpha + MIN(cld(k),0.75)*beta*a(k)*Fng - tv0
            ! vt and vq correspond to beta-theta and beta-q, respectively,  
            ! in NN09, Eq. B8.  They also correspond to the bracketed
            ! expressions in BCMT95, Eq. 15, since (s*ql/sigma^2) = cldfra*Fng
@@ -3800,8 +3818,11 @@ ENDIF
 
     REAL, DIMENSION(IMS:IME,KMS:KME,JMS:JME), INTENT(inout) :: &
          &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,RQCBLTEN,&
-         &RQIBLTEN,RQNIBLTEN,RTHRATEN,RQNCBLTEN, &
+         &RQIBLTEN,RQNIBLTEN,RQNCBLTEN, &
          &RQNWFABLTEN,RQNIFABLTEN
+
+    REAL, DIMENSION(IMS:IME,KMS:KME,JMS:JME), INTENT(in) :: &
+         &RTHRATEN
 
     REAL, DIMENSION(IMS:IME,KMS:KME,JMS:JME), INTENT(out) :: &
          &exch_h,exch_m
@@ -3962,7 +3983,6 @@ ENDIF
              DO i=ITS,ITF
                 exch_m(i,k,j)=0.
                 exch_h(i,k,j)=0.
-                qke(i,k,j)=0.1-MIN(zw(k)*0.001, 0.0) !for initial PBLH calc only
             ENDDO
          ENDDO
        ENDDO
@@ -4018,7 +4038,7 @@ ENDIF
                    zw(k)=zw(k-1)+dz(i,k-1,j)
                 ENDIF
                 thvl(k)=thl(k)*(1.+0.61*sqv(k))
-                qke1(k)=qke(i,k,j)
+                qke1(k)=0.1-MIN(zw(k)*0.001, 0.0) !for initial PBLH calc only
                 el(k)=el_pbl(i,k,j)
                 sh(k)=Sh3D(i,k,j)
                 tsq1(k)=tsq(i,k,j)
@@ -4332,6 +4352,7 @@ ENDIF
                    zminrad=zw(kk) + 0.5*dz1(kk)
                 endif
              ENDDO
+             IF (MAX(kminrad,kpbl(i,j)) < 2)cloudflg = .false.
              IF (cloudflg) THEN
                 zl1 = dz1(kts)
                 k = MAX(kpbl(i,j)-1, kminrad-1)
@@ -4659,7 +4680,7 @@ ENDIF
                IF ( ABS(vq(k)) > 6000.)print*,&
                   "SUSPICIOUS VALUES AT: i,j,k=",i,j,k," vq=",vq(k) 
                IF ( exch_m(i,k,j) < 0. .OR. exch_m(i,k,j)> 2000.)print*,&
-                  "SUSPICIOUS VALUES AT: i,j,k=",i,j,k," exxch_m=",exch_m(i,k,j)
+                  "SUSPICIOUS VALUES AT: i,j,k=",i,j,k," exch_m=",exch_m(i,k,j)
                IF ( vdfg(i,j) < 0. .OR. vdfg(i,j)>5. )print*,&
                   "SUSPICIOUS VALUES AT: i,j,k=",i,j,k," vdfg=",vdfg(i,j)
                IF ( ABS(QFX(i,j))>.001)print*,&
@@ -4985,6 +5006,8 @@ ENDIF
   ! outputs - updraft properties
      REAL,DIMENSION(KTS:KTE), INTENT(OUT) :: edmf_a,edmf_w,        &
                       & edmf_qt,edmf_thl, edmf_ent,edmf_qc
+     !add one local edmf variable:
+     REAL,DIMENSION(KTS:KTE) :: edmf_th
   ! output
      INTEGER, INTENT(OUT) :: nup2,ktop
      REAL, INTENT(OUT) :: maxmf,ztop
@@ -5035,7 +5058,7 @@ ENDIF
          & ENT0=0.1
 
   ! Implement ideas from Neggers (2016, JAMES):
-     REAL, PARAMETER :: Atot = 0.12 ! Maximum total fractional area of all updrafts
+     REAL, PARAMETER :: Atot = 0.10 ! Maximum total fractional area of all updrafts
      REAL, PARAMETER :: lmax = 1000.! diameter of largest plume
      REAL, PARAMETER :: dl   = 100. ! diff size of each plume - the differential multiplied by the integrand
      REAL, PARAMETER :: dcut = 1.0  ! max diameter of plume to parameterize relative to dx (km)
@@ -5063,6 +5086,10 @@ ENDIF
    REAL,DIMENSION(KTS:KTE), INTENT(INOUT) :: vt, vq, sgm
    REAL :: sigq,xl,tlk,qsat_tl,rsl,cpm,a,qmq,mf_cf,diffqt,&
            Q1,Fng,qww,alpha,beta,bb,f,pt,t,q2p,b9,satvp,rhgrid
+
+  ! Variables for plume interpolation/saturation check
+   REAL,DIMENSION(KTS:KTE) :: exneri,dzi
+   REAL ::  THLp, THp, QTp, QCp, rhplume, esat, qsl
 
    ! WA TEST 11/9/15 for consistent reduction of updraft params
    REAL :: csigma,acfac,EntThrottle
@@ -5214,16 +5241,17 @@ ENDIF
   NUP2 = max(1,min(NUP,INT(dx*dcut/dl)))
   ! Criteria (2) and (4)
   !wspd_pbl=SQRT(MAX(u(kpbl)**2 + v(kpbl)**2, 0.01))
-  maxwidth = 1.0*PBLH !- MIN(15.*MAX(wspd_pbl - 7.5, 0.), 0.3*PBLH)
+  maxwidth = 1.1*PBLH !- MIN(15.*MAX(wspd_pbl - 7.5, 0.), 0.3*PBLH)
   ! Criteria (3)
-  maxwidth = MIN(maxwidth,0.5*cloud_base)
+  maxwidth = MIN(maxwidth,0.75*cloud_base)
   ! Criteria (5)
   IF((landsea-1.5).LT.0)THEN
     IF (cloud_base .LT. 2000.) THEN
-      width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.120)/0.03) + .5),1000.), 0.)
+      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.120)/0.03) + .5),1000.), 0.)
+      width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.100)/0.03) + .5),1000.), 0.)
     ELSE
-      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.085)/0.04) + .5),1000.), 0.)
-      width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.050)/0.03) + .5),1000.), 0.)
+      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.050)/0.03) + .5),1000.), 0.)
+      width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.040)/0.03) + .5),1000.), 0.)
     ENDIF
     maxwidth = MIN(maxwidth,width_flx)
   ENDIF
@@ -5259,7 +5287,8 @@ ENDIF
        ! Make updraft area (UPA) a function of the buoyancy flux
 !       acfac = .5*tanh((fltv - 0.05)/0.2) + .5
 !       acfac = .5*tanh((fltv - 0.07)/0.09) + .5 
-       acfac = .5*tanh((fltv - 0.03)/0.09) + .5
+!       acfac = .5*tanh((fltv - 0.03)/0.09) + .5
+       acfac = .5*tanh((fltv - 0.015)/0.05) + .5
        UPA(1,I)=UPA(1,I)*acfac
        An2 = An2 + UPA(1,I)                 ! total fractional area of all plumes
        !print*," plume size=",l,"; area=",UPA(1,I),"; total=",An2
@@ -5481,9 +5510,9 @@ ENDIF
           IF(ZW(k+1) >= MIN(pblh+3000.,4500.))Wn=0.
 
           !JOE- minimize the plume penetratration in stratocu-topped PBL
-          IF (fltv < 0.06) THEN
-             IF(ZW(k+1) >= pblh-200. .AND. qc(k) > 1e-5 .AND. I > 4) Wn=0.
-          ENDIF
+          !IF (fltv < 0.06) THEN
+          !   IF(ZW(k+1) >= pblh-200. .AND. qc(k) > 1e-5 .AND. I > 4) Wn=0.
+          !ENDIF
 
           IF (Wn > 0.) THEN
              UPW(K,I)=Wn  !Wn !sqrt(Wn2)
@@ -5589,7 +5618,11 @@ ENDIF
     !        & -dtz(k)*s_awthl(kts+1) + diss_heat(k)*delt*dheat_opt
     ! So, s_awthl(kts+1) must be less than flt
     THVk = (THL(kts)*DZ(kts+1)+THL(kts+1)*DZ(kts))/(DZ(kts+1)+DZ(kts))
+    if (s_aw(kts+1).ne.0) then
     flx1 = MAX(s_aw(kts+1)*(s_awthl(kts+1)/s_aw(kts+1) - THVk),0.0)
+    else
+        flx1 = 0.0
+    end if
     !flx1 = -dt/dz(kts)*s_awthl(kts+1)
     !flx1 = (s_awthl(kts+1)-s_awthl(kts))!/(0.5*(dz(k)+dz(k-1)))
     adjustment=1.0
@@ -5662,38 +5695,66 @@ ENDIF
       ENDIF
     ENDDO
 
+    !First, compute exner, plume theta, and dz centered at interface
+    !Here, k=1 is the top of the first model layer. These values do not
+    !need to be defined at k=kte (unused level).
+    DO K=KTS,KTE-1
+       exneri(k) = (exner(k)*DZ(k+1)+exner(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
+       edmf_th(k)= edmf_thl(k) + xlvcp/exneri(k)*edmf_qc(K)
+       dzi(k)    = 0.5*(DZ(k)+DZ(k+1))
+    ENDDO
+
 !JOE: ADD CLDFRA_bl1d, qc_bl1d. Note that they have already been defined in
-!     mym_condensation. Here, a shallow-cu component is added.  
-     DO K=KTS,KTE-1
+!     mym_condensation. Here, a shallow-cu component is added, but no cumulus
+!     clouds can be added at k=1 (start loop at k=2).
+    DO K=KTS+1,KTE-2
         IF(k > KTOP) exit
-        IF(0.5*(edmf_qc(k)+edmf_qc(k+1))>0.0)THEN
+        IF(0.5*(edmf_qc(k)+edmf_qc(k-1))>0.0)THEN
             satvp = 3.80*exp(17.27*(th(k)-273.)/ &
                    (th(k)-36.))/(.01*p(k))
             rhgrid = max(.01,MIN( 1., qv(k) /satvp))
 
+            !then interpolate plume thl, th, and qt to mass levels
+            THLp= (edmf_thl(k)*dzi(k-1)+edmf_thl(k-1)*dzi(k))/(dzi(k-1)+dzi(k))
+            THp = (edmf_th(k)*dzi(k-1)+edmf_th(k-1)*dzi(k))/(dzi(k-1)+dzi(k))
+            QTp = (edmf_qt(k)*dzi(k-1)+edmf_qt(k-1)*dzi(k))/(dzi(k-1)+dzi(k))
+            !convert TH to T
+            t = THp*exner(k)
+            !SATURATED VAPOR PRESSURE
+            esat = esat_blend(t)
+            !SATURATED SPECIFIC HUMIDITY
+            qsl=ep_2*esat/max(1.e-4,(p(k)-ep_3*esat)) 
+            rhplume = max(.01,MIN( 1., QTp /qsl))
+
+            IF (edmf_qc(k)>0.0 .AND. edmf_qc(k-1)>0.0)THEN
+              QCp = 0.5*(edmf_qc(k)+edmf_qc(k-1))
+            ELSE
+              QCp = MAX(0.0, QTp-qsl)
+            ENDIF
+
             !COMPUTE CLDFRA & QC_BL FROM MASS-FLUX SCHEME and recompute vt & vq
 
-            xl = xl_blend(tk(k))                ! obtain blended heat capacity 
-            tlk = thl(k)*(p(k)/p1000mb)**rcp    ! recover liquid temp (tl) from thl
+            xl = xl_blend(t)                ! obtain blended heat capacity 
+            tlk = thlp*(p(k)/p1000mb)**rcp    ! recover liquid temp (tl) from thl
             qsat_tl = qsat_blend(tlk,p(k))      ! get saturation water vapor mixing ratio
                                                 !   at tl and p
             rsl = xl*qsat_tl / (r_v*tlk**2)     ! slope of C-C curve at t = tl
                                                 ! CB02, Eqn. 4
-            cpm = cp + qt(k)*cpv                ! CB02, sec. 2, para. 1
+            cpm = cp + qtp*cpv                  ! CB02, sec. 2, para. 1
             a   = 1./(1. + xl*rsl/cpm)          ! CB02 variable "a"
             b9  = a*rsl                         ! CB02 variable "b" 
 
             q2p  = xlvcp/exner(k)
-            pt = thl(k) +q2p*edmf_qc(k) ! potential temp
-            bb = b9*tk(k)/pt ! bb is "b9" in BCMT95.  Their "b9" differs from
+            pt = THp !thlp +q2p*qcp ! potential temp
+            bb = b9*t/pt   ! bb is "b9" in BCMT95.  Their "b9" differs from
                            ! "b9" in CB02 by a factor
                            ! of T/theta.  Strictly, b9 above is formulated in
                            ! terms of sat. mixing ratio, but bb in BCMT95 is
                            ! cast in terms of sat. specific humidity.  The
                            ! conversion is neglected here.
-            qww   = 1.+0.61*qt(k)
+            qww   = 1.+0.61*QTp
             alpha = 0.61*pt
-            t     = th(k)*exner(k)
+            t     = THp*exner(k)
             beta  = pt*xl/(t*cp) - 1.61*pt
             !Buoyancy flux terms have been moved to the end of this section...
 
@@ -5703,32 +5764,34 @@ ENDIF
             else
                f = 1.0
             endif
-            sigq = 9.E-3 * 0.5*(edmf_a(k)+edmf_a(k+1)) * &
+            sigq = 6.E-3 * 0.5*(edmf_a(k)+edmf_a(k+1)) * &
                &           0.5*(edmf_w(k)+edmf_w(k+1)) * f       ! convective component of sigma (CB2005)
             !sigq = MAX(sigq, 1.0E-4)         
             sigq = SQRT(sigq**2 + sgm(k)**2)    ! combined conv + stratus components
 
-            qmq = a * (qt(k) - qsat_tl)         ! saturation deficit/excess;
+            qmq = a * (QTp - qsat_tl)         ! saturation deficit/excess;
                                                 !   the numerator of Q1
-            mf_cf = min(max(0.5 + 0.36 * atan(1.55*(qmq/sigq)),0.02),0.6)
+            mf_cf = min(max(0.5 + 0.36 * atan(1.55*(qmq/sigq)),0.01),0.6)
             IF ( debug_code ) THEN
                print*,"In MYNN, StEM edmf"
-               print*,"  CB: qt=",qt(k)," qsat=",qsat_tl," satdef=",qt(k) - qsat_tl
+               print*,"  CB: env qt=",qt(k)," plume qt=",QTp
+               print*,"      qsat=",qsat_tl," satdef=",QTp - qsat_tl
                print*,"  CB: sigq=",sigq," qmq=",qmq," tlk=",tlk
                print*,"  CB: mf_cf=",mf_cf," cldfra_bl=",cldfra_bl1d(k)," edmf_a=",edmf_a(k)
             ENDIF
 
             IF (cldfra_bl1d(k) < 0.5) THEN
-               IF (mf_cf > 0.5*(edmf_a(k)+edmf_a(k+1))) THEN
+               IF (mf_cf > 0.5*(edmf_a(k)+edmf_a(k-1))) THEN
                   cldfra_bl1d(k) = mf_cf
                   !qc_bl1d(k) = edmf_qc(k)*edmf_a(k)/mf_cf
-                  qc_bl1d(k) = 0.5*(edmf_qc(k)+edmf_qc(k+1))* &
-                       &       0.5*(edmf_a(k)+edmf_a(k+1))/mf_cf
+                  !qc_bl1d(k) = 0.5*(edmf_qc(k)+edmf_qc(k+1))* &
+                  !     &       0.5*(edmf_a(k)+edmf_a(k+1))/mf_cf
+                  qc_bl1d(k) = QCp*0.5*(edmf_a(k)+edmf_a(k-1))/mf_cf
                ELSE
                   !cldfra_bl1d(k)=edmf_a(k)
                   !qc_bl1d(k) = edmf_qc(k)
-                  cldfra_bl1d(k)=0.5*(edmf_a(k)+edmf_a(k+1))
-                  qc_bl1d(k) = 0.5*(edmf_qc(k)+edmf_qc(k+1))
+                  cldfra_bl1d(k)=0.5*(edmf_a(k)+edmf_a(k-1))
+                  qc_bl1d(k) = QCp !0.5*(edmf_qc(k)+edmf_qc(k+1))
                ENDIF
             ENDIF
             !Now recalculate the terms for the buoyancy flux for mass-flux clouds:
@@ -5745,10 +5808,10 @@ ENDIF
             ELSEIF (Q1 .GE. -2.5 .AND. Q1 .LE. -1.7) THEN
                Fng = 3.0 + EXP(-3.8*(Q1+1.7))
             ELSE
-               Fng = MIN(23.9 + EXP(-1.6*(Q1+2.5)), 80.)
+               Fng = MIN(23.9 + EXP(-1.6*(Q1+2.5)), 60.)
             ENDIF
-            vt(k) = qww   - MIN(0.30,cldfra_bl1D(k))*beta*bb*Fng - 1.
-            vq(k) = alpha + MIN(0.30,cldfra_bl1D(k))*beta*a*Fng  - tv0
+            vt(k) = qww   - MIN(0.25,cldfra_bl1D(k))*beta*bb*Fng - 1.
+            vq(k) = alpha + MIN(0.25,cldfra_bl1D(k))*beta*a*Fng  - tv0
          ENDIF
 
       ENDDO
