@@ -144,6 +144,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT
+           "${CMAKE_Fortran_FLAGS_LOPT}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
     # Force consistent results of math calculations for MG microphysics;
