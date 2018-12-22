@@ -47,8 +47,8 @@ MODULE module_sf_ruclsm
 CONTAINS
 
 !-----------------------------------------------------------------
-    SUBROUTINE LSMRUC(                           &
-                   DT,KTAU,iter,NSL,                             &
+    SUBROUTINE LSMRUC(                                           &
+                   DT,init,restart,KTAU,iter,NSL,                &
 !                   lakemodel,lakemask,                           &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
@@ -87,6 +87,8 @@ CONTAINS
 !     J. Geophys. Res. 105, 4077-4086.
 !-----------------------------------------------------------------
 !-- DT            time step (second)
+!        init - flag for initialization
+!     restart - flag for restart run
 !        ktau - number of time step
 !        NSL  - number of soil layers
 !        NZS  - number of levels in soil
@@ -155,7 +157,7 @@ CONTAINS
 !   INTEGER,     PARAMETER            ::     nddzs=2*(nzss-2)
 
    REAL,       INTENT(IN   )    ::     DT
-   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn
+   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,restart
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT ! , mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme, &
@@ -411,7 +413,7 @@ CONTAINS
 !--- Initialize soil/vegetation parameters
 !--- This is temporary until SI is added to mass coordinate ---!!!!!
 
-     if(ktau == 1 .and. iter == 1) then
+     if(init .and. iter == 1) then
      DO J=jts,jte
          DO i=its,ite
 !            do k=1,nsl
@@ -494,7 +496,7 @@ CONTAINS
            soilice(k)=0.
            soiliqw(k)=0.
         enddo
-     endif ! ktau=1, iter=1
+     endif ! init=.true., iter=1
 
 !-----------------------------------------------------------------
 
@@ -680,8 +682,7 @@ CONTAINS
        endif
 
     IF (debug_print ) THEN
-!       if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
-      if(ktau.eq.1 ) then
+      if(init) then
            print *,'before SOILVEGIN - z0,znt(195,254)',z0(i,j),znt(i,j)
            print *,'ILAND, ISOIL =',i,j,iland,isoil
       endif
@@ -694,12 +695,10 @@ CONTAINS
                        EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),RDLAI2D,                &
                        QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j )
     IF (debug_print ) THEN
-!      if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
-      if(ktau.eq.1 ) &
+      if(init) &
          print *,'after SOILVEGIN - z0,znt(1,26),lai(1,26)',z0(i,j),znt(i,j),lai(i,j)
 
-!      if(ktau.eq.1 .and. (i.eq.358.and.j.eq.260)) then
-      if(ktau.eq.1 )then
+      if(init)then
 !         print *,'NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
 !                  NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),i,j
          print *,'NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
@@ -862,11 +861,6 @@ CONTAINS
            enddo
 
               LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/(ref-qmin)))
-
-!     if(ktau.gt.1) then
-! extract dew from the cloud water at the surface
-!30july13              QCG(I,J)=QCG(I,J)-DEW(I,J)/QKMS
-!     endif
 
     IF (debug_print ) THEN
    print *,'LAND, i,j,tso1d,soilm1d,PATM,TABS,QVATM,QCATM,RHO',  &
@@ -1149,7 +1143,7 @@ endif
    SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         &
 !--- input variables
                 nzs,nddzs,nroot,meltfactor,                      &
-                ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,          &
+                ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
                 RHOSN,RHONEWSN,RHOSNFALL,                        &
                 snowrat,grauprat,icerat,curat,                   &
@@ -2212,7 +2206,7 @@ endif
 !   soil
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     J,I - the location of grid point
 !     IME, JME, KME, NZS - dimensions of the domain
@@ -4571,7 +4565,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !   solved here and
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     IME, JME, KME, NZS - dimensions of the domain 
 !     NROOT - number of levels within the root zone
@@ -4901,7 +4895,7 @@ endif ! 1==2
 !   solved here to obtain snow and soil temperatures
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     IME, JME, KME, NZS - dimensions of the domain 
 !     NROOT - number of levels within the root zone
