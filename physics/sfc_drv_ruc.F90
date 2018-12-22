@@ -42,6 +42,7 @@ module lsm_ruc
 
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
+
       end subroutine lsm_ruc_init
 
 !---
@@ -62,7 +63,7 @@ module lsm_ruc
       errmsg = ''
       errflg = 0
 
-      end subroutine lsm_ruc_finalize
+  end subroutine lsm_ruc_finalize
 
 ! ===================================================================== !
 !  lsm_ruc_run:                                                         !
@@ -139,7 +140,7 @@ module lsm_ruc
 #if 0
 !! \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!|-------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! |-----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
 !! | me              | mpi_rank                                                                     | current MPI-rank                                                | index         |    0 | integer   |           | in     | F        |
 !! | kdt             | index_of_time_step                                                           | current number of time steps                                    | index         |    0 | integer   |           | in     | F        |
@@ -239,6 +240,8 @@ module lsm_ruc
 !! | shdmax          | maximum_vegetation_area_fraction                                             | max fractional coverage of green vegetation                     | frac          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter       | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | flag_guess      | flag_for_guess_run                                                           | flag for guess run                                              | flag          |    1 | logical   |           | in     | F        |
+!! | flag_init       | flag_for_first_time_step                                                     | flag signaling first time step for time integration loop        | flag          |    0 | logical   |           | in     | F        |
+!! | flag_restart    | flag_for_restart                                                             | flag for restart (warmstart) or coldstart                       | flag          |    0 | logical   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -271,7 +274,7 @@ module lsm_ruc
      &       rhosnf, runof, runoff, srunoff,                            &
      &       chh, cmm, evbs, evcw, sbsno, snowc, stm, wet1,             &
      &       acsnow, snowfallac,                                        &
-     &       errmsg, errflg                                             &
+     &       flag_init, flag_restart, errmsg, errflg                    &
      &     )
 
       implicit none
@@ -325,6 +328,7 @@ module lsm_ruc
      &       rhosnf, evbs, evcw, sbsno, snowc, stm, wet1,               &
      &       acsnow, snowfallac
 
+      logical,          intent(in)  :: flag_init, flag_restart
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -403,26 +407,28 @@ module lsm_ruc
       endif
       allocate(landusef(im,nlcat,1))
 
-      if(debug_print) then
+      !if(debug_print) then
         print *,'RUC LSM run'
         print *,'noah soil temp',ipr,stc(ipr,:)
         print *,'noah soil mois',ipr,smc(ipr,:)
         print *,'soiltyp=',ipr,soiltyp(ipr)
         print *,'vegtype=',ipr,vegtype(ipr)
         print *,'kdt, iter =',kdt,iter
-      endif
+        print *,'flag_init =',flag_init
+        print *,'flag_restart =',flag_restart
+      !endif
 
 ! RUC initialization
-      if( kdt == 1 .and. iter ==1 ) then
+      if(flag_init .and. iter==1) then
         !print *,'RUC LSM initialization, kdt=', kdt
 
-        call rucinit          (im, lsoil_ruc, lsoil, nlev,            & ! in
-                               isot, soiltyp, vegtype, fice,          & ! in
-                               islmsk, tskin, tg3,                    & ! in
-                               smc, slc, stc,                         & ! in
-                               smcref2, smcwlt2,                      & ! inout
-                               lsm_ruc, lsm,                          & ! in
-                               zs, sh2o, smfrkeep, tslb, smois, wet1, & ! out
+        call rucinit          (flag_restart, im, lsoil_ruc, lsoil, nlev, & ! in
+                               isot, soiltyp, vegtype, fice,             & ! in
+                               islmsk, tskin, tg3,                       & ! in
+                               smc, slc, stc,                            & ! in
+                               smcref2, smcwlt2,                         & ! inout
+                               lsm_ruc, lsm,                             & ! in
+                               zs, sh2o, smfrkeep, tslb, smois, wet1,    & ! out
                                errmsg, errflg)
 
         do i  = 1, im ! n - horizontal loop
@@ -434,7 +440,7 @@ module lsm_ruc
           enddo
         enddo ! i
 
-      endif ! kdt=iter=1
+      endif ! flag_init=.true.,iter=1
 !-- end of initialization
 
       ims = 1
@@ -817,6 +823,8 @@ module lsm_ruc
             print *,'soilt1 = ',soilt1(i,j), i,j
             print *,'delt =',delt
             print *,'kdt =',kdt
+            print *,'flag_init =',flag_init
+            print *,'flag_restart =',flag_restart
             print *,'nsoil =',nsoil
             print *,'frpcpn =',frpcpn
             print *,'zs =',zs
@@ -905,7 +913,7 @@ module lsm_ruc
         endif
 
 !> - Call RUC LSM lsmruc(). 
-      call lsmruc( delt, kdt, iter, nsoil,                                   &
+      call lsmruc( delt, flag_init, flag_restart, kdt, iter, nsoil,          &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
      &          zs, prcp(i,j), sneqv(i,j), snowh(i,j), sncovr(i,j),          &
      &          ffrozp(i,j), frpcpn,                                         &
@@ -1116,7 +1124,7 @@ module lsm_ruc
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
-      subroutine rucinit      (im, lsoil_ruc, lsoil, nlev,            & ! in
+      subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tsurf, tg3,                    & ! in
                                smc, slc, stc,                         & ! in
@@ -1127,6 +1135,7 @@ module lsm_ruc
 
       implicit none
 
+      logical,                                 intent(in   ) :: restart
       integer,                                 intent(in   ) :: lsm
       integer,                                 intent(in   ) :: lsm_ruc
       integer,                                 intent(in   ) :: isot
@@ -1234,8 +1243,10 @@ module lsm_ruc
       ! Initialize the RUC soil levels, needed for cold starts and warm starts
       CALL init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-      ! Check if RUC soil data (tslb, ...) is provided or not
-      if (minval(tslb)==maxval(tslb)) then
+      !! Check if RUC soil data (tslb, ...) is provided or not
+      !if (minval(tslb)==maxval(tslb)) then
+      ! For restart runs, can assume that RUC soul data is provided
+      if (.not.restart) then
 
         flag_soil_layers = 1  ! =1 for input from the Noah LSM
         flag_soil_levels = 0  ! =1 for input from RUC LSM
