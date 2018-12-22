@@ -20,7 +20,9 @@
 !! | ix                  | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
 !! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
 !! | levs                | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | kdt                 | index_of_time_step                                                          | current forecast iteration                            | index         |    0 | integer   |           | in     | F        |
+!! | iter                | ccpp_loop_counter                                                           | loop counter for subcycling loops in CCPP             | index         |    0 | integer   |           | in     | F        |
+!! | flag_init           | flag_for_first_time_step                                                 | flag signaling first time step for time integration loop | flag          |    0 | logical   |           | in     | F        |
+!! | flag_restart        | flag_for_restart                                                            | flag for restart (warmstart) or coldstart             | flag          |    0 | logical   |           | in     | F        |
 !! | delt                | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
 !! | dx                  | cell_size                                                                   | size of the grid cell                                 | m             |    1 | real      | kind_phys | in     | F        |
 !! | u                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
@@ -83,7 +85,8 @@
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(         &
      &  ix,im,levs,                     &
-     &  kdt,delt,dx,                    &
+     &  iter,flag_init,flag_restart,    &
+     &  delt,dx,                        &
      &  u, v, t3d, qvsh, qc, prsl, phii,&
      &  exner, tsq, qsq, cov, sh3d,     &
      &  el_pbl, qc_bl, cldfra_bl,       &
@@ -188,8 +191,8 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 !MYNN-1D
       REAL    :: delt
       INTEGER :: im, ix, levs
-      INTEGER :: initflag, kdt, k, i
-      LOGICAL :: lprnt
+      INTEGER :: iter, k, i, itimestep
+      LOGICAL :: flag_init,flag_restart,lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
@@ -207,7 +210,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &        dz, rho, th, qv,                              &
      &        pattern_spp_pbl
 
-!MYNN-2D                                                                  
+!MYNN-2D
       real(kind=kind_phys), dimension(im) ::                &
      &        dx, pblh, slmsk, tsk, qsfc, ps,               &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
@@ -227,13 +230,20 @@ SUBROUTINE mynnsfc_wrapper_run(         &
       if (lprnt) then
          write(0,*)"=============================================="
          write(0,*)"in mynn surface layer wrapper..."
-         write(0,*)"kdt=",kdt
+         write(0,*)"flag_init=",flag_init
+         write(0,*)"flag_restart=",flag_restart
+         write(0,*)"iter=",iter
       endif
 
-      if (kdt .eq. 1) then
-         initflag=1
+      ! If initialization is needed and mynnsfc_wrapper is called
+      ! in a subcycling loop, then test for (flag_init==.T. .and. iter==1);
+      ! initialization in sfclay_mynn is triggered by itimestep == 1
+      ! DH* TODO: Use flag_restart to distinguish which fields need
+      ! to be initialized and which are read from restart files
+      if (flag_init.and.iter==1) then
+          itimestep = 1
       else
-         initflag=0
+          itimestep = 2
       endif
 
       !prep MYNN-only variables
@@ -284,7 +294,9 @@ SUBROUTINE mynnsfc_wrapper_run(         &
           print*,"wspd:",wspd(1),"br=",br(1)
           print*,"znt:",znt(1)," delt=",delt
           print*,"im=",im," levs=",levs
-          print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
+          print*,"flag_init=",flag_init !," ntcw=",ntcw!," ntk=",ntk
+          print*,"flag_restart=",flag_restart !," ntcw=",ntcw!," ntk=",ntk
+          print*,"iter=",iter
           !print*,"ncld=",ncld," ntrac(gq0)=",ntrac
           print*,"zlvl(1)=",dz(1,1)*0.5
           print*,"PBLH=",pblh(1)," xland=",xland(1)
@@ -305,7 +317,7 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                      GZ1OZ0=GZ1OZ0,WSPD=wspd,BR=br,ISFFLX=isfflx,DX=dx,   &
                      SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,           &
                      EP1=ep_1,EP2=ep_2,KARMAN=karman,                     &
-                     itimestep=kdt,ch=ch,                                 &
+                     itimestep=itimestep,ch=ch,                           &
                      th3d=th,pi3d=exner,qc3d=qc,rho3d=rho,                &
                      tsq=tsq,qsq=qsq,cov=cov,sh3d=sh3d,el_pbl=el_pbl,     &
                      qcg=qcg,wstar=wstar,                                 &
