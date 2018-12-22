@@ -23,7 +23,8 @@
 !! | ix                          | horizontal_dimension                                                         | horizontal dimension                                                       | count         |    0 | integer   |           | in     | F        |
 !! | im                          | horizontal_loop_extent                                                       | horizontal loop extent                                                     | count         |    0 | integer   |           | in     | F        |
 !! | levs                        | vertical_dimension                                                           | vertical layer dimension                                                   | count         |    0 | integer   |           | in     | F        |
-!! | kdt                         | index_of_time_step                                                           | current forecast iteration                                                 | index         |    0 | integer   |           | in     | F        |
+!! | flag_init                   | flag_for_first_time_step                                                     | flag signaling first time step for time integration loop                   | flag          |    0 | logical   |           | in     | F        |
+!! | flag_restart                | flag_for_restart                                                             | flag for restart (warmstart) or coldstart                                  | flag          |    0 | logical   |           | in     | F        |
 !! | delt                        | time_step_for_physics                                                        | time step for physics                                                      | s             |    0 | real      | kind_phys | in     | F        |
 !! | dx                          | cell_size                                                                    | size of the grid cell                                                      | m             |    1 | real      | kind_phys | in     | F        |
 !! | zorl                        | surface_roughness_length                                                     | surface roughness length in cm                                             | cm            |    1 | real      | kind_phys | in     | F        |
@@ -119,7 +120,8 @@
 !###===================================================================
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
-     &  kdt,delt,dx,zorl,               &
+     &  flag_init,flag_restart,         &
+     &  delt,dx,zorl,                   &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
      &  qgrs_liquid_cloud,              &
@@ -277,7 +279,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MYNN-1D
       REAL(kind=kind_phys), intent(in) :: delt
-      INTEGER, intent(in) :: im, ix, levs, kdt
+      INTEGER, intent(in) :: im, ix, levs
+      LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                                &
      &            IMS,IME,JMS,JME,KMS,KME,                               &
@@ -355,15 +358,18 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       if (lprnt) then
          write(0,*)"=============================================="
          write(0,*)"in mynn wrapper..."
-         write(0,*)"kdt=",kdt
+         write(0,*)"flag_init=",flag_init
+         write(0,*)"flag_restart=",flag_restart
       endif
 
-      if (kdt .eq. 1) then
+      ! DH* TODO: Use flag_restart to distinguish which fields need
+      ! to be initialized and which are read from restart files
+      if (flag_init) then
          initflag=1
-         !print*,"in MYNN, initflag=",initflag," kdt=",kdt
+         !print*,"in MYNN, initflag=",initflag
       else
          initflag=0
-         !print*,"in MYNN, initflag=",initflag," kdt=",kdt
+         !print*,"in MYNN, initflag=",initflag
       endif
 
   ! Assign variables for each microphysics scheme
