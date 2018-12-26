@@ -37,7 +37,7 @@
           module physcons                
 !
   use machine,       only : kind_phys
-  use CCPP_typedefs, only : kind_dyn
+  use machine,       only : kind_dyn
 !
   implicit none
 !
