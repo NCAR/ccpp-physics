@@ -63,8 +63,7 @@ module fv_sat_adj
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
-    use machine,              only: kind_grid
-    use CCPP_typedefs,        only: kind_dyn
+    use machine,              only: kind_grid, kind_dyn
     use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
     use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
     use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
@@ -76,9 +75,9 @@ module fv_sat_adj
 
     real(kind=kind_dyn), parameter :: rrg = -rdgas/grav
     ! real, parameter :: cp_air = cp_air           ! 1004.6, heat capacity of dry air at constant pressure, come from constants_mod
-    real(kind=kind_dyn), parameter :: cp_vap = 4.0_kind_dyn * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
+    real(kind=kind_dyn), parameter :: cp_vap = 4.0 * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
     real(kind=kind_dyn), parameter :: cv_air = cp_air - rdgas     !< 717.55, heat capacity of dry air at constant volume
-    real(kind=kind_dyn), parameter :: cv_vap = 3.0_kind_dyn * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
+    real(kind=kind_dyn), parameter :: cv_vap = 3.0 * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
     ! http: / / www.engineeringtoolbox.com / ice - thermal - properties - d_576.html
     ! c_ice = 2050.0 at 0 deg c
     ! c_ice = 1972.0 at - 15 deg c
@@ -89,16 +88,16 @@ module fv_sat_adj
     ! c_liq = 4178.0 at 30 deg c
     ! real, parameter :: c_ice = 2106.0            ! ifs: heat capacity of ice at 0 deg c
     ! real, parameter :: c_liq = 4218.0            ! ifs: heat capacity of liquid at 0 deg c
-    real(kind=kind_dyn), parameter :: c_ice = 1972.0_kind_dyn              !< gfdl: heat capacity of ice at - 15 deg c
-    real(kind=kind_dyn), parameter :: c_liq = 4185.5_kind_dyn              !< gfdl: heat capacity of liquid at 15 deg c
+    real(kind=kind_dyn), parameter :: c_ice = 1972.0              !< gfdl: heat capacity of ice at - 15 deg c
+    real(kind=kind_dyn), parameter :: c_liq = 4185.5              !< gfdl: heat capacity of liquid at 15 deg c
     real(kind=kind_dyn), parameter :: dc_vap = cp_vap - c_liq     !< - 2339.5, isobaric heating / cooling
     real(kind=kind_dyn), parameter :: dc_ice = c_liq - c_ice      !< 2213.5, isobaric heating / colling
-    real(kind=kind_dyn), parameter :: tice = 273.16_kind_dyn               !< freezing temperature
-    real(kind=kind_dyn), parameter :: t_wfr = tice - 40._kind_dyn          !< homogeneous freezing temperature
+    real(kind=kind_dyn), parameter :: tice = 273.16               !< freezing temperature
+    real(kind=kind_dyn), parameter :: t_wfr = tice - 40.          !< homogeneous freezing temperature
     real(kind=kind_dyn), parameter :: lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
     real(kind=kind_dyn), parameter :: li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
     ! real (kind_grid), parameter :: e00 = 610.71  ! gfdl: saturation vapor pressure at 0 deg c
-    real (kind_grid), parameter :: e00 = 611.21_kind_grid    !< ifs: saturation vapor pressure at 0 deg c
+    real (kind_grid), parameter  :: e00 = 611.21    !< ifs: saturation vapor pressure at 0 deg c
     real (kind_grid), parameter :: d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
     real (kind_grid), parameter :: li2 = lv0 + li00        !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
     real(kind=kind_dyn), parameter :: lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
@@ -146,7 +145,6 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
     call qs_table (length)
     call qs_table2 (length)
     call qs_tablew (length)
-
 
     do i = 1, length - 1
         des2 (i) = max (0., table2 (i + 1) - table2 (i))
@@ -296,14 +294,14 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
     real(kind_grid),  intent(in)    :: area(isd:ied, jsd:jed)
-    real(kind=kind_dyn),             intent(inout) :: dtdt(is:ie, js:je, 1:km)
-    logical,          intent(in)    :: out_dt
-    logical,          intent(in)    :: last_step
-    logical,          intent(in)    :: do_qa
-    real(kind=kind_dyn),             intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
-    integer,          intent(in)    :: nthreads
-    character(len=*), intent(  out) :: errmsg
-    integer,          intent(  out) :: errflg
+    real(kind=kind_dyn), intent(inout) :: dtdt(is:ie, js:je, 1:km)
+    logical,             intent(in)    :: out_dt
+    logical,             intent(in)    :: last_step
+    logical,             intent(in)    :: do_qa
+    real(kind=kind_dyn), intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
+    integer,             intent(in)    :: nthreads
+    character(len=*),    intent(  out) :: errmsg
+    integer,             intent(  out) :: errflg
 
     ! Local variables
     real(kind=kind_dyn), dimension(is:ie,js:je) :: dpln
@@ -414,22 +412,20 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     real(kind=kind_dyn) :: factor, qim, tice0, c_air, c_vap, dw
     integer :: i, j
 
-
-
-    sdt = 0.5_kind_dyn * mdt                   ! half remapping time step
+    sdt = 0.5 * mdt                   ! half remapping time step
     dt_bigg = mdt                     ! bigg mechinism time step
-    tice0 = tice - 0.01_kind_dyn               ! 273.15, standard freezing temperature
+    tice0 = tice - 0.01               ! 273.15, standard freezing temperature
     ! -----------------------------------------------------------------------
     !> - Define conversion scalar / factor.
     ! -----------------------------------------------------------------------
-    fac_i2s = 1._kind_dyn - exp (- mdt / tau_i2s)
-    fac_v2l = 1._kind_dyn - exp (- sdt / tau_v2l)
-    fac_r2g = 1._kind_dyn - exp (- mdt / tau_r2g)
-    fac_l2r = 1._kind_dyn - exp (- mdt / tau_l2r)
-    fac_l2v = 1._kind_dyn - exp (- sdt / tau_l2v)
+    fac_i2s = 1. - exp (- mdt / tau_i2s)
+    fac_v2l = 1. - exp (- sdt / tau_v2l)
+    fac_r2g = 1. - exp (- mdt / tau_r2g)
+    fac_l2r = 1. - exp (- mdt / tau_l2r)
+    fac_l2v = 1. - exp (- sdt / tau_l2v)
     fac_l2v = min (sat_adj0, fac_l2v)
-    fac_imlt = 1._kind_dyn - exp (- sdt / tau_imlt)
-    fac_smlt = 1._kind_dyn - exp (- mdt / tau_smlt)
+    fac_imlt = 1. - exp (- sdt / tau_imlt)
+    fac_smlt = 1. - exp (- mdt / tau_smlt)
     ! -----------------------------------------------------------------------
     !> - Define heat capacity of dry air and water vapor based on hydrostatical property.
     ! -----------------------------------------------------------------------
@@ -450,9 +446,9 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             q_sol (i) = qi (i, j) + qs (i, j) + qg (i, j)
             qpz (i) = q_liq (i) + q_sol (i)
 #ifdef USE_COND
-            pt1 (i) = pt (i, j) / ((1.0_kind_dyn + zvir * qv (i, j)) * (1.0_kind_dyn - qpz (i)))
+            pt1 (i) = pt (i, j) / ((1 + zvir * qv (i, j)) * (1 - qpz (i)))
 #else
-            pt1 (i) = pt (i, j) / (1.0_kind_dyn + zvir * qv (i, j))
+            pt1 (i) = pt (i, j) / (1 + zvir * qv (i, j))
 #endif
             t0 (i) = pt1 (i) ! true temperature
             qpz (i) = qpz (i) + qv (i, j) ! total_wat conserved in this routine
@@ -473,7 +469,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Define heat capacity and latend heat coefficient.
         ! -----------------------------------------------------------------------
         do i = is, ie
-            mc_air (i) = (1._kind_dyn - qpz (i)) * c_air ! constant
+            mc_air (i) = (1. - qpz (i)) * c_air ! constant
             cvm (i) = mc_air (i) + qv (i, j) * c_vap + q_liq (i) * c_liq + q_sol (i) * c_ice
             lhi (i) = li00 + dc_ice * pt1 (i)
             icp2 (i) = lhi (i) / cvm (i)
@@ -500,7 +496,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Fix negative cloud ice with snow.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            if (qi (i, j) < 0._kind_dyn) then
+            if (qi (i, j) < 0.) then
                 qs (i, j) = qs (i, j) + qi (i, j)
                 qi (i, j) = 0.
             endif
@@ -509,7 +505,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Melting of cloud ice to cloud water and rain.
         ! -----------------------------------------------------------------------
         do i = is, ie
-            if (qi (i, j) > 1.e-8_kind_dyn .and. pt1 (i) > tice) then
+            if (qi (i, j) > 1.e-8 .and. pt1 (i) > tice) then
                 sink (i) = min (qi (i, j), fac_imlt * (pt1 (i) - tice) / icp2 (i))
                 qi (i, j) = qi (i, j) - sink (i)
                 ! sjl, may 17, 2017
@@ -535,11 +531,11 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Fix negative snow with graupel or graupel with available snow.
         ! -----------------------------------------------------------------------
         do i = is, ie
-            if (qs (i, j) < 0._kind_dyn) then
+            if (qs (i, j) < 0.) then
                 qg (i, j) = qg (i, j) + qs (i, j)
-                qs (i, j) = 0._kind_dyn
-            elseif (qg (i, j) < 0._kind_dyn) then
-                tmp = min (- qg (i, j), max (0._kind_dyn, qs (i, j)))
+                qs (i, j) = 0.
+            elseif (qg (i, j) < 0.) then
+                tmp = min (- qg (i, j), max (0., qs (i, j)))
                 qg (i, j) = qg (i, j) + tmp
                 qs (i, j) = qs (i, j) - tmp
             endif
@@ -549,25 +545,23 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Fix negative cloud water with rain or rain with available cloud water.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            if (ql (i, j) < 0._kind_dyn) then
-                tmp = min (- ql (i, j), max (0._kind_dyn, qr (i, j)))
+            if (ql (i, j) < 0.) then
+                tmp = min (- ql (i, j), max (0., qr (i, j)))
                 ql (i, j) = ql (i, j) + tmp
                 qr (i, j) = qr (i, j) - tmp
-            elseif (qr (i, j) < 0._kind_dyn) then
-                tmp = min (- qr (i, j), max (0._kind_dyn, ql (i, j)))
+            elseif (qr (i, j) < 0.) then
+                tmp = min (- qr (i, j), max (0., ql (i, j)))
                 ql (i, j) = ql (i, j) - tmp
                 qr (i, j) = qr (i, j) + tmp
             endif
         enddo
-
-
         ! -----------------------------------------------------------------------
         !> - Enforce complete freezing of cloud water to cloud ice below - 48 c.
         ! -----------------------------------------------------------------------
 
         do i = is, ie
-            dtmp = tice - 48._kind_dyn - pt1 (i)
-            if (ql (i, j) > 0._kind_dyn .and. dtmp > 0._kind_dyn) then
+            dtmp = tice - 48. - pt1 (i)
+            if (ql (i, j) > 0. .and. dtmp > 0.) then
                 sink (i) = min (ql (i, j), dtmp / icp2 (i))
                 ql (i, j) = ql (i, j) - sink (i)
                 qi (i, j) = qi (i, j) + sink (i)
@@ -585,7 +579,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             lhi (i) = li00 + dc_ice * pt1 (i)
             lcp2 (i) = lhl (i) / cvm (i)
             icp2 (i) = lhi (i) / cvm (i)
-            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1._kind_dyn, dim (tice, pt1 (i)) /48._kind_dyn)
+            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) /48.)
         enddo
         ! -----------------------------------------------------------------------
         !> - Condensation/evaporation between water vapor and cloud water.
@@ -593,15 +587,15 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
             adj_fac = sat_adj0
         do i = is, ie
-            dq0 = (qv (i, j) - wqsat (i)) / (1._kind_dyn + tcp3 (i) * dq2dt (i))
-            if (dq0 > 0._kind_dyn) then ! whole grid - box saturated
+            dq0 = (qv (i, j) - wqsat (i)) / (1. + tcp3 (i) * dq2dt (i))
+            if (dq0 > 0.) then ! whole grid - box saturated
                 src (i) = min (adj_fac * dq0, max (ql_gen - ql (i, j), fac_v2l * dq0))
             else ! evaporation of ql
                 ! sjl 20170703 added ql factor to prevent the situation of high ql and rh<1
                 ! factor = - min (1., fac_l2v * sqrt (max (0., ql (i, j)) / 1.e-5) * 10. * (1. - qv (i, j) / wqsat (i)))
                 ! factor = - fac_l2v
                 ! factor = - 1
-                factor = - min (1._kind_dyn, fac_l2v * 10._kind_dyn * (1._kind_dyn - qv (i, j) / wqsat (i))) ! the rh dependent factor = 1 at 90%
+                factor = - min (1., fac_l2v * 10. * (1. - qv (i, j) / wqsat (i))) ! the rh dependent factor = 1 at 90%
                 src (i) = - min (ql (i, j), factor * dq0)
             endif
             qv (i, j) = qv (i, j) - src (i)
@@ -618,7 +612,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             lhi (i) = li00 + dc_ice * pt1 (i)
             lcp2 (i) = lhl (i) / cvm (i)
             icp2 (i) = lhi (i) / cvm (i)
-            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) / 48._kind_dyn)
+            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) / 48.)
         enddo
             if (last_step) then
             ! -----------------------------------------------------------------------
@@ -628,17 +622,17 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             ! -----------------------------------------------------------------------
                     call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
                     do i = is, ie
-                dq0 = (qv (i, j) - wqsat (i)) / (1._kind_dyn + tcp3 (i) * dq2dt (i))
-                if (dq0 > 0._kind_dyn) then ! remove super - saturation, prevent super saturation over water
+                dq0 = (qv (i, j) - wqsat (i)) / (1. + tcp3 (i) * dq2dt (i))
+                if (dq0 > 0.) then ! remove super - saturation, prevent super saturation over water
                     src (i) = dq0
                 else ! evaporation of ql
                     ! factor = - min (1., fac_l2v * sqrt (max (0., ql (i, j)) / 1.e-5) * 10. * (1. - qv (i, j) / wqsat (i))) ! the rh dependent factor = 1 at 90%
                     ! factor = - fac_l2v
                     ! factor = - 1
-                    factor = - min (1._kind_dyn, fac_l2v * 10._kind_dyn * (1._kind_dyn - qv (i, j) / wqsat (i))) ! the rh dependent factor = 1 at 90%
+                    factor = - min (1., fac_l2v * 10. * (1. - qv (i, j) / wqsat (i))) ! the rh dependent factor = 1 at 90%
                     src (i) = - min (ql (i, j), factor * dq0)
                 endif
-                adj_fac = 1._kind_dyn
+                adj_fac = 1.
                 qv (i, j) = qv (i, j) - src (i)
                 ql (i, j) = ql (i, j) + src (i)
                 q_liq (i) = q_liq (i) + src (i)
@@ -660,8 +654,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
             do i = is, ie
             dtmp = t_wfr - pt1 (i) ! [ - 40, - 48]
-            if (ql (i, j) > 0._kind_dyn .and. dtmp > 0._kind_dyn) then
-                sink (i) = min (ql (i, j), ql (i, j) * dtmp * 0.125_kind_dyn, dtmp / icp2 (i))
+            if (ql (i, j) > 0. .and. dtmp > 0.) then
+                sink (i) = min (ql (i, j), ql (i, j) * dtmp * 0.125, dtmp / icp2 (i))
                 ql (i, j) = ql (i, j) - sink (i)
                 qi (i, j) = qi (i, j) + sink (i)
                 q_liq (i) = q_liq (i) - sink (i)
@@ -682,8 +676,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
             do i = is, ie
             tc = tice0 - pt1 (i)
-            if (ql (i, j) > 0.0_kind_dyn .and. tc > 0._kind_dyn) then
-                sink (i) = 3.3333e-10_kind_dyn * dt_bigg * (exp (0.66_kind_dyn * tc) - 1._kind_dyn) * den (i) * ql (i, j) ** 2
+            if (ql (i, j) > 0.0 .and. tc > 0.) then
+                sink (i) = 3.3333e-10 * dt_bigg * (exp (0.66 * tc) - 1.) * den (i) * ql (i, j) ** 2
                 sink (i) = min (ql (i, j), tc / icp2 (i), sink (i))
                 ql (i, j) = ql (i, j) - sink (i)
                 qi (i, j) = qi (i, j) + sink (i)
@@ -704,9 +698,9 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Freezing of rain to graupel.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            dtmp = (tice - 0.1_kind_dyn) - pt1 (i)
-            if (qr (i, j) > 1.e-7_kind_dyn .and. dtmp > 0._kind_dyn) then
-                tmp = min (1._kind_dyn, (dtmp * 0.025_kind_dyn) ** 2) * qr (i, j) ! no limit on freezing below - 40 deg c
+            dtmp = (tice - 0.1) - pt1 (i)
+            if (qr (i, j) > 1.e-7 .and. dtmp > 0.) then
+                tmp = min (1., (dtmp * 0.025) ** 2) * qr (i, j) ! no limit on freezing below - 40 deg c
                 sink (i) = min (tmp, fac_r2g * dtmp / icp2 (i))
                 qr (i, j) = qr (i, j) - sink (i)
                 qg (i, j) = qg (i, j) + sink (i)
@@ -716,7 +710,6 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 pt1 (i) = pt1 (i) + sink (i) * lhi (i) / cvm (i)
             endif
         enddo
-
         ! -----------------------------------------------------------------------
         !> - Update latend heat coefficient.
         ! -----------------------------------------------------------------------
@@ -728,9 +721,9 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Melting of snow to rain or cloud water.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            dtmp = pt1 (i) - (tice + 0.1_kind_dyn)
-            if (qs (i, j) > 1.e-7_kind_dyn .and. dtmp > 0._kind_dyn) then
-                tmp = min (1._kind_dyn, (dtmp * 0.1_kind_dyn) ** 2) * qs (i, j) ! no limter on melting above 10 deg c
+            dtmp = pt1 (i) - (tice + 0.1)
+            if (qs (i, j) > 1.e-7 .and. dtmp > 0.) then
+                tmp = min (1., (dtmp * 0.1) ** 2) * qs (i, j) ! no limter on melting above 10 deg c
                 sink (i) = min (tmp, fac_smlt * dtmp / icp2 (i))
                 tmp = min (sink (i), dim (qs_mlt, ql (i, j))) ! max ql due to snow melt
                 qs (i, j) = qs (i, j) - sink (i)
@@ -743,7 +736,6 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 pt1 (i) = pt1 (i) - sink (i) * lhi (i) / cvm (i)
             endif
         enddo
-
         ! -----------------------------------------------------------------------
         !> - Autoconversion from cloud water to rain.
         ! -----------------------------------------------------------------------
@@ -754,7 +746,6 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 ql (i, j) = ql (i, j) - sink (i)
             endif
         enddo
-
         ! -----------------------------------------------------------------------
         !> - Update latend heat coefficient.
         ! -----------------------------------------------------------------------
@@ -769,25 +760,25 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         !> - Sublimation/deposition between water vapor and cloud ice.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            src (i) = 0._kind_dyn
+            src (i) = 0.
             if (pt1 (i) < t_sub) then ! too cold to be accurate; freeze qv as a fix
-                src (i) = dim (qv (i, j), 1.e-6_kind_dyn)
+                src (i) = dim (qv (i, j), 1.e-6)
             elseif (pt1 (i) < tice0) then
                 qsi = iqs2 (pt1 (i), den (i), dqsdt)
                 dq = qv (i, j) - qsi
-                sink (i) = adj_fac * dq / (1._kind_dyn + tcp2 (i) * dqsdt)
-                if (qi (i, j) > 1.e-8_kind_dyn) then
-                    pidep = sdt * dq * 349138.78_kind_dyn * exp (0.875_kind_dyn * log (qi (i, j) * den (i))) &
-                         / (qsi * den (i) * lat2 / (0.0243_kind_dyn * rvgas * pt1 (i) ** 2) + 4.42478e4_kind_dyn)
+                sink (i) = adj_fac * dq / (1. + tcp2 (i) * dqsdt)
+                if (qi (i, j) > 1.e-8) then
+                    pidep = sdt * dq * 349138.78 * exp (0.875 * log (qi (i, j) * den (i))) &
+                         / (qsi * den (i) * lat2 / (0.0243 * rvgas * pt1 (i) ** 2) + 4.42478e4)
                 else
-                    pidep = 0._kind_dyn
+                    pidep = 0.
                 endif
-                if (dq > 0._kind_dyn) then ! vapor - > ice
+                if (dq > 0.) then ! vapor - > ice
                     tmp = tice - pt1 (i)
-                    qi_crt = qi_gen * min (qi_lim, 0.1_kind_dyn * tmp) / den (i)
+                    qi_crt = qi_gen * min (qi_lim, 0.1 * tmp) / den (i)
                     src (i) = min (sink (i), max (qi_crt - qi (i, j), pidep), tmp / tcp2 (i))
                 else
-                    pidep = pidep * min (1., dim (pt1 (i), t_sub) * 0.2_kind_dyn)
+                    pidep = pidep * min (1., dim (pt1 (i), t_sub) * 0.2)
                     src (i) = max (pidep, sink (i), - qi (i, j))
                 endif
             endif
@@ -803,20 +794,20 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             do i = is, ie
 #ifdef USE_COND
             q_con (i, j) = q_liq (i) + q_sol (i)
-            tmp = 1._kind_dyn + zvir * qv (i, j)
-            pt (i, j) = pt1 (i) * tmp * (1._kind_dyn - q_con (i, j))
+            tmp = 1. + zvir * qv (i, j)
+            pt (i, j) = pt1 (i) * tmp * (1. - q_con (i, j))
             tmp = rdgas * tmp
             cappa (i, j) = tmp / (tmp + cvm (i))
 #else
-            pt (i, j) = pt1 (i) * (1._kind_dyn + zvir * qv (i, j))
+            pt (i, j) = pt1 (i) * (1. + zvir * qv (i, j))
 #endif
         enddo
         ! -----------------------------------------------------------------------
         !> - Fix negative graupel with available cloud ice.
         ! -----------------------------------------------------------------------
             do i = is, ie
-            if (qg (i, j) < 0._kind_dyn) then
-                tmp = min (- qg (i, j), max (0._kind_dyn, qi (i, j)))
+            if (qg (i, j) < 0.) then
+                tmp = min (- qg (i, j), max (0., qi (i, j)))
                 qg (i, j) = qg (i, j) + tmp
                 qi (i, j) = qi (i, j) - tmp
             endif
@@ -917,18 +908,18 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                     ! mixed phase:
                     qsi = iqs1 (tin, den (i))
                     qsw = wqs1 (tin, den (i))
-                    if (q_cond (i) > 1.e-6_kind_dyn) then
+                    if (q_cond (i) > 1.e-6) then
                         rqi = q_sol (i) / q_cond (i)
                     else
                         ! mostly liquid water clouds at initial cloud development stage
                         rqi = ((tice - tin) / (tice - t_wfr))
                     endif
-                    qstar (i) = rqi * qsi + (1._kind_dyn - rqi) * qsw
+                    qstar (i) = rqi * qsi + (1. - rqi) * qsw
                 endif
                 !>   - higher than 10 m is considered "land" and will have higher subgrid variability
-                dw = dw_ocean + (dw_land - dw_ocean) * min (1._kind_dyn, abs (hs (i, j)) / (10._kind_dyn * grav))
+                dw = dw_ocean + (dw_land - dw_ocean) * min (1., abs (hs (i, j)) / (10. * grav))
                 !>   - "scale - aware" subgrid variability: 100 - km as the base
-                hvar (i) = min (0.2_kind_dyn, max (0.01_kind_dyn, dw * sqrt (sqrt (area (i, j)) / 100.e3_kind_dyn)))
+                hvar (i) = min (0.2, max (0.01, dw * sqrt (sqrt (area (i, j)) / 100.e3)))
                 ! -----------------------------------------------------------------------
                 !>   - calculate partial cloudiness by pdf;
                 !! assuming subgrid linear distribution in horizontal; this is effectively a smoother for the
@@ -940,37 +931,37 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 ! icloud_f = 1: old fvgfs gfdl) mp implementation
                 ! icloud_f = 2: binary cloud scheme (0 / 1)
                 ! -----------------------------------------------------------------------
-                if (rh > 0.75_kind_dyn .and. qpz (i) > 1.e-6_kind_dyn) then
+                if (rh > 0.75 .and. qpz (i) > 1.e-6) then
                     dq = hvar (i) * qpz (i)
                     q_plus = qpz (i) + dq
                     q_minus = qpz (i) - dq
                     if (icloud_f == 2) then
                         if (qpz (i) > qstar (i)) then
-                            qa (i, j) = 1._kind_dyn
-                        elseif (qstar (i) < q_plus .and. q_cond (i) > 1.e-6_kind_dyn) then
+                            qa (i, j) = 1.
+                        elseif (qstar (i) < q_plus .and. q_cond (i) > 1.e-6) then
                             qa (i, j) = ((q_plus - qstar (i)) / dq) ** 2
-                            qa (i, j) = min (1._kind_dyn, qa (i, j))
+                            qa (i, j) = min (1., qa (i, j))
                         else
                             qa (i, j) = 0.
                         endif
                     else   ! icloud_f
                         if (qstar (i) < q_minus) then
-                            qa (i, j) = 1._kind_dyn
+                            qa (i, j) = 1.
                         else
                             if (qstar (i) < q_plus) then
                                 if (icloud_f == 0) then
                                     qa (i, j) = (q_plus - qstar (i)) / (dq + dq)
                                 else
-                                    qa (i, j) = (q_plus - qstar (i)) / (2._kind_dyn * dq * (1._kind_dyn - q_cond (i)))
+                                    qa (i, j) = (q_plus - qstar (i)) / (2. * dq * (1. - q_cond (i)))
                                 endif
                             else
-                                qa (i, j) = 0._kind_dyn
+                                qa (i, j) = 0.
                             endif
                             ! impose minimum cloudiness if substantial q_cond (i) exist
-                            if (q_cond (i) > 1.e-6_kind_dyn) then
+                            if (q_cond (i) > 1.e-6) then
                                 qa (i, j) = max (cld_min, qa (i, j))
                             endif
-                            qa (i, j) = min (1._kind_dyn, qa (i, j))
+                            qa (i, j) = min (1., qa (i, j))
                         endif
                     endif
                 else   !rh
@@ -980,7 +971,6 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 endif
         enddo ! end j loop
     
-
 end subroutine fv_sat_adj_work
 !! @}
 
@@ -1002,9 +992,9 @@ real(kind=kind_dyn) function wqs1 (ta, den)
 
     integer :: it
 
-    tmin = tice - 160._kind_dyn
-    ap1 = 10._kind_dyn * dim (ta, tmin) + 1._kind_dyn
-    ap1 = min (2621._kind_dyn, ap1)
+    tmin = tice - 160.
+    ap1 = 10. * dim (ta, tmin) + 1.
+    ap1 = min (2621., ap1)
     it = ap1
     es = tablew (it) + (ap1 - it) * desw (it)
     wqs1 = es / (rvgas * ta * den)
@@ -1029,9 +1019,9 @@ real(kind=kind_dyn) function iqs1 (ta, den)
 
     integer :: it
 
-    tmin = tice - 160._kind_dyn
-    ap1 = 10._kind_dyn * dim (ta, tmin) + 1._kind_dyn
-    ap1 = min (2621._kind_dyn, ap1)
+    tmin = tice - 160.
+    ap1 = 10. * dim (ta, tmin) + 1.
+    ap1 = min (2621., ap1)
     it = ap1
     es = table2 (it) + (ap1 - it) * des2 (it)
     iqs1 = es / (rvgas * ta * den)
@@ -1058,15 +1048,15 @@ real(kind=kind_dyn) function wqs2 (ta, den, dqdt)
 
     integer :: it
 
-    tmin = tice - 160._kind_dyn
-    ap1 = 10._kind_dyn * dim (ta, tmin) + 1._kind_dyn
-    ap1 = min (2621._kind_dyn, ap1)
+    tmin = tice - 160.
+    ap1 = 10. * dim (ta, tmin) + 1.
+    ap1 = min (2621., ap1)
     it = ap1
     es = tablew (it) + (ap1 - it) * desw (it)
     wqs2 = es / (rvgas * ta * den)
-    it = ap1 - 0.5_kind_dyn
+    it = ap1 - 0.5
     ! finite diff, del_t = 0.1:
-    dqdt = 10._kind_dyn * (desw (it) + (ap1 - it) * (desw (it + 1) - desw (it))) / (rvgas * ta * den)
+    dqdt = 10. * (desw (it) + (ap1 - it) * (desw (it + 1) - desw (it))) / (rvgas * ta * den)
 
 end function wqs2
 
@@ -1093,17 +1083,17 @@ subroutine wqs2_vect (is, ie, ta, den, wqsat, dqdt)
 
     integer :: i, it
 
-    tmin = tice - 160._kind_dyn
+    tmin = tice - 160.
 
     do i = is, ie
-        ap1 = 10._kind_dyn * dim (ta (i), tmin) + 1._kind_dyn
-        ap1 = min (2621._kind_dyn, ap1)
+        ap1 = 10. * dim (ta (i), tmin) + 1.
+        ap1 = min (2621., ap1)
         it = ap1
         es = tablew (it) + (ap1 - it) * desw (it)
         wqsat (i) = es / (rvgas * ta (i) * den (i))
-        it = ap1 - 0.5_kind_dyn
+        it = ap1 - 0.5
         ! finite diff, del_t = 0.1:
-        dqdt (i) = 10._kind_dyn * (desw (it) + (ap1 - it) * (desw (it + 1) - desw (it))) / (rvgas * ta (i) * den (i))
+        dqdt (i) = 10. * (desw (it) + (ap1 - it) * (desw (it + 1) - desw (it))) / (rvgas * ta (i) * den (i))
     enddo
 
 end subroutine wqs2_vect
@@ -1128,15 +1118,15 @@ real(kind=kind_dyn) function iqs2 (ta, den, dqdt)
 
     integer :: it
 
-    tmin = tice - 160._kind_dyn
-    ap1 = 10._kind_dyn * dim (ta, tmin) + 1._kind_dyn
-    ap1 = min (2621._kind_dyn, ap1)
+    tmin = tice - 160.
+    ap1 = 10. * dim (ta, tmin) + 1.
+    ap1 = min (2621., ap1)
     it = ap1
     es = table2 (it) + (ap1 - it) * des2 (it)
     iqs2 = es / (rvgas * ta * den)
-    it = ap1 - 0.5_kind_dyn
+    it = ap1 - 0.5
     ! finite diff, del_t = 0.1:
-    dqdt = 10._kind_dyn * (des2 (it) + (ap1 - it) * (des2 (it + 1) - des2 (it))) / (rvgas * ta * den)
+    dqdt = 10. * (des2 (it) + (ap1 - it) * (des2 (it + 1) - des2 (it))) / (rvgas * ta * den)
 
 end function iqs2
 
@@ -1146,17 +1136,17 @@ end function iqs2
 subroutine qs_table (n)
     implicit none
     integer, intent (in) :: n
-    real (kind_grid) :: delt = 0.1_kind_grid
+    real (kind_grid) :: delt = 0.1
     real (kind_grid) :: tmin, tem, esh20
     real (kind_grid) :: wice, wh2o, fac0, fac1, fac2
     real (kind_grid) :: esupc (200)
     integer :: i
-    tmin = tice - 160._kind_grid
+    tmin = tice - 160.
     ! -----------------------------------------------------------------------
     ! compute es over ice between - 160 deg c and 0 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1600
-        tem = tmin + delt * real (i - 1, kind=kind_grid)
+        tem = tmin + delt * real (i - 1)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * li2
         fac2 = (d2ice * log (tem / tice) + fac1) / rvgas
@@ -1166,7 +1156,7 @@ subroutine qs_table (n)
     ! compute es over water between - 20 deg c and 102 deg c.
     ! -----------------------------------------------------------------------
     do i = 1, 1221
-        tem = 253.16_kind_grid + delt * real (i - 1, kind=kind_grid)
+        tem = 253.16 + delt * real (i - 1)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1181,9 +1171,9 @@ subroutine qs_table (n)
     ! derive blended es over ice and supercooled water between - 20 deg c and 0 deg c
     ! -----------------------------------------------------------------------
     do i = 1, 200
-        tem = 253.16_kind_grid + delt * real (i - 1, kind=kind_grid)
-        wice = 0.05_kind_grid * (tice - tem)
-        wh2o = 0.05_kind_grid * (tem - 253.16_kind_grid)
+        tem = 253.16 + delt * real (i - 1)
+        wice = 0.05 * (tice - tem)
+        wh2o = 0.05 * (tem - 253.16)
         table (i + 1400) = wice * table (i + 1400) + wh2o * esupc (i)
     enddo
 end subroutine qs_table
@@ -1194,16 +1184,15 @@ end subroutine qs_table
 subroutine qs_tablew (n)
     implicit none
     integer, intent (in) :: n
-    real (kind_grid) :: delt = 0.1_kind_grid
-    real (kind_grid) :: tmin, tem, fac0, fac1, fac2,tem2
+    real (kind_grid) :: delt = 0.1
+    real (kind_grid) :: tmin, tem, fac0, fac1, fac2
     integer :: i
-    tmin = tice - 160._kind_grid
+    tmin = tice - 160.
     ! -----------------------------------------------------------------------
     ! compute es over water
     ! -----------------------------------------------------------------------
     do i = 1, n
-        tem2 = real (i - 1, kind=kind_grid)
-        tem = tmin + delt * real (i - 1, kind=kind_grid)
+        tem = tmin + delt * real (i - 1)
         fac0 = (tem - tice) / (tem * tice)
         fac1 = fac0 * lv0
         fac2 = (dc_vap * log (tem / tice) + fac1) / rvgas
@@ -1217,12 +1206,12 @@ end subroutine qs_tablew
 subroutine qs_table2 (n)
     implicit none
     integer, intent (in) :: n
-    real (kind_grid) :: delt = 0.1_kind_grid
+    real (kind_grid) :: delt = 0.1
     real (kind_grid) :: tmin, tem0, tem1, fac0, fac1, fac2
     integer :: i, i0, i1
-    tmin = tice - 160._kind_grid
+    tmin = tice - 160.
     do i = 1, n
-        tem0 = tmin + delt * real (i - 1, kind=kind_grid)
+        tem0 = tmin + delt * real (i - 1)
         fac0 = (tem0 - tice) / (tem0 * tice)
         if (i <= 1600) then
             ! -----------------------------------------------------------------------
@@ -1244,8 +1233,8 @@ subroutine qs_table2 (n)
     ! -----------------------------------------------------------------------
     i0 = 1600
     i1 = 1601
-    tem0 = 0.25_kind_grid * (table2 (i0 - 1) + 2._kind_grid * table (i0) + table2 (i0 + 1))
-    tem1 = 0.25_kind_grid * (table2 (i1 - 1) + 2._kind_grid * table (i1) + table2 (i1 + 1))
+    tem0 = 0.25 * (table2 (i0 - 1) + 2. * table (i0) + table2 (i0 + 1))
+    tem1 = 0.25 * (table2 (i1 - 1) + 2. * table (i1) + table2 (i1 + 1))
     table2 (i0) = tem0
     table2 (i1) = tem1
 end subroutine qs_table2
