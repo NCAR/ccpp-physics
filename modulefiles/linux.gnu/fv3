@@ -42,7 +42,6 @@ export ESMF_MOD=/usr/local/${ESMF_VERSION}/mod/modO/Linux.gfortran.64.mpich3.def
 export ESMFMKFILE=/usr/local/${ESMF_VERSION}/lib/libO/Linux.gfortran.64.mpich3.default/esmf.mk
 export PATH="/usr/local/${ESMF_VERSION}/bin/binO/Linux.gfortran.64.mpich3.default${PATH:+:$PATH}"
 export LD_LIBRARY_PATH="/usr/local/${ESMF_VERSION}/lib/libO/Linux.gfortran.64.mpich3.default${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export DYLD_LIBRARY_PATH="/usr/local/${ESMF_VERSION}/lib/libO/Linux.gfortran.64.mpich3.default${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
 
 ##
 ## NCEP libraries (need to download and build manually, see doc/README_{UBUNTU,CENTOS,...}.txt and https://github.com/climbfuji/NCEPlibs)

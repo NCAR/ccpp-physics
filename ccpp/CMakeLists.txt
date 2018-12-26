@@ -228,6 +228,18 @@ else(MKL_DIR)
 endif(MKL_DIR)
 
 #------------------------------------------------------------------------------
+# Set netCDF flags for preprocessor, compiler and linker (if defined)
+if(NETCDF_DIR)
+  set (NETCDF_INC "-I${NETCDF_DIR}/include")
+  set (NETCDF_LIB "-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${NETCDF_INC} ${NETCDF_LIB}")
+  ADD_DEFINITIONS(-DNETCDF)
+  message (STATUS "Enable netCDF support")
+else(NETCDF_DIR)
+  message (STATUS "Disable netCDF support")
+endif(NETCDF_DIR)
+
+#------------------------------------------------------------------------------
 # Set ESMF flags for preprocessor, compiler and linker (if defined)
 if(ESMF_LIB_DIR)
   message (STATUS "ESMF_LIB_DIR: ${ESMF_LIB_DIR}")

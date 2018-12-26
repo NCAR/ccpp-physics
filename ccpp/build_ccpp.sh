@@ -71,36 +71,10 @@ readonly clean_after=${5:-YES}
 
 checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
-# Run ccpp_prebuild.py from the top-level directory before building the CCPP framework and physics
-cd ..
-if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
-  if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
-    if [[ "${MAKE_OPT}" == *"SUITE="* ]]; then
-      # Extract name of suite definition file
-      TMP=${MAKE_OPT#*SUITE=}
-      SUITE=${TMP% *}
-      STATICFLAGS="--static --suite=ccpp/suites/${SUITE}"
-    else
-      echo "Error, option STATIC=Y requires suite definition file as SUITE=xyz.xml (w/o path)"
-      exit 1
-    fi
-  else
-    echo "Error, option STATIC=Y requires HYBRID=N"
-    exit 1
-  fi
-else
-  STATICFLAGS=""
-fi
-if [[ "${MAKE_OPT}" == *"DEBUG=Y"* ]]; then
-  DEBUGFLAG="--debug"
-else
-  DEBUGFLAG=""
-fi
-./ccpp/framework/scripts/ccpp_prebuild.py --config=./ccpp/config/ccpp_prebuild_config.py ${STATICFLAGS} ${DEBUGFLAG}
-cd -
+# Generate CCPP cmake flags from MAKE_OPT
 
 # Generate CCPP cmake flags from MAKE_OPT
-CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DMPI=ON"
+CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DNETCDF_DIR=${NETCDF} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
 if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSIONLIB=${SIONLIB}"
