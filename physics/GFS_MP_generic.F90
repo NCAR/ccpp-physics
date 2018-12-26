@@ -319,15 +319,15 @@
         do i = 1, im
           tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp
           srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
-          if (tsfc(i) .ge. 273.15) then
+          if (tsfc(i) >= 273.15) then
             crain = rainc(i)
             csnow = 0.0
           else
             crain = 0.0
             csnow = rainc(i)
           endif
-!         if ((snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow) > (rain0(i,1)+crain)) then
-          if ((snow0(i)+ice0(i)+graupel0(i)+csnow) > 0.0) then
+!         if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
+          if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
             srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
           endif
         enddo
@@ -351,7 +351,7 @@
         enddo
       endif
 
-      if ((cplchm).and.(.not. cplflx)) then
+      if (cplchm .and. .not.cplflx) then
         do i = 1, im
              rain_cpl(i) = rain_cpl(i) + rain(i)
              rainc_cpl(i) = rainc_cpl(i) + rainc(i)

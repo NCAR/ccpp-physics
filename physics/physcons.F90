@@ -44,7 +44,8 @@
   public
 
 !> \name Math constants
-  real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931        !< pi
+! real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931        !< pi
+  real(kind=kind_phys),parameter:: con_pi     =4.0d0*atan(1.0d0)         !< pi
   real(kind=kind_phys),parameter:: con_sqrt2  =1.414214e+0               !< square root of 2 
   real(kind=kind_phys),parameter:: con_sqrt3  =1.732051e+0               !< quare root of 3
 

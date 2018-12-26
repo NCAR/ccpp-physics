@@ -149,6 +149,7 @@
 !                                                                      !
 !      jul 2014 s. moorthi - merging with gfs version                  !
 !      feb 2017 a. cheng   - add odepth output, effective radius input !
+!      Jan 2018 S Moorthi  - update to include physics from ipdv4      !
 !      jun 2018 h-m lin/y-t hou   - removed the legacy subroutine      !
 !        'diagcld1' for diagnostic cloud scheme, added new cloud       !
 !        overlapping method of de-correlation length, and optimized    !
@@ -1556,7 +1557,7 @@
 
         do k = 1, nlay
           do i = 1, ix
-            clwt  = max(0.0,(clwf(i,k)+cnvw(i,k))) * gfac * delp(i,k)
+            clwt = max(0.0,(clwf(i,k)+cnvw(i,k))) * gfac * delp(i,k)
             cip(i,k) = clwt * tem2d(i,k)
             cwp(i,k) = clwt - cip(i,k)
           enddo
@@ -2895,7 +2896,7 @@
             crp   (i,k) = 0.0
             csp   (i,k) = 0.0
             rew   (i,k) = effrl (i,k)
-            rei   (i,k) = effri (i,k)
+            rei   (i,k) = max(10.0, min(150.0,effri (i,k)))
             rer   (i,k) = effrr (i,k)
             res   (i,k) = effrs (i,k)
             tem2d (i,k) = min( 1.0, max( 0.0,(con_ttp-tlyr(i,k))*0.05))

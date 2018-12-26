@@ -72,6 +72,7 @@ public ::                           &
      bergeron_process_snow,         &
      liu_liq_autoconversion,        &
      gmao_ice_autoconversion,       &
+     size_dist_param_ice,           &
 !++ag
      graupel_collecting_snow,       &
      graupel_collecting_rain,       &
@@ -120,6 +121,11 @@ end interface
 interface size_dist_param_basic
   module procedure size_dist_param_basic_vect
   module procedure size_dist_param_basic_line
+end interface
+
+interface size_dist_param_ice
+  module procedure size_dist_param_ice_vect
+  module procedure size_dist_param_ice_line
 end interface
 
 !=================================================
@@ -225,7 +231,9 @@ real(r8), parameter :: f2r = 0.308_r8
 
 ! collection efficiencies
 ! aggregation of cloud ice and snow
-real(r8), parameter :: eii = 0.5_r8
+!real(r8), parameter :: eii = 0.5_r8
+!real(r8), parameter :: eii = 0.1_r8
+ real(r8), parameter :: eii = 0.2_r8
 !++ag
 ! collection efficiency, ice-droplet collisions
 real(r8), parameter, public :: ecid = 0.7_r8
@@ -437,14 +445,16 @@ end function calc_ab
 ! get cloud droplet size distribution parameters
 elemental subroutine size_dist_param_liq_line(props, qcic, ncic, rho, pgam, lamc)
   type(MGHydrometeorProps), intent(in) :: props
-  real(r8), intent(in)    :: qcic
-  real(r8), intent(inout) :: ncic
-  real(r8), intent(in)    :: rho
+  real(r8), intent(in)     :: qcic
+  real(r8), intent(inout)  :: ncic
+  real(r8), intent(in)     :: rho
 
-  real(r8), intent(out)   :: pgam
-  real(r8), intent(out)   :: lamc
+  real(r8), intent(out)    :: pgam
+  real(r8), intent(out)    :: lamc
+  real(r8)                 :: xs
 
   type(MGHydrometeorProps) :: props_loc
+  logical, parameter       :: liq_gmao=.true.
 
   if (qcic > qsmall) then
 
@@ -454,8 +464,25 @@ elemental subroutine size_dist_param_liq_line(props, qcic, ncic, rho, pgam, lamc
      props_loc = props
 
      ! Get pgam from fit to observations of martin et al. 1994
-     pgam = one - 0.7_r8 * exp(-0.008_r8*1.e-6_r8*ncic*rho)
-!    pgam = 0.0005714_r8*1.e-6_r8*ncic*rho + 0.2714_r8
+
+     if (liq_gmao) then
+       pgam = 0.0005714_r8*1.e-6_r8*ncic*rho + 0.2714_r8
+       ! Anning modified lamc
+       if ((ncic > 1.0e-3) .and. (qcic > 1.0e-11)) then
+         xs = 0.07_r8*(1000._r8*qcic/ncic) ** (-0.14_r8)
+       else
+         xs = 1.2
+       end if
+
+        xs = max(min(xs, 1.7_r8), 1.1_r8)
+        xs = xs*xs*xs
+        xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.)/8.0_r8
+        pgam = sqrt(xs)
+     else
+
+       pgam = one - 0.7_r8 * exp(-0.008_r8*1.e-6_r8*ncic*rho)
+!      pgam = 0.0005714_r8*1.e-6_r8*ncic*rho + 0.2714_r8
+     endif
      pgam = one / (pgam*pgam) - one
      pgam = max(pgam, two)
 
@@ -495,7 +522,9 @@ subroutine size_dist_param_liq_vect(props, qcic, ncic, rho, pgam, lamc, mgncol)
   real(r8), dimension(mgncol), intent(in)    :: rho
   real(r8), dimension(mgncol), intent(out)   :: pgam
   real(r8), dimension(mgncol), intent(out)   :: lamc
+  real(r8)                                   :: xs
   type(mghydrometeorprops)                   :: props_loc
+  logical, parameter                         :: liq_gmao=.true.
   integer :: i
 
   do i=1,mgncol
@@ -505,8 +534,24 @@ subroutine size_dist_param_liq_vect(props, qcic, ncic, rho, pgam, lamc, mgncol)
         ! arguments.)
         props_loc = props
         ! Get pgam from fit to observations of martin et al. 1994
-        pgam(i) = one - 0.7_r8 * exp(-0.008_r8*1.e-6_r8*ncic(i)*rho(i))
-!       pgam(i) = 0.0005714_r8*1.e-6_r8*ncic(i)*rho(i) + 0.2714_r8
+
+        if (liq_gmao) then
+          pgam(i) = 0.0005714_r8*1.e-6_r8*ncic(i)*rho(i) + 0.2714_r8
+          if ((ncic(i) > 1.0e-3) .and. (qcic(i) > 1.0e-11)) then
+            xs = 0.07_r8*(1000._r8*qcic(i)/ncic(i)) **(-0.14_r8)
+          else
+            xs = 1.2
+          end if
+
+          xs = max(min(xs, 1.7_r8), 1.1_r8)
+          xs = xs*xs*xs
+          xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.)/8.0_r8
+          pgam(i) = sqrt(xs)
+        else
+          pgam(i) = one - 0.7_r8 * exp(-0.008_r8*1.e-6_r8*ncic(i)*rho(i))
+!         pgam(i) = 0.0005714_r8*1.e-6_r8*ncic(i)*rho(i) + 0.2714_r8
+        endif
+
         pgam(i) = one/(pgam(i)*pgam(i)) - one
         pgam(i) = max(pgam(i), two)
      endif
@@ -544,10 +589,10 @@ end subroutine size_dist_param_liq_vect
 ! Basic routine for getting size distribution parameters.
 elemental subroutine size_dist_param_basic_line(props, qic, nic, lam, n0)
   type(MGHydrometeorProps), intent(in) :: props
-  real(r8), intent(in) :: qic
+  real(r8), intent(in)    :: qic
   real(r8), intent(inout) :: nic
 
-  real(r8), intent(out) :: lam
+  real(r8), intent(out)   :: lam
   real(r8), intent(out), optional :: n0
 
   if (qic > qsmall) then
@@ -620,6 +665,115 @@ subroutine size_dist_param_basic_vect(props, qic, nic, lam, mgncol, n0)
   if (present(n0)) n0 = nic * lam
 
 end subroutine size_dist_param_basic_vect
+
+! ice routine for getting size distribution parameters.
+elemental subroutine size_dist_param_ice_line(props, qic, nic, lam, n0)
+  type(MGHydrometeorProps), intent(in) :: props
+  real(r8), intent(in) :: qic
+  real(r8), intent(inout) :: nic
+
+  real(r8), intent(out) :: lam
+  real(r8):: miu_ice,tx1,tx2, aux
+  real(r8), intent(out), optional :: n0
+  logical, parameter  ::  ice_sep=.true.
+
+  if (qic > qsmall) then
+
+     ! add upper limit to in-cloud number concentration to prevent
+     ! numerical error
+     if (limiter_is_on(props%min_mean_mass)) then
+        nic = min(nic, qic / props%min_mean_mass)
+     end if
+
+     ! lambda = (c n/q)^(1/d)
+     lam = (props%shape_coef * nic/qic)**(1._r8/props%eff_dim)
+     if (ice_sep) then
+       miu_ice = max(min(0.008_r8*(lam*0.01)**0.87_r8, 10.0_r8), 0.1_r8)
+       tx1 = 1. + miu_ice
+       tx2 = 1. / gamma(tx1)
+       aux = (gamma(tx1+3.)*tx2) ** (1./3.)
+       lam = lam*aux
+     else
+       aux = 1.
+       tx1 = 1.0
+       tx2 = 1.0
+     end if
+     if (present(n0)) n0 = nic * lam**tx1*tx2
+
+     ! check for slope
+     ! adjust vars
+     if (lam < props%lambda_bounds(1)*aux) then
+        lam = props%lambda_bounds(1)
+        nic = lam**(props%eff_dim) * qic/props%shape_coef
+        if (present(n0)) n0 = nic * lam
+     else if (lam > props%lambda_bounds(2)*aux) then
+        lam = props%lambda_bounds(2)
+        nic = lam**(props%eff_dim) * qic/props%shape_coef
+        if (present(n0)) n0 = nic * lam
+     end if
+
+  else
+     lam = 0._r8
+  end if
+
+
+end subroutine size_dist_param_ice_line
+
+subroutine size_dist_param_ice_vect(props, qic, nic, lam, mgncol, n0)
+
+  type (mghydrometeorprops), intent(in) :: props
+  integer,                          intent(in) :: mgncol
+  real(r8), dimension(mgncol), intent(in) :: qic
+  real(r8), dimension(mgncol), intent(inout) :: nic
+  real(r8), dimension(mgncol), intent(out) :: lam
+  real(r8), dimension(mgncol), intent(out), optional :: n0
+  real(r8) :: miu_ice,tx1,tx2, aux
+  integer :: i
+  logical, parameter  ::  ice_sep=.true.
+  do i=1,mgncol
+
+     if (qic(i) > qsmall) then
+
+        ! add upper limit to in-cloud number concentration to prevent
+        ! numerical error
+        if (limiter_is_on(props%min_mean_mass)) then
+           nic(i) = min(nic(i), qic(i) / props%min_mean_mass)
+        end if
+
+        ! lambda = (c n/q)^(1/d)
+        lam(i) = (props%shape_coef * nic(i)/qic(i))**(1._r8/props%eff_dim)
+        if (ice_sep) then
+           miu_ice = max(min(0.008_r8*(lam(i)*0.01)**0.87_r8, 10.0_r8), 0.1_r8)
+           tx1    = 1. + miu_ice
+           tx2    = 1. / gamma(tx1)
+           aux    = (gamma(tx1+3.)*tx2) ** (1./3.)
+           lam(i) = lam(i)*aux
+        else
+           aux = 1.
+           tx1 = 1.0
+           tx2 = 1.0
+        end if
+        if (present(n0)) n0(i) = nic(i) * lam(i)**tx1*tx2
+
+        ! check for slope
+        ! adjust vars
+        if (lam(i) < props%lambda_bounds(1)*aux) then
+           lam(i) = props%lambda_bounds(1)
+           nic(i) = lam(i)**(props%eff_dim) * qic(i)/props%shape_coef
+           if (present(n0)) n0(i) = nic(i) * lam(i)
+        else if (lam(i) > props%lambda_bounds(2)*aux) then
+           lam(i) = props%lambda_bounds(2)
+           nic(i) = lam(i)**(props%eff_dim) * qic(i)/props%shape_coef
+           if (present(n0)) n0(i) = nic(i) * lam(i)
+        end if
+
+     else
+        lam(i) = 0._r8
+     end if
+
+  enddo
+
+end subroutine size_dist_param_ice_vect
 
 
 real(r8) elemental function avg_diameter(q, n, rho_air, rho_sub)
@@ -711,7 +865,8 @@ subroutine ice_deposition_sublimation(t, qv, qi, ni, &
         !Compute linearized condensational heating correction
         ab = calc_ab(t(i), qvi(i), xxls)
         !Get slope and intercept of gamma distn for ice.
-        call size_dist_param_basic(mg_ice_props, qiic, niic, lami, n0i)
+!       call size_dist_param_basic(mg_ice_props, qiic, niic, lami, n0i)
+        call size_dist_param_ice(mg_ice_props, qiic, niic, lami, n0i)
         !Get depletion timescale=1/eps
         epsi = twopi*n0i*rho(i)*Dv(i)/(lami*lami)
 
@@ -901,26 +1056,28 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
        real(r8), dimension(mgncol), intent (out) :: nprc1
        real(r8), dimension(mgncol), intent (out) :: nprc
        real(r8) :: xs,lw, nw, beta6
-       real(r8), parameter :: dcrit=1.0e-6, miu_disp=1.
+!      real(r8), parameter :: dcrit=1.0e-6, miu_disp=1.
+!      real(r8), parameter :: dcrit=1.0e-3, miu_disp=1.
+       real(r8), parameter :: dcrit=2.0e-3, miu_disp=0.8
        integer ::  i
 
        do i=1,mgncol
          if (qc(i) > qsmall) then
-           xs    = 1. / (1.+pgam(i))
-           beta6 = (1.+3.0*xs)*(1.+4.0*xs)*(1.+5.0*xs)  &
-                 / ((1.+xs)*(1.+xs+xs))
+           xs    = one / (one+pgam(i))
+           beta6 = (one+three*xs)*(one+four*xs)*(one+five*xs)  &
+                 / ((one+xs)*(one+xs+xs))
            LW    = 1.0e-3_r8 * qc(i) * rho(i)
            NW    = nc(i) * rho(i)  * 1.e-6_r8
 
            xs    = min(20.0, 1.03e16*(LW*LW)/(NW*SQRT(NW)))
            au(i) = 1.1e10*beta6*LW*LW*LW                &
-                 * (1.-exp(-(xs**miu_disp))) / NW
+                 * (one-exp(-(xs**miu_disp))) / NW
            au(i) = au(i)*1.0e3/rho(i)
-           au(i) = au(i) * gamma(2.+relvar(i))          &
+           au(i) = au(i) * gamma(two+relvar(i))          &
                  / (gamma(relvar(i))*(relvar(i)*relvar(i)))
 
-           au(i)   = au(i)*dcrit
-           nprc1(i)= au(i) * two/2.6e-7_r8*1000._r8
+           au(i)   = au(i) * dcrit
+           nprc1(i)= au(i) * (two/2.6e-7_r8*1000._r8)
            nprc(i) = au(i) / droplet_mass_40um
          else
            au(i)    = zero
@@ -1052,7 +1209,7 @@ subroutine gmao_ice_autoconversion(t, qiic, niic, lami, n0i,        &
 
 
       real(r8) :: m_ip, tx1, tx2
-      integer :: i
+      integer  :: i
       do i=1,mgncol
         if (t(i) <= tmelt .and. qiic(i) >= qsmall) then
            m_ip = max(min(0.008_r8*(lami(i)*0.01)**0.87_r8,  &
@@ -2014,19 +2171,19 @@ subroutine graupel_collecting_cld_water(qgic,qcic,ncic,rho,n0g,lamg,bg,agn, &
   real(r8) :: cons, tx1
   integer :: i
 
-  cons = gamma(bg + 3._r8)*pi/4._r8 * ecid
+  cons = gamma(bg+three) * pi/four * ecid
 
   do i=1,mgncol
 
         if (qgic(i) >= 1.e-8 .and. qcic(i) >= qsmall) then
 
-           tx1 = cons*agn(i)*rho(i)*n0g(i) / lamg(i)**(bg+3.)
+           tx1 = cons*agn(i)*rho(i)*n0g(i) / lamg(i)**(bg+three)
 
            psacwg(i)  = tx1 * qcic(i)
            npsacwg(i) = tx1 * ncic(i)
         else
-           psacwg(i)  = 0._r8
-           npsacwg(i) = 0._r8
+           psacwg(i)  = zero
+           npsacwg(i) = zero
         end if
      enddo
 end subroutine graupel_collecting_cld_water
@@ -2529,8 +2686,7 @@ FUNCTION gamma_incomp(muice, x)
   xog  = log(alfa -0.3068_r8)
   kg   = 1.44818*(alfa**0.5357_r8)
   auxx = max(min(kg*(log(x)-xog), 30._r8), -30._r8)
-  gamma_incomp = one / (one +exp(-auxx))
-  gamma_incomp = max(gamma_incomp, 1.0e-20)
+  gamma_incomp = max(one/(one+exp(-auxx)), 1.0e-20) 
 
 END FUNCTION gamma_incomp
 

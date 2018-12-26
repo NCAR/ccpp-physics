@@ -446,7 +446,7 @@
 !  --- ...  lai sfc-perts, mgehne
 !> - Calculate perturbated leaf area index.
       xlai = xlai * (1.+xlaip)
-      xlai = amax1(xlai, .75)
+      xlai = max(xlai, .75)
 
 !> - Initialize precipitation logicals.
 
