@@ -201,7 +201,7 @@ module lsm_ruc
 !! | qsurf           | surface_specific_humidity                                                    | surface air saturation specific humidity                        | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | sfcqc           | cloud_condensed_water_mixing_ratio_at_surface                                | moist cloud water mixing ratio at surface                       | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | sfcqv           | water_vapor_mixing_ratio_at_surface                                          | water vapor mixing ratio at surface                             | kg kg-1       |    1 | real      | kind_phys | none   | F        |
-!! | sfcdew          | surface_condensation_mass                                                    | surface condensation mass                                       | kg m-2        |    1 | real      | kind_phys | out    | F        |
+!! | sfcdew          | surface_condensation_mass                                                    | surface condensation mass                                       | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | tg3             | deep_soil_temperature                                                        | deep soil temperature                                           | K             |    1 | real      | kind_phys | in     | F        |
 !! | smc             | volume_fraction_of_soil_moisture                                             | total soil moisture                                             | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | slc             | volume_fraction_of_unfrozen_soil_moisture                                    | liquid soil moisture                                            | frac          |    2 | real      | kind_phys | inout  | F        |
@@ -350,14 +350,14 @@ module lsm_ruc
       real (kind=kind_phys),dimension (im,1)        ::                  &
      &     albbck, alb, chs, flhc, flqc, wet, smmax, cmc,               &
      &     dew, drip,  ec, edir, ett, lh, esnow, etp, qfx,              &
-     &     acceta, ffrozp, lwdn, prcp, xland, xice,                 &
+     &     acceta, ffrozp, lwdn, prcp, xland, xice,                     &
      &     graupelncv, snowncv, rainncv, raincv,                        &
      &     solnet, sfcexc,                                              &
      &     runoff1, runoff2, acrunoff,                                  &
      &     sfcems, hfx, shdfac, shdmin1d, shdmax1d,                     &
      &     sneqv, snoalb1d, snowh, snoh, tsnav,                         &
      &     snomlt, sncovr, soilw, soilm, ssoil, soilt, tbot,            &
-     &     xlai, swdn, z0, znt, rhosnfr, infiltr,                 &
+     &     xlai, swdn, z0, znt, rhosnfr, infiltr,                       &
      &     precipfr, snfallac, acsn,                                    &
      &     qsfc, qsg, qvg, qcg, soilt1, chklowq
 
@@ -407,7 +407,7 @@ module lsm_ruc
       endif
       allocate(landusef(im,nlcat,1))
 
-      !if(debug_print) then
+      if(debug_print) then
         print *,'RUC LSM run'
         print *,'noah soil temp',ipr,stc(ipr,:)
         print *,'noah soil mois',ipr,smc(ipr,:)
@@ -416,7 +416,7 @@ module lsm_ruc
         print *,'kdt, iter =',kdt,iter
         print *,'flag_init =',flag_init
         print *,'flag_restart =',flag_restart
-      !endif
+      endif
 
 ! RUC initialization
       if(flag_init .and. iter==1) then
@@ -609,7 +609,7 @@ module lsm_ruc
         if (flag_iter(i) .and. flag(i)) then
 
         if(.not.frpcpn) then ! no mixed-phase precipitation available
-          if     (srflag(i) == 1.0) then  ! snow phase
+          if (srflag(i) == 1.0) then  ! snow phase
             ffrozp(i,j) = 1.0
           elseif (srflag(i) == 0.0) then  ! rain phase
             ffrozp(i,j) = 0.0
@@ -618,12 +618,12 @@ module lsm_ruc
             ffrozp(i,j) = sr(i)
         endif ! frpcpn
 
-          !tgs - for now set rdlai2d to .false., WRF has LAI maps, and RUC LSM
-          !      uses rdlai2d = .true.
-          rdlai2d = .false.
-          !if( .not. rdlai2d) xlai = lai_data(vtype)
+        !tgs - for now set rdlai2d to .false., WRF has LAI maps, and RUC LSM
+        !      uses rdlai2d = .true.
+        rdlai2d = .false.
+        !if( .not. rdlai2d) xlai = lai_data(vtype)
 
-          conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
+        conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
 
 !>  -   2. forcing data (f):
 !!\n  ---------------------------------------
@@ -633,11 +633,11 @@ module lsm_ruc
 !!\n  \a qcatm   - cloud water mising ration at height zf above ground (\f$kg !kg^{-1}\f$)
 !!\n  \a rho2    - air density at height zf above ground (pascals)
 
-          sfcprs(i,1,j)  = prsl1(i)
-          sfctmp(i,1,j)  = t1(i)
-          q2(i,1,j)      = q0(i)
-          qcatm(i,1,j)   = max(0., qc(i))
-          rho2(i,1,j)    = rho(i)
+        sfcprs(i,1,j)  = prsl1(i)
+        sfctmp(i,1,j)  = t1(i)
+        q2(i,1,j)      = q0(i)
+        qcatm(i,1,j)   = max(0., qc(i))
+        rho2(i,1,j)    = rho(i)
 
 !!\n  ---------------------------------------
 !!\n  \a lwdn    - lw dw radiation flux at surface (\f$W m^{-2}\f$)
@@ -654,28 +654,28 @@ module lsm_ruc
 !!\n  \a qsg     - saturated water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
 !!\n  \a qcg     - cloud water mixing ratio at surface (\f$kg kg^{-1}\f$)
 
-          lwdn(i,j)   = dlwflx(i)         !..downward lw flux at sfc in w/m2
-          swdn(i,j)   = dswsfc(i)         !..downward sw flux at sfc in w/m2
-          solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
+        lwdn(i,j)   = dlwflx(i)         !..downward lw flux at sfc in w/m2
+        swdn(i,j)   = dswsfc(i)         !..downward sw flux at sfc in w/m2
+        solnet(i,j) = dswsfc(i)*(1.-sfalb(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
 
-          ! all precip input to RUC LSM is in [mm]
-          !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
-          !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
-          !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
-          !graupelncv(i,j) = rhoh2o * graupel(i)
-          !snowncv(i,j)    = rhoh2o * snow(i)
-          prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
-          raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
-          rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
-          graupelncv(i,j) = rhoh2o * graupel(i)
-          snowncv(i,j)    = rhoh2o * snow(i)
-          ! ice not used
-          ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
+        ! all precip input to RUC LSM is in [mm]
+        !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
+        !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
+        !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
+        !graupelncv(i,j) = rhoh2o * graupel(i)
+        !snowncv(i,j)    = rhoh2o * snow(i)
+        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
+        raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
+        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
+        graupelncv(i,j) = rhoh2o * graupel(i)
+        snowncv(i,j)    = rhoh2o * snow(i)
+        ! ice not used
+        ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
-          qvg(i,j)    = sfcqv(i)
-          qsfc(i,j)   = sfcqv(i)/(1.+sfcqv(i))
-          qsg(i,j)    = rslf(prsl1(i),tsurf(i))
-          qcg(i,j)    = sfcqc(i) 
+        qvg(i,j)    = sfcqv(i)
+        qsfc(i,j)   = sfcqv(i)/(1.+sfcqv(i))
+        qsg(i,j)    = rslf(prsl1(i),tsurf(i))
+        qcg(i,j)    = sfcqc(i) 
 
 !>  -   3. canopy/soil characteristics (s):
 !!\n      ------------------------------------
@@ -690,45 +690,45 @@ module lsm_ruc
 !!\n \a sfalb  - surface albedo including snow effect (unitless fraction) -> alb
 !!\n \a tbot    - bottom soil temperature (local yearly-mean sfc air temp)
 
-      if(ivegsrc == 1) then   ! IGBP - MODIS
-      !> - Prepare land/ice/water masks for RUC LSM
-      !SLMSK0   - SEA(0),LAND(1),ICE(2) MASK
-       if(islmsk(i) == 0.) then
-           vtype(i,j) = 17 ! 17 - water (oceans and lakes) in MODIS
-           stype(i,j) = 14
-           xland(i,j) = 2. ! xland = 2 for water
-           xice(i,j)  = 0.
-       elseif(islmsk(i) == 1.) then ! land
-           vtype(i,j) = vegtype(i)
-           stype(i,j) = soiltyp(i)
-           xland(i,j)  = 1.
-           xice(i,j)   = 0.
-       elseif(islmsk(i) == 2) then  ! ice
-           vtype(i,j) = 15 ! MODIS
-          if(isot == 0) then
+        if(ivegsrc == 1) then   ! IGBP - MODIS
+        !> - Prepare land/ice/water masks for RUC LSM
+        !SLMSK0   - SEA(0),LAND(1),ICE(2) MASK
+          if(islmsk(i) == 0.) then
+            vtype(i,j) = 17 ! 17 - water (oceans and lakes) in MODIS
+            stype(i,j) = 14
+            xland(i,j) = 2. ! xland = 2 for water
+            xice(i,j)  = 0.
+          elseif(islmsk(i) == 1.) then ! land
+            vtype(i,j) = vegtype(i)
+            stype(i,j) = soiltyp(i)
+            xland(i,j) = 1.
+            xice(i,j)  = 0.
+          elseif(islmsk(i) == 2) then  ! ice
+            vtype(i,j) = 15 ! MODIS
+            if(isot == 0) then
               stype(i,j) = 9  ! ZOBLER
-          else
+            else
               stype(i,j) = 16 ! STASGO
+            endif
+            xland(i,j) = 1.
+            xice(i,j) = fice(i)  ! fraction of sea-ice
           endif
-           xland(i,j)    = 1.
-           xice(i,j) = fice(i)  ! fraction of sea-ice
-       endif
-      else
-        print *,'MODIS landuse is not available'
-      endif
+        else
+          print *,'MODIS landuse is not available'
+        endif
 
-          ! --- units %
-          shdfac(i,j) = sigmaf(i)*100.
-          shdmin1d(i,j) = shdmin(i)*100.
-          shdmax1d(i,j) = shdmax(i)*100.
+        ! --- units %
+        shdfac(i,j) = sigmaf(i)*100.
+        shdmin1d(i,j) = shdmin(i)*100.
+        shdmax1d(i,j) = shdmax(i)*100.
 
-          sfcems(i,j) = sfcemis(i)
+        sfcems(i,j) = sfcemis(i)
 
-          snoalb1d(i,j) = snoalb(i)
-          albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
-          alb(i,j)      = sfalb(i)
+        snoalb1d(i,j) = snoalb(i)
+        albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
+        alb(i,j)      = sfalb(i)
 
-          tbot(i,j) = tg3(i)
+        tbot(i,j) = tg3(i)
 
 !>  -   4. history (state) variables (h):
 !!\n      ------------------------------
@@ -747,8 +747,8 @@ module lsm_ruc
 !!\n \a ch         - surface exchange coefficient for heat (\f$m s^{-1}\f$)      -> chs
 !!\n \a z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
 
-          cmc(i,j) = canopy(i)            !  [mm] 
-          soilt(i,j) = tsurf(i)            ! clu_q2m_iter
+        cmc(i,j) = canopy(i)            !  [mm] 
+        soilt(i,j) = tsurf(i)            ! clu_q2m_iter
         ! sanity check for snow temperature tsnow
         if (tsnow(i) > 0. .and. tsnow(i) < 273.15) then
           soilt1(i,j) = tsnow(i)
@@ -815,7 +815,7 @@ module lsm_ruc
         znt(i,j) = zorl(i)/100.
 
         if(debug_print) then
-          if(me==0 .and. i==ipr) then
+          !if(me==0 .and. i==ipr) then
             print *,'before RUC smsoil = ',smsoil(i,:,j), i,j
             print *,'stsoil = ',stsoil(i,:,j), i,j
             print *,'soilt = ',soilt(i,j), i,j
@@ -909,7 +909,7 @@ module lsm_ruc
             print *,'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             print *,'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             print *,'rdlai2d =',rdlai2d
-          endif
+          !endif
         endif
 
 !> - Call RUC LSM lsmruc(). 
@@ -996,14 +996,14 @@ module lsm_ruc
 !!\n \a snoh    - phase-change heat flux from snowmelt (w m-2)
 !
         if(debug_print) then
-          if(me==0.and.i==ipr) then
+          !if(me==0.and.i==ipr) then
             print *,'after  RUC smsoil = ',smsoil(i,:,j), i, j
             print *,'stsoil = ',stsoil(i,:,j), i,j
             print *,'soilt = ',soilt(i,j), i,j
             print *,'wet = ',wet(i,j), i,j
             print *,'soilt1 = ',soilt1(i,j), i,j
             print *,'rhosnfr = ',rhosnfr(i,j), i,j
-          endif
+          !endif
         endif
 
         ! Interstitial
