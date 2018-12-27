@@ -413,7 +413,7 @@ CONTAINS
 !--- Initialize soil/vegetation parameters
 !--- This is temporary until SI is added to mass coordinate ---!!!!!
 
-     if(init .and. iter == 1) then
+     if(init .and. (.not. restart) .and. iter == 1) then
      DO J=jts,jte
          DO i=its,ite
 !            do k=1,nsl
@@ -428,13 +428,13 @@ CONTAINS
 !--- initializing inside snow temp if it is not defined
         IF((soilt1(i,j) .LT. 170.) .or. (soilt1(i,j) .GT.400.)) THEN
             IF(snow(i,j).gt.32.) THEN
-           soilt1(i,j)=0.5*(soilt(i,j)+tso(i,1,j))
-    IF (debug_print ) THEN
-        print *, &
-       'Temperature inside snow is initialized in RUCLSM ', soilt1(i,j),i,j
-    ENDIF
+              soilt1(i,j)=0.5*(soilt(i,j)+tso(i,1,j))
+              IF (debug_print ) THEN
+                  print *, &
+                 'Temperature inside snow is initialized in RUCLSM ', soilt1(i,j),i,j
+              ENDIF
             ELSE
-           soilt1(i,j) = tso(i,1,j)
+              soilt1(i,j) = tso(i,1,j)
             ENDIF
         ENDIF
            tsnav(i,j) =0.5*(soilt(i,j)+tso(i,1,j))-273.15
