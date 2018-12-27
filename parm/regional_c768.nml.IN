@@ -12,7 +12,6 @@
      chksum_debug = .false.
      dycore_only = .false.
      fdiag = 1
-     ccpp_suite = 'ccpp_suite.xml'
 /
 
 &diag_manager_nml
@@ -159,17 +158,11 @@
        ivegsrc        = 1
        isot           = 1
        debug          = .false.
-       oz_phys        = .true.
-       oz_phys_2015   = .false.
        nstf_name      = 1,1,1,0,5
        cplflx         = .F.
        iau_delthrs    = 6
        iaufhrs        = 30
        iau_inc_files  = ''
-       do_sppt        = @[DO_SPPT]
-       do_shum        = @[DO_SHUM]
-       do_skeb        = @[DO_SKEB]
-       do_sfcperts    = @[DO_SFCPERTS]
 /
 
   &interpolator_nml
