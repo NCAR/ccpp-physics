@@ -166,6 +166,7 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%f10m'     , Sfcprop%f10m)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tprcp'    , Sfcprop%tprcp)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%srflag'   , Sfcprop%srflag)
+                     call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%sr'       , Sfcprop%sr)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%slc'      , Sfcprop%slc)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%smc'      , Sfcprop%smc)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%stc'      , Sfcprop%stc)
@@ -198,6 +199,7 @@
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%zs',          Sfcprop%zs)
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%qwv_surf',    Sfcprop%qwv_surf)
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
                         call print_var(mpirank,omprank, Tbd%blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
@@ -821,7 +823,7 @@
          errmsg = ''
          errflg = 0
 
-         !if (Model%kdt==3) then
+         !if (Model%kdt==4) then
              if (Model%me==0) write(0,*) "GFS_abort_run: ABORTING MODEL"
              call sleep(10)
              stop
