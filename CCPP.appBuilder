@@ -4,7 +4,7 @@
 
 COMPONENTS=( CCPP FMS FV3 )
 
-FV3_MAKEOPT="CCPP=Y"
+FV3_MAKEOPT="CCPP=Y HYBRID=N STATIC=Y SUITE=suite_FV3_GFS_2017_updated.xml"
 
 # The modules.nems and configure.nems are selected by
 # conf/before_appbuilder_file.mk.

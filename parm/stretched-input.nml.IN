@@ -153,10 +153,9 @@
        ivegsrc        = 1
        isot           = 1
        debug          = .false.
-	   cdmbgwd = 3.5,0.25
-	   dspheat = .T.
-	   hybedmf = .F.
-	   shal_cnv = .T. !Shallow convection
+       cdmbgwd        = 3.5,0.25
+       dspheat        = .T.
+       shal_cnv       = .T. !Shallow convection
 /
 
 &interpolator_nml

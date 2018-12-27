@@ -37,13 +37,14 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/iccn_def.F',
     'ccpp/physics/physics/iccninterp.F90',
     'ccpp/physics/physics/iounitdef.f',
-    'ccpp/physics/physics/machine.F', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/machine.F',
     'ccpp/physics/physics/mersenne_twister.f',
     'ccpp/physics/physics/mfpbl.f',
     'ccpp/physics/physics/micro_mg_utils.F90',
     'ccpp/physics/physics/micro_mg2_0.F90',
     'ccpp/physics/physics/micro_mg3_0.F90',
     'ccpp/physics/physics/module_bfmicrophysics.f',
+    'ccpp/physics/physics/module_gfdl_cloud_microphys.F90',
     'ccpp/physics/physics/module_nst_model.f90',
     'ccpp/physics/physics/module_nst_parameters.f90',
     'ccpp/physics/physics/module_nst_water_prop.f90',
@@ -58,7 +59,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/ozne_def.f',
     'ccpp/physics/physics/ozinterp.f90',
     'ccpp/physics/physics/physcons.F90',
-    'ccpp/physics/physics/physparam.f', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/physparam.f',
     'ccpp/physics/physics/radcons.f90',
     'ccpp/physics/physics/radiation_aerosols.f',
     'ccpp/physics/physics/radiation_astronomy.f',
@@ -319,7 +320,7 @@ MODULE_USE_TEMPLATE_SCHEME_CAP = \
    use machine, only: kind_grid, kind_phys
    use module_radlw_parameters, only: sfcflw_type, topflw_type
    use module_radsw_parameters, only: cmpfsw_type, sfcfsw_type, topfsw_type
-   use CCPP_typedefs, only: CCPP_interstitial_type
+   use CCPP_typedefs, only: CCPP_interstitial_type, kind_dyn
    use GFS_typedefs, only: GFS_statein_type,  GFS_stateout_type,    &
                            GFS_sfcprop_type,  GFS_coupling_type,    &
                            GFS_control_type,  GFS_grid_type,        &

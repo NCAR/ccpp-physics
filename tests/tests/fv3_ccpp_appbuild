@@ -1,12 +1,18 @@
 ###############################################################################
 #
-#  FV3 control compiled with 32-bit dynamics test
+#  FV3 CCPP control test
 #
 ###############################################################################
 
-export TEST_DESCR="Compare FV3 32bit control results with previous trunk version"
-
-export CNTL_DIR=fv3_control_32bit
+# Until there is a way to pass the REPRO=Y flag to NEMSAppBuilder, need separate
+# control directory for Cheyenne/Intel (as fv3_control, but with REPRO=N)
+if [[ $MACHINE_ID = cheyenne.intel ]]; then
+export TEST_DESCR="Compare FV3 CCPP appbuild results (fv3_control with REPRO=N) with previous trunk version using NEMSAppBuilder"
+export CNTL_DIR=fv3_appbuild
+else
+export TEST_DESCR="Compare FV3 CCPP control results with previous trunk version using NEMSAppBuilder"
+export CNTL_DIR=fv3_control
+fi
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -74,5 +80,10 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
 
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
+
+export FV3_RUN=ccpp_control_run.IN
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated.xml
+export CCPP_LIB_DIR=ccpp/lib
+export INPUT_NML=ccpp_control.nml.IN
 
 RUN_SCRIPT=rt_fv3.sh

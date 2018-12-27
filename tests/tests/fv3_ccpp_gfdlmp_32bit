@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 control compiled with 32-bit dynamics test
+#  FV3 CCPP GFDL-MP compiled with 32-bit dynamics test
 #
 ###############################################################################
 
-export TEST_DESCR="Compare FV3 32bit control results with previous trunk version"
+export TEST_DESCR="Compare FV3 32bit CCPP GFDL-MP results with previous trunk version"
 
-export CNTL_DIR=fv3_control_32bit
+export CNTL_DIR=fv3_gfdlmp_32bit
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -58,21 +58,28 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
                    RESTART/fv_tracer.res.tile4.nc \
                    RESTART/fv_tracer.res.tile5.nc \
                    RESTART/fv_tracer.res.tile6.nc \
-                   RESTART/phy_data.tile1.nc \
-                   RESTART/phy_data.tile2.nc \
-                   RESTART/phy_data.tile3.nc \
-                   RESTART/phy_data.tile4.nc \
-                   RESTART/phy_data.tile5.nc \
-                   RESTART/phy_data.tile6.nc \
                    RESTART/sfc_data.tile1.nc \
                    RESTART/sfc_data.tile2.nc \
                    RESTART/sfc_data.tile3.nc \
                    RESTART/sfc_data.tile4.nc \
                    RESTART/sfc_data.tile5.nc \
-                   RESTART/sfc_data.tile6.nc"
+                   RESTART/sfc_data.tile6.nc \
+                   RESTART/phy_data.tile1.nc \
+                   RESTART/phy_data.tile2.nc \
+                   RESTART/phy_data.tile3.nc \
+                   RESTART/phy_data.tile4.nc \
+                   RESTART/phy_data.tile5.nc \
+                   RESTART/phy_data.tile6.nc"
 
 
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
+
+DT_ATMOS="1200"
+
+export FV3_RUN=ccpp_gfdlmp_run.IN
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_gfdlmp.xml
+export CCPP_LIB_DIR=ccpp/lib
+export INPUT_NML=ccpp_gfdlmp.nml.IN
 
 RUN_SCRIPT=rt_fv3.sh
