@@ -112,7 +112,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
-      string(REPLACE "-fdefault-real-8" "-fdefault-real-4" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      string(REPLACE "-fdefault-real-8" "" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
       SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
     endif (DYN32)
