@@ -152,7 +152,7 @@
        cal_pre        = .false.
        redrag         = .true.
        dspheat        = .false.
-       hybedmf        = .false.
+       hybedmf        = .true.
        satmedmf       = .false.
        random_clds    = .true.
        trans_trac     = .true.
