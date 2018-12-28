@@ -610,7 +610,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 
               CALL  mynn_bl_driver(                                    &
-     &             initflag=initflag,grav_settling=grav_settling,      &
+     &             initflag=initflag,restart=flag_restart,             &
+     &             grav_settling=grav_settling,                        &
      &             delt=delt,dz=dz,dx=dx,znt=znt,                      &
      &             u=u,v=v,w=w,th=th,qv=qv,qc=qc,                      &
      &             qi=qi,qni=qni,qnc=qnc,                              &
