@@ -3715,7 +3715,7 @@ ENDIF
         end subroutine tridiag3
 ! ==================================================================
   SUBROUTINE mynn_bl_driver(            &
-       &initflag,grav_settling,         &
+       &initflag,restart,grav_settling, &
        &delt,dz,dx,znt,                 &
        &u,v,w,th,qv,qc,qi,qnc,qni,      &
        &qnwfa,qnifa,                    &
@@ -3762,6 +3762,7 @@ ENDIF
 !-------------------------------------------------------------------
 
     INTEGER, INTENT(in) :: initflag
+    LOGICAL, INTENT(IN) :: restart
     !INPUT NAMELIST OPTIONS:
     INTEGER, INTENT(in) :: levflag
     INTEGER, INTENT(in) :: grav_settling
@@ -3954,13 +3955,19 @@ ENDIF
     ENDIF
     maxKHtopdown(its:ite,jts:jte)=0.
 
-    IF (initflag > 0) THEN
- 
-       Sh3D(its:ite,kts:kte,jts:jte)=0.
-       el_pbl(its:ite,kts:kte,jts:jte)=0.
-       tsq(its:ite,kts:kte,jts:jte)=0.
-       qsq(its:ite,kts:kte,jts:jte)=0.
-       cov(its:ite,kts:kte,jts:jte)=0.
+   ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
+   IF (initflag > 0) THEN
+
+       if (.not.restart) THEN
+         Sh3D(its:ite,kts:kte,jts:jte)=0.
+         el_pbl(its:ite,kts:kte,jts:jte)=0.
+         tsq(its:ite,kts:kte,jts:jte)=0.
+         qsq(its:ite,kts:kte,jts:jte)=0.
+         cov(its:ite,kts:kte,jts:jte)=0.
+         cldfra_bl(its:ite,kts:kte,jts:jte)=0.
+         qc_bl(its:ite,kts:kte,jts:jte)=0.
+         qke(its:ite,kts:kte,jts:jte)=0.
+       end if
        dqc1(kts:kte)=0.0
        dqi1(kts:kte)=0.0
        dqni1(kts:kte)=0.0
@@ -4038,7 +4045,11 @@ ENDIF
                    zw(k)=zw(k-1)+dz(i,k-1,j)
                 ENDIF
                 thvl(k)=thl(k)*(1.+0.61*sqv(k))
-                qke1(k)=0.1-MIN(zw(k)*0.001, 0.0) !for initial PBLH calc only
+                if (restart) then
+                   qke1(k) = qke(i,k,j)
+                else
+                   qke1(k)=0.1-MIN(zw(k)*0.001, 0.0) !for initial PBLH calc only
+                end if
                 el(k)=el_pbl(i,k,j)
                 sh(k)=Sh3D(i,k,j)
                 tsq1(k)=tsq(i,k,j)
@@ -4065,6 +4076,7 @@ ENDIF
                 Psig_shcu(i,j)=1.0
              ENDIF
 
+             ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
              CALL mym_initialize (             & 
                   &kts,kte,                    &
                   &dz1, zw, u1, v1, thl, sqv,  &
@@ -4076,19 +4088,21 @@ ENDIF
                   &edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,&
                   &spp_pbl,rstoch_col )
 
-             !UPDATE 3D VARIABLES
-             DO k=KTS,KTE !KTF
-                el_pbl(i,k,j)=el(k)
-                sh3d(i,k,j)=sh(k)
-                qke(i,k,j)=qke1(k)
-                tsq(i,k,j)=tsq1(k)
-                qsq(i,k,j)=qsq1(k)
-                cov(i,k,j)=cov1(k)
-                !ACF,JOE- initialize qke_adv array if using advection
-                IF (bl_mynn_tkeadvect) THEN
-                   qke_adv(i,k,j)=qke1(k)
-                ENDIF
-             ENDDO
+             IF (.not.restart) THEN
+                !UPDATE 3D VARIABLES
+                DO k=KTS,KTE !KTF
+                   el_pbl(i,k,j)=el(k)
+                   sh3d(i,k,j)=sh(k)
+                   qke(i,k,j)=qke1(k)
+                   tsq(i,k,j)=tsq1(k)
+                   qsq(i,k,j)=qsq1(k)
+                   cov(i,k,j)=cov1(k)
+                   !ACF,JOE- initialize qke_adv array if using advection
+                   IF (bl_mynn_tkeadvect) THEN
+                      qke_adv(i,k,j)=qke1(k)
+                   ENDIF
+                ENDDO
+             ENDIF
 
 !***  Begin debugging
 !             k=kdebug
