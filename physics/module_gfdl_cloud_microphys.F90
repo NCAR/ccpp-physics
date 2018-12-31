@@ -1,5 +1,5 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the column GFDL cloud microphysics ( Chen and Lin (2013) 
+!! This file contains the column GFDL cloud microphysics ( Chen and Lin (2013)
 !! \cite chen_and_lin_2013 ).
 !***********************************************************************
 !*                   GNU Lesser General Public License
@@ -772,9 +772,9 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         endif
 
         ! -----------------------------------------------------------------------
-        !> - Calculate horizontal subgrid variability, which is used in cloud 
-        !! fraction, relative humidity calculation, evaporation and condensation 
-        !! processes. Horizontal sub-grid variability is a function of cell area 
+        !> - Calculate horizontal subgrid variability, which is used in cloud
+        !! fraction, relative humidity calculation, evaporation and condensation
+        !! processes. Horizontal sub-grid variability is a function of cell area
         !! and land/sea mask:
         !!\n Over land:
         !!\f[
@@ -784,12 +784,12 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         !!\f[
         !! t_{ocean}=dw_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}
         !!\f]
-        !! where \f$A_{r}\f$ is cell area. \f$dw_{land}=0.16\f$ and \f$dw_{ocean}=0.10\f$ 
+        !! where \f$A_{r}\f$ is cell area. \f$dw_{land}=0.16\f$ and \f$dw_{ocean}=0.10\f$
         !! are base value for sub-grid variability over land and ocean.
         !! The total horizontal sub-grid variability is:
         !!\f[
         !! h_{var}=t_{land}\times fr_{land}+t_{ocean}\times (1-fr_{land})
-        !!\f] 
+        !!\f]
         !!\f[
         !! h_{var}=min[0.2,max(0.01,h_{var})]
         !!\f]
@@ -820,7 +820,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
 
         m2_rain (:, :) = 0.
         m2_sol (:, :) = 0.
-    
+
         !> - Do loop on cloud microphysics sub time step.
         do n = 1, ntimes
 
@@ -863,7 +863,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
             !>   - Call fall_speed() to calculate the fall velocity of cloud ice, snow
             !!     and graupel.
             call fall_speed (ktop, kbot, den, qsz, qiz, qgz, qlz, tz, vtsz, vtiz, vtgz)
-        
+
             !>   - Call terminal_fall() to calculate the terminal fall speed.
             call terminal_fall (dts, ktop, kbot, tz, qvz, qlz, qrz, qgz, qsz, qiz, &
                 dz1, dp1, den, vtgz, vtsz, vtiz, r1, g1, s1, i1, m1_sol, w1)
@@ -1139,7 +1139,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         enddo
 
         ! -----------------------------------------------------------------------
-        !> - Call revap_racc(), to calculate evaporation and accretion 
+        !> - Call revap_racc(), to calculate evaporation and accretion
         !! of rain for the first 1/2 time step.
         ! -----------------------------------------------------------------------
 
@@ -1153,7 +1153,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         endif
 
         ! -----------------------------------------------------------------------
-        !> - Calculate mass flux induced by falling rain 
+        !> - Calculate mass flux induced by falling rain
         !! ( use_ppm =.false, call implicit_fall(): time-implicit monotonic fall scheme.)
         ! -----------------------------------------------------------------------
 
@@ -1194,7 +1194,7 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
             call sedi_heat (ktop, kbot, dp, m1_rain, dz, tz, qv, ql, qr, qi, qs, qg, c_liq)
 
         ! -----------------------------------------------------------------------
-        !> - Call revap_racc() to calculate evaporation and accretion 
+        !> - Call revap_racc() to calculate evaporation and accretion
         !! of rain for the remaing 1/2 time step.
         ! -----------------------------------------------------------------------
 
@@ -1433,7 +1433,7 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
         dm (km) = 0.
 
         ! -----------------------------------------------------------------------
-        !> - Impose the background horizontal variability (\f$h_{var}\f$) that 
+        !> - Impose the background horizontal variability (\f$h_{var}\f$) that
         !! is proportional to the value itself.
         ! -----------------------------------------------------------------------
 
@@ -1455,7 +1455,7 @@ end subroutine linear_prof
 !>\author Shian-Jiann Lin, GFDL
 !!
 !! This scheme is featured with:
-!! - bulk cloud microphysics 
+!! - bulk cloud microphysics
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
 !>\section det_icloud GFDL icloud Detailed Algorithm
@@ -1731,7 +1731,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 ! -----------------------------------------------------------------------
                 !>  - \f$P_{saut}\f$: autoconversion: cloud ice \f$\rightarrow\f$ snow.
                 !!\n similar to Lin et al.(1983) \cite lin_et_al_1983 eq. 21 solved implicitly;
-                !! threshold from wsm6 scheme, Hong et al. (2004) \cite hong_et_al_2004, 
+                !! threshold from wsm6 scheme, Hong et al. (2004) \cite hong_et_al_2004,
                 !! eq (13) : qi0_crt ~0.8e-4.
                 ! -----------------------------------------------------------------------
 
@@ -2349,7 +2349,7 @@ subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
         endif
 
         ! -----------------------------------------------------------------------
-        !> - Compute cloud fraction, assuming subgrid linear distribution in horizontal; 
+        !> - Compute cloud fraction, assuming subgrid linear distribution in horizontal;
         !! this is effectively a smoother for the binary cloud scheme.
         ! -----------------------------------------------------------------------
 
@@ -2810,7 +2810,7 @@ end subroutine check_column
 
 ! =======================================================================
 !>\ingroup gfdlmp
-!>@brief The subroutine computes the time-implicit monotonic 
+!>@brief The subroutine computes the time-implicit monotonic
 !! fall scheme.
 !>@author Shian-Jiann Lin, 2016
 ! =======================================================================
@@ -3504,7 +3504,7 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
         write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
         stop
     else
-        open (unit = nlunit, file = fn_nml, readonly, status = 'old', iostat = ios)
+        open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
     endif
     rewind (nlunit)
     read (nlunit, nml = gfdl_cloud_microphysics_nml)
@@ -3752,7 +3752,7 @@ subroutine qsmith_init
        des2 (length) = des2 (length - 1)
        des3 (length) = des3 (length - 1)
        desw (length) = desw (length - 1)
-    
+
         tables_are_initialized = .true.
 
     endif
@@ -3791,7 +3791,7 @@ end function wqs1
 ! =======================================================================
 ! compute the gradient of saturated specific humidity for table ii
 !>@brief The function 'wqs2' returns the saturation vapor pressure over pure
-!! liquid water for a given temperature and air density, as well as the 
+!! liquid water for a given temperature and air density, as well as the
 !! analytic dqs/dT: rate of change of saturation vapor pressure WRT temperature.
 ! =======================================================================
 
@@ -4668,7 +4668,7 @@ end subroutine interpolate_z
 
 ! =======================================================================
 !> \ingroup gfdlmp
-!>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud 
+!>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud
 !! species.
 ! =======================================================================
 
