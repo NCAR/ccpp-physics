@@ -22,8 +22,7 @@
 
 !>\defgroup GFS_ozphys_2015 GFS ozphys_2015 Main
 !! @{
-!! \brief The operational GFS currently parameterizes ozone production
-!and
+!! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model

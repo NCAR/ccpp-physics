@@ -1,3 +1,4 @@
+!>\file sfc_drv_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
 module lsm_ruc
@@ -136,8 +137,8 @@ module lsm_ruc
 !  ====================    end of description    =====================  !
 
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
-#if 0
 !! @{
+#if 0
 !! \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !|-------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|

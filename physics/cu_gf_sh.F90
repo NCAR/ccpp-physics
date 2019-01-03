@@ -1,5 +1,11 @@
-! module cup_gf_sh will call shallow convection as described in grell and
-! freitas (2016). input variables are:
+!>\file cu_gf_sh.F90
+!! This file contains
+
+!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
+!> \ingroup cu_gf_group
+!! @{
+!! module cup_gf_sh will call shallow convection as described in grell and
+!! freitas (2016). input variables are:
 !    zo               height at model levels
 !    t,tn             temperature without and with forcing at model levels
 !    q,qo             mixing ratio without and with forcing at model levels
@@ -51,17 +57,53 @@ module cu_gf_sh
 
 contains
 
-  subroutine cu_gf_sh_run (                                            &
-! input variables, must be supplied
-                         zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
+!> This subroutine calculates
+!!\param    zo               height at model levels
+!!\param    t,tn             temperature without and with forcing at model levels
+!    q,qo             mixing ratio without and with forcing at model levels
+!    po               pressure at model levels (mb)
+!    psur             surface pressure (mb)
+!    z1               surface height
+!    dhdt             forcing for boundary layer equilibrium
+!    hfx,qfx          in w/m2 (positive, if upward from sfc)
+!    kpbl             level of boundaty layer height
+!    xland            land mask (1. for land)
+!    ichoice          which closure to choose
+!                     1: old g
+!                     2: zws
+!                     3: dhdt
+!                     0: average
+!    tcrit            parameter for water/ice conversion (258)
+!
+!!!!!!!!!!!! variables that are diagnostic
+!
+!    zuo               normalized mass flux profile
+!    xmb_out           base mass flux
+!    kbcon             convective cloud base
+!    ktop              cloud top
+!    k22               level of updraft originating air
+!    ierr              error flag
+!    ierrc             error description
+!
+!!!!!!!!!!!! variables that are on output
+!    outt               temperature tendency (k/s)
+!    outq               mixing ratio tendency (kg/kg/s)
+!    outqc              cloud water/ice tendency (kg/kg/s)
+!    pre                precip rate (mm/s)
+!    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)
+!                       this needs heavy tuning factors, since cloud fraction is
+!                       not included (kg/kg)
+!    cnvwt              required for gfs physics
+!
+!    itf,ktf,its,ite, kts,kte are dimensions
+!    ztexec,zqexec    excess temperature and moisture for updraft
+
+  subroutine cu_gf_sh_run (                                         & 
+                         zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
-! input variables. ierr should be initialized to zero or larger than zero for
-! turning off shallow convection for grid points
-                         zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
-! output tendencies
-                         outt,outq,outqc,cnvwt,pre,cupclw,          &
-! dimesnional variables
-                         itf,ktf,its,ite, kts,kte,ipr,tropics)
+                         zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     & ! input variables. ierr should be initialized to zero or larger than zero for turning off shallow convection for grid points
+                         outt,outq,outqc,cnvwt,pre,cupclw,          & ! output tendencies
+                         itf,ktf,its,ite, kts,kte,ipr,tropics)        ! dimesnional variables
 !
 ! this module needs some subroutines from gf_deep
 !
@@ -849,3 +891,4 @@ contains
 
    end subroutine cu_gf_sh_run
 end module cu_gf_sh
+!! @}

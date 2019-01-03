@@ -285,7 +285,7 @@ module cs_conv
    subroutine cs_conv_finalize()
    end subroutine cs_conv_finalize
 
-!>\defgroup cs_scheme Chikira-Sugiyama convective scheme Main
+!>\defgroup cs_scheme Chikira-Sugiyama Cumulus Scheme Main
 !! @{
 !> \brief The subroutine contains the entirety of the Chikira-Sugiyama convection scheme.
 !!

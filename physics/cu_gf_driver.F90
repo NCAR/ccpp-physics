@@ -58,8 +58,10 @@ contains
 ! t = current temp (t2di + physics up to now)
 !===================
 
-!> \defgroup cu_gf_driver_group GSD Grell-Freitas Scheme Module
+!> \defgroup cu_gf_group Scale-Aware Grell-Freitas Cumulus Scheme Main
 !! @{
+
+!> \defgroup cu_gf_driver_group Grell-Freitas Cumulus Scheme Driver Module 
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
