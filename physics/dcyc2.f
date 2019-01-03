@@ -5,6 +5,12 @@
 !! calculation time interval into model's more frequent time steps.
       module dcyc2t3
 
+      implicit none
+
+      private
+
+      public :: dcyc2t3_init, dcyc2t3_run, dcyc2t3_finalize
+
       contains
 
 !! \section arg_table_dcyc2t3_init Argument Table
@@ -184,6 +190,7 @@
 !! | ix             | horizontal_dimension                                                                           | horizontal dimension                                                                                 | count   |    0 | integer   |           | in     | F        |
 !! | im             | horizontal_loop_extent                                                                         | horizontal loop extent                                                                               | count   |    0 | integer   |           | in     | F        |
 !! | levs           | vertical_dimension                                                                             | number of vertical layers                                                                            | count   |    0 | integer   |           | in     | F        |
+!! | deltim         | time_step_for_dynamics                                                                         | dynamics timestep                                                                                    | s       |    0 | real      | kind_phys | in     | F        |
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                               | total radiative heating rate at current time                                                         | K s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky                        | clear sky radiative (shortwave + longwave) heating rate at current time                              | K s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | adjsfcdsw      | surface_downwelling_shortwave_flux                                                             | surface downwelling shortwave flux at current time                                                   | W m-2   |    1 | real      | kind_phys | out    | F        |
@@ -211,7 +218,7 @@
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
-     &       ix, im, levs,                                              &
+     &       ix, im, levs, deltim,                                      &
      &       dtdt,dtdtc,                                                & !  ---  input/output:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,xmu,xcosz,         & !  ---  outputs:
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
@@ -225,12 +232,15 @@
       implicit none
 !
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: f_eps  = 0.0001, hour12 = 12.0
+      real(kind=kind_phys), parameter :: f_eps  = 0.0001, hour12 = 12.0,&
+     &                                   f7200  = 1.0/7200.0,           &
+     &                                   pid12  = con_pi / hour12
 
 !  ---  inputs:
       integer, intent(in) :: ix, im, levs
 
-      real(kind=kind_phys), intent(in) :: solhr, slag, cdec, sdec
+      real(kind=kind_phys), intent(in) :: solhr, slag, cdec, sdec,      &
+     &                                    deltim
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      sinlat, coslat, xlon, coszen, tsea, tf, tsflw, sfcdlw,      &
@@ -264,7 +274,7 @@
       errmsg = ''
       errflg = 0
 !
-      cns = con_pi * (solhr - hour12) / hour12 + slag
+      cns = pid12 * (solhr + deltim*f7200 - hour12) + slag
 !
       do i = 1, im
 
@@ -272,7 +282,7 @@
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
         tem1 = tf(i) / tsflw(i)
-        tem2  = tem1 * tem1
+        tem2 = tem1 * tem1
         adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 
 !!  - compute \a sfc upward LW flux from current \a sfc temperature.
@@ -300,18 +310,18 @@
 !>  - adjust \a sfc net and downward SW fluxes for zenith angle changes.
 !      note: sfc emiss effect will not be appied here
 
-        adjsfcnsw(i) = sfcnsw(i)   * xmu(i)
-        adjsfcdsw(i) = sfcdsw(i)   * xmu(i)
+        adjsfcnsw(i) = sfcnsw(i)    * xmu(i)
+        adjsfcdsw(i) = sfcdsw(i)    * xmu(i)
 
-        adjnirbmu(i)  = sfcnirbmu(i) * xmu(i)
-        adjnirdfu(i)  = sfcnirdfu(i) * xmu(i)
-        adjvisbmu(i)  = sfcvisbmu(i) * xmu(i)
-        adjvisdfu(i)  = sfcvisdfu(i) * xmu(i)
+        adjnirbmu(i) = sfcnirbmu(i) * xmu(i)
+        adjnirdfu(i) = sfcnirdfu(i) * xmu(i)
+        adjvisbmu(i) = sfcvisbmu(i) * xmu(i)
+        adjvisdfu(i) = sfcvisdfu(i) * xmu(i)
 
-        adjnirbmd(i)  = sfcnirbmd(i) * xmu(i)
-        adjnirdfd(i)  = sfcnirdfd(i) * xmu(i)
-        adjvisbmd(i)  = sfcvisbmd(i) * xmu(i)
-        adjvisdfd(i)  = sfcvisdfd(i) * xmu(i)
+        adjnirbmd(i) = sfcnirbmd(i) * xmu(i)
+        adjnirdfd(i) = sfcnirdfd(i) * xmu(i)
+        adjvisbmd(i) = sfcvisbmd(i) * xmu(i)
+        adjvisdfd(i) = sfcvisdfd(i) * xmu(i)
       enddo
 
 !>  - adjust SW heating rates with zenith angle change and
@@ -333,7 +343,14 @@
       end module dcyc2t3
 
 
+
       module dcyc2t3_post
+
+      implicit none
+
+      private
+
+      public :: dcyc2t3_post_init,dcyc2t3_post_run,dcyc2t3_post_finalize
 
       contains
 

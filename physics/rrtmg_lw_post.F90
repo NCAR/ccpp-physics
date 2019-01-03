@@ -67,8 +67,8 @@
             Radtend%htrlw(1:im,k) = htlwc(1:im,k1)
         enddo
         ! --- repopulate the points above levr
-        if (Model%levr < Model%levs) then
-          do k = LM,Model%levs
+        if (lm < Model%levs) then
+          do k = lm,Model%levs
             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
           enddo
         endif
@@ -79,8 +79,8 @@
             Radtend%lwhc(1:im,k) = htlw0(1:im,k1)
           enddo
           ! --- repopulate the points above levr
-          if (Model%levr < Model%levs) then
-            do k = LM,Model%levs
+          if (lm < Model%levs) then
+            do k = lm,Model%levs
               Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
             enddo
           endif

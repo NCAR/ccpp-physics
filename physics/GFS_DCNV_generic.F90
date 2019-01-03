@@ -95,6 +95,8 @@
 !! | lssav           | flag_diagnostics                                                                            | logical flag for storing diagnostics                                 | flag          |    0 | logical           |           | in     | F        |
 !! | ldiag3d         | flag_diagnostics_3D                                                                         | flag for 3d diagnostic fields                                        | flag          |    0 | logical           |           | in     | F        |
 !! | lgocart         | flag_gocart                                                                                 | flag for 3d diagnostic fields for gocart 1                           | flag          |    0 | logical           |           | in     | F        |
+!! | ras             | flag_for_ras_deep_convection                                                                | flag for ras convection scheme                                       | flag          |    0 | logical           |           | in     | F        |
+!! | cscnv           | flag_for_Chikira_Sugiyama_deep_convection                                                   | flag for Chikira-Sugiyama convection                                 | flag          |    0 | logical           |           | in     | F        |
 !! | frain           | dynamics_to_physics_timestep_ratio                                                          | ratio of dynamics timestep to physics timestep                       | none          |    0 | real              | kind_phys | in     | F        |
 !! | rain1           | lwe_thickness_of_deep_convective_precipitation_amount                                       | deep convective rainfall amount on physics timestep                  | m             |    1 | real              | kind_phys | in     | F        |
 !! | dtf             | time_step_for_dynamics                                                                      | dynamics timestep                                                    | s             |    0 | real              | kind_phys | in     | F        |
@@ -111,8 +113,8 @@
 !! | dd_mf           | instantaneous_atmosphere_downdraft_convective_mass_flux                                     | (downdraft mass flux) * delt                                         | kg m-2        |    2 | real              | kind_phys | in     | F        |
 !! | dt_mf           | instantaneous_atmosphere_detrainment_convective_mass_flux                                   | (detrainment mass flux) * delt                                       | kg m-2        |    2 | real              | kind_phys | in     | F        |
 !! | con_g           | gravitational_acceleration                                                                  | gravitational acceleration                                           | m s-2         |    0 | real              | kind_phys | in     | F        |
-!! | clw_ice         | cloud_ice_mixing_ratio                                                                      | moist cloud ice mixing ratio                                         | kg kg-1       |    2 | real              | kind_phys | in     | F        |
-!! | clw_liquid      | cloud_liquid_water_mixing_ratio                                                             | moist cloud water mixing ratio                                       | kg kg-1       |    2 | real              | kind_phys | in     | F        |
+!! | clw_ice         | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 | 2 | real | kind_phys | in     | F        |
+!! | clw_liquid      | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 | 2 | real | kind_phys | in     | F        |
 !! | npdf3d          | number_of_3d_arrays_associated_with_pdf-based_clouds                                        | number of 3d arrays associated with pdf based clouds/mp              | count         |    0 | integer           |           | in     | F        |
 !! | num_p3d         | array_dimension_of_3d_arrays_for_microphysics                                               | number of 3D arrays needed for microphysics                          | count         |    0 | integer           |           | in     | F        |
 !! | ncnvcld3d       | number_of_convective_3d_cloud_fields                                                        | number of convective 3d clouds fields                                | count         |    0 | integer           |           | in     | F        |
@@ -139,9 +141,9 @@
 !! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
 !!
-    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, frain, rain1, dtf, cld1d, &
-      save_u, save_v, save_t, save_qv, gu0, gv0, gt0, gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, &
-      clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d, &
+    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv,           &
+      frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0, gq0_water_vapor,   &
+      ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,                 &
       rainc, cldwrk, cnvprcp, cnvprcpb, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti, &
       cnvqci, upd_mfi, dwn_mfi, det_mfi, cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, errmsg, errflg)
 
@@ -150,7 +152,7 @@
       implicit none
 
       integer, intent(in) :: im, levs
-      logical, intent(in) :: lssav, ldiag3d, lgocart
+      logical, intent(in) :: lssav, ldiag3d, lgocart, ras, cscnv
 
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d
@@ -178,6 +180,26 @@
       errmsg = ''
       errflg = 0
 
+      if (.not. ras .and. .not. cscnv) then
+       if (npdf3d == 3 .and. num_p3d == 4) then
+         do k=1,levs
+           do i=1,im
+             cnvw_phy_f3d(i,k) = cnvw(i,k)
+             cnvc_phy_f3d(i,k) = cnvc(i,k)
+             cnvw(i,k)         = 0.0
+             cnvc(i,k)         = 0.0
+           enddo
+         enddo
+       elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
+         do k=1,levs
+           do i=1,im
+             cnvw_phy_f3d(i,k) = cnvw(i,k)
+             cnvw(i,k)         = 0.0
+           enddo
+         enddo
+       endif
+      endif ! if (.not. ras .and. .not. cscnv)
+
       do i=1,im
         rainc(i) = frain * rain1(i)
       enddo
@@ -204,7 +226,7 @@
           enddo
         endif ! if (ldiag3d)
 
-endif   ! end if_lssav
+      endif ! if (lssav)
 
       !update dqdt_v to include moisture tendency due to deep convection
       if (lgocart) then
@@ -218,25 +240,6 @@ endif   ! end if_lssav
           enddo
         enddo
       endif ! if (lgocart)
-!
-      if ((npdf3d == 3) .and. (num_p3d == 4)) then
-        do k=1,levs
-          do i=1,im
-            cnvw_phy_f3d(i,k) = cnvw(i,k)
-            cnvc_phy_f3d(i,k) = cnvc(i,k)
-            cnvw(i,k)             = 0.0
-            cnvc(i,k)             = 0.0
-          enddo
-        enddo
-      elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
-        do k=1,levs
-          do i=1,im
-            cnvw_phy_f3d(i,k) = cnvw(i,k)
-            cnvw(i,k)             = 0.0
-          enddo
-        enddo
-      endif
-
 
     end subroutine GFS_DCNV_generic_post_run
 

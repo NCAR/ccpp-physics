@@ -36,25 +36,16 @@
 !! constants for GCM models.
           module physcons                
 !
-  use machine,      only : kind_phys
+  use machine,       only : kind_phys
+  use CCPP_typedefs, only : kind_dyn
 !
   implicit none
 !
   public
 
-! \section arg_table_physcons Argument Table
-! | local_name            | standard_name                                          | long_name                                               | units         | rank | type              |    kind   | intent | optional |
-! |-----------------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
-! | con_cp                | specific_heat_of_dry_air_at_constant_pressure          | specific heat of dry air at constant pressure           | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
-! | con_fvirt             | ratio_of_vapor_to_dry_air_gas_constants_minus_one      | rv/rd - 1 (rv = ideal gas constant for water vapor)     | none          |    0 | real              | kind_phys | none   | F        |
-! | con_g                 | gravitational_acceleration                             | gravitational acceleration                              | m s-2         |    0 | real              | kind_phys | none   | F        |
-! | con_pi                | pi                                                     | ratio of a circle's circumference to its diameter       | radians       |    0 | real              | kind_phys | none   | F        |
-! | con_rd                | gas_constant_dry_air                                   | ideal gas constant for dry air                          | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
-! | con_rv                | gas_constant_water_vapor                               | ideal gas constant for water vapor                      | J kg-1 K-1    |    0 | real              | kind_phys | none   | F        |
-!
-
 !> \name Math constants
-  real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931        !< pi
+! real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931        !< pi
+  real(kind=kind_phys),parameter:: con_pi     =4.0d0*atan(1.0d0)         !< pi
   real(kind=kind_phys),parameter:: con_sqrt2  =1.414214e+0               !< square root of 2 
   real(kind=kind_phys),parameter:: con_sqrt3  =1.732051e+0               !< quare root of 3
 
@@ -67,6 +58,8 @@
   real(kind=kind_phys),parameter:: con_solr_old =1.3660e+3               !< solar constant (\f$W/m^{2}\f$)-Liu(2002)
   real(kind=kind_phys),parameter:: con_solr   =1.3608e+3                 !< solar constant (\f$W/m^{2}\f$)-nasa-sorce Tim(2008)
 ! real(kind=kind_phys),parameter:: con_solr   =1.36742732e+3             ! solar constant    (W/m2)-gfdl(1989) - OPR as of Jan 2006
+  ! Selected geophysics/astronomy constants with kind=kind_dyn
+  real(kind=kind_dyn), parameter:: con_g_dyn  =9.80665e+0                !< gravity (\f$m/s^{2}\f$)
 
 !> \name Thermodynamics constants
   real(kind=kind_phys),parameter:: con_rgas   =8.314472                  !< molar gas constant (\f$J/mol/K\f$)
@@ -86,6 +79,12 @@
   real(kind=kind_phys),parameter:: con_jcal   =4.1855E+0                 !< joules per calorie
   real(kind=kind_phys),parameter:: con_rhw0   =1022.0                    !< sea water reference density (\f$kg/m^{3}\f$)
   real(kind=kind_phys),parameter:: con_epsq   =1.0E-12                   !< min q for computing precip type
+  ! Selected thermodynamics constants with kind=kind_dyn
+  real(kind=kind_dyn), parameter:: con_rd_dyn   =2.8705e+2               !< gas constant air (\f$J/kg/K\f$)
+  real(kind=kind_dyn), parameter:: con_rv_dyn   =4.6150e+2               !< gas constant H2O (\f$J/kg/K\f$)
+  real(kind=kind_dyn), parameter:: con_cp_dyn   =1.0046e+3               !< spec heat air at p (\f$J/kg/K\f$)
+  real(kind=kind_dyn), parameter:: con_hvap_dyn =2.5000e+6               !< lat heat H2O cond (\f$J/kg\f$)
+  real(kind=kind_dyn), parameter:: con_hfus_dyn =3.3358e+5               !< lat heat H2O fusion (\f$J/kg\f$)
 
 !> \name Secondary constants
   real(kind=kind_phys),parameter:: con_rocp   =con_rd/con_cp
@@ -105,11 +104,11 @@
   real(kind=kind_phys),parameter:: con_sbc    =5.670400e-8               !< stefan-boltzmann (\f$W/m^{2}/K^{4}\f$)
   real(kind=kind_phys),parameter:: con_avgd   =6.0221415e23              !< avogadro constant (\f$mol^{-1}\f$)
   real(kind=kind_phys),parameter:: con_gasv   =22413.996e-6              !< vol of ideal gas at 273.15K, 101.325kPa (\f$m^{3}/mol\f$)
-! real(kind=kind_phys),parameter:: con_amd    =28.970                    ! molecular wght of dry air (g/mol)
+! real(kind=kind_phys),parameter:: con_amd    =28.970                    !< molecular wght of dry air (g/mol)
   real(kind=kind_phys),parameter:: con_amd    =28.9644                   !< molecular wght of dry air (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amw    =18.0154                   !< molecular wght of water vapor (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amo3   =47.9982                   !< molecular wght of o3 (\f$g/mol\f$)
-! real(kind=kind_phys),parameter:: con_amo3   =48.0                      ! molecular wght of o3  (g/mol)
+! real(kind=kind_phys),parameter:: con_amo3   =48.0                      !< molecular wght of o3  (g/mol)
   real(kind=kind_phys),parameter:: con_amco2  =44.011                    !< molecular wght of co2 (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amo2   =31.9999                   !< molecular wght of o2 (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amch4  =16.043                    !< molecular wght of ch4 (\f$g/mol\f$)

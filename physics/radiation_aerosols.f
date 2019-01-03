@@ -4414,7 +4414,7 @@
 !!  0.1399  0.2399  0.4499 0.8000 1.3994  2.3964 4.4964  7.9887 <-- reff
       data indx_dust/4, 8, 12, 18, 21, 24, 30, 36/
 
-      PI = acos(-1.d0)
+!     PI = acos(-1.d0)
 
 ! -- allocate aerosol optical data
       if ( .not. allocated( iendwv_grt ) ) then

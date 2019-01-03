@@ -54,7 +54,7 @@
 !! | rv             | gas_constant_water_vapor                                   | ideal gas constant for water vapor                                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
 !! | t0c            | temperature_at_zero_celsius                                | temperature at 0 degrees Celsius                                                                         | K           |    0 | real      | kind_phys | in     | F        |
 !! | delt           | time_step_for_physics                                      | physics time step                                                                                        | s           |    0 | real      | kind_phys | in     | F        |
-!! | ntk            | index_of_TKE_convective_transport_tracer                   | index of TKE in the convectively transported tracer array                                                | index       |    0 | integer   |           | in     | F        |
+!! | ntk            | index_for_turbulent_kinetic_energy_convective_transport_tracer | index for turbulent kinetic energy in the convectively transported tracer array                      | index       |    0 | integer   |           | in     | F        |
 !! | ntr            | number_of_tracers_for_samf                                 | number of tracers for scale-aware mass flux schemes                                                      | count       |    0 | integer   |           | in     | F        |
 !! | delp           | air_pressure_difference_between_midlayers                  | pres(k) - pres(k+1)                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
 !! | prslp          | air_pressure                                               | mean layer pressure                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
@@ -1893,14 +1893,14 @@ c
           enddo
         endif
 ! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
-        if ((shcnvcw) .and. (num_p3d == 4) .and. (npdf3d == 3)) then
+        if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
               cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
+        elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)

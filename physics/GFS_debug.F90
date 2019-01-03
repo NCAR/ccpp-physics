@@ -225,11 +225,11 @@
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%acvb'            , Tbd%acvb)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%acvt'            , Tbd%acvt)
                      if (Model%do_sppt) then
-                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dtdtr'           , Tbd%dtdtr)
-                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dtotprcp'        , Tbd%dtotprcp)
-                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dcnvprcp'        , Tbd%dcnvprcp)
-                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%drain_cpl'       , Tbd%drain_cpl)
-                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dsnow_cpl'       , Tbd%dsnow_cpl)
+                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dtdtr'         , Tbd%dtdtr)
+                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dtotprcp'      , Tbd%dtotprcp)
+                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dcnvprcp'      , Tbd%dcnvprcp)
+                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%drain_cpl'     , Tbd%drain_cpl)
+                       call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%dsnow_cpl'     , Tbd%dsnow_cpl)
                      end if
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_fctd'        , Tbd%phy_fctd)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f2d'         , Tbd%phy_f2d)
@@ -237,6 +237,9 @@
                      do n=1,size(Tbd%phy_f3d(1,1,:))
                          call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%phy_f3d_n'   , Tbd%phy_f3d(:,:,n))
                      end do
+                     call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%in_nm'           , Tbd%in_nm)
+                     call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
+                     call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%aer_nm'          , Tbd%aer_nm)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Tbd%blkno'           , Tbd%blkno)
                      ! Diag (incomplete)
                      call print_var(mpirank,omprank, Tbd%blkno, 'Diag%topfsw%upfxc',    Diag%topfsw%upfxc)
@@ -390,6 +393,7 @@
                      end if
                      if(Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
                         call print_var(mpirank,omprank, Tbd%blkno, 'Coupling%nwfa2d', Coupling%nwfa2d)
+                        call print_var(mpirank,omprank, Tbd%blkno, 'Coupling%nifa2d', Coupling%nifa2d)
                      end if
                      ! Grid
                      call print_var(mpirank,omprank, Tbd%blkno, 'Grid%xlon  ', Grid%xlon  )
