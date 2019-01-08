@@ -1,7 +1,6 @@
 
 rsync -arv @[RTPWD]/FV3_regional_input_data/. .
 rsync -arv @[RTPWD]/@[CNTL_DIR]/model_configure .
-rsync -arv @[RTPWD]/@[CNTL_DIR]/input.nml .
 
 rm -rf INPUT RESTART
 mkdir  INPUT RESTART
