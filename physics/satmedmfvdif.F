@@ -26,9 +26,9 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup SATMEDMF FV3GFS satmedmfvdif_run Main
+!> \defgroup satmedmf FV3GFS satmedmfvdif Main
 !! @{
-!! \brief This subroutine contains all of the logic for the 
+!! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
 !!
 !> \section arg_table_satmedmfvdif_run Argument Table
@@ -95,13 +95,14 @@
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,
-     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
-     &     tsea,heat,evap,stress,spd1,kpbl,
-     &     prsi,del,prsl,prslk,phii,phil,delt,
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,
+!>\section gen_satmedmfvdif FV3GFS satmedmfvdif General Algorithim
+      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
+     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     tsea,heat,evap,stress,spd1,kpbl,                             &
+     &     prsi,del,prsl,prslk,phii,phil,delt,                          &
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -114,29 +115,29 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,
+      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),
+      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
-      real(kind=kind_phys), intent(in) ::
-     &                     u1(ix,km),     v1(ix,km),
-     &                     t1(ix,km),     q1(ix,km,ntrac),
-     &                     swh(ix,km),    hlw(ix,km),
-     &                     xmu(im),       garea(im),
-     &                     psk(ix),       rbsoil(im),
-     &                     zorl(im),      tsea(im),
-     &                     u10m(im),      v10m(im),
-     &                     fm(im),        fh(im),
-     &                     evap(im),      heat(im),
-     &                     stress(im),    spd1(im),
-     &                     prsi(ix,km+1), del(ix,km),
-     &                     prsl(ix,km),   prslk(ix,km),
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     u1(ix,km),     v1(ix,km),                    &
+     &                     t1(ix,km),     q1(ix,km,ntrac),              &
+     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     xmu(im),       garea(im),                    &
+     &                     psk(ix),       rbsoil(im),                   &
+     &                     zorl(im),      tsea(im),                     &
+     &                     u10m(im),      v10m(im),                     &
+     &                     fm(im),        fh(im),                       &
+     &                     evap(im),      heat(im),                     &
+     &                     stress(im),    spd1(im),                     &
+     &                     prsi(ix,km+1), del(ix,km),                   &
+     &                     prsl(ix,km),   prslk(ix,km),                 &
      &                     phii(ix,km+1), phil(ix,km)
-      real(kind=kind_phys), intent(out) ::
-     &                     dusfc(im),     dvsfc(im),
-     &                     dtsfc(im),     dqsfc(im),
-     &                     hpbl(im) 
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dusfc(im),     dvsfc(im),                    &
+     &                     dtsfc(im),     dqsfc(im),                    &
+     &                     hpbl(im)
 !
       logical, intent(out)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -1452,10 +1453,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine satmedmfvdif_run
-!! @}
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
+!>\ingroup satmedmf
 !> This subroutine solves tridiagonal problem for TKE.
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------
@@ -1514,5 +1515,6 @@
 !-----------------------------------------------------------------------
       return
       end
+!! @}
 
       end module satmedmfvdif

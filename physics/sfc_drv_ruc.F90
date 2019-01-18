@@ -44,7 +44,6 @@ module lsm_ruc
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
       end subroutine lsm_ruc_init
 
-!---
 !! \section arg_table_lsm_ruc_finalize Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |  kind     | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -241,25 +240,21 @@ module lsm_ruc
 !! | errflg          | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-
-      subroutine lsm_ruc_run                                            &
-! --- inputs
+!>\section gen_lsmruc GSD RUC LSM Scheme General Algorithm
+      subroutine lsm_ruc_run                                            &   ! --- inputs
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
      &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, zf, islmsk, ddvel, shdmin, shdmax, alvwf, alnwf,    &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
      &       smc, stc, slc, lsm_ruc, lsm,                               &
-! --- constants
-     &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,&
-! --- in/outs
-     &       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
+     &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& ! --- constants
+     &       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            & ! --- in/outs
      &       graupel, srflag, sr,                                       &
      &       smois, tslb, sh2o, keepfr, smfrkeep,                       & ! on RUC levels
      &       canopy, trans, tsurf, tsnow, zorl,                         &
      &       sfcqc, sfcdew, tice, sfcqv,                                &
-! --- outputs
-     &       sncovr1, qsurf, gflux, drain, evap, hflx,                  &
+     &       sncovr1, qsurf, gflux, drain, evap, hflx,                  & ! --- outputs
      &       rhosnf, runof, runoff, srunoff,                            &
      &       chh, cmm, evbs, evcw, sbsno, snowc, stm, wet1,             &
      &       acsnow, snowfallac,                                        &
@@ -346,13 +341,13 @@ module lsm_ruc
 
       real (kind=kind_phys) :: xice_threshold
 
-      character(len=256) :: llanduse  ! Land-use dataset.  Valid values are :
-                                      ! "USGS" (USGS 24/27 category dataset) and
-                                      ! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
+      character(len=256) :: llanduse  !< Land-use dataset.  Valid values are :
+                                      !! "USGS" (USGS 24/27 category dataset) and
+                                      !! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
 
       integer :: nscat, nlcat
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef ! fractional landuse
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop ! fractional soil type
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef !< fractional landuse
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop !< fractional soil type
 
       integer :: nsoil, iswater, isice
       integer, dimension (1:im,1:1) :: stype, vtype
@@ -399,7 +394,8 @@ module lsm_ruc
         print *,'kdt, iter =',kdt,iter
       endif
  
-! RUC initialization
+!> - Call rucinit() for RUC initialization,then overwrite Noah soil fields
+!! with initialized RUC soil fields for output.
       if( kdt == 1 .and. iter ==1 ) then
         !print *,'RUC LSM initialization, kdt=', kdt
         call rucinit          (im, lsoil_ruc, lsoil, nlev,            & ! in
@@ -444,13 +440,13 @@ module lsm_ruc
       landusef (:,:,:) = 0.0
       soilctop (:,:,:) = 0.0
 
-      !> -- number of soil categories          
+      ! -- number of soil categories          
       !if(isot == 1) then
       !nscat = 19 ! stasgo
       !else
       !nscat = 9  ! zobler
       !endif
-      !> -- set parameters for IGBP land-use data
+      !> - Set parameters for IGBP land-use data.
       if(ivegsrc == 1) then
         llanduse = 'MODI-RUC'  ! IGBP
         iswater = 17
@@ -734,7 +730,7 @@ module lsm_ruc
           snfallac(i,j) = snowfallac(i)
           acsn(i,j)     = acsnow(i)
 
-        !> -- sanity checks on sneqv and snowh
+        ! -- sanity checks on sneqv and snowh
         if (sneqv(i,j) /= 0.0 .and. snowh(i,j) == 0.0) then
           snowh(i,j) = 0.003 * sneqv(i,j) ! snow density ~300 kg m-3 
         endif
@@ -862,7 +858,7 @@ module lsm_ruc
      print *,'rdlai2d =',rdlai2d
     endif
 
-!> - Call RUC LSM lsmruc(). 
+!> - Call RUC LSM lsmruc().
       call lsmruc( delt, kdt, iter, nsoil,                                   &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
      &          zs, prcp(i,j), sneqv(i,j), snowh(i,j), sncovr(i,j),          &
@@ -1073,6 +1069,11 @@ module lsm_ruc
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
+
+!>\ingroup lsm_ruc_group
+!! This subroutine contains RUC LSM initialization.
+!>\param[in] im    
+!>\param[in] lsoil_ruc
       subroutine rucinit      (im, lsoil_ruc, lsoil, nlev,            & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tsurf, tg3,                    & ! in
@@ -1110,7 +1111,7 @@ module lsm_ruc
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-!> local
+! local
       logical :: debug_print
       logical :: smadj ! for soil mosture adjustment
 
@@ -1241,7 +1242,7 @@ module lsm_ruc
            xice(i,j)=0.
        elseif(islmsk(i) == 2) then  ! ice
            ivgtyp(i,j)=15 ! MODIS
-          !> -- number of soil categories          
+          ! -- number of soil categories          
           if(isot == 1) then
             isltyp(i,j) = 16 ! STATSGO
           else

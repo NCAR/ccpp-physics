@@ -133,10 +133,12 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 #if 0
-!> \defgroup condense GFS m_micro Main
+
+!> \defgroup mg2mg3 FV3GFS m_micro Main
+!! @{
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
-!! \section arg_table_m_micro_run Argument Table
+!> \section arg_table_m_micro_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                                                      | count       |    0 | integer    |           | in     | F        |
@@ -216,8 +218,7 @@ end subroutine m_micro_init
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
      &,                         lwheat_i, swheat_i, w_upi, cf_upi       &
-     &,                         FRLAND,   ZPBL, CNV_MFD_i   &
-!    &,                         FRLAND,   ZPBL, CNV_MFD_i, CNV_PRC3_i   &
+     &,                         FRLAND,   ZPBL, CNV_MFD_i               &
      &,                         CNV_DQLDT_i, CLCN_i, u_i, v_i           &
      &,                         TAUGWX,   TAUGWY                        &
      &,                         TAUOROX,  TAUOROY, CNV_FICE_i           &
@@ -230,7 +231,6 @@ end subroutine m_micro_init
      &,                         CLDREFFG, aerfld_i                      &
      &,                         aero_in,  naai_i, npccn_i, iccn         &
      &,                         skip_macro                              &
-!    &,                         skip_macro, cn_prc2, cn_snr             &
      &,                         lprnt, alf_fac, qc_min, pdfflag         &
      &,                         ipr, kdt, xlat, xlon, rhc_i,            &
      &                          errmsg, errflg)
@@ -1860,11 +1860,14 @@ end subroutine m_micro_init
 !=======================================================================
 
        end subroutine m_micro_run
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !DONIF Calculate the Brunt_Vaisala frequency
 
 !===============================================================================
+!> This subroutine computes profiles of background state quantities for 
+!! the multiple gravity wave drag parameterization.
        subroutine gw_prof (pcols, pver, ncol, t, pm, pi, rhoi, ni, ti,  &
                            nm, sph)
        use machine , only : kind_phys
@@ -1947,8 +1950,7 @@ end subroutine m_micro_init
        end subroutine gw_prof
 
 
-!Find cloud top based on cloud fraction
-
+!> This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none
 
@@ -1981,5 +1983,6 @@ end subroutine m_micro_init
 
 
       end subroutine find_cldtop
+!! @}
 
 end module m_micro

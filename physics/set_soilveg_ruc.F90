@@ -13,6 +13,8 @@
 
       contains
 
+!>\ingroup lsm_ruc_group
+!! This subroutine contains
       subroutine set_soilveg_ruc(me,isot,ivet,nlunit)
 
       integer, intent(in) :: isot,ivet,nlunit

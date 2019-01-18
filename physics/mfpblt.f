@@ -1,13 +1,18 @@
-      subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,
-     &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
-     &   gdx,hpbl,kpbl,vpert,buo,xmf,
+!>\file mfpblt.f
+!! This file contains
+
+!>\ingroup satmedmf
+!! This subroutine 
+      subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
+     &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
+     &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &
      &   tcko,qcko,ucko,vcko,xlamue)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp
-     &,             rv => con_rv, hvap => con_hvap
-     &,             fv => con_fvirt
+      use physcons, grav => con_g, cp => con_cp                         &
+     &,             rv => con_rv, hvap => con_hvap                      &
+     &,             fv => con_fvirt                                     &
      &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
@@ -17,15 +22,15 @@
       integer              kpbl(im)
       logical              cnvflg(im)
       real(kind=kind_phys) delt
-      real(kind=kind_phys) q1(ix,km,ntrac1),
-     &                     t1(ix,km),  u1(ix,km), v1(ix,km),
-     &                     plyr(im,km),pix(im,km),thlx(im,km),
-     &                     thvx(im,km),zl(im,km), zm(im,km),
-     &                     gdx(im),
-     &                     hpbl(im),   vpert(im),
-     &                     buo(im,km), xmf(im,km),
-     &                     tcko(im,km),qcko(im,km,ntrac1),
-     &                     ucko(im,km),vcko(im,km),
+      real(kind=kind_phys) q1(ix,km,ntrac1),                            &
+     &                     t1(ix,km),  u1(ix,km), v1(ix,km),            &
+     &                     plyr(im,km),pix(im,km),thlx(im,km),          &
+     &                     thvx(im,km),zl(im,km), zm(im,km),            &
+     &                     gdx(im),                                     &
+     &                     hpbl(im),   vpert(im),                       &
+     &                     buo(im,km), xmf(im,km),                      &
+     &                     tcko(im,km),qcko(im,km,ntrac1),              &
+     &                     ucko(im,km),vcko(im,km),                     &
      &                     xlamue(im,km-1)
 !
 c  local variables and arrays

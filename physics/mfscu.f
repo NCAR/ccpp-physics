@@ -1,14 +1,19 @@
-      subroutine mfscu(im,ix,km,kmscu,ntcw,ntrac1,delt,
-     &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,
-     &   thlx,thvx,thlvx,gdx,thetae,radj,
-     &   krad,mrad,radmin,buo,xmfd,
+!>\file mfscu.f
+!! This file contains 
+
+!>\ingroup satmedmf
+!! This subroutine is
+      subroutine mfscu(im,ix,km,kmscu,ntcw,ntrac1,delt,                 &
+     &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,                             &
+     &   thlx,thvx,thlvx,gdx,thetae,radj,                               &
+     &   krad,mrad,radmin,buo,xmfd,                                     &
      &   tcdo,qcdo,ucdo,vcdo,xlamde)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp
-     &,             rv => con_rv, hvap => con_hvap
-     &,             fv => con_fvirt
+      use physcons, grav => con_g, cp => con_cp                         &
+     &,             rv => con_rv, hvap => con_hvap                      &
+     &,             fv => con_fvirt                                     &
      &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
@@ -19,17 +24,17 @@
 !
       logical cnvflg(im)
       real(kind=kind_phys) delt
-      real(kind=kind_phys) q1(ix,km,ntrac1),t1(ix,km),
-     &                     u1(ix,km),      v1(ix,km),
-     &                     plyr(im,km),    pix(im,km),
-     &                     thlx(im,km),
-     &                     thvx(im,km),    thlvx(im,km),
-     &                     gdx(im),        radj(im),
-     &                     zl(im,km),      zm(im,km),
-     &                     thetae(im,km),  radmin(im),
-     &                     buo(im,km), xmfd(im,km),
-     &                     tcdo(im,km), qcdo(im,km,ntrac1),
-     &                     ucdo(im,km), vcdo(im,km),
+      real(kind=kind_phys) q1(ix,km,ntrac1),t1(ix,km),                  &
+     &                     u1(ix,km),      v1(ix,km),                   &
+     &                     plyr(im,km),    pix(im,km),                  &
+     &                     thlx(im,km),                                 &
+     &                     thvx(im,km),    thlvx(im,km),                &
+     &                     gdx(im),        radj(im),                    &
+     &                     zl(im,km),      zm(im,km),                   &
+     &                     thetae(im,km),  radmin(im),                  &
+     &                     buo(im,km), xmfd(im,km),                     &
+     &                     tcdo(im,km), qcdo(im,km,ntrac1),             &
+     &                     ucdo(im,km), vcdo(im,km),                    &
      &                     xlamde(im,km-1)
 !
 !  local variables and arrays
