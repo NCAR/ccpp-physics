@@ -21,8 +21,8 @@
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
 !! | local_name        | standard_name                                          | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
 !! |-------------------|--------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model             | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | Data              | FV3-GFS_Data_type_all_blocks                           | Fortran DDT containing FV3-GFS data                                           | DDT      |    1 | GFS_data_type         |           | inout  | F        |
+!! | Model             | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | Data              | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                           | DDT      |    1 | GFS_data_type         |           | inout  | F        |
 !! | errmsg            | ccpp_error_message                                     | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                        | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
