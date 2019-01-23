@@ -73,8 +73,6 @@ readonly clean_after=${5:-YES}
 checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
 # Generate CCPP cmake flags from MAKE_OPT
-
-# Generate CCPP cmake flags from MAKE_OPT
 CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DNETCDF_DIR=${NETCDF} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
 if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
@@ -104,6 +102,11 @@ if [[ "${MAKE_OPT}" == *"32BIT=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=ON"
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=OFF"
+fi
+if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=OFF"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=ON"
 fi
 if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
   if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
