@@ -121,7 +121,7 @@ FFLAGS +=
 CFLAGS +=
 endif
 
-FFLAGS_OPT = -O2 -g -fno-range-check
+FFLAGS_OPT = -O2 -fno-range-check
 FFLAGS_REPRO = -O2 -g -fbacktrace -fno-range-check
 FFLAGS_DEBUG = -g -O0 -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
 
@@ -131,8 +131,8 @@ FFLAGS_VERBOSE = -v -V
 
 CFLAGS += -D__IFC
 
-CFLAGS_OPT = -O2 -g
-CFLAGS_REPRO = -O2 -g
+CFLAGS_OPT = -O2
+CFLAGS_REPRO = -O2
 CFLAGS_OPENMP = -fopenmp
 CFLAGS_DEBUG = -O0 -g
 

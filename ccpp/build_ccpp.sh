@@ -16,6 +16,7 @@ function usage   {
   echo "           MAKE_OPT     [optional] can be any of the NEMSfv3gfs MAKE_OPT options; used:"
   echo "                                   SION=Y/N   (default N)"
   echo "                                   DEBUG=Y/N  (default N)"
+  echo "                                   REPRO=Y/N  (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
   echo "                                   HYBRID=Y/N (default Y)"
   echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"

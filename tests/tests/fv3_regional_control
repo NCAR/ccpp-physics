@@ -18,3 +18,5 @@ export TASKS=24
 
 export RUN_SCRIPT=rt_fv3.sh
 export FV3_RUN=fv3_regional_run.IN
+
+export INPUT_NML=regional_control.nml.IN

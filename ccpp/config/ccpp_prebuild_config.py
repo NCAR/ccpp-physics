@@ -44,6 +44,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/micro_mg2_0.F90',
     'ccpp/physics/physics/micro_mg3_0.F90',
     'ccpp/physics/physics/module_bfmicrophysics.f',
+    'ccpp/physics/physics/module_gfdl_cloud_microphys.F90',
     'ccpp/physics/physics/module_nst_model.f90',
     'ccpp/physics/physics/module_nst_parameters.f90',
     'ccpp/physics/physics/module_nst_water_prop.f90',
