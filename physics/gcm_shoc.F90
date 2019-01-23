@@ -19,6 +19,7 @@ end subroutine shoc_init
 subroutine shoc_finalize ()
 end subroutine shoc_finalize
 
+#if 0
 !> \section arg_table_shoc_run Argument Table
 !! | local_name                 | standard_name                                                               | long_name                                                                                   | units         | rank | type       |    kind   | intent | optional |
 !! |----------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
@@ -81,14 +82,15 @@ end subroutine shoc_finalize
 !! | errmsg                     | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none          |    0 | character  | len=*     | out    | F        |
 !! | errflg                     | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag          |    0 | integer    |           | out    | F        |
 !!
-subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,     &
-    imp_physics_zhao_carr_pdf, imp_physics_mg, fprcp, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi,  &
-    con_fvirt, gq0_cloud_ice, gq0_rain, gq0_snow, gq0_graupel, dtp, me, prsl, phii, phil, u, v, omega, rhc, supice, pcrit,   &
-    cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                                                                        &
-    skip_macro, clw_ice, clw_liquid, gq0_cloud_liquid, ncpl, ncpi, gt0, gq0_water_vapor, cld_sgs, tke, tkh, wthv_sec,        &
+#endif
+subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,    &
+    imp_physics_zhao_carr_pdf, imp_physics_mg, fprcp, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, &
+    con_fvirt, gq0_cloud_ice, gq0_rain, gq0_snow, gq0_graupel, dtp, me, prsl, phii, phil, u, v, omega, rhc, supice, pcrit,  &
+    cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                                                                       &
+    skip_macro, clw_ice, clw_liquid, gq0_cloud_liquid, ncpl, ncpi, gt0, gq0_water_vapor, cld_sgs, tke, tkh, wthv_sec,       &
     errmsg, errflg)
 
-   implicit none
+    implicit none
 
     integer, intent(in) :: ix, nx, nzm, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, &
      imp_physics_mg, fprcp, me
@@ -113,7 +115,8 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
    integer :: i, k
 
    real(kind=kind_phys) :: tem
-   real(kind=kind_phys), dimension(nx,nzm) :: qsnw !qsnw can be local to this routine
+   real(kind=kind_phys), dimension(nx,nzm) :: qsnw ! qsnw can be local to this routine
+   real(kind=kind_phys), dimension(nx,nzm) :: qgl  ! qgl  can be local to this routine
 
 ! Initialize CCPP error handling variables
 
@@ -129,6 +132,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !GF - gq0(ntrw) is passed in directly, no need to copy
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        elseif (fprcp > 1) then
@@ -136,6 +140,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            do i=1,nx
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k) + gq0_graupel(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        endif
@@ -158,6 +163,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !GF - gq0(ntrw) is passed in directly, no need to copy
              !qrn(i,k)  = gq0_rain(i,k)
              qsnw(i,k) = gq0_snow(i,k)
+             qgl(i,k)  = 0.0
            enddo
          enddo
        elseif (fprcp > 1) then
@@ -165,6 +171,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            do i=1,nx
              !qrn(i,k)    = gq0_rain(i,k)
              qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k)
+             qgl(i,k)     = 0.0
              clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
            enddo
          enddo
@@ -174,8 +181,9 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
          do i=1,nx
            clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
            clw_liquid(i,k) = gq0_cloud_liquid(i,k)                    ! water
-           !qrn(i,k)   = gq0_rain(i,k)
-           qsnw(i,k)  = gq0_snow(i,k)
+           !qrn(i,k)  = gq0_rain(i,k)
+           qsnw(i,k) = gq0_snow(i,k)
+           qgl(i,k)  = 0.0
          enddo
        enddo
       elseif (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_zhao_carr_pdf) then
@@ -187,6 +195,8 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
            tem = gq0_cloud_liquid(i,k) * max(0.0, MIN(1.0, (tcr-gt0(i,k))*tcrf))
            clw_ice(i,k) = tem                              ! ice
            clw_liquid(i,k) = gq0_cloud_liquid(i,k) - tem              ! water
+           qsnw(i,k) = 0.0
+           qgl(i,k)  = 0.0
          enddo
        enddo
       endif
@@ -207,7 +217,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
     call shoc_work (ix, nx, 1, nzm, nzm+1, dtp, me, 1, prsl,  &
               phii, phil, u, v, omega, gt0,  &
               gq0_water_vapor, clw_ice, clw_liquid, qsnw, gq0_rain,  &
-              gq0_graupel, rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
+              qgl, rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt, &
               cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec, .false., 1, ncpl, ncpi, &
               con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
 

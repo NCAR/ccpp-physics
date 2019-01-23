@@ -54,21 +54,20 @@ module fv_sat_adj
 ! </table>
     ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
     !use constants_mod, only: rvgas, rdgas, grav, hlv, hlf, cp_air
-    use physcons, only : rdgas => con_rd, &
-                         rvgas => con_rv, &
-                         grav => con_g,   &
-                         hlv => con_hvap, &
-                         hlf => con_hfus, &
-                         cp_air => con_cp
+    use physcons, only : rdgas => con_rd_dyn, &
+                         rvgas => con_rv_dyn, &
+                         grav => con_g_dyn,   &
+                         hlv => con_hvap_dyn, &
+                         hlf => con_hfus_dyn, &
+                         cp_air => con_cp_dyn
     ! *DH
     !use fv_mp_mod, only: is_master
     !use fv_arrays_mod, only: r_grid
-    use machine,              only: kind_grid
-    use CCPP_typedefs,        only: kind_dyn
-    use gfdl_cloud_microphys, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
-    use gfdl_cloud_microphys, only: icloud_f, sat_adj0, t_sub, cld_min
-    use gfdl_cloud_microphys, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
-    use gfdl_cloud_microphys, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
+    use machine,              only: kind_grid, kind_dyn
+    use gfdl_cloud_microphys_mod, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
+    use gfdl_cloud_microphys_mod, only: icloud_f, sat_adj0, t_sub, cld_min
+    use gfdl_cloud_microphys_mod, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
+    use gfdl_cloud_microphys_mod, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
     implicit none
     private
 
@@ -98,7 +97,7 @@ module fv_sat_adj
     real(kind=kind_dyn), parameter :: lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
     real(kind=kind_dyn), parameter :: li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
     ! real (kind_grid), parameter :: e00 = 610.71  ! gfdl: saturation vapor pressure at 0 deg c
-    real (kind_grid), parameter :: e00 = 611.21    !< ifs: saturation vapor pressure at 0 deg c
+    real (kind_grid), parameter  :: e00 = 611.21    !< ifs: saturation vapor pressure at 0 deg c
     real (kind_grid), parameter :: d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
     real (kind_grid), parameter :: li2 = lv0 + li00        !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
     real(kind=kind_dyn), parameter :: lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
@@ -112,15 +111,17 @@ contains
 !! \section arg_table_fv_sat_adj_init Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | do_sat_adj     | flag_for_saturation_adjustment_for_microphysics_in_dynamics   | flag for saturation adjustment for microphysics in dynamics                            | none    |    0 | logical   |           | in     | F        |
 !! | kmp            | top_layer_index_for_fast_physics                              | top_layer_inder_for_gfdl_mp                                                            | index   |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
 !!
-subroutine fv_sat_adj_init(kmp, errmsg, errflg)
+subroutine fv_sat_adj_init(do_sat_adj, kmp, errmsg, errflg)
 
     implicit none
 
     ! Interface variables
+    logical,          intent (in) :: do_sat_adj
     integer,          intent (in) :: kmp
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -132,6 +133,13 @@ subroutine fv_sat_adj_init(kmp, errmsg, errflg)
     ! Initialize the CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    ! If saturation adjustment is not used, return immediately
+    if (.not.do_sat_adj) then
+      write(errmsg,'(a)') 'Logic error: fv_sat_adj_init is called but do_sat_adj is set to false'
+      errflg = 1
+      return
+    end if
 
     if (allocated(table)) return
 
@@ -295,14 +303,14 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
     real(kind_grid),  intent(in)    :: area(isd:ied, jsd:jed)
-    real(kind=kind_dyn),             intent(inout) :: dtdt(is:ie, js:je, 1:km)
-    logical,          intent(in)    :: out_dt
-    logical,          intent(in)    :: last_step
-    logical,          intent(in)    :: do_qa
-    real(kind=kind_dyn),             intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
-    integer,          intent(in)    :: nthreads
-    character(len=*), intent(  out) :: errmsg
-    integer,          intent(  out) :: errflg
+    real(kind=kind_dyn), intent(inout) :: dtdt(is:ie, js:je, 1:km)
+    logical,             intent(in)    :: out_dt
+    logical,             intent(in)    :: last_step
+    logical,             intent(in)    :: do_qa
+    real(kind=kind_dyn), intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
+    integer,             intent(in)    :: nthreads
+    character(len=*),    intent(  out) :: errmsg
+    integer,             intent(  out) :: errflg
 
     ! Local variables
     real(kind=kind_dyn), dimension(is:ie,js:je) :: dpln
@@ -580,7 +588,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             lhi (i) = li00 + dc_ice * pt1 (i)
             lcp2 (i) = lhl (i) / cvm (i)
             icp2 (i) = lhi (i) / cvm (i)
-            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) / 48.)
+            tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) /48.)
         enddo
         ! -----------------------------------------------------------------------
         !> - Condensation/evaporation between water vapor and cloud water.
@@ -971,7 +979,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             enddo
                 endif
         enddo ! end j loop
-
+    
 end subroutine fv_sat_adj_work
 !! @}
 
