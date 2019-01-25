@@ -41,7 +41,7 @@ module mp_thompson_hrrr_pre
 !! | mpicomm         | mpi_comm                                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | blkno           | block_number                                                          | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
+!! | blkno           | ccpp_block_number                                                     | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
