@@ -253,6 +253,9 @@
                      call print_var(mpirank,omprank, blkno, 'Tbd%aer_nm'          , Tbd%aer_nm)
                      ! Diag
                      call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
+                     do n=1,size(Diag%fluxr(1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
+                     end do
                      call print_var(mpirank,omprank, blkno, 'Diag%srunoff     ',    Diag%srunoff)
                      call print_var(mpirank,omprank, blkno, 'Diag%evbsa       ',    Diag%evbsa)
                      call print_var(mpirank,omprank, blkno, 'Diag%evcwa       ',    Diag%evcwa)
