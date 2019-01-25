@@ -170,6 +170,12 @@ if (STATIC)
 endif (STATIC)
 
 #------------------------------------------------------------------------------
+# Set flags for CCPP transition (selective reduction of optimization, Intel15)
+if (TRANSITION)
+  ADD_DEFINITIONS(-DTRANSITION)
+endif (TRANSITION)
+
+#------------------------------------------------------------------------------
 # Set flag for 32bit dynamics build
 if (DYN32)
   message(STATUS "Dynamics compiled with 32-bit option, adjust fv_sat_adj types")
