@@ -32,6 +32,12 @@
 
 #endif
 
+#ifdef OVERLOAD_R4
+      integer, parameter :: kind_dyn  = 4 
+#else
+      integer, parameter :: kind_dyn  = 8
+#endif
+
 !
       real(kind=kind_evod), parameter :: mprec = 1.e-12           ! machine precision to restrict dep
       real(kind=kind_evod), parameter :: grib_undef = 9.99e20     ! grib undefine value
