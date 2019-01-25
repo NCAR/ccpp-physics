@@ -17,6 +17,7 @@ function usage   {
   echo "                                   SION=Y/N   (default N)"
   echo "                                   DEBUG=Y/N  (default N)"
   echo "                                   REPRO=Y/N  (default N)"
+  echo "                                   TRANSITION=Y/N (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
   echo "                                   HYBRID=Y/N (default Y)"
   echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"
@@ -87,6 +88,9 @@ elif [[ "${MAKE_OPT}" == *"REPRO=Y"* ]]; then
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Release"
   CCPP_MAKE_FLAGS="${CCPP_MAKE_FLAGS} VERBOSE=1"
+fi
+if [[ "${MAKE_OPT}" == *"TRANSITION=Y"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTRANSITION=ON"
 fi
 if [[ "${MAKE_OPT}" == *"OPENMP=N"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=OFF"
