@@ -266,19 +266,22 @@ set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
 
-# DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
+# DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
+# this is only needed for dynamics builds - static build generates plain Fortran code.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-set(CAPOBJS)
-foreach(cap ${CAPS})
-    string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
-    list(APPEND CAPOBJS ${capobj})
-endforeach(cap)
-
-add_custom_command(TARGET ccppphys
-                   PRE_LINK
-                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                   COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  if (NOT STATIC)
+  set(CAPOBJS)
+  foreach(cap ${CAPS})
+      string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
+      list(APPEND CAPOBJS ${capobj})
+  endforeach(cap)
+  
+  add_custom_command(TARGET ccppphys
+                     PRE_LINK
+                     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                     COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  endif (NOT STATIC)
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 # *DH end hack for PGI compiler
 
