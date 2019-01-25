@@ -22,7 +22,7 @@ cd ${PATHTR}/..
 rm -f $PATHTR/../NEMS/exe/NEMS.x
 rm -f $PATHTR/../NEMS/src/conf/modules.nems
 
-if [[ $APP = CCPP ]]; then
+if [[ $APP = CCPP || $APP = CCPP_static_trans ]]; then
   if [[ $MACHINE_ID = theia.* ]]; then
     echo "Move original modulefile modulefiles/theia.intel/fv3 aside and replace with modulefiles/theia.intel/fv3.intel-15.1.133"
     cd modulefiles/theia.intel
@@ -39,7 +39,7 @@ set +e
 RC=$?
 set -e
 cd ${PATHTR}/..
-if [[ $APP = CCPP ]]; then
+if [[ $APP = CCPP || $APP = CCPP_static_trans ]]; then
   if [[ $MACHINE_ID = theia.* ]]; then
     echo "Reinstantiate original modulefile modulefiles/theia.intel/fv3"
     cd modulefiles/theia.intel
