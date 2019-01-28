@@ -17,6 +17,7 @@ function usage   {
   echo "                                   SION=Y/N   (default N)"
   echo "                                   DEBUG=Y/N  (default N)"
   echo "                                   REPRO=Y/N  (default N)"
+  echo "                                   TRANSITION=Y/N (default N)"
   echo "                                   OPENMP=Y/N (default Y)"
   echo "                                   HYBRID=Y/N (default Y)"
   echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"
@@ -73,8 +74,6 @@ readonly clean_after=${5:-YES}
 checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
 # Generate CCPP cmake flags from MAKE_OPT
-
-# Generate CCPP cmake flags from MAKE_OPT
 CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DNETCDF_DIR=${NETCDF} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
 if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
@@ -90,6 +89,9 @@ else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Release"
   CCPP_MAKE_FLAGS="${CCPP_MAKE_FLAGS} VERBOSE=1"
 fi
+if [[ "${MAKE_OPT}" == *"TRANSITION=Y"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTRANSITION=ON"
+fi
 if [[ "${MAKE_OPT}" == *"OPENMP=N"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=OFF"
 else
@@ -104,6 +106,11 @@ if [[ "${MAKE_OPT}" == *"32BIT=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=ON"
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=OFF"
+fi
+if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=OFF"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=ON"
 fi
 if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
   if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
