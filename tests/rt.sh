@@ -203,7 +203,6 @@ else
 fi
 
 mkdir -p ${STMP}/${USER}
-mkdir -p ${PTMP}/${USER}
 
 # Different own baseline directories for different compilers on Theia/Cheyenne
 NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
@@ -211,7 +210,8 @@ if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_
     NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
 fi
 
-RUNDIR_ROOT=${PTMP}/${USER}/FV3_RT/rt_$$
+# Overwrite default RUNDIR_ROOT if environment variable RUNDIR_ROOT is set
+RUNDIR_ROOT=${RUNDIR_ROOT:-${PTMP}/${USER}/FV3_RT}/rt_$$
 mkdir -p ${RUNDIR_ROOT}
 
 CREATE_BASELINE=false
