@@ -19,6 +19,7 @@ end subroutine shoc_init
 subroutine shoc_finalize ()
 end subroutine shoc_finalize
 
+#if 0
 !> \section arg_table_shoc_run Argument Table
 !! | local_name                 | standard_name                                                               | long_name                                                                                   | units         | rank | type       |    kind   | intent | optional |
 !! |----------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
@@ -81,14 +82,15 @@ end subroutine shoc_finalize
 !! | errmsg                     | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none          |    0 | character  | len=*     | out    | F        |
 !! | errflg                     | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag          |    0 | integer    |           | out    | F        |
 !!
-subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,     &
-    imp_physics_zhao_carr_pdf, imp_physics_mg, fprcp, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi,  &
-    con_fvirt, gq0_cloud_ice, gq0_rain, gq0_snow, gq0_graupel, dtp, me, prsl, phii, phil, u, v, omega, rhc, supice, pcrit,   &
-    cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                                                                        &
-    skip_macro, clw_ice, clw_liquid, gq0_cloud_liquid, ncpl, ncpi, gt0, gq0_water_vapor, cld_sgs, tke, tkh, wthv_sec,        &
+#endif
+subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,    &
+    imp_physics_zhao_carr_pdf, imp_physics_mg, fprcp, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, &
+    con_fvirt, gq0_cloud_ice, gq0_rain, gq0_snow, gq0_graupel, dtp, me, prsl, phii, phil, u, v, omega, rhc, supice, pcrit,  &
+    cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                                                                       &
+    skip_macro, clw_ice, clw_liquid, gq0_cloud_liquid, ncpl, ncpi, gt0, gq0_water_vapor, cld_sgs, tke, tkh, wthv_sec,       &
     errmsg, errflg)
 
-   implicit none
+    implicit none
 
     integer, intent(in) :: ix, nx, nzm, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, &
      imp_physics_mg, fprcp, me
