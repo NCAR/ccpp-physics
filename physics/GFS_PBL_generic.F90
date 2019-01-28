@@ -178,6 +178,8 @@
 !! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)                                                 | flag          |    0 | logical   |           | in     | F        |
 !! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                                           | flag for scale-aware TKE moist EDMF PBL scheme                                              | flag          |    0 | logical   |           | in     | F        |
+!! | shinhong                     | flag_for_scale_aware_Shinhong_PBL                                                 | flag for scale-aware Shinhong PBL scheme                                                    | flag          |    0 | logical   |           | in     | F        |
+!! | do_ysu                       | flag_for_ysu                                                                      | flag for YSU PBL scheme                                                                     | flag          |    0 | logical   |           | in     | F        |
 !! | dvdftra                      | tendency_of_vertically_diffused_tracer_concentration                              | updated tendency of the tracers due to vertical diffusion in PBL scheme                     | kg kg-1 s-1   |    3 | real      | kind_phys | in     | F        |
 !! | dusfc1                       | instantaneous_surface_x_momentum_flux                                             | surface momentum flux in the x-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | dvsfc1                       | instantaneous_surface_y_momentum_flux                                             | surface momentum flux in the y-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
@@ -232,7 +234,7 @@
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac, ntoz, ntke, ntkev,                                         &
         imp_physics, imp_physics_gfdl, imp_physics_thompson,                                                                   &
-        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                               &
+        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,             &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc, &
         dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain, dqdt_snow, dqdt_graupel, dqdt_tke,                          &
@@ -247,7 +249,7 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf
+      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
@@ -271,9 +273,10 @@
       errmsg = ''
       errflg = 0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
+!      print*,"dqdt:",maxval(dqdt(:,:,1)),minval(dqdt(:,:,1))
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc)) then
         dqdt = dvdftra
-      elseif (nvdiff /= ntrac) then
+      elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
@@ -395,7 +398,8 @@
   !         endif
           do k=1,levs
             do i=1,im
-              tem  = dqdt_water_vapor(i,k) * dtf
+!              tem  = dqdt_water_vapor(i,k) * dtf
+              tem  = dqdt(i,k,1) * dtf
               dq3dt(i,k) = dq3dt(i,k) + tem
             enddo
           enddo
@@ -409,6 +413,8 @@
         endif
 
       endif   ! end if_lssav
+
+  !    print*,"dqdt:",shinhong, maxval(dqdt(:,:,1)),minval(dqdt(:,:,1))
 
       end subroutine GFS_PBL_generic_post_run
 
