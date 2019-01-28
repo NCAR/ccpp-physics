@@ -14,10 +14,10 @@
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
 !! | local_name     | standard_name                             | long_name                                                          | units    | rank |  type            |   kind    | intent | optional |
 !! |----------------|-------------------------------------------|--------------------------------------------------------------------|----------|------|------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                      | Fortran DDT containing FV3-GFS model control parameters            | DDT      |    0 | GFS_control_type |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                         | Fortran DDT containing FV3-GFS grid and interpolation related data | DDT      |    0 | GFS_grid_type    |           | in     | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                      | Fortran DDT containing FV3-GFS surface fields                      | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                      | Fortran DDT containing FV3-GFS radiation tendencies                | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters            | DDT      |    0 | GFS_control_type |           | in     | F        |
+!! | Grid           | GFS_grid_type_instance                    | Fortran DDT containing FV3-GFS grid and interpolation related data | DDT      |    0 | GFS_grid_type    |           | in     | F        |
+!! | Sfcprop        | GFS_sfcprop_type_instance                 | Fortran DDT containing FV3-GFS surface fields                      | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
+!! | Radtend        | GFS_radtend_type_instance                 | Fortran DDT containing FV3-GFS radiation tendencies                | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
 !! | im             | horizontal_loop_extent                    | horizontal loop extent                                             | count    |    0 | integer          |           | in     | F        |
 !! | nday           | daytime_points_dimension                  | daytime points dimension                                           | count    |    0 | integer          |           | out    | F        |
 !! | idxday         | daytime_points                            | daytime points                                                     | index    |    1 | integer          |           | out    | F        |
