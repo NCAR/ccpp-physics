@@ -891,11 +891,12 @@
 !> \section arg_table_GFS_abort_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | derived type GFS_control_type in FV3                    | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_abort_run (Model, errmsg, errflg)
+      subroutine GFS_abort_run (Model, blkno, errmsg, errflg)
 
          use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type
@@ -904,18 +905,19 @@
 
          !--- interface variables
          type(GFS_control_type),   intent(in   ) :: Model
-         character(len=*),           intent(out) :: errmsg
-         integer,                    intent(out) :: errflg
+         integer,                  intent(in   ) :: blkno
+         character(len=*),         intent(  out) :: errmsg
+         integer,                  intent(  out) :: errflg
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-         !if (Model%kdt==4) then
+         if (Model%kdt==1) then
              if (Model%me==0) write(0,*) "GFS_abort_run: ABORTING MODEL"
              call sleep(10)
              stop
-         !end if
+         end if
 
       end subroutine GFS_abort_run
 
