@@ -97,8 +97,10 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fpp")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -save-temps")
   if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapuv -traceback")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftrapuv -traceback")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -check -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check")
-    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fstack-protector-all -fpe0 -traceback -debug extended -ftrapuv")
+    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fstack-protector-all -fpe0 -traceback -debug -ftrapuv")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -g -traceback")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
@@ -156,10 +158,29 @@ if (TEMPLOG)
 endif (TEMPLOG)
 
 #------------------------------------------------------------------------------
+# Set flags for hybrid/non-hybrid build of CCPP
+if (HYBRID)
+  ADD_DEFINITIONS(-DHYBRID)
+endif (HYBRID)
+
+#------------------------------------------------------------------------------
 # Set flags for static building/linking of CCPP
 if (STATIC)
   ADD_DEFINITIONS(-DSTATIC)
 endif (STATIC)
+
+#------------------------------------------------------------------------------
+# Set flags for CCPP transition (selective reduction of optimization, Intel15)
+if (TRANSITION)
+  ADD_DEFINITIONS(-DTRANSITION)
+endif (TRANSITION)
+
+#------------------------------------------------------------------------------
+# Set flag for 32bit dynamics build
+if (DYN32)
+  message(STATUS "Dynamics compiled with 32-bit option, adjust fv_sat_adj types")
+  ADD_DEFINITIONS(-DOVERLOAD_R4)
+endif (DYN32)
 
 #------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor

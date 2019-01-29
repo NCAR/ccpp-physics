@@ -51,9 +51,11 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
+TRANSITION = N
 HYBRID = Y
 STATIC = N
 MEMCHECK = N
+DYN32 = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -95,6 +97,10 @@ endif
 
 ifeq ($(NAM_phys),Y)
 CPPDEFS += -DNAM_phys
+endif
+
+ifeq ($(DYN32),Y)
+CPPDEFS += -DOVERLOAD_R4
 endif
 
 ifeq ($(32BIT),Y)
@@ -194,6 +200,10 @@ LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
 else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
 endif
+endif
+
+ifeq ($(TRANSITION),Y)
+CPPDEFS += -DTRANSITION
 endif
 
 ifeq ($(MEMCHECK),Y)

@@ -12,9 +12,10 @@ HOST_MODEL_IDENTIFIER = "FV3"
 # Add all files with metadata tables on the host model side,
 # relative to basedir = top-level directory of host model
 VARIABLE_DEFINITION_FILES = [
-    'FV3/atmos_cubed_sphere/model/fv_arrays.F90',
+    'ccpp/physics/physics/machine.F',
     'FV3/gfsphysics/CCPP_layer/CCPP_typedefs.F90',
     'FV3/gfsphysics/GFS_layer/GFS_typedefs.F90',
+    'FV3/gfsphysics/CCPP_layer/CCPP_data.F90',
     ]
 
 # Add all physics scheme dependencies relative to basedir - note that the CCPP
@@ -37,13 +38,14 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/iccn_def.F',
     'ccpp/physics/physics/iccninterp.F90',
     'ccpp/physics/physics/iounitdef.f',
-    'ccpp/physics/physics/machine.F', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/machine.F',
     'ccpp/physics/physics/mersenne_twister.f',
     'ccpp/physics/physics/mfpbl.f',
     'ccpp/physics/physics/micro_mg_utils.F90',
     'ccpp/physics/physics/micro_mg2_0.F90',
     'ccpp/physics/physics/micro_mg3_0.F90',
     'ccpp/physics/physics/module_bfmicrophysics.f',
+    'ccpp/physics/physics/module_gfdl_cloud_microphys.F90',
     'ccpp/physics/physics/module_nst_model.f90',
     'ccpp/physics/physics/module_nst_parameters.f90',
     'ccpp/physics/physics/module_nst_water_prop.f90',
@@ -58,7 +60,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/ozne_def.f',
     'ccpp/physics/physics/ozinterp.f90',
     'ccpp/physics/physics/physcons.F90',
-    'ccpp/physics/physics/physparam.f', # DH should this be in FV3/gfsphysics/physics/physparam.f ?
+    'ccpp/physics/physics/physparam.f',
     'ccpp/physics/physics/radcons.f90',
     'ccpp/physics/physics/radiation_aerosols.f',
     'ccpp/physics/physics/radiation_astronomy.f',
@@ -78,6 +80,8 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/cu_gf_sh.F90',
     'ccpp/physics/physics/tridi.f',
     'ccpp/physics/physics/tridi2t3.f',
+    # This file needs to be compiled for the hybrid mode (see GFS_typedefs.F90)
+    # and can be removed once the hybrid mode is gone: wam_f107_kp_mod.f90
     'ccpp/physics/physics/wam_f107_kp_mod.f90',
     'ccpp/physics/physics/wv_saturation.F',
     'ccpp/physics/physics/module_sf_ruclsm.F90',
@@ -145,7 +149,6 @@ SCHEME_FILES = {
     'ccpp/physics/physics/get_prs_fv3.F90'                   : [ 'slow_physics' ],
     'ccpp/physics/physics/gfdl_cloud_microphys.F90'          : [ 'slow_physics' ],
     'ccpp/physics/physics/gfdl_fv_sat_adj.F90'               : [ 'fast_physics' ],
-    #'ccpp/physics/physics/gfdl_fv_sat_adj_pre.F90'           : [ 'fast_physics' ],
     'ccpp/physics/physics/gscond.f'                          : [ 'slow_physics' ],
     'ccpp/physics/physics/gwdc.f'                            : [ 'slow_physics' ],
     'ccpp/physics/physics/gwdps.f'                           : [ 'slow_physics' ],
@@ -280,13 +283,13 @@ OPTIONAL_ARGUMENTS = {
     }
 
 # Names of Fortran include files in the host model cap (do not change);
-# both files will be written to the directory of each target file
+# both files will be written to the directory of each target file, only
+# used by the dynamic builds
 MODULE_INCLUDE_FILE = 'ccpp_modules_{set}.inc'
 FIELDS_INCLUDE_FILE = 'ccpp_fields_{set}.inc'
 
-# Names of Fortran include files in the host model cap for static
-# build (do not change); will be written to the directory of each target file
-MODULE_INCLUDE_FILE_STATIC_BUILD = 'ccpp_modules_static_{set}.inc'
+# Directory where to write static API to
+STATIC_API_DIR = 'FV3/gfsphysics/CCPP_layer'
 
 # HTML document containing the model-defined CCPP variables
 HTML_VARTABLE_FILE = 'ccpp/physics/CCPP_VARIABLES_FV3.html'
@@ -305,28 +308,5 @@ LATEX_VARTABLE_FILE = 'ccpp/framework/doc/DevelopersGuide/CCPP_VARIABLES_FV3.tex
 # OpenMP threads as the second dimension; nb is the loop
 # index for the current block, nt for the current thread.
 # Internally, the model uses an associate construct to
-# reference cdata(nb,nt) with cdata.
+# reference cdata(nb,nt) with cdata (recommended).
 CCPP_DATA_STRUCTURE = 'cdata'
-
-# Modules to load for auto-generated ccpp_field_add code
-# in the host model cap (e.g. error handling)
-MODULE_USE_TEMPLATE_HOST_CAP = \
-'''
-use ccpp_api, only: ccpp_error
-'''
-
-# Modules to load for auto-generated ccpp_field_get code
-# in the physics scheme cap (e.g. derived data types)
-MODULE_USE_TEMPLATE_SCHEME_CAP = \
-'''
-   use machine, only: kind_grid, kind_phys
-   use module_radlw_parameters, only: sfcflw_type, topflw_type
-   use module_radsw_parameters, only: cmpfsw_type, sfcfsw_type, topfsw_type
-   use CCPP_typedefs, only: CCPP_interstitial_type
-   use GFS_typedefs, only: GFS_statein_type,  GFS_stateout_type,    &
-                           GFS_sfcprop_type,  GFS_coupling_type,    &
-                           GFS_control_type,  GFS_grid_type,        &
-                           GFS_tbd_type,      GFS_cldprop_type,     &
-                           GFS_radtend_type,  GFS_diag_type,        &
-                           GFS_data_type,     GFS_interstitial_type
-'''
