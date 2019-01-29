@@ -153,6 +153,32 @@ elif [[ $MACHINE_ID = theia.* ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
 
+elif [[ $MACHINE_ID = stampede.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+#  module load rocoto
+#  ROCOTORUN=$(which rocotorun)
+#  ROCOTOSTAT=$(which rocotostat)
+  export PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:$PATH
+  export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
+  ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
+  ACCNR=TG-ATM160014
+  QUEUE=skx-dev
+  PARTITION=
+  dprefix=/scratch4/NCEPDEV
+  dprefix=/scratch/05294/tg845932/model/run
+  DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
+  DISKNM=/scratch/05294/tg845932/model/RT
+  STMP=$dprefix/stmp4
+  PTMP=$dprefix/stmp3
+  SCHEDULER=sbatch
+  MPIEXEC=ibrun
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
+
 elif [[ $MACHINE_ID = cheyenne.* ]]; then
 
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
@@ -239,7 +265,7 @@ done
 if [[ $MACHINE_ID = cheyenne.* ]]; then
   RTPWD=${RTPWD:-$DISKNM/trunk-20181105/${COMPILER^^}}
 else
-  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20181105}
+  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20181214}
 fi
 
 shift $((OPTIND-1))
