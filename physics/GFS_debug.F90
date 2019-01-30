@@ -317,8 +317,11 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
-                     call print_var(mpirank,omprank, blkno, 'Diag%snowfallac  ',    Diag%snowfallac)
-                     call print_var(mpirank,omprank, blkno, 'Diag%acsnow      ',    Diag%acsnow)
+                     ! CCPP/RUC only
+                     if (Model%lsm == Model%lsm_ruc) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%snowfallac  ',    Diag%snowfallac)
+                       call print_var(mpirank,omprank, blkno, 'Diag%acsnow      ',    Diag%acsnow)
+                     endif
                      call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)
@@ -913,7 +916,7 @@
          errmsg = ''
          errflg = 0
 
-         if (Model%kdt==1) then
+         if (Model%kdt==1 .and. blkno==4) then
              if (Model%me==0) write(0,*) "GFS_abort_run: ABORTING MODEL"
              call sleep(10)
              stop
