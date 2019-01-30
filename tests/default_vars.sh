@@ -105,6 +105,7 @@ export MAKE_NH=.T.
 export MOUNTAIN=.F.
 export SATMEDMF=.F.
 export HYBEDMF=.T.
+export LHEATSTRG=.F.
 export NA_INIT=1
 export CPL=.F.
 export CPLFLX=.F.
