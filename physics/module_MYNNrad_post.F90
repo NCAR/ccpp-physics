@@ -55,8 +55,8 @@ SUBROUTINE mynnrad_post_run(               &
       errmsg = ''
       errflg = 0
 
-      write(0,*)"=============================================="
-      write(0,*)"in mynn rad post"
+      !write(0,*)"=============================================="
+      !write(0,*)"in mynn rad post"
 
      ! Add subgrid cloud information:
         do k = 1, levs
@@ -68,8 +68,8 @@ SUBROUTINE mynnrad_post_run(               &
            enddo
         enddo
 
-        print*,"===Finished restoring the resolved-scale clouds"
-        !print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
+       ! print*,"===Finished restoring the resolved-scale clouds"
+       ! print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
 
   END SUBROUTINE mynnrad_post_run
 
