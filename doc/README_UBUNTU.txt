@@ -115,7 +115,7 @@ step 4, these differences can be ignored. It is also assumed that the bash shell
     make 2>&1 | tee log.make
     make install 2>&1 | tee log.install
     cd ..
-    rm -fr parallel-netcdf-1.9.0
+    rm -fr parallel-netcdf-1.8.1
 
     # netcdf-4.6.1
     tar -xvf netcdf-4.6.1.tar.gz 
