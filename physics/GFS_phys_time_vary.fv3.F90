@@ -213,24 +213,20 @@
 
 !$OMP end parallel
 
-         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-         !    Model%imfdeepcnv < 0 when Model%ras = .true.
-         !    initial calculation of maps local ix -> global i and j, store in Tbd
-         if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
-           ix = 0
-           nb = 1
-           do j = 1,Model%ny
-             do i = 1,Model%nx
-               ix = ix + 1
-               if (ix .gt. Model%blksz(nb)) then
-                 ix = 1
-                 nb = nb + 1
-               endif
-               Data(nb)%Tbd%jmap(ix) = j
-               Data(nb)%Tbd%imap(ix) = i
-             enddo
+         !--- initial calculation of maps local ix -> global i and j, store in Tbd
+         ix = 0
+         nb = 1
+         do j = 1,Model%ny
+           do i = 1,Model%nx
+             ix = ix + 1
+             if (ix .gt. Model%blksz(nb)) then
+               ix = 1
+               nb = nb + 1
+             endif
+             Data(nb)%Tbd%jmap(ix) = j
+             Data(nb)%Tbd%imap(ix) = i
            enddo
-         endif  ! imfdeepcnv, cal_re, random_clds 
+         enddo
 
          is_initialized = .true.
 
