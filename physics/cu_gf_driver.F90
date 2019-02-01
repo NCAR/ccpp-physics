@@ -58,10 +58,10 @@ contains
 ! t = current temp (t2di + physics up to now)
 !===================
 
-!> \defgroup cu_gf_group Scale-Aware Grell-Freitas Cumulus Scheme Main
-!! @{
+!> \defgroup cu_gf_group GSD Scale-Aware Grell-Freitas Cumulus Scheme Module
 
-!> \defgroup cu_gf_driver_group Grell-Freitas Cumulus Scheme Driver Module 
+!>\ingroup cu_gf_group
+!>\defgroup cu_gf_driver GSD GF Cumulus Scheme Driver
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -103,6 +103,7 @@ contains
 !! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
+!>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
       subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
                forcet,forceq,phil,raincv,q,t,cld1d,       &
                us,vs,t2di,w,q2di,p2di,psuri,              &

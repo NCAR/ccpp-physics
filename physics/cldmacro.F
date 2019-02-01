@@ -1,3 +1,8 @@
+!>\file cldmacro.F
+!! This file contains
+
+!>\ingroup mg2mg3
+!>\defgroup cldmacro_mod Morrison-Gettelman MP cldmacro Module
       module cldmacro
 !=======================================================================
 !      Anning Cheng 2/18/2016 replaced GEO condensation scheme
@@ -101,7 +106,8 @@
 
        contains
 
-
+!>\ingroup cldmacro_mod
+!>This subroutine calculates
        subroutine macro_cloud(IRUN, LM, DT, alf_fac, PP_dev, PPE_dev
 !    &,                                               RMFDTR_dev
 !    &,                                   FRLAND_dev, RMFDTR_dev
@@ -629,6 +635,8 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!>\ingroup cldmacro_mod
+!> This subroutine calculates
        subroutine pdf_spread (K, LM, PP, ALPHA, ALPHT_DIAG, FRLAND, rhc)
 
        integer, intent(in)  :: k,lm
@@ -665,6 +673,8 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!>\ingroup cldmacro_mod
+!> This subroutine calculates
        subroutine fix_up_clouds_2M(QV, TE, QLC, QIC, CF, QLA, QIA, AF,
      &                             NL, NI, qc_min)
 
@@ -748,6 +758,8 @@
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>\ingroup cldmacro_mod
+!> This subroutine calculates
        subroutine update_cld( irun, lm, DT, ALPHA, qc_min,
      &                        PDFSHAPE, PL, QV, QCl, QAl,
      &                        QCi, QAi, TE, CF, AF,
@@ -848,6 +860,8 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine hystpdf( DT, ALPHA, PDFSHAPE, qc_min, PL, QV, QCl, QAl
      &,                    QCi, QAi, TE, CF, AF, SCICE, NI, NL)
 !    &,                    QCi, QAi, TE, CF, AF, SCICE, NI, NL, i, k)
@@ -1139,7 +1153,8 @@
        end subroutine hystpdf
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine pdffrac (flag,qtmean,sigmaqt1,sigmaqt2,qstar,clfrac)
        implicit none
 
@@ -1191,7 +1206,8 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine pdfcondensate (flag,qtmean4,sigmaqt14,sigmaqt24,
      &                           qstar4,condensate4, clfrac4)
        implicit none
@@ -1270,7 +1286,8 @@
        end subroutine pdfcondensate
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine cnvsrc( DT, ICEPARAM, SCLMFDFR, MASS, iMASS, PL,
      &                    TE, QV, DCF, DMF, QLA, QIA, CF, AF, QS,
      &                    NL, NI, CNVFICE, CNVNDROP, CNVNICE)
@@ -1349,7 +1366,8 @@
        end subroutine cnvsrc
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine PRECIP3( K,LM , DT , FRLAND , RHCR3 , QPl , QPi ,
      & QCl , QCi , TE , QV , mass , imass , PL , dZE , QDDF3 , AA , BB ,
      & AREA , RAIN , SNOW , PFl_above , PFi_above , EVAP_DD_above,
@@ -1746,6 +1764,8 @@
        end subroutine precip3
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine MARSHPALMQ2(RAIN,PR,DIAM3,NTOTAL,W,VE)
 
        real, intent(in ) :: RAIN,PR
@@ -1802,7 +1822,8 @@
 
        end subroutine MARSHPALMQ2
 !==========================================================
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
        subroutine MICRO_AA_BB_3(TEMP,PR,Q_SAT,AA,BB)
 
        real, intent(in ) :: TEMP,Q_SAT
@@ -1928,6 +1949,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !Parititions DQ into ice and liquid. Follows Morrison and Gettelman, 2008
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
       subroutine Bergeron_iter ( DTIME , PL , TE , QV , QILS , QICN ,
      & QLLS , QLCN , CF , AF , NL , NI , DQALL , FQI )
 
@@ -2046,11 +2069,10 @@
 
 
 !=============================================================================
-! Subroutine Pfreezing: calculates the probability of finding a supersaturated parcel in the grid cell
-!SC_ICE is the effective freezing point for ice (Barahona & Nenes. 2009)
-! Modified 02/19/15. in situ nucleation only occurs in the non_convective part of the grid cell
-
-
+!>\ingroup cldmacro_mod
+!! Subroutine Pfreezing: calculates the probability of finding a supersaturated parcel in the grid cell
+!!SC_ICE is the effective freezing point for ice (Barahona and Nenes(2009) \cite Barahona_2009)
+!!\n Modified 02/19/15. in situ nucleation only occurs in the non_convective part of the grid cell
       subroutine Pfreezing ( ALPHA , PL , TE , QV , QCl , QAl , QCi ,
      &                       QAi , SC_ICE , CF , AF , PF, pdfflag)
 
@@ -2123,7 +2145,8 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Instantaneous freezing of condensate!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
+!>\ingroup cldmacro_mod
+!! This subroutine calculates instantaneous freezing of condensate.
       subroutine meltfrz_inst(IM, LM, TE, QCL, QAL, QCI, QAI, NL, NI)
 
       integer, intent(in) :: IM, LM
@@ -2207,6 +2230,8 @@
 
 
 !======================================
+!>\ingroup cldmacro_mod
+!! This subroutine calculates
       subroutine cloud_ptr_stubs (
      & SMAXL, SMAXI, WSUB, CCN01, CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4,
      & ORG, BCARBON, DUST, SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW,
@@ -2341,13 +2366,10 @@
       end subroutine cloud_ptr_stubs
 
 !C=======================================================================
-!C
-!C *** REAL FUNCTION erf (overwrites previous versions)
-!C *** THIS SUBROUTINE CALCULATES THE ERROR FUNCTION USING A
-!C *** POLYNOMIAL APPROXIMATION
-!C
-!C=======================================================================
-!C
+!>\ingroup cldmacro_mod
+!! REAL FUNCTION erf (overwrites previous versions)
+!! THIS SUBROUTINE CALCULATES THE ERROR FUNCTION USING A
+!! POLYNOMIAL APPROXIMATION
        REAL FUNCTION erf_app(x)
        REAL :: x
        REAL*8:: AA(4), axx, y

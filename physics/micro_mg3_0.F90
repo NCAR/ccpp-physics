@@ -1,3 +1,10 @@
+!>\file micro_mg3_0.F90
+!! This file contains Morrison-Gettelman MP version 3.0 -
+!! Update of MG microphysics with prognostic hai OR graupel.
+
+!>\ingroup mg2mg3
+!>\defgroup mg3_mp Morrison-Gettelman MP version 3.0
+
 module micro_mg3_0
 !---------------------------------------------------------------------------------
 ! Purpose:
@@ -246,6 +253,8 @@ logical  :: do_liq_liu
 contains
 !===============================================================================
 
+!>\ingroup mg3_mp
+!! This subroutine calculates
 subroutine micro_mg_init(                                         &
      kind, gravit, rair, rh2o, cpair,                             &
      tmelt_in, latvap, latice,                                    &
@@ -423,6 +432,8 @@ end subroutine micro_mg_init
 !===============================================================================
 !microphysics routine for each timestep goes here...
 
+!>\ingroup mg3_mp
+!! This subroutine calculates
 subroutine micro_mg_tend (                                       &
      mgncol,             nlev,               deltatin,           &
      t,                            q,                            &
@@ -4451,6 +4462,8 @@ end subroutine micro_mg_tend
 !OUTPUT CALCULATIONS
 !========================================================================
 
+!>\ingroup mg3_mp
+!! This subroutine calculates
 subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,nlev)
   integer, intent(in) :: mgncol, nlev
   real(r8), dimension(mgncol,nlev), intent(in) :: lamr          ! rain size parameter (slope)

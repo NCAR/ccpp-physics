@@ -1,11 +1,11 @@
 !>\file cu_gf_sh.F90
 !! This file contains
 
-!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
-!> \ingroup cu_gf_group
+!>\defgroup cu_gf_sh_group GSD GF Shallow Convection Main
 !! @{
+!> \ingroup cu_gf_group
 !! module cup_gf_sh will call shallow convection as described in grell and
-!! freitas (2016). input variables are:
+!! freitas (2014) \cite grell_and_freitas_2014. input variables are:
 !    zo               height at model levels
 !    t,tn             temperature without and with forcing at model levels
 !    q,qo             mixing ratio without and with forcing at model levels
@@ -60,34 +60,33 @@ contains
 !> This subroutine calculates
 !!\param    zo               height at model levels
 !!\param    t,tn             temperature without and with forcing at model levels
-!    q,qo             mixing ratio without and with forcing at model levels
-!    po               pressure at model levels (mb)
-!    psur             surface pressure (mb)
-!    z1               surface height
-!    dhdt             forcing for boundary layer equilibrium
-!    hfx,qfx          in w/m2 (positive, if upward from sfc)
-!    kpbl             level of boundaty layer height
-!    xland            land mask (1. for land)
-!    ichoice          which closure to choose
-!                     1: old g
-!                     2: zws
-!                     3: dhdt
-!                     0: average
-!    tcrit            parameter for water/ice conversion (258)
-!
-!!!!!!!!!!!! variables that are diagnostic
-!
-!    zuo               normalized mass flux profile
-!    xmb_out           base mass flux
-!    kbcon             convective cloud base
-!    ktop              cloud top
-!    k22               level of updraft originating air
-!    ierr              error flag
-!    ierrc             error description
-!
-!!!!!!!!!!!! variables that are on output
-!    outt               temperature tendency (k/s)
-!    outq               mixing ratio tendency (kg/kg/s)
+!!\param    q,qo             mixing ratio without and with forcing at model levels
+!!\param    z1               surface height
+!!\param    po               pressure at model levels (mb)
+!!\param    psur             surface pressure (mb)
+!!\param    dhdt             forcing for boundary layer equilibrium
+!!\param    kpbl             level of boundaty layer height
+!!\param    rho
+!!\param    hfx,qfx          in w/m2 (positive, if upward from sfc)
+!!\param    xland            land mask (1. for land)
+!!\param    ichoice          which closure to choose
+!!\n                         1: old g
+!!\n                         2: zws
+!!\n                         3: dhdt
+!!\n                         0: average
+!!\param    tcrit            parameter for water/ice conversion (258)
+!!\param    dtime
+!variables that are diagnostic
+!>\param    zuo               normalized mass flux profile
+!!\param    xmb_out           base mass flux
+!!\param    kbcon             convective cloud base
+!!\param    ktop              cloud top
+!!\param    k22               level of updraft originating air
+!!\param    ierr              error flag
+!!\param    ierrc             error description
+! variables that are on output
+!!\param    outt               temperature tendency (k/s)
+!!\param    outq               mixing ratio tendency (kg/kg/s)
 !    outqc              cloud water/ice tendency (kg/kg/s)
 !    pre                precip rate (mm/s)
 !    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)

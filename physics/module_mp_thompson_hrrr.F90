@@ -1,47 +1,54 @@
+!>\file module_mp_thompson_hrrr.F90
+!! This file contains the entity of GSD Thompson HRRR MP scheme
+
+!>\ingroup thompson
 !#define DEBUG_AEROSOLS
 
 !+---+-----------------------------------------------------------------+
-!.. This subroutine computes the moisture tendencies of water vapor,
-!.. cloud droplets, rain, cloud ice (pristine), snow, and graupel.
-!.. Prior to WRFv2.2 this code was based on Reisner et al (1998), but
-!.. few of those pieces remain.  A complete description is now found in
-!.. Thompson, G., P. R. Field, R. M. Rasmussen, and W. D. Hall, 2008:
-!.. Explicit Forecasts of winter precipitation using an improved bulk
-!.. microphysics scheme. Part II: Implementation of a new snow
-!.. parameterization.  Mon. Wea. Rev., 136, 5095-5115.
-!.. Prior to WRFv3.1, this code was single-moment rain prediction as
-!.. described in the reference above, but in v3.1 and higher, the
-!.. scheme is two-moment rain (predicted rain number concentration).
-!..
-!.. Beginning with WRFv3.6, this is also the "aerosol-aware" scheme as
-!.. described in Thompson, G. and T. Eidhammer, 2014:  A study of
-!.. aerosol impacts on clouds and precipitation development in a large
-!.. winter cyclone.  J. Atmos. Sci., 71, 3636-3658.  Setting WRF
-!.. namelist option mp_physics=8 utilizes the older one-moment cloud
-!.. water with constant droplet concentration set as Nt_c (found below)
-!.. while mp_physics=28 uses double-moment cloud droplet number
-!.. concentration, which is not permitted to exceed Nt_c_max below.
-!..
-!.. Most importantly, users may wish to modify the prescribed number of
-!.. cloud droplets (Nt_c; see guidelines mentioned below).  Otherwise,
-!.. users may alter the rain and graupel size distribution parameters
-!.. to use exponential (Marshal-Palmer) or generalized gamma shape.
-!.. The snow field assumes a combination of two gamma functions (from
-!.. Field et al. 2005) and would require significant modifications
-!.. throughout the entire code to alter its shape as well as accretion
-!.. rates.  Users may also alter the constants used for density of rain,
-!.. graupel, ice, and snow, but the latter is not constant when using
-!.. Paul Field's snow distribution and moments methods.  Other values
-!.. users can modify include the constants for mass and/or velocity
-!.. power law relations and assumed capacitances used in deposition/
-!.. sublimation/evaporation/melting.
-!.. Remaining values should probably be left alone.
-!..
-!..Author: Greg Thompson, NCAR-RAL, gthompsn@ucar.edu, 303-497-2805
-!..Last modified: 24 Jan 2018   Aerosol additions to v3.5.1 code 9/2013
-!..                 Cloud fraction additions 11/2014 part of pre-v3.7
-!..Imported in CCPP by: Dom Heinzeller, NOAA/ESRL/GS, dom.heinzeller@noaa.gov
-!..Last modified:  6 Aug 2018   Update of initial import to WRFV4.0
+!>\defgroup thompson_hrrr_mp Thompson-HRRR MP module
+!! This subroutine computes the moisture tendencies of water vapor,
+!! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
+!! Prior to WRFv2.2 this code was based on Reisner et al (1998), but
+!! few of those pieces remain.  A complete description is now found in
+!! Thompson, G., P. R. Field, R. M. Rasmussen, and W. D. Hall, 2008:
+!! Explicit Forecasts of winter precipitation using an improved bulk
+!! microphysics scheme. Part II: Implementation of a new snow
+!! parameterization.  Mon. Wea. Rev., 136, 5095-5115.
+!!
+!! Prior to WRFv3.1, this code was single-moment rain prediction as
+!! described in the reference above, but in v3.1 and higher, the
+!! scheme is two-moment rain (predicted rain number concentration).
+!!
+!! Beginning with WRFv3.6, this is also the "aerosol-aware" scheme as
+!! described in Thompson, G. and T. Eidhammer, 2014:  A study of
+!! aerosol impacts on clouds and precipitation development in a large
+!! winter cyclone.  J. Atmos. Sci., 71, 3636-3658.  Setting WRF
+!! namelist option mp_physics=8 utilizes the older one-moment cloud
+!! water with constant droplet concentration set as Nt_c (found below)
+!! while mp_physics=28 uses double-moment cloud droplet number
+!! concentration, which is not permitted to exceed Nt_c_max below.
+!!
+!! Most importantly, users may wish to modify the prescribed number of
+!! cloud droplets (Nt_c; see guidelines mentioned below).  Otherwise,
+!! users may alter the rain and graupel size distribution parameters
+!! to use exponential (Marshal-Palmer) or generalized gamma shape.
+!! The snow field assumes a combination of two gamma functions (from
+!! Field et al. 2005) and would require significant modifications
+!! throughout the entire code to alter its shape as well as accretion
+!! rates.  Users may also alter the constants used for density of rain,
+!! graupel, ice, and snow, but the latter is not constant when using
+!! Paul Field's snow distribution and moments methods.  Other values
+!! users can modify include the constants for mass and/or velocity
+!! power law relations and assumed capacitances used in deposition/
+!! sublimation/evaporation/melting.
+!! Remaining values should probably be left alone.
+!!
+!!\author Greg Thompson, NCAR-RAL, gthompsn@ucar.edu, 303-497-2805
+!!
+!! - Last modified: 24 Jan 2018   Aerosol additions to v3.5.1 code 9/2013
+!!                 Cloud fraction additions 11/2014 part of pre-v3.7
+!! - Imported in CCPP by: Dom Heinzeller, NOAA/ESRL/GS, dom.heinzeller@noaa.gov
+!! - Last modified:  6 Aug 2018   Update of initial import to WRFV4.0
 !+---+-----------------------------------------------------------------+
 !wrft:model_layer:physics
 !+---+-----------------------------------------------------------------+
@@ -956,8 +963,8 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..This is a wrapper routine designed to transfer values from 3D to 1D.
-!+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
+!!This is a wrapper routine designed to transfer values from 3D to 1D.
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
@@ -1482,13 +1489,12 @@ MODULE module_mp_thompson_hrrr
 !ctrlL
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
-!.. This subroutine computes the moisture tendencies of water vapor,
-!.. cloud droplets, rain, cloud ice (pristine), snow, and graupel.
-!.. Previously this code was based on Reisner et al (1998), but few of
-!.. those pieces remain.  A complete description is now found in
-!.. Thompson et al. (2004, 2008).
-!+---+-----------------------------------------------------------------+
-!
+!>\ingroup thompson_hrrr_mp
+!! This subroutine computes the moisture tendencies of water vapor,
+!! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
+!! Previously this code was based on Reisner et al (1998), but few of
+!! those pieces remain.  A complete description is now found in
+!! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &
                           pptrain, pptsnow, pptgraul, pptice, &
@@ -3769,9 +3775,8 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !..Creation of the lookup tables and support functions found below here.
 !+---+-----------------------------------------------------------------+
-!..Rain collecting graupel (and inverse).  Explicit CE integration.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Rain collecting graupel (and inverse).  Explicit CE integration.
       subroutine qr_acr_qg
 
       implicit none
@@ -3937,9 +3942,8 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Rain collecting snow (and inverse).  Explicit CE integration.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!!Rain collecting snow (and inverse).  Explicit CE integration.
       subroutine qr_acr_qs
 
       implicit none
@@ -4189,11 +4193,10 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..This is a literal adaptation of Bigg (1954) probability of drops of
-!..a particular volume freezing.  Given this probability, simply freeze
-!..the proportion of drops summing their masses.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! This is a literal adaptation of Bigg (1954) probability of drops of
+!! a particular volume freezing.  Given this probability, simply freeze
+!! the proportion of drops summing their masses.
       subroutine freezeH2O(threads)
 
       implicit none
@@ -4359,16 +4362,15 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Cloud ice converting to snow since portion greater than min snow
-!.. size.  Given cloud ice content (kg/m**3), number concentration
-!.. (#/m**3) and gamma shape parameter, mu_i, break the distrib into
-!.. bins and figure out the mass/number of ice with sizes larger than
-!.. D0s.  Also, compute incomplete gamma function for the integration
-!.. of ice depositional growth from diameter=0 to D0s.  Amount of
-!.. ice depositional growth is this portion of distrib while larger
-!.. diameters contribute to snow growth (as in Harrington et al. 1995).
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Cloud ice converting to snow since portion greater than min snow
+!! size.  Given cloud ice content (kg/m**3), number concentration
+!! (#/m**3) and gamma shape parameter, mu_i, break the distrib into
+!! bins and figure out the mass/number of ice with sizes larger than
+!! D0s.  Also, compute incomplete gamma function for the integration
+!! of ice depositional growth from diameter=0 to D0s.  Amount of
+!! ice depositional growth is this portion of distrib while larger
+!! diameters contribute to snow growth (as in Harrington et al. 1995).
       subroutine qi_aut_qs
 
       implicit none
@@ -4415,11 +4417,10 @@ MODULE module_mp_thompson_hrrr
       end subroutine qi_aut_qs
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Variable collision efficiency for rain collecting cloud water using
-!.. method of Beard and Grover, 1974 if a/A less than 0.25; otherwise
-!.. uses polynomials to get close match of Pruppacher & Klett Fig 14-9.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Variable collision efficiency for rain collecting cloud water using
+!! method of Beard and Grover, 1974 if a/A less than 0.25; otherwise
+!! uses polynomials to get close match of Pruppacher & Klett Fig 14-9.
       subroutine table_Efrw
 
       implicit none
@@ -4479,11 +4480,10 @@ MODULE module_mp_thompson_hrrr
       end subroutine table_Efrw
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Variable collision efficiency for snow collecting cloud water using
-!.. method of Wang and Ji, 2000 except equate melted snow diameter to
-!.. their "effective collision cross-section."
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Variable collision efficiency for snow collecting cloud water using
+!! method of Wang and Ji, 2000 except equate melted snow diameter to
+!! their "effective collision cross-section."
       subroutine table_Efsw
 
       implicit none
@@ -4523,11 +4523,10 @@ MODULE module_mp_thompson_hrrr
       end subroutine table_Efsw
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Function to compute collision efficiency of collector species (rain,
-!.. snow, graupel) of aerosols.  Follows Wang et al, 2010, ACP, which
-!.. follows Slinn (1983).
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Function to compute collision efficiency of collector species (rain,
+!! snow, graupel) of aerosols.  Follows Wang et al, 2010, ACP, which
+!! follows Slinn (1983).
       real function Eff_aero(D, Da, visc,rhoa,Temp,species)
 
       implicit none
@@ -4568,12 +4567,11 @@ MODULE module_mp_thompson_hrrr
 
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Integrate rain size distribution from zero to D-star to compute the
-!.. number of drops smaller than D-star that evaporate in a single
-!.. timestep.  Drops larger than D-star dont evaporate entirely so do
-!.. not affect number concentration.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Integrate rain size distribution from zero to D-star to compute the
+!! number of drops smaller than D-star that evaporate in a single
+!! timestep.  Drops larger than D-star dont evaporate entirely so do
+!! not affect number concentration.
       subroutine table_dropEvap
 
       implicit none
@@ -4666,13 +4664,12 @@ MODULE module_mp_thompson_hrrr
 !
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!..Fill the table of CCN activation data created from parcel model run
-!.. by Trude Eidhammer with inputs of aerosol number concentration,
-!.. vertical velocity, temperature, lognormal mean aerosol radius, and
-!.. hygroscopicity, kappa.  The data are read from external file and
-!.. contain activated fraction of CCN for given conditions.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Fill the table of CCN activation data created from parcel model run
+!! by Trude Eidhammer with inputs of aerosol number concentration,
+!! vertical velocity, temperature, lognormal mean aerosol radius, and
+!! hygroscopicity, kappa.  The data are read from external file and
+!! contain activated fraction of CCN for given conditions.
       subroutine table_ccnAct
 
       implicit none
@@ -4719,15 +4716,15 @@ MODULE module_mp_thompson_hrrr
       end subroutine table_ccnAct
 !^L
 !+---+-----------------------------------------------------------------+
-!..Retrieve fraction of CCN that gets activated given the model temp,
-!.. vertical velocity, and available CCN concentration.  The lookup
-!.. table (read from external file) has CCN concentration varying the
-!.. quickest, then updraft, then temperature, then mean aerosol radius,
-!.. and finally hygroscopicity, kappa.
-!.. TO_DO ITEM:  For radiation cooling producing fog, in which case the
+!>\ingroup thompson_hrrr_mp
+!! Retrieve fraction of CCN that gets activated given the model temp,
+!! vertical velocity, and available CCN concentration.  The lookup
+!! table (read from external file) has CCN concentration varying the
+!! quickest, then updraft, then temperature, then mean aerosol radius,
+!! and finally hygroscopicity, kappa.
+! TO_DO ITEM:  For radiation cooling producing fog, in which case the
 !.. updraft velocity could easily be negative, we could use the temp
 !.. and its tendency to diagnose a pretend postive updraft velocity.
-!+---+-----------------------------------------------------------------+
       real function activ_ncloud(Tt, Ww, NCCN)
 
       implicit none
@@ -4807,9 +4804,10 @@ MODULE module_mp_thompson_hrrr
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       SUBROUTINE GCF(GAMMCF,A,X,GLN)
-!     --- RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
-!     --- CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
+!> RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
+!! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
 !     --- LN(GAMMA(A)) AS GLN.  THE CONTINUED FRACTION IS EVALUATED BY
 !     --- A MODIFIED LENTZ METHOD.
 !     --- USES GAMMLN
@@ -4843,6 +4841,7 @@ MODULE module_mp_thompson_hrrr
       END SUBROUTINE GCF
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       SUBROUTINE GSER(GAMSER,A,X,GLN)
 !     --- RETURNS THE INCOMPLETE GAMMA FUNCTION P(A,X) EVALUATED BY ITS
 !     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A))
@@ -5136,14 +5135,13 @@ MODULE module_mp_thompson_hrrr
 !ctrlL
 
 !+---+-----------------------------------------------------------------+
-!..Compute _radiation_ effective radii of cloud water, ice, and snow.
-!.. These are entirely consistent with microphysics assumptions, not
-!.. constant or otherwise ad hoc as is internal to most radiation
-!.. schemes.  Since only the smallest snowflakes should impact
-!.. radiation, compute from first portion of complicated Field number
-!.. distribution, not the second part, which is the larger sizes.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Compute _radiation_ effective radii of cloud water, ice, and snow.
+!! These are entirely consistent with microphysics assumptions, not
+!! constant or otherwise ad hoc as is internal to most radiation
+!! schemes.  Since only the smallest snowflakes should impact
+!! radiation, compute from first portion of complicated Field number
+!! distribution, not the second part, which is the larger sizes.
       subroutine calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,   &
      &                re_qc1d, re_qi1d, re_qs1d, kts, kte)
 
@@ -5251,14 +5249,13 @@ MODULE module_mp_thompson_hrrr
       end subroutine calc_effectRad
 
 !+---+-----------------------------------------------------------------+
-!..Compute radar reflectivity assuming 10 cm wavelength radar and using
-!.. Rayleigh approximation.  Only complication is melted snow/graupel
-!.. which we treat as water-coated ice spheres and use Uli Blahak's
-!.. library of routines.  The meltwater fraction is simply the amount
-!.. of frozen species remaining from what initially existed at the
-!.. melting level interface.
-!+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_hrrr_mp
+!! Compute radar reflectivity assuming 10 cm wavelength radar and using
+!! Rayleigh approximation.  Only complication is melted snow/graupel
+!! which we treat as water-coated ice spheres and use Uli Blahak's
+!! library of routines.  The meltwater fraction is simply the amount
+!! of frozen species remaining from what initially existed at the
+!! melting level interface.
       subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,     &
                t1d, p1d, dBZ, kts, kte, ii, jj, vt_dBZ, first_time_step)
 
@@ -5585,6 +5582,7 @@ MODULE module_mp_thompson_hrrr
 !
 
 #ifdef SION
+!>\ingroup thompson_hrrr_mp
       subroutine readwrite_tables(mode, mpicomm, mpirank, mpiroot, ierr)
 
 #ifdef MPI

@@ -144,10 +144,10 @@ module mp_thompson_hrrr
 
       end subroutine mp_thompson_hrrr_init
 
-#if 0
 !>\defgroup thompson GSD Aerosal-Aware Thompson MP Module
-!! @{
-!! \section arg_table_mp_thompson_hrrr_run Argument Table
+
+#if 0
+!> \section arg_table_mp_thompson_hrrr_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -190,7 +190,7 @@ module mp_thompson_hrrr
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-!>\section thompsongen GSD Thompson MP General Algorithm
+!>\section gen_thompson_hrrr GSD Thompson MP General Algorithm
       subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
@@ -256,19 +256,19 @@ module mp_thompson_hrrr
 
          ! Local variables
 
-         ! Air density
-         real(kind_phys) :: rho(1:ncol,1:nlev)              ! kg m-3
-         ! Hydrometeors
-         real(kind_phys) :: qv_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         real(kind_phys) :: qc_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         real(kind_phys) :: qr_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         real(kind_phys) :: qi_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         real(kind_phys) :: qs_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         real(kind_phys) :: qg_mp(1:ncol,1:nlev)            ! kg kg-1 (dry mixing ratio)
-         ! Vertical velocity and level width
-         real(kind_phys) :: w(1:ncol,1:nlev)                ! m s-1
-         real(kind_phys) :: dz(1:ncol,1:nlev)               ! m
-         ! Rain/snow/graupel fall amounts
+         !> Air density
+         real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
+         !> Hydrometeors
+         real(kind_phys) :: qv_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         real(kind_phys) :: qc_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         real(kind_phys) :: qr_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         real(kind_phys) :: qi_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         real(kind_phys) :: qs_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         real(kind_phys) :: qg_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
+         !> Vertical velocity and level width
+         real(kind_phys) :: w(1:ncol,1:nlev)                !< m s-1
+         real(kind_phys) :: dz(1:ncol,1:nlev)               !< m
+         !> Rain/snow/graupel fall amounts
          real(kind_phys) :: rain_mp(1:ncol)                 ! mm, dummy, not used
          real(kind_phys) :: graupel_mp(1:ncol)              ! mm, dummy, not used
          real(kind_phys) :: ice_mp(1:ncol)                  ! mm, dummy, not used
@@ -277,10 +277,10 @@ module mp_thompson_hrrr
          real(kind_phys) :: delta_graupel_mp(1:ncol)        ! mm
          real(kind_phys) :: delta_ice_mp(1:ncol)            ! mm
          real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
-         ! Radar reflectivity
+         !> Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
-         ! Effective cloud radii
+         !> Effective cloud radii
          logical         :: do_effective_radii
          real(kind_phys) :: re_cloud_mp(1:ncol,1:nlev)      ! m
          real(kind_phys) :: re_ice_mp(1:ncol,1:nlev)        ! m
@@ -549,7 +549,6 @@ module mp_thompson_hrrr
          end if
 
       end subroutine mp_thompson_hrrr_run
-!! @}
 
 #if 0
 !! \section arg_table_mp_thompson_hrrr_finalize Argument Table

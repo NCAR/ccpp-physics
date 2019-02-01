@@ -1,3 +1,11 @@
+!>\file aer_cloud.F
+!! This file contains the models of Nenes and Seinfeld (2003) \cite Nenes_2003 ,
+!! Fountoukis and Nenes (2005) \cite Fountoukis_2005 and Barahona and
+!! Nenes (2008, 2009) \cite Barahona_2008 \cite Barahona_2009 .
+!>\author Donifan Barahona  donifan.o.barahona@nasa.gov 
+
+!>\ingroup mg2mg3
+!>\defgroup aer_cloud_mod Morrison-Gettelman MP aer_cloud Module
        MODULE aer_cloud
 
 #ifdef GEOS5
@@ -98,6 +106,8 @@
 
        CONTAINS
 
+!>\ingroup aer_cloud_mod
+!! This subroutine calculates
        subroutine aer_cloud_init()
 
        real*8  :: daux, sigaux
@@ -132,17 +142,16 @@
        end subroutine aer_cloud_init
 
 
-
-! SUBROUTNE AEROSOL ACTIVATE: sets the variables needed for
-!the activation  subroutines and  return the activated droplet and ice number concentration
-
-! ===============Input=============:
-! tparc_in = T (K)
-! pparc_in = P (pa)
-! sigwparc_in = variance of the distribution of updraft velocity (m s-1)
-! wparc_ls = mean of the distribution of updraft velocity (m s-1)
-! Aer_Props = AerProps  structure containing the aerosol properties Aerosol number concentration (Kg-1)
-! npre_in =  number concentration of prexisting ice crystals (#/Kg)
+!>\ingroup aer_cloud_mod
+!! This subroutine sets the variables needed for
+!!the activation  subroutines and  return the activated droplet and ice number concentration
+!>\param tparc_in  T (\f$K\f$)
+!!\param pparc_in  P (\f$Pa\f$)
+!!\param sigwparc_in variance of the distribution of updraft velocity (\f$m s^{-1}\f$)
+!!\param wparc_ls  mean of the distribution of updraft velocity (\f$m s^{-1}\f$)
+!!\param Aer_Props  AerProps structure containing the aerosol properties Aerosol number concentration (\f$Kg^{-1}\f$)
+!!\param npre_in   number concentration of prexisting ice crystals (\f$Kg^{-1}\f$)
+!>\todo paramlist
 ! dpre_in =  mass-weighted diameter of prexisting ice crystals (m)
 ! ccn_diagr8 = array of supersaturations for CCN diagnostics (in-out)
 
@@ -167,15 +176,11 @@
 ! fdust_immr8 = Fraction of immersion mixed-phase ice nuclei that are dust
 ! fdust_dhfr8 = Fraction of immersion ice nuclei that are dust (not mixed-phase)
 ! nlimr8 =  Limiting ice nuclei concentration (m-3)
-
-!===================================================================================
-
-
-       subroutine aerosol_activate(tparc_in, pparc_in, sigwparc_in,
-     & wparc_ls, Aer_Props, npre_in, dpre_in, ccn_diagr8, Ndropr8, 
-     & cdncr8, smaxliqr8, incr8, smaxicer8, nheticer8, INimmr8,
-     & dINimmr8, Ncdepr8, Ncdhfr8, sc_icer8, fdust_immr8, fdust_depr8,
-     & fdust_dhfr8, nlimr8, use_average_v, CCN_param, IN_param, fd_dust,
+       subroutine aerosol_activate(tparc_in, pparc_in, sigwparc_in,     &
+     & wparc_ls, Aer_Props, npre_in, dpre_in, ccn_diagr8, Ndropr8,      &
+     & cdncr8, smaxliqr8, incr8, smaxicer8, nheticer8, INimmr8,         &
+     & dINimmr8, Ncdepr8, Ncdhfr8, sc_icer8, fdust_immr8, fdust_depr8,  &
+     & fdust_dhfr8, nlimr8, use_average_v, CCN_param, IN_param,fd_dust, &
      & fd_soot, pfrz_inc_r8, sigma_nuc, rhi_cell,nccn)
 !    & fd_soot, pfrz_inc_r8, sigma_nuc, rhi_cell,nccn, lprnt)
 
@@ -617,16 +622,9 @@
 
 !=======================================================================
 !
-! *** SUBROUTINE AerConversion_base
-! *** This subrotine sets basic properties of the aerosol size distributions when using GOCART aerosol
-!****Mass-number conversion based on Barahona at al. GMD, 2014.
-!=======================================================================
-
-!Output:
-
-
-
-!
+!>\ingroup aer_cloud_mod
+!! This subrotine sets basic properties of the aerosol size distributions when using GOCART aerosol
+!!Mass-number conversion based on Barahona at al.(2014) \cite Barahona_2014.
        SUBROUTINE AerConversion_base ()
 
        integer, parameter    :: NMDM = 20
@@ -809,18 +807,10 @@
 
 !=======================================================================
 !
-! *** SUBROUTINE AerConversion
-! *** This subrotine sets the properties of the aerosol distributions
-!****Mass-number conversion based on Barahona at al. GMD, 2014.
-!=======================================================================
-!Input.
-
-!Output:
-
-
-
-!
-       SUBROUTINE AerConversion (aer_mass, AerPr, kappa, SULFATE, ORG,
+!>\ingroup aer_cloud_mod
+!! This subrotine sets the properties of the aerosol distributions
+!! Mass-number conversion based on Barahona at al. GMD, 2014. \cite Barahona_2014
+       SUBROUTINE AerConversion (aer_mass, AerPr, kappa, SULFATE, ORG,  &
      &                           BCARBON, DUST, SEASALT)
 
 
@@ -929,6 +919,8 @@
 !=======================================================================
 !=======================================================================
 !
+!>\ingroup aer_cloud_mod
+!! This subroutine calculates
        SUBROUTINE AerConversion1 (aer_mass, AerPr)
 
 
@@ -1024,9 +1016,8 @@
 !=======================================================================
 !=======================================================================
 
-!*********** Calculate subgrid scale distribution of vertical velocity****
-! ====================================================================
-
+!>\ingroup aer_cloud_mod
+!! This subroutine calculates subgrid scale distribution of vertical velocity.
       subroutine vertical_vel_variance(omeg, lc_turb, tm_gw, pm_gw,
      & rad_cool, uwind_gw, tausurf_gw, nm_gw, LCCIRRUS, Nct, Wct, ksa1,
      & fcn, KH, FRLAND, ZPBL, Z, maxkhpbl, wparc_ls, wparc_gw,
@@ -1100,7 +1091,8 @@
 !=======================================================================
 
 !=======================================================================
-!Extracts aerosol props with INactive = typ
+!>\ingroup aer_cloud_mod
+!! This subroutine extracts aerosol props with INactive = typ
       subroutine getINsubset(typ, aerin, aerout)
 
 ! typ  : type of aerosol needed: 1 dust, 2 soot, 3 organics
@@ -1142,7 +1134,8 @@
 
 !========================subroutines to handle aer strucuture=====================================
 
-
+!>\ingroup aer_cloud_mod
+!! This subroutine handles aer structure.
        subroutine copy_Aer(a,b)
 
        type (AerProps), intent(out) :: a
@@ -1160,6 +1153,8 @@
 
        end subroutine copy_Aer
 
+!>\ingroup aer_cloud_mod
+!! This subroutine
        subroutine copy_mode(a_out,a_in, mode_in, mode_out)
        type (AerProps), intent(out) :: a_out
        type (AerProps), intent(in) :: a_in
@@ -1176,6 +1171,8 @@
 
        end subroutine copy_mode
 
+!>\ingroup aer_cloud_mod
+!! This subroutine
        subroutine init_Aer(aerout)
 
        type (AerProps), intent(inout) :: aerout
@@ -1198,12 +1195,12 @@
 
 
 !!!!!!!!!!!!!!======================================
-!!!!!!!!!   Subroutine ARG_act: finds the activated droplet number following Abdul_Razzak and Ghan 2000.
-!Written by Donifan Barahona
+!>\ingroup aer_cloud.F
+!! This subroutine finds the activated droplet number following Abdul-Razzak and Ghan (2000)
+!! \cite Abdul_Razzak_2000 .
+!!\author  Donifan Barahona
 !!donifan.o.barahona@nasa.gov
-!!!!!!!!!!!!!!====================================
-
-       subroutine arg_activ (wparc,sigw,nact,smax,nmodes,tp_par,
+       subroutine arg_activ (wparc,sigw,nact,smax,nmodes,tp_par,        &
      &  dpg_par,kappa_par,sig_par,temp_par, pres_par)
 
 
@@ -1282,7 +1279,9 @@
 
 
 !=====================================================================================================
-       subroutine ccn_at_super (super,ccn_at_s,nmodes,
+!>\ingroup aer_cloud.F
+!! This subroutine calculates
+       subroutine ccn_at_super (super,ccn_at_s,nmodes,                  &
      &                          sig_par,sg_par,tp_par)
 
        integer :: j, I,nmodes
@@ -1388,9 +1387,9 @@
 !    -------------------------------
 !     DESCRIPTION
 !
-! *** subroutine pdfactiv
-! *** this subroutine calculates the ccn activation fraction according
-!     to the nenes and seinfeld (2003) parameterization, with
+!>\ingroup aer_cloud.F
+!! This subroutine calculates the ccn activation fraction according
+!! to the nenes and seinfeld (2003) parameterization, with
 !     modification for non-contunuum effects as proposed by fountoukis
 !     and nenes (2005). this routine calculates for a pdf of
 !     updraft velocities.
@@ -1400,9 +1399,6 @@
 !      Code Developer
 !      Donifan Barahona
 !      donifanb@umbc.edu
-
-!=======================================================================
-!
        subroutine pdfactiv (wparc,sigw, nact,smax,nmodes,
      &  alfa_par,bet2_par,akoh_par,sg_par,tp_par,
      &  temp_par, pres_par,aka_par, dv_par, psat_par,

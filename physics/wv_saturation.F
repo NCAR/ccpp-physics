@@ -1,9 +1,11 @@
-!
-! Common block and statement functions for saturation vapor pressure
-! look-up procedure, J. J. Hack, February 1990
+!>\file wv_saturation.F
+!!This file contains common block and statement functions for saturation vapor pressure
+!! look-up procedure, J. J. Hack, February 1990
 !
 ! $Id: wv_saturation.F90,v 1.1.12.2.10.1 2014-04-14 16:04:56 dbarahon Exp $
 !
+!>\ingroup mg2mg3
+!>\defgroup wv_saturation_mod Morrison-Gettelman MP wv_saturation Module
       module wv_saturation
 #ifdef GEOS5
        use MAPL_ConstantsMod, r8 => MAPL_R8
@@ -91,6 +93,9 @@
        estblf = (tmin+ai-e+1._r8)* estbl(i)-(tmin+ai-e)* estbl(i+1)
        end function estblf
 
+!>\ingroup wv_saturation_mod
+!! This subroutine builds saturation vapor pressure table for later
+!! procedure.
       subroutine gestbl(tmn ,tmx ,trice ,ip ,epsil , latvap ,latice ,   &
      &                  rh2o ,cpair ,tmeltx )
 !-----------------------------------------------------------------------
@@ -222,6 +227,11 @@
 !
       end subroutine gestbl
 
+!>\ingroup wv_saturation_mod
+!! This subroutine is the utility procedure to look up and returen
+!! saturation vapor pressure from precomputed table, calculate and
+!! return saturation specific humidity (\f$g g^{-1}\f$), for input 
+!! arrays of temperature and pressure (dimensioned ii,kk).
       subroutine aqsat(t ,p ,es ,qs ,ii , ilen ,kk ,kstart ,kend )
 !-----------------------------------------------------------------------
 !
@@ -286,6 +296,8 @@
       end subroutine aqsat
 
 !++xl
+!>\ingroup wv_saturation_mod
+!!
       subroutine aqsat_water(t, p, es, qs, ii, ilen, kk, kstart,kend)
 !-----------------------------------------------------------------------
 !
@@ -355,7 +367,8 @@
       end subroutine aqsat_water
 !--xl
 
-
+!>\ingroup wv_saturation_mod
+!!
       subroutine aqsatd(t, p, es, qs, gam, ii, ilen, kk, kstart, kend)
 !-----------------------------------------------------------------------
 !
@@ -499,6 +512,8 @@
 20     return
       end subroutine aqsatd
 
+!>\ingroup wv_saturation_mod
+!!
       subroutine vqsatd(t ,p ,es ,qs ,gam , len )
 !-----------------------------------------------------------------------
 !
@@ -630,6 +645,8 @@
       end subroutine vqsatd
 
 !++xl
+!>\ingroup wv_saturation_mod
+!!
       subroutine vqsatd_water(t, p, es, qs, gam, len)
 
 !------------------------------Arguments--------------------------------
@@ -709,12 +726,13 @@
 !
       end subroutine vqsatd_water
 
+!>\ingroup wv_saturation_mod
       function polysvp (T,typ)
-!  Compute saturation vapor pressure by using
-! function from Goff and Gatch (1946)
-!  Polysvp returned in units of pa.
-!  T is input in units of K.
-!  type refers to saturation with respect to liquid (0) or ice (1)
+!> This function computes saturation vapor pressure by using
+!! function from Goff and Gatch (1946)
+!!  Polysvp returned in units of pa.
+!!  T is input in units of K.
+!!  type refers to saturation with respect to liquid (0) or ice (1)
 
 !!DONIFF Changed to Murphy and Koop (2005) (03/04/14)
 
@@ -811,6 +829,8 @@
 
       end function qsat_water
 
+!>\ingroup wv_saturation_mod
+!! This subroutine 
       subroutine vqsat_water(t,p,qsat_water,len)
 
        integer, intent(in) :: len
@@ -833,6 +853,7 @@
 
       end subroutine vqsat_water
 
+!>\ingroup wv_saturation_mod
       real(r8) function qsat_ice(t,p)
 
        real(r8) t
@@ -845,6 +866,7 @@
 
       end function qsat_ice
 
+!>\ingroup wv_saturation_mod
       subroutine vqsat_ice(t,p,qsat_ice,len)
 
        integer,intent(in) :: len
@@ -872,6 +894,7 @@
 ! Replace 'gam -> dqsdt'
 ! Sungsu
 
+!>\ingroup wv_saturation_mod
       subroutine vqsatd2_water(t ,p ,es ,qs ,dqsdt , len )
 
 !------------------------------Arguments--------------------------------
@@ -963,6 +986,7 @@
 !
       end subroutine vqsatd2_water
 
+!>\ingroup wv_saturation_mod
       subroutine vqsatd2_water_single(t ,p ,es ,qs ,dqsdt)
 
 !------------------------------Arguments--------------------------------
@@ -1033,7 +1057,7 @@
 !
       end subroutine vqsatd2_water_single
 
-
+!>\ingroup wv_saturation_mod
       subroutine vqsatd2(t ,p ,es ,qs ,dqsdt , len )
 !-----------------------------------------------------------------------
 ! Sungsu : This is directly copied from 'vqsatd' but 'dqsdt' is output
@@ -1188,6 +1212,7 @@
 
 ! Below routine is by Sungsu
 
+!>\ingroup wv_saturation_mod
       subroutine vqsatd2_single(t ,p ,es ,qs ,dqsdt)
 !-----------------------------------------------------------------------
 ! Sungsu : This is directly copied from 'vqsatd' but 'dqsdt' is output
@@ -1342,6 +1367,7 @@
 
 !----------------------------------------------------------------------
 
+!>\ingroup wv_saturation_mod
       subroutine gffgch(t ,es ,tmelt ,itype )
 !-----------------------------------------------------------------------
 !
@@ -1470,9 +1496,8 @@
 !
       end subroutine gffgch
 
-
+!>\ingroup wv_saturation_mod
 !!DONIF USe Murphy and Koop (2005) (Written by Andrew Gettelman)
-
        function MurphyKoop_svp_water(tx) result(es)
        real(r8), intent(in) :: tx
        real(r8) :: es
@@ -1502,6 +1527,7 @@
 
       end function MurphyKoop_svp_ice
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>\ingroup wv_saturation_mod
       subroutine vqsatd2_ice_single(t ,p ,es ,qs ,dqsdt)
 
 !------------------------------Arguments--------------------------------

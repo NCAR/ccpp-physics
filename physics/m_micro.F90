@@ -2,7 +2,7 @@
 !! This file contains the subroutine that call Morrison-Gettelman microphysics (MG2 and MG3)
 !! \cite Morrison and Gettelman.
 
-!> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG2 and MG3) scheme.
+!> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG2 and MG3) driver scheme.
 module m_micro
 
   implicit none
@@ -134,8 +134,9 @@ end subroutine m_micro_init
        end subroutine m_micro_finalize
 #if 0
 
-!> \defgroup mg2mg3 FV3GFS m_micro Main
+!> \defgroup mg2mg3 FV3GFS Morrison-Gettelman MP scheme Module
 !! @{
+!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !> \section arg_table_m_micro_run Argument Table
@@ -214,6 +215,7 @@ end subroutine m_micro_init
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag    |    0 | integer    |           | out    | F        |
 !!
 #endif
+!>\ingroup mg_driver
       subroutine m_micro_run(   im,       ix,     lm,     flipv, dt_i   &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
@@ -288,7 +290,6 @@ end subroutine m_micro_init
        real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
-!    &       CNV_MFD_i,   CNV_PRC3_i, cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi, rhc_i, naai_i, npccn_i
        real (kind=kind_phys), dimension(im,lm,ntrcaer),intent(in) ::    &
      &       aerfld_i
@@ -1866,6 +1867,7 @@ end subroutine m_micro_init
 !DONIF Calculate the Brunt_Vaisala frequency
 
 !===============================================================================
+!>\ingroup mg_driver
 !> This subroutine computes profiles of background state quantities for 
 !! the multiple gravity wave drag parameterization.
        subroutine gw_prof (pcols, pver, ncol, t, pm, pi, rhoi, ni, ti,  &
@@ -1949,7 +1951,7 @@ end subroutine m_micro_init
        return
        end subroutine gw_prof
 
-
+!>\ingroup mg_driver
 !> This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none

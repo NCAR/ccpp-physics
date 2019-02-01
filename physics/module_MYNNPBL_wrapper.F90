@@ -11,6 +11,7 @@
       subroutine mynnedmf_wrapper_finalize ()
       end subroutine mynnedmf_wrapper_finalize
 
+!>\defgroup gsd_mynn_edmf GSD MYNN EDMF PBL Scheme Module
 !! The following references best describe the code within
 !!    Olson et al. (2018, NOAA Technical Memorandum) 
 !!    Nakanishi and Niino (2009, Jap. Meteor. Soc.)

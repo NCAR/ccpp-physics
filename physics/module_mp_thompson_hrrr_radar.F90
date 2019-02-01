@@ -1,23 +1,27 @@
-!+---+-----------------------------------------------------------------+
-!..This set of routines facilitates computing radar reflectivity.
-!.. This module is more library code whereas the individual microphysics
-!.. schemes contains specific details needed for the final computation,
-!.. so refer to location within each schemes calling the routine named
-!.. rayleigh_soak_wetgraupel.
-!.. The bulk of this code originated from Ulrich Blahak (Germany) and
-!.. was adapted to WRF by G. Thompson.  This version of code is only
-!.. intended for use when Rayleigh scattering principles dominate and
-!.. is not intended for wavelengths in which Mie scattering is a
-!.. significant portion.  Therefore, it is well-suited to use with
-!.. 5 or 10 cm wavelength like USA NEXRAD radars.
-!.. This code makes some rather simple assumptions about water
-!.. coating on outside of frozen species (snow/graupel).  Fraction of
-!.. meltwater is simply the ratio of mixing ratio below melting level
-!.. divided by mixing ratio at level just above highest T>0C.  Also,
-!.. immediately 90% of the melted water exists on the ice's surface
-!.. and 10% is embedded within ice.  No water is "shed" at all in these
-!.. assumptions. The code is quite slow because it does the reflectivity
-!.. calculations based on 50 individual size bins of the distributions.
+!>\file module_mp_thompson_hrrr_radar.F90
+!! This set of routines facilitates computing radar reflectivity.
+
+!>\ingroup thompson
+!>\defgroup thompson_radar Thompson-HRRR MP Radar Module
+!! This module is more library code whereas the individual microphysics
+!! schemes contains specific details needed for the final computation,
+!! so refer to location within each schemes calling the routine named
+!! rayleigh_soak_wetgraupel.
+!!
+!! The bulk of this code originated from Ulrich Blahak (Germany) and
+!! was adapted to WRF by G. Thompson.  This version of code is only
+!! intended for use when Rayleigh scattering principles dominate and
+!! is not intended for wavelengths in which Mie scattering is a
+!! significant portion.  Therefore, it is well-suited to use with
+!! 5 or 10 cm wavelength like USA NEXRAD radars.
+!! This code makes some rather simple assumptions about water
+!! coating on outside of frozen species (snow/graupel).  Fraction of
+!! meltwater is simply the ratio of mixing ratio below melting level
+!! divided by mixing ratio at level just above highest T>0C.  Also,
+!! immediately 90% of the melted water exists on the ice's surface
+!! and 10% is embedded within ice.  No water is "shed" at all in these
+!! assumptions. The code is quite slow because it does the reflectivity
+!! calculations based on 50 individual size bins of the distributions.
 !+---+-----------------------------------------------------------------+
 
    MODULE module_mp_thompson_hrrr_radar
@@ -55,7 +59,7 @@
               mixingrulestring_g, matrixstring_g, inclusionstring_g,    &
               hoststring_g, hostmatrixstring_g, hostinclusionstring_g
 
-!..Single melting snow/graupel particle 90% meltwater on external sfc
+!> Single melting snow/graupel particle 90% meltwater on external sfc
       DOUBLE PRECISION, PARAMETER:: melt_outside_s = 0.9d0
       DOUBLE PRECISION, PARAMETER:: melt_outside_g = 0.9d0
 
@@ -65,6 +69,8 @@
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 
+!>\ingroup thompson_radar
+!!
       subroutine radar_init
 
       IMPLICIT NONE
@@ -184,12 +190,13 @@
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 
+!>\ingroup thompson_radar
       COMPLEX*16 FUNCTION m_complex_water_ray(lambda,T)
 
-!      Complex refractive Index of Water as function of Temperature T
-!      [deg C] and radar wavelength lambda [m]; valid for
-!      lambda in [0.001,1.0] m; T in [-10.0,30.0] deg C
-!      after Ray (1972)
+!>      Complex refractive Index of Water as function of Temperature T
+!!      [deg C] and radar wavelength lambda [m]; valid for
+!!      lambda in [0.001,1.0] m; T in [-10.0,30.0] deg C
+!!      after Ray (1972)
 
       IMPLICIT NONE
       DOUBLE PRECISION, INTENT(IN):: T,lambda
@@ -258,6 +265,8 @@
 
 !+---+-----------------------------------------------------------------+
 
+!>ingroup thompson_radar
+!!
       subroutine rayleigh_soak_wetgraupel (x_g, a_geo, b_geo, fmelt,    &
                      meltratio_outside, m_w, m_i, lambda, C_back,       &
                      mixingrule,matrix,inclusion,                       &
@@ -354,7 +363,8 @@
       end subroutine rayleigh_soak_wetgraupel
 
 !+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_radar
+!!
       complex*16 function get_m_mix_nested (m_a, m_i, m_w, volair,      &
                      volice, volwater, mixingrule, host, matrix,        &
                      inclusion, hostmatrix, hostinclusion, cumulerror)
@@ -484,7 +494,8 @@
       end function get_m_mix_nested
 
 !+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_radar
+!!
       COMPLEX*16 FUNCTION get_m_mix (m_a, m_i, m_w, volair, volice,     &
                      volwater, mixingrule, matrix, inclusion, error)
 
@@ -525,7 +536,8 @@
       END FUNCTION get_m_mix
 
 !+---+-----------------------------------------------------------------+
-
+!>\ingroup thompson_radar
+!!
       COMPLEX*16 FUNCTION m_complex_maxwellgarnett(vol1, vol2, vol3,    &
                      m1, m2, m3, inclusion, error)
 
@@ -573,6 +585,7 @@
       END FUNCTION m_complex_maxwellgarnett
 
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_radar
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -598,6 +611,7 @@
       END FUNCTION GAMMLN
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_radar
       REAL FUNCTION WGAMMA(y)
 
       IMPLICIT NONE

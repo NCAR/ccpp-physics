@@ -1,3 +1,9 @@
+!>\file micro_mg2_0.F90
+!! This file contains Morrison-Gettelman MP version 2.0 - update of MG
+!! microphysics with prognostic precipitation.
+
+!>\ingroup mg2mg3
+!>\defgroup mg2_0_mp Morrison-Gettelman MP version 2.0
 module micro_mg2_0
 !---------------------------------------------------------------------------------
 ! Purpose:
@@ -214,6 +220,8 @@ logical  :: do_liq_liu
 contains
 !===============================================================================
 
+!>\ingroup mg2_0_mp
+!! This subroutine calculates
 subroutine micro_mg_init(                                         &
      kind, gravit, rair, rh2o, cpair,                             &
      tmelt_in, latvap, latice,                                    &
@@ -236,29 +244,29 @@ subroutine micro_mg_init(                                         &
   !
   !-----------------------------------------------------------------------
 
-  integer,  intent(in)  :: kind         ! Kind used for reals
+  integer,  intent(in)  :: kind         !< Kind used for reals
   real(r8), intent(in)  :: gravit
   real(r8), intent(in)  :: rair
   real(r8), intent(in)  :: rh2o
   real(r8), intent(in)  :: cpair
-  real(r8), intent(in)  :: tmelt_in     ! Freezing point of water (K)
+  real(r8), intent(in)  :: tmelt_in     !< Freezing point of water (K)
   real(r8), intent(in)  :: latvap
   real(r8), intent(in)  :: latice
-  real(r8), intent(in)  :: rhmini_in    ! Minimum rh for ice cloud fraction > 0.
+  real(r8), intent(in)  :: rhmini_in    !< Minimum rh for ice cloud fraction > 0.
   real(r8), intent(in)  :: micro_mg_dcs
   real(r8), intent(in)  :: ts_auto(2)
   real(r8), intent(in)  :: mg_qcvar
 
-  logical,  intent(in)  :: microp_uniform_in ! .true. = configure uniform for sub-columns
-                                             ! .false. = use w/o sub-columns (standard)
-  logical,  intent(in)  :: do_cldice_in      ! .true. = do all processes (standard)
-                                             ! .false. = skip all processes affecting cloud ice
-  logical,  intent(in)  :: use_hetfrz_classnuc_in ! use heterogeneous freezing
+  logical,  intent(in)  :: microp_uniform_in !< .true. = configure uniform for sub-columns
+                                             !! .false. = use w/o sub-columns (standard)
+  logical,  intent(in)  :: do_cldice_in      !< .true. = do all processes (standard)
+                                             !! .false. = skip all processes affecting cloud ice
+  logical,  intent(in)  :: use_hetfrz_classnuc_in !< use heterogeneous freezing
 
-  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  ! type of precipitation fraction method
-  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     ! berg efficiency factor
-  logical,  intent(in)  ::  allow_sed_supersat_in ! allow supersaturated conditions after sedimentation loop
-  logical,  intent(in)  ::  do_sb_physics_in ! do SB autoconversion and accretion physics
+  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  !< type of precipitation fraction method
+  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     !< berg efficiency factor
+  logical,  intent(in)  ::  allow_sed_supersat_in !< allow supersaturated conditions after sedimentation loop
+  logical,  intent(in)  ::  do_sb_physics_in !< do SB autoconversion and accretion physics
   logical,  intent(in)  ::  do_ice_gmao_in
   logical,  intent(in)  ::  do_liq_liu_in
 
@@ -351,6 +359,8 @@ end subroutine micro_mg_init
 !===============================================================================
 !microphysics routine for each timestep goes here...
 
+!>\ingroup mg2_0_mp
+!> This subroutine calculates
 subroutine micro_mg_tend (                                       &
      mgncol,             nlev,               deltatin,           &
      t,                            q,                            &
@@ -3354,6 +3364,8 @@ end subroutine micro_mg_tend
 !OUTPUT CALCULATIONS
 !========================================================================
 
+!>\ingroup mg2_0_mp
+!! This subroutine 
 subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,nlev)
   integer, intent(in) :: mgncol, nlev
   real(r8), dimension(mgncol,nlev), intent(in) :: lamr          ! rain size parameter (slope)

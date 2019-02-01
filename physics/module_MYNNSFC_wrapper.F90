@@ -11,8 +11,8 @@
       subroutine mynnsfc_wrapper_finalize ()
       end subroutine mynnsfc_wrapper_finalize
 
-!!
-!> \brief This scheme (1) performs pre-mynnsfc work, (20 runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
+!>\defgroup gsd_mynn_sfc GSD MYNN Surface Layer Scheme Module
+!> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
 #if 0
 !! \section arg_table_mynnsfc_wrapper_run Argument Table
 !! | local_name          | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |

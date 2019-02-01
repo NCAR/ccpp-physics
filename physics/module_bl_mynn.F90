@@ -1,30 +1,39 @@
-!WRF:MODEL_LAYER:PHYSICS
-!
-! translated from NN f77 to F90 and put into WRF by Mariusz Pagowski
-! NOAA/GSD & CIRA/CSU, Feb 2008
-! changes to original code:
-! 1. code is 1D (in z)
-! 2. no advection of TKE, covariances and variances 
-! 3. Cranck-Nicholson replaced with the implicit scheme
-! 4. removed terrain dependent grid since input in WRF in actual
-!    distances in z[m]
-! 5. cosmetic changes to adhere to WRF standard (remove common blocks, 
-!            intent etc)
-!-------------------------------------------------------------------
-!Modifications implemented by Joseph Olson NOAA/GSD/AMB - CU/CIRES
-!
-! Departures from original MYNN (Nakanish & Niino 2009)
-! 1. Addition of BouLac mixing length in the free atmosphere.
-! 2. Changed the turbulent mixing length to be integrated from the
-!    surface to the top of the BL + a transition layer depth.
-! v3.4.1:    Option to use Kitamura/Canuto modification which removes 
-!            the critical Richardson number and negative TKE (default).
-!            Hybrid PBL height diagnostic, which blends a theta-v-based
-!            definition in neutral/convective BL and a TKE-based definition
-!            in stable conditions.
-!            TKE budget output option (bl_mynn_tkebudget)
-! v3.5.0:    TKE advection option (bl_mynn_tkeadvect)
-! v3.5.1:    Fog deposition related changes.
+!>\file module_bl_mynn.F90
+!! This file contains the entity of MYNN EDMF PBL scheme.
+
+!>\ingroup gsd_mynn_edmf
+!!\defgroup module_bl_mynn_mod GSD module_bl_mynn module
+!! WRF:MODEL_LAYER:PHYSICS
+!!
+!! This module is translated from NN f77 to F90 and put into WRF by Mariusz Pagowski
+!! NOAA/GSD & CIRA/CSU, Feb 2008
+!! changes to original code:
+!! - 1. code is 1D (in z)
+!! - 2. no advection of TKE, covariances and variances 
+!! - 3. Cranck-Nicholson replaced with the implicit scheme
+!! - 4. removed terrain dependent grid since input in WRF in actual
+!!    distances in z[m]
+!! - 5. cosmetic changes to adhere to WRF standard (remove common blocks, 
+!! intent etc)
+!!-------------------------------------------------------------------
+!> Modifications implemented by Joseph Olson NOAA/GSD/AMB - CU/CIRES
+!!
+!! Departures from original MYNN (Nakanish & Niino 2009)
+!! - 1. Addition of BouLac mixing length in the free atmosphere.
+!! - 2. Changed the turbulent mixing length to be integrated from the
+!!    surface to the top of the BL + a transition layer depth.
+!!
+!! \b v3.4.1:    Option to use Kitamura/Canuto modification which removes 
+!!            the critical Richardson number and negative TKE (default).
+!!            Hybrid PBL height diagnostic, which blends a theta-v-based
+!!            definition in neutral/convective BL and a TKE-based definition
+!!            in stable conditions.
+!!            TKE budget output option (bl_mynn_tkebudget)
+!!
+!! \b v3.5.0:    TKE advection option (bl_mynn_tkeadvect)
+!!
+!! \b v3.5.1:    Fog deposition related changes.
+!!
 ! v3.6.0:    Removed fog deposition from the calculation of tendencies
 !            Added mixing of qc, qi, qni
 !            Added output for wstar, delta, TKE_PBL, & KPBL for correct 
@@ -683,6 +692,8 @@ CONTAINS
 !     NOTE: the mixing lengths are meant to be calculated at the full-
 !           sigmal levels (or interfaces beween the model layers).
 !
+!>\ingroup module_bl_mynn_mod
+!!
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,                      &
     &            dz, zw,                       &
@@ -1070,15 +1081,16 @@ CONTAINS
 !JOE- BouLac Code Start -
 
 ! ==================================================================
+!>\ingroup module_bl_mynn
   SUBROUTINE boulac_length0(k,kts,kte,zw,dz,qtke,theta,lb1,lb2)
 !
-!    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
-!          and modified for integration into the MYNN PBL scheme.
-!          WHILE loops were added to reduce the computational expense.
-!          This subroutine computes the length scales up and down
-!          and then computes the min, average of the up/down
-!          length scales, and also considers the distance to the
-!          surface.
+!>    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
+!!          and modified for integration into the MYNN PBL scheme.
+!!          WHILE loops were added to reduce the computational expense.
+!!          This subroutine computes the length scales up and down
+!!          and then computes the min, average of the up/down
+!!          length scales, and also considers the distance to the
+!!          surface.
 !
 !      dlu = the distance a parcel can be lifted upwards give a finite
 !            amount of TKE.
@@ -1221,15 +1233,16 @@ CONTAINS
   END SUBROUTINE boulac_length0
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE boulac_length(kts,kte,zw,dz,qtke,theta,lb1,lb2)
 !
-!    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
-!          and modified for integration into the MYNN PBL scheme.
-!          WHILE loops were added to reduce the computational expense.
-!          This subroutine computes the length scales up and down
-!          and then computes the min, average of the up/down
-!          length scales, and also considers the distance to the
-!          surface.
+!>    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
+!!          and modified for integration into the MYNN PBL scheme.
+!!          WHILE loops were added to reduce the computational expense.
+!!          This subroutine computes the length scales up and down
+!!          and then computes the min, average of the up/down
+!!          length scales, and also considers the distance to the
+!!          surface.
 !
 !      dlu = the distance a parcel can be lifted upwards give a finite 
 !            amount of TKE.
@@ -1416,6 +1429,7 @@ CONTAINS
 !     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
 !       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
 !
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE  mym_turbulence (                                &
     &            kts,kte,                                     &
     &            levflag,                                     &
@@ -1937,6 +1951,7 @@ CONTAINS
 !       scheme (program).
 !
 !-------------------------------------------------------------------
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE  mym_predict (kts,kte,&
        &            levflag,  &
        &            delt,&
@@ -2253,6 +2268,7 @@ CONTAINS
 !       Set these values to those adopted by you.
 !
 !-------------------------------------------------------------------
+!>\ingroup module_bl_mynn
   SUBROUTINE  mym_condensation (kts,kte,  &
     &            dx, dz,                  &
     &            thl, qw,                 &
@@ -2689,6 +2705,7 @@ CONTAINS
   END SUBROUTINE mym_condensation
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE mynn_tendencies(kts,kte,      &
        &levflag,grav_settling,             &
        &delt,dz,                           &
@@ -3303,6 +3320,7 @@ ENDIF
 
 ! ==================================================================
 #if (WRF_CHEM == 1)
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE mynn_mix_chem(kts,kte,      &
        levflag,grav_settling,             &
        delt,dz,                           &
@@ -3390,6 +3408,7 @@ ENDIF
 #endif
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dfq,dz,&
        &K_m,K_h,K_q)
@@ -3421,6 +3440,7 @@ ENDIF
   END SUBROUTINE retrieve_exchange_coeffs
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE tridiag(n,a,b,c,d)
 
 !! to solve system of linear eqs on tridiagonal matrix n times n
@@ -3456,6 +3476,7 @@ ENDIF
   END SUBROUTINE tridiag
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
       subroutine tridiag2(n,a,b,c,d,x)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
@@ -3490,6 +3511,7 @@ ENDIF
 
     end subroutine tridiag2
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE mynn_bl_driver(            &
        &initflag,grav_settling,         &
        &delt,dz,dx,znt,                 &
@@ -4448,6 +4470,7 @@ ENDIF
   END SUBROUTINE mynn_bl_driver
 
 ! ==================================================================
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE mynn_bl_init_driver(                   &
        &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,          &
        &RQCBLTEN,RQIBLTEN & !,RQNIBLTEN,RQNCBLTEN       &
@@ -4508,24 +4531,24 @@ ENDIF
   END SUBROUTINE mynn_bl_init_driver
 
 ! ==================================================================
-
+!>\ingroup module_bl_mynn_mod
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
 
     !---------------------------------------------------------------
     !             NOTES ON THE PBLH FORMULATION
     !
-    !The 1.5-theta-increase method defines PBL heights as the level at 
-    !which the potential temperature first exceeds the minimum potential 
-    !temperature within the boundary layer by 1.5 K. When applied to 
-    !observed temperatures, this method has been shown to produce PBL-
-    !height estimates that are unbiased relative to profiler-based 
-    !estimates (Nielsen-Gammon et al. 2008). However, their study did not
-    !include LLJs. Banta and Pichugina (2008) show that a TKE-based 
-    !threshold is a good estimate of the PBL height in LLJs. Therefore,
-    !a hybrid definition is implemented that uses both methods, weighting
-    !the TKE-method more during stable conditions (PBLH < 400 m).
-    !A variable tke threshold (TKEeps) is used since no hard-wired
-    !value could be found to work best in all conditions.
+    !>The 1.5-theta-increase method defines PBL heights as the level at 
+    !!which the potential temperature first exceeds the minimum potential 
+    !!temperature within the boundary layer by 1.5 K. When applied to 
+    !!observed temperatures, this method has been shown to produce PBL-
+    !!height estimates that are unbiased relative to profiler-based 
+    !!estimates (Nielsen-Gammon et al. 2008). However, their study did not
+    !!include LLJs. Banta and Pichugina (2008) show that a TKE-based 
+    !!threshold is a good estimate of the PBL height in LLJs. Therefore,
+    !!a hybrid definition is implemented that uses both methods, weighting
+    !!the TKE-method more during stable conditions (PBLH < 400 m).
+    !!A variable tke threshold (TKEeps) is used since no hard-wired
+    !!value could be found to work best in all conditions.
     !---------------------------------------------------------------
 
     INTEGER,INTENT(IN) :: KTS,KTE
@@ -4653,15 +4676,15 @@ ENDIF
   END SUBROUTINE GET_PBLH
   
 ! ==================================================================
-! Much thanks to Kay Suslj of NASA-JPL for contributing the original version
-! of this mass-flux scheme. Considerable changes have been made from it's
-! original form. Some additions include:
-!  1) scale-aware tapering as dx -> 0
-!  2) transport of TKE (extra namelist option)
-!  3) Chaboureau-Bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
-!  4) some extra limits for numerical stability
-! This scheme remains under development, so consider it experimental code. 
-!
+!>\ingroup module_bl_mynn_mod
+!! Much thanks to Kay Suslj of NASA-JPL for contributing the original version
+!! of this mass-flux scheme. Considerable changes have been made from it's
+!! original form. Some additions include:
+!! -  1) scale-aware tapering as dx -> 0
+!! -  2) transport of TKE (extra namelist option)
+!! -  3) Chaboureau-Bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
+!! -  4) some extra limits for numerical stability
+!! This scheme remains under development, so consider it experimental code. 
   SUBROUTINE StEM_mf(                       &
                  & kts,kte,dt,zw,dz,p,      &
                  & momentum_opt,            &
@@ -5461,6 +5484,7 @@ ENDIF !END Debugging
 
 END SUBROUTINE StEM_MF
 !=================================================================
+!>\ingroup module_bl_mynn_mod
 subroutine Poisson(istart,iend,jstart,jend,mu,POI)
 
   integer, intent(in) :: istart,iend,jstart,jend 
@@ -5479,6 +5503,7 @@ subroutine Poisson(istart,iend,jstart,jend,mu,POI)
 
 end subroutine Poisson
 !=================================================================  
+!>\ingroup module_bl_mynn_mod
 subroutine init_random_seed()
    !JOE: PGI had problem! use iso_fortran_env, only: int64
    !JOE: PGI had problem! use ifport, only: getpid 
@@ -5556,7 +5581,7 @@ subroutine init_random_seed()
 
   end subroutine init_random_seed
 
-
+!>\ingroup module_bl_mynn_mod
 subroutine random_Poisson(mu,first,ival) 
 !**********************************************************************
 !     Translated to Fortran 90 by Alan Miller from:  RANLIB
@@ -5786,7 +5811,7 @@ subroutine random_Poisson(mu,first,ival)
 	END subroutine random_Poisson
 
 !==================================================================
-
+!>\ingroup module_bl_mynn_mod
 	FUNCTION random_normal() RESULT(fn_val)
 
 	! Adapted from the following Fortran 77 code
@@ -5860,7 +5885,7 @@ subroutine random_Poisson(mu,first,ival)
 	END FUNCTION random_exponential
 
 !===============================================================
-
+!>\ingroup module_bl_mynn_mod
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
 ! zero or one condensation for edmf: calculates THV and QC
@@ -5915,14 +5940,14 @@ real :: diff,exn,t,th,qs,qcold
 end subroutine condensation_edmf
 
 !===============================================================
-
+!>\ingroup module_bl_mynn_mod
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
     !
-    !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
-    !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
+    !>JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
+    !!    JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
     !
     ! Psig_bl tapers local mixing
     ! Psig_shcu tapers nonlocal mixing
@@ -5990,15 +6015,15 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END SUBROUTINE SCALE_AWARE
 
 ! =====================================================================
-
+!>\ingroup module_bl_mynn_mod
   FUNCTION esat_blend(t) 
-! JAYMES- added 22 Apr 2015
-! 
-! This calculates saturation vapor pressure.  Separate ice and liquid functions 
-! are used (identical to those in module_mp_thompson.F, v3.6).  Then, the 
-! final returned value is a temperature-dependant "blend".  Because the final 
-! value is "phase-aware", this formulation may be preferred for use throughout 
-! the module (replacing "svp").
+!> JAYMES- added 22 Apr 2015
+!!
+!! This calculates saturation vapor pressure.  Separate ice and liquid functions 
+!! are used (identical to those in module_mp_thompson.F, v3.6).  Then, the 
+!! final returned value is a temperature-dependant "blend".  Because the final 
+!! value is "phase-aware", this formulation may be preferred for use throughout 
+!! the module (replacing "svp").
 
       IMPLICIT NONE
       
@@ -6088,14 +6113,15 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ===================================================================
 ! ===================================================================
-! This is the mass flux part of the TEMF scheme from module_bl_temf.F,
-! adapted for the MYNN context by Wayne Angevine June 2015.
-! Variable strategy:  TEMF external variables that have semantically
-! comfortable counterparts in the MYNN-EDMF context have been changed to
-! use those names.  Otherwise the TEMF variable names have been kept but
-! redefined as local variables.  Only "moist" vars are used, whether
-! updraft condenses or not.  Some former local vars are replaced with
-! externals.
+!>\ingroup module_bl_mynn_mod
+!! This is the mass flux part of the TEMF scheme from module_bl_temf.F,
+!! adapted for the MYNN context by Wayne Angevine June 2015.
+!! Variable strategy:  TEMF external variables that have semantically
+!! comfortable counterparts in the MYNN-EDMF context have been changed to
+!! use those names.  Otherwise the TEMF variable names have been kept but
+!! redefined as local variables.  Only "moist" vars are used, whether
+!! updraft condenses or not.  Some former local vars are replaced with
+!! externals.
 !
 ! (Partial) list of conversions:
 !    wupd_temfx -> moist_w
@@ -6864,12 +6890,13 @@ END SUBROUTINE temf_mf
 
 !--------------------------------------------------------------------
 !
+!>\ingroup module_bl_mynn_mod
    real function rsat_temf(p,T,ep2)
 
-!  Calculates the saturation mixing ratio with respect to liquid water
-!  Arguments are pressure (Pa) and absolute temperature (K)
-!  Uses the formula from the ARM intercomparison setup.
-!  Converted from Matlab by WA 7/28/08
+!>  Calculates the saturation mixing ratio with respect to liquid water
+!!  Arguments are pressure (Pa) and absolute temperature (K)
+!!  Uses the formula from the ARM intercomparison setup.
+!!  Converted from Matlab by WA 7/28/08
 
 implicit none
 real p, T, ep2
