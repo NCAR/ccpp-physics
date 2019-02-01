@@ -16,6 +16,8 @@
       integer me
 
       integer i
+      real refsmc1, wltsmc1
+
       NAMELIST /SOIL_VEG_RUC/ SLOPE_DATA, ALBTBL, Z0TBL, LEMITBL,       &
      &  PCTBL, SHDTBL, &
      &  IFORTBL, RSTBL, RGLTBL, HSTBL, SNUPTBL, LAITBL, MAXALB,         &
@@ -23,7 +25,7 @@
      &  RSMAX_DATA, BARE, NATURAL, CROP, URBAN,                         &
      &  DEFINED_VEG, DEFINED_SOIL, DEFINED_SLOPE,                       &
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
-     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu
+     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu, REFSMCnoah, WLTSMCnoah
 
       if(ivet.eq.2) then
 ! Using umd veg classification
@@ -359,8 +361,42 @@
      &            0.92, 0.00, 0.00, 0.00, 0.00, 0.00,             &
      &            0.00, 0.00, 0.00, 0.00, 0.00, 0.00/)
 
+! Noah parameter to compute SMCREFnoah and SMCWLTnoah
+      BBnoah    =(/4.05,  4.26, 4.74, 5.33, 5.33,  5.25,         &
+     &            6.77,  8.72,  8.17, 10.73, 10.39,  11.55,      &
+     &            5.25,  4.26,  4.05, 4.26,  11.55,  4.05,       &
+     &            4.05,  0.00,  0.00, 0.00,  0.00,  0.00,        &
+     &            0.00,  0.00,  0.00, 0.00,  0.00,  0.00/)
+      MAXSMCnoah=(/0.395, 0.421, 0.434, 0.476, 0.476, 0.439,     &
+     &            0.404, 0.464, 0.465, 0.406, 0.468, 0.457,      &
+     &            0.464, 0.421, 0.200, 0.421, 0.457, 0.200,      &
+     &            0.395, 0.000, 0.000, 0.000, 0.000, 0.000,      &
+     &            0.000, 0.000, 0.000, 0.000, 0.000, 0.000/)   
+!
+      SATPSInoah=(/0.035, 0.0363, 0.1413, 0.7586, 0.7586, 0.3548, &
+     &            0.1349, 0.6166, 0.2630, 0.0977, 0.3236, 0.4677, &
+     &            0.3548, 0.0363, 0.0350, 0.0363, 0.4677, 0.0350, &
+     &            0.0350, 0.00, 0.00, 0.00, 0.00, 0.00,           &
+     &            0.00, 0.00, 0.00, 0.00, 0.00, 0.00/)
+      SATDKnoah =(/1.76e-4, 1.4078e-5, 5.2304e-6, 2.8089e-6, 2.8089e-6,&
+     &            3.377e-6, 4.4518e-6, 2.0348e-6, 2.4464e-6, 7.2199e-6,&
+     &           1.3444e-6, 9.7394e-7, 3.377e-6, 1.4078e-5, 1.4087e-05,&
+     &           1.4078e-5, 9.7394e-7, 1.4078e-5, 1.760e-4, 0.00,      &
+     &            0.00   , 0.00   , 0.00   , 0.00   , 0.00,            &
+     &            0.00   , 0.00   , 0.00   , 0.00   , 0.00/)
+
       endif
 !   end if soil table
+
+         DO I = 1,DEFINED_SOIL
+           if (satdknoah(i) /= 0.0 .and. bbnoah(i) > 0.0) then
+           REFSMC1   = MAXSMCnoah(I)*(5.79E-9/SATDKnoah(I))  &
+     &                  **(1.0/(2.0*BBnoah(I)+3.0))
+           REFSMCnoah(I) = REFSMC1 + (MAXSMCnoah(I)-REFSMC1) / 6.
+           WLTSMC1   = MAXSMCnoah(I) * (200.0/SATPSInoah(I))**(-1.0/BBnoah(I))
+           WLTSMCnoah(I) = WLTSMC1 - 0.5 * WLTSMC1
+           endif
+         END DO
 
 ! - set mosaic_soil=1 when info for fractional landuse is available
       mosaic_soil = 0

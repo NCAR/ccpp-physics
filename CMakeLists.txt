@@ -152,6 +152,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT
+           "${CMAKE_Fortran_FLAGS_LOPT}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
     # Force consistent results of math calculations for MG microphysics;
@@ -175,6 +178,21 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
     endif (DYN32)
+
+    # For CCPP acceptance: selective reduction of optimization flags, hopefully
+    # to be removed once established that this is not a reasonable approach.
+    if (TRANSITION)
+      set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT
+             "${CMAKE_Fortran_FLAGS_LOPT}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT
+             "${CMAKE_Fortran_FLAGS_LOPT}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/sflx.f
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT}")
+    endif (TRANSITION)
+
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")

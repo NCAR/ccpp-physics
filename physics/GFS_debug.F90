@@ -8,7 +8,8 @@
 
       public print_my_stuff, chksum_int, chksum_real
 
-! Bug in gfortran prevents using print_chksum (operating system error: Cannot allocate memory ...)
+! Calculating the checksum leads to segmentation faults with gfortran (bug in malloc?),
+! thus print the sum of the array instead of the checksum.
 #ifdef __GFORTRAN__
 #define PRINT_SUM
 #else
@@ -167,6 +168,7 @@
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%f10m'     , Sfcprop%f10m)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tprcp'    , Sfcprop%tprcp)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%srflag'   , Sfcprop%srflag)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%sr'       , Sfcprop%sr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slc'      , Sfcprop%slc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%smc'      , Sfcprop%smc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%stc'      , Sfcprop%stc)
@@ -193,15 +195,18 @@
                         call print_var(mpirank,omprank, blkno, 'Sfcprop%qrain   ', Sfcprop%qrain)
                      end if
                      ! CCPP/RUC only
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',       Sfcprop%smois)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',          Sfcprop%zs)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
-                     !call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                     if (Model%lsm == Model%lsm_ruc) then
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',       Sfcprop%smois)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',          Sfcprop%zs)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%qwv_surf',    Sfcprop%qwv_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                     end if
                      ! Radtend
                      call print_var(mpirank,omprank, blkno, 'Radtend%sfcfsw%upfxc', Radtend%sfcfsw(:)%upfxc)
                      call print_var(mpirank,omprank, blkno, 'Radtend%sfcfsw%dnfxc', Radtend%sfcfsw(:)%dnfxc)
@@ -246,32 +251,120 @@
                      call print_var(mpirank,omprank, blkno, 'Tbd%in_nm'           , Tbd%in_nm)
                      call print_var(mpirank,omprank, blkno, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
                      call print_var(mpirank,omprank, blkno, 'Tbd%aer_nm'          , Tbd%aer_nm)
-                     ! Diag (incomplete)
-                     call print_var(mpirank,omprank, blkno, 'Diag%topfsw%upfxc',    Diag%topfsw%upfxc)
-                     call print_var(mpirank,omprank, blkno, 'Diag%topfsw%dnfxc',    Diag%topfsw%dnfxc)
-                     call print_var(mpirank,omprank, blkno, 'Diag%topfsw%upfx0',    Diag%topfsw%upfx0)
-                     call print_var(mpirank,omprank, blkno, 'Diag%topflw%upfxc',    Diag%topflw%upfxc)
-                     call print_var(mpirank,omprank, blkno, 'Diag%topflw%upfx0',    Diag%topflw%upfx0)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dswsfci',         Diag%dswsfci)
-                     !call print_var(mpirank,omprank, blkno, 'Diag%nswsfci',         Diag%nswsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%uswsfci',         Diag%uswsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dlwsfci',         Diag%dlwsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%ulwsfci',         Diag%ulwsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dusfci',          Diag%dusfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dvsfci',          Diag%dvsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dtsfci',          Diag%dtsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dqsfci',          Diag%dqsfci)
-                     call print_var(mpirank,omprank, blkno, 'Diag%gfluxi',          Diag%gfluxi)
-                     call print_var(mpirank,omprank, blkno, 'Diag%gflux',           Diag%gflux)
-                     call print_var(mpirank,omprank, blkno, 'Diag%epi'    ,         Diag%epi)
-                     call print_var(mpirank,omprank, blkno, 'Diag%gfluxi' ,         Diag%gfluxi)
-                     call print_var(mpirank,omprank, blkno, 'Diag%t1'     ,         Diag%t1)
-                     call print_var(mpirank,omprank, blkno, 'Diag%q1'     ,         Diag%q1)
-                     call print_var(mpirank,omprank, blkno, 'Diag%u1'     ,         Diag%u1)
-                     call print_var(mpirank,omprank, blkno, 'Diag%v1'     ,         Diag%v1)
-                     call print_var(mpirank,omprank, blkno, 'Diag%dlwsfc',          Diag%dlwsfc)
-                     call print_var(mpirank,omprank, blkno, 'Diag%ulwsfc',          Diag%ulwsfc)
-                     call print_var(mpirank,omprank, blkno, 'Diag%psmean',          Diag%psmean)
+                     ! Diag
+                     call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
+                     do n=1,size(Diag%fluxr(1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
+                     end do
+                     call print_var(mpirank,omprank, blkno, 'Diag%srunoff     ',    Diag%srunoff)
+                     call print_var(mpirank,omprank, blkno, 'Diag%evbsa       ',    Diag%evbsa)
+                     call print_var(mpirank,omprank, blkno, 'Diag%evcwa       ',    Diag%evcwa)
+                     call print_var(mpirank,omprank, blkno, 'Diag%snohfa      ',    Diag%snohfa)
+                     call print_var(mpirank,omprank, blkno, 'Diag%transa      ',    Diag%transa)
+                     call print_var(mpirank,omprank, blkno, 'Diag%sbsnoa      ',    Diag%sbsnoa)
+                     call print_var(mpirank,omprank, blkno, 'Diag%snowca      ',    Diag%snowca)
+                     call print_var(mpirank,omprank, blkno, 'Diag%soilm       ',    Diag%soilm)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tmpmin      ',    Diag%tmpmin)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tmpmax      ',    Diag%tmpmax)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dusfc       ',    Diag%dusfc)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dvsfc       ',    Diag%dvsfc)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dtsfc       ',    Diag%dtsfc)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dqsfc       ',    Diag%dqsfc)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totprcp     ',    Diag%totprcp)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totice      ',    Diag%totice)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totsnw      ',    Diag%totsnw)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totgrp      ',    Diag%totgrp)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totprcpb    ',    Diag%totprcpb)
+                     call print_var(mpirank,omprank, blkno, 'Diag%toticeb     ',    Diag%toticeb)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totsnwb     ',    Diag%totsnwb)
+                     call print_var(mpirank,omprank, blkno, 'Diag%totgrpb     ',    Diag%totgrpb)
+                     call print_var(mpirank,omprank, blkno, 'Diag%suntim      ',    Diag%suntim)
+                     call print_var(mpirank,omprank, blkno, 'Diag%runoff      ',    Diag%runoff)
+                     call print_var(mpirank,omprank, blkno, 'Diag%ep          ',    Diag%ep)
+                     call print_var(mpirank,omprank, blkno, 'Diag%cldwrk      ',    Diag%cldwrk)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dugwd       ',    Diag%dugwd)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dvgwd       ',    Diag%dvgwd)
+                     call print_var(mpirank,omprank, blkno, 'Diag%psmean      ',    Diag%psmean)
+                     call print_var(mpirank,omprank, blkno, 'Diag%cnvprcp     ',    Diag%cnvprcp)
+                     call print_var(mpirank,omprank, blkno, 'Diag%cnvprcpb    ',    Diag%cnvprcpb)
+                     call print_var(mpirank,omprank, blkno, 'Diag%spfhmin     ',    Diag%spfhmin)
+                     call print_var(mpirank,omprank, blkno, 'Diag%spfhmax     ',    Diag%spfhmax)
+                     call print_var(mpirank,omprank, blkno, 'Diag%u10mmax     ',    Diag%u10mmax)
+                     call print_var(mpirank,omprank, blkno, 'Diag%v10mmax     ',    Diag%v10mmax)
+                     call print_var(mpirank,omprank, blkno, 'Diag%wind10mmax  ',    Diag%wind10mmax)
+                     call print_var(mpirank,omprank, blkno, 'Diag%rain        ',    Diag%rain)
+                     call print_var(mpirank,omprank, blkno, 'Diag%rainc       ',    Diag%rainc)
+                     call print_var(mpirank,omprank, blkno, 'Diag%ice         ',    Diag%ice)
+                     call print_var(mpirank,omprank, blkno, 'Diag%snow        ',    Diag%snow)
+                     call print_var(mpirank,omprank, blkno, 'Diag%graupel     ',    Diag%graupel)
+                     call print_var(mpirank,omprank, blkno, 'Diag%u10m        ',    Diag%u10m)
+                     call print_var(mpirank,omprank, blkno, 'Diag%v10m        ',    Diag%v10m)
+                     call print_var(mpirank,omprank, blkno, 'Diag%dpt2m       ',    Diag%dpt2m)
+                     call print_var(mpirank,omprank, blkno, 'Diag%zlvl        ',    Diag%zlvl)
+                     call print_var(mpirank,omprank, blkno, 'Diag%psurf       ',    Diag%psurf)
+                     call print_var(mpirank,omprank, blkno, 'Diag%hpbl        ',    Diag%hpbl)
+                     call print_var(mpirank,omprank, blkno, 'Diag%pwat        ',    Diag%pwat)
+                     call print_var(mpirank,omprank, blkno, 'Diag%t1          ',    Diag%t1)
+                     call print_var(mpirank,omprank, blkno, 'Diag%q1          ',    Diag%q1)
+                     call print_var(mpirank,omprank, blkno, 'Diag%u1          ',    Diag%u1)
+                     call print_var(mpirank,omprank, blkno, 'Diag%v1          ',    Diag%v1)
+                     call print_var(mpirank,omprank, blkno, 'Diag%chh         ',    Diag%chh)
+                     call print_var(mpirank,omprank, blkno, 'Diag%cmm         ',    Diag%cmm)
+                     call print_var(mpirank,omprank, blkno, 'Diag%epi         ',    Diag%epi)
+                     call print_var(mpirank,omprank, blkno, 'Diag%smcwlt2     ',    Diag%smcwlt2)
+                     call print_var(mpirank,omprank, blkno, 'Diag%smcref2     ',    Diag%smcref2)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tdomr       ',    Diag%tdomr)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
+                     call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
+                     ! CCPP/RUC only
+                     if (Model%lsm == Model%lsm_ruc) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%snowfallac  ',    Diag%snowfallac)
+                       call print_var(mpirank,omprank, blkno, 'Diag%acsnow      ',    Diag%acsnow)
+                     endif
+                     call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
+                     call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
+                     call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)
+                     call print_var(mpirank,omprank, blkno, 'Diag%shum_wts    ',    Diag%shum_wts)
+                     call print_var(mpirank,omprank, blkno, 'Diag%zmtnblck    ',    Diag%zmtnblck)
+                     if (Model%ldiag3d) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%du3dt       ',    Diag%du3dt)
+                       do n=1,size(Diag%du3dt(1,1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%du3dt_n     ',  Diag%du3dt(:,:,n))
+                       end do
+                       call print_var(mpirank,omprank, blkno, 'Diag%dv3dt       ',    Diag%dv3dt)
+                       do n=1,size(Diag%dv3dt(1,1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%dv3dt_n     ',  Diag%dv3dt(:,:,n))
+                       end do
+                       call print_var(mpirank,omprank, blkno, 'Diag%dt3dt       ',    Diag%dt3dt)
+                       do n=1,size(Diag%dt3dt(1,1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%dt3dt_n     ',  Diag%dt3dt(:,:,n))
+                       end do
+                       call print_var(mpirank,omprank, blkno, 'Diag%dq3dt       ',    Diag%dq3dt)
+                       do n=1,size(Diag%dq3dt(1,1,:))
+                         call print_var(mpirank,omprank, blkno, 'Diag%dq3dt_n     ',  Diag%dq3dt(:,:,n))
+                       end do
+                       call print_var(mpirank,omprank, blkno, 'Diag%upd_mf      ',    Diag%upd_mf)
+                       call print_var(mpirank,omprank, blkno, 'Diag%dwn_mf      ',    Diag%dwn_mf)
+                       call print_var(mpirank,omprank, blkno, 'Diag%det_mf      ',    Diag%det_mf)
+                       call print_var(mpirank,omprank, blkno, 'Diag%cldcov      ',    Diag%cldcov)
+                     end if
+                     if(Model%lradar) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%refl_10cm   ',  Diag%refl_10cm)
+                     end if
+                     if (Model%do_mynnedmf) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qt     ',  Diag%edmf_qt)
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_thl    ',  Diag%edmf_thl)
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_ent    ',  Diag%edmf_ent)
+                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
+                       call print_var(mpirank,omprank, blkno, 'Diag%nupdraft    ',  Diag%nupdraft)
+                       call print_var(mpirank,omprank, blkno, 'Diag%maxMF       ',  Diag%maxMF)
+                       call print_var(mpirank,omprank, blkno, 'Diag%ktop_shallow',  Diag%ktop_shallow)
+                       call print_var(mpirank,omprank, blkno, 'Diag%exch_h      ',  Diag%exch_h)
+                       call print_var(mpirank,omprank, blkno, 'Diag%exch_m      ',  Diag%exch_m)
+                     end if
                      ! Statein
                      call print_var(mpirank,omprank, blkno, 'Statein%phii'    ,     Statein%phii)
                      call print_var(mpirank,omprank, blkno, 'Statein%prsi'    ,     Statein%prsi)
@@ -285,10 +378,9 @@
                      call print_var(mpirank,omprank, blkno, 'Statein%vvl'     ,     Statein%vvl)
                      call print_var(mpirank,omprank, blkno, 'Statein%tgrs'    ,     Statein%tgrs)
                      call print_var(mpirank,omprank, blkno, 'Statein%qgrs'    ,     Statein%qgrs)
-                     call print_var(mpirank,omprank, blkno, 'Statein%qgrs-qv' ,     Statein%qgrs(:,:,1))
-                     if (Model%ntoz>0) then
-                        call print_var(mpirank,omprank, blkno, 'Statein%qgrs-o3' ,     Statein%qgrs(:,:,Model%ntoz))
-                     end if
+                     do n=1,size(Statein%qgrs(1,1,:))
+                        call print_var(mpirank,omprank, blkno, 'Statein%qgrs_n',    Statein%qgrs(:,:,n))
+                     end do
                      call print_var(mpirank,omprank, blkno, 'Statein%diss_est',     Statein%diss_est)
                      call print_var(mpirank,omprank, blkno, 'Statein%smc'     ,     Statein%smc)
                      call print_var(mpirank,omprank, blkno, 'Statein%stc'     ,     Statein%stc)
@@ -298,10 +390,9 @@
                      call print_var(mpirank,omprank, blkno, 'Stateout%gv0',         Stateout%gv0)
                      call print_var(mpirank,omprank, blkno, 'Stateout%gt0',         Stateout%gt0)
                      call print_var(mpirank,omprank, blkno, 'Stateout%gq0',         Stateout%gq0)
-                     call print_var(mpirank,omprank, blkno, 'Stateout%gq0-qv' ,     Stateout%gq0(:,:,1))
-                     if (Model%ntoz>0) then
-                        call print_var(mpirank,omprank, blkno, 'Stateout%gq0-o3' ,     Stateout%gq0(:,:,Model%ntoz))
-                     end if
+                     do n=1,size(Stateout%gq0(1,1,:))
+                        call print_var(mpirank,omprank, blkno, 'Stateout%gq0_n',    Stateout%gq0(:,:,n))
+                     end do
                      ! Coupling
                      call print_var(mpirank,omprank, blkno, 'Coupling%nirbmdi', Coupling%nirbmdi)
                      call print_var(mpirank,omprank, blkno, 'Coupling%nirdfdi', Coupling%nirdfdi)
@@ -785,3 +876,52 @@
       end subroutine GFS_interstitialtoscreen_run
 
     end module GFS_interstitialtoscreen
+
+    module GFS_abort
+
+      private
+ 
+      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
+
+      contains
+
+      subroutine GFS_abort_init ()
+      end subroutine GFS_abort_init
+
+      subroutine GFS_abort_finalize ()
+      end subroutine GFS_abort_finalize
+
+!> \section arg_table_GFS_abort_run Argument Table
+!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
+!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!!
+      subroutine GFS_abort_run (Model, blkno, errmsg, errflg)
+
+         use machine,               only: kind_phys
+         use GFS_typedefs,          only: GFS_control_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),   intent(in   ) :: Model
+         integer,                  intent(in   ) :: blkno
+         character(len=*),         intent(  out) :: errmsg
+         integer,                  intent(  out) :: errflg
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (Model%kdt==1 .and. blkno==4) then
+             if (Model%me==0) write(0,*) "GFS_abort_run: ABORTING MODEL"
+             call sleep(10)
+             stop
+         end if
+
+      end subroutine GFS_abort_run
+
+    end module GFS_abort
