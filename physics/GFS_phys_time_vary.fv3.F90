@@ -3,6 +3,10 @@
 
    module GFS_phys_time_vary
 
+#ifdef OPENMP
+      use omp_lib
+#endif
+
       use ozne_def, only : levozp, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
       use ozinterp, only : read_o3data, setindxoz, ozinterpol
 
@@ -31,10 +35,11 @@
 !! | Data           | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                     | DDT      |    1 | GFS_data_type         |           | inout  | F        |
 !! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
 !! | Interstitial   | GFS_interstitial_type_instance_all_threads             | Fortran DDT containing FV3-GFS interstitial data                        | DDT      |    1 | GFS_interstitial_type |           | inout  | F        |
+!! | nthrds         | omp_threads                                            | number of OpenMP threads available for physics schemes                  | count    |    0 | integer               |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_init (Data, Model, Interstitial, errmsg, errflg)
+      subroutine GFS_phys_time_vary_init (Data, Model, Interstitial, nthrds, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_data_type, GFS_interstitial_type
 
@@ -44,11 +49,13 @@
          type(GFS_data_type),              intent(inout) :: Data(:)
          type(GFS_control_type),           intent(inout) :: Model
          type(GFS_interstitial_type),      intent(inout) :: Interstitial(:)
+         integer,                          intent(in)    :: nthrds
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
          ! Local variables
-         integer :: nb, nblks, nt, nthrds
+         integer :: nb, nblks, nt
+         integer :: i, j, ix
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -57,8 +64,30 @@
          if (is_initialized) return
 
          nblks = size(Model%blksz)
-         nthrds = size(Interstitial)
+         ! Consistency check - number of threads passed in via the argument list
+         ! has to match the size of the Interstitial data type.
+         if (.not. nthrds == size(Interstitial)) then
+             write(errmsg,'(*(a))') 'Logic error: nthrds does not match size of Interstitial variable'
+             errflg = 1
+             return
+         end if
 
+!$OMP parallel num_threads(nthrds) default(none)              &
+!$OMP          private (nt,nb)                                &
+!$OMP          shared (Model,Data,Interstitial,errmsg,errflg) &
+!$OMP          shared (levozp,oz_coeff,oz_pres)               &
+!$OMP          shared (levh2o,h2o_coeff,h2o_pres)             &
+!$OMP          shared (ntrcaer,nblks)
+
+#ifdef OPENMP
+         nt = omp_get_thread_num()+1
+#else
+         nt = 1
+#endif
+
+!$OMP sections
+
+!$OMP section
          call read_o3data  (Model%ntoz, Model%me, Model%master)
 
          ! Consistency check that the hardcoded values for levozp and
@@ -69,16 +98,15 @@
                   "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
                   levozp, " /= ", size(Data(1)%Tbd%ozpl, dim=2)
             errflg = 1
-            return
          end if
          if (size(Data(1)%Tbd%ozpl, dim=3).ne.oz_coeff) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
                   "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
                   oz_coeff, " /= ", size(Data(1)%Tbd%ozpl, dim=3)
             errflg = 1
-            return
          end if
 
+!$OMP section
          call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
          ! Consistency check that the hardcoded values for levh2o and
@@ -89,16 +117,15 @@
                   "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   levh2o, " /= ", size(Data(1)%Tbd%h2opl, dim=2)
             errflg = 1
-            return
          end if
          if (size(Data(1)%Tbd%h2opl, dim=3).ne.h2o_coeff) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
                   "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   h2o_coeff, " /= ", size(Data(1)%Tbd%h2opl, dim=3)
             errflg = 1
-            return
          end if
 
+!$OMP section
          if (Model%aero_in) then
             ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
             ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
@@ -107,14 +134,14 @@
                      "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
                      ntrcaerm, " /= ", size(Data(1)%Tbd%aer_nm, dim=3)
                errflg = 1
-               return
-            end if
-            ! Update the value of ntrcaer in aerclm_def with the value defined
-            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-            ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
-            ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
-            ! Read aerosol climatology
-            call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+            else
+               ! Update the value of ntrcaer in aerclm_def with the value defined
+               ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+               ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+               ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
+               ! Read aerosol climatology
+               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+            endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
@@ -122,65 +149,88 @@
             ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
          endif
 
+!$OMP section
          if (Model%iccn) then
            call read_cidata  ( Model%me, Model%master)
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
 
-         ! DH* OpenMP parallel region with OpenMP do loops for the do loops?
-         ! there is no threading on the outside, i.e. can use CCPP's omp_threads here
+!$OMP end sections
 
          ! Update values of oz_pres in Interstitial data type for all threads
          if (Model%ntoz > 0) then
-            do nt=1,nthrds
-               Interstitial(nt)%oz_pres = oz_pres
-            end do
+            Interstitial(nt)%oz_pres = oz_pres
          end if
 
          ! Update values of h2o_pres in Interstitial data type for all threads
          if (Model%h2o_phys) then
-            do nt=1,nthrds
-               Interstitial(nt)%h2o_pres = h2o_pres
-            end do
+            Interstitial(nt)%h2o_pres = h2o_pres
          end if
 
          !--- read in and initialize ozone
          if (Model%ntoz > 0) then
+!$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxoz (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_o3, &
                              Data(nb)%Grid%jindx2_o3, Data(nb)%Grid%ddy_o3)
            enddo
+!$OMP end do
          endif
 
          !--- read in and initialize stratospheric water
          if (Model%h2o_phys) then
+!$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxh2o (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_h, &
                               Data(nb)%Grid%jindx2_h, Data(nb)%Grid%ddy_h)
            enddo
+!$OMP end do
          endif
 
          !--- read in and initialize aerosols
          if (Model%aero_in) then
+!$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxaer (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_aer,           &
                               Data(nb)%Grid%jindx2_aer, Data(nb)%Grid%ddy_aer, Data(nb)%Grid%xlon_d,     &
                               Data(nb)%Grid%iindx1_aer, Data(nb)%Grid%iindx2_aer, Data(nb)%Grid%ddx_aer, &
                               Model%me, Model%master)
            enddo
+!$OMP end do
          endif
 
          !--- read in and initialize IN and CCN
          if (Model%iccn) then
+!$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxci (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_ci,       &
                              Data(nb)%Grid%jindx2_ci, Data(nb)%Grid%ddy_ci, Data(nb)%Grid%xlon_d,  &
                              Data(nb)%Grid%iindx1_ci, Data(nb)%Grid%iindx2_ci, Data(nb)%Grid%ddx_ci)
            enddo
+!$OMP end do
          endif
 
-         ! *DH
+!$OMP end parallel
+
+         !--- random number needed for RAS and old SAS and when cal_pre=.true.
+         !    Model%imfdeepcnv < 0 when Model%ras = .true.
+         !    initial calculation of maps local ix -> global i and j, store in Tbd
+         if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
+           ix = 0
+           nb = 1
+           do j = 1,Model%ny
+             do i = 1,Model%nx
+               ix = ix + 1
+               if (ix .gt. Model%blksz(nb)) then
+                 ix = 1
+                 nb = nb + 1
+               endif
+               Data(nb)%Tbd%jmap(ix) = j
+               Data(nb)%Tbd%imap(ix) = i
+             enddo
+           enddo
+         endif  ! imfdeepcnv, cal_re, random_clds 
 
          is_initialized = .true.
 
@@ -238,10 +288,11 @@
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
 !! | Data           | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                     | DDT      |    1 | GFS_data_type         |           | inout  | F        |
 !! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | nthrds         | omp_threads                                            | number of OpenMP threads available for physics schemes                  | count    |    0 | integer               |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_run (Data, Model, errmsg, errflg)
+      subroutine GFS_phys_time_vary_run (Data, Model, nthrds, errmsg, errflg)
 
         use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
@@ -252,6 +303,7 @@
         ! Interface variables
         type(GFS_data_type),              intent(in)    :: Data(:)
         type(GFS_control_type),           intent(inout) :: Model
+        integer,                          intent(in)    :: nthrds
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -294,9 +346,15 @@
           Model%clstp = 0100
         endif
 
+!$OMP parallel num_threads(nthrds) default(none)              &
+!$OMP          private (nb,iskip,ix,i,j,k)                    &
+!$OMP          shared (Model,Data,iseed,wrk,rannie,rndval)    &
+!$OMP          shared (nblks)
+
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
         !    Model%imfdeepcnv < 0 when Model%ras = .true.
         if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
+!$OMP single
           iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
           call random_setseed(iseed)
           call random_number(wrk)
@@ -306,49 +364,47 @@
             call random_number(rannie)
             rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
           enddo
+!$OMP end single
 
-          ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
-          ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
-          ! use OpenMP to speed up this loop or the inside loops *DH
           do k = 1,Model%nrcm
             iskip = (k-1)*Model%cnx*Model%cny
-            ix = 0
-            nb = 1
-            do j = 1,Model%ny
-              do i = 1,Model%nx
-                ix = ix + 1
-                if (ix .gt. Model%blksz(nb)) then
-                  ix = 1
-                  nb = nb + 1
-                endif
+!$OMP do schedule (dynamic,1)
+            do nb=1,nblks
+              do ix=1,Model%blksz(nb)
+                j = Data(nb)%Tbd%jmap(ix)
+                i = Data(nb)%Tbd%imap(ix)
                 Data(nb)%Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
               enddo
             enddo
+!$OMP end do
           enddo
         endif  ! imfdeepcnv, cal_re, random_clds
 
         !--- o3 interpolation
         if (Model%ntoz > 0) then
-! DH* OpenMP?
+!$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call ozinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                             Data(nb)%Grid%jindx1_o3, Data(nb)%Grid%jindx2_o3,              &
+                             Data(nb)%Grid%jindx1_o3, Data(nb)%Grid%jindx2_o3,    &
                              Data(nb)%Tbd%ozpl, Data(nb)%Grid%ddy_o3)
           enddo
+!$OMP end do
         endif
 
         !--- h2o interpolation
         if (Model%h2o_phys) then
-! DH* OpenMP?
+!$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                              Data(nb)%Grid%jindx1_h, Data(nb)%Grid%jindx2_h,                &
+                              Data(nb)%Grid%jindx1_h, Data(nb)%Grid%jindx2_h,      &
                               Data(nb)%Tbd%h2opl, Data(nb)%Grid%ddy_h)
           enddo
+!$OMP end do
         endif
 
         !--- aerosol interpolation
         if (Model%aero_in) then
+!$OMP do schedule (dynamic,1)
          do nb = 1, nblks
            call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
                              Model%idate, Model%fhour,                            &
@@ -358,10 +414,12 @@
                              Model%levs,Data(nb)%Statein%prsl,                    &
                              Data(nb)%Tbd%aer_nm)
          enddo
+!$OMP end do
         endif
 
         !--- ICCN interpolation
         if (Model%iccn) then
+!$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
                              Data(nb)%Grid%jindx1_ci, Data(nb)%Grid%jindx2_ci,    &
@@ -370,7 +428,10 @@
                              Model%levs,Data(nb)%Statein%prsl,                    &
                              Data(nb)%Tbd%in_nm, Data(nb)%Tbd%ccn_nm)
           enddo
+!$OMP end do
         endif
+
+!$OMP end parallel
 
         !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
         if (Model%nscyc >  0) then
@@ -381,7 +442,6 @@
 
         !--- determine if diagnostics buckets need to be cleared
         if (mod(Model%kdt,Model%nszero) == 1) then
-! DH* OpenMP?
           do nb = 1,nblks
             call Data(nb)%Intdiag%rad_zero  (Model)
             call Data(nb)%Intdiag%phys_zero (Model)
