@@ -735,10 +735,9 @@ MODULE module_mp_thompson_hrrr
       call cpu_time(stime)
       call readwrite_tables("read", mpicomm, mpirank, mpiroot, ierr)
       call cpu_time(etime)
-      if (mpirank==mpiroot) print '("Reading and broadcasting precomputed Thompson tables took ",f10.3," seconds.")', etime-stime
       if (ierr==0) then
          precomputed_tables = .true.
-         if (mpirank==mpiroot) write(0,*) "Read Thompson tables from disk, skip calculation"
+         if (mpirank==mpiroot) print '("Reading and broadcasting precomputed Thompson tables took ",f10.3," seconds.")', etime-stime
       else
          precomputed_tables = .false.
          if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
@@ -952,6 +951,14 @@ MODULE module_mp_thompson_hrrr
 #endif
 
       end if precomputed_tables_2
+
+      ! DH* TEMPORARY GUARD 20181203
+      if (minval(tnccn_act)==maxval(tnccn_act)) then
+        write(0,*) "TEMPORARY GUARD: abort model because table_ccnact seems to be faulty."
+        call sleep(5)
+        stop
+      end if
+      ! *DH
 
       endif if_not_iiwarm
 
@@ -4707,10 +4714,18 @@ MODULE module_mp_thompson_hrrr
  9009 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
       write(0,*) errmess
+      ! DH* TEMPORARY FIX 20181203
+      call sleep(5)
+      stop
+      ! *DH
       RETURN
  9010 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
       write(0,*) errmess
+      ! DH* TEMPORARY FIX 20181203
+      call sleep(5)
+      stop
+      ! *DH
       RETURN
 
       end subroutine table_ccnAct
