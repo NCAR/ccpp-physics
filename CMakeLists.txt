@@ -182,6 +182,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # For CCPP acceptance: selective reduction of optimization flags, hopefully
     # to be removed once established that this is not a reasonable approach.
     if (TRANSITION)
+      # Replace "CORE-AVX2" with "CORE-AVX-I"
       set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
       string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
              CMAKE_Fortran_FLAGS_LOPT
@@ -191,6 +192,23 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
              "${CMAKE_Fortran_FLAGS_LOPT}")
       SET_SOURCE_FILES_PROPERTIES(./physics/sflx.f
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT}")
+      # Replace "-no-prec-div -no-prec-sqrt" with "-prec-div -prec-sqrt",
+      # replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT2 ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-no-prec-div" "-prec-div"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-no-prec-sqrt" "-prec-sqrt"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/satmedmfvdif.F
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
     endif (TRANSITION)
 
   else (PROJECT STREQUAL "CCPP-FV3")
