@@ -1869,8 +1869,13 @@ c
 
         real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
      &    cnvprcp, cnvprcpb
-        real(kind=kind_phys), dimension(im,levs), intent(inout) ::
+        ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+        ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
+        ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
+        ! as long as these do not get used when not allocated.
+        real(kind=kind_phys), dimension(:,:), intent(inout) ::
      &    cnvw_phy_f3d, cnvc_phy_f3d
+        ! *DH
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
@@ -1893,14 +1898,14 @@ c
           enddo
         endif
 ! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
-        if ((shcnvcw) .and. (num_p3d == 4) .and. (npdf3d == 3)) then
+        if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
               cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then
+        elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
           do k=1,levs
             do i=1,im
               cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)

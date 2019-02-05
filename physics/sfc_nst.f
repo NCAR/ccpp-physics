@@ -27,7 +27,6 @@
 !! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                                      | vertical layer dimension                                    | count         |    0 | integer   |           | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
@@ -90,7 +89,7 @@
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
-     &     ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  &
+     &     ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      &
      &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
@@ -108,7 +107,7 @@
 !                                                                       !
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
-!          ( im, km, ps, u1, v1, t1, q1, tref, cm, ch,                  !
+!          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
 !            prsl1, prslki, islimsk, xlon, sinlat, stress,              !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
@@ -144,7 +143,6 @@
 !                                                                       !
 !  inputs:                                                       size   !
 !     im       - integer, horiz dimension                          1    !
-!     km       - integer, vertical dimension                       1    !
 !     ps       - real, surface pressure (pa)                       im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
@@ -251,7 +249,7 @@
 
 
 !  ---  inputs:
-      integer, intent(in) :: im, km, kdt, ipr, nstf_name1, nstf_name4,  &
+      integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
      &       nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
@@ -786,16 +784,14 @@ cc
 ! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
 !! \brief Brief description of the parameterization
 !!
-
-! \section arg_table_sfc_nst_init  Argument Table
+!! \section arg_table_sfc_nst_post_init  Argument Table
 !!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
 
 ! \brief Brief description of the subroutine
-!
 !!
-! \section arg_table_sfc_nst_finalize  Argument Table
+!! \section arg_table_sfc_nst_post_finalize  Argument Table
 !!
       subroutine sfc_nst_post_finalize
       end subroutine sfc_nst_post_finalize

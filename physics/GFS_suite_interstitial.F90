@@ -14,7 +14,7 @@
 !> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!! | Interstitial   | GFS_interstitial_type_instance                         | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
@@ -52,8 +52,8 @@
 !> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | Interstitial   | GFS_interstitial_type_instance                         | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
@@ -563,6 +563,7 @@
 !! | ntsnc                      | index_for_snow_number_concentration                                                           | tracer index for snow   number concentration                      | index         |    0 | integer    |           | in     | F        |
 !! | ntgl                       | index_for_graupel                                                                             | tracer index for graupel                                          | index         |    0 | integer    |           | in     | F        |
 !! | ntgnc                      | index_for_graupel_number_concentration                                                        | tracer index for graupel number concentration                     | index         |    0 | integer    |           | in     | F        |
+!! | xlat                       | latitude                                                                                      | latitude                                                          | radians       |    1 | real       | kind_phys | in     | F        |
 !! | gq0                        | tracer_concentration_updated_by_physics                                                       | tracer concentration updated by physics                           | kg kg-1       |    3 | real       | kind_phys | in     | F        |
 !! | imp_physics                | flag_for_microphysics_scheme                                                                  | choice of microphysics scheme                                     | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                                               | choice of Morrison-Gettelman rmicrophysics scheme                 | flag          |    0 | integer    |           | in     | F        |
@@ -591,7 +592,7 @@
 !!
 #endif
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
-      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,      &
+      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
       imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, prslk, rhcbot,     &
       rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl,                                                                 &
       clw, rhc, save_qc, save_qi, errmsg, errflg)
@@ -611,6 +612,7 @@
       real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
       real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
+      real(kind=kind_phys), dimension(im),              intent(in) :: xlat
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc, save_qi
@@ -624,7 +626,7 @@
       real(kind=kind_phys) :: tem, tem1, tem2
       real(kind=kind_phys), dimension(im) :: tx1, tx2
 
-      real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.02,  &
+      real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.04,  &
                          turnrhcrit = 0.900, turnrhcrit_upper = 0.150
 
       ! Initialize CCPP error handling variables
@@ -638,7 +640,9 @@
       !     clw(i,k,2) = -999.9
       !   enddo
       ! enddo
-      ! if ((imfdeepcnv >= 0) .or. imfshalcnv > 0)) then
+      ! if (Model%imfdeepcnv >= 0 .or.  Model%imfshalcnv > 0  .or. &
+      !     (Model%npdf3d == 3     .and. Model%num_p3d   == 4) .or. &
+      !     (Model%npdf3d == 0     .and. Model%ncnvcld3d == 1) ) then
       !   do k=1,levs
       !     do i=1,im
       !       cnvc(i,k)  = 0.0
@@ -673,17 +677,17 @@
       endif ! end if_ras or cfscnv or samf
 
       if (ntcw > 0) then
-        if (imp_physics == imp_physics_mg .and. .not. do_shoc) then ! compute rhc for GMAO macro physics cloud pdf
+        if (imp_physics == imp_physics_mg) then ! compute rhc for GMAO macro physics cloud pdf
           do i=1,im
             tx1(i) = 1.0 / prsi(i,1)
-            tx2(i) = 1.0 - rhcbot
+            tx2(i) = 1.0 - rhcmax * work1(i)-rhcbot*work2(i)
           enddo
           do k = 1, levs
             do i = 1, im
+              kk   = max(2,kpbl(i))
               tem  = prsl(i,k) * tx1(i)
-              tem1 = min(max((tem-turnrhcrit)/slope_mg, -20.0), 20.0)
-!             tem2 = min(max((0.3-0.2*abs(cos(Grid%xlat(i)))-tem)/slope_upmg, -20.0), 20.0) ! Anning
-              tem2 = min(max((turnrhcrit_upper-tem)/slope_upmg, -20.0), 20.0)
+              tem1 = min(max((tem-prsi(i,kk)*tx1(i))/slope_mg, -20.0), 20.0)
+              tem2 = min(max((0.3-0.2*abs(cos(xlat(i)))-tem)/slope_upmg, -20.0), 20.0) ! Anning
               if (islmsk(i) > 0) then
                 tem1 = 1.0 / (1.0+exp(tem1+tem1))
               else
@@ -691,8 +695,8 @@
               endif
               tem2 = 1.0 / (1.0+exp(tem2))
 
-!             rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
-              rhc(i,k) = min(rhcmax, rhcmax*work1(i) + (1.0-tx2(i)*tem1*tem2)*work2(i))
+              rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
+!             rhc(i,k) = min(rhcmax, rhcmax*work1(i) + (1.0-tx2(i)*tem1*tem2)*work2(i))
             enddo
           enddo
         else

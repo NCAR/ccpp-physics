@@ -14,11 +14,11 @@
 !> \section arg_table_rrtmg_sw_post_run Argument Table
 !! | local_name     | standard_name                                                                                  | long_name                                                                    | units    | rank |  type                 |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                                                           | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                                                              | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type         |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                                                              | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type         |           | inout  | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                                                                           | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
-!! | Coupling       | FV3-GFS_Coupling_type                                                                          | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in     | F        |
+!! | Grid           | GFS_grid_type_instance                                                                         | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type         |           | in     | F        |
+!! | Diag           | GFS_diag_type_instance                                                                         | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type         |           | inout  | F        |
+!! | Radtend        | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
+!! | Coupling       | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout  | F        |
 !! | im             | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer               |           | in     | F        |
 !! | ltp            | extra_top_layer                                                                                | extra top layers                                                             | none     |    0 | integer               |           | in     | F        |
 !! | nday           | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer               |           | in     | F        |
@@ -71,12 +71,13 @@
         if (nday > 0) then
           do k = 1, LM
             k1 = k + kd
-            Radtend%htrsw(:,k) = htswc(:,k1)
+            Radtend%htrsw(1:im,k) = htswc(1:im,k1)
           enddo
-          ! --- repopulate the points above levr
-          if (Model%levr < Model%levs) then
-            do k = LM,Model%levs
-              Radtend%htrsw (:,k) = Radtend%htrsw (:,LM)
+          ! We are assuming that radiative tendencies are from bottom to top 
+          ! --- repopulate the points above levr i.e. LM
+          if (lm < Model%levs) then
+            do k = lm,Model%levs
+              Radtend%htrsw (1:im,k) = Radtend%htrsw (1:im,LM)
             enddo
           endif
 
@@ -85,10 +86,10 @@
                k1 = k + kd
                Radtend%swhc(1:im,k) = htsw0(1:im,k1)
              enddo
-             ! --- repopulate the points above levr
-             if (Model%levr < Model%levs) then
-               do k = LM,Model%levs
-                 Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM) 
+             ! --- repopulate the points above levr i.e. LM
+             if (lm < Model%levs) then
+               do k = lm,Model%levs
+                 Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM)
                enddo
              endif
           endif

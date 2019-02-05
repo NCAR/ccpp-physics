@@ -13,12 +13,12 @@
 !> \section arg_table_GFS_rrtmg_post_run Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                     | units    | rank |  type             |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type  |           | in     | F        |
-!! | Grid           | FV3-GFS_Grid_type                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type     |           | in     | F        |
-!! | Diag           | FV3-GFS_Diag_type                                             | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |    0 | GFS_diag_type     |           | inout  | F        |
-!! | Radtend        | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type  |           | in     | F        |
-!! | Statein        | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type  |           | in     | F        |
-!! | Coupling       | FV3-GFS_Coupling_type                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |    0 | GFS_coupling_type |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                                     | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type  |           | in     | F        |
+!! | Grid           | GFS_grid_type_instance                                        | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type     |           | in     | F        |
+!! | Diag           | GFS_diag_type_instance                                        | Fortran DDT containing FV3-GFS diagnotics data                                | DDT      |    0 | GFS_diag_type     |           | inout  | F        |
+!! | Radtend        | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type  |           | in     | F        |
+!! | Statein        | GFS_statein_type_instance                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type  |           | in     | F        |
+!! | Coupling       | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields to/from coupling with other components  | DDT      |    0 | GFS_coupling_type |           | inout  | F        |
 !! | scmpsw         | components_of_surface_downward_shortwave_fluxes               | derived type for special components of surface downward shortwave fluxes      | W m-2    |    1 | cmpfsw_type       |           | in     | F        |
 !! | im             | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer           |           | in     | F        |
 !! | lm             | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | count    |    0 | integer           |           | in     | F        |
@@ -129,7 +129,7 @@
             if (Radtend%coszen(i) > 0.) then
 !  ---                                  sw total-sky fluxes
 !                                       -------------------
-              tem0d = Model%fhswr * Radtend%coszdg(i)  / Radtend%coszen(i)
+              tem0d = Model%fhswr * Radtend%coszdg(i) / Radtend%coszen(i)
               Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
               Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
               Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
@@ -181,9 +181,9 @@
               tem1 = 0.
               tem2 = 0.
               do k=ibtc,itop
-                 tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
-                 tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
-              end do
+                tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
+                tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
+              enddo
               Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
               Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
             enddo

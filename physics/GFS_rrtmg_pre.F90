@@ -16,14 +16,14 @@
 !> \section arg_table_GFS_rrtmg_pre_run Argument Table
 !! | local_name        | standard_name                                                 | long_name                                                                     | units    | rank |  type            |   kind    | intent | optional |
 !! |-------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|------------------|-----------|--------|----------|
-!! | Model             | FV3-GFS_Control_type                                          | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type |           | in     | F        |
-!! | Grid              | FV3-GFS_Grid_type                                             | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type    |           | in     | F        |
-!! | Sfcprop           | FV3-GFS_Sfcprop_type                                          | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
-!! | Statein           | FV3-GFS_Statein_type                                          | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type |           | in     | F        |
-!! | Tbd               | FV3-GFS_Tbd_type                                              | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type     |           | in     | F        |
-!! | Cldprop           | FV3-GFS_Cldprop_type                                          | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |    0 | GFS_cldprop_type |           | in     | F        |
-!! | Coupling          | FV3-GFS_Coupling_type                                         | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type|           | in     | F        |
-!! | Radtend           | FV3-GFS_Radtend_type                                          | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
+!! | Model             | GFS_control_type_instance                                     | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type |           | in     | F        |
+!! | Grid              | GFS_grid_type_instance                                        | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type    |           | in     | F        |
+!! | Sfcprop           | GFS_sfcprop_type_instance                                     | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
+!! | Statein           | GFS_statein_type_instance                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type |           | in     | F        |
+!! | Tbd               | GFS_tbd_type_instance                                         | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type     |           | in     | F        |
+!! | Cldprop           | GFS_cldprop_type_instance                                     | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |    0 | GFS_cldprop_type |           | in     | F        |
+!! | Coupling          | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type|           | in     | F        |
+!! | Radtend           | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
 !! | lm                | vertical_layer_dimension_for_radiation                        | number of vertical layers for radiation calculation                           | count    |    0 | integer          |           | in     | F        |
 !! | im                | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer          |           | in     | F        |
 !! | lmk               | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |    0 | integer          |           | in     | F        |
@@ -194,7 +194,7 @@
       ! Local variables
       integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl
 
-      integer :: i, j, k, k1, lv, n, itop, ibtc, LP1, lla, llb, lya, lyb
+      integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya, lyb
 
       real(kind=kind_phys) :: es, qs, delt, tem0d
 
@@ -292,41 +292,55 @@
 
 !> -# Prepare atmospheric profiles for radiation input.
 !
+
+      lsk = 0
+      if (ivflip == 0 .and. lm < Model%levs) lsk = Model%levs - lm
+
 !           convert pressure unit from pa to mb
       do k = 1, LM
         k1 = k + kd
+        k2 = k + lsk
         do i = 1, IM
-          plvl(i,k1)   = 0.01 * Statein%prsi(i,k)   ! pa to mb (hpa)
-          plyr(i,k1)   = 0.01 * Statein%prsl(i,k)   ! pa to mb (hpa)
-          tlyr(i,k1)   = Statein%tgrs(i,k)
-          prslk1(i,k1) = Statein%prslk(i,k)
+          plvl(i,k1+kb) = Statein%prsi(i,k2+kb) * 0.01   ! pa to mb (hpa)
+          plyr(i,k1)    = Statein%prsl(i,k2)    * 0.01   ! pa to mb (hpa)
+          tlyr(i,k1)    = Statein%tgrs(i,k2)
+          prslk1(i,k1)  = Statein%prslk(i,k2)
 
 !>  - Compute relative humidity.
-!         es  = min( Statein%prsl(i,k), 0.001 * fpvs( Statein%tgrs(i,k)   ) )   ! fpvs in pa
-          es  = min( Statein%prsl(i,k),  fpvs( Statein%tgrs(i,k) ) )  ! fpvs and prsl in pa
-          qs  = max( QMIN, eps * es / (Statein%prsl(i,k) + epsm1*es) )
-          rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, Statein%qgrs(i,k,1))/qs ) )
+          es  = min( Statein%prsl(i,k2),  fpvs( Statein%tgrs(i,k2) ) )  ! fpvs and prsl in pa
+          qs  = max( QMIN, eps * es / (Statein%prsl(i,k2) + epsm1*es) )
+          rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, Statein%qgrs(i,k2,1))/qs ) )
           qstl(i,k1) = qs
         enddo
       enddo
 
-      !--- recast remaining all tracers (except sphum) forcing them all
-      !to be positive
+      !--- recast remaining all tracers (except sphum) forcing them all to be positive
       do j = 2, NTRAC
         do k = 1, LM
           k1 = k + kd
-          tracer1(:,k1,j) = max(0.0,Statein%qgrs(:,k,j))
+          k2 = k + lsk
+          tracer1(:,k1,j) = max(0.0, Statein%qgrs(:,k2,j))
         enddo
       enddo
-
-      do i = 1, IM
-        plvl(i,LP1+kd) = 0.01 * Statein%prsi(i,LP1)  ! pa to mb (hpa)
-      enddo
-      if (Model%levr < Model%levs) then
+!
+      if (ivflip == 0) then                                ! input data from toa to sfc
         do i = 1, IM
-          plvl(i,LP1+kd) = 0.01 * Statein%prsi(i,Model%levs+1)  ! pa to mb (hpa)
-          plvl(i,LM+kd)  = 0.5 * (plvl(i,LP1+kd) + plvl(i,LM+kd))
+          plvl(i,1+kd) = 0.01 * Statein%prsi(i,1)          ! pa to mb (hpa)
         enddo
+        if (lsk /= 0) then
+          do i = 1, IM
+            plvl(i,1+kd)  = 0.5 * (plvl(i,2+kd) + plvl(i,1+kd))
+          enddo
+        endif
+      else                                                 ! input data from sfc to top
+        do i = 1, IM
+          plvl(i,LP1+kd) = 0.01 * Statein%prsi(i,LP1+lsk)  ! pa to mb (hpa)
+        enddo
+        if (lsk /= 0) then
+          do i = 1, IM
+            plvl(i,LM+kd)  = 0.5 * (plvl(i,LP1+kd) + plvl(i,LM+kd))
+          enddo
+        endif
       endif
 
       if ( lextop ) then                 ! values for extra top layer
@@ -359,8 +373,8 @@
                      olyr)                                !  ---  outputs
       endif                               ! end_if_ntoz
 
-!>  - Call coszmn(), to compute cosine of zenith angle.
-      if( Model%lsswr ) then
+!>  - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
+      if (Model%lsswr) then
         call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
                      Grid%coslat,Model%solhr, IM, me, &
                      Radtend%coszen, Radtend%coszdg)        !  --- outputs
@@ -614,10 +628,10 @@
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntsw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntgl)
 
-          else
-            do j=1,Model%ncld
-              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
-            enddo
+!          else
+!            do j=1,Model%ncld
+!              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
+!            enddo
           endif 
           do k=1,LMK
             do i=1,IM
@@ -626,33 +640,27 @@
           enddo
         endif
 !
-        if (Model%shoc_cld) then                                        ! all but MG microphys
-          cldcov(1:IM,1+kd:LM+kd) = Tbd%phy_f3d(1:IM,1:LM,Model%ntot3d-2)
-          if (ncld == 2 .and. Model%effr_in) then
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                effrl(i,k1) = Tbd%phy_f3d(i,k,2)
-                effri(i,k1) = Tbd%phy_f3d(i,k,3)
-                effrr(i,k1) = Tbd%phy_f3d(i,k,4)
-                effrs(i,k1) = Tbd%phy_f3d(i,k,5)
-              enddo
-            enddo
-          endif
-        elseif (Model%imp_physics == 10) then                                 ! MG microphys
-          cldcov(1:IM,1+kd:LM+kd) = Tbd%phy_f3d(1:IM,1:LM,1)
+        if (Model%uni_cld) then
           if (Model%effr_in) then
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                effrl(i,k1) = Tbd%phy_f3d(i,k,2)
-                effri(i,k1) = Tbd%phy_f3d(i,k,3)
-                effrr(i,k1) = Tbd%phy_f3d(i,k,4)
-                effrs(i,k1) = Tbd%phy_f3d(i,k,5)
+                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
+                effri(i,k1)  = Tbd%phy_f3d(i,k,3)
+                effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
+                effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
+              enddo
+            enddo
+          else
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
               enddo
             enddo
           endif
-        elseif (Model%imp_physics == 11) then                          ! GFDL MP
+        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
           cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
         else                                                           ! neither of the other two cases
           cldcov = 0.0

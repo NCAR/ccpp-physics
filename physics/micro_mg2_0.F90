@@ -159,7 +159,7 @@ real(r8), parameter :: mindbz = -99._r8
 real(r8), parameter :: minrefl = 1.26e-10_r8    ! minrefl = 10._r8**(mindbz/10._r8)
 
 ! autoconversion size threshold for cloud ice to snow (m)
-real(r8)            :: dcs, ts_au, qcvar
+real(r8)            :: dcs, ts_au, ts_au_min, qcvar
 
 ! minimum mass of new crystal due to freezing of cloud droplets done
 ! externally (kg)
@@ -207,6 +207,8 @@ real(r8)           :: micro_mg_berg_eff_factor     ! berg efficiency factor
 
 logical  :: allow_sed_supersat ! Allow supersaturated conditions after sedimentation loop
 logical  :: do_sb_physics ! do SB 2001 autoconversion or accretion physics
+logical  :: do_ice_gmao
+logical  :: do_liq_liu
 
 !===============================================================================
 contains
@@ -219,6 +221,7 @@ subroutine micro_mg_init(                                         &
      microp_uniform_in, do_cldice_in, use_hetfrz_classnuc_in,     &
      micro_mg_precip_frac_method_in, micro_mg_berg_eff_factor_in, &
      allow_sed_supersat_in, do_sb_physics_in,                     &
+     do_ice_gmao_in, do_liq_liu_in,                               &
      nccons_in, nicons_in, ncnst_in, ninst_in)
 
   use micro_mg_utils, only : micro_mg_utils_init
@@ -243,7 +246,7 @@ subroutine micro_mg_init(                                         &
   real(r8), intent(in)  :: latice
   real(r8), intent(in)  :: rhmini_in    ! Minimum rh for ice cloud fraction > 0.
   real(r8), intent(in)  :: micro_mg_dcs
-  real(r8), intent(in)  :: ts_auto
+  real(r8), intent(in)  :: ts_auto(2)
   real(r8), intent(in)  :: mg_qcvar
 
   logical,  intent(in)  :: microp_uniform_in ! .true. = configure uniform for sub-columns
@@ -256,6 +259,8 @@ subroutine micro_mg_init(                                         &
   real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     ! berg efficiency factor
   logical,  intent(in)  ::  allow_sed_supersat_in ! allow supersaturated conditions after sedimentation loop
   logical,  intent(in)  ::  do_sb_physics_in ! do SB autoconversion and accretion physics
+  logical,  intent(in)  ::  do_ice_gmao_in
+  logical,  intent(in)  ::  do_liq_liu_in
 
   logical,  intent(in)  :: nccons_in, nicons_in
   real(r8), intent(in)  :: ncnst_in,  ninst_in
@@ -266,9 +271,10 @@ subroutine micro_mg_init(                                         &
 
   !-----------------------------------------------------------------------
 
-  dcs   = micro_mg_dcs * 1.0e-6
-  ts_au = ts_auto
-  qcvar = mg_qcvar
+  dcs       = micro_mg_dcs * 1.0e-6
+  ts_au_min = ts_auto(1)
+  ts_au     = ts_auto(2)
+  qcvar     = mg_qcvar
 
   ! Initialize subordinate utilities module.
   call micro_mg_utils_init(kind, rair, rh2o, cpair, tmelt_in, latvap, latice, &
@@ -287,6 +293,8 @@ subroutine micro_mg_init(                                         &
   micro_mg_berg_eff_factor    = micro_mg_berg_eff_factor_in
   allow_sed_supersat          = allow_sed_supersat_in
   do_sb_physics               = do_sb_physics_in
+  do_ice_gmao                 = do_ice_gmao_in
+  do_liq_liu                  = do_liq_liu_in
 
   nccons = nccons_in
   nicons = nicons_in
@@ -343,7 +351,7 @@ end subroutine micro_mg_init
 !===============================================================================
 !microphysics routine for each timestep goes here...
 
-subroutine micro_mg_tend ( &
+subroutine micro_mg_tend (                                       &
      mgncol,             nlev,               deltatin,           &
      t,                            q,                            &
      qcn,                          qin,                          &
@@ -395,7 +403,7 @@ subroutine micro_mg_tend ( &
      drout2,                       dsout2,                       &
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
-     prer_evap,xlat,xlon,lprnt)
+     prer_evap, xlat, xlon, lprnt, iccn, aero_in, nlball)
 
   ! Constituent properties.
   use micro_mg_utils, only: mg_liq_props,  &
@@ -427,7 +435,8 @@ subroutine micro_mg_tend ( &
                             evaporate_sublimate_precip,    &
                             bergeron_process_snow,         &
                             liu_liq_autoconversion,        &
-                            gmao_ice_autoconversion
+                            gmao_ice_autoconversion,       &
+                            size_dist_param_ice
 
   !Authors: Hugh Morrison, Andrew Gettelman, NCAR, Peter Caldwell, LLNL
   ! e-mail: morrison@ucar.edu, andrew@ucar.edu
@@ -435,6 +444,7 @@ subroutine micro_mg_tend ( &
   ! input arguments
   integer,  intent(in) :: mgncol                  ! number of microphysics columns
   integer,  intent(in) :: nlev                    ! number of layers
+  integer,  intent(in) :: nlball(mgncol)          ! sedimentation start level
   real(r8), intent(in) :: xlat,xlon               ! number of layers
   real(r8), intent(in) :: deltatin                ! time step (s)
   real(r8), intent(in) :: t(mgncol,nlev)          ! input temperature (K)
@@ -464,7 +474,7 @@ subroutine micro_mg_tend ( &
   real(r8), intent(in) :: liqcldf(mgncol,nlev)    ! liquid cloud fraction (no units)
   real(r8), intent(in) :: icecldf(mgncol,nlev)    ! ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    ! subgrid cloud water saturation scaling factor (no units)
-  logical, intent(in)  :: lprnt
+  logical, intent(in)  :: lprnt, iccn, aero_in
 
 
   ! used for scavenging
@@ -824,10 +834,11 @@ subroutine micro_mg_tend ( &
 
   ! Varaibles to scale fall velocity between small and regular ice regimes.
   real(r8) :: irad, ifrac, tsfac
-  logical, parameter  :: do_ice_gmao=.false., do_liq_liu=.false.
+! logical, parameter  :: do_ice_gmao=.false., do_liq_liu=.false.
 ! logical, parameter  :: do_ice_gmao=.true., do_liq_liu=.true.
-  real(r8), parameter :: qimax=0.010, qimin=0.001, qiinv=one/(qimax-qimin), &
-                         ts_au_min=180.0
+! logical, parameter  :: do_ice_gmao=.true., do_liq_liu=.false.
+  real(r8), parameter :: qimax=0.010, qimin=0.005, qiinv=one/(qimax-qimin)
+!                        ts_au_min=180.0
 
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -837,9 +848,9 @@ subroutine micro_mg_tend ( &
   ! assign variable deltat to deltatin
   deltat    = deltatin
   oneodt    = one / deltat
-  nlb       = nlev/3
-  nstep_def = max(1, nint(deltat/20))
-  tsfac     = log(ts_au/ts_au_min) * qiinv
+! nstep_def = max(1, nint(deltat/20))
+  nstep_def = max(1, nint(deltat/5))
+! tsfac     = log(ts_au/ts_au_min) * qiinv
 
   ! Copies of input concentrations that may be changed internally.
   do k=1,nlev
@@ -1111,6 +1122,20 @@ subroutine micro_mg_tend ( &
       npccn(i,k)  = zero
     enddo
   enddo
+
+  if(iccn) then
+    do k=1,nlev
+      do i=1,mgncol
+        npccn(i,k) = npccnin(i,k)
+      enddo
+    enddo
+  else
+    do k=1,nlev
+      do i=1,mgncol
+        npccn(i,k) = max((npccnin(i,k)*lcldm(i,k)-nc(i,k))*oneodt, zero)
+      enddo
+    enddo
+  endif
   ! initialize precip at surface
 
   do i=1,mgncol
@@ -1133,20 +1158,56 @@ subroutine micro_mg_tend ( &
      npccn = max((npccnin*lcldm-nc)*oneodt, zero)
      nc    = max(nc + npccn*deltat, zero)
      ncal  = nc*rho/lcldm ! sghan minimum in #/cm3
+  elsewhere
+     ncal = zero
   end where
 
-  do k=1,nlev
-    do i=1,mgncol
-      if( (t(i,k) < icenuct)) then
-         ncai(i,k) = 0.005_r8*exp(0.304_r8*(273.15_r8-t(i,k))) * 1000._r8
-         ncai(i,k) = min(ncai(i,k), 208.9e3_r8)
-         naai(i,k) = ncai(i,k) * rhoinv(i,k)
-      else
-         naai(i,k) = zero
-         ncai(i,k) = zero
-      endif
+  if (iccn) then
+    do k=1,nlev
+      do i=1,mgncol
+        if (t(i,k) < icenuct) then
+          ncai(i,k) = 0.005_r8*exp(0.304_r8*(273.15_r8-t(i,k))) * 1000._r8
+!         ncai(i,k) = min(ncai(i,k), 208.9e3_r8)
+          ncai(i,k) = min(ncai(i,k), 355.0e3_r8)
+          naai(i,k) = (ncai(i,k)*rhoinv(i,k) + naai(i,k))  * half
+          ncai(i,k) = naai(i,k)*rho(i,k)
+        else
+          naai(i,k) = zero
+          ncai(i,k) = zero
+        endif
+      enddo
     enddo
-  enddo
+  elseif (aero_in) then
+    do k=1,nlev
+      do i=1,mgncol
+        if (t(i,k) < icenuct) then
+          ncai(i,k) = naai(i,k)*rho(i,k)
+        else
+          naai(i,k) = zero
+          ncai(i,k) = zero
+        endif
+      enddo
+    enddo
+  else
+    do k=1,nlev
+      do i=1,mgncol
+        if (t(i,k) < icenuct) then
+          ncai(i,k) = 0.005_r8*exp(0.304_r8*(273.15_r8-t(i,k))) * 1000._r8
+          ncai(i,k) = min(ncai(i,k), 355.0e3_r8)
+          naai(i,k) = ncai(i,k)*rhoinv(i,k)
+        else
+          naai(i,k) = zero
+          ncai(i,k) = zero
+        endif
+      enddo
+    enddo
+    do k=1,nlev
+      do i=1,mgncol
+        naai(i,k) = zero
+        ncai(i,k) = zero
+      enddo
+    enddo
+  endif
 
 
   !===============================================
@@ -1265,9 +1326,9 @@ subroutine micro_mg_tend ( &
         ! units are kg/kg for mixing ratio, 1/kg for number conc
 
         if (qc(i,k) >= qsmall) then
-           ! limit in-cloud values to 0.005 kg/kg
            dum = one / lcldm(i,k)
-           qcic(i,k) = min(qc(i,k)*dum, 5.e-3_r8)
+!          qcic(i,k) = min(qc(i,k)*dum, 5.e-3_r8) ! limit in-cloud values to 0.005 kg/kg
+           qcic(i,k) = min(qc(i,k)*dum, 0.05_r8)  ! limit in-cloud values to 0.05 kg/kg
            ncic(i,k) = max(nc(i,k)*dum, zero)
 
            ! specify droplet concentration
@@ -1280,9 +1341,9 @@ subroutine micro_mg_tend ( &
         end if
 
         if (qi(i,k) >= qsmall) then
-           ! limit in-cloud values to 0.005 kg/kg
            dum = one / icldm(i,k)
-           qiic(i,k) = min(qi(i,k)*dum, 5.e-3_r8)
+!          qiic(i,k) = min(qi(i,k)*dum, 5.e-3_r8) ! limit in-cloud values to 0.005 kg/kg
+           qiic(i,k) = min(qi(i,k)*dum, 0.05_r8)  ! limit in-cloud values to 0.05 kg/kg
            niic(i,k) = max(ni(i,k)*dum, zero)
 
            ! switch for specification of cloud ice number
@@ -1360,7 +1421,8 @@ subroutine micro_mg_tend ( &
        else
          dum = zero
        endif
-       qric(i,k) = min(qr(i,k)*dum, 0.01_r8) ! limit in-precip mixing ratios to 10 g/kg
+!      qric(i,k) = min(qr(i,k)*dum, 0.01_r8) ! limit in-precip mixing ratios to 10 g/kg
+       qric(i,k) = min(qr(i,k)*dum, 0.05_r8) ! limit in-precip mixing ratios to 50 g/kg
        nric(i,k) = nr(i,k) * dum
 
 
@@ -1379,8 +1441,11 @@ subroutine micro_mg_tend ( &
      enddo 
      ! Get size distribution parameters for cloud ice
 
-     call size_dist_param_basic(mg_ice_props, qiic(:,k), niic(:,k), &
-          lami(:,k), mgncol, n0=n0i(:,k))
+     call size_dist_param_ice(mg_ice_props, qiic(:,k), niic(:,k), &
+                              lami(:,k), mgncol, n0=n0i(:,k))
+
+!    call size_dist_param_basic(mg_ice_props, qiic(:,k), niic(:,k), &
+!         lami(:,k), mgncol, n0=n0i(:,k))
   
      ! Alternative autoconversion 
      if (do_sb_physics) then
@@ -1398,16 +1463,20 @@ subroutine micro_mg_tend ( &
      ! similar to Ferrier (1994)
 
      if (do_cldice) then
-       do i=1,mgncol
+        do i=1,mgncol
           if (qiic(i,k) >= qimax) then
+!         if (qi(i,k) >= qimax) then
             ts_au_loc(i) = ts_au_min
           elseif (qiic(i,k) <= qimin) then
+!         elseif (qi(i,k) <= qimin) then
             ts_au_loc(i) = ts_au
           else
-!           ts_au_loc(i) = (ts_au*(qimax-qiic(i,k)) + ts_au_min*(qiic(i,k)-qimin)) * qiinv
-            ts_au_loc(i) = ts_au_min *exp(-tsfac*(qiic(i,k)-qimin))
+!           ts_au_loc(i) = (ts_au*(qimax-qi(i,k)) + ts_au_min*(qi(i,k)-qimin)) * qiinv
+            ts_au_loc(i) = (ts_au*(qimax-qiic(i,k)) + ts_au_min*(qiic(i,k)-qimin)) * qiinv
+!           ts_au_loc(i) = ts_au * exp(-tsfac*(qiic(i,k)-qimin))
           endif
         enddo
+
         if(do_ice_gmao) then
           call gmao_ice_autoconversion(t(:,k), qiic(:,k), niic(:,k), lami(:,k),     &
                n0i(:,k), dcs, ts_au_loc(:), prci(:,k), nprci(:,k), mgncol)
@@ -1431,7 +1500,9 @@ subroutine micro_mg_tend ( &
        else
          dum = zero
        endif
-       qsic(i,k) = min(qs(i,k)*dum, 0.01_r8) ! limit in-precip mixing ratios to 10 g/kg
+!      qsic(i,k) = min(qs(i,k)*dum, 0.01_r8) ! limit in-precip mixing ratios to 10 g/kg
+!      qsic(i,k) = min(qs(i,k)*dum, 0.05_r8) ! limit in-precip mixing ratios to 50 g/kg
+       qsic(i,k) = min(qs(i,k)*dum, 0.10_r8) ! limit in-precip mixing ratios to 50 g/kg
        nsic(i,k) = ns(i,k) * dum
 
      ! if precip mix ratio is zero so should number concentration
@@ -2221,11 +2292,14 @@ subroutine micro_mg_tend ( &
 ! obtain new slope parameter to avoid possible singularity
 
 
+     call size_dist_param_ice(mg_ice_props, dumi(:,k), dumni(:,k), &
+                              lami(:,k), mgncol)
+
      call size_dist_param_liq(mg_liq_props, dumc(:,k), dumnc(:,k), rho(:,k), &
                               pgam(:,k), lamc(:,k), mgncol)
 
-     call size_dist_param_basic(mg_ice_props, dumi(:,k), dumni(:,k), &
-                                lami(:,k), mgncol)
+!    call size_dist_param_basic(mg_ice_props, dumi(:,k), dumni(:,k), &
+!                               lami(:,k), mgncol)
 ! fallspeed for rain
 
      call size_dist_param_basic(mg_rain_props, dumr(:,k), dumnr(:,k), &
@@ -2363,6 +2437,7 @@ subroutine micro_mg_tend ( &
   ! for sedimentation calculations
   !-------------------------------------------------------------------
   do i=1,mgncol
+     nlb = nlball(i)
      nstep = 1 + nint(max( maxval( fi(i,nlb:nlev)*pdel_inv(i,nlb:nlev)), &
                            maxval(fni(i,nlb:nlev)*pdel_inv(i,nlb:nlev))) * deltat)
 
@@ -2944,8 +3019,10 @@ subroutine micro_mg_tend ( &
         end if
 
         ! limit in-cloud mixing ratio to reasonable value of 5 g kg-1
-        dumc(i,k) = min(dumc(i,k), 5.e-3_r8)
-        dumi(i,k) = min(dumi(i,k), 5.e-3_r8)
+!       dumc(i,k) = min(dumc(i,k), 5.e-3_r8)
+!       dumi(i,k) = min(dumi(i,k), 5.e-3_r8)
+        dumc(i,k) = min(dumc(i,k), 10.e-3_r8)
+        dumi(i,k) = min(dumi(i,k), 10.e-3_r8)
         ! limit in-precip mixing ratios
         dumr(i,k) = min(dumr(i,k), 10.e-3_r8)
         dums(i,k) = min(dums(i,k), 10.e-3_r8)
@@ -2969,11 +3046,13 @@ subroutine micro_mg_tend ( &
               end if
 
               tx1 = one / lami(i,k)
-              effi(i,k)   = (1.5_r8*1.e6_r8) * tx1
+!             effi(i,k)   = (1.5_r8*1.e6_r8) * tx1
+              effi(i,k)   = (three*1.e6_r8) * tx1
               sadice(i,k) = two*pi*(tx1*tx1*tx1)*dumni0*rho(i,k)*1.e-2_r8  ! m2/m3 -> cm2/cm3
 
            else
-              effi(i,k)   = 25._r8
+!             effi(i,k)   = 25._r8
+              effi(i,k)   = 50._r8
               sadice(i,k) = zero
            end if
 
@@ -3134,7 +3213,7 @@ subroutine micro_mg_tend ( &
          drout2(i,k)    = avg_diameter(qrout(i,k), nrout(i,k), rho(i,k), rhow)
          freqr(i,k)     = precip_frac(i,k)
 
-         reff_rain(i,k) = (1.e6_r8*1.5_r8) * drout2(i,k)
+         reff_rain(i,k) = (1.e6_r8*three) * drout2(i,k)
       else
          qrout2(i,k)    = zero
          nrout2(i,k)    = zero
@@ -3153,7 +3232,7 @@ subroutine micro_mg_tend ( &
 
          dsout(i,k)     = three*rhosn/rhows*dsout2(i,k)
 
-         reff_snow(i,k) = (1.e6_r8*1.5_r8) * dsout2(i,k)
+         reff_snow(i,k) = (1.e6_r8*three) * dsout2(i,k)
       else
          dsout(i,k)     = zero
          qsout2(i,k)    = zero

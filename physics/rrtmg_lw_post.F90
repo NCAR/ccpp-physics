@@ -15,10 +15,10 @@
 !> \section arg_table_rrtmg_lw_post_run Argument Table
 !! | local_name      | standard_name                                                                                 | long_name                                                                    | units    | rank |  type                 |   kind    | intent    | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|-----------------------|-----------|-----------|----------|
-!! | Model           | FV3-GFS_Control_type                                                                          | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in        | F        |
-!! | Grid            | FV3-GFS_Grid_type                                                                             | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type         |           | in        | F        |
-!! | Radtend         | FV3-GFS_Radtend_type                                                                          | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout     | F        |
-!! | Coupling        | FV3-GFS_Coupling_type                                                                         | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout     | F        |
+!! | Model           | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in        | F        |
+!! | Grid            | GFS_grid_type_instance                                                                        | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type         |           | in        | F        |
+!! | Radtend         | GFS_radtend_type_instance                                                                     | Fortran DDT containing FV3-GFS fields targetted for diagnostic output        | DDT      |    0 | GFS_radtend_type      |           | inout     | F        |
+!! | Coupling        | GFS_coupling_type_instance                                                                    | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type     |           | inout     | F        |
 !! | im              | horizontal_loop_extent                                                                        | horizontal loop extent                                                       | count    |    0 | integer               |           | in        | F        |
 !! | ltp             | extra_top_layer                                                                               | extra top layers                                                             | none     |    0 | integer               |           | in        | F        |
 !! | lm              | vertical_layer_dimension_for_radiation                                                        | number of vertical layers for radiation calculation                          | count    |    0 | integer               |           | in        | F        |
@@ -67,8 +67,8 @@
             Radtend%htrlw(1:im,k) = htlwc(1:im,k1)
         enddo
         ! --- repopulate the points above levr
-        if (Model%levr < Model%levs) then
-          do k = LM,Model%levs
+        if (lm < Model%levs) then
+          do k = lm,Model%levs
             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
           enddo
         endif
@@ -79,8 +79,8 @@
             Radtend%lwhc(1:im,k) = htlw0(1:im,k1)
           enddo
           ! --- repopulate the points above levr
-          if (Model%levr < Model%levs) then
-            do k = LM,Model%levs
+          if (lm < Model%levs) then
+            do k = lm,Model%levs
               Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
             enddo
           endif
