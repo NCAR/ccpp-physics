@@ -114,13 +114,14 @@ CONTAINS
    SUBROUTINE SFCLAY_mynn(                                         &
                      U3D,V3D,T3D,QV3D,P3D,dz8w,                    &
                      CP,G,ROVCP,R,XLV,PSFCPA,CHS,CHS2,CQS2,        &
-                     ZNT,UST,PBLH,MAVAIL,ZOL,MOL,REGIME,PSIM,PSIH, &
+                     ZNT,UST,PBLH,MAVAIL,ZOL,MOL,REGIME,           &
+                     PSIM,PSIH,PSIX,PSIX10,PSIT,PSIT2,             &
                      XLAND,HFX,QFX,LH,TSK,FLHC,FLQC,QSFC,RMOL,     &
                      U10,V10,TH2,T2,Q2,SNOWH,                      &
                      GZ1OZ0,WSPD,BR,ISFFLX,DX,                     &
                      SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
                      KARMAN,itimestep,ch,th3d,pi3d,qc3d,rho3d,     &
-                     tsq,qsq,cov,sh3d,el_pbl,qcg,                  &
+                     tsq,qsq,cov,sh3d,el_pbl,qcg,wstar,            &
                      icloud_bl,qc_bl,cldfra_bl,                    &
                      spp_pbl,pattern_spp_pbl,                      &
                      ids,ide, jds,jde, kds,kde,                    &
@@ -271,9 +272,9 @@ CONTAINS
                                                             XLAND, &
                                                               TSK, &
                                                               QCG, &
-                                                           PSFCPA ,&
-                                                            SNOWH, DX
-
+                                                           PSFCPA, &
+                                                            SNOWH, &
+                                                               DX
 
       REAL,     DIMENSION( ims:ime, jms:jme )                    , &
                 INTENT(OUT  )               ::            U10,V10, &
@@ -298,12 +299,14 @@ CONTAINS
                                                                CH, &
                                                         FLHC,FLQC, &
                                                    GZ1OZ0,WSPD,BR, &
-                                                        PSIM,PSIH
+                                                        PSIM,PSIH, &
+                                                            WSTAR, &
+                                           PSIX,PSIX10,PSIT,PSIT2
 
 !ADDITIONAL OUTPUT
 !JOE-begin
       REAL,     DIMENSION( ims:ime, jms:jme )    ::    z0zt_ratio, &
-                                 BulkRi,wstar,qstar,resist,logres
+                                 BulkRi,qstar,resist,logres
 !JOE-end 
 !===================================
 ! 1D LOCAL ARRAYS
@@ -449,6 +452,7 @@ CONTAINS
                 CQS2(ims,j), PBLH(ims,j), RMOL(ims,j),             &
                 ZNT(ims,j),UST(ims,j),MAVAIL(ims,j),ZOL(ims,j),    &
                 MOL(ims,j),REGIME(ims,j),PSIM(ims,j),PSIH(ims,j),  &
+                PSIX(ims,j),PSIX10(ims,j),PSIT(ims,j),PSIT2(ims,j),&
                 XLAND(ims,j),HFX(ims,j),QFX(ims,j),TSK(ims,j),     &
                 U10(ims,j),V10(ims,j),TH2(ims,j),T2(ims,j),        &
                 Q2(ims,j),FLHC(ims,j),FLQC(ims,j),SNOWH(ims,j),    &
@@ -480,7 +484,8 @@ CONTAINS
                      U1D2,V1D2,dz2w1d,                             &
                      CP,G,ROVCP,R,XLV,PSFCPA,CHS,CHS2,CQS2,        &
                      PBLH,RMOL,ZNT,UST,MAVAIL,ZOL,MOL,REGIME,      &
-                     PSIM,PSIH,XLAND,HFX,QFX,TSK,                  &
+                     PSIM,PSIH,PSIX,PSIX10,PSIT,PSIT2,             &
+                     XLAND,HFX,QFX,TSK,                            &
                      U10,V10,TH2,T2,Q2,FLHC,FLQC,SNOWH,            &
                      QSFC,LH,GZ1OZ0,WSPD,BR,ISFFLX,DX,             &
                      SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
@@ -551,7 +556,9 @@ CONTAINS
                                                            GZ1OZ0, &
                                                              WSPD, &
                                                                BR, &
-                                                        PSIM,PSIH
+                                                        PSIM,PSIH, &
+                                           PSIX,PSIX10,PSIT,PSIT2
+
       REAL,     DIMENSION( its:ite ), INTENT(IN)   ::     rstoch1D
 
       ! DIAGNOSTIC OUTPUT
@@ -600,8 +607,7 @@ CONTAINS
 
       REAL    ::  PL,THCON,TVCON,E1
       REAL    ::  DTHVDZ,DTHVM,VCONV,RZOL,RZOL2,RZOL10,ZOL2,ZOL10
-      REAL    ::  DTG,PSIX,DTTHX,DTHDZ,PSIX10,PSIT,PSIT2,PSIT10, &
-                  PSIQ,PSIQ2,PSIQ10
+      REAL    ::  DTG,DTTHX,DTHDZ,PSIT10,PSIQ,PSIQ2,PSIQ10
       REAL    ::  FLUXC,VSGD
       REAL    ::  restar,VISC,DQG,OLDUST,OLDTST
       REAL, PARAMETER :: psilim = -10.  ! ONLY AFFECTS z/L > 2.0
@@ -1041,17 +1047,17 @@ CONTAINS
      !-----COMPUTE THE FRICTIONAL VELOCITY:                                           
      !------------------------------------------------------------
      !     ZA(1982) EQS(2.60),(2.61).
-      PSIX=GZ1OZ0(I)-PSIM(I)
-      PSIX10=GZ10OZ0(I)-PSIM10(I)
+      PSIX(I)=GZ1OZ0(I)-PSIM(I)
+      PSIX10(I)=GZ10OZ0(I)-PSIM10(I)
       ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE 
       OLDUST = UST(I)
-      UST(I)=0.5*UST(I)+0.5*KARMAN*WSPD(I)/PSIX 
-      !NON-AVERAGED: UST(I)=KARMAN*WSPD(I)/PSIX
+      UST(I)=0.5*UST(I)+0.5*KARMAN*WSPD(I)/PSIX(I) 
+      !NON-AVERAGED: UST(I)=KARMAN*WSPD(I)/PSIX(I)
      
       ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
       WSPDI(I)=MAX(SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I)), wmin)
       IF ( PRESENT(USTM) ) THEN
-         USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX
+         USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX(I)
       ENDIF
 
       IF ((XLAND(I)-1.5).LT.0.) THEN        !LAND
@@ -1068,9 +1074,9 @@ CONTAINS
       GZ1OZt(I)= LOG((ZA(I)+z_t(i))/z_t(i))           
       GZ2OZt(I)= LOG((2.0+z_t(i))/z_t(i))                                        
 
-      PSIT =MAX(GZ1OZt(I)-PSIH(I) ,1.)
-      PSIT2=MAX(GZ2OZt(I)-PSIH2(I),1.)
-      resist(I)=PSIT
+      PSIT(I) =MAX(GZ1OZt(I)-PSIH(I) ,1.)
+      PSIT2(I)=MAX(GZ2OZt(I)-PSIH2(I),1.)
+      resist(I)=PSIT(I)
       logres(I)=GZ1OZt(I)
 
       PSIQ=MAX(LOG((ZA(I)+z_q(i))/z_q(I))-PSIH(I) ,1.0)
@@ -1089,7 +1095,7 @@ CONTAINS
       !DTG=TH1D(I)-THGB(I) !SWITCH TO THETA-V                                                   
       DTG=THV1D(I)-THVGB(I)
       OLDTST=MOL(I)
-      MOL(I)=KARMAN*DTG/PSIT/PRT
+      MOL(I)=KARMAN*DTG/PSIT(I)/PRT
       !t_star(I) = -HFX(I)/(UST(I)*CPM(I)*RHO1D(I))
       !t_star(I) = MOL(I)
       !----------------------------------------------------
@@ -1136,11 +1142,11 @@ CONTAINS
 
     !For computing the diagnostics and fluxes (below), whether the fluxes
     !are turned off or on, we need the following:
-    PSIX=GZ1OZ0(I)-PSIM(I)
-    PSIX10=GZ10OZ0(I)-PSIM10(I)
+    PSIX(I)=GZ1OZ0(I)-PSIM(I)
+    PSIX10(I)=GZ10OZ0(I)-PSIM10(I)
 
-    PSIT =MAX(GZ1OZt(I)-PSIH(I), 1.0)
-    PSIT2=MAX(GZ2OZt(I)-PSIH2(I),1.0)
+    PSIT(I) =MAX(GZ1OZt(I)-PSIH(I), 1.0)
+    PSIT2(I)=MAX(GZ2OZt(I)-PSIH2(I),1.0)
     PSIT10=MAX(GZ10OZ0(I)-PSIH10(I), 1.0)
   
     PSIQ=MAX(LOG((ZA(I)+z_q(i))/z_q(I))-PSIH(I) ,1.0)
@@ -1179,7 +1185,7 @@ CONTAINS
       ! AND MOISTURE (FLQC)
       !------------------------------------------
       FLQC(I)=RHO1D(I)*MAVAIL(I)*UST(I)*KARMAN/PSIQ
-      FLHC(I)=RHO1D(I)*CPM(I)*UST(I)*KARMAN/PSIT
+      FLHC(I)=RHO1D(I)*CPM(I)*UST(I)*KARMAN/PSIT(I)
       !OLD WAY:
       !DTTHX=ABS(TH1D(I)-THGB(I))                                            
       !IF(DTTHX.GT.1.E-5)THEN                                                   
@@ -1215,7 +1221,7 @@ CONTAINS
       !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
       !       /XKA+ZA(I)/ZL)-PSIH(I))
 
-      CHS(I)=UST(I)*KARMAN/PSIT
+      CHS(I)=UST(I)*KARMAN/PSIT(I)
 
       ! The exchange coefficient for cloud water is assumed to be the 
       ! same as that for heat. CH is multiplied by WSPD.
@@ -1225,14 +1231,14 @@ CONTAINS
 
       !THESE ARE USED FOR 2-M DIAGNOSTICS ONLY
       CQS2(I)=UST(I)*KARMAN/PSIQ2
-      CHS2(I)=UST(I)*KARMAN/PSIT2
+      CHS2(I)=UST(I)*KARMAN/PSIT2(I)
 
       IF(PRESENT(ck)  .and. PRESENT(cd) .and. &
         &PRESENT(cka) .and. PRESENT(cda)) THEN
-         Ck(I)=(karman/psix10)*(karman/psiq10)
-         Cd(I)=(karman/psix10)*(karman/psix10)
-         Cka(I)=(karman/psix)*(karman/psiq)
-         Cda(I)=(karman/psix)*(karman/psix)
+         Ck(I)=(karman/psix10(I))*(karman/psiq10)
+         Cd(I)=(karman/psix10(I))*(karman/psix10(I))
+         Cka(I)=(karman/psix(I))*(karman/psiq)
+         Cda(I)=(karman/psix(I))*(karman/psix(I))
       ENDIF
 
    ENDIF !end ISFFLX option
@@ -1256,15 +1262,15 @@ CONTAINS
       endif
    elseif(ZA(i) .gt. 7.0 .and. ZA(i) .lt. 13.0) then
       !moderate vertical resolution
-      !U10(I)=U1D(I)*PSIX10/PSIX
-      !V10(I)=V1D(I)*PSIX10/PSIX
+      !U10(I)=U1D(I)*PSIX10(I)/PSIX(I)
+      !V10(I)=V1D(I)*PSIX10(I)/PSIX(I)
       !use neutral-log:
       U10(I)=U1D(I)*log(10./ZNTstoch(I))/log(ZA(I)/ZNTstoch(I))
       V10(I)=V1D(I)*log(10./ZNTstoch(I))/log(ZA(I)/ZNTstoch(I))
    else
       ! very coarse vertical resolution
-      U10(I)=U1D(I)*PSIX10/PSIX
-      V10(I)=V1D(I)*PSIX10/PSIX
+      U10(I)=U1D(I)*PSIX10(I)/PSIX(I)
+      V10(I)=V1D(I)*PSIX10(I)/PSIX(I)
    endif
 
    !-----------------------------------------------------
@@ -1272,7 +1278,7 @@ CONTAINS
    !THESE WILL BE OVERWRITTEN FOR LAND POINTS IN THE LSM
    !-----------------------------------------------------
    DTG=TH1D(I)-THGB(I) 
-   TH2(I)=THGB(I)+DTG*PSIT2/PSIT
+   TH2(I)=THGB(I)+DTG*PSIT2(I)/PSIT(I)
    !***  BE CERTAIN THAT THE 2-M THETA IS BRACKETED BY
    !***  THE VALUES AT THE SURFACE AND LOWEST MODEL LEVEL.
    IF ((TH1D(I)>THGB(I) .AND. (TH2(I)<THGB(I) .OR. TH2(I)>TH1D(I))) .OR. &
@@ -1339,7 +1345,7 @@ CONTAINS
               " za:",za(I)
         write(*,1005)"Re:",restar," MAVAIL:",MAVAIL(I)," QSFC(I):",&
               QSFC(I)," QVSH(I):",QVSH(I)
-        print*,"PSIX=",PSIX," Z0:",ZNTstoch(I)," T1D(i):",T1D(i)
+        print*,"PSIX=",PSIX(I)," Z0:",ZNTstoch(I)," T1D(i):",T1D(i)
         write(*,*)"============================================="
       ENDIF
    ENDIF

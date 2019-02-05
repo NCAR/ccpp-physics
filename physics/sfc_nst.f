@@ -784,16 +784,14 @@ cc
 ! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
 !! \brief Brief description of the parameterization
 !!
-
-! \section arg_table_sfc_nst_init  Argument Table
+!! \section arg_table_sfc_nst_post_init  Argument Table
 !!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
 
 ! \brief Brief description of the subroutine
-!
 !!
-! \section arg_table_sfc_nst_finalize  Argument Table
+!! \section arg_table_sfc_nst_post_finalize  Argument Table
 !!
       subroutine sfc_nst_post_finalize
       end subroutine sfc_nst_post_finalize

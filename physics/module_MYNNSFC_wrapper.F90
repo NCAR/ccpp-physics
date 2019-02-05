@@ -20,7 +20,9 @@
 !! | ix                  | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
 !! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
 !! | levs                | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | kdt                 | index_of_time_step                                                          | current forecast iteration                            | index         |    0 | integer   |           | in     | F        |
+!! | iter                | ccpp_loop_counter                                                           | loop counter for subcycling loops in CCPP             | index         |    0 | integer   |           | in     | F        |
+!! | flag_init           | flag_for_first_time_step                                                 | flag signaling first time step for time integration loop | flag          |    0 | logical   |           | in     | F        |
+!! | flag_restart        | flag_for_restart                                                            | flag for restart (warmstart) or coldstart             | flag          |    0 | logical   |           | in     | F        |
 !! | delt                | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
 !! | dx                  | cell_size                                                                   | size of the grid cell                                 | m             |    1 | real      | kind_phys | in     | F        |
 !! | u                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
@@ -50,8 +52,10 @@
 !! | zol                 | surface_stability_parameter                                                 | monin obukhov surface stability parameter             | none          |    1 | real      | kind_phys | inout  | F        |
 !! | mol                 | theta_star                                                                  | temperature flux divided by ustar (temperature scale) | K             |    1 | real      | kind_phys | inout  | F        |
 !! | rmol                | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        |
-!! | psim                | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | inout  | F        |
-!! | psih                | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fm                  | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fh                  | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fm10                | Monin-Obukhov_similarity_function_for_momentum_at_10m                       | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
+!! | fh2                 | Monin-Obukhov_similarity_function_for_heat_at_2m                            | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
 !! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | br                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | inout  | F        |
 !! | ch                  | surface_drag_wind_speed_for_momentum_in_air                                 | momentum exchange coefficient                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
@@ -65,6 +69,7 @@
 !! | th2                 | potential_temperature_at_2m                                                 | 2 meter potential temperature                         | K             |    1 | real      | kind_phys | inout  | F        |
 !! | t2                  | temperature_at_2m                                                           | 2 meter temperature                                   | K             |    1 | real      | kind_phys | inout  | F        |
 !! | q2                  | specific_humidity_at_2m                                                     | 2 meter specific humidity                             | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | wstar               | surface_wind_enhancement_due_to_convection                                  | surface wind enhancement due to convection            | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | chs2                | surface_exchange_coefficient_for_heat_at_2m                                 | exchange coefficient for heat at 2 meters             | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cqs2                | surface_exchange_coefficient_for_moisture_at_2m                             | exchange coefficient for moisture at 2 meters         | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | cda                 | surface_drag_coefficient_for_momentum_in_air                                | surface exchange coeff for momentum                   | none          |    1 | real      | kind_phys | inout  | F        |
@@ -80,17 +85,18 @@
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(         &
      &  ix,im,levs,                     &
-     &  kdt,delt,dx,                    &
+     &  iter,flag_init,flag_restart,    &
+     &  delt,dx,                        &
      &  u, v, t3d, qvsh, qc, prsl, phii,&
      &  exner, tsq, qsq, cov, sh3d,     &
      &  el_pbl, qc_bl, cldfra_bl,       &
      &  ps, PBLH, slmsk, TSK,           &
      &  QSFC, snowd,                    &
      &  zorl,UST,USTM, ZOL,MOL,RMOL,    &
-     &  PSIM, PSIH, WSPD, br, ch,       &
+     &  fm, fh, fm10, fh2, WSPD, br, ch,&
      &  HFLX, QFX, LH, FLHC, FLQC,      &
      &  U10, V10, TH2, T2, Q2,          &
-     &  CHS2, CQS2,                     &
+     &  wstar, CHS2, CQS2,              &
      &  cda, cka, stress,               &
 !     &  CP, G, ROVCP, R, XLV,           &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
@@ -185,8 +191,8 @@ SUBROUTINE mynnsfc_wrapper_run(         &
 !MYNN-1D
       REAL    :: delt
       INTEGER :: im, ix, levs
-      INTEGER :: initflag, kdt, k, i
-      LOGICAL :: lprnt
+      INTEGER :: iter, k, i, itimestep
+      LOGICAL :: flag_init,flag_restart,lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
@@ -204,16 +210,17 @@ SUBROUTINE mynnsfc_wrapper_run(         &
      &        dz, rho, th, qv,                              &
      &        pattern_spp_pbl
 
-!MYNN-2D                                                                  
+!MYNN-2D
       real(kind=kind_phys), dimension(im) ::                &
      &        dx, pblh, slmsk, tsk, qsfc, ps,               &
      &        zorl, ust, ustm, hflx, qfx, br, wspd, snowd,  &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
-     &        CHS2, CQS2, rmol, zol, mol, ch, psih, psim,   &
-     &        lh, cda, cka, stress
+     &        CHS2, CQS2, rmol, zol, mol, ch,               &
+     &        fm, fh, fm10, fh2,                            &
+     &        lh, cda, cka, stress, wstar
      !LOCAL
       real, dimension(im) ::                                &
-     &        WSTAR, qcg, hfx, znt, ts, snowh,              &
+     &        qcg, hfx, znt, ts, snowh, psim, psih,         &
      &        chs, ck, cd, mavail, regime, xland, GZ1OZ0       
 
       ! Initialize CCPP error handling variables
@@ -223,13 +230,20 @@ SUBROUTINE mynnsfc_wrapper_run(         &
       if (lprnt) then
          write(0,*)"=============================================="
          write(0,*)"in mynn surface layer wrapper..."
-         write(0,*)"kdt=",kdt
+         write(0,*)"flag_init=",flag_init
+         write(0,*)"flag_restart=",flag_restart
+         write(0,*)"iter=",iter
       endif
 
-      if (kdt .eq. 1) then
-         initflag=1
+      ! If initialization is needed and mynnsfc_wrapper is called
+      ! in a subcycling loop, then test for (flag_init==.T. .and. iter==1);
+      ! initialization in sfclay_mynn is triggered by itimestep == 1
+      ! DH* TODO: Use flag_restart to distinguish which fields need
+      ! to be initialized and which are read from restart files
+      if (flag_init.and.iter==1) then
+          itimestep = 1
       else
-         initflag=0
+          itimestep = 2
       endif
 
       !prep MYNN-only variables
@@ -280,7 +294,9 @@ SUBROUTINE mynnsfc_wrapper_run(         &
           print*,"wspd:",wspd(1),"br=",br(1)
           print*,"znt:",znt(1)," delt=",delt
           print*,"im=",im," levs=",levs
-          print*,"initflag=",initflag !," ntcw=",ntcw!," ntk=",ntk
+          print*,"flag_init=",flag_init !," ntcw=",ntcw!," ntk=",ntk
+          print*,"flag_restart=",flag_restart !," ntcw=",ntcw!," ntk=",ntk
+          print*,"iter=",iter
           !print*,"ncld=",ncld," ntrac(gq0)=",ntrac
           print*,"zlvl(1)=",dz(1,1)*0.5
           print*,"PBLH=",pblh(1)," xland=",xland(1)
@@ -292,17 +308,19 @@ SUBROUTINE mynnsfc_wrapper_run(         &
                      CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                   &
                      PSFCPA=ps,CHS=chs,CHS2=chs2,CQS2=cqs2,               &
                      ZNT=znt,UST=ust,PBLH=pblh,MAVAIL=mavail,             &
-                     ZOL=zol,MOL=mol,REGIME=regime,PSIM=psim,PSIH=psih,   &
+                     ZOL=zol,MOL=mol,REGIME=regime,psim=psim,psih=psih,   &
+                     psix=fm,psit=fh,psix10=fm10,psit2=fh2,               &
+!                     fm=psix,fh=psit,fm10=psix10,fh2=psit2,               &
                      XLAND=xland,HFX=hfx,QFX=qfx,LH=lh,TSK=tsk,           &
                      FLHC=flhc,FLQC=flqc,QSFC=qsfc,RMOL=rmol,             &
                      U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,SNOWH=snowh,     &
                      GZ1OZ0=GZ1OZ0,WSPD=wspd,BR=br,ISFFLX=isfflx,DX=dx,   &
                      SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,           &
                      EP1=ep_1,EP2=ep_2,KARMAN=karman,                     &
-                     itimestep=kdt,ch=ch,                                 &
+                     itimestep=itimestep,ch=ch,                           &
                      th3d=th,pi3d=exner,qc3d=qc,rho3d=rho,                &
                      tsq=tsq,qsq=qsq,cov=cov,sh3d=sh3d,el_pbl=el_pbl,     &
-                     qcg=qcg,                                             &
+                     qcg=qcg,wstar=wstar,                                 &
                      icloud_bl=icloud_bl,qc_bl=qc_bl,cldfra_bl=cldfra_bl, &
                      spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,     &
                      ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,           &

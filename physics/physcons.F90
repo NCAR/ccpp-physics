@@ -36,8 +36,7 @@
 !! constants for GCM models.
           module physcons                
 !
-  use machine,       only : kind_phys
-  use machine,       only : kind_dyn
+  use machine, only: kind_phys, kind_dyn
 !
   implicit none
 !
