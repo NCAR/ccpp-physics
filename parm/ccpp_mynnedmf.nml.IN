@@ -68,9 +68,9 @@
        n_split  = 6
        nwat = 6
        na_init = 1
-       d_ext = 0.
-       dnats = 0
-       fv_sg_adj = 450
+       d_ext = 0.0
+       dnats = 1
+       fv_sg_adj = 225
        d2_bg = 0.
        nord =  2
        dddmp = 0.1
@@ -93,6 +93,7 @@
        hord_tr =  8
        adjust_dry_mass = .F.
        consv_te = 1.
+       do_sat_adj = .T.
        consv_am = .F.
        fill = .T.
        dwind_2d = .F.
@@ -135,16 +136,13 @@
        use_ufo        = .true.
        pre_rad        = .false.
        ncld           = 5
-       imp_physics    = 8
-       ltaerosol      = @[LTAEROSOL]
-       lradar         = @[LRADAR]
-       ttendlim       = 0.002
+       imp_physics    = 11
        pdfcld         = .false.
        fhswr          = 3600.
        fhlwr          = 3600.
        ialb           = 1
        iems           = 1
-       iaer           = 111
+       IAER           = 111
        ico2           = 2
        isubc_sw       = 2
        isubc_lw       = 2
@@ -161,10 +159,10 @@
        do_mynnedmf    = .true.
        do_mynnsfclay  = .false.
        random_clds    = .false.
-       trans_trac     = .true.
+       trans_trac     = .false.
        cnvcld         = .true.
        imfshalcnv     = -1
-       imfdeepcnv     = 3
+       imfdeepcnv     = 2
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
        ivegsrc        = 1
@@ -173,6 +171,9 @@
        oz_phys        = .false.
        oz_phys_2015   = .true.
        nstf_name      = @[NSTF_NAME]
+       xkzminv        = 0.3
+       xkzm_m         = 1.0
+       xkzm_h         = 1.0
        cplflx         = @[CPLFLX]
        iau_delthrs    = 6
        iaufhrs        = 30
@@ -181,13 +182,60 @@
        do_shum        = @[DO_SHUM]
        do_skeb        = @[DO_SKEB]
        do_sfcperts    = @[DO_SFCPERTS]
-       lsm            = 2
-       lsoil_lsm      = 9
        icloud_bl         = 1
        bl_mynn_tkeadvect = .true.
        bl_mynn_edmf      = 1
        bl_mynn_edmf_mom  = 1
+/
 
+&gfdl_cloud_microphysics_nml
+       sedi_transport = .true.
+       do_sedi_heat = .false.
+       rad_snow = .true.
+       rad_graupel = .true.
+       rad_rain = .true.
+       const_vi = .F.
+       const_vs = .F.
+       const_vg = .F.
+       const_vr = .F.
+       vi_max = 1.
+       vs_max = 2.
+       vg_max = 12.
+       vr_max = 12.
+       qi_lim = 1.
+       prog_ccn = .false.
+       do_qa = .true.
+       fast_sat_adj = .true.
+       tau_l2v = 300.
+       tau_l2v = 225.
+       tau_v2l = 150.
+       tau_g2v = 900.
+       rthresh = 10.e-6  ! This is a key parameter for cloud water
+       dw_land  = 0.16
+       dw_ocean = 0.10
+       ql_gen = 1.0e-3
+       ql_mlt = 1.0e-3
+       qi0_crt = 8.0E-5
+       qs0_crt = 1.0e-3
+       tau_i2s = 1000.
+       c_psaci = 0.05
+       c_pgacs = 0.01
+       rh_inc = 0.30
+       rh_inr = 0.30
+       rh_ins = 0.30
+       ccn_l = 300.
+       ccn_o = 100.
+       c_paut = 0.5
+       c_cracw = 0.8
+       use_ppm = .false.
+       use_ccn = .true.
+       mono_prof = .true.
+       z_slope_liq  = .true.
+       z_slope_ice  = .true.
+       de_ice = .false.
+       fix_negative = .true.
+       icloud_f = 1
+       mp_time = 150.
 /
 
 &interpolator_nml

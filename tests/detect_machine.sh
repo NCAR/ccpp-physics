@@ -57,6 +57,18 @@ case $(hostname -f) in
   tfe09)                   MACHINE_ID=theia ;; ### theia09
   tfe10)                   MACHINE_ID=theia ;; ### theia10
 
+  fe1)                     MACHINE_ID=jet ;; ### jet01
+  fe2)                     MACHINE_ID=jet ;; ### jet02
+  fe3)                     MACHINE_ID=jet ;; ### jet03
+  fe4)                     MACHINE_ID=jet ;; ### jet04
+  fe5)                     MACHINE_ID=jet ;; ### jet05
+  fe6)                     MACHINE_ID=jet ;; ### jet06
+  fe7)                     MACHINE_ID=jet ;; ### jet07
+  fe8)                     MACHINE_ID=jet ;; ### jet08
+  tfe1)                    MACHINE_ID=jet ;; ### jet09
+  tfe2)                    MACHINE_ID=jet ;; ### jet10
+
+
   cheyenne1.ib0.cheyenne.ucar.edu) MACHINE_ID=cheyenne ;; ### cheyenne1
   cheyenne2.ib0.cheyenne.ucar.edu) MACHINE_ID=cheyenne ;; ### cheyenne2
   cheyenne3.ib0.cheyenne.ucar.edu) MACHINE_ID=cheyenne ;; ### cheyenne3
@@ -71,7 +83,7 @@ case $(hostname -f) in
 esac
 
 # For Theia and Cheyenne, append compiler
-if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = stampede ] ; then
+if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = jet ] || [ $MACHINE_ID = stampede ] ; then
     MACHINE_ID=${MACHINE_ID}.${COMPILER}
 fi
 

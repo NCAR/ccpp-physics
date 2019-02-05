@@ -1,0 +1,57 @@
+#%Module######################################################################
+##
+##      nems prerequisites
+##
+
+proc ModulesHelp {} {
+     puts stderr "The prerequisites for compiling or running FV3 on Jet."
+}
+
+module purge
+module load newdefaults
+module load intel/15.0.3.187
+module load impi/5.1.1.109
+module load szip
+module load hdf5
+module load netcdf4/4.2.1.1
+module load contrib anaconda
+
+set libdir /mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
+
+##
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
+##
+set NCEPLIBS_DIR /lfs3/projects/hfv3gfs/GMTB/NCEPlibs-intel-15.0.3.187-20181105
+setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
+setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
+setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
+setenv BACIO_LIB4   ${NCEPLIBS_DIR}/lib/libbacio_4.a
+setenv SP_LIBd      ${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
+setenv W3EMC_LIBd   ${NCEPLIBS_DIR}/lib/libw3emc_d.a
+setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
+
+##
+### use pre-compiled EMSF library for above compiler / MPI combination
+##
+module use /lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles
+module load esmf/7.1.0r_impi_optim
+
+# Set path to NetCDF
+setenv NETCDF /apps/netcdf/4.2.1.1-intel
+
+##
+## SIONlib library
+##
+set    SIONLIB     /lfs3/projects/hfv3gfs/GMTB/sionlib-1.7.2/intel-15.0.3.187/impi-5.1.1.109
+setenv SIONLIB     ${SIONLIB}
+setenv SIONLIB_INC "-I${SIONLIB}/include -I${SIONLIB}/include/mod_64"
+setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi_64 -lsiongen_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none"
+
+##
+## Set compiler environment variables for CCPP
+##
+setenv CC  mpiicc
+setenv CXX mpiicpc
+setenv FC  mpiifort
+setenv F77 mpiifort
+setenv F90 mpiifort
