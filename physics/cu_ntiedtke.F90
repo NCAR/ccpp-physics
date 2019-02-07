@@ -10,6 +10,9 @@ module cu_ntiedtke
 
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      use machine , only : kind_phys
+     ! DH* TODO - replace with arguments to subroutine calls,
+     ! this also requires redefining derived constants in the
+     ! parameter section below
      use physcons, only:rd=>con_rd, rv=>con_rv, g=>con_g, &
    &       cpd=>con_cp, alv=>con_hvap, alf=>con_hfus              
 
