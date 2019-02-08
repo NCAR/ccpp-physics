@@ -53,7 +53,7 @@ HYDRO = N
 CCPP = N
 HYBRID = Y
 STATIC = N
-MEMCHECK = N
+DYN32 = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -70,13 +70,13 @@ ifneq ($(need),$(ok))
 $(error Need at least make version $(need).  Load module gmake/3.81)
 endif
 
-NETCDF_ROOT = $(NETCDF)
+NETCDF_ROOT = $(TACC_NETCDF_DIR)
 INCLUDE = -I$(NETCDF_ROOT)/include
 NETCDF_INC = -I$(NETCDF_ROOT)/include
 ifneq ($(findstring netcdf/4,$(LOADEDMODULES)),)
-  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf
 else
-  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf
 endif
 
 FPPFLAGS := -fpp -Wp,-w $(INCLUDE)
@@ -95,6 +95,10 @@ endif
 
 ifeq ($(NAM_phys),Y)
 CPPDEFS += -DNAM_phys
+endif
+
+ifeq ($(DYN32),Y)
+CPPDEFS += -DOVERLOAD_R4
 endif
 
 ifeq ($(32BIT),Y)
@@ -194,13 +198,6 @@ LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
 else
 LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
 endif
-endif
-
-ifeq ($(MEMCHECK),Y)
-CPPDEFS += -DMEMCHECK
-CFLAGS += $(MEMCHECK_INC)
-FFLAGS += $(MEMCHECK_INC)
-LDFLAGS += $(MEMCHECK_LIB)
 endif
 
 LDFLAGS += $(LIBS)
