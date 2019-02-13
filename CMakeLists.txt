@@ -198,9 +198,18 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
              CMAKE_Fortran_FLAGS_LOPT2
              "${CMAKE_Fortran_FLAGS_LOPT2}")
       SET_SOURCE_FILES_PROPERTIES(./physics/module_gfdl_cloud_microphys.F90
-                                  ./physics/gfdl_fv_sat_adj.F90
                                   ./physics/sflx.f
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
+      # Replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT3 ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT3
+             "${CMAKE_Fortran_FLAGS_LOPT3}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT3
+             "${CMAKE_Fortran_FLAGS_LOPT3}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT3}")
     endif (TRANSITION)
 
   else (PROJECT STREQUAL "CCPP-FV3")
