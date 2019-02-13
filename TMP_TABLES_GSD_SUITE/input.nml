@@ -131,7 +131,7 @@
   imp_physics = 8
   ltaerosol   = .true.
   lradar      = .true.
-  ttendlim    = 0.002
+  ttendlim    = 0.07
   pdfcld      = .false.
   fhswr       = 3600.
   fhlwr       = 3600.
