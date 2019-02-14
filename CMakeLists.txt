@@ -199,6 +199,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
              "${CMAKE_Fortran_FLAGS_LOPT2}")
       SET_SOURCE_FILES_PROPERTIES(./physics/module_gfdl_cloud_microphys.F90
                                   ./physics/sflx.f
+                                  ./physics/satmedmfvdif.F
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
       # Replace "CORE-AVX2" with "CORE-AVX-I"
       set(CMAKE_Fortran_FLAGS_LOPT3 ${CMAKE_Fortran_FLAGS})

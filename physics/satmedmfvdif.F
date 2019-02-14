@@ -1512,6 +1512,6 @@
       enddo
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine tridit
 
       end module satmedmfvdif
