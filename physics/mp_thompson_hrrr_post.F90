@@ -78,7 +78,7 @@ contains
          !   mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
          !
          ! Our testing with FV3 has shown thus far that 0.002 is
-         ! too small for a 13km (C768) resolution and that 0.07
+         ! too small for a 13km (C768) resolution and that 0.01
          ! works better. This is work in progress ...
          mp_tend_lim(i) = ttendlim
       end do
