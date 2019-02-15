@@ -39,9 +39,7 @@
     <subcycle loop="2">
       <scheme>sfc_ex_coef</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
-      <!-- <scheme>sfc_nst_pre</scheme>
-      <scheme>sfc_nst</scheme>
-      <scheme>sfc_nst_post</scheme> -->
+      <scheme>sfc_ocean</scheme>
       <scheme>lsm_noah</scheme>
       <scheme>sfc_sice</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
