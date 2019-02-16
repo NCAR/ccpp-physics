@@ -73,7 +73,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
     # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "Coverage")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Bitforbit" "Release" "Coverage")
 endif()
 
 #------------------------------------------------------------------------------
@@ -109,6 +109,14 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  if (PROJECT STREQUAL "CCPP-FV3")
+    if (DYN32)
+      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-fdefault-real-8" "" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+    endif (DYN32)
+  endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
@@ -137,15 +145,18 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
     # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
     # is fully accepted.
-    set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
+    set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS})
     string(REPLACE "-xHOST" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT
-           "${CMAKE_Fortran_FLAGS_LOPT}")
+           CMAKE_Fortran_FLAGS_LOPT1
+           "${CMAKE_Fortran_FLAGS_LOPT1}")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT
-           "${CMAKE_Fortran_FLAGS_LOPT}")
+           CMAKE_Fortran_FLAGS_LOPT1
+           "${CMAKE_Fortran_FLAGS_LOPT1}")
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT1
+           "${CMAKE_Fortran_FLAGS_LOPT1}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
+                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1} -r8 -ftz")
     # Force consistent results of math calculations for MG microphysics;
     # in Debug/Bitforbit) mode; without this flag, the results of the
     # intrinsic gamma function are different for the non-CCPP and CCPP
@@ -160,6 +171,48 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                   ./physics/micro_mg3_0.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
     endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    if (DYN32)
+      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-real-size 64" "-real-size 32" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      string(REPLACE "-r8" "-r4" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+    endif (DYN32)
+
+    # For CCPP acceptance: selective reduction of optimization flags, hopefully
+    # to be removed once established that this is not a reasonable approach.
+    if (TRANSITION)
+      # Replace "-no-prec-div -no-prec-sqrt" with "-prec-div -prec-sqrt",
+      # replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT2 ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-no-prec-div" "-prec-div"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-no-prec-sqrt" "-prec-sqrt"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/module_gfdl_cloud_microphys.F90
+                                  ./physics/sflx.f
+                                  ./physics/satmedmfvdif.F
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
+      # Replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT3 ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT3
+             "${CMAKE_Fortran_FLAGS_LOPT3}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT3
+             "${CMAKE_Fortran_FLAGS_LOPT3}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT3}")
+    endif (TRANSITION)
+
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
@@ -173,6 +226,14 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
+  if (PROJECT STREQUAL "CCPP-FV3")
+    if (DYN32)
+      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-r8" "-r4" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+    endif (DYN32)
+  endif (PROJECT STREQUAL "CCPP-FV3")
 else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
@@ -240,19 +301,22 @@ set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
 
-# DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
+# DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
+# this is only needed for dynamics builds - static build generates plain Fortran code.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-set(CAPOBJS)
-foreach(cap ${CAPS})
-    string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
-    list(APPEND CAPOBJS ${capobj})
-endforeach(cap)
-
-add_custom_command(TARGET ccppphys
-                   PRE_LINK
-                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                   COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  if (NOT STATIC)
+  set(CAPOBJS)
+  foreach(cap ${CAPS})
+      string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
+      list(APPEND CAPOBJS ${capobj})
+  endforeach(cap)
+  
+  add_custom_command(TARGET ccppphys
+                     PRE_LINK
+                     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                     COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  endif (NOT STATIC)
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 # *DH end hack for PGI compiler
 

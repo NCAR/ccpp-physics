@@ -144,46 +144,47 @@ module mp_thompson_hrrr
 
 #if 0
 !! \section arg_table_mp_thompson_hrrr_run Argument Table
-!! | local_name      | standard_name                                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | con_g           | gravitational_acceleration                                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | con_rd          | gas_constant_dry_air                                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | spechum         | water_vapor_specific_humidity_updated_by_physics                      | water vapor specific humidity                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qc              | cloud_condensed_water_mixing_ratio_updated_by_physics                 | cloud water mixing ratio wrt dry+vapor (no condensates)  | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qr              | rain_water_mixing_ratio_updated_by_physics                            | rain water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qi              | ice_water_mixing_ratio_updated_by_physics                             | ice water mixing ratio wrt dry+vapor (no condensates)    | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qs              | snow_water_mixing_ratio_updated_by_physics                            | snow water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)      | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                 | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
-!! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nifa            | ice_friendly_aerosol_number_concentration_updated_by_physics          | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface                        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
-!! | nifa2d          | tendency_of_ice_friendly_aerosols_at_surface                          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
-!! | tgrs            | air_temperature_updated_by_physics                                    | model layer mean temperature                             | K          |    2 | real      | kind_phys | inout  | F        |
-!! | prsl            | air_pressure                                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | phii            | geopotential_at_interface                                             | geopotential at model layer interfaces                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | omega           | omega                                                                 | layer mean vertical velocity                             | Pa s-1     |    2 | real      | kind_phys | in     | F        |
-!! | dtp             | time_step_for_physics                                                 | physics timestep                                         | s          |    0 | real      | kind_phys | in     | F        |
-!! | rain            | lwe_thickness_of_explicit_precipitation_amount                        | explicit rainfall amount on physics timestep             | m          |    1 | real      | kind_phys | inout  | F        |
-!! | graupel         | lwe_thickness_of_graupel_amount                                       | graupel fall on physics timestep                         | m          |    1 | real      | kind_phys | inout  | F        |
-!! | ice             | lwe_thickness_of_ice_amount                                           | ice fall on physics timestep                             | m          |    1 | real      | kind_phys | inout  | F        |
-!! | snow            | lwe_thickness_of_snow_amount                                          | snow fall on physics timestep                            | m          |    1 | real      | kind_phys | inout  | F        |
-!! | sr              | ratio_of_snowfall_to_rainfall                                         | ratio of snowfall to large-scale rainfall                | frac       |    1 | real      | kind_phys | out    | F        |
-!! | refl_10cm       | radar_reflectivity_10cm                                               | instantaneous refl_10cm                                  | dBZ        |    2 | real      | kind_phys | out    | F        |
-!! | do_radar_ref    | flag_for_radar_reflectivity                                           | flag for radar reflectivity                              | flag       |    0 | logical   |           | in     | F        |
-!! | re_cloud        | mean_effective_radius_for_liquid_cloud                                | mean effective radius for liquid cloud                   | micron     |    2 | real      | kind_phys | out    | T        |
-!! | re_ice          | mean_effective_radius_for_ice_cloud                                   | mean effective radius for ice cloud                      | micron     |    2 | real      | kind_phys | out    | T        |
-!! | re_snow         | mean_effective_radius_for_snow_flake                                  | mean effective radius for snow flake                     | micron     |    2 | real      | kind_phys | out    | T        |
-!! | mpicomm         | mpi_comm                                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! | local_name      | standard_name                                                         | long_name                                                             | units      | rank | type      |    kind   | intent | optional |
+!! |-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                                | count      |    0 | integer   |           | in     | F        |
+!! | nlev            | vertical_dimension                                                    | number of vertical levels                                             | count      |    0 | integer   |           | in     | F        |
+!! | con_g           | gravitational_acceleration                                            | gravitational acceleration                                            | m s-2      |    0 | real      | kind_phys | in     | F        |
+!! | con_rd          | gas_constant_dry_air                                                  | ideal gas constant for dry air                                        | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
+!! | spechum         | water_vapor_specific_humidity_updated_by_physics                      | water vapor specific humidity                                         | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qc              | cloud_condensed_water_mixing_ratio_updated_by_physics                 | cloud water mixing ratio wrt dry+vapor (no condensates)               | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qr              | rain_water_mixing_ratio_updated_by_physics                            | rain water mixing ratio wrt dry+vapor (no condensates)                | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qi              | ice_water_mixing_ratio_updated_by_physics                             | ice water mixing ratio wrt dry+vapor (no condensates)                 | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qs              | snow_water_mixing_ratio_updated_by_physics                            | snow water mixing ratio wrt dry+vapor (no condensates)                | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)                   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                              | kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                             | kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                                        | flag       |    0 | logical   |           | in     | F        |
+!! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                                    | kg-1       |    2 | real      | kind_phys | inout  | T        |
+!! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
+!! | nifa            | ice_friendly_aerosol_number_concentration_updated_by_physics          | number concentration of ice-friendly aerosols                         | kg-1       |    2 | real      | kind_phys | inout  | T        |
+!! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface                        | instantaneous fake water-friendly surface aerosol source              | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
+!! | nifa2d          | tendency_of_ice_friendly_aerosols_at_surface                          | instantaneous fake ice-friendly surface aerosol source                | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
+!! | tgrs            | air_temperature_updated_by_physics                                    | model layer mean temperature                                          | K          |    2 | real      | kind_phys | inout  | F        |
+!! | prsl            | air_pressure                                                          | mean layer pressure                                                   | Pa         |    2 | real      | kind_phys | in     | F        |
+!! | phii            | geopotential_at_interface                                             | geopotential at model layer interfaces                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
+!! | omega           | omega                                                                 | layer mean vertical velocity                                          | Pa s-1     |    2 | real      | kind_phys | in     | F        |
+!! | dtp             | time_step_for_physics                                                 | physics timestep                                                      | s          |    0 | real      | kind_phys | in     | F        |
+!! | prcp            | lwe_thickness_of_explicit_precipitation_amount                        | explicit precipitation (rain, ice, snow, graupel) on physics timestep | m          |    1 | real      | kind_phys | inout  | F        |
+!! | rain            | lwe_thickness_of_explicit_rain_amount                                 | explicit rain fall on physics timestep                                | m          |    1 | real      | kind_phys | inout  | F        |
+!! | graupel         | lwe_thickness_of_graupel_amount                                       | graupel fall on physics timestep                                      | m          |    1 | real      | kind_phys | inout  | F        |
+!! | ice             | lwe_thickness_of_ice_amount                                           | ice fall on physics timestep                                          | m          |    1 | real      | kind_phys | inout  | F        |
+!! | snow            | lwe_thickness_of_snow_amount                                          | snow fall on physics timestep                                         | m          |    1 | real      | kind_phys | inout  | F        |
+!! | sr              | ratio_of_snowfall_to_rainfall                                         | ratio of snowfall to large-scale rainfall                             | frac       |    1 | real      | kind_phys | out    | F        |
+!! | refl_10cm       | radar_reflectivity_10cm                                               | instantaneous refl_10cm                                               | dBZ        |    2 | real      | kind_phys | out    | F        |
+!! | do_radar_ref    | flag_for_radar_reflectivity                                           | flag for radar reflectivity                                           | flag       |    0 | logical   |           | in     | F        |
+!! | re_cloud        | effective_radius_of_stratiform_cloud_liquid_water_particle_in_um      | eff. radius of cloud liquid water particle in micrometer              | um         |    2 | real      | kind_phys | none   | F        |
+!! | re_ice          | effective_radius_of_stratiform_cloud_ice_particle_in_um               | eff. radius of cloud ice water particle in micrometer                 | um         |    2 | real      | kind_phys | none   | F        |
+!! | re_snow         | effective_radius_of_stratiform_cloud_snow_particle_in_um              | effective radius of cloud snow particle in micrometers                | um         |    2 | real      | kind_phys | none   | F        |
+!! | mpicomm         | mpi_comm                                                              | MPI communicator                                                      | index      |    0 | integer   |           | in     | F        |
+!! | mpirank         | mpi_rank                                                              | current MPI-rank                                                      | index      |    0 | integer   |           | in     | F        |
+!! | mpiroot         | mpi_root                                                              | master MPI-rank                                                       | index      |    0 | integer   |           | in     | F        |
+!! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
       subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
@@ -191,7 +192,7 @@ module mp_thompson_hrrr
                               is_aerosol_aware, nc, nwfa, nifa,          &
                               nwfa2d, nifa2d,                            &
                               tgrs, prsl, phii, omega, dtp,              &
-                              rain, graupel, ice, snow, sr,              &
+                              prcp, rain, graupel, ice, snow, sr,        &
                               refl_10cm, do_radar_ref,                   &
                               re_cloud, re_ice, re_snow,                 &
                               mpicomm, mpirank, mpiroot,                 &
@@ -228,11 +229,12 @@ module mp_thompson_hrrr
          real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
          real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: dtp
-         ! Rain/snow/graupel fall amounts and fraction of frozen precip
-         real(kind_phys),           intent(inout) :: rain(1:ncol)
-         real(kind_phys),           intent(inout) :: graupel(1:ncol)
-         real(kind_phys),           intent(inout) :: ice(1:ncol)
-         real(kind_phys),           intent(inout) :: snow(1:ncol)
+         ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
+         real(kind_phys),           intent(  out) :: prcp(1:ncol)
+         real(kind_phys),           intent(  out) :: rain(1:ncol)
+         real(kind_phys),           intent(  out) :: graupel(1:ncol)
+         real(kind_phys),           intent(  out) :: ice(1:ncol)
+         real(kind_phys),           intent(  out) :: snow(1:ncol)
          real(kind_phys),           intent(  out) :: sr(1:ncol)
          ! Radar reflectivity
          real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
@@ -531,10 +533,12 @@ module mp_thompson_hrrr
 #endif
 
          ! Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
-         rain    = rain    + delta_rain_mp/1000.0_kind_phys
-         graupel = graupel + delta_graupel_mp/1000.0_kind_phys
-         ice     = ice     + delta_ice_mp/1000.0_kind_phys
-         snow    = snow    + delta_snow_mp/1000.0_kind_phys
+         ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
+         prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
+         graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
+         ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
+         snow    = max(0.0, delta_snow_mp/1000.0_kind_phys)
+         rain    = max(0.0, delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp)/1000.0_kind_phys)
 
          if (do_effective_radii) then
             ! Convert m to micron

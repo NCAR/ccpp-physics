@@ -41,6 +41,7 @@ module mp_thompson_hrrr_pre
 !! | mpicomm         | mpi_comm                                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
+!! | blkno           | ccpp_block_number                                                     | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
@@ -48,7 +49,8 @@ module mp_thompson_hrrr_pre
       subroutine mp_thompson_hrrr_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
                                   is_aerosol_aware, nwfa, nifa, nwfa2d,      &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
-                                  mpicomm, mpirank, mpiroot, errmsg, errflg)
+                                  mpicomm, mpirank, mpiroot, blkno,          &
+                                  errmsg, errflg)
 
          implicit none
 
@@ -75,6 +77,8 @@ module mp_thompson_hrrr_pre
          integer,                   intent(in   ) :: mpicomm
          integer,                   intent(in   ) :: mpirank
          integer,                   intent(in   ) :: mpiroot
+         ! Blocking information
+         integer,                   intent(in   ) :: blkno
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
@@ -135,7 +139,7 @@ module mp_thompson_hrrr_pre
 
 !.. CCN
          if (MAXVAL(nwfa) .lt. eps) then
-            write(*,*) ' Apparently there are no initial CCN aerosols.'
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -153,21 +157,63 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            write(*,*) ' Apparently initial CCN aerosols are present.' 
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosols are present.'
             if (MAXVAL(nwfa2d) .lt. eps) then
-               write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+! Hard-coded switch between new (from WRFv4.0, top) and old (until WRFv3.9.1.1, bottom) surface emission rate calculations
+#if 0
+               !+---+-----------------------------------------------------------------+
+               !..Scale the lowest level aerosol data into an emissions rate.  This is
+               !.. very far from ideal, but need higher emissions where larger amount
+               !.. of (climo) existing and lesser emissions where there exists fewer to
+               !.. begin as a first-order simplistic approach.  Later, proper connection to
+               !.. emission inventory would be better, but, for now, scale like this:
+               !.. where: Nwfa=50 per cc, emit 0.875E4 aerosols per second per grid box unit
+               !..        that was tested as ~(20kmx20kmx50m = 2.E10 m**-3)
+               !+---+-----------------------------------------------------------------+
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Use new (WRFv4+) formula to calculate CCN surface emission rates.'
                do i = 1, ncol
                   airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
+#else
+#if 1
+               !+---+-----------------------------------------------------------------+
+               !..Scale the lowest level aerosol data into an emissions rate.  This is
+               !.. very far from ideal, but need higher emissions where larger amount
+               !.. of existing and lesser emissions where not already lots of aerosols
+               !.. for first-order simplistic approach.  Later, proper connection to
+               !.. emission inventory would be better, but, for now, scale like this:
+               !.. where: Nwfa=50 per cc, emit 0.875E4 aerosols per kg per second
+               !..        Nwfa=500 per cc, emit 0.875E5 aerosols per kg per second
+               !..        Nwfa=5000 per cc, emit 0.875E6 aerosols per kg per second
+               !.. for a grid with 20km spacing and scale accordingly for other spacings.
+               !+---+-----------------------------------------------------------------+
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Use old (pre WRFv4) formula to calculate CCN surface emission rates.'
+               do i = 1, ncol
+                  if (SQRT(area(i))/20000.0 .ge. 1.0) then
+                     h_01 = 0.875
+                  else
+                     h_01 = (0.875 + 0.125*((20000.-SQRT(area(i)))/16000.)) * SQRT(area(i))/20000.
+                  endif
+                  nwfa2d(i) = 10.0**(LOG10(nwfa(i,1)*1.E-6)-3.69897)
+                  nwfa2d(i) = nwfa2d(i)*h_01 * 1.E6
+               enddo
+#else
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates, set to zero.'
+               ! calculate CCN surface flux here, right now just set to zero
+               nwfa2d = 0.
+#endif
+#endif
             else
-               write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
             endif
          endif
 
 !.. IN
          if (MAXVAL(nifa) .lt. eps) then
-            write(*,*) ' Apparently there are no initial IN aerosols.'
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosols.'
             do i = 1, ncol
                if (hgt(i,1).le.1000.0) then
                   h_01 = 0.8
@@ -184,13 +230,13 @@ module mp_thompson_hrrr_pre
                enddo
             enddo
          else
-            write(*,*) ' Apparently initial IN aerosols are present.' 
+            if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial IN aerosols are present.' 
             if (MAXVAL(nifa2d) .lt. eps) then
-               write(*,*) ' Apparently there are no initial IN aerosol surface emission rates.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial IN aerosol surface emission rates, set to zero.'
                ! calculate IN surface flux here, right now just set to zero
                nifa2d = 0.
             else
-               write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
+               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial IN aerosol surface emission rates are present.'
             endif
          endif
 

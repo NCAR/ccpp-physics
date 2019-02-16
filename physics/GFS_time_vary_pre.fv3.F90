@@ -28,8 +28,12 @@
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
-         if (is_initialized) return
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
+         if (is_initialized) return
+ 
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
          call gfuncphys ()
 
@@ -51,6 +55,10 @@
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
          if (.not. is_initialized) return
 
          ! DH* this is the place to deallocate whatever is allocated by gfuncphys() in GFS_time_vary_pre_init
@@ -63,7 +71,7 @@
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!

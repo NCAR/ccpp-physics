@@ -47,8 +47,8 @@ MODULE module_sf_ruclsm
 CONTAINS
 
 !-----------------------------------------------------------------
-    SUBROUTINE LSMRUC(                           &
-                   DT,KTAU,iter,NSL,                             &
+    SUBROUTINE LSMRUC(                                           &
+                   DT,init,restart,KTAU,iter,NSL,                &
 !                   lakemodel,lakemask,                           &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
@@ -87,6 +87,8 @@ CONTAINS
 !     J. Geophys. Res. 105, 4077-4086.
 !-----------------------------------------------------------------
 !-- DT            time step (second)
+!        init - flag for initialization
+!     restart - flag for restart run
 !        ktau - number of time step
 !        NSL  - number of soil layers
 !        NZS  - number of levels in soil
@@ -155,7 +157,7 @@ CONTAINS
 !   INTEGER,     PARAMETER            ::     nddzs=2*(nzss-2)
 
    REAL,       INTENT(IN   )    ::     DT
-   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn
+   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,restart
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT ! , mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme, &
@@ -411,7 +413,7 @@ CONTAINS
 !--- Initialize soil/vegetation parameters
 !--- This is temporary until SI is added to mass coordinate ---!!!!!
 
-     if(ktau == 1 .and. iter == 1) then
+     if(init .and. (.not. restart) .and. iter == 1) then
      DO J=jts,jte
          DO i=its,ite
 !            do k=1,nsl
@@ -426,13 +428,13 @@ CONTAINS
 !--- initializing inside snow temp if it is not defined
         IF((soilt1(i,j) .LT. 170.) .or. (soilt1(i,j) .GT.400.)) THEN
             IF(snow(i,j).gt.32.) THEN
-           soilt1(i,j)=0.5*(soilt(i,j)+tso(i,1,j))
-    IF (debug_print ) THEN
-        print *, &
-       'Temperature inside snow is initialized in RUCLSM ', soilt1(i,j),i,j
-    ENDIF
+              soilt1(i,j)=0.5*(soilt(i,j)+tso(i,1,j))
+              IF (debug_print ) THEN
+                  print *, &
+                 'Temperature inside snow is initialized in RUCLSM ', soilt1(i,j),i,j
+              ENDIF
             ELSE
-           soilt1(i,j) = tso(i,1,j)
+              soilt1(i,j) = tso(i,1,j)
             ENDIF
         ENDIF
            tsnav(i,j) =0.5*(soilt(i,j)+tso(i,1,j))-273.15
@@ -494,7 +496,7 @@ CONTAINS
            soilice(k)=0.
            soiliqw(k)=0.
         enddo
-     endif ! ktau=1, iter=1
+     endif ! init=.true., iter=1
 
 !-----------------------------------------------------------------
 
@@ -680,8 +682,7 @@ CONTAINS
        endif
 
     IF (debug_print ) THEN
-!       if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
-      if(ktau.eq.1 ) then
+      if(init) then
            print *,'before SOILVEGIN - z0,znt(195,254)',z0(i,j),znt(i,j)
            print *,'ILAND, ISOIL =',i,j,iland,isoil
       endif
@@ -694,12 +695,10 @@ CONTAINS
                        EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),RDLAI2D,                &
                        QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j )
     IF (debug_print ) THEN
-!      if(ktau.eq.1 .and.(i.eq.358.and.j.eq.260)) &
-      if(ktau.eq.1 ) &
+      if(init) &
          print *,'after SOILVEGIN - z0,znt(1,26),lai(1,26)',z0(i,j),znt(i,j),lai(i,j)
 
-!      if(ktau.eq.1 .and. (i.eq.358.and.j.eq.260)) then
-      if(ktau.eq.1 )then
+      if(init)then
 !         print *,'NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
 !                  NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),i,j
          print *,'NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
@@ -862,11 +861,6 @@ CONTAINS
            enddo
 
               LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/(ref-qmin)))
-
-!     if(ktau.gt.1) then
-! extract dew from the cloud water at the surface
-!30july13              QCG(I,J)=QCG(I,J)-DEW(I,J)/QKMS
-!     endif
 
     IF (debug_print ) THEN
    print *,'LAND, i,j,tso1d,soilm1d,PATM,TABS,QVATM,QCATM,RHO',  &
@@ -1149,7 +1143,7 @@ endif
    SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         &
 !--- input variables
                 nzs,nddzs,nroot,meltfactor,                      &
-                ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,          &
+                ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
                 RHOSN,RHONEWSN,RHOSNFALL,                        &
                 snowrat,grauprat,icerat,curat,                   &
@@ -2212,7 +2206,7 @@ endif
 !   soil
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     J,I - the location of grid point
 !     IME, JME, KME, NZS - dimensions of the domain
@@ -2755,6 +2749,7 @@ endif
     ENDIF
      endif ! myj
           QFX= XLV*EETA
+          EETA= - RHO*DEW
         ELSE
 ! ---  evaporation
           EDIR1 =-soilres*(1.-vegfrac)*QKMS*RAS*                      &
@@ -2797,6 +2792,7 @@ endif
     ENDIF
      endif ! myj
           QFX= XLV * EETA
+          EETA = (EDIR1 + EC1 + ETT1)*1.E3
         ENDIF
     IF (debug_print ) THEN
      print *,'potential temp HFT ',HFT
@@ -3053,6 +3049,7 @@ endif
     ENDIF
      endif ! myj
           QFX= XLS*EETA
+          EETA= - RHO*DEW
         ELSE
 ! ---  evaporation
      if(myj) then
@@ -3070,6 +3067,7 @@ endif
     ENDIF
      endif ! myj
           QFX= XLS * EETA
+          EETA = Q1*1.E3
         ENDIF
           EVAPL=EETA
 
@@ -3730,6 +3728,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
     ENDIF
      endif ! myj
           QFX= XLVm*EETA
+          EETA= - RHO*DEW
         ELSE
 ! ---  evaporation
         EDIR1 = Q1*UMVEG *BETA
@@ -3764,6 +3763,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
     ENDIF
      endif ! myj
         QFX= XLVm * EETA
+        EETA = (EDIR1 + EC1 + ETT1)*1.E3
        ENDIF
         S=SNFLX
 !        sublim=eeta
@@ -4464,6 +4464,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           EETA= - RHO*DEW
       endif ! myj
           QFX= XLVm*EETA
+          EETA= - RHO*DEW
           sublim = EETA
         ELSE
 ! ---  evaporation
@@ -4476,6 +4477,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           EETA = Q1*BETA*1.E3
       endif ! myj
           QFX= XLVm * EETA
+          EETA = Q1*BETA*1.E3
           sublim = EETA
         ENDIF
 
@@ -4563,7 +4565,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !   solved here and
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     IME, JME, KME, NZS - dimensions of the domain 
 !     NROOT - number of levels within the root zone
@@ -4893,7 +4895,7 @@ endif ! 1==2
 !   solved here to obtain snow and soil temperatures
 !
 !     DELT - time step (s)
-!     ktau - numver of time step
+!     ktau - number of time step
 !     CONFLX - depth of constant flux layer (m)
 !     IME, JME, KME, NZS - dimensions of the domain 
 !     NROOT - number of levels within the root zone
@@ -6821,25 +6823,19 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
             ifortbl(ivgtyp),ivgtyp,laitbl(ivgtyp),z0tbl(ivgtyp)
     ENDIF
 
-! 11oct2012 - seasonal correction on ZNT for crops and LAI for all veg. types
-! factor = 1 with minimum greenness -->  vegfrac = shdmin (cold season)
-!      if((vegfrac - shdmin) .le. 0.) then
-!        factor = 1.
-!      else
-!        factor = 1. - max(0.,min(1.,((vegfrac - shdmin)/(shdmax-shdmin))))
-!      endif
+        deltalai(:) = 0.
 
 ! 11oct2012 - seasonal correction on ZNT for crops and LAI for all veg. types
 ! factor = 1 with minimum greenness -->  vegfrac = shdmin (cold season)
+! factor = 0 with maximum greenness -->  vegfrac = shdmax
 ! SHDMAX, SHDMIN and VEGFRAC are in % here.
       if((shdmax - shdmin) .lt. 1) then
-        factor = 1.
+        factor = 1. ! min greenness
       else
         factor = 1. - max(0.,min(1.,(vegfrac - shdmin)/max(1.,(shdmax-shdmin))))
       endif
 
-        deltalai(:) = 0.
-
+! 18sept18 - LAITBL and Z0TBL are the max values
       do k = 1,nlcat
        if(IFORTBL(k) == 1) deltalai(k)=min(0.2,0.8*LAITBL(K))
        if(IFORTBL(k) == 2 .or. IFORTBL(k) == 7) deltalai(k)=min(0.5,0.8*LAITBL(K))
@@ -6848,9 +6844,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        if(IFORTBL(k) == 5) deltalai(k)=min(0.86,0.8*LAITBL(K))
 
        if(k.ne.iswater) then
+!-- 20aug18 - change in LAItoday based on the greenness fraction for the current day
         LAItoday(k) = LAITBL(K) - deltalai(k) * factor
+
          if(IFORTBL(k) == 7) then
-!crops
+!-- seasonal change of roughness length for crops 
            ZNTtoday(k) = Z0TBL(K) - 0.125 * factor
          else
            ZNTtoday(k) = Z0TBL(K)
@@ -6917,7 +6915,6 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         if(.not.rdlai2d) LAI = LAItoday(IVGTYP)
      endif
 
-!   print *,'emiss,znt,pc,lai',j,emiss,znt,pc,lai
 ! parameters from SOILPARM.TBL
           RHOCS  = 0.
           BCLH   = 0.
