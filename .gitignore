@@ -108,3 +108,4 @@ physics/stochastic_physics_sfc_cap.F90
 physics/ysuvdif_cap.F90
 physics/zhaocarr_gscond_cap.F90
 physics/zhaocarr_precpd_cap.F90
+physics/GFS_abort_cap.F90
