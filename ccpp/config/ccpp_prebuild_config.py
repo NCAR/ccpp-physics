@@ -185,6 +185,7 @@ SCHEME_FILES = {
     'ccpp/physics/physics/sfc_diff.f'                        : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_drv.f'                         : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_nst.f'                         : [ 'slow_physics' ],
+    'ccpp/physics/physics/sfc_ocean.F'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_sice.f'                        : [ 'slow_physics' ],
     # stochastic physics
     'ccpp/physics/stochastic_physics/stochastic_physics.F90' : [ 'slow_physics' ],
