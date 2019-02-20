@@ -545,8 +545,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          dqsfc1(i)=qfx(i)*XLV
          dtsfci_diag(i)=dtsfc1(i)
          dqsfci_diag(i)=dqsfc1(i)
-         dtsfc_diag(i)=dtsfc1(i)*delt
-         dqsfc_diag(i)=dqsfc1(i)*delt
+         dtsfc_diag(i)=dtsfc_diag(i) + dtsfc1(i)*delt
+         dqsfc_diag(i)=dqsfc_diag(i) + dqsfc1(i)*delt
 
          znt(i)=zorl(i)*0.01 !cm -> m?
          if (do_mynnsfclay) then
