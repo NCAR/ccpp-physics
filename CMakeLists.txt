@@ -152,6 +152,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT
            "${CMAKE_Fortran_FLAGS_LOPT}")
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+           CMAKE_Fortran_FLAGS_LOPT
+           "${CMAKE_Fortran_FLAGS_LOPT}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT} -r8 -ftz")
     # Force consistent results of math calculations for MG microphysics;
@@ -175,6 +178,39 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
     endif (DYN32)
+
+    # For CCPP acceptance: selective reduction of optimization flags, hopefully
+    # to be removed once established that this is not a reasonable approach.
+    if (TRANSITION)
+      # Replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT
+             "${CMAKE_Fortran_FLAGS_LOPT}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT
+             "${CMAKE_Fortran_FLAGS_LOPT}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/sflx.f
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT}")
+      # Replace "-no-prec-div -no-prec-sqrt" with "-prec-div -prec-sqrt",
+      # replace "CORE-AVX2" with "CORE-AVX-I"
+      set(CMAKE_Fortran_FLAGS_LOPT2 ${CMAKE_Fortran_FLAGS})
+      string(REPLACE "-no-prec-div" "-prec-div"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-no-prec-sqrt" "-prec-sqrt"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT2
+             "${CMAKE_Fortran_FLAGS_LOPT2}")
+      SET_SOURCE_FILES_PROPERTIES(./physics/satmedmfvdif.F
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
+    endif (TRANSITION)
+
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
@@ -263,19 +299,22 @@ set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
                                      LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
 
-# DH* hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy
+# DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
+# this is only needed for dynamics builds - static build generates plain Fortran code.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-set(CAPOBJS)
-foreach(cap ${CAPS})
-    string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
-    list(APPEND CAPOBJS ${capobj})
-endforeach(cap)
-
-add_custom_command(TARGET ccppphys
-                   PRE_LINK
-                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                   COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  if (NOT STATIC)
+  set(CAPOBJS)
+  foreach(cap ${CAPS})
+      string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
+      list(APPEND CAPOBJS ${capobj})
+  endforeach(cap)
+  
+  add_custom_command(TARGET ccppphys
+                     PRE_LINK
+                     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                     COMMENT "Running pgifix_wrapper.py over all scheme caps")
+  endif (NOT STATIC)
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 # *DH end hack for PGI compiler
 

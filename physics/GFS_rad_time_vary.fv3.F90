@@ -21,12 +21,13 @@
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
 !! | local_name        | standard_name                                          | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
 !! |-------------------|--------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model             | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | Data              | FV3-GFS_Data_type_all_blocks                           | Fortran DDT containing FV3-GFS data                                           | DDT      |    1 | GFS_data_type         |           | inout  | F        |
+!! | Model             | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
+!! | Data              | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                           | DDT      |    1 | GFS_data_type         |           | inout  | F        |
+!! | nthrds            | omp_threads                                            | number of OpenMP threads available for physics schemes                        | count    |    0 | integer               |           | in     | F        |
 !! | errmsg            | ccpp_error_message                                     | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                        | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_rad_time_vary_run (Model, Data, errmsg, errflg)
+      subroutine GFS_rad_time_vary_run (Model, Data, nthrds, errmsg, errflg)
 
          use physparam,                 only: ipsd0, ipsdlim, iaerflg
          use mersenne_twister,          only: random_setseed, random_index, random_stat
@@ -39,8 +40,9 @@
 
          type(GFS_control_type), intent(inout) :: Model
          type(GFS_data_type),    intent(inout) :: Data(:)
-         character(len=*),       intent(out) :: errmsg
-         integer,                intent(out) :: errflg
+         integer,                intent(in)    :: nthrds
+         character(len=*),       intent(out)   :: errmsg
+         integer,                intent(out)   :: errflg
 
          !--- local variables
          type (random_stat) :: stat
@@ -57,36 +59,35 @@
 
            !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
 
+!$OMP parallel num_threads(nthrds) default(none)        &
+!$OMP          private (nb,ix,i,j)                      &
+!$OMP          shared (Model,Data,ipsdlim,ipsd0,ipseed) &
+!$OMP          shared (numrdm,stat,nblks)
+
            !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
            if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
+!$OMP single
              ipseed = mod(nint(con_100*sqrt(Model%sec)), ipsdlim) + 1 + ipsd0
              call random_setseed (ipseed, stat)
              call random_index (ipsdlim, numrdm, stat)
-    
-             !--- set the random seeds for each column in a reproducible way
-             ix = 0
-             nb = 1
-             ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
-             ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
-             ! use OpenMP to speed up this loop *DH
-             do j = 1,Model%ny
-               do i = 1,Model%nx
-                 ix = ix + 1
-                 if (ix .gt. Model%blksz(nb)) then
-                   ix = 1
-                   nb = nb + 1
-                 endif
-              
+!$OMP end single
+
+!$OMP do schedule (dynamic,1)
+             do nb=1,nblks
+               do ix=1,Model%blksz(nb)
+                 j = Data(nb)%Tbd%jmap(ix)
+                 i = Data(nb)%Tbd%imap(ix)
                  !--- for testing purposes, replace numrdm with '100'
                  Data(nb)%Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
                  Data(nb)%Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
                enddo
              enddo
+!$OMP end do
            endif  ! isubc_lw and isubc_sw
 
            if (Model%imp_physics == 99) then
              if (Model%kdt == 1) then
-   ! DH* OpenMP?
+!$OMP do schedule (dynamic,1)
                do nb = 1,nblks
                  Data(nb)%Tbd%phy_f3d(:,:,1) = Data(nb)%Statein%tgrs
                  Data(nb)%Tbd%phy_f3d(:,:,2) = max(qmin,Data(nb)%Statein%qgrs(:,:,1))
@@ -95,8 +96,11 @@
                  Data(nb)%Tbd%phy_f2d(:,1)   = Data(nb)%Statein%prsi(:,1)
                  Data(nb)%Tbd%phy_f2d(:,2)   = Data(nb)%Statein%prsi(:,1)
                enddo
+!$OMP end do
              endif
            endif
+
+!$OMP end parallel
 
          endif
 
