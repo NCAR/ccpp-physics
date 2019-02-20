@@ -153,31 +153,31 @@ elif [[ $MACHINE_ID = theia.* ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
 
-elif [[ $MACHINE_ID = stampede.* ]]; then
+elif [[ $MACHINE_ID = jet.* ]]; then
 
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
   # Re-instantiate COMPILER in case it gets deleted by module purge
   COMPILER=${NEMS_COMPILER:-intel}
 
-#  module load rocoto
-#  ROCOTORUN=$(which rocotorun)
-#  ROCOTOSTAT=$(which rocotostat)
+  module load rocoto
+  ROCOTORUN=$(which rocotorun)
+  ROCOTOSTAT=$(which rocotostat)
   export PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:$PATH
   export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
   ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
-  ACCNR=TG-ATM160014
-  QUEUE=skx-dev
+  QUEUE=debug
+#  ACCNR=fv3-cpu
   PARTITION=
-  dprefix=/scratch4/NCEPDEV
-  dprefix=/scratch/05294/tg845932/model/run
+  dprefix=/mnt/lfs3/projects/hfv3gfs/lpan/ncar2/run/NCEPDEV
   DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
-  DISKNM=/scratch/05294/tg845932/model/RT
+  DISKNM=/lfs3/projects/hfv3gfs/emc.nemspara/RT
+  DISKNM=/mnt/lfs3/projects/hfv3gfs/lpan/RT
   STMP=$dprefix/stmp4
   PTMP=$dprefix/stmp3
-  SCHEDULER=sbatch
-  MPIEXEC=ibrun
+  SCHEDULER=pbs
+  MPIEXEC=mpirun
   MPIEXECOPTS=
-  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
+  cp fv3_conf/fv3_qsub.IN_jet fv3_conf/fv3_qsub.IN
 
 elif [[ $MACHINE_ID = cheyenne.* ]]; then
 
@@ -198,20 +198,39 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
 
+elif [[ $MACHINE_ID = stampede.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+  export PYTHONPATH=
+  ECFLOW_START=
+  QUEUE=skx-dev
+  PARTITION=
+  dprefix=$WORK/NEMSfv3gfs/run
+  DISKNM=$WORK/NEMSfv3gfs/RT
+  STMP=$dprefix/stmp4
+  PTMP=$dprefix/stmp3
+  SCHEDULER=sbatch
+  MPIEXEC=ibrun
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
+
 else
   die "Unknown machine ID, please edit detect_machine.sh file"
 fi
 
 mkdir -p ${STMP}/${USER}
-mkdir -p ${PTMP}/${USER}
 
 # Different own baseline directories for different compilers on Theia/Cheyenne
-NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
-if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]]; then
+NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST_CAPS_PHYS_CCPP_CREATE
+if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_ID = jet.* ]]; then
     NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
 fi
 
-RUNDIR_ROOT=${PTMP}/${USER}/FV3_RT/rt_$$
+# Overwrite default RUNDIR_ROOT if environment variable RUNDIR_ROOT is set
+RUNDIR_ROOT=${RUNDIR_ROOT:-${PTMP}/${USER}/FV3_RT}/rt_$$
 mkdir -p ${RUNDIR_ROOT}
 
 CREATE_BASELINE=false
@@ -265,7 +284,7 @@ done
 if [[ $MACHINE_ID = cheyenne.* ]]; then
   RTPWD=${RTPWD:-$DISKNM/trunk-20181105/${COMPILER^^}}
 else
-  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20181214}
+  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20181105}
 fi
 
 shift $((OPTIND-1))
@@ -316,6 +335,10 @@ if [[ $ROCOTO == true ]]; then
     QUEUE=batch
     COMPILE_QUEUE=service
     ROCOTO_SCHEDULER=moabtorque
+  elif [[ $MACHINE_ID = jet.* ]]; then
+    QUEUE=batch
+    COMPILE_QUEUE=service
+    ROCOTO_SCHEDULER=moabtorque
   else
     die "Rocoto is not supported on this machine $MACHINE_ID"
   fi
@@ -359,6 +382,8 @@ EOF
   elif [[ $MACHINE_ID = wcoss_cray ]]; then
     QUEUE=dev
   elif [[ $MACHINE_ID = theia.* ]]; then
+    QUEUE=batch
+  elif [[ $MACHINE_ID = jet.* ]]; then
     QUEUE=batch
   else
     die "ecFlow is not supported on this machine $MACHINE_ID"

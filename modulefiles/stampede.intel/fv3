@@ -1,12 +1,12 @@
 #%Module######################################################################
 ##
-##    NEMS FV3 Prerequisites: Cheyenne/Intel
+##    NEMS FV3 Prerequisites: Stampede/Intel
 
 proc ModulesHelp {} {
-  puts stderr "\tcit - loads modules required for building and running FV3 under NEMS on Cheyenne/Intel"
+  puts stderr "\tcit - loads modules required for building and running FV3 under NEMS on Stampede/Intel"
 }
 
-module-whatis "loads NEMS FV3 prerequisites for Cheyenne/Intel"
+module-whatis "loads NEMS FV3 prerequisites for Stampede/Intel"
 
 # NOTE: the "module purge" and loading of the module command are
 # handled by the module-setup.sh (or .csh) script.
@@ -20,10 +20,12 @@ module load impi/17.0.3
 module load netcdf/4.3.3.1
 module load hdf5/1.8.16
 module load pnetcdf/1.8.1
+setenv NETCDF /opt/apps/intel17/netcdf/4.3.3.1/x86_64
 
 ##
 ## use pre-compiled EMSF library for above compiler / MPI combination
 ##
+# DH* todo - shared directory
 set ESMF_DIR /home1/05294/tg845932/softwares/esmf_7_1_0r
 setenv ESMF_DIR              ${ESMF_DIR}
 setenv ESMF_INC              ${ESMF_DIR}/include
@@ -37,6 +39,7 @@ prepend-path LD_LIBRARY_PATH ${ESMF_DIR}/lib/lib0/Linux.intel.64.intelmpi.defaul
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
 ##
+# DH* todo - shared directory
 set NCEPLIBS_DIR /home1/05294/tg845932/softwares/NCEPlibs
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
@@ -45,13 +48,6 @@ setenv BACIO_LIB4   ${NCEPLIBS_DIR}/lib/libbacio_4.a
 setenv SP_LIBd      ${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
 setenv W3EMC_LIBd   ${NCEPLIBS_DIR}/lib/libw3emc_d.a
 setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
-
-##
-## memcheck utility
-##
-#set MEMCHECK_DIR /glade/p/ral/jntp/GMTB/tools/memcheck/20180720/intel-18.0.1
-#setenv MEMCHECK_INC "-I${MEMCHECK_DIR}/include"
-#setenv MEMCHECK_LIB "-L${MEMCHECK_DIR}/lib -lmemcheck"
 
 ##
 ## Set compiler environment variables for CCPP

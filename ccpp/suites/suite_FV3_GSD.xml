@@ -17,10 +17,12 @@
       <scheme>GFS_suite_interstitial_rad_reset</scheme>
       <scheme>GFS_rrtmg_pre</scheme>
       <scheme>rrtmg_sw_pre</scheme>
+      <scheme>mynnrad_pre</scheme>
       <scheme>rrtmg_sw</scheme>
       <scheme>rrtmg_sw_post</scheme>
       <scheme>rrtmg_lw_pre</scheme>
       <scheme>rrtmg_lw</scheme>
+      <scheme>mynnrad_post</scheme>
       <scheme>rrtmg_lw_post</scheme>
       <scheme>GFS_rrtmg_post</scheme>
     </subcycle>
@@ -37,7 +39,7 @@
     </subcycle>
     <!-- Surface iteration loop -->
     <subcycle loop="2">
-      <scheme>mynnsfc_wrapper</scheme>
+      <scheme>sfc_ex_coef</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
       <scheme>sfc_nst_pre</scheme>
       <scheme>sfc_nst</scheme>
@@ -57,7 +59,8 @@
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys</scheme>
+      <scheme>ozphys_2015</scheme>
+      <scheme>h2ophys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
