@@ -64,17 +64,22 @@ contains
       !dx = sqrt(area)
 
       do i=1,ncol
-         !! DH* testing/development: limiters on temperature tendency
-         !! depending on the grid spacing - no limit for >50km *DH
-         !if (dx(i)<=5000) then
-         !   mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
-         !else if (dx(i)<=50000) then
+         ! The column-dependent values that were set here previously
+         ! are replaced with a single value set in the namelist
+         ! input.nml.This value is independent of the grid spacing
+         ! (as opposed to setting it here on a per-column basis).
+         ! However, given that the timestep is the same for all grid
+         ! columns and determined by the smallest grid spacing in
+         ! the domain, it makes sense to use a single value.
+         !
+         ! The values previously used in RAP/HRRR were
+         !    mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
+         ! and
          !   mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
-         !else
-         !   ! no limit for grid spacings >50km
-         !   !mp_tend_lim(i) = 0.00006 ! [K/s], guess for >50km
-         !   mp_tend_lim(i) = 1.0E+08
-         !end if
+         !
+         ! Our testing with FV3 has shown thus far that 0.002 is
+         ! too small for a 13km (C768) resolution and that 0.01
+         ! works better. This is work in progress ...
          mp_tend_lim(i) = ttendlim
       end do
 
