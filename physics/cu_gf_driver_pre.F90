@@ -20,6 +20,8 @@ module cu_gf_driver_pre
 !> \section arg_table_cu_gf_driver_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                        | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|--------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | flag_init      | flag_for_first_time_step                       | flag signaling first time step for time integration loop | flag          |    0 | logical   |           | in     | F        |
+!! | flag_restart   | flag_for_restart                               | flag for restart (warmstart) or coldstart                | flag          |    0 | logical   |           | in     | F        |
 !! | kdt            | index_of_time_step                                     | current forecast iteration                       | index         |    0 | integer   |           | in     | F        |
 !! | fhour          | forecast_time                                          | curent forecast time                             | h             |    0 | real      | kind_phys | in     | F        |
 !! | dtp            | time_step_for_physics                                  | physics timestep                                 | s             |    0 | real      | kind_phys | in     | F        |
@@ -34,12 +36,15 @@ module cu_gf_driver_pre
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP         | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP            | flag          |    0 | integer   |           | out    | F        |
 !!
-   subroutine cu_gf_driver_pre_run (kdt, fhour, dtp, t, q, prevst, prevsq, forcet, forceq, cactiv, conv_act, errmsg, errflg)
+   subroutine cu_gf_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
+                                    forcet, forceq, cactiv, conv_act, errmsg, errflg)
 
       use machine, only: kind_phys
 
       implicit none
 
+      logical,          intent(in)  :: flag_init
+      logical,          intent(in)  :: flag_restart
       integer,          intent(in)  :: kdt
       real(kind_phys),  intent(in)  :: fhour
       real(kind_phys),  intent(in)  :: dtp
@@ -61,7 +66,13 @@ module cu_gf_driver_pre
       errmsg = ''
       errflg = 0
 
-      if(kdt.gt.1) then
+      ! For restart runs, can assume that prevst and prevsq
+      ! are read from the restart files beforehand, same
+      ! for conv_act.
+      if(flag_init .and. .not.flag_restart) then
+        forcet(:,:)=0.0
+        forceq(:,:)=0.0
+      else
         dtdyn=3600.0*(fhour)/kdt
         if(dtp > dtdyn) then
           forcet(:,:)=(t(:,:) - prevst(:,:))/dtp
@@ -70,9 +81,6 @@ module cu_gf_driver_pre
           forcet(:,:)=(t(:,:) - prevst(:,:))/dtdyn
           forceq(:,:)=(q(:,:) - prevsq(:,:))/dtdyn
         endif
-      else
-        forcet(:,:)=0.0
-        forceq(:,:)=0.0
       endif
 
       cactiv(:)=nint(conv_act(:))

@@ -14,7 +14,7 @@
 !> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!! | Interstitial   | GFS_interstitial_type_instance                         | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!
@@ -52,8 +52,8 @@
 !> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Interstitial   | FV3-GFS_Interstitial_type                              | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
+!! | Interstitial   | GFS_interstitial_type_instance                         | derived type GFS_interstitial_type in FV3               | DDT           |    0 | GFS_interstitial_type |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters | DDT           |    0 | GFS_control_type      |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
 !!

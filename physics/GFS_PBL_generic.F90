@@ -20,6 +20,17 @@
 !! | levs                         | vertical_dimension                                     | vertical layer dimension                                                            | count         |    0 | integer   |           | in     | F        |
 !! | nvdiff                       | number_of_vertical_diffusion_tracers                   | number of tracers to diffuse vertically                                             | count         |    0 | integer   |           | in     | F        |
 !! | ntrac                        | number_of_tracers                                      | number of tracers                                                                   | count         |    0 | integer   |           | in     | F        |
+!! | ntqv                         | index_for_water_vapor                                  | tracer index for water vapor (specific humidity)                                    | index         |    0 | integer   |           | in     | F        |
+!! | ntcw                         | index_for_liquid_cloud_condensate                      | tracer index for cloud condensate (or liquid water)                                 | index         |    0 | integer   |           | in     | F        |
+!! | ntiw                         | index_for_ice_cloud_condensate                         | tracer index for  ice water                                                         | index         |    0 | integer   |           | in     | F        |
+!! | ntrw                         | index_for_rain_water                                   | tracer index for rain water                                                         | index         |    0 | integer   |           | in     | F        |
+!! | ntsw                         | index_for_snow_water                                   | tracer index for snow water                                                         | index         |    0 | integer   |           | in     | F        |
+!! | ntlnc                        | index_for_liquid_cloud_number_concentration            | tracer index for liquid number concentration                                        | index         |    0 | integer   |           | in     | F        |
+!! | ntinc                        | index_for_ice_cloud_number_concentration               | tracer index for ice    number concentration                                        | index         |    0 | integer   |           | in     | F        |
+!! | ntwa                         | index_for_water_friendly_aerosols                      | tracer index for water friendly aerosol                                             | index         |    0 | integer   |           | in     | F        |
+!! | ntia                         | index_for_ice_friendly_aerosols                        | tracer index for ice friendly aerosol                                               | index         |    0 | integer   |           | in     | F        |
+!! | ntgl                         | index_for_graupel                                      | tracer index for graupel                                                            | index         |    0 | integer   |           | in     | F        |
+!! | ntoz                         | index_for_ozone                                        | tracer index for ozone mixing ratio                                                 | index         |    0 | integer   |           | in     | F        |
 !! | ntke                         | index_for_turbulent_kinetic_energy                     | tracer index for turbulent kinetic energy                                           | index         |    0 | integer   |           | in     | F        |
 !! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array    | index         |    0 | integer   |           | in     | F        |
 !! | imp_physics                  | flag_for_microphysics_scheme                           | choice of microphysics scheme                                                       | flag          |    0 | integer   |           | in     | F        |
@@ -29,40 +40,26 @@
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
 !! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                | flag for scale-aware TKE moist EDMF PBL scheme                                      | flag          |    0 | logical   |           | in     | F        |
 !! | qgrs                         | tracer_concentration                                   | model layer mean tracer concentration                                               | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | qgrs_water_vapor             | water_vapor_specific_humidity                          | water vapor specific humidity                                                       | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_liquid_cloud            | cloud_condensed_water_mixing_ratio                     | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)          | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ice_cloud               | ice_water_mixing_ratio                                 | moist (dry+vapor, no condensates) mixing ratio of ice water                         | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ozone                   | ozone_mixing_ratio                                     | ozone mixing ratio                                                                  | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_cloud_droplet_num_conc  | cloud_droplet_number_concentration                     | number concentration of cloud droplets (liquid)                                     | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_cloud_ice_num_conc      | ice_number_concentration                               | number concentration of ice                                                         | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_water_aer_num_conc      | water_friendly_aerosol_number_concentration            | number concentration of water-friendly aerosols                                     | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_ice_aer_num_conc        | ice_friendly_aerosol_number_concentration              | number concentration of ice-friendly aerosols                                       | kg-1          |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_rain                    | rain_water_mixing_ratio                                | moist (dry+vapor, no condensates) mixing ratio of rain water                        | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_snow                    | snow_water_mixing_ratio                                | moist (dry+vapor, no condensates) mixing ratio of snow water                        | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_graupel                 | graupel_mixing_ratio                                   | moist (dry+vapor, no condensates) mixing ratio of graupel                           | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs_tke                     | turbulent_kinetic_energy                               | turbulent kinetic energy                                                            | J             |    2 | real      | kind_phys | in     | F        |
 !! | vdftra                       | vertically_diffused_tracer_concentration               | tracer concentration diffused by PBL scheme                                         | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
 !! | errmsg                       | ccpp_error_message                                     | error message for error handling in CCPP                                            | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                        | error flag for error handling in CCPP                                               | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, ntke, ntkev, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-        imp_physics_wsm6, ltaerosol, satmedmf, qgrs, qgrs_water_vapor, qgrs_liquid_cloud, qgrs_ice_cloud, qgrs_ozone,                 &
-        qgrs_cloud_droplet_num_conc, qgrs_cloud_ice_num_conc, qgrs_water_aer_num_conc, qgrs_ice_aer_num_conc, qgrs_rain,              &
-        qgrs_snow, qgrs_graupel, qgrs_tke, vdftra, errmsg, errflg)
+      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
+        ltaerosol, satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntke, ntkev
+      integer, intent(in) :: im, levs, nvdiff, ntrac
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       logical, intent(in) :: ltaerosol, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
-      real(kind=kind_phys), dimension(im, levs), intent(in) :: qgrs_water_vapor, qgrs_liquid_cloud, qgrs_ice_cloud, &
-        qgrs_ozone, qgrs_cloud_droplet_num_conc, qgrs_cloud_ice_num_conc, qgrs_water_aer_num_conc, qgrs_ice_aer_num_conc, &
-        qgrs_rain, qgrs_snow, qgrs_graupel, qgrs_tke
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
 
       character(len=*), intent(out) :: errmsg
@@ -82,35 +79,36 @@
   ! WSM6
           do k=1,levs
             do i=1,im
-              vdftra(i,k,1) = qgrs_water_vapor(i,k)
-              vdftra(i,k,2) = qgrs_liquid_cloud(i,k)
-              vdftra(i,k,3) = qgrs_ice_cloud(i,k)
-              vdftra(i,k,4) = qgrs_ozone(i,k)
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
+          ! DH* Thompson ntrw and ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs_water_vapor(i,k)
-                vdftra(i,k,2) = qgrs_liquid_cloud(i,k)
-                vdftra(i,k,3) = qgrs_ice_cloud(i,k)
-                vdftra(i,k,4) = qgrs_cloud_droplet_num_conc(i,k)
-                vdftra(i,k,5) = qgrs_cloud_ice_num_conc(i,k)
-                vdftra(i,k,6) = qgrs_ozone(i,k)
-                vdftra(i,k,7) = qgrs_water_aer_num_conc(i,k)
-                vdftra(i,k,8) = qgrs_ice_aer_num_conc(i,k)
+                vdftra(i,k,1) = qgrs(i,k,ntqv)
+                vdftra(i,k,2) = qgrs(i,k,ntcw)
+                vdftra(i,k,3) = qgrs(i,k,ntiw)
+                vdftra(i,k,4) = qgrs(i,k,ntlnc)
+                vdftra(i,k,5) = qgrs(i,k,ntinc)
+                vdftra(i,k,6) = qgrs(i,k,ntoz)
+                vdftra(i,k,7) = qgrs(i,k,ntwa)
+                vdftra(i,k,8) = qgrs(i,k,ntia)
               enddo
             enddo
           else
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs_water_vapor(i,k)
-                vdftra(i,k,2) = qgrs_liquid_cloud(i,k)
-                vdftra(i,k,3) = qgrs_ice_cloud(i,k)
-                vdftra(i,k,4) = qgrs_cloud_ice_num_conc(i,k)
-                vdftra(i,k,5) = qgrs_ozone(i,k)
+                vdftra(i,k,1) = qgrs(i,k,ntqv)
+                vdftra(i,k,2) = qgrs(i,k,ntcw)
+                vdftra(i,k,3) = qgrs(i,k,ntiw)
+                vdftra(i,k,4) = qgrs(i,k,ntinc)
+                vdftra(i,k,5) = qgrs(i,k,ntoz)
               enddo
             enddo
           endif
@@ -119,13 +117,13 @@
   ! GFDL MP
           do k=1,levs
             do i=1,im
-              vdftra(i,k,1) = qgrs_water_vapor(i,k)
-              vdftra(i,k,2) = qgrs_liquid_cloud(i,k)
-              vdftra(i,k,3) = qgrs_ice_cloud(i,k)
-              vdftra(i,k,4) = qgrs_rain(i,k)
-              vdftra(i,k,5) = qgrs_snow(i,k)
-              vdftra(i,k,6) = qgrs_graupel(i,k)
-              vdftra(i,k,7) = qgrs_ozone(i,k)
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntrw)
+              vdftra(i,k,5) = qgrs(i,k,ntsw)
+              vdftra(i,k,6) = qgrs(i,k,ntgl)
+              vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
         endif
@@ -133,7 +131,7 @@
         if (satmedmf) then
           do k=1,levs
             do i=1,im
-              vdftra(i,k,ntkev) = qgrs_tke(i,k)
+              vdftra(i,k,ntkev) = qgrs(i,k,ntke)
             enddo
           enddo
         endif
@@ -163,6 +161,16 @@
 !! | levs                         | vertical_dimension                                                                | vertical layer dimension                                                                    | count         |    0 | integer   |           | in     | F        |
 !! | nvdiff                       | number_of_vertical_diffusion_tracers                                              | number of tracers to diffuse vertically                                                     | count         |    0 | integer   |           | in     | F        |
 !! | ntrac                        | number_of_tracers                                                                 | number of tracers                                                                           | count         |    0 | integer   |           | in     | F        |
+!! | ntqv                         | index_for_water_vapor                                                             | tracer index for water vapor (specific humidity)                                            | index         |    0 | integer   |           | in     | F        |
+!! | ntcw                         | index_for_liquid_cloud_condensate                                                 | tracer index for cloud condensate (or liquid water)                                         | index         |    0 | integer   |           | in     | F        |
+!! | ntiw                         | index_for_ice_cloud_condensate                                                    | tracer index for  ice water                                                                 | index         |    0 | integer   |           | in     | F        |
+!! | ntrw                         | index_for_rain_water                                                              | tracer index for rain water                                                                 | index         |    0 | integer   |           | in     | F        |
+!! | ntsw                         | index_for_snow_water                                                              | tracer index for snow water                                                                 | index         |    0 | integer   |           | in     | F        |
+!! | ntlnc                        | index_for_liquid_cloud_number_concentration                                       | tracer index for liquid number concentration                                                | index         |    0 | integer   |           | in     | F        |
+!! | ntinc                        | index_for_ice_cloud_number_concentration                                          | tracer index for ice    number concentration                                                | index         |    0 | integer   |           | in     | F        |
+!! | ntwa                         | index_for_water_friendly_aerosols                                                 | tracer index for water friendly aerosol                                                     | index         |    0 | integer   |           | in     | F        |
+!! | ntia                         | index_for_ice_friendly_aerosols                                                   | tracer index for ice friendly aerosol                                                       | index         |    0 | integer   |           | in     | F        |
+!! | ntgl                         | index_for_graupel                                                                 | tracer index for graupel                                                                    | index         |    0 | integer   |           | in     | F        |
 !! | ntoz                         | index_for_ozone                                                                   | tracer index for ozone mixing ratio                                                         | index         |    0 | integer   |           | in     | F        |
 !! | ntke                         | index_for_turbulent_kinetic_energy                                                | tracer index for turbulent kinetic energy                                                   | index         |    0 | integer   |           | in     | F        |
 !! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer                      | index for turbulent kinetic energy in the vertically diffused tracer array                  | index         |    0 | integer   |           | in     | F        |
@@ -191,18 +199,6 @@
 !! | htrlw                        | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep         | total sky lw heating rate                                                                   | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | xmu                          | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                      | zenith angle temporal adjustment factor for shortwave                                       | none          |    1 | real      | kind_phys | in     | F        |
 !! | dqdt                         | tendency_of_tracers_due_to_model_physics                                          | updated tendency of the tracers due to model physics                                        | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
-!! | dqdt_water_vapor             | tendency_of_water_vapor_specific_humidity_due_to_model_physics                    | water vapor specific humidity tendency due to model physics                                 | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_liquid_cloud            | tendency_of_liquid_cloud_water_mixing_ratio_due_to_model_physics                  | cloud condensed water mixing ratio tendency due to model physics                            | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_cloud               | tendency_of_ice_cloud_water_mixing_ratio_due_to_model_physics                     | cloud condensed water mixing ratio tendency due to model physics                            | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ozone                   | tendency_of_ozone_mixing_ratio_due_to_model_physics                               | ozone mixing ratio tendency due to model physics                                            | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_cloud_droplet_num_conc  | tendency_of_cloud_droplet_number_concentration_due_to_model_physics               | number concentration of cloud droplets (liquid) tendency due to model physics               | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_num_conc            | tendency_of_ice_number_concentration_due_to_model_physics                         | number concentration of ice tendency due to model physics                                   | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_water_aer_num_conc      | tendency_of_water_friendly_aerosol_number_concentration_due_to_model_physics      | number concentration of water-friendly aerosols tendency due to model physics               | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_ice_aer_num_conc        | tendency_of_ice_friendly_aerosol_number_concentration_due_to_model_physics        | number concentration of ice-friendly aerosols tendency due to model physics                 | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_rain                    | tendency_of_rain_water_mixing_ratio_due_to_model_physics                          | moist (dry+vapor, no condensates) mixing ratio of rain water tendency due to model physics  | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_snow                    | tendency_of_snow_water_mixing_ratio_due_to_model_physics                          | moist (dry+vapor, no condensates) mixing ratio of snow water tendency due to model physics  | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_graupel                 | tendency_of_graupel_mixing_ratio_due_to_model_physics                             | moist (dry+vapor, no condensates) mixing ratio of graupel tendency due to model physics     | kg kg-1 s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | dqdt_tke                     | tendency_of_turbulent_kinetic_energy_due_to_model_physics                         | turbulent kinetic energy tendency due to model physics                                      | J s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | dusfc_cpl                    | cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep            | cumulative sfc u momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
 !! | dvsfc_cpl                    | cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep            | cumulative sfc v momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
 !! | dtsfc_cpl                    | cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep  | cumulative sfc sensible heat flux multiplied by timestep                                    | W m-2 s       |    1 | real      | kind_phys | inout  | F        |
@@ -230,13 +226,12 @@
 !! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac, ntoz, ntke, ntkev,                                         &
+      subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                       &
         imp_physics, imp_physics_gfdl, imp_physics_thompson,                                                                   &
         imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                               &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
-        dqdt, dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc, &
-        dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain, dqdt_snow, dqdt_graupel, dqdt_tke,                          &
-        dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                       &
+        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, errmsg, errflg)
@@ -245,7 +240,8 @@
 
       implicit none
 
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntoz, ntke, ntkev
+      integer, intent(in) :: im, levs, nvdiff, ntrac
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf
 
@@ -255,11 +251,15 @@
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: dqdt
-      real(kind=kind_phys), dimension(im, levs), intent(inout) :: dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud, dqdt_ozone, &
-        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_rain,&
-        dqdt_snow, dqdt_graupel, dqdt_tke, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
-      real(kind=kind_phys), dimension(im), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
+
+      ! DH* The following arrays may not be allocated, depending on certain flags (cplflx, ...).
+      ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
+      ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
+      ! as long as these do not get used when not allocated.
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
+      real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
+      ! *DH
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -278,35 +278,36 @@
   ! WSM6
           do k=1,levs
             do i=1,im
-              dqdt_water_vapor(i,k)  = dvdftra(i,k,1)
-              dqdt_liquid_cloud(i,k) = dvdftra(i,k,2)
-              dqdt_ice_cloud(i,k)    = dvdftra(i,k,3)
-              dqdt_ozone(i,k)        = dvdftra(i,k,4)
+              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+              dqdt(i,k,ntoz)  = dvdftra(i,k,4)
             enddo
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
+          ! DH* - Thompson ntrw, ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                dqdt_water_vapor(i,k)             = dvdftra(i,k,1)
-                dqdt_liquid_cloud(i,k)            = dvdftra(i,k,2)
-                dqdt_ice_cloud(i,k)               = dvdftra(i,k,3)
-                dqdt_cloud_droplet_num_conc(i,k)  = dvdftra(i,k,4)
-                dqdt_ice_num_conc(i,k)            = dvdftra(i,k,5)
-                dqdt_ozone(i,k)                   = dvdftra(i,k,6)
-                dqdt_water_aer_num_conc(i,k)      = dvdftra(i,k,7)
-                dqdt_ice_aer_num_conc(i,k)        = dvdftra(i,k,8)
+                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,4)
+                dqdt(i,k,ntinc) = dvdftra(i,k,5)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,6)
+                dqdt(i,k,ntwa)  = dvdftra(i,k,7)
+                dqdt(i,k,ntia)  = dvdftra(i,k,8)
               enddo
             enddo
           else
             do k=1,levs
               do i=1,im
-                dqdt_water_vapor(i,k)   = dvdftra(i,k,1)
-                dqdt_liquid_cloud(i,k)  = dvdftra(i,k,2)
-                dqdt_ice_cloud(i,k)     = dvdftra(i,k,3)
-                dqdt_ice_num_conc(i,k)  = dvdftra(i,k,4)
-                dqdt_ozone(i,k)         = dvdftra(i,k,5)
+                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+                dqdt(i,k,ntinc) = dvdftra(i,k,4)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,5)
               enddo
             enddo
           endif
@@ -314,13 +315,13 @@
   ! GFDL MP
           do k=1,levs
             do i=1,im
-              dqdt_water_vapor(i,k)   = dvdftra(i,k,1)
-              dqdt_liquid_cloud(i,k)  = dvdftra(i,k,2)
-              dqdt_ice_cloud(i,k)     = dvdftra(i,k,3)
-              dqdt_rain(i,k)          = dvdftra(i,k,4)
-              dqdt_snow(i,k)          = dvdftra(i,k,5)
-              dqdt_graupel(i,k)       = dvdftra(i,k,6)
-              dqdt_ozone(i,k)         = dvdftra(i,k,7)
+              dqdt(i,k,ntqv) = dvdftra(i,k,1)
+              dqdt(i,k,ntcw) = dvdftra(i,k,2)
+              dqdt(i,k,ntiw) = dvdftra(i,k,3)
+              dqdt(i,k,ntrw) = dvdftra(i,k,4)
+              dqdt(i,k,ntsw) = dvdftra(i,k,5)
+              dqdt(i,k,ntgl) = dvdftra(i,k,6)
+              dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
         endif
@@ -328,7 +329,7 @@
         if (satmedmf) then
           do k=1,levs
             do i=1,im
-              dqdt_tke(i,k) = dvdftra(i,k,ntkev)
+              dqdt(i,k,ntke)  = dvdftra(i,k,ntkev)
             enddo
           enddo
         endif
@@ -395,14 +396,14 @@
   !         endif
           do k=1,levs
             do i=1,im
-              tem  = dqdt_water_vapor(i,k) * dtf
+              tem  = dqdt(i,k,ntqv) * dtf
               dq3dt(i,k) = dq3dt(i,k) + tem
             enddo
           enddo
           if (ntoz > 0) then
             do k=1,levs
               do i=1,im
-                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt_ozone(i,k) * dtf
+                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
               enddo
             enddo
           endif
