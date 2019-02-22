@@ -249,6 +249,11 @@ module stochy_patterngenerator_mod
  end subroutine getnoise
  
  subroutine patterngenerator_advance(rpattern,k,skeb_first_call)
+
+#ifdef TRANSITION
+!DIR$ OPTIMIZE:1
+#endif
+
     ! advance 1st-order autoregressive process with
     ! specified autocorrelation (phi) and variance spectrum (spectrum)
     real(kind_dbl_prec) :: noise_e(len_trie_ls,2)
