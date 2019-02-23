@@ -224,7 +224,7 @@ fi
 mkdir -p ${STMP}/${USER}
 
 # Different own baseline directories for different compilers on Theia/Cheyenne
-NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST_CAPS_PHYS_CCPP_CREATE
+NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
 if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_ID = jet.* ]]; then
     NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
 fi
