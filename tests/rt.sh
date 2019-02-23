@@ -198,6 +198,25 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
 
+elif [[ $MACHINE_ID = stampede.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+  export PYTHONPATH=
+  ECFLOW_START=
+  QUEUE=skx-dev
+  PARTITION=
+  dprefix=$WORK/NEMSfv3gfs/run
+  DISKNM=$WORK/NEMSfv3gfs/RT
+  STMP=$dprefix/stmp4
+  PTMP=$dprefix/stmp3
+  SCHEDULER=sbatch
+  MPIEXEC=ibrun
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
+
 else
   die "Unknown machine ID, please edit detect_machine.sh file"
 fi
@@ -205,7 +224,7 @@ fi
 mkdir -p ${STMP}/${USER}
 
 # Different own baseline directories for different compilers on Theia/Cheyenne
-NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
+NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST_CAPS_PHYS_CCPP_CREATE
 if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_ID = jet.* ]]; then
     NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
 fi
