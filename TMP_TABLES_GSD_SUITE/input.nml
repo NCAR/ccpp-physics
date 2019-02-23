@@ -98,6 +98,7 @@
   hord_tr =  8
   adjust_dry_mass = .false.
   consv_te = 1.
+  do_sat_adj = .false.
   consv_am = .false.
   fill = .true.
   dwind_2d = .false.
@@ -131,7 +132,6 @@
   imp_physics = 8
   ltaerosol   = .true.
   lradar      = .true.
-  ttendlim    = 0.01
   pdfcld      = .false.
   fhswr       = 3600.
   fhlwr       = 3600.
@@ -153,9 +153,14 @@
   satmedmf    = .false.
   do_mynnedmf    = .true.
   do_mynnsfclay  = .false.
+  bl_mynn_edmf = 1
+  icloud_bl    = 1
+  bl_mynn_tkeadvect=.true.
+  bl_mynn_edmf_mom=1
   random_clds  = .false.
   trans_trac   = .true.
   cnvcld    = .true.
+  ttendlim     = 0.005
   imfshalcnv   = 3
   imfdeepcnv   = 3
   cdmbgwd   = 3.5,0.25
@@ -175,10 +180,6 @@
   do_sfcperts    = .false.
   lsm       = 2
   lsoil_lsm      = 9
-  icloud_bl = 1
-  bl_mynn_tkeadvect = .true.
-  bl_mynn_edmf = 1
-  bl_mynn_edmf_mom = 1
 
 /
 
