@@ -186,6 +186,8 @@
 !! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)                                                 | flag          |    0 | logical   |           | in     | F        |
 !! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                                           | flag for scale-aware TKE moist EDMF PBL scheme                                              | flag          |    0 | logical   |           | in     | F        |
+!! | shinhong                     | flag_for_scale_aware_Shinhong_PBL                                                 | flag for scale-aware Shinhong PBL scheme                                                    | flag          |    0 | logical   |           | in     | F        |
+!! | do_ysu                       | flag_for_ysu                                                                      | flag for YSU PBL scheme                                                                     | flag          |    0 | logical   |           | in     | F        |
 !! | dvdftra                      | tendency_of_vertically_diffused_tracer_concentration                              | updated tendency of the tracers due to vertical diffusion in PBL scheme                     | kg kg-1 s-1   |    3 | real      | kind_phys | in     | F        |
 !! | dusfc1                       | instantaneous_surface_x_momentum_flux                                             | surface momentum flux in the x-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | dvsfc1                       | instantaneous_surface_y_momentum_flux                                             | surface momentum flux in the y-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
@@ -229,7 +231,7 @@
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                       &
         imp_physics, imp_physics_gfdl, imp_physics_thompson,                                                                   &
-        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                               &
+        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,             &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
@@ -243,7 +245,7 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf
+      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
@@ -273,7 +275,7 @@
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc)) then
         dqdt = dvdftra
-      elseif (nvdiff /= ntrac) then
+      elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
