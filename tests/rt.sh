@@ -198,6 +198,25 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
 
+elif [[ $MACHINE_ID = stampede.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+  export PYTHONPATH=
+  ECFLOW_START=
+  QUEUE=skx-dev
+  PARTITION=
+  dprefix=$WORK/NEMSfv3gfs/run
+  DISKNM=$WORK/NEMSfv3gfs/RT
+  STMP=$dprefix/stmp4
+  PTMP=$dprefix/stmp3
+  SCHEDULER=sbatch
+  MPIEXEC=ibrun
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
+
 else
   die "Unknown machine ID, please edit detect_machine.sh file"
 fi
