@@ -38,6 +38,8 @@
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                  | choice of Thompson microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
+!! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)              | flag          |    0 | logical   |           | in     | F        |
+!! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                            | flag          |    0 | logical   |           | in     | F        |
 !! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                | flag for scale-aware TKE moist EDMF PBL scheme                                      | flag          |    0 | logical   |           | in     | F        |
 !! | qgrs                         | tracer_concentration                                   | model layer mean tracer concentration                                               | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | vdftra                       | vertically_diffused_tracer_concentration               | tracer concentration diffused by PBL scheme                                         | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
@@ -48,7 +50,7 @@
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        ltaerosol, satmedmf, qgrs, vdftra, errmsg, errflg)
+        ltaerosol, hybedmf, do_shoc, satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
 
@@ -57,7 +59,7 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, satmedmf
+      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
@@ -72,7 +74,8 @@
       errmsg = ''
       errflg = 0
 
-      if(nvdiff == ntrac) then
+!DH: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
+      if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         vdftra = qgrs
       else
         if (imp_physics == imp_physics_wsm6) then
@@ -273,7 +276,7 @@
       errmsg = ''
       errflg = 0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
-      if (nvdiff == ntrac .and. (hybedmf .or. do_shoc)) then
+      if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         dqdt = dvdftra
       elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
         if (imp_physics == imp_physics_wsm6) then
