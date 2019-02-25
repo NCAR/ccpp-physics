@@ -52,6 +52,7 @@
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
+      <scheme>GFS_PBL_generic_pre</scheme>
       <scheme>satmedmfvdif</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>gwdps_pre</scheme>

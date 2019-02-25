@@ -12,5 +12,5 @@
 	url = https://github.com/NCAR/ccpp-physics
 [submodule "FMS"]
 	path = FMS
-	url = git://github.com/NOAA-EMC/FMS
+	url = https://github.com/NCAR/FMS
 	branch = GFS-FMS
