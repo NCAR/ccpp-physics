@@ -168,10 +168,16 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
                                   ./physics/micro_mg3_0.F90
                                   PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+                              ./physics/micro_mg3_0.F90)
     elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
       SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
                                   ./physics/micro_mg3_0.F90
                                   PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+                              ./physics/micro_mg3_0.F90)
     elseif (TRANSITION)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
       # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
