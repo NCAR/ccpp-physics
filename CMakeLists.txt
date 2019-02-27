@@ -204,6 +204,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                   ./physics/sflx.f
                                   ./physics/satmedmfvdif.F
                                   ./physics/cs_conv.F90
+                                  ./physics/gcm_shoc.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
       # Add all of the above files to the list of schemes with special compiler flags
       list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
@@ -214,6 +215,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                               ./physics/sflx.f
                               ./physics/satmedmfvdif.F
                               ./physics/cs_conv.F90
+                              ./physics/gcm_shoc.F90
                               ./physics/gfdl_fv_sat_adj.F90)
     endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
@@ -254,21 +256,22 @@ else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 # The auto-generated caps can contain calls to physics schemes in
-# which some of the arguments (pointers) are not associated. This is
-# on purpose to avoid allocating fields that are not used inside the
+# which some of the arguments (pointers, arrays) are not associated/allocated.
+# This is on purpose to avoid allocating fields that are not used inside the
 # scheme if, for example, certain conditions are not met. To avoid
 # Fortran runtime errors, it is necessary to remove checks for pointers
-# that are not associated from the caps ONLY. For the physics schemes,
-# these checks can and should remain enabled. Overwriting the check flags
-# explicitly works for Intel and GNU, but not for PGI.
+# that are not associated and for array bounds from the caps ONLY. For the
+# physics schemes, these checks can and should remain enabled. Overwriting
+# the pointer check flags explicitly works for Intel and GNU, but not for PGI.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer,no-bounds")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers,nobounds")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   if (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
     message (FATAL_ERROR "PGI compiler option chkptr cannot be used for CCPP physics")
   endif (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-FV3")
