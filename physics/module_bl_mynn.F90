@@ -113,7 +113,7 @@ MODULE module_bl_mynn
        &                  p_qnc= 0, &
        &                  p_qni= 0
 
-!END FV3 CONSTANTS                                                                                                                                                                                                                                                                                       
+!END FV3 CONSTANTS
 !====================================================================
 !WRF CONSTANTS
 !  USE module_model_constants, only: &
