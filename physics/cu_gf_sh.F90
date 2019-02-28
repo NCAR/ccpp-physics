@@ -41,7 +41,8 @@
 !    ztexec,zqexec    excess temperature and moisture for updraft
 module cu_gf_sh
     use machine , only : kind_phys
-    real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
+    !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
+    real(kind=kind_phys), parameter:: c1_shal=0. !0.005! .0005
     real(kind=kind_phys), parameter:: g  =9.81
     real(kind=kind_phys), parameter:: cp =1004.
     real(kind=kind_phys), parameter:: xlv=2.5e6
@@ -53,13 +54,13 @@ contains
 
   subroutine cu_gf_sh_run (                                            &
 ! input variables, must be supplied
-                         zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
+                         us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
 ! input variables. ierr should be initialized to zero or larger than zero for
 ! turning off shallow convection for grid points
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
 ! output tendencies
-                         outt,outq,outqc,cnvwt,pre,cupclw,          &
+                         outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,          &
 ! dimesnional variables
                          itf,ktf,its,ite, kts,kte,ipr,tropics)
 !
@@ -85,7 +86,7 @@ contains
   ! pre    = output precip
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (inout  )                 ::                           &
-        cnvwt,outt,outq,outqc,cupclw,zuo
+        cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv
      real(kind=kind_phys),    dimension (its:ite)                                      &
         ,intent (out  )                   ::                           &
         xmb_out
@@ -104,7 +105,7 @@ contains
   !
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (in   )                   ::                           &
-        t,po,tn,dhdt,rho
+        t,po,tn,dhdt,rho,us,vs
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (inout)                   ::                           &
          q,qo
@@ -172,7 +173,7 @@ contains
   ! dellaq = change of q per unit mass flux of cloud ensemble
   ! dellaqc = change of qc per unit mass flux of cloud ensemble
 
-        cd,dellah,dellaq,dellat,dellaqc
+        cd,dellah,dellaq,dellat,dellaqc,uc,vc,dellu,dellv,u_cup,v_cup
 
   ! aa0 cloud work function for downdraft
   ! aa0     = cloud work function without forcing effects
@@ -184,7 +185,7 @@ contains
        flux_tun,hkbo,xhkb,                                             &
        rand_vmas,xmbmax,xmb,                                           &
        cap_max,entr_rate,                                              &
-       cap_max_increment
+       cap_max_increment,lambau
      integer,    dimension (its:ite)      ::                           &
        kstabi,xland1,kbmax,ktopx
 
@@ -199,14 +200,16 @@ contains
      real(kind=kind_phys) xff_shal(3),blqe,xkshal
      character*50 :: ierrc(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                           &
-       up_massentr,up_massdetr,up_massentro,up_massdetro
-     real(kind=kind_phys) :: c_up,x_add,qaver
-     real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
+       up_massentr,up_massdetr,up_massentro,up_massdetro,up_massentru,up_massdetru
+     real(kind=kind_phys) :: c_up,x_add,qaver,dts,fp,fpi
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) :: c1d,dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
      integer, dimension (its:ite) ::  start_level, pmin_lev
      start_level(:)=0
      rand_vmas(:)=0.
      flux_tun=fluxtune
+     lambau(:)=2.
+     c1d(:,:)=0.
       do i=its,itf
         xland1(i)=int(xland(i)+.001) ! 1.
         ktopx(i)=0
@@ -232,6 +235,8 @@ contains
       do i=its,itf
         up_massentro(i,k)=0.
         up_massdetro(i,k)=0.
+        up_massentru(i,k)=0.
+        up_massdetru(i,k)=0.
         z(i,k)=zo(i,k)
         xz(i,k)=zo(i,k)
         qrco(i,k)=0.
@@ -313,6 +318,17 @@ contains
            ierr,z1,                                                &
            itf,ktf,                                                &
            its,ite, kts,kte)
+      do i=its,itf
+        if(ierr(i).eq.0)then
+          u_cup(i,kts)=us(i,kts)
+          v_cup(i,kts)=vs(i,kts)
+          do k=kts+1,ktf
+           u_cup(i,k)=.5*(us(i,k-1)+us(i,k))
+           v_cup(i,k)=.5*(vs(i,k-1)+vs(i,k))
+          enddo
+        endif
+      enddo
+
       do i=its,itf
         if(ierr(i).eq.0)then
 !
@@ -459,7 +475,7 @@ contains
       call get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                 ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
                                 ,up_massentro, up_massdetro ,up_massentr, up_massdetr &
-                                ,'shallow',kbcon,k22)
+                                ,'shallow',kbcon,k22,up_massentru,up_massdetru,lambau)
 
       do k=kts,ktf
       do i=its,itf
@@ -473,6 +489,10 @@ contains
       enddo
       do i=its,itf
        if(ierr(i) /= 0) cycle
+         do k=1,start_level(i)
+            uc(i,k)=u_cup(i,k)
+            vc(i,k)=v_cup(i,k)
+         enddo
          do k=1,start_level(i)-1
             hc(i,k)=he_cup(i,k)
             hco(i,k)=heo_cup(i,k)
@@ -489,6 +509,12 @@ contains
          do k=start_level(i)+1,ktop(i)
           hc(i,k)=(hc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)*hc(i,k-1)+      &
                          up_massentr(i,k-1)*he(i,k-1))   /                   &
+                         (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
+          uc(i,k)=(uc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)*uc(i,k-1)+ &
+                                          up_massentr(i,k-1)*us(i,k-1)) /  &
+                           (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
+          vc(i,k)=(vc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)*vc(i,k-1)+ &
+                                          up_massentr(i,k-1)*vs(i,k-1))/     &
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
           dby(i,k)=max(0.,hc(i,k)-hes_cup(i,k))
           hco(i,k)=(hco(i,k-1)*zuo(i,k-1)-.5*up_massdetro(i,k-1)*hco(i,k-1)+ &
@@ -545,7 +571,14 @@ contains
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
 !              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
-              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1_shal)*dz)
+!              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1_shal)*dz)
+              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
+              c1d(i,k-1)=10.*up_massdetr(i,k-1)*.5*(qrco(i,k-1)+qrco(i,k))
+              qrco(i,k)= qrco(i,k)-c1d(i,k-1)*dz*qrco(i,k)
+              if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
+                 qrco(i,k)=0.
+                 c1d(i,k-1)=1./dz
+              endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
               ! cloud water vapor 
               qco (i,k)= trash+qrco(i,k)
@@ -570,6 +603,8 @@ contains
            hc  (i,k)=hes_cup (i,k)
            hco (i,k)=heso_cup(i,k)
            qco (i,k)=qeso_cup(i,k)
+           uc(i,k)=u_cup(i,k)
+           vc(i,k)=v_cup(i,k)
            qrco(i,k)=0.
            dby (i,k)=0.
            dbyo(i,k)=0.
@@ -609,6 +644,9 @@ contains
        do i=its,itf
         dellah(i,k)=0.
         dellaq(i,k)=0.
+        dellaqc(i,k)=0.
+        dellu  (i,k)=0.
+        dellv  (i,k)=0.
        enddo
       enddo
 !
@@ -653,6 +691,13 @@ contains
       trash2=0.
       do i=its,itf
         if(ierr(i).eq.0)then
+         dp=100.*(po_cup(i,1)-po_cup(i,2))
+         dellu(i,1)= -zuo(i,2)*(uc (i,2)-u_cup(i,2)) *g/dp
+         dellv(i,1)= -zuo(i,2)*(vc (i,2)-v_cup(i,2)) *g/dp
+         dellah(i,1)=-zuo(i,2)*(hco(i,2)-heo_cup(i,2))*g/dp
+
+         dellaq (i,1)=-zuo(i,2)*(qco(i,2)-qo_cup(i,2))*g/dp
+
          do k=k22(i),ktop(i)
             ! entrainment/detrainment for updraft
             entup=up_massentro(i,k)
@@ -668,8 +713,8 @@ contains
 
             !-- take out cloud liquid water for detrainment
             dz=zo_cup(i,k+1)-zo_cup(i,k)
-            if(k.lt.ktop(i) .and. c1_shal > 0)then
-             dellaqc(i,k)= zuo(i,k)*c1_shal*qrco(i,k)*dz/dp*g !  detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
+            if(k.lt.ktop(i) .and. c1d(i,k) > 0)then
+             dellaqc(i,k)= zuo(i,k)*c1d(i,k)*qrco(i,k)*dz/dp*g !  detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
             else
              dellaqc(i,k)=detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
 !             dellaqc(i,k)=   detup*qrco(i,k) *g/dp
@@ -685,6 +730,11 @@ contains
             dellaq(i,k) =-(zuo(i,k+1)*(qco(i,k+1)-qo_cup(i,k+1) ) -      &
                            zuo(i,k  )*(qco(i,k  )-qo_cup(i,k  ) ) )*g/dp &
                            - c_up - 0.5*(pwo (i,k)+pwo (i,k+1))*g/dp
+             dellu(i,k) =-(zuo(i,k+1)*(uc (i,k+1)-u_cup(i,k+1) ) - &
+                           zuo(i,k  )*(uc (i,k  )-u_cup(i,k  ) ) )*g/dp 
+             dellv(i,k) =-(zuo(i,k+1)*(vc (i,k+1)-v_cup(i,k+1) ) - &
+                           zuo(i,k  )*(vc (i,k  )-v_cup(i,k  ) ) )*g/dp 
+
           enddo
         endif
       enddo
@@ -826,6 +876,8 @@ contains
            ktop (i)=0
            xmb  (i)=0.
            outt (i,:)=0.
+           outu (i,:)=0.
+           outv (i,:)=0.
            outq (i,:)=0.
            outqc(i,:)=0.
         else if(ierr(i).eq.0)then
@@ -840,12 +892,46 @@ contains
            outqc(i,k)= dellaqc(i,k)*xmb(i)
            pre  (i)  = pre(i)+pwo(i,k)*xmb(i)
           enddo
+          outt (i,1)= dellat (i,1)*xmb(i)
+          outq (i,1)= dellaq (i,1)*xmb(i)
+          outu(i,1)=dellu(i,1)*xmb(i)
+          outv(i,1)=dellv(i,1)*xmb(i)
+          do k=kts+1,ktop(i)
+             outu(i,k)=.25*(dellu(i,k-1)+2.*dellu(i,k)+dellu(i,k+1))*xmb(i)
+             outv(i,k)=.25*(dellv(i,k-1)+2.*dellv(i,k)+dellv(i,k+1))*xmb(i)
+          enddo
+
         endif
        enddo
+!
+! since kinetic energy is being dissipated, add heating accordingly (from ecmwf)
+!
+      do i=its,itf
+          if(ierr(i).eq.0) then
+             dts=0.
+             fpi=0.
+             do k=kts,ktop(i)
+                dp=(po_cup(i,k)-po_cup(i,k+1))*100.
+!total ke dissiptaion estimate
+                dts= dts -(outu(i,k)*us(i,k)+outv(i,k)*vs(i,k))*dp/g
+! fpi needed for calcualtion of conversion to pot. energyintegrated 
+                fpi = fpi  +sqrt(outu(i,k)*outu(i,k) + outv(i,k)*outv(i,k))*dp
+             enddo
+             if(fpi.gt.0.)then
+                do k=kts,ktop(i)
+                   fp= sqrt((outu(i,k)*outu(i,k)+outv(i,k)*outv(i,k)))/fpi
+                   outt(i,k)=outt(i,k)+fp*dts*g/cp
+                enddo
+             endif
+          endif
+      enddo
 !      
 ! done shallow
 !--------------------------done------------------------------
 !
+!             do k=1,30
+!              print*,'hlisq',qco(1,k),qrco(1,k),pwo(1,k)
+!             enddo
 
    end subroutine cu_gf_sh_run
 end module cu_gf_sh
