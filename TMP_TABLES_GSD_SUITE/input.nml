@@ -130,6 +130,7 @@
   pre_rad     = .false.
   ncld        = 5
   imp_physics = 8
+  ttendlim    = 0.008
   ltaerosol   = .true.
   lradar      = .true.
   pdfcld      = .false.
