@@ -15,7 +15,7 @@ cp    @[RTPWD]/FV3_input_data/qr_acr_q* .
 cp    @[RTPWD]/FV3_input_data/*grb .
 cp    @[RTPWD]/FV3_input_data/*_table .
 cp    @[RTPWD]/FV3_input_data/diag_table_thompson diag_table
-cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/field_table_thompson_mynn field_table
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/field_table_gf_thompson field_table
 cp    @[RTPWD]/FV3_input_data/*configure .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/CCN_ACTIVATE.BIN .
 
