@@ -1,23 +1,23 @@
-!> \file cu_gf_driver_pre.F90
-!!  Contains code related to GF convective schemes to be used within the GFS physics suite.
+!> \file cu_ntiedtke_pre.F90
+!!  Contains code related to New Tiedtke convective scheme
 
-module cu_gf_driver_pre
+module cu_ntiedtke_pre
 
    implicit none
 
    private
 
-   public :: cu_gf_driver_pre_init, cu_gf_driver_pre_run, cu_gf_driver_pre_finalize
+   public :: cu_ntiedtke_pre_init, cu_ntiedtke_pre_run, cu_ntiedtke_pre_finalize
 
    contains
 
-   subroutine cu_gf_driver_pre_init ()
-   end subroutine cu_gf_driver_pre_init
+   subroutine cu_ntiedtke_pre_init ()
+   end subroutine cu_ntiedtke_pre_init
 
-   subroutine cu_gf_driver_pre_finalize()
-   end subroutine cu_gf_driver_pre_finalize
+   subroutine cu_ntiedtke_pre_finalize()
+   end subroutine cu_ntiedtke_pre_finalize
 
-!> \section arg_table_cu_gf_driver_pre_run Argument Table
+!> \section arg_table_cu_ntiedtke_pre_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                        | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|--------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | flag_init      | flag_for_first_time_step                       | flag signaling first time step for time integration loop | flag          |    0 | logical   |           | in     | F        |
@@ -31,13 +31,11 @@ module cu_gf_driver_pre
 !! | prevsq         | moisture_from_previous_timestep                        | moisture from previous time step                 | kg kg-1       |    2 | real      | kind_phys | in     | F        |
 !! | forcet         | temperature_tendency_due_to_dynamics                   | temperature tendency due to dynamics only        | K s-1         |    2 | real      | kind_phys | out    | F        |
 !! | forceq         | moisture_tendency_due_to_dynamics                      | moisture tendency due to dynamics only           | kg kg-1 s-1   |    2 | real      | kind_phys | out    | F        |
-!! | cactiv         | conv_activity_counter                                  | convective activity memory                       | none          |    1 | integer   |           | out    | F        |
-!! | conv_act       | gf_memory_counter                                      | Memory counter for GF                            | none          |    1 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP         | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP            | flag          |    0 | integer   |           | out    | F        |
 !!
-   subroutine cu_gf_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
-                                    forcet, forceq, cactiv, conv_act, errmsg, errflg)
+   subroutine cu_ntiedtke_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
+                                   forcet, forceq, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -54,8 +52,6 @@ module cu_gf_driver_pre
       real(kind_phys),  intent(in)  :: prevsq(:,:)
       real(kind_phys),  intent(out) :: forcet(:,:)
       real(kind_phys),  intent(out) :: forceq(:,:)
-      integer,          intent(out) :: cactiv(:)
-      real(kind_phys),  intent(in)  :: conv_act(:)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -83,8 +79,6 @@ module cu_gf_driver_pre
         endif
       endif
 
-      cactiv(:)=nint(conv_act(:))
+   end subroutine cu_ntiedtke_pre_run
 
-   end subroutine cu_gf_driver_pre_run
-
-end module cu_gf_driver_pre
+end module cu_ntiedtke_pre

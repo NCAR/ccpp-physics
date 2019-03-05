@@ -18,9 +18,9 @@
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT      |    0 | GFS_grid_type         |           | inout  | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
+!! | Grid           | GFS_grid_type_instance                                 | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT      |    0 | GFS_grid_type         |           | inout  | F        |
+!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | in     | F        |
+!! | Tbd            | GFS_tbd_type_instance                                  | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
@@ -66,12 +66,12 @@
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
 !! | local_name     | standard_name                                          | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Grid           | FV3-GFS_Grid_type                                      | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Model          | FV3-GFS_Control_type                                   | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | Tbd            | FV3-GFS_Tbd_type                                       | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
-!! | Sfcprop        | FV3-GFS_Sfcprop_type                                   | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
-!! | Cldprop        | FV3-GFS_Cldprop_type                                   | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
-!! | Diag           | FV3-GFS_Diag_type                                      | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
+!! | Grid           | GFS_grid_type_instance                                 | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
+!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
+!! | Tbd            | GFS_tbd_type_instance                                  | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
+!! | Sfcprop        | GFS_sfcprop_type_instance                              | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
+!! | Cldprop        | GFS_cldprop_type_instance                              | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
+!! | Diag           | GFS_diag_type_instance                                 | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
 !!

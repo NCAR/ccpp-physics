@@ -40,7 +40,7 @@
 !! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
 !! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
 !! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
-!! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        |
+!! | ntiw           | index_for_ice_cloud_condensate_vertical_diffusion_tracer             | tracer index for ice water in the vertically diffused tracer array | index         |    0 | integer   |           | in     | F        |
 !! | ntke           | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array | index   |    0 | integer   |           | in     | F        |
 !! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
@@ -54,11 +54,11 @@
 !! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
 !! | tdt            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers due to model physics  | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
+!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1 | 3 | real | kind_phys | inout | F |
 !! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | tracer_concentration                                                        | model layer mean tracer concentration                 | kg kg-1       |    3 | real      | kind_phys | in     | F        |
+!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
 !! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real      | kind_phys | in     | F        |
@@ -1512,6 +1512,6 @@
       enddo
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine tridit
 
       end module satmedmfvdif
