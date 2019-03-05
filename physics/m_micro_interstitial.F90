@@ -25,8 +25,6 @@
 !! | do_shoc        | flag_for_shoc                                         | flag for SHOC                                                                                                                    | flag    |    0 | logical    |           | in     | F        |
 !! | fprcp          | number_of_frozen_precipitation_species                | number of frozen precipitation species                                                                                           | count   |    0 | integer    |           | in     | F        |
 !! | mg3_as_mg2     | flag_mg3_as_mg2                                       | flag for controlling prep for Morrison-Gettelman microphysics                                                                    | flag    |    0 | logical    |           | in     | F        |
-!! | imfdeepcnv     | flag_for_mass_flux_deep_convection_scheme             | flag for mass-flux deep convection scheme                                                                                        | flag    |    0 | integer    |           | in     | F        |
-!! | imfshalcnv     | flag_for_mass_flux_shallow_convection_scheme          | flag for mass-flux shallow convection scheme                                                                                     | flag    |    0 | integer    |           | in     | F        |
 !! | gq0_ice        | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                                                   | kg kg-1 |    2 | real       | kind_phys | in     | F        |
 !! | gq0_water      | cloud_condensed_water_mixing_ratio_updated_by_physics | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics                                       | kg kg-1 |    2 | real       | kind_phys | in     | F        |
 !! | gq0_rain       | rain_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                                                  | kg kg-1 |    2 | real       | kind_phys | in     | F        |
@@ -58,14 +56,14 @@
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                                                            | flag    |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine m_micro_pre_run (im, levs, do_shoc, fprcp, mg3_as_mg2, imfdeepcnv, imfshalcnv, gq0_ice, gq0_water,       &
-        gq0_rain, gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,  &
+      subroutine m_micro_pre_run (im, levs, do_shoc, fprcp, mg3_as_mg2, gq0_ice, gq0_water, gq0_rain,           &
+        gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,  &
         qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, qlcn, qicn, cf_upi, clw_water, clw_ice, clcn, errmsg, errflg )
 
       use machine, only : kind_phys
       implicit none
 
-      integer, intent(in) :: im, levs, imfdeepcnv, imfshalcnv, fprcp
+      integer, intent(in) :: im, levs, fprcp
       logical, intent(in) :: do_shoc, mg3_as_mg2
       real(kind=kind_phys), intent(in) :: tcr, tcrf
 

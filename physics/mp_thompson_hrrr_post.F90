@@ -8,7 +8,9 @@ module mp_thompson_hrrr_post
 
    private
 
-   logical :: is_initialized = .False.
+   logical :: is_initialized = .false.
+
+   logical :: apply_limiter
 
    real(kind_phys), dimension(:), allocatable :: mp_tend_lim
 
@@ -20,24 +22,27 @@ contains
 !! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
 !! | area            | cell_area                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
+!! | ttendlim        | limit_for_temperature_tendency_for_microphysics       | temperature tendency limiter per physics time step       | K s-1      |    0 | real      | kind_phys | in     | F        |
 !! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-   subroutine mp_thompson_hrrr_post_init(ncol, area, errmsg, errflg)
+   subroutine mp_thompson_hrrr_post_init(ncol, area, ttendlim, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer,                            intent(in) :: ncol
+      integer,         intent(in) :: ncol
+      ! DH* TODO: remove area and dx (also from metadata table)
       real(kind_phys), dimension(1:ncol), intent(in) :: area
+      real(kind_phys), intent(in) :: ttendlim
 
       ! CCPP error handling
       character(len=*), intent(  out) :: errmsg
       integer,          intent(  out) :: errflg
 
       ! Local variables
-      real(kind_phys), dimension(1:ncol) :: dx
+      !real(kind_phys), dimension(1:ncol) :: dx
       integer :: i
 
       ! Initialize the CCPP error handling variables
@@ -47,26 +52,40 @@ contains
       ! Check initialization state
       if (is_initialized) return
 
+      if (ttendlim < 0) then
+          apply_limiter = .false.
+          is_initialized = .true.
+          return
+      end if
+
       allocate(mp_tend_lim(1:ncol))
 
-      ! Cell size in m as square root of cell area
-      dx = sqrt(area)
+      !! Cell size in m as square root of cell area
+      !dx = sqrt(area)
 
       do i=1,ncol
-         ! DH* testing/development: limiters on temperature tendency
-         ! depending on the grid spacing - no limit for >50km *DH
-         if (dx(i)<=5000) then
-            mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
-         else if (dx(i)<=50000) then
-            mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
-         else
-            ! no limit for grid spacings >50km
-            !mp_tend_lim(i) = 0.00006 ! [K/s], guess for >50km
-            mp_tend_lim(i) = 1.0E+08
-         end if
+         ! The column-dependent values that were set here previously
+         ! are replaced with a single value set in the namelist
+         ! input.nml.This value is independent of the grid spacing
+         ! (as opposed to setting it here on a per-column basis).
+         ! However, given that the timestep is the same for all grid
+         ! columns and determined by the smallest grid spacing in
+         ! the domain, it makes sense to use a single value.
+         !
+         ! The values previously used in RAP/HRRR were
+         !    mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
+         ! and
+         !   mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
+         !
+         ! Our testing with FV3 has shown thus far that 0.002 is
+         ! too small for a 13km (C768) resolution and that 0.01
+         ! works better. This is work in progress ...
+         mp_tend_lim(i) = ttendlim
       end do
 
-      is_initialized = .True.
+      apply_limiter = .true.
+
+      is_initialized = .true.
 
    end subroutine mp_thompson_hrrr_post_init
 
@@ -110,6 +129,7 @@ contains
       ! Local variables
       real(kind_phys), dimension(1:ncol,1:nlev) :: mp_tend
       integer :: i, k
+      integer :: events
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -122,21 +142,31 @@ contains
          return
       end if
 
+      ! If limiter is deactivated, return immediately
+      if (.not.apply_limiter) return
+
       ! mp_tend and mp_tend_lim are expressed in potential temperature
       mp_tend = (tgrs - tgrs_save)/prslk
 
+      events = 0
       do k=1,nlev
          do i=1,ncol
             mp_tend(i,k) = max( -mp_tend_lim(i)*dtp, min( mp_tend_lim(i)*dtp, mp_tend(i,k) ) )
-            ! DH*
-            if ( mpirank==mpiroot .and. (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) ) then
-               write(0,*) "DH DEBUG mp_thompson_hrrr_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
-                                  & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
+
+            if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
+#ifdef DEBUG
+              write(0,*) "mp_thompson_hrrr_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
+                         & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
+#endif
+              events = events + 1
             end if
-            ! *DH
             tgrs(i,k) = tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
          end do
       end do
+
+      if (events > 0) then
+        write(0,'(a,i0,a,i0,a)') "mp_thompson_hrrr_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, " times"
+      end if
 
    end subroutine mp_thompson_hrrr_post_run
 
@@ -161,7 +191,7 @@ contains
 
       if (allocated(mp_tend_lim)) deallocate(mp_tend_lim)
 
-      is_initialized = .False.
+      is_initialized = .false.
 
    end subroutine mp_thompson_hrrr_post_finalize
 

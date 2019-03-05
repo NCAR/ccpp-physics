@@ -219,6 +219,17 @@ contains
                ccnout(j,l)=ccnpm(j,1)
            else
              DO  k=kcipl-1,1,-1
+               ! DH* There is no backstop if this condition isn't met,
+               ! i.e. i1 and i2 will have values determined by the
+               ! previous code (line 178) - this leads to crashes in
+               ! debug mode (out of bounds), for example for regression
+               ! test fv3_stretched_nest_debug_moninq. For the time
+               ! being, this is 'solved' by simply switching off ICCN
+               ! if MG2/3 are not used (these are the only microphysics
+               ! schemes that use the ICCN data); however, this doesn't
+               ! mean that the code is correct for MG2/3, it just doesn't
+               ! abort if the below condition isn't met, because the code
+               ! is not tested in DEBUG mode. *DH
                IF(prsl(j,l)>cipres(j,k)) then
                  i1=k
                  i2=min(k+1,kcipl)

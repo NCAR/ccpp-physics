@@ -169,7 +169,13 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: upd_mf, dwn_mf, det_mf
       ! dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi only allocated if ldiag3d == .true. or lgocart == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc
+      ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+      ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
+      ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
+      ! as long as these do not get used when not allocated (it is still invalid Fortran code, though).
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
+      ! *DH
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
