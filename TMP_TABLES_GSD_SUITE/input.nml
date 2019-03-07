@@ -130,6 +130,7 @@
   pre_rad     = .false.
   ncld        = 5
   imp_physics = 8
+  ttendlim    = 0.008
   ltaerosol   = .true.
   lradar      = .true.
   pdfcld      = .false.
@@ -160,7 +161,6 @@
   random_clds  = .false.
   trans_trac   = .true.
   cnvcld    = .true.
-  ttendlim     = 0.005
   imfshalcnv   = 3
   imfdeepcnv   = 3
   cdmbgwd   = 3.5,0.25
@@ -185,7 +185,6 @@
 
 &interpolator_nml
   interp_method = 'conserve_great_circle'
-  
 /
 
 &namsfc

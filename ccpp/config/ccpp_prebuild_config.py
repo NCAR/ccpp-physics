@@ -253,10 +253,11 @@ OPTIONAL_ARGUMENTS = {
         },
     'mp_thompson_hrrr' : {
         'mp_thompson_hrrr_init' : [
-            'tendency_of_water_friendly_aerosols_at_surface',
-            'tendency_of_ice_friendly_aerosols_at_surface',
+            'cloud_droplet_number_concentration_updated_by_physics',
             'water_friendly_aerosol_number_concentration',
             'ice_friendly_aerosol_number_concentration',
+            'tendency_of_water_friendly_aerosols_at_surface',
+            'tendency_of_ice_friendly_aerosols_at_surface',
             ],
         'mp_thompson_hrrr_run' : [
             'cloud_droplet_number_concentration_updated_by_physics',
