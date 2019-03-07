@@ -317,12 +317,20 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "radiation driver"
 
+      ! DH*
+      write(0,*) "Calling MY_DIAGTOSCREEN before radiation step"
+      call MY_DIAGTOSCREEN()
+      ! *DH
+
 !--- execute the IPD atmospheric radiation subcomponent (RRTM)
 
       call mpp_clock_begin(radClock)
 #ifdef CCPP
-      call IPD_CCPP_step (step="radiation", nblks=Atm_block%nblks, ierr=ierr)
-      if (ierr/=0)  call mpp_error(FATAL, 'Call to IPD-CCPP radiation step failed')
+      ! Performance improvement. Only enter if it is time to call the radiation physics.
+      if (IPD_Control%lsswr .or. IPD_Control%lslwr) then
+        call IPD_CCPP_step (step="radiation", nblks=Atm_block%nblks, ierr=ierr)
+        if (ierr/=0)  call mpp_error(FATAL, 'Call to IPD-CCPP radiation step failed')
+      endif
 #else
       Func0d => radiation_step1
 !$OMP parallel do default (none)       &
@@ -345,6 +353,11 @@ subroutine update_atmos_radiation_physics (Atmos)
       endif
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "physics driver"
+
+      ! DH*
+      write(0,*) "Calling MY_DIAGTOSCREEN before physics step"
+      call MY_DIAGTOSCREEN()
+      ! *DH
 
 !--- execute the IPD atmospheric physics step1 subcomponent (main physics driver)
 
@@ -383,6 +396,11 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "stochastic physics driver"
 
+      ! DH*
+      write(0,*) "Calling MY_DIAGTOSCREEN before stochastics step"
+      call MY_DIAGTOSCREEN()
+      ! *DH
+
 !--- execute the IPD atmospheric physics step2 subcomponent (stochastic physics driver)
 
       call mpp_clock_begin(physClock)
@@ -412,6 +430,11 @@ subroutine update_atmos_radiation_physics (Atmos)
       call getiauforcing(IPD_Control,IAU_data)
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "end of radiation and physics step"
     endif
+
+    ! DH*
+    write(0,*) "Calling MY_DIAGTOSCREEN after radiation step"
+    call MY_DIAGTOSCREEN()
+    ! *DH
 
 #ifdef CCPP
     ! Update flag for first time step of time integration
