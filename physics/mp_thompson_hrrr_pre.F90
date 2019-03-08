@@ -28,7 +28,16 @@ module mp_thompson_hrrr_pre
 !! | kdt             | index_of_time_step                                                    | current forecast iteration                               | index      |    0 | integer   |           | in     | F        |
 !! | con_g           | gravitational_acceleration                                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
 !! | con_rd          | gas_constant_dry_air                                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
+!! | spechum         | water_vapor_specific_humidity_updated_by_physics                      | water vapor specific humidity                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qc              | cloud_condensed_water_mixing_ratio_updated_by_physics                 | cloud water mixing ratio wrt dry+vapor (no condensates)  | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qr              | rain_water_mixing_ratio_updated_by_physics                            | rain water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qi              | ice_water_mixing_ratio_updated_by_physics                             | ice water mixing ratio wrt dry+vapor (no condensates)    | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qs              | snow_water_mixing_ratio_updated_by_physics                            | snow water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)      | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
+!! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                 | kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                | kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
+!! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
 !! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
 !! | nifa            | ice_friendly_aerosol_number_concentration_updated_by_physics          | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
 !! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface                        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
@@ -47,7 +56,8 @@ module mp_thompson_hrrr_pre
 !!
 #endif
       subroutine mp_thompson_hrrr_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
-                                  is_aerosol_aware, nwfa, nifa, nwfa2d,      &
+                                  spechum, qc, qr, qi, qs, qg, ni, nr,       &
+                                  is_aerosol_aware, nc, nwfa, nifa, nwfa2d,  &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
                                   mpicomm, mpirank, mpiroot, blkno,          &
                                   errmsg, errflg)
@@ -61,8 +71,18 @@ module mp_thompson_hrrr_pre
          integer,                   intent(in   ) :: kdt
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
+         ! Hydrometeors
+         real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qi(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qs(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qg(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
+         real(kind_phys), optional, intent(inout) :: nc(1:ncol,1:nlev)
          real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
          real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
          real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
@@ -97,19 +117,43 @@ module mp_thompson_hrrr_pre
          ! Return if not first timestep
          if (kdt > 1) return
 
+         ! Fix initial values of hydrometeors
+         where(spechum<0) spechum = 0.0
+         where(qc<0)      qc = 0.0
+         where(qr<0)      qr = 0.0
+         where(qi<0)      qi = 0.0
+         where(qs<0)      qs = 0.0
+         where(qg<0)      qg = 0.0
+         where(ni<0)      ni = 0.0
+         where(nr<0)      nr = 0.0
+         ! If qi is in boundary conditions but ni is not, reset qi to zero (and vice versa)
+         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
+         if (maxval(ni)>0.0 .and. maxval(qi)==0.0) ni = 0.0
+         ! If qr is in boundary conditions but nr is not, reset qr to zero (and vice versa)
+         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
+         if (maxval(nr)>0.0 .and. maxval(qr)==0.0) nr = 0.0
+
          ! Return if aerosol-aware option is not used
          if (.not. is_aerosol_aware) return
 
-         if (.not.present(nwfa2d) .or. &
+         if (.not.present(nc)     .or. &
+             .not.present(nwfa2d) .or. &
              .not.present(nifa2d) .or. &
              .not.present(nwfa)   .or. &
              .not.present(nifa)        ) then
              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_pre_run:',                 &
                                         ' aerosol-aware microphysics require all of the following', &
-                                        ' optional arguments: nifa2d, nwfa2d, nwfa, nifa'
+                                        ' optional arguments: nc, nifa2d, nwfa2d, nwfa, nifa'
              errflg = 1
              return
           end if
+
+          ! Fix initial values of aerosols
+          where(nc<0)     nc = 0.0
+          where(nwfa<0)   nwfa = 0.0
+          where(nifa<0)   nifa = 0.0
+          where(nwfa2d<0) nwfa2d = 0.0
+          where(nifa2d<0) nifa2d = 0.0
 
 #ifdef DEBUG_AEROSOLS
          if (mpirank==mpiroot) then
