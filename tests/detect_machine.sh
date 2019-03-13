@@ -79,7 +79,7 @@ case $(hostname -f) in
 esac
 
 # For Theia and Cheyenne, append compiler
-if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = jet ] ; then
+if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = jet ] || [ $MACHINE_ID = gaea ] ; then
     MACHINE_ID=${MACHINE_ID}.${COMPILER}
 fi
 
