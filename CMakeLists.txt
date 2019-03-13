@@ -288,7 +288,7 @@ if(STATIC)
       list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
   endforeach()
 else(STATIC)
-  add_library(ccppphys ${SCHEMES} ${CAPS})
+  add_library(ccppphys SHARED ${SCHEMES} ${CAPS})
 endif(STATIC)
 
 if (PROJECT STREQUAL "CCPP-FV3")
