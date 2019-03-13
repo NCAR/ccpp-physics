@@ -105,7 +105,11 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -g -traceback")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -no-prec-div -no-prec-sqrt")
-    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3 -axSSE4.2,AVX,CORE-AVX2")
+    if (SIMDMULTIARCH)
+      set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3 -axSSE4.2,AVX,CORE-AVX2")
+    else (SIMDMULTIARCH)
+      set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3 -xCORE-AVX2")
+    endif (SIMDMULTIARCH)
   endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message (FATAL_ERROR "CCPP has only been compiled with gfortran, pgf90 and ifort.")
@@ -181,6 +185,14 @@ if (DYN32)
   message(STATUS "Dynamics compiled with 32-bit option, adjust fv_sat_adj types")
   ADD_DEFINITIONS(-DOVERLOAD_R4)
 endif (DYN32)
+
+#------------------------------------------------------------------------------
+# If a dynamic build is requested, set TARGET_SUPPORTS_SHARED_LIBS to TRUE; on
+# some systems, cmake doesn't set this even though the system supports shared
+# libraries (e.g. Cray systems)
+if(NOT STATIC)
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif(NOT STATIC)
 
 #------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor
