@@ -189,14 +189,11 @@ CPPDEFS += -DCCPP
 ifeq ($(HYBRID),Y)
 CPPDEFS += -DHYBRID
 endif
-CFLAGS += -I$(PATH_CCPP)/include
-FFLAGS += -I$(PATH_CCPP)/include
 ifeq ($(STATIC),Y)
 CPPDEFS += -DSTATIC
-LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
-else
-LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
 endif
+CFLAGS += -I$(PATH_CCPP)/include
+FFLAGS += -I$(PATH_CCPP)/include
 endif
 
 ifeq ($(SION),Y)
