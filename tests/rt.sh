@@ -56,7 +56,7 @@ else
   exit 1
 fi
 
-# Default compiler "intel" for Theia and Cheyenne
+# Default compiler "intel"
 export COMPILER=${NEMS_COMPILER:-intel}
 
 source detect_machine.sh
@@ -109,7 +109,7 @@ elif [[ $MACHINE_ID = wcoss_cray ]]; then
   MPIEXECOPTS="\"-j 1 -n @[TASKS] -N @[TPN] -d 1\""
   cp fv3_conf/fv3_bsub.IN_wcoss_cray fv3_conf/fv3_bsub.IN
 
-elif [[ $MACHINE_ID = gaea ]]; then
+elif [[ $MACHINE_ID = gaea.* ]]; then
 
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
 
@@ -206,7 +206,7 @@ mkdir -p ${STMP}/${USER}
 
 # Different own baseline directories for different compilers on Theia/Cheyenne
 NEW_BASELINE=${STMP}/${USER}/FV3_RT/REGRESSION_TEST
-if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_ID = jet.* ]]; then
+if [[ $MACHINE_ID = theia.* ]] || [[ $MACHINE_ID = cheyenne.* ]] || [[ $MACHINE_ID = jet.* ]] || [[ $MACHINE_ID = gaea.* ]]; then
     NEW_BASELINE=${NEW_BASELINE}_${COMPILER^^}
 fi
 
