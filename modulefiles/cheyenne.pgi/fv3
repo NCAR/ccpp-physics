@@ -17,27 +17,27 @@ module-whatis "loads NEMS FV3 prerequisites for Cheyenne/PGI"
 ##
 module load ncarenv/1.2
 module load pgi/17.9
-module load mpt/2.15f
+module load mpt/2.19
 module load ncarcompilers/0.4.1
 module load netcdf/4.4.1.1
 
 ##
 ## use pre-compiled EMSF library for above compiler / MPI combination
 ##
-set ESMF_DIR /glade/p/ral/jntp/GMTB/tools/esmf-7.1.0r/pgi-17.9/mpt-2.15f
+set ESMF_DIR /glade/p/ral/jntp/GMTB/tools/esmf-7.1.0r/pgi-17.9/mpt-2.19
 setenv ESMF_DIR              ${ESMF_DIR}
 setenv ESMF_INC              ${ESMF_DIR}/include
-setenv ESMF_BIN              ${ESMF_DIR}/bin/binO/Linux.pgi.64.mpi.default
-setenv ESMF_LIB              ${ESMF_DIR}/lib/libO/Linux.pgi.64.mpi.default
-setenv ESMF_MOD              ${ESMF_DIR}/mod/modO/Linux.pgi.64.mpi.default
-setenv ESMFMKFILE            ${ESMF_DIR}/lib/libO/Linux.pgi.64.mpi.default/esmf.mk
-prepend-path PATH            ${ESMF_DIR}/bin/binO/Linux.pgi.64.mpi.default
-prepend-path LD_LIBRARY_PATH ${ESMF_DIR}/lib/libO/Linux.pgi.64.mpi.default
+setenv ESMF_BIN              ${ESMF_DIR}/bin
+setenv ESMF_LIB              ${ESMF_DIR}/lib
+setenv ESMF_MOD              ${ESMF_DIR}/mod
+setenv ESMFMKFILE            ${ESMF_DIR}/lib/esmf.mk
+prepend-path PATH            ${ESMF_DIR}/bin
+prepend-path LD_LIBRARY_PATH ${ESMF_DIR}/lib
 
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
-set NCEPLIBS_DIR /glade/p/ral/jntp/GMTB/tools/NCEPlibs/20181105/pgi-17.9
+set NCEPLIBS_DIR /glade/p/ral/jntp/GMTB/tools/NCEPlibs/20181105/pgi-17.9/mpt-2.19
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
 setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
