@@ -25,15 +25,17 @@ setenv HDF5   /opt/cray/pe/hdf5/1.8.16/INTEL/15.0
 ##
 ## Libxml2 - compiled manually because of issues with linking the code
 ## 
-set LIBXML2_DIR /lustre/f1/unswept/Dom.Heinzeller/libxml2-2.9.9/intel-16.0.3.210
+set LIBXML2_DIR /lustre/f2/dev/Dom.Heinzeller/libxml2-2.9.9/intel-16.0.3.210
 setenv LIBXML2_DIR         ${LIBXML2_DIR}
 setenv LIBXML2_INCLUDE_DIR ${LIBXML2_DIR}/include
 setenv LIBXML2_LIB_DIR     ${LIBXML2_DIR}/lib
+prepend-path LD_LIBRARY_PATH /lustre/f2/dev/Dom.Heinzeller/libxml2-2.9.9/intel-16.0.3.210/lib
+
 
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
-set NCEPLIBS_DIR /lustre/f1/unswept/Dom.Heinzeller/NCEPlibs-20190215/intel-16.0.3.210/cray-mpich-7.4.0
+set NCEPLIBS_DIR /lustre/f2/dev/Dom.Heinzeller/NCEPlibs-20190215/intel-16.0.3.210/cray-mpich-7.4.0
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
 setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
@@ -45,7 +47,7 @@ setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
 ##
 ## SIONlib library
 ##
-set    SIONLIB     /lustre/f1/unswept/Dom.Heinzeller/sionlib-1.7.2/intel-16.0.3.210/cray-mpich-7.4.0
+set    SIONLIB     /lustre/f2/dev/Dom.Heinzeller/sionlib-1.7.2/intel-16.0.3.210/cray-mpich-7.4.0
 setenv SIONLIB     ${SIONLIB}
 setenv SIONLIB_INC "-I${SIONLIB}/include -I${SIONLIB}/include/mod_64"
 setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi_64 -lsiongen_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none"
@@ -53,14 +55,14 @@ setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi
 ##
 ## use pre-compiled EMSF library for above compiler / MPI combination
 ##
-setenv ESMF_DIR              /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0
-setenv ESMF_INC              /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/include
-setenv ESMF_BIN              /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/bin
-setenv ESMF_LIB              /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib
-setenv ESMF_MOD              /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/mod
-setenv ESMFMKFILE            /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib/esmf.mk
-prepend-path PATH            /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/bin
-prepend-path LD_LIBRARY_PATH /lustre/f1/unswept/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib
+setenv ESMF_DIR              /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0
+setenv ESMF_INC              /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/include
+setenv ESMF_BIN              /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/bin
+setenv ESMF_LIB              /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib
+setenv ESMF_MOD              /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/mod
+setenv ESMFMKFILE            /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib/esmf.mk
+prepend-path PATH            /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/bin
+prepend-path LD_LIBRARY_PATH /lustre/f2/dev/Dom.Heinzeller/esmf-7.1.0r/intel-16.0.3.210/cray-mpich-7.4.0/lib
 
 ##
 ## Set compiler environment variables for CCPP
