@@ -24,14 +24,8 @@ module cu_gf_deep
 !> tuning for shallow and mid convection. ec uses 1.5
      integer, parameter:: use_excess=0
      real(kind=kind_phys), parameter :: fluxtune=1.5
-<<<<<<< HEAD
 !> flag to turn off or modify mom transport by downdrafts
-     real(kind=kind_phys), parameter :: pgcd = 1.
-=======
-! flag to turn off or modify mom transport by downdrafts
-    !real(kind=kind_phys), parameter :: pgcd = 1.
      real(kind=kind_phys), parameter :: pgcd = 0.1
->>>>>>> 34bc5c5805f22b87193ac1c28dfaadf7ec703d30
 !
 !> aerosol awareness, do not user yet!
      integer, parameter :: autoconv=1
@@ -4056,13 +4050,9 @@ endif
 
   end subroutine rates_up_pdf
 !-------------------------------------------------------------------------
-<<<<<<< HEAD
 !>\ingroup cu_gf_deep_group
 !> This subroutine calculates
 !>\param
-=======
-
->>>>>>> 34bc5c5805f22b87193ac1c28dfaadf7ec703d30
  subroutine get_zu_zd_pdf_fim(kklev,p,rand_vmas,zubeg,ipr,xland,zuh2,draft,ierr,kb,kt,zu,kts,kte,ktf,max_mass,kpbli,csum,pmin_lev)
 
  implicit none

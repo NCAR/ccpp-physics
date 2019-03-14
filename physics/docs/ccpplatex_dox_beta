@@ -121,6 +121,7 @@ INPUT                  =  pdftxt/mainpage.txt            \
                           pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/GFS_SURFACE_PERT.txt    \
                           pdftxt/CPT_CSAW.txt            \
+                          pdftxt/MYNN_EDMF.txt           \
 ### Radiation
                         ../radlw_main.f                  \
                         ../radsw_main.f                  \
@@ -353,9 +354,9 @@ GENERATE_PERLMOD       = NO
 PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
-ENABLE_PREPROCESSING   = NO
-MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF     = NO
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = NO
+EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =

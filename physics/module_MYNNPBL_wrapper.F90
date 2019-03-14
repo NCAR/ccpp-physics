@@ -14,7 +14,7 @@
 !>\defgroup gsd_mynn_edmf GSD MYNN EDMF PBL Scheme Module
 !! The following references best describe the code within
 !!    Olson et al. (2018, NOAA Technical Memorandum) 
-!!    Nakanishi and Niino (2009, Jap. Meteor. Soc.)
+!!    Nakanishi and Niino (2009 ) \cite NAKANISHI_2009
 !!
 !> \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 #if 0
