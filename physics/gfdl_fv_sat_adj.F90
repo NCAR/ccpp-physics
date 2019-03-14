@@ -255,54 +255,54 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     implicit none
 
     ! Interface variables
-    real(kind=kind_dyn),             intent(in)    :: mdt
-    real(kind=kind_dyn),             intent(in)    :: zvir
-    integer,          intent(in)    :: is
-    integer,          intent(in)    :: ie
-    integer,          intent(in)    :: isd
-    integer,          intent(in)    :: ied
-    integer,          intent(in)    :: kmp
-    integer,          intent(in)    :: km
-    integer,          intent(in)    :: kmdelz
-    integer,          intent(in)    :: js
-    integer,          intent(in)    :: je
-    integer,          intent(in)    :: jsd
-    integer,          intent(in)    :: jed
-    integer,          intent(in)    :: ng
-    logical,          intent(in)    :: hydrostatic
-    logical,          intent(in)    :: fast_mp_consv
-    real(kind=kind_dyn),             intent(inout) :: te0_2d(is:ie, js:je)
-    real(kind=kind_dyn),             intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(in)    :: hs(isd:ied, jsd:jed)
-    real(kind=kind_dyn),             intent(in)    :: peln(is:ie, 1:km+1, js:je)
+    real(kind=kind_dyn), intent(in)    :: mdt
+    real(kind=kind_dyn), intent(in)    :: zvir
+    integer,             intent(in)    :: is
+    integer,             intent(in)    :: ie
+    integer,             intent(in)    :: isd
+    integer,             intent(in)    :: ied
+    integer,             intent(in)    :: kmp
+    integer,             intent(in)    :: km
+    integer,             intent(in)    :: kmdelz
+    integer,             intent(in)    :: js
+    integer,             intent(in)    :: je
+    integer,             intent(in)    :: jsd
+    integer,             intent(in)    :: jed
+    integer,             intent(in)    :: ng
+    logical,             intent(in)    :: hydrostatic
+    logical,             intent(in)    :: fast_mp_consv
+    real(kind=kind_dyn), intent(inout) :: te0_2d(is:ie, js:je)
+    real(kind=kind_dyn), intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(in)    :: hs(isd:ied, jsd:jed)
+    real(kind=kind_dyn), intent(in)    :: peln(is:ie, 1:km+1, js:je)
     ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
-    real(kind=kind_dyn),             intent(in)    :: delz(isd:ied, jsd:jed, 1:kmdelz)
-    real(kind=kind_dyn),             intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn),             intent(inout) :: pkz(is:ie, js:je, 1:km)
+    real(kind=kind_dyn), intent(in)    :: delz(isd:ied, jsd:jed, 1:kmdelz)
+    real(kind=kind_dyn), intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: pkz(is:ie, js:je, 1:km)
 #ifdef USE_COND
-    real(kind=kind_dyn),             intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
 #else
-    real(kind=kind_dyn),             intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
+    real(kind=kind_dyn), intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
 #endif
-    real(kind=kind_dyn),             intent(in)    :: akap
+    real(kind=kind_dyn), intent(in)    :: akap
 #ifdef MOIST_CAPPA
-    real(kind=kind_dyn),             intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
 #else
-    real(kind=kind_dyn),             intent(inout) :: cappa(isd:ied, jsd:jed, 1)
+    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1)
 #endif
     ! DH* WARNING, allocation in fv_arrays.F90 is area(isd_2d:ied_2d, jsd_2d:jed_2d),
     ! where normally isd_2d = isd etc, but for memory optimization, these can be set
     ! to isd_2d=0, ied_2d=-1 etc. I don't believe this optimization is actually used,
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
-    real(kind_grid),  intent(in)    :: area(isd:ied, jsd:jed)
+    real(kind_grid),     intent(in)    :: area(isd:ied, jsd:jed)
     real(kind=kind_dyn), intent(inout) :: dtdt(is:ie, js:je, 1:km)
     logical,             intent(in)    :: out_dt
     logical,             intent(in)    :: last_step
@@ -314,6 +314,10 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
 
     ! Local variables
     real(kind=kind_dyn), dimension(is:ie,js:je) :: dpln
+#ifdef TRANSITION
+    ! For bit-for-bit reproducibility
+    real(kind=kind_dyn), volatile :: volatile_var
+#endif
     integer :: kdelz
     integer :: k, j, i
 
@@ -331,6 +335,9 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
 !$OMP                 ql,qv,te0,fast_mp_consv,     &
 !$OMP                 hydrostatic,ng,zvir,pkz,     &
 !$OMP                 akap,te0_2d)                 &
+#ifdef TRANSITION
+!$OMP          private(volatile_var)               &
+#endif
 !$OMP          private(k,j,i,kdelz,dpln)
 #endif
 
@@ -356,9 +363,19 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
           do j=js,je
              do i=is,ie
 #ifdef MOIST_CAPPA
+#ifdef TRANSITION
+               volatile_var = log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k))
+               pkz(i,j,k) = exp(cappa(i,j,k)*volatile_var)
+#else
                pkz(i,j,k) = exp(cappa(i,j,k)*log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)))
+#endif
+#else
+#ifdef TRANSITION
+               volatile_var = log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k))
+               pkz(i,j,k) = exp(akap*volatile_var)
 #else
                pkz(i,j,k) = exp(akap*log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)))
+#endif
 #endif
              enddo
           enddo
@@ -616,21 +633,21 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         !> - Update latend heat coefficient.
         ! -----------------------------------------------------------------------
-            do i = is, ie
+        do i = is, ie
             lhl (i) = lv00 + d0_vap * pt1 (i)
             lhi (i) = li00 + dc_ice * pt1 (i)
             lcp2 (i) = lhl (i) / cvm (i)
             icp2 (i) = lhi (i) / cvm (i)
             tcp3 (i) = lcp2 (i) + icp2 (i) * min (1., dim (tice, pt1 (i)) / 48.)
         enddo
-            if (last_step) then
+        if (last_step) then
             ! -----------------------------------------------------------------------
             !> - condensation/evaporation between water vapor and cloud water, last time step
             !! enforce upper (no super_sat) & lower (critical rh) bounds.
             ! final iteration:
             ! -----------------------------------------------------------------------
-                    call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
-                    do i = is, ie
+            call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
+            do i = is, ie
                 dq0 = (qv (i, j) - wqsat (i)) / (1. + tcp3 (i) * dq2dt (i))
                 if (dq0 > 0.) then ! remove super - saturation, prevent super saturation over water
                     src (i) = dq0
@@ -651,17 +668,17 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             ! -----------------------------------------------------------------------
             !> - Update latend heat coefficient.
             ! -----------------------------------------------------------------------
-                    do i = is, ie
+            do i = is, ie
                 lhl (i) = lv00 + d0_vap * pt1 (i)
                 lhi (i) = li00 + dc_ice * pt1 (i)
                 lcp2 (i) = lhl (i) / cvm (i)
                 icp2 (i) = lhi (i) / cvm (i)
             enddo
-                endif
+        endif
         ! -----------------------------------------------------------------------
         !> - Homogeneous freezing of cloud water to cloud ice.
         ! -----------------------------------------------------------------------
-            do i = is, ie
+        do i = is, ie
             dtmp = t_wfr - pt1 (i) ! [ - 40, - 48]
             if (ql (i, j) > 0. .and. dtmp > 0.) then
                 sink (i) = min (ql (i, j), ql (i, j) * dtmp * 0.125, dtmp / icp2 (i))
@@ -676,14 +693,14 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         !> - Update latend heat coefficient.
         ! -----------------------------------------------------------------------
-            do i = is, ie
+        do i = is, ie
             lhi (i) = li00 + dc_ice * pt1 (i)
             icp2 (i) = lhi (i) / cvm (i)
         enddo
         ! -----------------------------------------------------------------------
         !> - bigg mechanism (heterogeneous freezing of cloud water to cloud ice).
         ! -----------------------------------------------------------------------
-            do i = is, ie
+        do i = is, ie
             tc = tice0 - pt1 (i)
             if (ql (i, j) > 0.0 .and. tc > 0.) then
                 sink (i) = 3.3333e-10 * dt_bigg * (exp (0.66 * tc) - 1.) * den (i) * ql (i, j) ** 2
@@ -699,7 +716,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         !> - Update latend heat coefficient.
         ! -----------------------------------------------------------------------
-            do i = is, ie
+        do i = is, ie
             lhi (i) = li00 + dc_ice * pt1 (i)
             icp2 (i) = lhi (i) / cvm (i)
         enddo
@@ -866,11 +883,11 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         !> - Compute cloud fraction.
         ! -----------------------------------------------------------------------
-            if (do_qa .and. last_step) then
+        if (do_qa .and. last_step) then
             ! -----------------------------------------------------------------------
             !>  - If it is the last step, combine water species.
             ! -----------------------------------------------------------------------
-                    if (rad_snow) then
+            if (rad_snow) then
                 if (rad_graupel) then
                     do i = is, ie
                         q_sol (i) = qi (i, j) + qs (i, j) + qg (i, j)
@@ -977,8 +994,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                     qa (i, j) = 0.
                 endif
             enddo
-                endif
-        enddo ! end j loop
+        endif
+    enddo ! end j loop
     
 end subroutine fv_sat_adj_work
 !! @}

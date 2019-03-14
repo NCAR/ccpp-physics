@@ -623,14 +623,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     real, dimension (ktop:kbot) :: qv0, ql0, qr0, qi0, qs0, qg0, qa0
     real, dimension (ktop:kbot) :: t0, den, den0, tz, p1, denfac
     real, dimension (ktop:kbot) :: ccn, c_praut, m1_rain, m1_sol, m1
-#if 0
-!ifdef TRANSITION
-    ! For bit-for-bit reproducibility
-    real, dimension (ktop:kbot) :: u0, v0, w1
-    real, dimension (ktop:kbot), volatile :: u1, v1
-#else
     real, dimension (ktop:kbot) :: u0, v0, u1, v1, w1
-#endif
 
     real :: cpaut, rh_adj, rh_rain
     real :: r1, s1, i1, g1, rdt, ccn0
@@ -1393,10 +1386,7 @@ end subroutine revap_racc
 ! -----------------------------------------------------------------------
 
 subroutine linear_prof (km, q, dm, z_var, h_var)
-#if 0
-!ifdef TRANSITION
-!DIR$ NOOPTIMIZE
-#endif
+
     implicit none
 
     integer, intent (in) :: km
@@ -1955,10 +1945,7 @@ end subroutine icloud
 
 subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
     ql, qr, qi, qs, qg, qa, h_var, rh_rain)
-#if 0
-!ifdef TRANSITION
-!DIR$ NOOPTIMIZE
-#endif
+
     implicit none
 
     integer, intent (in) :: ktop, kbot

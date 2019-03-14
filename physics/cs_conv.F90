@@ -59,7 +59,9 @@ module cs_conv_pre
 ! --- input/output
   real(r8), dimension(ntrac-ncld+2), intent(out) :: fswtr, fscav
   real(r8), dimension(im), intent(out) :: wcbmax
-  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2,save_q3
+  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2
+  ! save_q3 is not allocated for Zhao-Carr MP
+  real(r8), dimension(:,:), intent(out)     :: save_q3
 
   character(len=*), intent(out) :: errmsg
   integer,          intent(out) :: errflg
