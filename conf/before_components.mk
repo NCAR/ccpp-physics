@@ -26,6 +26,12 @@ ifneq (,$(findstring INTEL18=Y,$(FV3_MAKEOPT)))
   else ifeq ($(CHOSEN_MODULE),gaea.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.3.222
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
+  else ifeq ($(CHOSEN_MODULE),wcoss_cray/fv3)
+    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
+    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
+  else ifeq ($(CHOSEN_MODULE),wcoss_dell_p3/fv3)
+    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
+    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   endif
 else ifneq (,$(findstring CCPP=Y,$(FV3_MAKEOPT)))
   ifeq ($(CHOSEN_MODULE),theia.intel/fv3)
@@ -36,6 +42,12 @@ else ifneq (,$(findstring CCPP=Y,$(FV3_MAKEOPT)))
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   else ifeq ($(CHOSEN_MODULE),gaea.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-16.0.3.210
+    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
+  else ifeq ($(CHOSEN_MODULE),wcoss_cray/fv3)
+    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
+    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
+  else ifeq ($(CHOSEN_MODULE),wcoss_dell_p3/fv3)
+    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   endif
 endif
