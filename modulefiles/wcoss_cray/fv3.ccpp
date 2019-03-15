@@ -22,6 +22,8 @@ module load intel/16.3.210
 module load cray-netcdf
 module load xt-lsfhpc/9.1.3
 module load craype-haswell
+module load python/2.7.13
+module load cmake/3.6.2
 ##
 ## load nwprod libraries
 ##
@@ -42,22 +44,13 @@ module load ugni
 
 module use /gpfs/hps3/emc/nems/noscrub/emc.nemspara/soft/modulefiles
 module load esmf/7.1.0r
+setenv ESMF_LIB /gpfs/hps3/emc/nems/noscrub/emc.nemspara/soft/esmf/7.1.0r/lib
 module swap pmi pmi/5.0.11
 
 ##
-## Set path to NETCDF and HDF5 - this was needed on gaea (cray)
+## Set path to NETCDF
 ##
-#setenv NETCDF /opt/cray/pe/netcdf/4.4.0/INTEL/15.0
-#setenv HDF5   /opt/cray/pe/hdf5/1.8.16/INTEL/15.0
-
-##
-## Libxml2 - compiled manually because of issues with linking the code - this was needed on gaea (cray)
-## 
-#set LIBXML2_DIR /lustre/f2/dev/Dom.Heinzeller/libxml2-2.9.9/intel-16.0.3.210
-#setenv LIBXML2_DIR         ${LIBXML2_DIR}
-#setenv LIBXML2_INCLUDE_DIR ${LIBXML2_DIR}/include
-#setenv LIBXML2_LIB_DIR     ${LIBXML2_DIR}/lib
-#prepend-path LD_LIBRARY_PATH /lustre/f2/dev/Dom.Heinzeller/libxml2-2.9.9/intel-16.0.3.210/lib
+setenv NETCDF /opt/cray/netcdf/4.3.2/INTEL/140
 
 ##
 ## Set compiler environment variables for CCPP
