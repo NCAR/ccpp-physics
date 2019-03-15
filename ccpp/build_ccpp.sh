@@ -77,7 +77,7 @@ readonly clean_after=${6:-YES}
 checkvalid MACHINE_ID $MACHINE_ID ${VALID_MACHINES[@]}
 
 # Generate CCPP cmake flags from MAKE_OPT
-CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNCEPLIBS_DIR=${NCEPLIBS_DIR} -DNETCDF_DIR=${NETCDF} -DMPI=ON"
+CCPP_CMAKE_FLAGS="-DCMAKE_INSTALL_PREFIX=${CCPP_DIR} -DNETCDF_DIR=${NETCDF} -DMPI=ON"
 CCPP_MAKE_FLAGS=""
 if [[ "${MAKE_OPT}" == *"SION=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSIONLIB=${SIONLIB}"
@@ -145,7 +145,11 @@ elif [[ "${MACHINE_ID}" == "linux.gnu" ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNETCDF_DIR=${NETCDF}"
 elif [[ "${MACHINE_ID}" == "gaea.intel" || "${MACHINE_ID}" == "wcoss_cray" ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DLIBXML2_LIB_DIR=${LIBXML2_LIB_DIR} -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR}"
+  # Fix broken libxml2 installation on gaea by
+  # using own version (not known to the system)
+  if [[ "${MACHINE_ID}" == "gaea.intel" ]]; then
+    CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DLIBXML2_LIB_DIR=${LIBXML2_LIB_DIR} -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR}"
+  fi
   # DH* At this time, it is not possible to use the dynamic CCPP
   # build on gaea. While compiling/linking works, the model crashes
   # immediately. This may be related to 64bit/32bit mismatches
