@@ -4,7 +4,7 @@ set +x
 set -eu
 
 # List of valid/tested machines
-VALID_MACHINES=( gaea.intel jet.intel theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi endeavor.intel macosx.gnu linux.gnu )
+VALID_MACHINES=( wcoss_cray wcoss_dell_p3 gaea.intel jet.intel theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.gnu cheyenne.pgi endeavor.intel macosx.gnu linux.gnu )
 
 ###################################################################################################
 
@@ -143,22 +143,23 @@ elif [[ "${MACHINE_ID}" == "linux.gnu" ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
   # netCDF (needed when linking ESMF)
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNETCDF_DIR=${NETCDF}"
-elif [[ "${MACHINE_ID}" == "gaea.intel" ]]; then
+elif [[ "${MACHINE_ID}" == "gaea.intel" || "${MACHINE_ID}" == "wcoss_cray" ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DLIBXML2_LIB_DIR=${LIBXML2_LIB_DIR} -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR}"
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DCRAY=ON"
+  # DH* At this time, it is not possible to use the dynamic CCPP
+  # build on gaea. While compiling/linking works, the model crashes
+  # immediately. This may be related to 64bit/32bit mismatches
+  # in the MPI libraries (missing "-fPIC" flags when the MPI libraries
+  # were compiled on the system?) - to be investigated.
   if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
-    # DH* At this time, it is not possible to use the dynamic CCPP
-    # build on gaea. While compiling/linking works, the model crashes
-    # immediately. This may be related to 64bit/32bit mismatches
-    # in the MPI libraries (missing "-fPIC" flags when the MPI libraries
-    # were compiled on the system?) - to be investigated.
-    ## FOR DYNAMIC BUILD, SET ENVIRONMENT VARIABLE
+    :
+  else
+    ## FOR DYNAMIC BUILD, SET ENVIRONMENT VARIABLE CRAYPE_LINK_TYPE
     #export CRAYPE_LINK_TYPE=dynamic
-    echo "Dynamic CCPP build not supported on gaea at this time."
+    echo "Dynamic CCPP build not supported on gaea/wcoss_cray at this time."
     exit 1
-    # *DH
   fi
+  # *DH
 fi
 
 # Build and install CCPP
