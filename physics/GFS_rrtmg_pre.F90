@@ -32,7 +32,7 @@
 !! | kt                | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |    0 | integer          |           | out    | F        |
 !! | kb                | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |    0 | integer          |           | out    | F        |
 !! | raddt             | time_step_for_radiation                                       | radiation time step                                                           | s        |    0 | real             | kind_phys | out    | F        |
-!! | delp              | layer_pressure_thickness_for_radiation                        | layer pressure thickness on radiation levels                                  | hPa      |    2 | real             | kind_phys | out    | F        | 
+!! | delp              | layer_pressure_thickness_for_radiation                        | layer pressure thickness on radiation levels                                  | hPa      |    2 | real             | kind_phys | out    | F        |
 !! | dz                | layer_thickness_for_radiation                                 | layer thickness on radiation levels                                           | km       |    2 | real             | kind_phys | out    | F        |
 !! | plvl              | air_pressure_at_interface_for_radiation_in_hPa                | air pressure at vertical interface for radiation calculation                  | hPa      |    2 | real             | kind_phys | out    | F        |
 !! | plyr              | air_pressure_at_layer_for_radiation_in_hPa                    | air pressure at vertical layer for radiation calculation                      | hPa      |    2 | real             | kind_phys | out    | F        |
@@ -407,10 +407,10 @@
            gasvmr_o2     (i,k)  = gasvmr(i,k,4)
            gasvmr_co     (i,k)  = gasvmr(i,k,5)
            gasvmr_cfc11  (i,k)  = gasvmr(i,k,6)
-           gasvmr_cfc12  (i,k)  = gasvmr(i,k,7)   
-           gasvmr_cfc22  (i,k)  = gasvmr(i,k,8)    
-           gasvmr_ccl4   (i,k)  = gasvmr(i,k,9)  
-           gasvmr_cfc113 (i,k)  = gasvmr(i,k,10) 
+           gasvmr_cfc12  (i,k)  = gasvmr(i,k,7)
+           gasvmr_cfc22  (i,k)  = gasvmr(i,k,8)
+           gasvmr_ccl4   (i,k)  = gasvmr(i,k,9)
+           gasvmr_cfc113 (i,k)  = gasvmr(i,k,10)
          enddo
       enddo
 
@@ -539,12 +539,12 @@
 ! CCPP
       do j = 1,NBDSW
         do k = 1, LMK
-          do i = 1, IM 
+          do i = 1, IM
             ! NF_AESW = 3
             faersw1(i,k,j) = faersw(i,k,j,1)
             faersw2(i,k,j) = faersw(i,k,j,2)
             faersw3(i,k,j) = faersw(i,k,j,3)
-          enddo 
+          enddo
         enddo
        enddo
 
@@ -571,7 +571,7 @@
 !  --- ...  obtain cloud information for radiation calculations
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
-
+        ccnd = 0.0_kind_phys
         if (Model%ncnd == 1) then                                 ! Zhao_Carr_Sundqvist
           do k=1,LMK
             do i=1,IM
@@ -615,13 +615,13 @@
           if (.not. Model%lgfdlmprad) then
 
 
-! rsun the  summation methods and order make the difference in calculation 
+! rsun the  summation methods and order make the difference in calculation
 
-!            clw(:,:) = clw(:,:) + tracer1(:,1:LMK,Model%ntcw)   &        
-!                                + tracer1(:,1:LMK,Model%ntiw)   & 
-!                                + tracer1(:,1:LMK,Model%ntrw)   & 
-!                                + tracer1(:,1:LMK,Model%ntsw)   & 
-!                                + tracer1(:,1:LMK,Model%ntgl) 
+!            clw(:,:) = clw(:,:) + tracer1(:,1:LMK,Model%ntcw)   &
+!                                + tracer1(:,1:LMK,Model%ntiw)   &
+!                                + tracer1(:,1:LMK,Model%ntrw)   &
+!                                + tracer1(:,1:LMK,Model%ntsw)   &
+!                                + tracer1(:,1:LMK,Model%ntgl)
             ccnd(:,:,1) =               tracer1(:,1:LMK,ntcw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntrw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntiw)
@@ -632,7 +632,7 @@
 !            do j=1,Model%ncld
 !              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
 !            enddo
-          endif 
+          endif
           do k=1,LMK
             do i=1,IM
               if (ccnd(i,k,1) < EPSQ ) ccnd(i,k,1) = 0.0
@@ -769,13 +769,13 @@
 !           call progcld4o (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,       &   !  ---  inputs
 !                           tracer1, Grid%xlat, Grid%xlon, Sfcprop%slmsk,   &
 !                           dz, delp,                                       &
-!                           ntrac-1, Model%ntcw-1,Model%ntiw-1,Model%ntrw-1,& 
+!                           ntrac-1, Model%ntcw-1,Model%ntiw-1,Model%ntrw-1,&
 !                           Model%ntsw-1,Model%ntgl-1,Model%ntclamt-1,      &
 !                           im, lmk, lmp,                                   &
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
-          endif 
+          endif
 
-        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme 
+        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme
 
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,1) = 10.
@@ -783,16 +783,16 @@
             Tbd%phy_f3d(:,:,3) = 250.
           endif
 
-          call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs 
+          call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
                          Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             & 
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, Model%uni_cld,               &
                          Model%lmfshal,Model%lmfdeep2,              &
                          cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
-                         clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs  
-              
+                         clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
+
         endif                            ! end if_imp_physics
 
 !      endif                                ! end_if_ntcw
@@ -827,7 +827,7 @@
 ! mg, sfc-perts
 
       end subroutine GFS_rrtmg_pre_run
-   
+
 !> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
 !!
       subroutine GFS_rrtmg_pre_finalize ()
@@ -835,5 +835,3 @@
 
 !! @}
       end module GFS_rrtmg_pre
-
-

@@ -374,8 +374,7 @@ contains
      ierrs(:)=0
      cuten(:)=0.
      cutenm(:)=0.
-     cutens(:)=1.
-     if(ishallow_g3.eq.0)cutens(:)=0.
+     cutens(:)=0.
      ierrc(:)=" "
 
      kbcon(:)=0
@@ -531,7 +530,7 @@ contains
 !> if ishallow_g3=1, call shallow: cup_gf_sh()
 !
     ! print*,'hli bf shallow t2d',t2d
-          call cu_gf_sh_run (                                              &
+          call cu_gf_sh_run (us,vs,                                              &
 ! input variables, must be supplied
                          zo,t2d,q2d,ter11,tshall,qshall,p2d,psur,dhdt,kpbli,     &
                          rhoi,hfx,qfx,xlandi,ichoice_s,tcrit,dt, &
@@ -539,13 +538,13 @@ contains
 ! turning off shallow convection for grid points
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,    &
 ! output tendencies
-                         outts,outqs,outqcs,cnvwt,prets,cupclws,             &
+                         outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
 ! dimesnional variables
                          itf,ktf,its,ite, kts,kte,ipr,tropics)
 
 
           do i=its,itf
-           if(xmbs(i).le.0.)cutens(i)=0.
+           if(xmbs(i).gt.0.)cutens(i)=1.
           enddo
           call neg_check('shallow',ipn,dt,qcheck,outqs,outts,outus,outvs,   &
                                  outqcs,prets,its,ite,kts,kte,itf,ktf,ktops)
@@ -779,8 +778,8 @@ contains
                t(i,k)=t(i,k)+dt*(cutens(i)*outts(i,k)+cutenm(i)*outtm(i,k)+outt(i,k)*cuten(i))
                qv(i,k)=max(1.e-16,qv(i,k)+dt*(cutens(i)*outqs(i,k)+cutenm(i)*outqm(i,k)+outq(i,k)*cuten(i)))
                gdc(i,k,7)=sqrt(us(i,k)**2 +vs(i,k)**2)
-               us(i,k)=us(i,k)+outu(i,k)*cuten(i)*dt +outum(i,k)*cutenm(i)*dt
-               vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt
+               us(i,k)=us(i,k)+outu(i,k)*cuten(i)*dt +outum(i,k)*cutenm(i)*dt +outus(i,k)*cutens(i)*dt
+               vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt +outvs(i,k)*cutens(i)*dt
 
 !hj 10/11/2016: don't need gdc and gdc2 yet for gsm. 
 !hli 08/18/2017: couple gdc to radiation
