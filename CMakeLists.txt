@@ -179,8 +179,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
     endif (DYN32)
 
-    # For CCPP acceptance: selective reduction of optimization flags, hopefully
-    # to be removed once established that this is not a reasonable approach.
+    # For CCPP acceptance: selective reduction of optimization flags
     if (TRANSITION)
       # Replace "-no-prec-div -no-prec-sqrt" with "-prec-div -prec-sqrt",
       # replace "CORE-AVX2" with "CORE-AVX-I"
