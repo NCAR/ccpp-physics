@@ -52,6 +52,12 @@ elif [[ $SCHEDULER = 'pbs' ]]; then
     NODES=$(( NODES + 1 ))
   fi
   atparse < $PATHRT/fv3_conf/fv3_qsub.IN > job_card
+elif [[ $SCHEDULER = 'sbatch' ]]; then
+  NODES=$(( TASKS / TPN ))
+  if (( NODES * TPN < TASKS )); then
+    NODES=$(( NODES + 1 ))
+  fi
+  atparse < $PATHRT/fv3_conf/fv3_qsub.IN > job_card
 elif [[ $SCHEDULER = 'lsf' ]]; then
   atparse < $PATHRT/fv3_conf/fv3_bsub.IN > job_card
 fi

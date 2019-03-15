@@ -143,6 +143,9 @@ SCHEME_FILES = {
     'ccpp/physics/physics/cnvc90.f'                          : [ 'slow_physics' ],
     'ccpp/physics/physics/cs_conv.F90'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/cs_conv_aw_adj.F90'                : [ 'slow_physics' ],
+    'ccpp/physics/physics/cu_ntiedtke_pre.F90'               : [ 'slow_physics' ],
+    'ccpp/physics/physics/cu_ntiedtke.F90'                   : [ 'slow_physics' ],
+    'ccpp/physics/physics/cu_ntiedtke_post.F90'              : [ 'slow_physics' ],
     'ccpp/physics/physics/dcyc2.f'                           : [ 'slow_physics' ],
     'ccpp/physics/physics/gcm_shoc.F90'                      : [ 'slow_physics' ],
     'ccpp/physics/physics/get_prs_fv3.F90'                   : [ 'slow_physics' ],
@@ -162,6 +165,8 @@ SCHEME_FILES = {
     'ccpp/physics/physics/moninedmf.f'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/moninshoc.f'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/satmedmfvdif.F'                    : [ 'slow_physics' ],
+    'ccpp/physics/physics/shinhongvdif.F90'                  : [ 'slow_physics' ],
+    'ccpp/physics/physics/ysuvdif.F90'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/module_MYNNPBL_wrapper.F90'        : [ 'slow_physics' ],
     'ccpp/physics/physics/module_MYNNSFC_wrapper.F90'        : [ 'slow_physics' ],
     'ccpp/physics/physics/module_MYNNrad_pre.F90'            : [ 'slow_physics' ],
@@ -185,6 +190,7 @@ SCHEME_FILES = {
     'ccpp/physics/physics/sfc_diff.f'                        : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_drv.f'                         : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_nst.f'                         : [ 'slow_physics' ],
+    'ccpp/physics/physics/sfc_ocean.F'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/sfc_sice.f'                        : [ 'slow_physics' ],
     # stochastic physics
     'ccpp/physics/stochastic_physics/stochastic_physics.F90' : [ 'slow_physics' ],
@@ -247,10 +253,11 @@ OPTIONAL_ARGUMENTS = {
         },
     'mp_thompson_hrrr' : {
         'mp_thompson_hrrr_init' : [
-            'tendency_of_water_friendly_aerosols_at_surface',
-            'tendency_of_ice_friendly_aerosols_at_surface',
+            'cloud_droplet_number_concentration_updated_by_physics',
             'water_friendly_aerosol_number_concentration',
             'ice_friendly_aerosol_number_concentration',
+            'tendency_of_water_friendly_aerosols_at_surface',
+            'tendency_of_ice_friendly_aerosols_at_surface',
             ],
         'mp_thompson_hrrr_run' : [
             'cloud_droplet_number_concentration_updated_by_physics',

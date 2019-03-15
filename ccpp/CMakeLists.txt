@@ -71,7 +71,10 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS_RELEASE}")
 endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
-# Set compiler-specific options, depending on build type
+# Set compiler-specific options, depending on build type; some optimization flags may only be used
+# for certain files (controlled for example in ccpp-physics' CMakeLists.txt). These must be set as
+# CMAKE_Fortran_FLAGS_OPT, which by default is empty.
+set (CMAKE_Fortran_FLAGS_OPT "")
 if (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fcray-pointer -ffree-line-length-none -fno-range-check")
   set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fbacktrace -fdefault-real-8 -fdefault-double-8")
@@ -104,12 +107,13 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -g -traceback")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
-    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -no-prec-div -no-prec-sqrt")
+    # Specify aggressive optimization flags (to be overwritten for individual files in ccpp-physics' CMakeLists.txt)
     if (SIMDMULTIARCH)
-      set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3 -axSSE4.2,AVX,CORE-AVX2")
+      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -axSSE4.2,AVX,CORE-AVX2")
     else (SIMDMULTIARCH)
-      set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3 -xCORE-AVX2")
+      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -xCORE-AVX2")
     endif (SIMDMULTIARCH)
+    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3")
   endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   message (FATAL_ERROR "CCPP has only been compiled with gfortran, pgf90 and ifort.")

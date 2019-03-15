@@ -76,10 +76,14 @@ case $(hostname -f) in
   cheyenne5.ib0.cheyenne.ucar.edu) MACHINE_ID=cheyenne ;; ### cheyenne5
   cheyenne6.ib0.cheyenne.ucar.edu) MACHINE_ID=cheyenne ;; ### cheyenne6
 
+  login1.stampede2.tacc.utexas.edu) MACHINE_ID=stampede ;; ### stampede1
+  login2.stampede2.tacc.utexas.edu) MACHINE_ID=stampede ;; ### stampede2
+  login3.stampede2.tacc.utexas.edu) MACHINE_ID=stampede ;; ### stampede3
+  login4.stampede2.tacc.utexas.edu) MACHINE_ID=stampede ;; ### stampede4
 esac
 
 # For Theia and Cheyenne, append compiler
-if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = jet ] || [ $MACHINE_ID = gaea ] ; then
+if [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ] || [ $MACHINE_ID = jet ] || [ $MACHINE_ID = gaea ] || [ $MACHINE_ID = stampede ] ; then
     MACHINE_ID=${MACHINE_ID}.${COMPILER}
 fi
 

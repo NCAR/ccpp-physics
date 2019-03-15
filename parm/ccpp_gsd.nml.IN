@@ -136,9 +136,9 @@
        pre_rad        = .false.
        ncld           = 5
        imp_physics    = 8
+       ttendlim       = 0.008
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
-       ttendlim       = 0.01
        pdfcld         = .false.
        fhswr          = 3600.
        fhlwr          = 3600.
@@ -152,7 +152,7 @@
        lwhtr          = .true.
        swhtr          = .true.
        cnvgwd         = .true.
-       shal_cnv       = .false.
+       shal_cnv       = .true.
        cal_pre        = .false.
        redrag         = .true.
        dspheat        = .true.
@@ -163,7 +163,7 @@
        random_clds    = .false.
        trans_trac     = .true.
        cnvcld         = .true.
-       imfshalcnv     = -1
+       imfshalcnv     = 3
        imfdeepcnv     = 3
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
@@ -187,7 +187,6 @@
        bl_mynn_tkeadvect = .true.
        bl_mynn_edmf      = 1
        bl_mynn_edmf_mom  = 1
-
 /
 
 &interpolator_nml

@@ -168,12 +168,10 @@ elif [[ $MACHINE_ID = jet.* ]]; then
   QUEUE=debug
 #  ACCNR=fv3-cpu
   PARTITION=
-  dprefix=/mnt/lfs3/projects/hfv3gfs/lpan/ncar2/run/NCEPDEV
-  DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
-  DISKNM=/lfs3/projects/hfv3gfs/emc.nemspara/RT
   DISKNM=/mnt/lfs3/projects/hfv3gfs/lpan/RT
-  STMP=$dprefix/stmp4
-  PTMP=$dprefix/stmp3
+  dprefix=/mnt/lfs3/projects/hfv3gfs/$USER
+  STMP=$dprefix/RT_BASELINE
+  PTMP=$dprefix/RT_RUNDIRS
   SCHEDULER=pbs
   MPIEXEC=mpirun
   MPIEXECOPTS=
@@ -197,6 +195,25 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   MPIEXEC=mpiexec_mpt
   MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
+
+elif [[ $MACHINE_ID = stampede.* ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  # Re-instantiate COMPILER in case it gets deleted by module purge
+  COMPILER=${NEMS_COMPILER:-intel}
+
+  export PYTHONPATH=
+  ECFLOW_START=
+  QUEUE=skx-dev
+  PARTITION=
+  dprefix=$WORK/NEMSfv3gfs/run
+  DISKNM=$WORK/NEMSfv3gfs/RT
+  STMP=$dprefix/stmp4
+  PTMP=$dprefix/stmp3
+  SCHEDULER=sbatch
+  MPIEXEC=ibrun
+  MPIEXECOPTS=
+  cp fv3_conf/fv3_qsub.IN_stampede fv3_conf/fv3_qsub.IN
 
 else
   die "Unknown machine ID, please edit detect_machine.sh file"

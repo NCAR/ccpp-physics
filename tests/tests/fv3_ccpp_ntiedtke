@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 CCPP GF + Thompson MP test
+#  FV3 CCPP New Tiedtke test
 #
 ###############################################################################
 
-export TEST_DESCR="Compare FV3 CCPP GF + Thompson MP results with previous trunk version"
+export TEST_DESCR="Compare FV3 CCPP New Tiedtke results with previous trunk version"
 
-export CNTL_DIR=fv3_ccpp_gfthompson
+export CNTL_DIR=fv3_ntiedtke
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -75,17 +75,11 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
-export DT_ATMOS="1200"
-export LRADAR=.T.
+DT_ATMOS="600"
 
-export FV3_RUN=ccpp_gfthompson_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_gf_thompson.xml
+export FV3_RUN=ccpp_ntiedtke_run.IN
+export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_ntiedtke.xml
 export CCPP_LIB_DIR=ccpp/lib
-export INPUT_NML=ccpp_gfthompson.nml.IN
-
+export INPUT_NML=ccpp_ntiedtke.nml.IN
 
 RUN_SCRIPT=rt_fv3.sh
-
-if [[ $MACHINE_ID = cheyenne.intel ]]; then
-  export WLCLK=30
-fi
