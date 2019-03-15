@@ -53,13 +53,6 @@ prepend-path PATH            /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-
 prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-5.1.2.150/lib/libO/Linux.intel.64.intelmpi.default
 
 ##
-## memcheck utility
-##
-set MEMCHECK_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/memcheck-intel-18.1.163-20180820
-setenv MEMCHECK_INC "-I${MEMCHECK_DIR}/include"
-setenv MEMCHECK_LIB "-L${MEMCHECK_DIR}/lib -lmemcheck"
-
-##
 ## Set compiler environment variables for CCPP
 ##
 setenv CC  mpiicc
