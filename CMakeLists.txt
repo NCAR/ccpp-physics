@@ -274,7 +274,11 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-SCM")
+if (PROJECT STREQUAL "CCPP-FV3")
+  if (NOT STATIC)
+    link_directories(${NCEPLIBS_DIR}/lib)
+  endif (NOT STATIC)
+elseif (PROJECT STREQUAL "CCPP-SCM")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
@@ -289,7 +293,7 @@ if (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-SCM")
+endif (PROJECT STREQUAL "CCPP-FV3")
 
 #------------------------------------------------------------------------------
 
@@ -305,10 +309,13 @@ else(STATIC)
   add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
 endif(STATIC)
 
-if (PROJECT STREQUAL "CCPP-SCM")
+if (PROJECT STREQUAL "CCPP-FV3")
+  if (NOT STATIC)
+    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
+  endif (NOT STATIC)
+elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
-endif (PROJECT STREQUAL "CCPP-SCM")
-
+endif (PROJECT STREQUAL "CCPP-FV3")
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
