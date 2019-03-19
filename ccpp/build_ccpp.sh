@@ -125,6 +125,9 @@ if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
     echo "Error, option STATIC=Y requires HYBRID=N"
     exit 1
   fi
+else
+  # Dynamic builds require linking the NCEPlibs, provide path to them
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNCEPLIBS_DIR=${NCEPLIBS_DIR}"
 fi
 
 CCPP_CMAKE_FLAGS=$(trim "${CCPP_CMAKE_FLAGS}")
@@ -144,7 +147,9 @@ elif [[ "${MACHINE_ID}" == "linux.gnu" ]]; then
   # netCDF (needed when linking ESMF)
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNETCDF_DIR=${NETCDF}"
 elif [[ "${MACHINE_ID}" == "gaea.intel" || "${MACHINE_ID}" == "wcoss_cray" ]]; then
+  # DH* TODO CHECK IF THIS IS NEEDED FOR STATIC BUILD? OR AT ALL?
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DESMF_LIB_DIR=${ESMF_LIB}"
+  # *DH
   # Fix broken libxml2 installation on gaea by
   # using own version (not known to the system)
   if [[ "${MACHINE_ID}" == "gaea.intel" ]]; then
