@@ -1,3 +1,4 @@
+#define MYDEBUG
 !***********************************************************************
 !*                   GNU General Public License                        *
 !* This file is a part of fvGFS.                                       *
@@ -289,10 +290,12 @@ subroutine update_atmos_radiation_physics (Atmos)
                                  jdat(5), jdat(6), jdat(7))
       IPD_Control%jdat(:) = jdat(:)
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before time_vary step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric setup step
       call mpp_clock_begin(setupClock)
@@ -317,10 +320,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "radiation driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before radiation step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric radiation subcomponent (RRTM)
 
@@ -350,10 +355,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "physics driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before physics step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric physics step1 subcomponent (main physics driver)
 
@@ -388,10 +395,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "stochastic physics driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before stochastics step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric physics step2 subcomponent (stochastic physics driver)
 
@@ -419,10 +428,12 @@ subroutine update_atmos_radiation_physics (Atmos)
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "end of radiation and physics step"
     endif
 
+#ifdef MYDEBUG
     ! DH*
     write(0,*) "Calling MY_DIAGTOSCREEN after radiation step"
     call MY_DIAGTOSCREEN()
     ! *DH
+#endif
 
 #ifdef CCPP
     ! Update flag for first time step of time integration
