@@ -156,8 +156,8 @@ elif [[ "${MACHINE_ID}" == "gaea.intel" || "${MACHINE_ID}" == "wcoss_cray" ]]; t
     CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DLIBXML2_LIB_DIR=${LIBXML2_LIB_DIR} -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR}"
   fi
   # DH* At this time, it is not possible to use the dynamic CCPP
-  # build on gaea. While compiling/linking works, the model crashes
-  # immediately. This may be related to 64bit/32bit mismatches
+  # build on gaea/wcoss_cray. While compiling/linking works, the model
+  # crashes immediately. This may be related to 64bit/32bit mismatches
   # in the MPI libraries (missing "-fPIC" flags when the MPI libraries
   # were compiled on the system?) - to be investigated.
   if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
@@ -191,10 +191,6 @@ cmake ${CCPP_CMAKE_FLAGS} ${PATH_CCPP}
 make ${CCPP_MAKE_FLAGS}
 make ${CCPP_MAKE_FLAGS} install
 
-if [ $clean_after = YES ]; then
-    rm -fr ${PATH_CCPP_BUILD}
-fi
-
 # Generate ESMF makefile fragment
 
 # Explicitly append libxml2, with or without path
@@ -213,3 +209,8 @@ else
 fi
 echo "ESMF_DEP_INCPATH=-I${PATH_CCPP_INC}" > ${ESMF_MK}
 echo "ESMF_DEP_LINK_OBJS=${CCPP_LINK_OBJS}" >> ${ESMF_MK}
+
+if [ $clean_after = YES ]; then
+    rm -fr ${PATH_CCPP_BUILD}
+fi
+
