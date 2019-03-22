@@ -101,3 +101,7 @@ export INPUT_NEST02_NML=input_nest02.nml.IN
 export MODEL_CONFIGURE=stretched-nest-model_configure.IN
 export RUN_SCRIPT=rt_fv3.sh
 export FV3_RUN=fv3_stretched_run.IN
+
+if [[ $MACHINE_ID = *.gnu ]]; then
+  export WLCLK=30
+fi
