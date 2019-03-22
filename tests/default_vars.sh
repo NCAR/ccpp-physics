@@ -126,6 +126,9 @@ export SHOUR=00
 export FHMAX=${FHMAX:-`expr $DAYS \* 24`}
 export DT_ATMOS=1800
 
+export OZ_PHYS_OLD=.T.
+export OZ_PHYS_NEW=.F.
+export H2O_PHYS=.F.
 export DO_SPPT=.F.
 export DO_SHUM=.F.
 export DO_SKEB=.F.
