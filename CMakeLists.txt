@@ -164,21 +164,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # intrinsic gamma function are different for the non-CCPP and CCPP
     # version (on Theia with Intel 18). Note this is only required with
     # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
-    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
-                                  ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
-      # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
-                              ./physics/micro_mg3_0.F90)
-    elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
-      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
-                                  ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
-      # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
-                              ./physics/micro_mg3_0.F90)
-    elseif (TRANSITION)
+    if (TRANSITION)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
       # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
       # with non-CCPP builds. These may go in the future once the CCPP solution is fully accepted.
@@ -217,7 +203,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                               ./physics/cs_conv.F90
                               ./physics/gcm_shoc.F90
                               ./physics/gfdl_fv_sat_adj.F90)
-    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    endif (TRANSITION)
 
     # Remove files with special compiler flags from list of files with standard compiler flags
     list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX})
