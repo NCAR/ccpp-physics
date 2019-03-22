@@ -14,6 +14,7 @@ module rrtmgp_lw
   use module_radlw_parameters, only: topflw_type, sfcflw_type, proflw_type
   use physparam,               only: ilwcliq,isubclw
   use GFS_typedefs,            only: GFS_control_type
+  use mo_rrtmgp_constants,     only: grav, avogad
   use mo_rrtmgp_lw_cloud_optics
   implicit none
 
@@ -25,8 +26,11 @@ module rrtmgp_lw
 
   ! Molecular weight ratios (for converting mmr to vmr)
   real(kind_phys), parameter :: &
-       amdw = 1.607793_kind_phys,  &  ! Molecular weight of dry air / water vapor
-       amdo3 = 0.603428_kind_phys     ! Molecular weight of dry air / ozone
+       amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
+       amw   = 18.0154_kind_phys,  & ! Molecular weight of water vapor (g/mol)
+       amo3  = 47.9982_kind_phys,  & ! Modelular weight of ozone       (g/mol)
+       amdw  = amd/amw,            & ! Molecular weight of dry air / water vapor
+       amdo3 = amd/amo3              ! Molecular weight of dry air / ozone
 
   ! Logical flags for optional output fields in rrtmgp_lw_run(), default=.false.
   logical :: &
@@ -674,8 +678,7 @@ contains
             lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (rrtmgp_lw_cld_phys .eq. 2) then
-       call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, radliq_lwr, radliq_upr, &
-            radliq_fac, radice_lwr, radice_upr, radice_fac, pade_extliq,               &
+       call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, pade_extliq,            &
             pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,           &
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,             &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
@@ -837,12 +840,16 @@ contains
     integer :: iGpt,iCol,iLay,iBand
     integer,dimension(ncol) :: ipseed
     real(kind_phys), dimension(nBandsLW,ncol) :: &
-         semiss
+         semiss, secdiff         
+    real(kind_phys) :: &
+         tem1,tem2
+    real(kind_phys), dimension(ncol) :: &
+         precipitableH2o
     real(kind_phys), dimension(ncol,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
     real(kind_phys), dimension(ncol,nlay) :: &
          vmr_o3, vmr_h2o, cldfrac2, thetaTendClrSky,thetaTendAllSky, cld_ref_liq2, &
-         cld_ref_ice2,tau_snow,tau_rain
+         cld_ref_ice2,tau_snow,tau_rain,coldry,tem0,colamt
     logical,dimension(ncol,nlay) :: &
          liqmask,icemask
     real(kind_phys), dimension(nGptsLW,ncol,nlay) :: &
@@ -932,11 +939,33 @@ contains
     ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
     liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
     icemask = (cldfrac .gt. 0 .and. cld_iwp .gt. 0)
+
+    ! Conpute diffusivity angle adjustments.
+    ! First need to compute precipitable water in each column
+    tem0   = (1._kind_phys - vmr_h2o)*amd + vmr_h2o*amw
+    coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1._kind_phys + vmr_h2o))
+    colamt = max(0._kind_phys, coldry*vmr_h2o)
+    tem1   = 0._kind_phys
+    tem2   = 0._kind_phys
     do iCol=1,nCol
        do iLay=1,nLay
-          if (icemask(iCol,iLay)) then
-             print*,'ICEMASKTEST: ',iceMask(iCol,iLay),cld_iwp(iCol,iLay),cld_ref_ice(iCol,iLay)
-          end if
+          tem1 = tem1 + coldry(iCol,iLay)+colamt(iCol,iLay)
+          tem2 = tem2 + colamt(iCol,iLay)
+       enddo
+       precipitableH2o(iCol) = p_lev(iCol,1)*(10._kind_phys*tem2 / (amdw*tem1*grav))
+    enddo
+
+    ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
+    ! and 1.80) as a function of total column water vapor.  the function
+    ! has been defined to minimize flux and cooling rate errors in these bands
+    ! over a wide range of precipitable water values.    
+    do iCol=1,nCol
+       do iBand = 1, nbandsLW
+          if (iBand==1 .or. iBand==4 .or. iBand==10) then
+             secdiff(iBand,iCol) = diffusivityB1410
+          else
+             secdiff(iBand,iCol) = min( diffusivityHigh, max(diffusivityLow, a0(iBand)+a1(iBand)*exp(a2(iBand)*precipitableH2o(iCol))))
+          endif
        enddo
     enddo
 
@@ -997,6 +1026,13 @@ contains
     optical_props_aer%tau(1:ncol,1:nlay,1:nBandsLW) = tau_aer * (1._kind_phys - ssa_aer)
     call check_error_msg(optical_props_aer%increment(optical_props_clr))
 
+    ! 1c2) Apply diffusivity angle 
+    do iCol=1,nCol
+       do iBand=1,nBandsLW
+          optical_props_clr%tau(iCol,1:nlay,iBand) = optical_props_clr%tau(iCol,1:nlay,iBand)*secdiff(iBand,iCol)
+       enddo
+    enddo
+
     ! 1d) Compute the clear-sky broadband fluxes
     print*,'Clear-Sky(LW): Fluxes'
     call check_error_msg(rte_lw(                   &
@@ -1024,7 +1060,7 @@ contains
        ! If using RRTMG cloud-physics. Model can provide either cloud-optics (cld_od) or 
        ! cloud-properties by type (cloud LWP,snow effective radius, etc...)
        if (rrtmgp_lw_cld_phys .eq. 0) then
-          print*,'Using RRTMG cloud-physics',rrtmgp_lw_cld_phys,shape(cldfrac)
+          print*,'Using RRTMG cloud-physics'
           ! Cloud-optical properties by type provided.
           if (.not. present(cld_od)) then
              print*,'   Using all types too...'
@@ -1035,7 +1071,7 @@ contains
              do iCol=1,ncol
                 do iLay=1,nlay
                    if (cldfrac(iCol,iLay) .gt. cldmin) then
-                      tau_cld(:,iCol,iLay) = cld_od(iCol,iLay)
+                      tau_cld(:,iCol,iLay) = cld_od(iCol,iLay)*secdiff(:,iCol)
                    else
                       tau_cld(:,iCol,iLay) = 0._kind_phys
                    endif
@@ -1068,9 +1104,7 @@ contains
           do iBand=1,nBandsLW 
              tau_cld(iBand,:,:) = optical_props_cldy%tau(iBand,:,:)+tau_snow+tau_rain
           enddo
-          !tau_cld = optical_props_cldy%tau
        end if
-
     endif
 
     ! 2b) Call McICA to generate subcolumns.
@@ -1086,7 +1120,7 @@ contains
              do iGpt=1,nGptsLW
                 iBand = kdist_lw_clr%convert_gpt2band(iGpt)
                 if (cldfracMCICA(iBand,iCol,iLay) .gt. 0._kind_phys) then
-                   tau_gpt(iCol,iLay,iGpt) = tau_cld(iband,iCol,iLay)
+                   tau_gpt(iCol,iLay,iGpt) = tau_cld(iband,iCol,iLay)*secdiff(iBand,iCol)
                 else
                    tau_gpt(iCol,iLay,iGpt) = 0._kind_phys
                 endif
