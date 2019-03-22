@@ -9,7 +9,6 @@ Krueger et al.(1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_an
 Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain() and icloud()) and are feature with time-split between warm-rain (faster) and ice-phase (slower) processes (see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values). 
 
 \image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
-\image  latex  gfdl_cloud_mp_diagram.eps "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
 
 Some unique attributes of GFDL cloud microphysics include:
 
