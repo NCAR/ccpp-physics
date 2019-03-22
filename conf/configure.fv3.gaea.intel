@@ -97,7 +97,7 @@ endif
 endif
 
 FFLAGS_OPT = -O2 -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3
-FFLAGS_REPRO = -O2 -debug minimal -fp-model source -qoverride-limits -g -traceback
+FFLAGS_REPRO = -O2 -debug minimal -fp-model consistent -qoverride-limits -g -traceback
 FFLAGS_DEBUG = -g -O0 -check all -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check -fstack-protector-all -fpe0 -debug -traceback -ftrapuv
 
 TRANSCENDENTALS := -fast-transcendentals
@@ -148,8 +148,6 @@ CPPDEFS += -DOPENMP
 CFLAGS += $(CFLAGS_OPENMP)
 FFLAGS += $(FFLAGS_OPENMP)
 LDFLAGS += $(LDFLAGS_OPENMP)
-# to correct a loader bug on gaea: envars below set by module load intel
-LIBS += -L/opt/intel/compilers_and_libraries_2018.3.222/linux/compiler/lib/intel64_lin -lifcoremt
 endif
 
 ifeq ($(VERBOSE),Y)
@@ -163,11 +161,14 @@ CPPDEFS += -DCCPP
 ifeq ($(HYBRID),Y)
 CPPDEFS += -DHYBRID
 endif
-ifeq ($(STATIC),Y)
-CPPDEFS += -DSTATIC
-endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
+ifeq ($(STATIC),Y)
+CPPDEFS += -DSTATIC
+LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
+else
+LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
 endif
 
 ifeq ($(SION),Y)
