@@ -615,7 +615,9 @@
       real(kind=kind_phys), dimension(im),              intent(in) :: xlat
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc, save_qi
+      real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
+      ! save_qi is not allocated for Zhao-Carr MP
+      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg
@@ -829,7 +831,9 @@
       logical,                                  intent(in) :: ltaerosol, lgocart
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, save_qi
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
+      ! save_qi is not allocated for Zhao-Carr MP
+      real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw

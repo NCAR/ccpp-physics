@@ -100,6 +100,8 @@ list(APPEND LIBS "ccpp")
 include(./CCPP_SCHEMES.cmake)
 # Set the sources: physics scheme caps
 include(./CCPP_CAPS.cmake)
+# Create empty lists for schemes with special compiler flags
+set(SCHEMES_SFX "")
 
 #------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
@@ -111,10 +113,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
-      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
-      string(REPLACE "-fdefault-real-8" "" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
-      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      message (FATAL_ERROR "The current build system does not allow building fast physics with 32-bit precision when the GNU compilers are used")
     endif (DYN32)
   endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
@@ -133,6 +132,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/wv_saturation.F
                                 ./physics/cldwat2m_micro.F
                                 ./physics/surface_perturbation.F90
+                                ./physics/radiation_aerosols.f
                                 ./physics/cu_gf_deep.F90
                                 ./physics/cu_gf_sh.F90
                                 ./physics/module_bl_mynn.F90
@@ -141,11 +141,10 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNSFC_wrapper.F90
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -ftz")
-    # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files (following FV3/gfsphysics/makefile)
-    # for bit-for-bit reproducibility with non-CCPP builds. These may go in the future once the CCPP solution
-    # is fully accepted.
-    set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS})
+                                PROPERTIES COMPILE_FLAGS "-r8 -ftz")
+
+    # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
+    set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
     string(REPLACE "-xHOST" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
@@ -156,35 +155,34 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1} -r8 -ftz")
+                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
+    # Add all of the above files to the list of schemes with special compiler flags
+    list(APPEND SCHEMES_SFX ./physics/radiation_aerosols.f)
+
     # Force consistent results of math calculations for MG microphysics;
-    # in Debug/Bitforbit) mode; without this flag, the results of the
+    # in Debug/Bitforbit mode; without this flag, the results of the
     # intrinsic gamma function are different for the non-CCPP and CCPP
     # version (on Theia with Intel 18). Note this is only required with
     # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
     if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
       SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
                                   ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
+                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+                              ./physics/micro_mg3_0.F90)
     elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
       SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
                                   ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS} -fimf-arch-consistency=true")
-    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    if (DYN32)
-      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
-      string(REPLACE "-real-size 64" "-real-size 32" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
-      string(REPLACE "-r8" "-r4" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
-      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
-    endif (DYN32)
-
-    # For CCPP acceptance: selective reduction of optimization flags, hopefully
-    # to be removed once established that this is not a reasonable approach.
-    if (TRANSITION)
-      # Replace "-no-prec-div -no-prec-sqrt" with "-prec-div -prec-sqrt",
-      # replace "CORE-AVX2" with "CORE-AVX-I"
-      set(CMAKE_Fortran_FLAGS_LOPT2 ${CMAKE_Fortran_FLAGS})
+                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+                              ./physics/micro_mg3_0.F90)
+    elseif (TRANSITION)
+      # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
+      # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
+      # with non-CCPP builds. These may go in the future once the CCPP solution is fully accepted.
+      set(CMAKE_Fortran_FLAGS_LOPT2 ${CMAKE_Fortran_FLAGS_OPT})
       string(REPLACE "-no-prec-div" "-prec-div"
              CMAKE_Fortran_FLAGS_LOPT2
              "${CMAKE_Fortran_FLAGS_LOPT2}")
@@ -197,21 +195,41 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
              CMAKE_Fortran_FLAGS_LOPT2
              "${CMAKE_Fortran_FLAGS_LOPT2}")
-      SET_SOURCE_FILES_PROPERTIES(./physics/module_gfdl_cloud_microphys.F90
+      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
+                                  ./physics/micro_mg3_0.F90
+                                  ./physics/aer_cloud.F
+                                  ./physics/cldmacro.F
+                                  ./physics/gfdl_fv_sat_adj.F90
+                                  ./physics/module_gfdl_cloud_microphys.F90
                                   ./physics/sflx.f
                                   ./physics/satmedmfvdif.F
+                                  ./physics/cs_conv.F90
+                                  ./physics/gcm_shoc.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
-      # Replace "CORE-AVX2" with "CORE-AVX-I"
-      set(CMAKE_Fortran_FLAGS_LOPT3 ${CMAKE_Fortran_FLAGS})
-      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
-             CMAKE_Fortran_FLAGS_LOPT3
-             "${CMAKE_Fortran_FLAGS_LOPT3}")
-      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
-             CMAKE_Fortran_FLAGS_LOPT3
-             "${CMAKE_Fortran_FLAGS_LOPT3}")
-      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT3}")
-    endif (TRANSITION)
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+                              ./physics/micro_mg3_0.F90
+                              ./physics/aer_cloud.F
+                              ./physics/cldmacro.F
+                              ./physics/module_gfdl_cloud_microphys.F90
+                              ./physics/sflx.f
+                              ./physics/satmedmfvdif.F
+                              ./physics/cs_conv.F90
+                              ./physics/gcm_shoc.F90
+                              ./physics/gfdl_fv_sat_adj.F90)
+    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+
+    # Remove files with special compiler flags from list of files with standard compiler flags
+    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX})
+    # Assign standard compiler flags to all remaining schemes and caps
+    SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
+                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")
+
+    # This has to come last: append 32-bit dynamics flags to certain files that are executed
+    # in the dynamics (fast physics part); this will overwrite any preceding -real-size 64
+    if (DYN32)
+      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -real-size 32 ")
+    endif (DYN32)
 
   else (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
@@ -228,10 +246,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
-      set(CMAKE_Fortran_FLAGS_OPT32BIT ${CMAKE_Fortran_FLAGS})
-      string(REPLACE "-r8" "-r4" CMAKE_Fortran_FLAGS_OPT32BIT "${CMAKE_Fortran_FLAGS_OPT32BIT}")
-      SET_SOURCE_FILES_PROPERTIES(./physics/gfdl_fv_sat_adj.F90
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT32BIT}")
+      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -r4 ")
     endif (DYN32)
   endif (PROJECT STREQUAL "CCPP-FV3")
 else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
@@ -241,21 +256,22 @@ else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 # The auto-generated caps can contain calls to physics schemes in
-# which some of the arguments (pointers) are not associated. This is
-# on purpose to avoid allocating fields that are not used inside the
+# which some of the arguments (pointers, arrays) are not associated/allocated.
+# This is on purpose to avoid allocating fields that are not used inside the
 # scheme if, for example, certain conditions are not met. To avoid
 # Fortran runtime errors, it is necessary to remove checks for pointers
-# that are not associated from the caps ONLY. For the physics schemes,
-# these checks can and should remain enabled. Overwriting the check flags
-# explicitly works for Intel and GNU, but not for PGI.
+# that are not associated and for array bounds from the caps ONLY. For the
+# physics schemes, these checks can and should remain enabled. Overwriting
+# the pointer check flags explicitly works for Intel and GNU, but not for PGI.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer,no-bounds")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers,nobounds")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   if (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
     message (FATAL_ERROR "PGI compiler option chkptr cannot be used for CCPP physics")
   endif (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
+  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-FV3")
@@ -280,7 +296,7 @@ endif (PROJECT STREQUAL "CCPP-FV3")
 #------------------------------------------------------------------------------
 
 if(STATIC)
-  add_library(ccppphys STATIC ${SCHEMES} ${CAPS})
+  add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
   # Generate list of Fortran modules from defined sources
   foreach(source_f90 ${CAPS})
       string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${source_f90})
@@ -288,7 +304,7 @@ if(STATIC)
       list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
   endforeach()
 else(STATIC)
-  add_library(ccppphys ${SCHEMES} ${CAPS})
+  add_library(ccppphys ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
 endif(STATIC)
 
 if (PROJECT STREQUAL "CCPP-FV3")
@@ -297,9 +313,7 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
 endif (PROJECT STREQUAL "CCPP-FV3")
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
-                                     SOVERSION ${PROJECT_VERSION_MAJOR}
-                                     COMPILE_FLAGS "${CMAKE_Fortran_FLAGS}"
-                                     LINK_FLAGS "${CMAKE_Fortran_FLAGS}")
+                                     SOVERSION ${PROJECT_VERSION_MAJOR})
 
 # DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
 # this is only needed for dynamics builds - static build generates plain Fortran code.
