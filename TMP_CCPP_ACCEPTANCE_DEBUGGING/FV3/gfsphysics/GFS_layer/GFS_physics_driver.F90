@@ -43,9 +43,6 @@ module module_physics_driver
 #endif
 #endif
 
-#ifdef MEMCHECK
-  use memcheck_mod,          only: memcheck_run
-#endif
 
   implicit none
 
@@ -3659,15 +3656,6 @@ module module_physics_driver
 ! This is for GFS_PBL_generic_post
 #include "debug_bitforbit_diagtoscreen.inc"
 
-#ifdef MEMCHECK
-#ifdef CCPP
-      if (Model%me==Model%master) write(0,*) 'CCPP DEBUG: calling CCPP compliant version of memcheck in physics between GFS_PBL_generic_post and gwdps_pre'
-      call ccpp_physics_run(cdata_block(nb,nt), scheme_name="memcheck", ierr=ierr)
-#else
-      if (Model%me==Model%master) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of memcheck in physics between GFS_PBL_generic_post and gwdps_pre'
-      call memcheck_run(Model%communicator, Model%master)
-#endif
-#endif
 !-------------------------------------------------------lssav if loop ----------
 !
 !            Orographic gravity wave drag parameterization

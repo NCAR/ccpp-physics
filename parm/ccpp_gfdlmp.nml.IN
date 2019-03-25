@@ -165,6 +165,9 @@
        ivegsrc        = 1
        isot           = 1
        debug          = .false.
+       oz_phys        = @[OZ_PHYS_OLD]
+       oz_phys_2015   = @[OZ_PHYS_NEW]
+       h2o_phys       = @[H2O_PHYS]
        nstf_name      = @[NSTF_NAME]
        xkzminv        = 0.3
        xkzm_m         = 1.0

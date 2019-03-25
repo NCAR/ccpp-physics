@@ -1,3 +1,4 @@
+#define MYDEBUG
 !***********************************************************************
 !*                   GNU General Public License                        *
 !* This file is a part of fvGFS.                                       *
@@ -289,10 +290,12 @@ subroutine update_atmos_radiation_physics (Atmos)
                                  jdat(5), jdat(6), jdat(7))
       IPD_Control%jdat(:) = jdat(:)
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before time_vary step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric setup step
       call mpp_clock_begin(setupClock)
@@ -317,10 +320,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "radiation driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before radiation step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric radiation subcomponent (RRTM)
 
@@ -334,11 +339,7 @@ subroutine update_atmos_radiation_physics (Atmos)
 #else
       Func0d => radiation_step1
 !$OMP parallel do default (none)       &
-#ifdef MEMCHECK
-!$OMP            schedule (static,Atm_block%nblks), &
-#else
 !$OMP            schedule (dynamic,1), &
-#endif
 !$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Func0d) &
 !$OMP            private  (nb)
       do nb = 1,Atm_block%nblks
@@ -354,10 +355,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "physics driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before physics step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric physics step1 subcomponent (main physics driver)
 
@@ -368,11 +371,7 @@ subroutine update_atmos_radiation_physics (Atmos)
 #else
       Func0d => physics_step1
 !$OMP parallel do default (none) &
-#ifdef MEMCHECK
-!$OMP            schedule (static,Atm_block%nblks), &
-#else
 !$OMP            schedule (dynamic,1), &
-#endif
 #ifdef CCPP
 !$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, IPD_Interstitial, Func0d) &
 #else
@@ -396,10 +395,12 @@ subroutine update_atmos_radiation_physics (Atmos)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "stochastic physics driver"
 
+#ifdef MYDEBUG
       ! DH*
       write(0,*) "Calling MY_DIAGTOSCREEN before stochastics step"
       call MY_DIAGTOSCREEN()
       ! *DH
+#endif
 
 !--- execute the IPD atmospheric physics step2 subcomponent (stochastic physics driver)
 
@@ -410,11 +411,7 @@ subroutine update_atmos_radiation_physics (Atmos)
 #else
       Func0d => physics_step2
 !$OMP parallel do default (none) &
-#ifdef MEMCHECK
-!$OMP            schedule (static,Atm_block%nblks), &
-#else
 !$OMP            schedule (dynamic,1), &
-#endif
 !$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Func0d) &
 !$OMP            private  (nb)
       do nb = 1,Atm_block%nblks
@@ -431,10 +428,12 @@ subroutine update_atmos_radiation_physics (Atmos)
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "end of radiation and physics step"
     endif
 
+#ifdef MYDEBUG
     ! DH*
     write(0,*) "Calling MY_DIAGTOSCREEN after radiation step"
     call MY_DIAGTOSCREEN()
     ! *DH
+#endif
 
 #ifdef CCPP
     ! Update flag for first time step of time integration
@@ -460,8 +459,6 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
 #endif
   use fv_mp_mod, only: commglobal
   use mpp_mod, only: mpp_npes
-#elif MEMCHECK
-  use fv_mp_mod, only: commglobal
 #endif
 
   type (atmos_data_type), intent(inout) :: Atmos
@@ -620,8 +617,6 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
 #ifdef CCPP
    call IPD_initialize (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, &
                         IPD_Interstitial, commglobal, mpp_npes(), Init_parm)
-#elif MEMCHECK
-   call IPD_initialize (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, commglobal, Init_parm)
 #else
    call IPD_initialize (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Init_parm)
 #endif
