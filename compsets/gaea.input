@@ -3,7 +3,7 @@
 
 gaea.common= {
     use platform.defaults
-    MACHINE_ID='gaea'
+    MACHINE_ID='gaea.intel'
     HOMEnems=PWD_UP5
     HOMErt=OUTPUT_PATH
     BASELINE="/lustre/f1/pdata/ncep_shared/emc.nemspara/RT/NEMSfv3gfs/trunk-20181010"
