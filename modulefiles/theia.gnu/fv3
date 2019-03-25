@@ -46,7 +46,7 @@ prepend-path PATH            /scratch4/BMC/gmtb/esmf-7.1.0r/gnu-6.2.0/mpich-3.2.
 prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/gnu-6.2.0/mpich-3.2.1/lib/libO/Linux.gfortran.64.mpich3.default
 
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
 set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-gnu-20181105
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}

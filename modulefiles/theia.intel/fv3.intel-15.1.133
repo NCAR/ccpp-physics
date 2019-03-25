@@ -25,7 +25,7 @@ module load netcdf/4.3.0
 module load pnetcdf
 
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
 set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-intel-20181105
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}

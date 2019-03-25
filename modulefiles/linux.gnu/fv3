@@ -44,7 +44,7 @@ export PATH="/usr/local/${ESMF_VERSION}/bin/binO/Linux.gfortran.64.mpich3.defaul
 export LD_LIBRARY_PATH="/usr/local/${ESMF_VERSION}/lib/libO/Linux.gfortran.64.mpich3.default${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 ##
-## NCEP libraries (need to download and build manually, see doc/README_{UBUNTU,CENTOS,...}.txt and https://github.com/climbfuji/NCEPlibs)
+## NCEP libraries (need to download and build manually, see doc/README_{UBUNTU,CENTOS,...}.txt and https://github.com/NCAR/NCEPlibs)
 ##
 NCEPLIBS_DIR=/usr/local/NCEPlibs-gnu-20181105
 export NCEPLIBS_DIR=${NCEPLIBS_DIR}
@@ -54,10 +54,3 @@ export SP_LIBd=${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
 export W3EMC_LIBd=${NCEPLIBS_DIR}/lib/libw3emc_d.a
 export W3NCO_LIBd=${NCEPLIBS_DIR}/lib/libw3nco_d.a
 export NEMSIO_LIB=${NCEPLIBS_DIR}/lib/libnemsio_d.a
-
-##
-## memcheck utility
-##
-MEMCHECK_DIR=/usr/local/memcheck-gnu-20180828
-export MEMCHECK_INC="-I${MEMCHECK_DIR}/include"
-export MEMCHECK_LIB="-L${MEMCHECK_DIR}/lib -lmemcheck"

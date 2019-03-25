@@ -32,7 +32,7 @@ prepend-path PATH            /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.
 prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/lib/libO/Linux.pgi.64.mvapich2.default
 
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
 set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-pgi-20181105
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
