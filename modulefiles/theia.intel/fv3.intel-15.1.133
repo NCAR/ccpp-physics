@@ -23,6 +23,7 @@ module load intel/15.1.133
 module load impi/5.1.1.109
 module load netcdf/4.3.0
 module load pnetcdf
+module load slurm
 
 ##
 ## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
@@ -48,8 +49,7 @@ setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi
 ## load ESMF library for above compiler / MPI combination
 ##
 module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
-#module load esmf/7.1.0r
-module load esmf/7.1.0rp1bs01
+module load esmf/8.0.0bs21
 
 ##
 ## Set compiler environment variables for CCPP

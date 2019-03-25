@@ -268,16 +268,6 @@ else(ESMF_LIB_DIR)
 endif(ESMF_LIB_DIR)
 
 #------------------------------------------------------------------------------
-# Set netCDF flags for preprocessor, compiler and linker (if defined)
-if(NETCDF_DIR)
-  message (STATUS "NETCDF_DIR: ${NETCDF_DIR}")
-  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -L${NETCDF_DIR} -lnetcdff -lnetcdf")
-  message (STATUS "Enable netCDF support")
-else(NETCDF_DIR)
-  message (STATUS "Disable netCDF support")
-endif(NETCDF_DIR)
-
-#------------------------------------------------------------------------------
 # Build CCPP framework and physics
 
 SET(CCPP_FRAMEWORK_SRC ${CMAKE_SOURCE_DIR}/framework)
