@@ -156,6 +156,7 @@
        dspheat        = .true.
        hybedmf        = .false.
        satmedmf       = .false.
+       lheatstrg      = @[LHEATSTRG]
        do_mynnedmf    = .true.
        do_mynnsfclay  = .false.
        random_clds    = .false.
