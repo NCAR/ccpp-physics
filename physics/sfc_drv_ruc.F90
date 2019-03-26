@@ -335,14 +335,15 @@ module lsm_ruc
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, wind, weasd_old, snwdph_old,                      &
-     &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old
+     &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old,      &
+     &       tsnow_old, snowfallac_old, acsnow_old
 
       real (kind=kind_phys), dimension(lsoil_ruc) :: et
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,              &
+      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,       &
            slsoil, stsoil, smfrsoil, keepfrsoil
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,               &
+      real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,      &
      &       tslb_old, sh2o_old, keepfr_old, smfrkeep_old
 
       real (kind=kind_phys),dimension (im,1,1)      ::                  &
@@ -508,13 +509,16 @@ module lsm_ruc
       do i  = 1, im ! i - horizontal loop
         if (flag(i) .and. flag_guess(i)) then
           !if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
-          weasd_old(i)  = weasd(i)
-          snwdph_old(i) = snwdph(i)
-          tskin_old(i)  = tskin(i)
-          canopy_old(i) = canopy(i)
-          !tprcp_old(i)  = tprcp(i)
-          srflag_old(i) = srflag(i)
-          sr_old(i)     = sr(i)
+          weasd_old(i)       = weasd(i)
+          snwdph_old(i)      = snwdph(i)
+          tskin_old(i)       = tskin(i)
+          canopy_old(i)      = canopy(i)
+          !tprcp_old(i)       = tprcp(i)
+          srflag_old(i)      = srflag(i)
+          sr_old(i)          = sr(i)
+          tsnow_old(i)       = tsnow(i)
+          snowfallac_old(i)  = snowfallac(i)
+          acsnow_old(i)      = acsnow(i)
 
           !> - Save land-related prognostic fields for guess run.
           do k = 1, lsoil_ruc
@@ -1039,6 +1043,10 @@ module lsm_ruc
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
         srunoff(i) = srunoff(i) + runof(i) * delt * 0.001            ! kg m-2
 
+        ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
+        snowfallac(i) = snfallac(i,j) ! kg m-2
+        acsnow(i)     = acsn(i,j)     ! kg m-2
+
         !  --- ...  unit conversion (from m to mm)
         snwdph(i)  = snowh(i,j) * 1000.0
 
@@ -1094,12 +1102,15 @@ module lsm_ruc
           if(debug_print) print *,'end ',i,flag_guess(i),flag_iter(i)
           if (flag_guess(i)) then
             if(debug_print) print *,'guess run'
-            weasd(i)  = weasd_old(i)
-            snwdph(i) = snwdph_old(i)
-            tskin(i)  = tskin_old(i)
-            canopy(i) = canopy_old(i)
-            !tprcp(i)  = tprcp_old(i)
-            srflag(i) = srflag_old(i)
+            weasd(i)       = weasd_old(i)
+            snwdph(i)      = snwdph_old(i)
+            tskin(i)       = tskin_old(i)
+            canopy(i)      = canopy_old(i)
+            !tprcp(i)       = tprcp_old(i)
+            srflag(i)      = srflag_old(i)
+            tsnow(i)       = tsnow_old(i)
+            snowfallac(i)  = snowfallac_old(i)
+            acsnow(i)      = acsnow_old(i)
 
             do k = 1, lsoil_ruc
               smois(i,k) = smois_old(i,k)
