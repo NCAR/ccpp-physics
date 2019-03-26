@@ -1,7 +1,7 @@
 
 jet.common= {
     use platform.defaults
-    MACHINE_ID='jet'
+    MACHINE_ID='jet.intel'
     HOMEnems=PWD_UP5
     HOMErt=OUTPUT_PATH
     INPUTS="@[BASELINE]"
@@ -9,7 +9,7 @@ jet.common= {
     MPI='impi'
 
     embed bash detect [[[
-        if [[ -d /lfs3 && -d /pan2 ]] ; then
+        if [[ -d /lfs3 && -d /lfs1 ]] ; then
             exit 0
         fi
         exit 1
@@ -26,7 +26,7 @@ jet.common= {
         # This function is used at PARSE TIME to detect whether we are
         # on Jet.  It must be very fast and low resource usage since
         # the parser runs it.
-        if [[ -d /lfs3 && -d /pan2 ]] ; then
+        if [[ -d /lfs3 && -d /lfs1 ]] ; then
             exit 0
         fi
         exit 1
