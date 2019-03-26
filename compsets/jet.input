@@ -1,7 +1,7 @@
 
 jet.common= {
     use platform.defaults
-    MACHINE_ID='jet'
+    MACHINE_ID='jet.intel'
     HOMEnems=PWD_UP5
     HOMErt=OUTPUT_PATH
     INPUTS="@[BASELINE]"
@@ -9,7 +9,7 @@ jet.common= {
     MPI='impi'
 
     embed bash detect [[[
-        if [[ -d /lfs3 && -d /pan2 ]] ; then
+        if [[ -d /lfs3 && -d /lfs1 ]] ; then
             exit 0
         fi
         exit 1
@@ -29,7 +29,7 @@ jet.common= {
         if ( which sbatch > /dev/null 2>&1 ) ; then
             exit 1
         fi
-        if [[ -d /lfs3 && -d /pan2 ]] ; then
+        if [[ -d /lfs3 && -d /lfs1 ]] ; then
             exit 0
         fi
         exit 1
