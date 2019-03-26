@@ -74,7 +74,7 @@
 !            sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          !
 !            prsl1, prslki, zf, islimsk, ddvel, slopetyp,               !
 !            shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      !
-!            isot, ivegsrc,                                             !
+!            lheatstrg, isot, ivegsrc,                                  !
 !  ---  in/outs:                                                        !
 !            weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        !
 !            canopy, trans, tsurf, zorl,                                !
@@ -128,6 +128,8 @@
 !     sfalb    - real, mean sfc diffused sw albedo (fractional)    im   !
 !     flag_iter- logical,                                          im   !
 !     flag_guess-logical,                                          im   !
+!     lheatstrg- logical, flag for canopy heat storage             1    !
+!                         parameterization                              !
 !     isot     - integer, sfc soil type data source zobler or statsgo   !
 !     ivegsrc  - integer, sfc veg type data source umd or igbp          !
 !                                                                       !
@@ -207,6 +209,7 @@
 !! | sfalb          | surface_diffused_shortwave_albedo                                            | mean surface diffused shortwave albedo                          | frac          |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                              | flag          |    1 | logical   |           | in     | F        |
+!! | lheatstrg      | flag_for_canopy_heat_storage                                                 | flag for canopy heat storage parameterization                   | flag          |    0 | logical   |           | in     | F        |
 !! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                        | index         |    0 | integer   |           | in     | F        |
 !! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                         | index         |    0 | integer   |           | in     | F        |
 !! | bexppert       | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                         | frac          |    1 | real      | kind_phys | in     | F        |
@@ -249,20 +252,23 @@
 !!
 !> \section general_noah_drv GFS sfc_drv General Algorithm
 !!  @{
-      subroutine lsm_noah_run                                            &
+      subroutine lsm_noah_run                                           &
+!  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, islimsk, ddvel, slopetyp,               &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
-     &       isot, ivegsrc,                                             & !  ---  inputs from here and above
+     &       lheatstrg, isot, ivegsrc,                                  &
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
+!  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-     &       canopy, trans, tsurf, zorl,                                & ! --- in/outs from here and above
+     &       canopy, trans, tsurf, zorl,                                &
+!  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1, errmsg, errflg                     & ! -- outputs from here and above
+     &       smcwlt2, smcref2, wet1, errmsg, errflg                     &
      &     )
-
+!
       use machine , only : kind_phys
       use funcphys, only : fpvs
       use physcons, only : grav   => con_g,    cp   => con_cp,          &
@@ -270,8 +276,7 @@
      &                     eps    => con_eps, epsm1 => con_epsm1,       &
      &                     rvrdm1 => con_fvirt
 
-!      use module_radiation_surface, only : ppfbet ! comment out and put the function instance inside lsm_noah module
-      use surface_perturbation, only : ppfbet ! comment out and put the function instance inside lsm_noah module
+      use surface_perturbation, only : ppfbet
 
       implicit none
 
@@ -290,7 +295,6 @@
 
 !  ---  input:
       integer, intent(in) :: im, km, isot, ivegsrc
-!      real (kind=kind_phys), dimension(6), intent(in) :: pertvegf
       real (kind=kind_phys), dimension(5), intent(in) :: pertvegf
 
       integer, dimension(im), intent(in) :: soiltyp, vegtype, slopetyp
@@ -305,6 +309,8 @@
       real (kind=kind_phys),  intent(in) :: delt
 
       logical, dimension(im), intent(in) :: flag_iter, flag_guess
+
+      logical, intent(in) :: lheatstrg
 
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
@@ -341,7 +347,7 @@
      &       sfcems, sheat, shdfac, shdmin1d, shdmax1d, smcwlt,         &
      &       smcdry, smcref, smcmax, sneqv, snoalb1d, snowh,            &
      &       snomlt, sncovr, soilw, soilm, ssoil, tsea, th2, tbot,      &
-     &       xlai, zlvl, swdn, tem,z0, bexpp, xlaip, vegfp,             &
+     &       xlai, zlvl, swdn, tem, z0, bexpp, xlaip, vegfp,            &
      &       mv,sv,alphav,betav,vegftmp
 
       integer :: couple, ice, nsoil, nroot, slope, stype, vtype
@@ -441,12 +447,13 @@
 ! sldpth   the thickness of each soil layer (\f$m\f$)
 
           couple = 1                      ! run noah lsm in 'couple' mode
-
-          if     (srflag(i) == 1.0) then  ! snow phase
-            ffrozp = 1.0
-          elseif (srflag(i) == 0.0) then  ! rain phase
-            ffrozp = 0.0
-          endif
+! use srflag directly to allow fractional rain/snow
+!          if     (srflag(i) == 1.0) then  ! snow phase
+!            ffrozp = 1.0
+!          elseif (srflag(i) == 0.0) then  ! rain phase
+!            ffrozp = 0.0
+!          endif
+          ffrozp = srflag(i)
           ice = 0
 
           zlvl = zf(i)
@@ -583,6 +590,7 @@
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
      &       bexpp, xlaip,                                              & ! sfc-perts, mgehne
+     &       lheatstrg,                                                 &
 !  ---  input/outputs:
      &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &
      &       z0,                                                        &
