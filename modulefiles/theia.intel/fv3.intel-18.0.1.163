@@ -15,10 +15,6 @@ module-whatis "loads NEMS FV3 prerequisites for Theia"
 ## load programming environment
 ## this typically includes compiler, MPI and job scheduler
 ##
-##
-## load programming environment
-## this typically includes compiler, MPI and job scheduler
-##
 module load intel/18.0.1.163
 module load impi/5.1.2.150
 module load netcdf/4.3.0
@@ -26,7 +22,7 @@ module load pnetcdf/1.5.0-impi
 module load slurm
 
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
 set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-intel-18.1.163-20181105
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
@@ -56,13 +52,6 @@ setenv ESMF_MOD              /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-
 setenv ESMFMKFILE            /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-5.1.2.150/lib/libO/Linux.intel.64.intelmpi.default/esmf.mk
 prepend-path PATH            /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-5.1.2.150/bin/binO/Linux.intel.64.intelmpi.default
 prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/intel-18.1.163/impi-5.1.2.150/lib/libO/Linux.intel.64.intelmpi.default
-
-##
-## memcheck utility
-##
-set MEMCHECK_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/memcheck-intel-18.1.163-20180820
-setenv MEMCHECK_INC "-I${MEMCHECK_DIR}/include"
-setenv MEMCHECK_LIB "-L${MEMCHECK_DIR}/lib -lmemcheck"
 
 ##
 ## Set compiler environment variables for CCPP

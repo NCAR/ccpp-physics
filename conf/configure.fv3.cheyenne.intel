@@ -58,7 +58,6 @@ CCPP = N
 TRANSITION = N
 HYBRID = Y
 STATIC = N
-MEMCHECK = N
 SION = N
 DYN32 = N
 
@@ -133,7 +132,7 @@ endif
 endif
 
 FFLAGS_OPT = -O2 -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3
-FFLAGS_REPRO = -O2 -debug minimal -fp-model source -qoverride-limits -g -traceback
+FFLAGS_REPRO = -O2 -debug minimal -fp-model consistent -qoverride-limits -g -traceback
 FFLAGS_DEBUG = -g -O0 -check all -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check -fstack-protector-all -fpe0 -debug -traceback -ftrapuv
 
 TRANSCENDENTALS := -fast-transcendentals
@@ -216,13 +215,6 @@ endif
 
 ifeq ($(TRANSITION),Y)
 CPPDEFS += -DTRANSITION
-endif
-
-ifeq ($(MEMCHECK),Y)
-CPPDEFS += -DMEMCHECK
-CFLAGS += $(MEMCHECK_INC)
-FFLAGS += $(MEMCHECK_INC)
-LDFLAGS += $(MEMCHECK_LIB)
 endif
 
 LDFLAGS += $(LIBS)

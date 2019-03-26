@@ -108,3 +108,6 @@ export FV3_RUN=ccpp_stretched_run.IN
 export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_stretched.xml
 export CCPP_LIB_DIR=ccpp/lib
 
+if [[ $MACHINE_ID = *.gnu ]]; then
+  export WLCLK=30
+fi

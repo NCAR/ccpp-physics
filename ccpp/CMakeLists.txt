@@ -105,10 +105,14 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -check -check noarg_temp_created -check nopointer -warn -warn noerrors -fp-stack-check")
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -fstack-protector-all -fpe0 -traceback -debug -ftrapuv")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
-    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -g -traceback")
+    set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model consistent -qoverride-limits -g -traceback")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
     # Specify aggressive optimization flags (to be overwritten for individual files in ccpp-physics' CMakeLists.txt)
-    set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -axSSE4.2,AVX,CORE-AVX2")
+    if (SIMDMULTIARCH)
+      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -axSSE4.2,AVX,CORE-AVX2")
+    else (SIMDMULTIARCH)
+      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -xCORE-AVX2")
+    endif (SIMDMULTIARCH)
     set (CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3")
   endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
 else (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
@@ -185,6 +189,14 @@ if (DYN32)
   message(STATUS "Dynamics compiled with 32-bit option, adjust fv_sat_adj types")
   ADD_DEFINITIONS(-DOVERLOAD_R4)
 endif (DYN32)
+
+#------------------------------------------------------------------------------
+# If a dynamic build is requested, set TARGET_SUPPORTS_SHARED_LIBS to TRUE; on
+# some systems, cmake doesn't set this even though the system supports shared
+# libraries (e.g. Cray systems)
+if(NOT STATIC)
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif(NOT STATIC)
 
 #------------------------------------------------------------------------------
 # Add model-specific flags for C/C++/Fortran preprocessor

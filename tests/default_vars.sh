@@ -41,7 +41,7 @@ elif [[ $MACHINE_ID = jet.* ]]; then
   TASKS_stretch=48 ; TPN_stretch=12 ; INPES_stretch=2 ; JNPES_stretch=4
   TASKS_strnest=96 ; TPN_strnest=12 ; INPES_strnest=2 ; JNPES_strnest=4
 
-elif [ $MACHINE_ID = gaea ]; then
+elif [[ $MACHINE_ID = gaea.* ]]; then
 
   TASKS_dflt=150 ; TPN_dflt=36 ; INPES_dflt=3 ; JNPES_dflt=8
   TASKS_thrd=84  ; TPN_thrd=18 ; INPES_thrd=3 ; JNPES_thrd=4
@@ -137,6 +137,9 @@ export SHOUR=00
 export FHMAX=${FHMAX:-`expr $DAYS \* 24`}
 export DT_ATMOS=1800
 
+export OZ_PHYS_OLD=.T.
+export OZ_PHYS_NEW=.F.
+export H2O_PHYS=.F.
 export DO_SPPT=.F.
 export DO_SHUM=.F.
 export DO_SKEB=.F.
