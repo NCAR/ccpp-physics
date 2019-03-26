@@ -10,7 +10,7 @@
 
       contains
 
-!>\defgroup GFS_rad_time_vary GFS RRTMG Update 
+!>\defgroup GFS_rad_time_vary GFS RRTMG Update
 !!\ingroup RRTMG
 !! @{
 !! \section arg_table_GFS_rad_time_vary_init Argument Table
@@ -55,6 +55,8 @@
       errmsg = ''
       errflg = 0
 
+      nb = 1
+
       if (Model%lsswr .or. Model%lslwr) then
 
         !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
@@ -64,30 +66,18 @@
           ipseed = mod(nint(con_100*sqrt(Model%sec)), ipsdlim) + 1 + ipsd0
           call random_setseed (ipseed, stat)
           call random_index (ipsdlim, numrdm, stat)
-    
+
           !--- set the random seeds for each column in a reproducible way
-          ix = 0
-          nb = 1
-          ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
-          ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
-          ! use OpenMP to speed up this loop *DH
-          do j = 1,Model%ny
-            do i = 1,Model%nx
-              ix = ix + 1
-              if (ix .gt. Model%blksz(nb)) then
-                ix = 1
-                nb = nb + 1
-              endif
-              if (nb == Tbd%blkno) then
-                !--- for testing purposes, replace numrdm with '100'
-                Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-                Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
-              endif
-            enddo
+          do ix=1,Model%blksz(nb)
+             j = Tbd%jmap(ix)
+             i = Tbd%imap(ix)
+             !--- for testing purposes, replace numrdm with '100'
+             Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
+             Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
           enddo
         endif  ! isubc_lw and isubc_sw
 
-        if (Model%num_p3d == 4) then
+        if (Model%imp_physics == 99) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,1) = Statein%tgrs
             Tbd%phy_f3d(:,:,2) = max(qmin,Statein%qgrs(:,:,1))
@@ -101,7 +91,7 @@
       endif
 
   end subroutine GFS_rad_time_vary_run
- 
+
 !> \section arg_table_GFS_rad_time_vary_finalize Argument Table
 !!
   subroutine GFS_rad_time_vary_finalize()
