@@ -1,0 +1,417 @@
+
+!
+! This work (Common Community Physics Package), identified by NOAA, NCAR,
+! CU/CIRES, is free of known copyright restrictions and is placed in the
+! public domain.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+! THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+! IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+! CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+!
+
+!>
+!! @brief Auto-generated cap module for the cs_conv_aw_adj scheme
+!!
+!
+module cs_conv_aw_adj_cap
+
+    use, intrinsic :: iso_c_binding,                                   &
+                      only: c_f_pointer, c_ptr, c_int32_t
+    use            :: ccpp_types,                                      &
+                      only: ccpp_t, CCPP_GENERIC_KIND
+    use            :: ccpp_fields,                                     &
+                      only: ccpp_field_get
+    use            :: ccpp_errors,                                     &
+                      only: ccpp_error, ccpp_debug
+    use            :: cs_conv_aw_adj, &
+                      only: cs_conv_aw_adj_run,cs_conv_aw_adj_init,cs_conv_aw_adj_finalize
+    ! Other modules required, e.g. type definitions
+    use machine, only: kind_phys
+
+    implicit none
+
+    private
+    public :: cs_conv_aw_adj_run_cap,cs_conv_aw_adj_init_cap,cs_conv_aw_adj_finalize_cap
+
+    contains
+
+
+    function cs_conv_aw_adj_run_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        type(ccpp_t), pointer           :: cdata
+        type(c_ptr)                     :: cptr
+        integer, allocatable            :: cdims(:)
+        integer                         :: ckind
+        integer, pointer :: im
+        integer, pointer :: levs
+        logical, pointer :: do_cscnv
+        logical, pointer :: do_aw
+        logical, pointer :: do_shoc
+        integer, pointer :: ntrac
+        integer, pointer :: ncld
+        integer, pointer :: ntcw
+        integer, pointer :: ntclamt
+        integer, pointer :: nncl
+        real(kind_phys), pointer :: con_g
+        real(kind_phys), pointer :: sigmafrac(:,:)
+        real(kind_phys), pointer :: gt0(:,:)
+        real(kind_phys), pointer :: gq0(:,:,:)
+        real(kind_phys), pointer :: save_t(:,:)
+        real(kind_phys), pointer :: save_q(:,:,:)
+        real(kind_phys), pointer :: prsi(:,:)
+        real(kind_phys), pointer :: cldfrac(:,:)
+        real(kind_phys), pointer :: subcldfrac(:,:)
+        real(kind_phys), pointer :: prcp(:)
+
+        ierr = 0
+
+        call c_f_pointer(ptr, cdata)
+
+
+        call ccpp_field_get(cdata, 'horizontal_dimension', im, ierr=ierr, kind=ckind, index=364)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve horizontal_dimension from CCPP data structure')
+            return
+        end if
+        if (kind(im).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable horizontal_dimension')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'vertical_dimension', levs, ierr=ierr, kind=ckind, index=817)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve vertical_dimension from CCPP data structure')
+            return
+        end if
+        if (kind(levs).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable vertical_dimension')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'flag_for_Chikira_Sugiyama_deep_convection', do_cscnv, ierr=ierr, kind=ckind, index=269)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve flag_for_Chikira_Sugiyama_deep_convection from CCPP data structure')
+            return
+        end if
+        if (kind(do_cscnv).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable flag_for_Chikira_Sugiyama_deep_convection')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'flag_for_Arakawa_Wu_adjustment', do_aw, ierr=ierr, kind=ckind, index=267)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve flag_for_Arakawa_Wu_adjustment from CCPP data structure')
+            return
+        end if
+        if (kind(do_aw).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable flag_for_Arakawa_Wu_adjustment')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'flag_for_shoc', do_shoc, ierr=ierr, kind=ckind, index=313)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve flag_for_shoc from CCPP data structure')
+            return
+        end if
+        if (kind(do_shoc).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable flag_for_shoc')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'number_of_tracers', ntrac, ierr=ierr, kind=ckind, index=584)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve number_of_tracers from CCPP data structure')
+            return
+        end if
+        if (kind(ntrac).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable number_of_tracers')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'number_of_hydrometeors', ncld, ierr=ierr, kind=ckind, index=578)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve number_of_hydrometeors from CCPP data structure')
+            return
+        end if
+        if (kind(ncld).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable number_of_hydrometeors')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'index_for_liquid_cloud_condensate', ntcw, ierr=ierr, kind=ckind, index=384)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve index_for_liquid_cloud_condensate from CCPP data structure')
+            return
+        end if
+        if (kind(ntcw).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable index_for_liquid_cloud_condensate')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'index_for_cloud_amount', ntclamt, ierr=ierr, kind=ckind, index=378)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve index_for_cloud_amount from CCPP data structure')
+            return
+        end if
+        if (kind(ntclamt).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable index_for_cloud_amount')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'number_of_tracers_for_cloud_condensate', nncl, ierr=ierr, kind=ckind, index=586)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve number_of_tracers_for_cloud_condensate from CCPP data structure')
+            return
+        end if
+        if (kind(nncl).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable number_of_tracers_for_cloud_condensate')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'gravitational_acceleration', con_g, ierr=ierr, kind=ckind, index=355)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve gravitational_acceleration from CCPP data structure')
+            return
+        end if
+        if (kind(con_g).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable gravitational_acceleration')
+            ierr = 1
+            return
+        end if
+#endif
+        
+
+        call ccpp_field_get(cdata, 'convective_updraft_area_fraction', sigmafrac, ierr=ierr, dims=cdims, kind=ckind, index=131)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve convective_updraft_area_fraction from CCPP data structure')
+            return
+        end if
+        if (kind(sigmafrac).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable convective_updraft_area_fraction')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'air_temperature_updated_by_physics', gt0, ierr=ierr, dims=cdims, kind=ckind, index=59)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve air_temperature_updated_by_physics from CCPP data structure')
+            return
+        end if
+        if (kind(gt0).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable air_temperature_updated_by_physics')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'tracer_concentration_updated_by_physics', gq0, ierr=ierr, dims=cdims, kind=ckind, index=803)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve tracer_concentration_updated_by_physics from CCPP data structure')
+            return
+        end if
+        if (kind(gq0).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable tracer_concentration_updated_by_physics')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'air_temperature_save', save_t, ierr=ierr, dims=cdims, kind=ckind, index=57)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve air_temperature_save from CCPP data structure')
+            return
+        end if
+        if (kind(save_t).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable air_temperature_save')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'tracer_concentration_save', save_q, ierr=ierr, dims=cdims, kind=ckind, index=802)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve tracer_concentration_save from CCPP data structure')
+            return
+        end if
+        if (kind(save_q).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable tracer_concentration_save')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'air_pressure_at_interface', prsi, ierr=ierr, dims=cdims, kind=ckind, index=45)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve air_pressure_at_interface from CCPP data structure')
+            return
+        end if
+        if (kind(prsi).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable air_pressure_at_interface')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'cloud_fraction_for_MG', cldfrac, ierr=ierr, dims=cdims, kind=ckind, index=99)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve cloud_fraction_for_MG from CCPP data structure')
+            return
+        end if
+        if (kind(cldfrac).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable cloud_fraction_for_MG')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'subgrid_scale_cloud_fraction_from_shoc', subcldfrac, ierr=ierr, dims=cdims, kind=ckind, index=675)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve subgrid_scale_cloud_fraction_from_shoc from CCPP data structure')
+            return
+        end if
+        if (kind(subcldfrac).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable subgrid_scale_cloud_fraction_from_shoc')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call ccpp_field_get(cdata, 'lwe_thickness_of_explicit_precipitation_amount', prcp, ierr=ierr, dims=cdims, kind=ckind, index=480)
+#ifdef DEBUG
+        if (ierr /= 0) then
+            call ccpp_error('Unable to retrieve lwe_thickness_of_explicit_precipitation_amount from CCPP data structure')
+            return
+        end if
+        if (kind(prcp).ne.ckind) then
+            call ccpp_error('Kind mismatch for variable lwe_thickness_of_explicit_precipitation_amount')
+            ierr = 1
+            return
+        end if
+#endif
+        deallocate(cdims)
+        
+
+        call cs_conv_aw_adj_run(im=im,levs=levs,do_cscnv=do_cscnv,do_aw=do_aw,do_shoc=do_shoc,ntrac=ntrac, &
+                  ncld=ncld,ntcw=ntcw,ntclamt=ntclamt,nncl=nncl,con_g=con_g,sigmafrac=sigmafrac, &
+                  gt0=gt0,gq0=gq0,save_t=save_t,save_q=save_q,prsi=prsi,cldfrac=cldfrac,subcldfrac=subcldfrac, &
+                  prcp=prcp,errmsg=cdata%errmsg,errflg=cdata%errflg)
+        ierr=cdata%errflg
+
+    end function cs_conv_aw_adj_run_cap
+
+    function cs_conv_aw_adj_init_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        type(ccpp_t), pointer           :: cdata
+        type(c_ptr)                     :: cptr
+        integer, allocatable            :: cdims(:)
+        integer                         :: ckind
+
+
+        ierr = 0
+
+        call c_f_pointer(ptr, cdata)
+
+
+
+        call cs_conv_aw_adj_init()
+        
+
+    end function cs_conv_aw_adj_init_cap
+
+    function cs_conv_aw_adj_finalize_cap(ptr) bind(c) result(ierr)
+
+        integer(c_int32_t)         :: ierr
+        type(c_ptr), intent(inout) :: ptr
+
+        type(ccpp_t), pointer           :: cdata
+        type(c_ptr)                     :: cptr
+        integer, allocatable            :: cdims(:)
+        integer                         :: ckind
+
+
+        ierr = 0
+
+        call c_f_pointer(ptr, cdata)
+
+
+
+        call cs_conv_aw_adj_finalize()
+        
+
+    end function cs_conv_aw_adj_finalize_cap
+end module cs_conv_aw_adj_cap
