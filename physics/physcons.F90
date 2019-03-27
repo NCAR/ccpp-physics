@@ -130,6 +130,12 @@
   real(kind=kind_phys),parameter:: rhosnow    = 100.                   !< density of snow (kg/m^3)
   real(kind=kind_phys),parameter:: rhoair     = 1.28                   !< density of air near surface (kg/m^3)
 
+!> \name physics related constants for CIRES UGWP (Valery Yudin - 2019)
+
+
+
+
+
 !........................................!
       end module physcons                !
 !========================================!
