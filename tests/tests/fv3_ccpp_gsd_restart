@@ -1,6 +1,6 @@
 ###############################################################################
 #
-#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + RUC LSM) restart test
+#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + RUC LSM) restart (24-48h) test
 #
 ###############################################################################
 
@@ -93,9 +93,4 @@ export CCPP_SDF=ccpp/suites/suite_FV3_GSD.xml
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gsd.nml.IN
 
-
 RUN_SCRIPT=rt_fv3.sh
-
-if [[ $MACHINE_ID = cheyenne.intel ]]; then
-  export WLCLK=30
-fi
