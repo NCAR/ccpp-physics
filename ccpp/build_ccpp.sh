@@ -13,7 +13,7 @@ function usage   {
   echo "build_ccpp.sh MACHINE_ID CCPP_DIR ESMF_MK [ 'MAKE_OPT' ] [ clean_before ] [ clean_after ]"
   echo "    Where: MACHINE      [required] can be : ${VALID_MACHINES[@]}"
   echo "           CCPP_DIR     [required] is the target installation directory for CCPP"
-  echo "           ESMF_MK      [required] is the location of the ESMF makefile fragement"
+  echo "           ESMF_MK      [required] is the location/name of the ESMF makefile fragement"
   echo "           MAKE_OPT     [optional] can be any of the NEMSfv3gfs MAKE_OPT options,"
   echo "                                   enclosed in a single string; used:"
   echo "                                   SION=Y/N   (default N)"
