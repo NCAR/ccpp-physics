@@ -8,7 +8,7 @@
 /
 
  &atmos_model_nml
-     blocksize = 30
+     blocksize = 32
      chksum_debug = .false.
      dycore_only = .false.
      fdiag = 1
@@ -41,7 +41,7 @@
        npx      = 1729
        npy      = 1441
        ntiles   = 1,
-       npz    = 63
+       npz    = 64
        !grid_type = -1
        make_nh = .T.
        fv_debug = .F.
@@ -107,14 +107,14 @@
        target_lon = -97.5
        stretch_fac = 1.5
 !!     nord_zs_filter = 4
-       n_zs_filter = 0 
+       n_zs_filter = 0
        regional = .true.
-       bc_update_interval = 3
+       bc_update_interval = 6
 /
 
  &external_ic_nml
        filtered_terrain = .true.
-       levp = 64
+       levp = 65
        gfs_dwinds = .true.
        checker_tr = .F.
        nt_checker = 0

@@ -49,7 +49,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/module_nst_model.f90',
     'ccpp/physics/physics/module_nst_parameters.f90',
     'ccpp/physics/physics/module_nst_water_prop.f90',
-    'ccpp/physics/physics/module_mp_thompson_hrrr_radar.F90',
+    'ccpp/physics/physics/module_mp_radar.F90',
     'ccpp/physics/physics/module_mp_thompson_hrrr.F90',
     'ccpp/physics/physics/module_bl_mynn.F90',
     'ccpp/physics/physics/module_sf_mynn.F90',
@@ -206,7 +206,7 @@ SCHEMES_CMAKEFILE = 'ccpp/physics/CCPP_SCHEMES.cmake'
 # determines the directory to place ccpp_{modules,fields}.inc
 TARGET_FILES = [
     'FV3/atmos_cubed_sphere/driver/fvGFS/atmosphere.F90',
-    'FV3/ipd/IPD_CCPP_Driver.F90',
+    'FV3/CCPP_layer/CCPP_Driver.F90',
     ]
 
 # Auto-generated makefile/cmakefile snippets that contain all caps

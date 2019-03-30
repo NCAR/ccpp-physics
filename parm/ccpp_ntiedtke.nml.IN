@@ -155,6 +155,7 @@
        dspheat        = .true.
        hybedmf        = .true.
        satmedmf       = .false.
+       lheatstrg      = @[LHEATSTRG]
        random_clds    = .false.
        trans_trac     = .false.
        cnvcld         = .true.
