@@ -232,6 +232,7 @@
 !! |----------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                                                              | horizontal loop extent                                                              | count       |    0 | integer    |           | in     | F        |
 !! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
+!! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                                                                                   | landmask: sea/land/ice=0/1/2                                                        | flag        |    1 | integer    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
@@ -317,7 +318,7 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, lssav, islmsk, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,          &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, islmsk, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,  &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
         t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -331,7 +332,7 @@
         implicit none
 
         integer,                              intent(in) :: im
-        logical,                              intent(in) :: cplflx, lssav
+        logical,                              intent(in) :: cplflx, cplwav, lssav
         integer, dimension(im),               intent(in) :: islmsk
 
         real(kind=kind_phys),                 intent(in) :: dtf
@@ -370,6 +371,13 @@
           v1(i)      = vgrs_1(i)
         enddo
 
+        if (cplflx .or. cplwav) then
+          do i=1,im
+            u10mi_cpl   (i) = u10m(i)
+            v10mi_cpl   (i) = v10m(i)
+          enddo
+        endif
+
         if (cplflx) then
           do i=1,im
             dlwsfci_cpl (i) = adjsfcdlw(i)
@@ -388,8 +396,6 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            u10mi_cpl   (i) = u10m(i)
-            v10mi_cpl   (i) = v10m(i)
             tsfci_cpl   (i) = tsfc(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
