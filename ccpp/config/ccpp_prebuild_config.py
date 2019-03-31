@@ -157,6 +157,7 @@ SCHEME_FILES = {
     'ccpp/physics/physics/h2ophys.f'                         : [ 'slow_physics' ],
     'ccpp/physics/physics/samfdeepcnv.f'                     : [ 'slow_physics' ],
     'ccpp/physics/physics/samfshalcnv.f'                     : [ 'slow_physics' ],
+    'ccpp/physics/physics/maximum_hourly_diagnostics.F90'    : [ 'slow_physics' ],
     'ccpp/physics/physics/m_micro.F90'                       : [ 'slow_physics' ],
     'ccpp/physics/physics/m_micro_interstitial.F90'          : [ 'slow_physics' ],
     'ccpp/physics/physics/cu_gf_driver_pre.F90'              : [ 'slow_physics' ],
