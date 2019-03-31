@@ -160,6 +160,8 @@ contains
 !! | phys_hydrostatic | flag_for_hydrostatic_heating_from_physics                        | flag indicating hydrostatic heating from physics                      | flag       |    0 | logical   |           | in    | F        |
 !! | lradar           | flag_for_radar_reflectivity                                      | flag for radar reflectivity                                           | flag       |    0 | logical   |           | in    | F        |
 !! | refl_10cm        | radar_reflectivity_10cm                                          | instantaneous refl_10cm                                               | dBZ        |    2 | real      | kind_phys | inout | F        |
+!! | kdt              | index_of_time_step                                               | current forecast iteration                                            | index      |    0 | integer   |           | in    | F        |
+!! | nsteps_per_reset | number_of_time_steps_per_maximum_hourly_time_interval            | number_of_time_steps_per_maximum_hourly_time_interval                 | count      |    0 | integer   |           | in    | F        |
 !! | effr_in          | flag_for_cloud_effective_radii                                   | flag for cloud effective radii calculations in microphysics           |            |    0 | logical   |           | in    | F        |
 !! | rew              | effective_radius_of_stratiform_cloud_liquid_water_particle_in_um | eff. radius of cloud liquid water particle in micrometer              | um         |    2 | real      | kind_phys | inout | F        |
 !! | rei              | effective_radius_of_stratiform_cloud_ice_particle_in_um          | eff. radius of cloud ice water particle in micrometer                 | um         |    2 | real      | kind_phys | inout | F        |
@@ -175,7 +177,7 @@ contains
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
       dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                  &
-      effr_in, rew, rei, rer, res, reg, errmsg, errflg)
+      kdt, nsteps_per_reset, effr_in, rew, rei, rer, res, reg, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -212,6 +214,7 @@ contains
 
       logical, intent (in) :: lradar
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: refl_10cm
+      integer, intent (in) :: kdt, nsteps_per_reset
       logical, intent (in) :: effr_in
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: rew, rei, rer, res, reg
 
@@ -288,7 +291,7 @@ contains
                  qv1, ql1, qr1, qi1, qs1, qg1, qa1, qn1, qv_dt, ql_dt, qr_dt, qi_dt, &
                  qs_dt, qg_dt, qa_dt, pt_dt, pt, w,  uin, vin, u_dt, v_dt, dz, delp, &
                  garea, dtp, frland, rain0, snow0, ice0, graupel0, hydrostatic,      &
-                 phys_hydrostatic, p123, lradar, refl)
+                 phys_hydrostatic, p123, lradar, refl, kdt, nsteps_per_reset)
       tem   = dtp*con_p001/con_day
 
       ! fix negative values
