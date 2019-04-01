@@ -324,7 +324,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
             uin, vin, udt, vdt, dz, delp, area, dt_in, land,                    &
             rain, snow, ice, graupel, hydrostatic, phys_hydrostatic,            &
-            p, lradar, refl_10cm)
+            p, lradar, refl_10cm, kdt, nsteps_per_reset)
 
    implicit none
 
@@ -354,8 +354,11 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    real, intent (in), dimension (iis:iie, jjs:jje, kks:kke) :: p
    logical, intent (in) :: lradar
    real, intent (out), dimension (iis:iie, jjs:jje, kks:kke) :: refl_10cm
+   integer, intent (in) :: kdt, nsteps_per_reset
 
    ! Local variables
+   logical :: melti = .false.
+
    real :: mpdt, rdt, dts, convt, tot_prec
 
    integer :: i, j, k
@@ -588,6 +591,12 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
 
    ! call mpp_clock_end (gfdl_mp_clock)
     if(lradar) then
+       ! Only set melti to true at the output times
+       if(mod(kdt,nsteps_per_reset)==0)then
+         melti=.true.
+       else
+         melti=.false.
+       endif
        do j = js, je
           do i = is, ie
              do k = ktop,kbot
@@ -600,7 +609,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
                qg1d(k) = qg(i,j,kflip)
              enddo
              call refl10cm_gfdl (qv1d, qr1d, qs1d, qg1d,                 &
-                       t1d, p1d, dBZ, ktop, kbot, i,j)
+                       t1d, p1d, dBZ, ktop, kbot, i, j, melti)
              do k = ktop,kbot
                 kflip = kbot-ktop+1-k+1
                 refl_10cm(i,j,kflip) = MAX(-35., dBZ(k))
@@ -4735,7 +4744,8 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
     real :: alphar = 0.8, alphas = 0.25, alphag = 0.5
     real :: gammar = 17.837789, gammas = 8.2850630, gammag = 11.631769
 !   real :: qmin = 1.0e-5, ccn = 1.0e8, beta = 1.22
-    real :: qmin = 5.0e-6, ccn = 1.0e8, beta = 1.22
+!   real :: qmin = 5.0e-6, ccn = 1.0e8, beta = 1.22
+    real :: qmin = 9.0e-6, ccn = 1.0e8, beta = 1.22
 !   real :: qmin = 1.0e-6, ccn = 1.0e8, beta = 1.22
 !   real :: qmin = 1.0e-8, ccn = 1.0e8, beta = 1.22
 !   real :: qmin = 1.0e-12, ccn = 1.0e8, beta = 1.22
@@ -4841,7 +4851,7 @@ end subroutine cloud_diagnosis
 !+---+-----------------------------------------------------------------+
 
       subroutine refl10cm_gfdl (qv1d, qr1d, qs1d, qg1d,                 &
-                       t1d, p1d, dBZ, kts, kte, ii,jj)
+                       t1d, p1d, dBZ, kts, kte, ii, jj, melti)
 
       IMPLICIT NONE
 
@@ -4865,8 +4875,7 @@ end subroutine cloud_diagnosis
       DOUBLE PRECISION:: fmelt_s, fmelt_g
 
       INTEGER:: i, k, k_0, kbot, n
-      LOGICAL:: melti
-
+      LOGICAL, INTENT(IN):: melti
       DOUBLE PRECISION:: cback, x, eta, f_d
 !+---+
 
@@ -4921,17 +4930,14 @@ end subroutine cloud_diagnosis
 !+---+-----------------------------------------------------------------+
 !..Locate K-level of start of melting (k_0 is level above).
 !+---+-----------------------------------------------------------------+
-      melti = .false.
       k_0 = kts
-      do k = kte-1, kts, -1
-         if ( (temp(k).gt.273.15) .and. L_qr(k)                         &
-                                  .and. (L_qs(k+1).or.L_qg(k+1)) ) then
+      K_LOOP:do k = kte-1, kts, -1
+         if ( melti .and. (temp(k).gt.273.15) .and. L_qr(k)             &
+              .and. (L_qs(k+1).or.L_qg(k+1)) ) then
             k_0 = MAX(k+1, k_0)
-            melti=.true.
-            goto 195
+            EXIT K_LOOP
          endif
-      enddo
- 195  continue
+      enddo K_LOOP
 !+---+-----------------------------------------------------------------+
 !..Assume Rayleigh approximation at 10 cm wavelength. Rain (all temps)
 !.. and non-water-coated snow and graupel when below freezing are

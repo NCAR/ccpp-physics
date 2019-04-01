@@ -322,7 +322,7 @@
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islimsk(i) >= 2) .and. flag_iter(i)
+        flag(i) = (islimsk(i) == 2) .and. flag_iter(i)
         if (flag_iter(i) .and. islimsk(i) < 2) then
           hice(i) = 0.0
           fice(i) = 0.0

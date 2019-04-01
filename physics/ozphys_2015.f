@@ -77,8 +77,9 @@
      &                                    prsl(ix,levs), tin(ix,levs),  &
      &                                    delp(ix,levs),                &
      &                                    prdout(ix,ko3,pl_coeff), dt
-      real(kind=kind_phys), intent(inout) :: ozp1(ix,levs),             &
-     &                  ozp2(ix,levs), ozp3(ix,levs),ozp4(ix,levs)
+      ! These arrays may not be allocated and need assumed array sizes
+      real(kind=kind_phys), intent(inout) ::                            &
+     &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
       real(kind=kind_phys), intent(inout) :: oz(ix,levs)
 
 
@@ -169,16 +170,16 @@
 !ccpp            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
           oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
         enddo
-        if (ldiag3d) then     !     ozone change diagnostics
-          do i=1,im
-            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
-            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
-            ozp4(i,l) = ozp4(i,l) + prod(i,4)
-     &                              * (colo3(i,l)-coloz(i,l))*dt
-          enddo
-        endif
+!        if (ldiag3d) then     !     ozone change diagnostics
+!          do i=1,im
+!            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
+!!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+!            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+!            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
+!            ozp4(i,l) = ozp4(i,l) + prod(i,4)
+!     &                              * (colo3(i,l)-coloz(i,l))*dt
+!          enddo
+!        endif
       enddo                                ! vertical loop
 !
       return
