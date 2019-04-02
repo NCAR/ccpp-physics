@@ -84,6 +84,7 @@
       <scheme>gfdl_cloud_microphys</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
+      <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>
   <group name="stochastics">
