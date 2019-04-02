@@ -399,19 +399,19 @@
   !             enddo
   !           enddo
   !         endif
-          do k=1,levs
-            do i=1,im
-              tem  = dqdt(i,k,ntqv) * dtf
-              dq3dt(i,k) = dq3dt(i,k) + tem
-            enddo
-          enddo
-          if (ntoz > 0) then
-            do k=1,levs
-              do i=1,im
-                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
-              enddo
-            enddo
-          endif
+!          do k=1,levs
+!            do i=1,im
+!              tem  = dqdt(i,k,ntqv) * dtf
+!              dq3dt(i,k) = dq3dt(i,k) + tem
+!            enddo
+!          enddo
+!          if (ntoz > 0) then
+!            do k=1,levs
+!              do i=1,im
+!                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
+!              enddo
+!            enddo
+!          endif
         endif
 
       endif   ! end if_lssav
