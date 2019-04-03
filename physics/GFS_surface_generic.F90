@@ -13,56 +13,67 @@
 
 #if 0
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                           | count      |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                           | number of vertical levels                                        | count      |    0 | integer   |           | in     | F        |
-!! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                       | frac       |    1 | real      | kind_phys | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                     | flag       |    1 | integer   |           | in     | F        |
-!! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                         | index      |    0 | integer   |           | in     | F        |
-!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                          | index      |    0 | integer   |           | in     | F        |
-!! | stype          | soil_type_classification_real                                                | soil type for lsm                                                | index      |    1 | real      | kind_phys | in     | F        |
-!! | vtype          | vegetation_type_classification_real                                          | vegetation type for lsm                                          | index      |    1 | real      | kind_phys | in     | F        |
-!! | slope          | surface_slope_classification_real                                            | sfc slope type for lsm                                           | index      |    1 | real      | kind_phys | in     | F        |
-!! | prsik_1        | dimensionless_exner_function_at_lowest_model_interface                       | dimensionless Exner function at lowest model interface           | none       |    1 | real      | kind_phys | in     | F        |
-!! | prslk_1        | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer               | none       |    1 | real      | kind_phys | in     | F        |
-!! | semis          | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                                | frac       |    1 | real      | kind_phys | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                                            | surface downwelling longwave flux at current time                | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                                                     | surface skin temperature                                         | K          |    1 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                 | geopotential at model layer centers                              | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | con_g          | gravitational_acceleration                                                   | gravitational acceleration                                       | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom | frac       |    1 | real      | kind_phys | inout  | F        |
-!! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                      | index      |    1 | integer   |           | inout  | F        |
-!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                                | index      |    1 | integer   |           | inout  | F        |
-!! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                             | index      |    1 | integer   |           | inout  | F        |
-!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer      | ratio      |    1 | real      | kind_phys | inout  | F        |
-!! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground  | W m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                         | K          |    1 | real      | kind_phys | inout  | F        |
-!! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                            | m          |    1 | real      | kind_phys | inout  | F        |
-!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                | flag       |    0 | logical   |           | in     | F        |
-!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step              | K          |    2 | real      | kind_phys | out    | F        |
-!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling               | change in rain_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
-!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                        | change in show_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
-!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                           | total rain precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
-!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                    | total snow precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
-!! | do_sfcperts    | flag_for_stochastic_surface_perturbations                                    | flag for stochastic surface perturbations option                 | flag       |    0 | logical   |           | in     | F        |
-!! | nsfcpert       | number_of_surface_perturbations                                              | number of surface perturbations                                  | count      |    0 | integer   |           | in     | F        |
-!! | sfc_wts        | weights_for_stochastic_surface_physics_perturbation                          | weights for stochastic surface physics perturbation              | none       |    2 | real      | kind_phys | in     | F        |
-!! | pertz0         | magnitude_of_perturbation_of_momentum_roughness_length                       | magnitude of perturbation of momentum roughness length           | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertzt         | magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio         | magnitude of perturbation of heat to momentum roughness length r.| frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertshc        | magnitude_of_perturbation_of_soil_type_b_parameter                           | magnitude of perturbation of soil type b parameter               | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertlai        | magnitude_of_perturbation_of_leaf_area_index                                 | magnitude of perturbation of leaf area index                     | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertvegf       | magnitude_of_perturbation_of_vegetation_fraction                             | magnitude of perturbation of vegetation fraction                 | frac       |    1 | real      | kind_phys | in     | F        |
-!! | z01d           | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                        | frac       |    1 | real      | kind_phys | out    | F        |
-!! | zt1d           | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | out    | F        |
-!! | bexp1d         | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                          | frac       |    1 | real      | kind_phys | out    | F        |
-!! | xlai1d         | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                  | frac       |    1 | real      | kind_phys | out    | F        |
-!! | vegf1d         | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                              | frac       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                                | long_name                                                            | units      | rank | type      |    kind   | intent | optional |
+!! |----------------|------------------------------------------------------------------------------|----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                               | count      |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                                           | number of vertical levels                                            | count      |    0 | integer   |           | in     | F        |
+!! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                           | frac       |    1 | real      | kind_phys | in     | F        |
+!! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                         | flag       |    1 | integer   |           | in     | F        |
+!! | lndfrac        | land_area_fraction                                                           | fraction of horizontal grid area occupied by land                    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | lakfrac        | lake_area_fraction                                                           | fraction of horizontal grid area occupied by lake                    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | ocnfrac        | sea_area_fraction                                                            | fraction of horizontal grid area occupied by ocean                   | frac       |    1 | real      | kind_phys | in     | F        |
+!! | idry           | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction          | flag       |    1 | integer   |           | inout  | F        |
+!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag       |    1 | integer   |           | inout  | F        |
+!! | ilak           | flag_nonzero_lake_surface_fraction                                           | flag indicating presence of some lake surface area fraction          | flag       |    1 | integer   |           | inout  | F        |
+!! | iocn           | flag_nonzero_ocean_surface_fraction                                          | flag indicating presence of some ocean surface area fraction         | flag       |    1 | integer   |           | inout  | F        |
+!! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag       |    1 | integer   |           | inout  | F        |
+!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                         | frac       |    1 | real      | kind_phys | in     | F        |
+!! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                        | frac       |    0 | real      | kind_phys | in     | F        |
+!! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                             | index      |    0 | integer   |           | in     | F        |
+!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                              | index      |    0 | integer   |           | in     | F        |
+!! | stype          | soil_type_classification_real                                                | soil type for lsm                                                    | index      |    1 | real      | kind_phys | in     | F        |
+!! | vtype          | vegetation_type_classification_real                                          | vegetation type for lsm                                              | index      |    1 | real      | kind_phys | in     | F        |
+!! | slope          | surface_slope_classification_real                                            | sfc slope type for lsm                                               | index      |    1 | real      | kind_phys | in     | F        |
+!! | prsik_1        | dimensionless_exner_function_at_lowest_model_interface                       | dimensionless Exner function at lowest model interface               | none       |    1 | real      | kind_phys | in     | F        |
+!! | prslk_1        | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer                   | none       |    1 | real      | kind_phys | in     | F        |
+!! | semis          | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                                    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | adjsfcdlw      | surface_downwelling_longwave_flux                                            | surface downwelling longwave flux at current time                    | W m-2      |    1 | real      | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                                                     | surface skin temperature                                             | K          |    1 | real      | kind_phys | in     | F        |
+!! | phil           | geopotential                                                                 | geopotential at model layer centers                                  | m2 s-2     |    2 | real      | kind_phys | in     | F        |
+!! | con_g          | gravitational_acceleration                                                   | gravitational acceleration                                           | m s-2      |    0 | real      | kind_phys | in     | F        |
+!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom     | frac       |    1 | real      | kind_phys | inout  | F        |
+!! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                          | index      |    1 | integer   |           | inout  | F        |
+!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                                    | index      |    1 | integer   |           | inout  | F        |
+!! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                                 | index      |    1 | integer   |           | inout  | F        |
+!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer          | ratio      |    1 | real      | kind_phys | inout  | F        |
+!! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground      | W m-2      |    1 | real      | kind_phys | inout  | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                             | K          |    1 | real      | kind_phys | inout  | F        |
+!! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                                | m          |    1 | real      | kind_phys | inout  | F        |
+!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                    | flag       |    0 | logical   |           | in     | F        |
+!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step                  | K          |    2 | real      | kind_phys | out    | F        |
+!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling               | change in rain_cpl (coupling_type)                                   | m          |    1 | real      | kind_phys | out    | F        |
+!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                        | change in show_cpl (coupling_type)                                   | m          |    1 | real      | kind_phys | out    | F        |
+!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                           | total rain precipitation                                             | m          |    1 | real      | kind_phys | in     | F        |
+!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                    | total snow precipitation                                             | m          |    1 | real      | kind_phys | in     | F        |
+!! | do_sfcperts    | flag_for_stochastic_surface_perturbations                                    | flag for stochastic surface perturbations option                     | flag       |    0 | logical   |           | in     | F        |
+!! | nsfcpert       | number_of_surface_perturbations                                              | number of surface perturbations                                      | count      |    0 | integer   |           | in     | F        |
+!! | sfc_wts        | weights_for_stochastic_surface_physics_perturbation                          | weights for stochastic surface physics perturbation                  | none       |    2 | real      | kind_phys | in     | F        |
+!! | pertz0         | magnitude_of_perturbation_of_momentum_roughness_length                       | magnitude of perturbation of momentum roughness length               | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertzt         | magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio         | magnitude of perturbation of heat to momentum roughness length r.    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertshc        | magnitude_of_perturbation_of_soil_type_b_parameter                           | magnitude of perturbation of soil type b parameter                   | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertlai        | magnitude_of_perturbation_of_leaf_area_index                                 | magnitude of perturbation of leaf area index                         | frac       |    1 | real      | kind_phys | in     | F        |
+!! | pertvegf       | magnitude_of_perturbation_of_vegetation_fraction                             | magnitude of perturbation of vegetation fraction                     | frac       |    1 | real      | kind_phys | in     | F        |
+!! | z01d           | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                            | frac       |    1 | real      | kind_phys | out    | F        |
+!! | zt1d           | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio              | frac       |    1 | real      | kind_phys | out    | F        |
+!! | bexp1d         | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                              | frac       |    1 | real      | kind_phys | out    | F        |
+!! | xlai1d         | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                      | frac       |    1 | real      | kind_phys | out    | F        |
+!! | vegf1d         | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                                  | frac       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                             | none       |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                                | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
+      subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, lndfrac, lakfrac, ocnfrac, idry,    &
+                          iice, ilak, iocn, iwet, fice, cimin, isot, ivegsrc, stype, vtype, slope,         &
                           prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
                           slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
@@ -77,9 +88,11 @@
         ! Interface variables
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
+        integer, dimension(im), intent(inout) :: idry, iice, ilak, iocn, iwet
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
 
-        real(kind=kind_phys), intent(in) :: con_g
+        real(kind=kind_phys), intent(in) :: con_g, cimin
+        real(kind=kind_phys), dimension(im), intent(in) :: lndfrac, lakfrac, ocnfrac, fice
         real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
           semis, adjsfcdlw, tsfc
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
@@ -165,6 +178,14 @@
         endif
 
         ! End of stochastic physics / surface perturbation
+
+        do i = 1, im
+          if(lndfrac(i)<1.)    iwet(i) = 1
+          if(lndfrac(i)>0.)    idry(i) = 1
+          if(ocnfrac(i)>0.)    iocn(i) = 1
+          if(lakfrac(i)>0.)    ilak(i) = 1
+          if(iwet(i) == 1 .and. fice(i) >= cimin) iice(i) = 1
+        enddo
 
         do i=1,im
           sigmaf(i) = max(vfrac(i),0.01 )

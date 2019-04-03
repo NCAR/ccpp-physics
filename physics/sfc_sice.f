@@ -1,7 +1,7 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
-!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns 
+!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns
 !! updated ice thickness and concentration to global arrays
 !! where there is no ice, and set temperature to surface skin temperature.
       module sfc_sice_post
@@ -72,6 +72,14 @@
 
 !> This module contains the CCPP-compliant GFS sea ice scheme.
       module sfc_sice
+
+      use machine, only: kind_phys
+
+      implicit none
+
+      public
+
+      real (kind=kind_phys), parameter :: cimin = 0.15 !< minimum ice concentration
 
       contains
 
@@ -307,7 +315,6 @@
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kmi)
      &,                        hflxi, hflxw, q0, qs1, wind, qssi, qssw
-      real (kind=kind_phys), parameter :: cimin=0.15 !< minimum ice concentration
 
       integer :: i, k
 
@@ -552,7 +559,7 @@
 
 
 !-----------------------------------
-!> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
+!> This subroutine is the entity of three-layer sea ice vertical thermodynamics
 !! based on Winton(2000) \cite winton_2000 .
 !! @{
 !!\ingroup gfs_sice_main
@@ -730,7 +737,7 @@
 !! beneath the snow-ice interface (see \a eq.(5) in Winton (2000) \cite winton_2000).
           k12  = ki4*ks / (ks*hice(i) + ki4*snowd(i))
 
-!>  - Calculate the conductive coupling between the two ice temperature 
+!>  - Calculate the conductive coupling between the two ice temperature
 !! points (see \a eq.(10) in Winton (2000) \cite winton_2000).
           k32  = (ki+ki) / hice(i)
 
