@@ -118,8 +118,8 @@ FFLAGS += -qno-opt-dynamic-align
 CFLAGS += -qno-opt-dynamic-align
 else
 ifeq ($(AVX2),Y)
-FFLAGS += -axSSE4.2,AVX,CORE-AVX2 -qno-opt-dynamic-align
-CFLAGS += -axSSE4.2,AVX,CORE-AVX2 -qno-opt-dynamic-align
+FFLAGS += -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512 -qno-opt-dynamic-align
+CFLAGS += -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512 -qno-opt-dynamic-align
 else
 FFLAGS += -qno-opt-dynamic-align
 CFLAGS += -qno-opt-dynamic-align
