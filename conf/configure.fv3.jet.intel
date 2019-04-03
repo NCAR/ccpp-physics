@@ -71,13 +71,13 @@ ifneq ($(need),$(ok))
 $(error Need at least make version $(need).  Load module gmake/3.81)
 endif
 
-NETCDF_ROOT = $(NETCDF4)
+NETCDF_ROOT = $(NETCDF)
 INCLUDE = -I$(NETCDF_ROOT)/include
 NETCDF_INC = -I$(NETCDF_ROOT)/include
 ifneq ($(findstring netcdf/4,$(LOADEDMODULES)),)
-  NETCDF_LIB += -L$(NETCDF4)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 else
-  NETCDF_LIB += -L$(NETCDF4)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
 
 FPPFLAGS := -fpp -Wp,-w $(INCLUDE)
