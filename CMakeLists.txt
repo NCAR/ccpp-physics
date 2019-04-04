@@ -111,6 +111,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       message (FATAL_ERROR "The current build system does not allow building fast physics with 32-bit precision when the GNU compilers are used")
@@ -141,6 +142,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNSFC_wrapper.F90
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
+                                ./physics/module_mp_thompson_make_number_concentrations.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
@@ -230,6 +232,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-r8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -r4 ")
