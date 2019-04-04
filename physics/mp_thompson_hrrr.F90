@@ -1,7 +1,4 @@
 ! CCPP license goes here, as well as further documentation
-
-!#define DEBUG_AEROSOLS
-
 module mp_thompson_hrrr
 
       use machine, only : kind_phys
@@ -393,54 +390,6 @@ module mp_thompson_hrrr
          kme = nlev
          kte = nlev
 
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,*) "AEROSOL DEBUG: called mp_thompson_hrrr_run, is_aerosol_aware=",  is_aerosol_aware, &
-                      & ", do_effective_radii=", do_effective_radii, ", do_radar_ref=", do_radar_ref, &
-                      & ", diagflag=", diagflag, ", do_radar_ref_mp=", do_radar_ref_mp
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: prsl min/mean/max =", &
-                              & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: tgrs min/mean/max =", &
-                              & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: rho min/mean/max =", &
-                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
-             if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nc min/mean/max =", &
-                                    & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
-             end if
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: ni min/mean/max =", &
-                                 & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nr min/mean/max =", &
-                                 & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: omega min/mean/max =", &
-                                 & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: w min/mean/max =", &
-                                 & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_cloud_mp min/mean/max =", &
-                                 & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_ice_mp min/mean/max =", &
-                                 & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_snow_mp min/mean/max =", &
-                                 & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_rain_mp min/mean/max =", &
-                                 & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_snow_mp min/mean/max =", &
-                                 & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_ice_mp min/mean/max =", &
-                                 & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_graupel_mp min/mean/max =", &
-                                 & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
-         end if
-#endif
-
          ! Call Thompson MP with or without aerosols
          if (is_aerosol_aware) then
             call mp_gt_driver(qv=qv_mp, qc=qc_mp, qr=qr_mp, qi=qi_mp, qs=qs_mp, qg=qg_mp,    &
@@ -486,51 +435,6 @@ module mp_thompson_hrrr
          qi      = qi_mp/(1.0_kind_phys+qv_mp)
          qs      = qs_mp/(1.0_kind_phys+qv_mp)
          qg      = qg_mp/(1.0_kind_phys+qv_mp)
-
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: prsl min/mean/max =", &
-                              & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: tgrs min/mean/max =", &
-                              & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: rho min/mean/max =", &
-                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
-             if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nc min/mean/max =", &
-                                    & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
-             end if
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: ni min/mean/max =", &
-                                 & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nr min/mean/max =", &
-                                 & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: omega min/mean/max =", &
-                                 & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: w min/mean/max =", &
-                                 & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_cloud_mp min/mean/max =", &
-                                 & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_ice_mp min/mean/max =", &
-                                 & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_snow_mp min/mean/max =", &
-                                 & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_rain_mp min/mean/max =", &
-                                 & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_snow_mp min/mean/max =", &
-                                 & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_ice_mp min/mean/max =", &
-                                 & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_graupel_mp min/mean/max =", &
-                                 & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
-         end if
-#endif
 
          ! Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
