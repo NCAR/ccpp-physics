@@ -434,7 +434,7 @@ cc
           rf_ts  = (1000.*rain(i)/rho_w)*alfac*cp_w*(1.0+rch(i)*hl_ts)
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
-!> - Call cool_skin(), which is the sub-layer cooling parameterization 
+!> - Call cool_skin(), which is the sub-layer cooling parameterization
 !! (Fairfall et al. (1996) \cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
@@ -714,40 +714,67 @@ cc
       end subroutine sfc_nst_pre_finalize
 
 !! \section arg_table_sfc_nst_pre_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                      | units | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------- |-------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                         | count |    0 | integer   |           | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag  |    1 | integer   |           | in     | F        |
-!! | oro            | orography                                              | orography                                      | m     |    1 | real      | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                   | unfiltered orographyo                          | m     |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K     |    1 | real      | kind_phys | in     | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K     |    1 | real      | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature_for_nsst                      | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                     | long_name                                                             | units         | rank | type        |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                            | horizontal loop extent                                                | count         |    0 | integer     |           | in     | F        |
+!! | rlapse         | air_temperature_lapse_rate_constant                               | environmental air temperature lapse rate constant                     | K m-1         |    0 | real        | kind_phys | in     | F        |
+!! | iice           | flag_nonzero_sea_ice_surface_fraction                             | flag indicating presence of some sea ice surface area fraction        | flag          |    1 | integer     |           | in     | F        |
+!! | iwet           | flag_nonzero_wet_surface_fraction                                 | flag indicating presence of some ocean or lake surface area fraction  | flag          |    1 | integer     |           | in     | F        |
+!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                  | surface roughness length over ocean (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | inout  | F        |
+!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                    | surface roughness length over ice   (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | in     | F        |
+!! | cd_ocn         | surface_drag_coefficient_for_momentum_in_air_over_ocean           | surface exchange coeff for momentum over ocean                        | none          |    1 | real        | kind_phys | inout  | F        |
+!! | cd_ice         | surface_drag_coefficient_for_momentum_in_air_over_ice             | surface exchange coeff for momentum over ice                          | none          |    1 | real        | kind_phys | in     | F        |
+!! | cdq_ocn        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean  | surface exchange coeff heat & moisture over ocean                     | none          |    1 | real        | kind_phys | inout  | F        |
+!! | cdq_ice        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice    | surface exchange coeff heat & moisture over ice                       | none          |    1 | real        | kind_phys | in     | F        |
+!! | rb_ocn         | bulk_richardson_number_at_lowest_model_level_over_ocean           | bulk Richardson number at the surface over ocean                      | none          |    1 | real        | kind_phys | inout  | F        |
+!! | rb_ice         | bulk_richardson_number_at_lowest_model_level_over_ice             | bulk Richardson number at the surface over ice                        | none          |    1 | real        | kind_phys | in     | F        |
+!! | stress_ocn     | surface_wind_stress_over_ocean                                    | surface wind stress over ocean                                        | m2 s-2        |    1 | real        | kind_phys | inout  | F        |
+!! | stress_ice     | surface_wind_stress_over_ice                                      | surface wind stress over ice                                          | m2 s-2        |    1 | real        | kind_phys | in     | F        |
+!! | ffmm_ocn       | Monin-Obukhov_similarity_function_for_momentum_over_ocean         | Monin-Obukhov similarity function for momentum over ocean             | none          |    1 | real        | kind_phys | inout  | F        |
+!! | ffmm_ice       | Monin-Obukhov_similarity_function_for_momentum_over_ice           | Monin-Obukhov similarity function for momentum over ice               | none          |    1 | real        | kind_phys | in     | F        |
+!! | ffhh_ocn       | Monin-Obukhov_similarity_function_for_heat_over_ocean             | Monin-Obukhov similarity function for heat over ocean                 | none          |    1 | real        | kind_phys | inout  | F        |
+!! | ffhh_ice       | Monin-Obukhov_similarity_function_for_heat_over_ice               | Monin-Obukhov similarity function for heat over ice                   | none          |    1 | real        | kind_phys | in     | F        |
+!! | uustar_ocn     | surface_friction_velocity_over_ocean                              | surface friction velocity over ocean                                  | m s-1         |    1 | real        | kind_phys | inout  | F        |
+!! | uustar_ice     | surface_friction_velocity_over_ice                                | surface friction velocity over ice                                    | m s-1         |    1 | real        | kind_phys | in     | F        |
+!! | fm10_ocn       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ocean  | Monin-Obukhov similarity parameter for momentum at 10m over ocean     | none          |    1 | real        | kind_phys | inout  | F        |
+!! | fm10_ice       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ice    | Monin-Obukhov similarity parameter for momentum at 10m over ice       | none          |    1 | real        | kind_phys | in     | F        |
+!! | fh2_ocn        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ocean       | Monin-Obukhov similarity parameter for heat at 2m over ocean          | none          |    1 | real        | kind_phys | inout  | F        |
+!! | fh2_ice        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ice         | Monin-Obukhov similarity parameter for heat at 2m over ice            | none          |    1 | real        | kind_phys | in     | F        |
+!! | oro            | orography                                                         | orography                                                             | m             |    1 | real        | kind_phys | in     | F        |
+!! | oro_uf         | orography_unfiltered                                              | unfiltered orographyo                                                 | m             |    1 | real        | kind_phys | in     | F        |
+!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial                  | surface skin temperature over ocean (temporary use as interstitial)   | K             |    1 | real        | kind_phys | in     | F        |
+!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean               | surface skin temperature after iteration over ocean                   | K             |    1 | real        | kind_phys | inout  | F        |
+!! | tseal          | surface_skin_temperature_for_nsst                                 | ocean surface skin temperature                                        | K             |    1 | real        | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                | error message for error handling in CCPP                              | none          |    0 | character   | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                   | error flag for error handling in CCPP                                 | flag          |    0 | integer     |           | out    | F        |
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
-      subroutine sfc_nst_pre_run                                        &
-     &    (im, islimsk, oro, oro_uf, tsfc, tsurf, tskin, errmsg, errflg)
+      subroutine sfc_nst_pre_run
+     &    (im, rlapse, iice, iwet, zorl_ocn, zorl_ice, cd_ocn, cd_ice,
+     &     cdq_ocn, cdq_ice, rb_ocn, rb_ice, stress_ocn, stress_ice,
+     &     ffmm_ocn, ffmm_ice, ffhh_ocn, ffhh_ice, uustar_ocn,
+     &     uustar_ice, fm10_ocn, fm10_ice, fh2_ocn, fh2_ice, oro,
+     &     oro_uf, tsfc_ocn, tsurf_ocn, tseal, errmsg, errflg)
 
       use machine , only : kind_phys
-      use physcons, only: rlapse
 
       implicit none
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: islimsk
-      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
-      real (kind=kind_phys), dimension(im), intent(in) :: tsfc
+      integer, dimension(im), intent(in) :: iice, iwet
+      real (kind=kind_phys), intent(in) :: rlapse
+      real (kind=kind_phys), dimension(im), intent(in) :: zorl_ice,
+     &    cd_ice, cdq_ice, rb_ice, stress_ice, ffmm_ice, ffhh_ice,
+     &    uustar_ice, fm10_ice, fh2_ice, oro, oro_uf, tsfc_ocn
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn,
+     &    zorl_ocn, cd_ocn, cdq_ocn, rb_ocn, stress_ocn, ffmm_ocn,
+     &    ffhh_ocn, uustar_ocn, fm10_ocn, fh2_ocn
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(out) :: tskin
-
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -759,14 +786,26 @@ cc
       errmsg = ''
       errflg = 0
 
-      ! Initialize intent(out) variables
-      tskin = 0.0
+      do i=1,im
+        if(iice(i) == 1) then
+            zorl_ocn(i) = zorl_ice(i)
+              cd_ocn(i) = cd_ice(i)
+             cdq_ocn(i) = cdq_ice(i)
+              rb_ocn(i) = rb_ice(i)
+          stress_ocn(i) = stress_ice(i)
+            ffmm_ocn(i) = ffmm_ice(i)
+            ffhh_ocn(i) = ffhh_ice(i)
+          uustar_ocn(i) = uustar_ice(i)
+            fm10_ocn(i) = fm10_ice(i)
+             fh2_ocn(i) = fh2_ice(i)
+        endif
+      enddo
 
-      do i = 1, im
-        if ( islimsk(i) == 0 ) then
+      do i=1,im
+        if ( iwet(i) == 1 .and. iice(i) == 0 ) then
           tem      = (oro(i)-oro_uf(i)) * rlapse
-          tskin(i) = tsfc(i)  + tem
-          tsurf(i) = tsurf(i) + tem
+          tseal(i) = tsfc_ocn(i)  + tem
+          tsurf_ocn(i) = tsurf_ocn(i) + tem
         endif
       enddo
 
