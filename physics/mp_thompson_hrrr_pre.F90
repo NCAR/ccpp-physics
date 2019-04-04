@@ -1,12 +1,14 @@
+!Activate this CPP flag to calculate initial number concentrations
+!#define MAKE_NUMBER_CONCENTRATIONS
+
 ! CCPP license goes here, as well as further documentation
-
-!#define DEBUG_AEROSOLS
-
 module mp_thompson_hrrr_pre
 
       use machine, only : kind_phys
 
       use module_mp_thompson_hrrr, only : naIN0, naIN1, naCCN0, naCCN1, eps
+
+      use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
 
       implicit none
 
@@ -47,7 +49,6 @@ module mp_thompson_hrrr_pre
 !! | prsl            | air_pressure                                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
 !! | phil            | geopotential                                                          | geopotential at model layer centers                      | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | area            | cell_area                                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
-!! | mpicomm         | mpi_comm                                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
 !! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
 !! | blkno           | ccpp_block_number                                                     | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
@@ -59,8 +60,7 @@ module mp_thompson_hrrr_pre
                                   spechum, qc, qr, qi, qs, qg, ni, nr,       &
                                   is_aerosol_aware, nc, nwfa, nifa, nwfa2d,  &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
-                                  mpicomm, mpirank, mpiroot, blkno,          &
-                                  errmsg, errflg)
+                                  mpirank, mpiroot, blkno, errmsg, errflg)
 
          implicit none
 
@@ -94,7 +94,6 @@ module mp_thompson_hrrr_pre
          real(kind_phys),           intent(in   ) :: phil(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: area(1:ncol)
          ! MPI information
-         integer,                   intent(in   ) :: mpicomm
          integer,                   intent(in   ) :: mpirank
          integer,                   intent(in   ) :: mpiroot
          ! Blocking information
@@ -114,8 +113,25 @@ module mp_thompson_hrrr_pre
          errmsg = ''
          errflg = 0
 
+         ! Save current air temperature for tendency limiters in mp_thompson_hrrr_post
+         tgrs_save = tgrs
+
          ! Return if not first timestep
          if (kdt > 1) return
+
+         ! Consistency check
+         if (is_aerosol_aware     .and. &
+             (.not.present(nc)     .or. &
+              .not.present(nwfa2d) .or. &
+              .not.present(nifa2d) .or. &
+              .not.present(nwfa)   .or. &
+              .not.present(nifa)        )) then
+             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_pre_run:',                 &
+                                        ' aerosol-aware microphysics require all of the following', &
+                                        ' optional arguments: nc, nwfa2d, nifa2d, nwfa, nifa'
+             errflg = 1
+             return
+          end if
 
          ! Fix initial values of hydrometeors
          where(spechum<0) spechum = 0.0
@@ -126,50 +142,15 @@ module mp_thompson_hrrr_pre
          where(qg<0)      qg = 0.0
          where(ni<0)      ni = 0.0
          where(nr<0)      nr = 0.0
-         ! If qi is in boundary conditions but ni is not, reset qi to zero (and vice versa)
-         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
-         if (maxval(ni)>0.0 .and. maxval(qi)==0.0) ni = 0.0
-         ! If qr is in boundary conditions but nr is not, reset qr to zero (and vice versa)
-         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
-         if (maxval(nr)>0.0 .and. maxval(qr)==0.0) nr = 0.0
 
-         ! Return if aerosol-aware option is not used
-         if (.not. is_aerosol_aware) return
-
-         if (.not.present(nc)     .or. &
-             .not.present(nwfa2d) .or. &
-             .not.present(nifa2d) .or. &
-             .not.present(nwfa)   .or. &
-             .not.present(nifa)        ) then
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_pre_run:',                 &
-                                        ' aerosol-aware microphysics require all of the following', &
-                                        ' optional arguments: nc, nifa2d, nwfa2d, nwfa, nifa'
-             errflg = 1
-             return
-          end if
-
-          ! Fix initial values of aerosols
-          where(nc<0)     nc = 0.0
-          where(nwfa<0)   nwfa = 0.0
-          where(nifa<0)   nifa = 0.0
-          where(nwfa2d<0) nwfa2d = 0.0
-          where(nifa2d<0) nifa2d = 0.0
-
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run before: nwfa2d min/mean/max =", &
-                                 & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run before: nifa2d min/mean/max =", &
-                                 & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run before: nwfa min/mean/max =",   &
-                                 & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run before: nifa min/mean/max =",   &
-                                 & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
+         if (is_aerosol_aware) then
+            ! Fix initial values of aerosols
+            where(nc<0)     nc = 0.0
+            where(nwfa<0)   nwfa = 0.0
+            where(nifa<0)   nifa = 0.0
+            where(nwfa2d<0) nwfa2d = 0.0
+            where(nifa2d<0) nifa2d = 0.0
          end if
-#endif
-
-         ! Save current air temperature for tendency limiters in mp_thompson_hrrr_post
-         tgrs_save = tgrs
 
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
@@ -177,6 +158,39 @@ module mp_thompson_hrrr_pre
          ! Density of air in kg m-3 and inverse density of air
          rho = prsl/(con_rd*tgrs)
          orho = 1.0/rho
+
+         !  Prior to calling the functions: make_DropletNumber, make_IceNumber, make_RainNumber,
+         !  the incoming mixing ratios should be converted to units of mass/num per cubic meter
+         !  rather than per kg of air.  So, to pass back to the model state variables,
+         !  they also need to be switched back to mass/number per kg of air, because
+         !  what is returned by the functions is in units of number per cubic meter.
+
+#ifdef MAKE_NUMBER_CONCENTRATIONS
+         ! If qi is in boundary conditions but ni is not, calculate ni from qi, rho and tgrs
+         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) then
+             ni = make_IceNumber(qi*rho, tgrs) * orho
+         end if
+#else
+         ! If qi is in boundary conditions but ni is not, reset qi to zero
+         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
+#endif
+         ! If ni is in boundary conditions but qi is not, reset ni to zero
+         if (maxval(ni)>0.0 .and. maxval(qi)==0.0) ni = 0.0
+
+#ifdef MAKE_NUMBER_CONCENTRATIONS
+         ! If qr is in boundary conditions but nr is not, calculate nr from qr, rho and tgrs
+         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) then
+             nr = make_RainNumber(qr*rho, tgrs) * orho
+         end if
+#else
+         ! If qr is in boundary conditions but nr is not, reset qr to zero
+         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
+#endif
+         ! If nr is in boundary conditions but qr is not, reset nr to zero
+         if (maxval(nr)>0.0 .and. maxval(qr)==0.0) nr = 0.0
+
+         ! Return if aerosol-aware option is not used
+         if (.not. is_aerosol_aware) return
 
 !..Check for existing aerosol data, both CCN and IN aerosols.  If missing
 !.. fill in just a basic vertical profile, somewhat boundary-layer following.
@@ -221,7 +235,6 @@ module mp_thompson_hrrr_pre
                   nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*2.E-10)
                enddo
 #else
-#if 1
                !+---+-----------------------------------------------------------------+
                !..Scale the lowest level aerosol data into an emissions rate.  This is
                !.. very far from ideal, but need higher emissions where larger amount
@@ -244,11 +257,6 @@ module mp_thompson_hrrr_pre
                   nwfa2d(i) = 10.0**(LOG10(nwfa(i,1)*1.E-6)-3.69897)
                   nwfa2d(i) = nwfa2d(i)*h_01 * 1.E6
                enddo
-#else
-               if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates, set to zero.'
-               ! calculate CCN surface flux here, right now just set to zero
-               nwfa2d = 0.
-#endif
 #endif
             else
                if (mpirank==mpiroot .and. blkno==1) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
@@ -284,18 +292,17 @@ module mp_thompson_hrrr_pre
             endif
          endif
 
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run after: nwfa2d min/mean/max =", &
-                                 & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run after: nifa2d min/mean/max =", &
-                                 & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run after: nwfa min/mean/max =",   &
-                                 & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp_thompson_hrrr_pre_run after: nifa min/mean/max =",   &
-                                 & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
+#ifdef MAKE_NUMBER_CONCENTRATIONS
+         ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
+         if (maxval(qc)>0.0 .and. maxval(nc)==0.0) then
+            nc = make_DropletNumber(qc*rho, nwfa) * orho
          end if
+#else
+         ! If qc is in boundary conditions but nc is not, reset qc to zero
+         if (maxval(qc)>0.0 .and. maxval(nc)==0.0) qc = 0.0
 #endif
+         ! If nc is in boundary conditions but qc is not, reset nc to zero
+         if (maxval(nc)>0.0 .and. maxval(qc)==0.0) nc = 0.0
 
       end subroutine mp_thompson_hrrr_pre_run
 
