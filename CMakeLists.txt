@@ -153,7 +153,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
