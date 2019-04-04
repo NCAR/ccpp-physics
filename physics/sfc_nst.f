@@ -27,24 +27,36 @@
 !! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer   |           | in     | F        |
+!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                      | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure               | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                         | latent heat of fusion                                       | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | jcal           | joules_per_calorie_constant                                                  | joules per calorie constant                                 | J cal-1       |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                       | none          |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                 | none          |    0 | real      | kind_phys | in     | F        |
+!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)       | none          |    0 | real      | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | rhw0           | sea_water_reference_density                                                  | sea water reference density                                 | kg m-3        |    0 | real      | kind_phys | in     | F        |
+!! | sbc            | steffan_boltzmann_constant                                                   | Steffan-Boltzmann constant                                  | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
+!! | pi             | pi                                                                           | ratio of a circle's circumference to its diameter           | radians       |    0 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                              | K             |    1 | real      | kind_phys | in     | F        |
 !! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                        | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature                            | K             |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                         | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                      | none          |    1 | real      | kind_phys | in     | F        |
+!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ocean                      | surface exchange coeff for momentum over ocean              | none          |    1 | real      | kind_phys | in     | F        |
+!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean             | surface exchange coeff heat & moisture over ocean           | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                 | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag          |    1 | integer   |           | in     | F        |
+!! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag |    1 | integer   |           | in     | F        |
+!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag |    1 | integer   |           | in     | F        |
 !! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
 !! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                          | wind stress                                                 | m2 s-2        |    1 | real      | kind_phys | in     | F        |
+!! | stress         | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                              | m2 s-2        |    1 | real      | kind_phys | in     | F        |
 !! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          |    1 | real      | kind_phys | in     | F        |
 !! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc net sw flx into ocean                         | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount on dyn time step           | m             |    1 | real      | kind_phys | in     | F        |
+!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ocean | total precipitation amount in each time step over ocean | m            |    1 | real      | kind_phys | in     | F        |
 !! | timestep       | time_step_for_dynamics                                                       | timestep interval                                           | s             |    0 | real      | kind_phys | in     | F        |
 !! | kdt            | index_of_time_step                                                           | current time step index                                     | index         |    0 | integer   |           | in     | F        |
 !! | solhr          | forecast_hour                                                                | fcst hour at the end of prev time step                      | h             |    0 | real      | kind_phys | in     | F        |
@@ -58,7 +70,7 @@
 !! | lprnt          | flag_print                                                                   | flag for printing diagnostics to output                     | flag          |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                          | index         |    0 | integer   |           | in     | F        |
 !! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                              | K             |    1 | real      | kind_phys | inout  | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run                | K             |    1 | real      | kind_phys | inout  | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration_over_ocean                          | surface skin temperature after iteration over ocean         | K             |    1 | real      | kind_phys | inout  | F        |
 !! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer                   | K m           |    1 | real      | kind_phys | inout  | F        |
 !! | xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer              | ppt m         |    1 | real      | kind_phys | inout  | F        |
 !! | xu             | diurnal_thermocline_layer_x_current                                          | u-current content in diurnal thermocline layer              | m2 s-1        |    1 | real      | kind_phys | inout  | F        |
@@ -76,21 +88,22 @@
 !! | d_conv         | free_convection_layer_thickness                                              | thickness of free convection layer                          | m             |    1 | real      | kind_phys | inout  | F        |
 !! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         |    1 | real      | kind_phys | inout  | F        |
 !! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity                                                    | surface air saturation specific humidity                    | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                              | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                 | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | qsurf          | surface_specific_humidity_over_ocean                                         | surface air saturation specific humidity over ocean         | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | gflx           | upward_heat_flux_in_soil_over_ocean                                          | soil heat flux over ocean                                   | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ocean                       | momentum exchange coefficient over ocean                    | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean               | thermal exchange coefficient over ocean                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean        | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ocean                       | kinematic surface upward sensible heat flux over ocean      | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux_over_ocean                         | surface upward potential latent heat flux over ocean        | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
-     &     ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      &
-     &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
+     &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
+     &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
+     &       prsl1, prslki, iwet, iice, xlon, sinlat, stress,           &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
      &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
@@ -108,7 +121,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, islimsk, xlon, sinlat, stress,              !
+!            prsl1, prslki, iwet, iice, xlon, sinlat, stress,           !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -152,7 +165,8 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
-!     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
+!     iwet     - integer, =1 if any ocn/lak water (0 otherwise)    im   !
+!     iice     - integer, =1 if "enough" ice (0 otherwise)         im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
 !     stress   - real, wind stress       (n/m**2)                  im   !
@@ -221,11 +235,6 @@
 ! ===================================================================== !
       use machine , only : kind_phys
       use funcphys, only : fpvs
-      use physcons, hvap => con_hvap                                    &
-     &,             cp => con_cp, hfus => con_hfus, jcal => con_jcal    &
-     &,             eps => con_eps, epsm1 => con_epsm1                  &
-     &,             rvrdm1 => con_fvirt, rd => con_rd                   &
-     &,             rhw0 => con_rhw0,sbc => con_sbc,pi => con_pi
       use date_def, only: idate
       use module_nst_water_prop, only: get_dtzm_point
       use module_nst_parameters, only : t0k,cp_w,omg_m,omg_sh,          &
@@ -242,7 +251,6 @@
       implicit none
 !
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: cpinv=1.0/cp, hvapi=1.0/hvap
       real (kind=kind_phys), parameter :: f24   = 24.0     ! hours/day
       real (kind=kind_phys), parameter :: f1440 = 1440.0   ! minutes/day
       real (kind=kind_phys), parameter :: czmin = 0.0001   ! cos(89.994)
@@ -251,10 +259,12 @@
 !  ---  inputs:
       integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
      &       nstf_name5
+      real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,
+     &       epsm1, rvrdm1, rd, rhw0, sbc, pi
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
-      integer, intent(in), dimension(im):: islimsk
+      integer, intent(in), dimension(im):: iwet, iice
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
@@ -281,7 +291,7 @@
       real (kind=kind_phys), dimension(im) ::  q0, qss, rch,
      &                     rho_a, theta1, tv1, wind, wndmag
 
-      real(kind=kind_phys) elocp,tem
+      real(kind=kind_phys) elocp,tem,cpinv,hvapi,elocp
 !
 !    nstm related prognostic fields
 !
@@ -307,24 +317,26 @@
       integer :: iw3jdn
 !======================================================================================================
 cc
-      parameter (elocp=hvap/cp)
-
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cpinv=1.0/cp
+      hvapi=1.0/hvap
+      elocp=hvap/cp
 
       sss = 34.0             ! temporarily, when sea surface salinity data is not ready
 !
 ! flag for open water and where the iteration is on
 !
       do i = 1, im
-         flag(i) = islimsk(i) == 0 .and. flag_iter(i)
+         flag(i) = iwet(i) == 1 .and. iice(i) == 0 .and. flag_iter(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
-        if((islimsk(i) == 0) .and. flag_guess(i)) then
+        if(iwet(i) == 1 .and. iice(i) == 0 .and. flag_guess(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -633,7 +645,7 @@ cc
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
-        if((islimsk(i) == 0) ) then
+        if(iwet(i) == 1 .and. iice(i) == 0 ) then
           if(flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -656,7 +668,7 @@ cc
               tskin(i) = tsurf(i)
             endif               ! if ( nstf_name1 > 1  then
           endif                 ! if(flag_guess(i)) then
-        endif                   ! if((islimsk(i).eq. 0.) ) then
+        endif                   ! if((iwet(i)==1 .and. iice(i)==0) ) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
