@@ -51,6 +51,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/module_nst_water_prop.f90',
     'ccpp/physics/physics/module_mp_radar.F90',
     'ccpp/physics/physics/module_mp_thompson_hrrr.F90',
+    'ccpp/physics/physics/module_mp_thompson_make_number_concentrations.F90',
     'ccpp/physics/physics/module_bl_mynn.F90',
     'ccpp/physics/physics/module_sf_mynn.F90',
     'ccpp/physics/physics/namelist_soilveg.f',
