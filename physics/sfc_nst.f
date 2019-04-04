@@ -89,7 +89,7 @@
 !! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         |    1 | real      | kind_phys | inout  | F        |
 !! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             |    1 | real      | kind_phys | inout  | F        |
 !! | qsurf          | surface_specific_humidity_over_ocean                                         | surface air saturation specific humidity over ocean         | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | gflx           | upward_heat_flux_in_soil_over_ocean                                          | soil heat flux over ocean                                   | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | gflux          | upward_heat_flux_in_soil_over_ocean                                          | soil heat flux over ocean                                   | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ocean                       | momentum exchange coefficient over ocean                    | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean               | thermal exchange coefficient over ocean                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean        | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
@@ -291,7 +291,7 @@
       real (kind=kind_phys), dimension(im) ::  q0, qss, rch,
      &                     rho_a, theta1, tv1, wind, wndmag
 
-      real(kind=kind_phys) elocp,tem,cpinv,hvapi,elocp
+      real(kind=kind_phys) elocp,tem,cpinv,hvapi
 !
 !    nstm related prognostic fields
 !
