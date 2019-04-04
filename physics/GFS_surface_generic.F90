@@ -17,6 +17,7 @@
 !! |----------------|------------------------------------------------------------------------------|----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                               | count      |    0 | integer   |           | in     | F        |
 !! | levs           | vertical_dimension                                                           | number of vertical levels                                            | count      |    0 | integer   |           | in     | F        |
+!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                     | flag       |    0 | logical   |           | in     | F        |
 !! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                           | frac       |    1 | real      | kind_phys | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                         | flag       |    1 | integer   |           | in     | F        |
 !! | lndfrac        | land_area_fraction                                                           | fraction of horizontal grid area occupied by land                    | frac       |    1 | real      | kind_phys | in     | F        |
@@ -29,6 +30,30 @@
 !! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag       |    1 | integer   |           | inout  | F        |
 !! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                         | frac       |    1 | real      | kind_phys | in     | F        |
 !! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                        | frac       |    0 | real      | kind_phys | in     | F        |
+!! | zorl           | surface_roughness_length                                                     | surface roughness length                                             | cm         |    1 | real      | kind_phys | in     | F        |
+!! | zorlo          | surface_roughness_length_over_ocean                                          | surface roughness length over ocean                                  | cm         |    1 | real      | kind_phys | inout  | F        |
+!! | zorll          | surface_roughness_length_over_land                                           | surface roughness length over land                                   | cm         |    1 | real      | kind_phys | inout  | F        |
+!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                             | surface roughness length over ocean (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
+!! | zorl_lnd       | surface_roughness_length_over_land_interstitial                              | surface roughness length over land  (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
+!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                               | surface roughness length over ice   (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
+!! | snowd          | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                          | mm         |    1 | real      | kind_phys | in     | F        |
+!! | snowd_ocn      | surface_snow_thickness_water_equivalent_over_ocean                           | water equivalent snow depth over ocean                               | mm         |    1 | real      | kind_phys | inout  | F        |
+!! | snowd_lnd      | surface_snow_thickness_water_equivalent_over_land                            | water equivalent snow depth over land                                | mm         |    1 | real      | kind_phys | inout  | F        |
+!! | snowd_ice      | surface_snow_thickness_water_equivalent_over_ice                             | water equivalent snow depth over ice                                 | mm         |    1 | real      | kind_phys | inout  | F        |
+!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | total precipitation amount in each time step                         | m          |    1 | real      | kind_phys | in     | F        |
+!! | tprcp_ocn      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ocean | total precipitation amount in each time step over ocean         | m          |    1 | real      | kind_phys | inout  | F        |
+!! | tprcp_lnd      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_land  | total precipitation amount in each time step over land          | m          |    1 | real      | kind_phys | inout  | F        |
+!! | tprcp_ice      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice   | total precipitation amount in each time step over ice           | m          |    1 | real      | kind_phys | inout  | F        |
+!! | uustar         | surface_friction_velocity                                                    | boundary layer parameter                                             | m s-1      |    1 | real      | kind_phys | in     | F        |
+!! | uustar_lnd     | surface_friction_velocity_over_land                                          | surface friction velocity over land                                  | m s-1      |    1 | real      | kind_phys | inout  | F        |
+!! | uustar_ice     | surface_friction_velocity_over_ice                                           | surface friction velocity over ice                                   | m s-1      |    1 | real      | kind_phys | inout  | F        |
+!! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equiv of acc snow depth over land and sea ice                  | mm         |    1 | real      | kind_phys | in     | F        |
+!! | weasd_lnd      | water_equivalent_accumulated_snow_depth_over_land                            | water equiv of acc snow depth over land                              | mm         |    1 | real      | kind_phys | inout  | F        |
+!! | weasd_ice      | water_equivalent_accumulated_snow_depth_over_ice                             | water equiv of acc snow depth over ice                               | mm         |    1 | real      | kind_phys | inout  | F        |
+!! | evap_ocn       | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean                 | kg kg-1 m s-1 |    1 | real   | kind_phys | inout  | F        |
+!! | hflx_ocn       | kinematic_surface_upward_sensible_heat_flux_over_ocean                       | kinematic surface upward sensible heat flux over ocean               | K m s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | stress_ocn     | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                                       | m2 s-2     |    1 | real      | kind_phys | inout  | F        |
+!! | ep1d_ice       | surface_upward_potential_latent_heat_flux_over_ice                           | surface upward potential latent heat flux over ice                   | W m-2      |    1 | real      | kind_phys | inout  | F        |
 !! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                             | index      |    0 | integer   |           | in     | F        |
 !! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                              | index      |    0 | integer   |           | in     | F        |
 !! | stype          | soil_type_classification_real                                                | soil type for lsm                                                    | index      |    1 | real      | kind_phys | in     | F        |
@@ -39,6 +64,12 @@
 !! | semis          | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                                    | frac       |    1 | real      | kind_phys | in     | F        |
 !! | adjsfcdlw      | surface_downwelling_longwave_flux                                            | surface downwelling longwave flux at current time                    | W m-2      |    1 | real      | kind_phys | in     | F        |
 !! | tsfc           | surface_skin_temperature                                                     | surface skin temperature                                             | K          |    1 | real      | kind_phys | in     | F        |
+!! | tsfco          | sea_surface_temperature                                                      | sea surface temperature                                              | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsfcl          | surface_skin_temperature_over_land                                           | surface skin temperature over land                                   | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial                             | surface skin temperature over ocean (temporary use as interstitial)  | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsfc_lnd       | surface_skin_temperature_over_land_interstitial                              | surface skin temperature over land  (temporary use as interstitial)  | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsfc_ice       | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial)  | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tisfc          | sea_ice_temperature                                                          | sea ice surface skin temperature                                     | K          |    1 | real      | kind_phys | inout  | F        |
 !! | phil           | geopotential                                                                 | geopotential at model layer centers                                  | m2 s-2     |    2 | real      | kind_phys | in     | F        |
 !! | con_g          | gravitational_acceleration                                                   | gravitational acceleration                                           | m s-2      |    0 | real      | kind_phys | in     | F        |
 !! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom     | frac       |    1 | real      | kind_phys | inout  | F        |
@@ -48,6 +79,9 @@
 !! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer          | ratio      |    1 | real      | kind_phys | inout  | F        |
 !! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground      | W m-2      |    1 | real      | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                             | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean                          | surface skin temperature after iteration over ocean                  | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsurf_lnd      | surface_skin_temperature_after_iteration_over_land                           | surface skin temperature after iteration over land                   | K          |    1 | real      | kind_phys | inout  | F        |
+!! | tsurf_ice      | surface_skin_temperature_after_iteration_over_ice                            | surface skin temperature after iteration over ice                    | K          |    1 | real      | kind_phys | inout  | F        |
 !! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                                | m          |    1 | real      | kind_phys | inout  | F        |
 !! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                    | flag       |    0 | logical   |           | in     | F        |
 !! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step                  | K          |    2 | real      | kind_phys | out    | F        |
@@ -72,10 +106,14 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                                | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, lndfrac, lakfrac, ocnfrac, idry,    &
-                          iice, ilak, iocn, iwet, fice, cimin, isot, ivegsrc, stype, vtype, slope,         &
-                          prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
-                          slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
+      subroutine GFS_surface_generic_pre_run (im, levs, cplflx, vfrac, islmsk, lndfrac, lakfrac, ocnfrac,  &
+                          idry, iice, ilak, iocn, iwet, fice, cimin, zorl, zorlo, zorll, zorl_ocn,         &
+                          zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,    &
+                          tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_lnd,          &
+                          weasd_ice, evap_ocn, hflx_ocn, stress_ocn, ep1d_ice, sot, ivegsrc, stype, vtype, &
+                          slope, prsik_1, prslk_1, semis, adjsfcdlw, tsfc, tsfco, tsfcl, tsfc_ocn,         &
+                          tsfc_lnd, tsfc_ice, tisfc, phil, con_g, sigmaf, soiltyp, vegtype, slopetyp,      &
+                          work3, gabsbdlw, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice, zlvl, do_sppt, dtdtr,   &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           errmsg, errflg)
@@ -86,6 +124,8 @@
         implicit none
 
         ! Interface variables
+        logical, intent(in) :: cplflx
+
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: idry, iice, ilak, iocn, iwet
@@ -93,11 +133,17 @@
 
         real(kind=kind_phys), intent(in) :: con_g, cimin
         real(kind=kind_phys), dimension(im), intent(in) :: lndfrac, lakfrac, ocnfrac, fice
+        real(kind=kind_phys), dimension(im), intent(in) :: zorl, snowd, tprcp, uustar, weasd
         real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
           semis, adjsfcdlw, tsfc
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
 
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
+        real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, tsfco, tsfcl, tisfc
+        real(kind=kind_phys), dimension(im), intent(inout) :: snowd_ocn, snowd_lnd, snowd_ice, tprcp_ocn, &
+          tprcp_lnd, tprcp_ice, zorl_ocn, zorl_lnd, zorl_ice, tsfc_ocn, tsfc_lnd, tsfc_ice, tsurf_ocn,    &
+          tsurf_lnd, tsurf_ice, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice, evap_ocn, hflx_ocn,         &
+          stress_ocn, ep1d_ice
 
         ! Stochastic physics / surface perturbations
         logical, intent(in) :: do_sppt
@@ -233,6 +279,47 @@
           tsurf(i)   = tsfc(i)
           zlvl(i)    = phil(i,1) * onebg
         end do
+
+        do i=1,im
+          if (.not. cplflx) then
+            zorll(i) = zorl(i)
+            zorlo(i) = zorl(i)
+            tsfcl(i) = tsfc(i)
+            tsfco(i) = tsfc(i)
+            tisfc(i) = tsfc(i)
+          end if
+          if(iwet(i) == 1) then
+            snowd_ocn(i) = snowd(i)
+            tprcp_ocn(i) = tprcp(i)
+            zorl_ocn(i) = zorlo(i)
+            tsfc_ocn(i) = tsfco(i)
+            tsurf_ocn(i)= tsfco(i)
+            evap_ocn(i) = 0.
+            hflx_ocn(i) = 0.
+            stress_ocn(i) = 0.
+          endif
+  !
+          if (idry(i) == 1) then
+            uustar_lnd(i) = uustar(i)
+            weasd_lnd(i) = weasd(i)
+            tprcp_lnd(i) = tprcp(i)
+            zorl_lnd(i) = zorll(i)
+            tsfc_lnd(i) = tsfcl(i)
+            tsurf_lnd(i) = tsfcl(i)
+            snowd_lnd(i) = snowd(i)
+          end if
+  !
+          if (iice(i) == 1) then
+            uustar_ice(i) = uustar(i)
+            weasd_ice(i) = weasd(i)
+            tprcp_ice(i) = tprcp(i)
+            zorl_ice(i) = zorll(i)
+            tsfc_ice(i) = tisfc(i)
+            tsurf_ice(i)= tisfc(i)
+            snowd_ice(i) = snowd(i)
+            ep1d_ice(i) = 0.
+          end if
+        enddo
 
       end subroutine GFS_surface_generic_pre_run
 
