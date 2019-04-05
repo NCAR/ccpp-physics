@@ -156,12 +156,15 @@
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !!  @{
       subroutine sfc_sice_run                                           &
+!  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
-     &       flag_iter, mom4ice, lsm, lprnt, ipr,                       & ! -- inputs from here and above
-     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & ! -- in/outs
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & ! -- outputs
+     &       flag_iter, mom4ice, lsm, lprnt, ipr,                       &
+!  ---  input/outputs:
+     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            &
+!  ---  outputs:
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
      &       errmsg, errflg
      &     )
 
@@ -213,7 +216,7 @@
 !     dlwflx   - real, total sky sfc downward lw flux ( w/m**2 )   im   !
 !     sfcnsw   - real, total sky sfc netsw flx into ground(w/m**2) im   !
 !     sfcdsw   - real, total sky sfc downward sw flux ( w/m**2 )   im   !
-!     srflag   - real, snow/rain flag for precipitation            im   !
+!     srflag   - real, snow/rain fraction for precipitation        im   !
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure                 im   !
@@ -319,7 +322,7 @@
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islimsk(i) >= 2) .and. flag_iter(i)
+        flag(i) = (islimsk(i) == 2) .and. flag_iter(i)
         if (flag_iter(i) .and. islimsk(i) < 2) then
           hice(i) = 0.0
           fice(i) = 0.0
@@ -346,10 +349,10 @@
       elseif (lsm > 0) then           !  --- ...  snow-rain detection
         do i = 1, im
           if (flag(i)) then
-            if (srflag(i) == 1.0) then
-              ep(i) = 0.0
-              weasd(i) = weasd(i) + 1.e3*tprcp(i)
-              tprcp(i)  = 0.0
+            if (srflag(i) > 0) then
+              ep(i) = ep(i)*(1.-srflag(i))
+              weasd(i) = weasd(i) + 1.e3*tprcp(i)*srflag(i)
+              tprcp(i)  = tprcp(i)*(1.-srflag(i))
             endif
           endif
         enddo

@@ -17,6 +17,7 @@
 !! | local_name     | standard_name                                                           | long_name                                                                                | units   | rank | type      | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   |    0 | integer   |           | in     | F        |
+!! | levs           | vertical_dimension                                                      | vertical layer dimension                                                                 | count   |    0 | integer   |           | in     | F        |
 !! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   |    0 | integer   |           | in     | F        |
 !! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various |    2 | real      | kind_phys | in     | F        |
 !! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       |    1 | real      | kind_phys | out    | F        |
@@ -27,6 +28,11 @@
 !! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
 !! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
 !! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
+!! | lssav          | flag_diagnostics                                                        | logical flag for storing diagnostics                                                     | flag    |    0 | logical   |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                                     | flag for 3d diagnostic fields                                                            | flag    |    0 | logical   |           | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                        | updated tendency of the temperature                                                      | K s-1   |    2 | real      | kind_phys | in     | F        |
+!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag    | cumulative change in temperature due to orographic gravity wave drag                     | K       |    2 | real      | kind_phys | inout  | F        |
+!! | dtf            | time_step_for_dynamics                                                  | dynamics timestep                                                                        | s       |    0 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
 !!
@@ -34,22 +40,30 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine gwdps_pre_run(                                         &
-     &           im, nmtvr, mntvar,                                     &
+     &           im, levs, nmtvr, mntvar,                               &
      &           hprime, oc, oa4, clx, theta,                           &
-     &           sigma, gamma, elvmax, errmsg, errflg)
+     &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
+     &           dtdt, dt3dt, dtf, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
 
-      integer, intent(in) :: im, nmtvr
+      integer, intent(in) :: im, levs, nmtvr
       real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
 
       real(kind=kind_phys), intent(out) ::                              &
      &  hprime(im), oc(im), oa4(im,4), clx(im,4),                       &
      &  theta(im), sigma(im), gamma(im), elvmax(im)                     &
 
+      logical, intent(in) :: lssav, ldiag3d
+      real(kind=kind_phys), intent(in) :: dtdt(im,levs)
+      real(kind=kind_phys), intent(inout) :: dt3dt(im,levs)
+      real(kind=kind_phys), intent(in) :: dtf
+
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+
+      integer :: i, k
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -102,6 +116,16 @@
         sigma = 0
         elvmax = 0
       endif   ! end if_nmtvr
+
+      if (lssav) then
+        if (ldiag3d) then
+          do k=1,levs
+            do i=1,im
+              dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
+            enddo
+          enddo
+        endif
+      endif
 
       end subroutine gwdps_pre_run
 !> @}
@@ -1471,23 +1495,23 @@
       end subroutine gwdps_post_init
 
 !! \section arg_table_gwdps_post_run Argument Table
-!! | local_name     | standard_name                                                                                 | long_name                                                                 | units | rank | type      | kind      | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                                                              | flag for calculating diagnostic fields                                    | flag  |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                                           | flag for calculating 3-D diagnostic fields                                | flag  |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                                                        | dynamics time step                                                        | s     |    0 | real      | kind_phys | in     | F        |
-!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag                                               | zonal surface stress due to orographic gravity wave drag                  | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag                                               | meridional surface stress due to orographic gravity wave drag             | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                                                       | zonal wind tendency due to model physics                                  | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                                       | meridional wind tendency due to model physics                             | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                              | air temperature tendency due to model physics                             | K s-1 |    2 | real      | kind_phys | in     | F        |
-!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag                                            | integral over time of zonal stress due to gravity wave drag               | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag                                            | integral over time of meridional stress due to gravity wave drag          | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | du3dt          | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in zonal wind due to orographic gravity wave drag       | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt          | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in meridional wind due to orographic gravity wave drag  | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_shortwave_radiation_and_orographic_gravity_wave_drag  | cumulative change in temperature due to SW rad and oro. GWD               | K     |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                                            | error message for error handling in CCPP                                  | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                     | flag  |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                                        | long_name                                                                | units | rank | type      | kind      | intent | optional |
+!! |----------------|----------------------------------------------------------------------|--------------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | lssav          | flag_diagnostics                                                     | flag for calculating diagnostic fields                                   | flag  |    0 | logical   |           | in     | F        |
+!! | ldiag3d        | flag_diagnostics_3D                                                  | flag for calculating 3-D diagnostic fields                               | flag  |    0 | logical   |           | in     | F        |
+!! | dtf            | time_step_for_dynamics                                               | dynamics time step                                                       | s     |    0 | real      | kind_phys | in     | F        |
+!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag                      | zonal surface stress due to orographic gravity wave drag                 | Pa    |    1 | real      | kind_phys | in     | F        |
+!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag                      | meridional surface stress due to orographic gravity wave drag            | Pa    |    1 | real      | kind_phys | in     | F        |
+!! | dudt           | tendency_of_x_wind_due_to_model_physics                              | zonal wind tendency due to model physics                                 | m s-2 |    2 | real      | kind_phys | in     | F        |
+!! | dvdt           | tendency_of_y_wind_due_to_model_physics                              | meridional wind tendency due to model physics                            | m s-2 |    2 | real      | kind_phys | in     | F        |
+!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                     | air temperature tendency due to model physics                            | K s-1 |    2 | real      | kind_phys | in     | F        |
+!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag                   | integral over time of zonal stress due to gravity wave drag              | Pa s  |    1 | real      | kind_phys | inout  | F        |
+!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag                   | integral over time of meridional stress due to gravity wave drag         | Pa s  |    1 | real      | kind_phys | inout  | F        |
+!! | du3dt          | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag      | cumulative change in zonal wind due to orographic gravity wave drag      | m s-1 |    2 | real      | kind_phys | inout  | F        |
+!! | dv3dt          | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag      | cumulative change in meridional wind due to orographic gravity wave drag | m s-1 |    2 | real      | kind_phys | inout  | F        |
+!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag | cumulative change in temperature due to orographic gravity wave drag     | K     |    2 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                                   | error message for error handling in CCPP                                 | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                      | error flag for error handling in CCPP                                    | flag  |    0 | integer   |           | out    | F        |
 !!
       subroutine gwdps_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &

@@ -48,9 +48,9 @@
 !
 MODULE module_mp_thompson_hrrr
 
-      USE machine, ONLY : kind_phys
+      USE machine, only : kind_phys
 
-      USE module_mp_thompson_hrrr_radar
+      USE module_mp_radar
 
       IMPLICIT NONE
 
