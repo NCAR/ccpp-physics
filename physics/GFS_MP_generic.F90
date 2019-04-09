@@ -376,22 +376,9 @@
 !          endif
 ! compute fractional srflag
           total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
-          ! DH*
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, tem:          ", i, tem
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, snow0:        ", i, snow0(i)
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, ice0:         ", i, ice0(i)
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, graupel0:     ", i, graupel0(i)
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, rain0:        ", i, rain0(i)
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, rainc:        ", i, rainc(i)
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, total_precip: ", i, total_precip
-          !write(0,'(a,i6,l)')      "DH DEBUG srflag: i, total_precip*tem > rainmin: ", i, total_precip*tem > rainmin
-          ! *DH
           if (total_precip*tem > rainmin) then
             srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
           endif
-          ! DH*
-          !write(0,'(a,i6,e35.25)') "DH DEBUG srflag: i, srflag:       ", i, srflag(i)
-          ! *DH
         enddo
       elseif( .not. cal_pre) then
         do i = 1, im
@@ -403,7 +390,7 @@
         enddo
       endif
 
-      if (cplflx) then
+      if (cplflx .or. cplchm) then
         do i = 1, im
           if (t850(i) > 273.16) then
              rain_cpl(i) = rain_cpl(i) + rain(i)
@@ -413,9 +400,8 @@
         enddo
       endif
 
-      if (cplchm .and. .not.cplflx) then
+      if (cplchm) then
         do i = 1, im
-             rain_cpl(i) = rain_cpl(i) + rain(i)
              rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
       endif
