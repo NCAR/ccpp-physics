@@ -850,59 +850,60 @@ cc
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_nst_post_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                      | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------- |---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                         | count   |    0 | integer   |           | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag    |    1 | integer   |           | in     | F        |
-!! | oro            | orography                                              | orography                                      | m       |    1 | real      | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                   | unfiltered orography                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2        | flag    |    0 | integer   |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound         | zsea1                                          | mm      |    0 | integer   |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound         | zsea2                                          | mm      |    0 | integer   |           | in     | F        |
-!! | xt             | diurnal_thermocline_layer_heat_content                 | heat content in diurnal thermocline layer      | K m     |    1 | real      | kind_phys | in     | F        |
-!! | xz             | diurnal_thermocline_layer_thickness                    | diurnal thermocline layer thickness            | m       |    1 | real      | kind_phys | in     | F        |
-!! | dt_cool        | sub-layer_cooling_amount                               | sub-layer cooling amount                       | K       |    1 | real      | kind_phys | in     | F        |
-!! | z_c            | sub-layer_cooling_thickness                            | sub-layer cooling thickness                    | m       |    1 | real      | kind_phys | in     | F        |
-!! | rslimsk        | sea_land_ice_mask_real                                 | landmask: sea/land/ice=0/1/2                   | flag    |    1 | real      | kind_phys | in     | F        |
-!! | tref           | sea_surface_reference_temperature                      | reference/foundation temperature               | K       |    1 | real      | kind_phys | in     | F        |
-!! | xlon           | longitude                                              | longitude                                      | radians |    1 | real      | kind_phys | in     | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K       |    1 | real      | kind_phys | inout  | F        |
-!! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                | K       |    1 | real      | kind_phys | out    | F        |
-!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                          | long_name                                                            | units   | rank | type      |    kind   | intent | optional |
+!! |----------------|--------------------------------------------------------|----------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                               | count   |    0 | integer   |           | in     | F        |
+!! | rlapse         | air_temperature_lapse_rate_constant                    | environmental air temperature lapse rate constant                    | K m-1   |    0 | real      | kind_phys | in     | F        |
+!! | iwet           | flag_nonzero_wet_surface_fraction                      | flag indicating presence of some ocean or lake surface area fraction | flag    |    1 | integer   |           | in     | F        |
+!! | iice           | flag_nonzero_sea_ice_surface_fraction                  | flag indicating presence of some sea ice surface area fraction       | flag    |    1 | integer   |           | in     | F        |
+!! | oro            | orography                                              | orography                                                            | m       |    1 | real      | kind_phys | in     | F        |
+!! | oro_uf         | orography_unfiltered                                   | unfiltered orography                                                 | m       |    1 | real      | kind_phys | in     | F        |
+!! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2                              | flag    |    0 | integer   |           | in     | F        |
+!! | nstf_name4     | vertical_temperature_average_range_lower_bound         | zsea1                                                                | mm      |    0 | integer   |           | in     | F        |
+!! | nstf_name5     | vertical_temperature_average_range_upper_bound         | zsea2                                                                | mm      |    0 | integer   |           | in     | F        |
+!! | xt             | diurnal_thermocline_layer_heat_content                 | heat content in diurnal thermocline layer                            | K m     |    1 | real      | kind_phys | in     | F        |
+!! | xz             | diurnal_thermocline_layer_thickness                    | diurnal thermocline layer thickness                                  | m       |    1 | real      | kind_phys | in     | F        |
+!! | dt_cool        | sub-layer_cooling_amount                               | sub-layer cooling amount                                             | K       |    1 | real      | kind_phys | in     | F        |
+!! | z_c            | sub-layer_cooling_thickness                            | sub-layer cooling thickness                                          | m       |    1 | real      | kind_phys | in     | F        |
+!! | tref           | sea_surface_reference_temperature                      | reference/foundation temperature                                     | K       |    1 | real      | kind_phys | in     | F        |
+!! | xlon           | longitude                                              | longitude                                                            | radians |    1 | real      | kind_phys | in     | F        |
+!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean    | surface skin temperature after iteration over ocean                  | K       |    1 | real      | kind_phys | inout  | F        |
+!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial       | surface skin temperature over ocean (temporary use as interstitial)  | K       |    1 | real      | kind_phys | inout  | F        |
+!! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                                      | K       |    1 | real      | kind_phys | out    | F        |
+!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                             | none    |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                | flag    |    0 | integer   |           | out    | F        |
 !!
 ! \section NSST_general_post_algorithm General Algorithm
 !
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
-     &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
-     &       tsurf, dtzm, tsfc, errmsg, errflg                          &
+     &     ( im, rlapse, iwet, iice, oro, oro_uf, nstf_name1,           &
+     &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
+     &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
      &     )
 
       use machine , only : kind_phys
-      use physcons, only: rlapse
       use module_nst_water_prop, only: get_dtzm_2d
 
       implicit none
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: islimsk
+      integer, dimension(im), intent(in) :: iwet, iice
+      real (kind=kind_phys), intent(in) :: rlapse
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
-     &      dt_cool, z_c, rslimsk, tref, xlon
+     &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn, &
+     &      tsfc_ocn
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
      &      dtzm
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsfc
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -920,8 +921,9 @@ cc
 !    &     ' kdt=',kdt
 
       do i = 1, im
-        if ( islimsk(i) == 0 ) then
-          tsurf(i) = tsurf(i) - (oro(i)-oro_uf(i)) * rlapse
+        if (iwet(i) == 1 .and. iice(i) == 0 ) then
+              tsurf_ocn(i) = tsurf_ocn(i)                                  &
+               - (oro(i)-oro_uf(i)) * rlapse
         endif
       enddo
 
@@ -932,11 +934,11 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, rslimsk, zsea1, zsea2,                   &
+     &                    z_c, iwet, iice, zsea1, zsea2,                &
      &                    im, 1, dtzm)
         do i = 1, im
-          if ( islimsk(i) == 0 ) then
-            tsfc(i) = max(271.2,tref(i) + dtzm(i)) -                    &
+          if ( iwet(i) == 1  .and. iice(i) == 0 ) then
+            tsfc_ocn(i) = max(271.2,tref(i) + dtzm(i)) -                    &
      &                    (oro(i)-oro_uf(i))*rlapse
           endif
         enddo
