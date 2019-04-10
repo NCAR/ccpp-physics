@@ -37,9 +37,11 @@
 !! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                      | choice of GFDL microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                  | choice of Thompson microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                 | choice of Zhao-Carr microphysics scheme                                             | flag          |    0 | integer   |           | in     | F        |
+!! | cplchm                       | flag_for_chemistry_coupling                            | flag controlling cplchm collection (default off)                                    | flag          |    0 | logical   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
-!! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)              | flag          |    0 | logical   |           | in     | F        |
-!! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                            | flag          |    0 | logical   |           | in     | F        |
+!! | hybedmf                      | flag_for_hedmf                                         | flag for hybrid edmf pbl scheme (moninedmf)                                         | flag          |    0 | logical   |           | in     | F        |
+!! | do_shoc                      | flag_for_shoc                                          | flag for SHOC                                                                       | flag          |    0 | logical   |           | in     | F        |
 !! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                | flag for scale-aware TKE moist EDMF PBL scheme                                      | flag          |    0 | logical   |           | in     | F        |
 !! | qgrs                         | tracer_concentration                                   | model layer mean tracer concentration                                               | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | vdftra                       | vertically_diffused_tracer_concentration               | tracer concentration diffused by PBL scheme                                         | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
@@ -50,7 +52,8 @@
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        ltaerosol, hybedmf, do_shoc, satmedmf, qgrs, vdftra, errmsg, errflg)
+        imp_physics_zhao_carr, cplchm, ltaerosol, hybedmf, do_shoc, satmedmf,            &
+        qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
 
@@ -59,7 +62,8 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf
+      integer, intent(in) :: imp_physics_zhao_carr
+      logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
@@ -129,6 +133,17 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+        elseif (imp_physics == imp_physics_zhao_carr) then
+! Zhao/Carr/Sundqvist
+          if (cplchm) then
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1) = qgrs(i,k,ntqv)
+                vdftra(i,k,2) = qgrs(i,k,ntcw)
+                vdftra(i,k,3) = qgrs(i,k,ntoz)
+              enddo
+            enddo
+          endif
         endif
 
         if (satmedmf) then
@@ -181,8 +196,10 @@
 !! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                                                 | choice of GFDL microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                                             | choice of Thompson microphysics scheme                                                      | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                                                 | choice of WSM6 microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                                            | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                                                          | flag for aerosol physics                                                                    | flag          |    0 | logical   |           | in     | F        |
 !! | cplflx                       | flag_for_flux_coupling                                                            | flag controlling cplflx collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
+!! | cplchm                       | flag_for_chemistry_coupling                                                       | flag controlling cplchm collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
 !! | lssav                        | flag_diagnostics                                                                  | logical flag for storing diagnostics                                                        | flag          |    0 | logical   |           | in     | F        |
 !! | ldiag3d                      | flag_diagnostics_3D                                                               | flag for 3d diagnostic fields                                                               | flag          |    0 | logical   |           | in     | F        |
 !! | lsidea                       | flag_idealized_physics                                                            | flag for idealized physics                                                                  | flag          |    0 | logical   |           | in     | F        |
@@ -233,8 +250,8 @@
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                       &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson,                                                                   &
-        imp_physics_wsm6, ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,             &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                          &
+        ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
@@ -248,7 +265,9 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      logical, intent(in) :: ltaerosol, cplflx, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu
+      integer, intent(in) :: imp_physics_zhao_carr
+      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
+      logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
@@ -329,6 +348,16 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
+        elseif (imp_physics == imp_physics_zhao_carr) then
+          if (cplchm) then
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,1)    = dvdftra(i,k,1)
+                dqdt(i,k,ntcw) = dvdftra(i,k,2)
+                dqdt(i,k,ntoz) = dvdftra(i,k,3)
+              enddo
+            enddo
+          endif
         endif
 
         if (satmedmf) then
