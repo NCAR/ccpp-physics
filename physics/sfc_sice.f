@@ -19,27 +19,29 @@
       end subroutine sfc_sice_post_finalize
 
 !! \section arg_table_sfc_sice_post_run Argument Table
-!! | local_name     | standard_name                                         | long_name                                   | units | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|---------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count |    0 | integer   |           | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag  |    1 | integer   |           | in     | F        |
-!! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K     |    1 | real      | kind_phys | in     | F        |
-!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac  |    1 | real      | kind_phys | inout  | F        |
-!! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m     |    1 | real      | kind_phys | inout  | F        |
-!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K     |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP    | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP       | flag  |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                         | long_name                                         | units | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|---------------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                            | count |    0 | integer   |           | in     | F        |
+!! | cplflx         | flag_for_flux_coupling                                | flag controlling cplflx collection (default off)  | flag  |    0 | logical   |           | in     | F        |
+!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                        | flag  |    1 | integer   |           | in     | F        |
+!! | tsfc           | surface_skin_temperature                              | surface skin temperature                          | K     |    1 | real      | kind_phys | in     | F        |
+!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                       | frac  |    1 | real      | kind_phys | inout  | F        |
+!! | hice           | sea_ice_thickness                                     | sea-ice thickness                                 | m     |    1 | real      | kind_phys | inout  | F        |
+!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                       | K     |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP          | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP             | flag  |    0 | integer   |           | out    | F        |
 !!
-      subroutine sfc_sice_post_run(im, islmsk, tsfc, fice, hice, tisfc, &
-     &                             errmsg, errflg)
+      subroutine sfc_sice_post_run(im, cplflx, islmsk, tsfc, fice,       &
+     &    hice, tisfc, errmsg, errflg)
 
       use machine, only : kind_phys
 
       implicit none
 
 ! --- input
-      integer :: im
-      integer, dimension(im) :: islmsk
+      integer, intent(in) :: im
+      logical, intent(in) :: cplflx
+      integer, dimension(im), intent(in) :: islmsk
       real(kind=kind_phys), dimension(im), intent(in) :: tsfc
 
 ! --- input/output
@@ -58,13 +60,15 @@
 
 !--- return updated ice thickness & concentration to global arrays
 !    where there is no ice, set temperature to surface skin temperature.
-      do i = 1, im
-        if (islmsk(i) /= 2) then
-           hice(i) = 0.0
-           fice(i) = 0.0
-           tisfc(i) = tsfc(i)
-        endif
-      enddo
+      if(.not. cplflx) then
+        do i = 1, im
+          if (islmsk(i) /= 2) then
+             hice(i) = 0.0
+             fice(i) = 0.0
+             tisfc(i) = tsfc(i)
+          endif
+        enddo
+      endif
 
       end subroutine sfc_sice_post_run
 
@@ -341,7 +345,7 @@
       cpinv = 1.0/cp
       hvapi = 1.0/hvap
       elocp = hvap/cp
-      
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0

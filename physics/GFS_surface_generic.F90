@@ -33,9 +33,9 @@
 !! | zorl           | surface_roughness_length                                                     | surface roughness length                                             | cm         |    1 | real      | kind_phys | in     | F        |
 !! | zorlo          | surface_roughness_length_over_ocean                                          | surface roughness length over ocean                                  | cm         |    1 | real      | kind_phys | inout  | F        |
 !! | zorll          | surface_roughness_length_over_land                                           | surface roughness length over land                                   | cm         |    1 | real      | kind_phys | inout  | F        |
-!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                             | surface roughness length over ocean (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
-!! | zorl_lnd       | surface_roughness_length_over_land_interstitial                              | surface roughness length over land  (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
-!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                               | surface roughness length over ice   (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | none   | F        |
+!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                             | surface roughness length over ocean (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | inout  | F        |
+!! | zorl_lnd       | surface_roughness_length_over_land_interstitial                              | surface roughness length over land  (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | inout  | F        |
+!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                               | surface roughness length over ice   (temporary use as interstitial)  | cm         |    1 | real      | kind_phys | inout  | F        |
 !! | snowd          | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                          | mm         |    1 | real      | kind_phys | in     | F        |
 !! | snowd_ocn      | surface_snow_thickness_water_equivalent_over_ocean                           | water equivalent snow depth over ocean                               | mm         |    1 | real      | kind_phys | inout  | F        |
 !! | snowd_lnd      | surface_snow_thickness_water_equivalent_over_land                            | water equivalent snow depth over land                                | mm         |    1 | real      | kind_phys | inout  | F        |
@@ -327,6 +327,12 @@
 
       module GFS_surface_generic_post
 
+      implicit none
+
+      private
+
+      public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
+
       contains
 
       subroutine GFS_surface_generic_post_init ()
@@ -343,9 +349,11 @@
 !! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                                                                                   | landmask: sea/land/ice=0/1/2                                                        | flag        |    1 | integer    |           | in     | F        |
+!! | idry           | flag_nonzero_land_surface_fraction                                                                                  | flag indicating presence of some land surface area fraction                         | flag        |    1 | integer    |           | in     | F        |
+!! | iwet           | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | integer    |           | in     | F        |
+!! | iice           | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | integer    |           | in     | F        |
+!! | ilak           | flag_nonzero_lake_surface_fraction                                                                                  | flag indicating presence of some lake surface area fraction                         | flag        |    1 | integer    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
-!! | ep1d           | surface_upward_potential_latent_heat_flux                                                                           | surface upward potential latent heat flux                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | gflx           | upward_heat_flux_in_soil                                                                                            | upward soil heat flux                                                               | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | tgrs_1         | air_temperature_at_lowest_model_layer                                                                               | mean temperature at lowest model layer                                              | K           |    1 | real       | kind_phys | in     | F        |
 !! | qgrs_1         | water_vapor_specific_humidity_at_lowest_model_layer                                                                 | specific humidity at lowest model layer                                             | kg kg-1     |    1 | real       | kind_phys | in     | F        |
 !! | ugrs_1         | x_wind_at_lowest_model_layer                                                                                        | zonal wind at lowest model layer                                                    | m s-1       |    1 | real       | kind_phys | in     | F        |
@@ -365,7 +373,6 @@
 !! | q2m            | specific_humidity_at_2m                                                                                             | 2 meter specific humidity                                                           | kg kg-1     |    1 | real       | kind_phys | in     | F        |
 !! | u10m           | x_wind_at_10m                                                                                                       | 10 meter u wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
 !! | v10m           | y_wind_at_10m                                                                                                       | 10 meter v wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                                                                                            | surface skin temperature                                                            | K           |    1 | real       | kind_phys | in     | F        |
 !! | pgr            | surface_air_pressure                                                                                                | surface pressure                                                                    | Pa          |    1 | real       | kind_phys | in     | F        |
 !! | xcosz          | instantaneous_cosine_of_zenith_angle                                                                                | cosine of zenith angle at current time                                              | none        |    1 | real       | kind_phys | in     | F        |
 !! | evbs           | soil_upward_latent_heat_flux                                                                                        | soil upward latent heat flux                                                        | W m-2       |    1 | real       | kind_phys | in     | F        |
@@ -422,18 +429,121 @@
 !! | srunoff        | surface_runoff                                                                                                      | surface water runoff (from lsm)                                                     | kg m-2      |    1 | real       | kind_phys | inout  | F        |
 !! | runof          | surface_runoff_flux                                                                                                 | surface runoff flux                                                                 | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
 !! | drain          | subsurface_runoff_flux                                                                                              | subsurface runoff flux                                                              | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
+!! | lndfrac        | land_area_fraction                                                                                                  | fraction of horizontal grid area occupied by land                                   | frac        |    1 | real       | kind_phys | in     | F        |
+!! | lakfrac        | lake_area_fraction                                                                                                  | fraction of horizontal grid area occupied by lake                                   | frac        |    1 | real       | kind_phys | in     | F        |
+!! | ocnfrac        | sea_area_fraction                                                                                                   | fraction of horizontal grid area occupied by ocean                                  | frac        |    1 | real       | kind_phys | in     | F        |
+!! | cice           | sea_ice_concentration                                                                                               | ice fraction over open water                                                        | frac        |    1 | real       | kind_phys | in     | F        |
+!! | zorl           | surface_roughness_length                                                                                            | surface roughness length                                                            | cm          |    1 | real       | kind_phys | inout  | F        |
+!! | zorlo          | surface_roughness_length_over_ocean                                                                                 | surface roughness length over ocean                                                 | cm          |    1 | real       | kind_phys | inout  | F        |
+!! | zorll          | surface_roughness_length_over_land                                                                                  | surface roughness length over land                                                  | cm          |    1 | real       | kind_phys | inout  | F        |
+!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                                                                    | surface roughness length over ocean (temporary use as interstitial)                 | cm          |    1 | real       | kind_phys | in     | F        |
+!! | zorl_lnd       | surface_roughness_length_over_land_interstitial                                                                     | surface roughness length over land  (temporary use as interstitial)                 | cm          |    1 | real       | kind_phys | in     | F        |
+!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                                                                      | surface roughness length over ice   (temporary use as interstitial)                 | cm          |    1 | real       | kind_phys | in     | F        |
+!! | cd             | surface_drag_coefficient_for_momentum_in_air                                                                        | surface exchange coeff for momentum                                                 | none        |    1 | real       | kind_phys | inout  | F        |
+!! | cd_ocn         | surface_drag_coefficient_for_momentum_in_air_over_ocean                                                             | surface exchange coeff for momentum over ocean                                      | none        |    1 | real       | kind_phys | in     | F        |
+!! | cd_lnd         | surface_drag_coefficient_for_momentum_in_air_over_land                                                              | surface exchange coeff for momentum over land                                       | none        |    1 | real       | kind_phys | in     | F        |
+!! | cd_ice         | surface_drag_coefficient_for_momentum_in_air_over_ice                                                               | surface exchange coeff for momentum over ice                                        | none        |    1 | real       | kind_phys | in     | F        |
+!! | cdq            | surface_drag_coefficient_for_heat_and_moisture_in_air                                                               | surface exchange coeff heat & moisture                                              | none        |    1 | real       | kind_phys | inout  | F        |
+!! | cdq_ocn        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean                                                    | surface exchange coeff heat & moisture over ocean                                   | none        |    1 | real       | kind_phys | in     | F        |
+!! | cdq_lnd        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_land                                                     | surface exchange coeff heat & moisture over land                                    | none        |    1 | real       | kind_phys | in     | F        |
+!! | cdq_ice        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice                                                      | surface exchange coeff heat & moisture over ice                                     | none        |    1 | real       | kind_phys | in     | F        |
+!! | rb             | bulk_richardson_number_at_lowest_model_level                                                                        | bulk Richardson number at the surface                                               | none        |    1 | real       | kind_phys | inout  | F        |
+!! | rb_ocn         | bulk_richardson_number_at_lowest_model_level_over_ocean                                                             | bulk Richardson number at the surface over ocean                                    | none        |    1 | real       | kind_phys | in     | F        |
+!! | rb_lnd         | bulk_richardson_number_at_lowest_model_level_over_land                                                              | bulk Richardson number at the surface over land                                     | none        |    1 | real       | kind_phys | in     | F        |
+!! | rb_ice         | bulk_richardson_number_at_lowest_model_level_over_ice                                                               | bulk Richardson number at the surface over ice                                      | none        |    1 | real       | kind_phys | in     | F        |
+!! | stress         | surface_wind_stress                                                                                                 | surface wind stress                                                                 | m2 s-2      |    1 | real       | kind_phys | inout  | F        |
+!! | stress_ocn     | surface_wind_stress_over_ocean                                                                                      | surface wind stress over ocean                                                      | m2 s-2      |    1 | real       | kind_phys | in     | F        |
+!! | stress_lnd     | surface_wind_stress_over_land                                                                                       | surface wind stress over land                                                       | m2 s-2      |    1 | real       | kind_phys | in     | F        |
+!! | stress_ice     | surface_wind_stress_over_ice                                                                                        | surface wind stress over ice                                                        | m2 s-2      |    1 | real       | kind_phys | in     | F        |
+!! | ffmm           | Monin-Obukhov_similarity_function_for_momentum                                                                      | Monin-Obukhov similarity function for momentum                                      | none        |    1 | real       | kind_phys | inout  | F        |
+!! | ffmm_ocn       | Monin-Obukhov_similarity_function_for_momentum_over_ocean                                                           | Monin-Obukhov similarity function for momentum over ocean                           | none        |    1 | real       | kind_phys | in     | F        |
+!! | ffmm_lnd       | Monin-Obukhov_similarity_function_for_momentum_over_land                                                            | Monin-Obukhov similarity function for momentum over land                            | none        |    1 | real       | kind_phys | in     | F        |
+!! | ffmm_ice       | Monin-Obukhov_similarity_function_for_momentum_over_ice                                                             | Monin-Obukhov similarity function for momentum over ice                             | none        |    1 | real       | kind_phys | in     | F        |
+!! | ffhh           | Monin-Obukhov_similarity_function_for_heat                                                                          | Monin-Obukhov similarity function for heat                                          | none        |    1 | real       | kind_phys | inout  | F        |
+!! | ffhh_ocn       | Monin-Obukhov_similarity_function_for_heat_over_ocean                                                               | Monin-Obukhov similarity function for heat over ocean                               | none        |    1 | real       | kind_phys | in     | F        |
+!! | ffhh_lnd       | Monin-Obukhov_similarity_function_for_heat_over_land                                                                | Monin-Obukhov similarity function for heat over land                                | none        |    1 | real       | kind_phys | in     | F        |
+!! | ffhh_ice       | Monin-Obukhov_similarity_function_for_heat_over_ice                                                                 | Monin-Obukhov similarity function for heat over ice                                 | none        |    1 | real       | kind_phys | in     | F        |
+!! | uustar         | surface_friction_velocity                                                                                           | boundary layer parameter                                                            | m s-1       |    1 | real       | kind_phys | inout  | F        |
+!! | uustar_ocn     | surface_friction_velocity_over_ocean                                                                                | surface friction velocity over ocean                                                | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | uustar_lnd     | surface_friction_velocity_over_land                                                                                 | surface friction velocity over land                                                 | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | uustar_ice     | surface_friction_velocity_over_ice                                                                                  | surface friction velocity over ice                                                  | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                                                               | Monin-Obukhov similarity parameter for momentum at 10m                              | none        |    1 | real       | kind_phys | inout  | F        |
+!! | fm10_ocn       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ocean                                                    | Monin-Obukhov similarity parameter for momentum at 10m over ocean                   | none        |    1 | real       | kind_phys | in     | F        |
+!! | fm10_lnd       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_land                                                     | Monin-Obukhov similarity parameter for momentum at 10m over land                    | none        |    1 | real       | kind_phys | in     | F        |
+!! | fm10_ice       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ice                                                      | Monin-Obukhov similarity parameter for momentum at 10m over ice                     | none        |    1 | real       | kind_phys | in     | F        |
+!! | fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                                                                    | Monin-Obukhov similarity parameter for heat at 2m                                   | none        |    1 | real       | kind_phys | inout  | F        |
+!! | fh2_ocn        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ocean                                                         | Monin-Obukhov similarity parameter for heat at 2m over ocean                        | none        |    1 | real       | kind_phys | in     | F        |
+!! | fh2_lnd        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_land                                                          | Monin-Obukhov similarity parameter for heat at 2m over land                         | none        |    1 | real       | kind_phys | in     | F        |
+!! | fh2_ice        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ice                                                           | Monin-Obukhov similarity parameter for heat at 2m over ice                          | none        |    1 | real       | kind_phys | in     | F        |
+!! | tsurf          | surface_skin_temperature_after_iteration                                                                            | surface skin temperature after iteration                                            | K           |    1 | real       | kind_phys | inout  | F        |
+!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean                                                                 | surface skin temperature after iteration over ocean                                 | K           |    1 | real       | kind_phys | in     | F        |
+!! | tsurf_lnd      | surface_skin_temperature_after_iteration_over_land                                                                  | surface skin temperature after iteration over land                                  | K           |    1 | real       | kind_phys | in     | F        |
+!! | tsurf_ice      | surface_skin_temperature_after_iteration_over_ice                                                                   | surface skin temperature after iteration over ice                                   | K           |    1 | real       | kind_phys | in     | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                                                         | momentum exchange coefficient                                                       | m s-1       |    1 | real       | kind_phys | inout  | F        |
+!! | cmm_ocn        | surface_drag_wind_speed_for_momentum_in_air_over_ocean                                                              | momentum exchange coefficient over ocean                                            | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | cmm_lnd        | surface_drag_wind_speed_for_momentum_in_air_over_land                                                               | momentum exchange coefficient over land                                             | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | cmm_ice        | surface_drag_wind_speed_for_momentum_in_air_over_ice                                                                | momentum exchange coefficient over ice                                              | m s-1       |    1 | real       | kind_phys | in     | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                                                                 | thermal exchange coefficient                                                        | kg m-2 s-1  |    1 | real       | kind_phys | inout  | F        |
+!! | chh_ocn        | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean                                                      | thermal exchange coefficient over ocean                                             | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
+!! | chh_lnd        | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land                                                       | thermal exchange coefficient over land                                              | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
+!! | chh_ice        | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                                                        | thermal exchange coefficient over ice                                               | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
+!! | gflx           | upward_heat_flux_in_soil                                                                                            | soil heat flux                                                                      | W m-2       |    1 | real       | kind_phys | inout  | F        |
+!! | gflx_ocn       | upward_heat_flux_in_soil_over_ocean                                                                                 | soil heat flux over ocean                                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | gflx_lnd       | upward_heat_flux_in_soil_over_land                                                                                  | soil heat flux over land                                                            | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | gflx_ice       | upward_heat_flux_in_soil_over_ice                                                                                   | soil heat flux over ice                                                             | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | ep1d           | surface_upward_potential_latent_heat_flux                                                                           | surface upward potential latent heat flux                                           | W m-2       |    1 | real       | kind_phys | inout  | F        |
+!! | ep1d_ocn       | surface_upward_potential_latent_heat_flux_over_ocean                                                                | surface upward potential latent heat flux over ocean                                | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | ep1d_lnd       | surface_upward_potential_latent_heat_flux_over_land                                                                 | surface upward potential latent heat flux over land                                 | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | ep1d_ice       | surface_upward_potential_latent_heat_flux_over_ice                                                                  | surface upward potential latent heat flux over ice                                  | W m-2       |    1 | real       | kind_phys | in     | F        |
+!! | weasd          | water_equivalent_accumulated_snow_depth                                                                             | water equiv of acc snow depth over land and sea ice                                 | mm          |    1 | real       | kind_phys | inout  | F        |
+!! | weasd_lnd      | water_equivalent_accumulated_snow_depth_over_land                                                                   | water equiv of acc snow depth over land                                             | mm          |    1 | real       | kind_phys | in     | F        |
+!! | weasd_ice      | water_equivalent_accumulated_snow_depth_over_ice                                                                    | water equiv of acc snow depth over ice                                              | mm          |    1 | real       | kind_phys | in     | F        |
+!! | snowd          | surface_snow_thickness_water_equivalent                                                                             | water equivalent snow depth                                                         | mm          |    1 | real       | kind_phys | inout  | F        |
+!! | snowd_ocn      | surface_snow_thickness_water_equivalent_over_ocean                                                                  | water equivalent snow depth over ocean                                              | mm          |    1 | real       | kind_phys | in     | F        |
+!! | snowd_lnd      | surface_snow_thickness_water_equivalent_over_land                                                                   | water equivalent snow depth over land                                               | mm          |    1 | real       | kind_phys | in     | F        |
+!! | snowd_ice      | surface_snow_thickness_water_equivalent_over_ice                                                                    | water equivalent snow depth over ice                                                | mm          |    1 | real       | kind_phys | in     | F        |
+!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep                                              | total precipitation amount in each time step                                        | m           |    1 | real       | kind_phys | inout  | F        |
+!! | tprcp_ocn      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ocean                                   | total precipitation amount in each time step over ocean                             | m           |    1 | real       | kind_phys | in     | F        |
+!! | tprcp_lnd      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_land                                    | total precipitation amount in each time step over land                              | m           |    1 | real       | kind_phys | in     | F        |
+!! | tprcp_ice      | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice                                     | total precipitation amount in each time step over ice                               | m           |    1 | real       | kind_phys | in     | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                                                           | kinematic surface upward latent heat flux                                           | kg kg-1 m s-1 |  1 | real       | kind_phys | inout  | F        |
+!! | evap_ocn       | kinematic_surface_upward_latent_heat_flux_over_ocean                                                                | kinematic surface upward latent heat flux over ocean                                | kg kg-1 m s-1 |  1 | real       | kind_phys | in     | F        |
+!! | evap_lnd       | kinematic_surface_upward_latent_heat_flux_over_land                                                                 | kinematic surface upward latent heat flux over land                                 | kg kg-1 m s-1 |  1 | real       | kind_phys | in     | F        |
+!! | evap_ice       | kinematic_surface_upward_latent_heat_flux_over_ice                                                                  | kinematic surface upward latent heat flux over ice                                  | kg kg-1 m s-1 |  1 | real       | kind_phys | in     | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                                                         | kinematic surface upward sensible heat flux                                         | K m s-1     |    1 | real       | kind_phys | inout  | F        |
+!! | hflx_ocn       | kinematic_surface_upward_sensible_heat_flux_over_ocean                                                              | kinematic surface upward sensible heat flux over ocean                              | K m s-1     |    1 | real       | kind_phys | in     | F        |
+!! | hflx_lnd       | kinematic_surface_upward_sensible_heat_flux_over_land                                                               | kinematic surface upward sensible heat flux over land                               | K m s-1     |    1 | real       | kind_phys | in     | F        |
+!! | hflx_ice       | kinematic_surface_upward_sensible_heat_flux_over_ice                                                                | kinematic surface upward sensible heat flux over ice                                | K m s-1     |    1 | real       | kind_phys | in     | F        |
+!! | qss            | surface_specific_humidity                                                                                           | surface air saturation specific humidity                                            | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
+!! | qss_ocn        | surface_specific_humidity_over_ocean                                                                                | surface air saturation specific humidity over ocean                                 | kg kg-1     |    1 | real       | kind_phys | in     | F        |
+!! | qss_lnd        | surface_specific_humidity_over_land                                                                                 | surface air saturation specific humidity over land                                  | kg kg-1     |    1 | real       | kind_phys | in     | F        |
+!! | qss_ice        | surface_specific_humidity_over_ice                                                                                  | surface air saturation specific humidity over ice                                   | kg kg-1     |    1 | real       | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                                                                                            | surface skin temperature                                                            | K           |    1 | real       | kind_phys | inout  | F        |
+!! | tsfco          | sea_surface_temperature                                                                                             | sea surface temperature                                                             | K           |    1 | real       | kind_phys | inout  | F        |
+!! | tsfcl          | surface_skin_temperature_over_land                                                                                  | surface skin temperature over land                                                  | K           |    1 | real       | kind_phys | inout  | F        |
+!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial                                                                    | surface skin temperature over ocean (temporary use as interstitial)                 | K           |    1 | real       | kind_phys | in     | F        |
+!! | tsfc_lnd       | surface_skin_temperature_over_land_interstitial                                                                     | surface skin temperature over land  (temporary use as interstitial)                 | K           |    1 | real       | kind_phys | in     | F        |
+!! | tsfc_ice       | surface_skin_temperature_over_ice_interstitial                                                                      | surface skin temperature over ice   (temporary use as interstitial)                 | K           |    1 | real       | kind_phys | in     | F        |
+!! | tisfc          | sea_ice_temperature                                                                                                 | sea ice surface skin temperature                                                    | K           |    1 | real       | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                                                                                  | error message for error handling in CCPP                                            | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, islmsk, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,  &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, islmsk, idry, iwet, iice, ilak, dtf, ep1d, tgrs_1, qgrs_1, ugrs_1, vgrs_1,        &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-        t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
+        t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, errmsg, errflg)
+        runoff, srunoff, runof, drain, lndfrac, lakfrac, ocnfrac, cice, zorl, zorlo, zorll, zorl_ocn, zorl_lnd, zorl_ice,           &
+        cd, cd_ocn, cd_lnd, cd_ice, cdq, cdq_ocn, cdq_lnd, cdq_ice, rb, rb_ocn, rb_lnd, rb_ice, stress, stress_ocn, stress_lnd,     &
+        stress_ice, ffmm, ffmm_ocn, ffmm_lnd, ffmm_ice, ffhh, ffhh_ocn, ffhh_lnd, ffhh_ice, uustar, uustar_ocn, uustar_lnd,         &
+        uustar_ice, fm10, fm10_ocn, fm10_lnd, fm10_ice, fh2, fh2_ocn, fh2_lnd, fh2_ice, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice,     &
+        cmm, cmm_ocn, cmm_lnd, cmm_ice, chh, chh_ocn, chh_lnd, chh_ice, gflx, gflx_ocn, gflx_lnd, gflx_ice, ep1d, ep1d_ocn,         &
+        ep1d_lnd, ep1d_ice, weasd, weasd_lnd, weasd_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn, tprcp_lnd,       &
+        tprcp_ice, evap, evap_ocn, evap_lnd, evap_ice, hflx, hflx_ocn, hflx_lnd, hflx_ice, qss, qss_ocn, qss_lnd, qss_ice,          &
+        tsfc, tsfco, tsfcl, tsfc_ocn, tsfc_lnd, tsfc_ice, tisfc, errmsg, errflg)
 
         use machine,               only: kind_phys
 
@@ -441,19 +551,27 @@
 
         integer,                              intent(in) :: im
         logical,                              intent(in) :: cplflx, cplwav, lssav
-        integer, dimension(im),               intent(in) :: islmsk
+        integer, dimension(im),               intent(in) :: islmsk, idry, iwet, iice, ilak
 
         real(kind=kind_phys),                 intent(in) :: dtf
 
-        real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
-          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                   &
-          t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
+        real(kind=kind_phys), dimension(im),  intent(in)  :: tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,    &
+          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                      &
+          t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, lndfrac, lakfrac, ocnfrac, cice,        &
+          zorl_ocn, zorl_lnd, zorl_ice, cd_ocn, cd_lnd, cd_ice, cdq_ocn, cdq_lnd, cdq_ice, rb_ocn, rb_lnd, rb_ice, stress_ocn,    &
+          stress_lnd, stress_ice, ffmm_ocn, ffmm_lnd, ffmm_ice, ffhh_ocn, ffhh_lnd, ffhh_ice, uustar_ocn, uustar_lnd, uustar_ice, &
+          fm10_ocn, fm10_lnd, fm10_ice, fh2_ocn, fh2_lnd, fh2_ice, tsurf_ocn, tsurf_lnd, tsurf_ice, cmm_ocn, cmm_lnd, cmm_ice,    &
+          chh_ocn, chh_lnd, chh_ice, gflx_ocn, gflx_lnd, gflx_ice, ep1d_ocn, ep1d_lnd, ep1d_ice, weasd_lnd, weasd_ice, snowd_ocn, &
+          snowd_lnd, snowd_ice,tprcp_ocn, tprcp_lnd, tprcp_ice, evap_ocn, evap_lnd, evap_ice, hflx_ocn, hflx_lnd, hflx_ice,       &
+          qss_ocn, qss_lnd, qss_ice, tsfc_ocn, tsfc_lnd, tsfc_ice
+
 
         real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
           nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, &
           nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, &
-          evcwa, transa, sbsnoa, snowca, snohfa, ep
+          evcwa, transa, sbsnoa, snowca, snohfa, ep, zorl, zorlo, zorll, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, fh2,      &
+          tsurf, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
         real(kind=kind_phys), dimension(im), intent(inout) :: runoff, srunoff
         real(kind=kind_phys), dimension(im), intent(in)    :: drain, runof
@@ -469,6 +587,118 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! --- generate ocean/land/ice composites
+
+        do i=1, im
+  !
+  ! Three-way composites (fields from sfc_diff_ocean, sfc_diff_land, sfc_diff_ice)
+          zorl(i)           = cmposit3(ocnfrac(i), lndfrac(i),                &
+                                lakfrac(i),cice(i),                           &
+                                zorl_ocn(i),  zorl_lnd(i),  zorl_ice(i))
+          cd(i)             = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                  cd_ocn(i),    cd_lnd(i),    cd_ice(i))
+          cdq(i)            = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                 cdq_ocn(i),   cdq_lnd(i),   cdq_ice(i))
+          rb(i)             = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                  rb_ocn(i),    rb_lnd(i),    rb_ice(i))
+          stress(i)         = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                              stress_ocn(i),stress_lnd(i),stress_ice(i))
+          ffmm(i)           = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                ffmm_ocn(i),  ffmm_lnd(i),  ffmm_ice(i))
+          ffhh(i)           = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                ffhh_ocn(i),  ffhh_lnd(i),  ffhh_ice(i))
+          uustar(i)         = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                              uustar_ocn(i),uustar_lnd(i),uustar_ice(i))
+          fm10(i)           = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                fm10_ocn(i),  fm10_lnd(i),  fm10_ice(i))
+          fh2(i)            = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                 fh2_ocn(i),   fh2_lnd(i),   fh2_ice(i))
+          tsurf(i)          = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                               tsurf_ocn(i), tsurf_lnd(i), tsurf_ice(i))
+          cmm(i)            = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                 cmm_ocn(i),   cmm_lnd(i),   cmm_ice(i))
+          chh(i)            = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                 chh_ocn(i),   chh_lnd(i),   chh_ice(i))
+          gflx(i)           = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                gflx_ocn(i),  gflx_lnd(i),  gflx_ice(i))
+          ep1d(i)           = cmposit3(ocnfrac(i),lndfrac(i),                 &
+                                       lakfrac(i),cice(i),                    &
+                                ep1d_ocn(i),  ep1d_lnd(i),  ep1d_ice(i))
+          weasd(i)           = cmposit3(ocnfrac(i),lndfrac(i),                &
+                                       lakfrac(i),cice(i),                    &
+                                weasd(i), weasd_lnd(i), weasd_ice(i))
+          snowd(i)           = cmposit3(ocnfrac(i),lndfrac(i),                &
+                                       lakfrac(i),cice(i),                    &
+                               snowd_ocn(i), snowd_lnd(i), snowd_ice(i))
+          tprcp(i)           = cmposit3(ocnfrac(i),lndfrac(i),                &
+                                       lakfrac(i),cice(i),                    &
+                               tprcp_ocn(i), tprcp_lnd(i), tprcp_ice(i))
+
+  ! Two-way composites (fields already composited in sfc_sice)
+  ! Three-way composites when coupled
+          if(cplflx .and. ilak(i) == 0) then  ! Lakes in coupled mode use sice?
+            evap(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                  evap_ocn(i),  evap_lnd(i),  evap_ice(i))
+            hflx(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                  hflx_ocn(i),  hflx_lnd(i),  hflx_ice(i))
+            qss(i)            = cmposit3(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                   qss_ocn(i),   qss_lnd(i),   qss_ice(i))
+            tsfc(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                  tsfc_ocn(i),  tsfc_lnd(i),  tsfc_ice(i))
+          else
+            evap(i)           = cmposit2(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                  evap_ocn(i),  evap_lnd(i),  evap_ice(i))
+            hflx(i)           = cmposit2(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                  hflx_ocn(i),  hflx_lnd(i),  hflx_ice(i))
+            qss(i)            = cmposit2(ocnfrac(i),lndfrac(i),               &
+                                         lakfrac(i),cice(i),                  &
+                                   qss_ocn(i),   qss_lnd(i),   qss_ice(i))
+            tsfc(i)           = cmposit2(ocnfrac(i),lndfrac(i), &
+                                         lakfrac(i),cice(i),            &
+                                  tsfc_ocn(i),  tsfc_lnd(i),  tsfc_ice(i))
+            if(iice(i) == 1 .and. .not. cplflx) then
+              cmm(i)           = cmm_ice(i)
+              chh(i)           = chh_ice(i)
+              gflx(i)          = gflx_ice(i)
+              ep1d(i)          = ep1d_ice(i)
+              weasd(i)         = weasd_ice(i)
+              snowd(i)         = snowd_ice(i)
+            end if
+          endif
+
+          zorll(i) = zorl_lnd(i)
+          zorlo(i) = zorl_ocn(i)
+
+          if (idry(i)==1) tsfcl(i) = tsfc_lnd(i)
+          if (iwet(i)==1) then
+            tsfco(i) = tsfc_ocn(i)
+            tisfc(i) = tsfc_ice(i)
+          end if
+
+        end do
+
+  ! --- compositing done
+
 
         do i=1,im
           epi(i)     = ep1d(i)
@@ -512,7 +742,7 @@
   !       them to net SW heat fluxes
 
           do i=1,im
-            if (islmsk(i) /= 1) then  ! not a land point
+            if(lndfrac(i) < 1.) then ! Not 100% land
   !  ---  compute open water albedo
               xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
               ocalnirdf_cpl = 0.06
@@ -566,5 +796,29 @@
         endif
 
       end subroutine GFS_surface_generic_post_run
+
+      real function cmposit2(frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval)
+  ! --- 2-way compositing (use with ice/non-ice composited variables)
+      implicit none
+      real(kind=kind_phys),intent(IN) :: frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval
+      real(kind=kind_phys)            :: frac_wet
+
+      frac_wet=max(frac_lak,frac_ocn)
+      if (frac_ice.eq.0.) then
+        cmposit2 = frac_dry*lndval + frac_wet*ocnval
+      else
+        cmposit2 = frac_dry*lndval + frac_wet*iceval
+      end if
+      return
+      end function cmposit2
+
+      real function cmposit3(frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval)
+  ! --- 3-way compositing
+      implicit none
+      real(kind=kind_phys),intent(IN) :: frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval
+
+      cmposit3 = frac_dry*lndval + frac_ice*iceval + (1.-frac_dry-frac_ice)*ocnval
+      return
+      end function cmposit3
 
       end module GFS_surface_generic_post
