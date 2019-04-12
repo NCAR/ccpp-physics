@@ -374,6 +374,33 @@
 
       if (cplflx) then
         do i=1,im
+          !GF from fractional landmask commit; not needed yet due to cplflx = F
+!           if( iocn(i) == 1) then ! Ocean only, NO LAKES
+!             if( idry(i) == 1 .or. iice(i) == 1 ) then ! use stress_ocn from sfc_diff for opw component at mixed point
+!               tem1 = max(Diag%q1(i), 1.e-8)
+!               rho = Statein%prsl(i,1) / (con_rd*Diag%t1(i)*(1.0+con_fvirt*tem1))
+!               if (wind(i) > 0.) then
+!                 Coupling%dusfci_cpl(i) = -1 * rho * stress_ocn(i) * Statein%ugrs(i,1) / wind(i) ! U-momentum flux
+!                 Coupling%dvsfci_cpl(i) = -1 * rho * stress_ocn(i) * Statein%vgrs(i,1) / wind(i) ! V-momentum flux
+!               else
+!                 Coupling%dusfci_cpl(i) = 0.
+!                 Coupling%dvsfci_cpl(i) = 0.
+!               end if
+!               Coupling%dtsfci_cpl(i) = con_cp   * rho * hflx_ocn(i) !sensible heat flux over open ocean
+!               Coupling%dqsfci_cpl(i) = con_hvap * rho * evap_ocn(i) !  latent heat flux over open ocean
+!             else ! use results from PBL scheme for 100% open ocean
+!               Coupling%dusfci_cpl(i) = dusfc1(i)
+!               Coupling%dvsfci_cpl(i) = dvsfc1(i)
+!               Coupling%dtsfci_cpl(i) = dtsfc1(i)
+!               Coupling%dqsfci_cpl(i) = dqsfc1(i)
+!             endif
+! 
+!             Coupling%dusfc_cpl (i) = Coupling%dusfc_cpl(i) + Coupling%dusfci_cpl(i) * dtf
+!             Coupling%dvsfc_cpl (i) = Coupling%dvsfc_cpl(i) + Coupling%dvsfci_cpl(i) * dtf
+!             Coupling%dtsfc_cpl (i) = Coupling%dtsfc_cpl(i) + Coupling%dtsfci_cpl(i) * dtf
+!             Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + Coupling%dqsfci_cpl(i) * dtf
+! !
+!           endif ! Ocean only, NO LAKES
           dusfc_cpl (i) = dusfc_cpl(i) + dusfc1(i)*dtf
           dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfc1(i)*dtf
           dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfc1(i)*dtf

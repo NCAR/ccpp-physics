@@ -529,7 +529,7 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, islmsk, idry, iwet, iice, ilak, dtf, ep1d, tgrs_1, qgrs_1, ugrs_1, vgrs_1,        &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, idry, iwet, iice, ilak, dtf, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
         t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -551,7 +551,7 @@
 
         integer,                              intent(in) :: im
         logical,                              intent(in) :: cplflx, cplwav, lssav
-        integer, dimension(im),               intent(in) :: islmsk, idry, iwet, iice, ilak
+        integer, dimension(im),               intent(in) :: idry, iwet, iice, ilak
 
         real(kind=kind_phys),                 intent(in) :: dtf
 
