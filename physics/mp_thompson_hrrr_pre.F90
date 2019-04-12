@@ -1,6 +1,3 @@
-!Activate this CPP flag to calculate initial number concentrations
-!#define MAKE_NUMBER_CONCENTRATIONS
-
 ! CCPP license goes here, as well as further documentation
 module mp_thompson_hrrr_pre
 
@@ -38,6 +35,7 @@ module mp_thompson_hrrr_pre
 !! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)      | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
 !! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                 | kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                | kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | make_number_concentrations | flag_for_initial_number_concentration_calculation          | flag for initial number concentration calculation        | flag       |    0 | logical   |           | in     | F        |
 !! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
 !! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
 !! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
@@ -58,6 +56,7 @@ module mp_thompson_hrrr_pre
 #endif
       subroutine mp_thompson_hrrr_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,       &
+                                  make_number_concentrations,                &
                                   is_aerosol_aware, nc, nwfa, nifa, nwfa2d,  &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
                                   mpirank, mpiroot, blkno, errmsg, errflg)
@@ -80,6 +79,7 @@ module mp_thompson_hrrr_pre
          real(kind_phys),           intent(inout) :: qg(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
+         logical,                   intent(in   ) :: make_number_concentrations
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nc(1:ncol,1:nlev)
@@ -165,27 +165,29 @@ module mp_thompson_hrrr_pre
          !  they also need to be switched back to mass/number per kg of air, because
          !  what is returned by the functions is in units of number per cubic meter.
 
-#ifdef MAKE_NUMBER_CONCENTRATIONS
-         ! If qi is in boundary conditions but ni is not, calculate ni from qi, rho and tgrs
-         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) then
-             ni = make_IceNumber(qi*rho, tgrs) * orho
+         if (make_number_concentrations) then
+             ! If qi is in boundary conditions but ni is not, calculate ni from qi, rho and tgrs
+             if (maxval(qi)>0.0 .and. maxval(ni)==0.0) then
+                 ni = make_IceNumber(qi*rho, tgrs) * orho
+             end if
+         else
+             ! If qi is in boundary conditions but ni is not, reset qi to zero
+             if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
          end if
-#else
-         ! If qi is in boundary conditions but ni is not, reset qi to zero
-         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
-#endif
+
          ! If ni is in boundary conditions but qi is not, reset ni to zero
          if (maxval(ni)>0.0 .and. maxval(qi)==0.0) ni = 0.0
 
-#ifdef MAKE_NUMBER_CONCENTRATIONS
-         ! If qr is in boundary conditions but nr is not, calculate nr from qr, rho and tgrs
-         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) then
-             nr = make_RainNumber(qr*rho, tgrs) * orho
+         if (make_number_concentrations) then
+             ! If qr is in boundary conditions but nr is not, calculate nr from qr, rho and tgrs
+             if (maxval(qr)>0.0 .and. maxval(nr)==0.0) then
+                 nr = make_RainNumber(qr*rho, tgrs) * orho
+             end if
+         else
+             ! If qr is in boundary conditions but nr is not, reset qr to zero
+             if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
          end if
-#else
-         ! If qr is in boundary conditions but nr is not, reset qr to zero
-         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
-#endif
+
          ! If nr is in boundary conditions but qr is not, reset nr to zero
          if (maxval(nr)>0.0 .and. maxval(qr)==0.0) nr = 0.0
 
@@ -292,15 +294,16 @@ module mp_thompson_hrrr_pre
             endif
          endif
 
-#ifdef MAKE_NUMBER_CONCENTRATIONS
-         ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
-         if (maxval(qc)>0.0 .and. maxval(nc)==0.0) then
-            nc = make_DropletNumber(qc*rho, nwfa) * orho
+         if (make_number_concentrations) then
+             ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
+             if (maxval(qc)>0.0 .and. maxval(nc)==0.0) then
+                nc = make_DropletNumber(qc*rho, nwfa) * orho
+             end if
+         else
+             ! If qc is in boundary conditions but nc is not, reset qc to zero
+             if (maxval(qc)>0.0 .and. maxval(nc)==0.0) qc = 0.0
          end if
-#else
-         ! If qc is in boundary conditions but nc is not, reset qc to zero
-         if (maxval(qc)>0.0 .and. maxval(nc)==0.0) qc = 0.0
-#endif
+
          ! If nc is in boundary conditions but qc is not, reset nc to zero
          if (maxval(nc)>0.0 .and. maxval(qc)==0.0) nc = 0.0
 
