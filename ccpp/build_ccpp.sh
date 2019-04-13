@@ -24,7 +24,6 @@ function usage   {
   echo "                                   HYBRID=Y/N (default Y)"
   echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"
   echo "                                   STATIC=Y/N (default N, STATIC=Y requires HYBRID=N)"
-  echo "                                   SUITE=name_of_sdf_without_path.xml (only if STATIC=Y)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
   echo "           clean_after  [optional] can be 'YES' (default) or 'NO'"
   exit 1
