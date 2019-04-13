@@ -17,7 +17,7 @@ if [ $WARM_START = .T. ]; then
     cp ../fv3_ccpp_regional_control/RESTART/20180329.120000.sfc_data.nc             INPUT/sfc_data.nc
 fi
 
-cp ${PATHRT}/../${CCPP_SDF}                      ccpp_suite.xml
+cp ${PATHRT}/../ccpp/suites/suite_${CCPP_SUITE_NAME}.xml suite_${CCPP_SUITE_NAME}.xml
 
 # Add path to libccpp.so and libccpphys.so to LD_LIBRARY_PATH, append to module-setup.sh
 echo " " >> module-setup.sh
