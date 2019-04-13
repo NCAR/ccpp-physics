@@ -86,7 +86,7 @@ export FDIAG=3
 export NSTF_NAME=2,0,1,0,5
 
 export FV3_RUN=ccpp_control_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated.xml
+export CCPP_SUITE=FV3_GFS_2017_updated
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_control.nml.IN
 

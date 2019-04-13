@@ -78,7 +78,7 @@ export NODES=$(expr $TASKS / $TPN + 1)
 DT_ATMOS="600"
 
 export FV3_RUN=ccpp_ntiedtke_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_ntiedtke.xml
+export CCPP_SUITE=FV3_GFS_2017_updated_ntiedtke
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_ntiedtke.nml.IN
 

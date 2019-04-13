@@ -62,7 +62,7 @@ export OUTPUT_FILE="'nemsio'"
 export WRITE_NEMSIOFLIP=.true.
 export WRITE_FSYNCFLAG=.true.
 export FV3_RUN=ccpp_satmedmf_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_satmedmf.xml
+export CCPP_SUITE=FV3_GFS_2017_updated_satmedmf
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_satmedmf.nml.IN
 
