@@ -8,20 +8,18 @@ proc ModulesHelp {} {
 }
 
 module purge
-module load newdefaults
-module load intel/15.0.3.187
-module load impi/5.1.1.109
-module load szip
-module load hdf5
-module load netcdf4/4.2.1.1
+module load intel/18.0.5.274
+module load impi/2018.4.274
+module load szip/2.1
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load slurm/18.08.6
 module load contrib anaconda
 
-set libdir /mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
-
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
-##
-set NCEPLIBS_DIR /lfs3/projects/hfv3gfs/GMTB/NCEPlibs-intel-15.0.3.187-20181105
+### NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
+###
+set NCEPLIBS_DIR /lfs3/projects/hfv3gfs/GMTB/NCEPlibs/20190402/intel-18.0.5.274/impi-2018.4.274
 setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
 setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
 setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
@@ -33,16 +31,20 @@ setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
 ##
 ### use pre-compiled EMSF library for above compiler / MPI combination
 ##
-module use /lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles
-module load esmf/7.1.0r_impi_optim
-
-# Set path to NetCDF
-setenv NETCDF /apps/netcdf/4.2.1.1-intel
+set ESMF_DIR /lfs3/projects/hfv3gfs/GMTB/esmf-8.0.0_bs21/intel-18.0.5.274/impi-2018.4.274
+setenv ESMF_DIR              ${ESMF_DIR}
+setenv ESMF_INC              ${ESMF_DIR}/include
+setenv ESMF_BIN              ${ESMF_DIR}/bin
+setenv ESMF_LIB              ${ESMF_DIR}/lib
+setenv ESMF_MOD              ${ESMF_DIR}/mod
+setenv ESMFMKFILE            ${ESMF_DIR}/lib/esmf.mk
+prepend-path PATH            ${ESMF_DIR}/bin
+prepend-path LD_LIBRARY_PATH ${ESMF_DIR}/lib
 
 ##
 ## SIONlib library
 ##
-set    SIONLIB     /lfs3/projects/hfv3gfs/GMTB/sionlib-1.7.2/intel-15.0.3.187/impi-5.1.1.109
+set    SIONLIB     /lfs3/projects/hfv3gfs/GMTB/sionlib-1.7.2/intel-18.0.5.274/impi-2018.4.274
 setenv SIONLIB     ${SIONLIB}
 setenv SIONLIB_INC "-I${SIONLIB}/include -I${SIONLIB}/include/mod_64"
 setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi_64 -lsiongen_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none"

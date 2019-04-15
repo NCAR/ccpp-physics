@@ -12,7 +12,7 @@
        chksum_debug = .false.
        dycore_only = .false.
        fdiag = @[FDIAG]
-       ccpp_suite = ''@[CCPP_SUITE]''
+       ccpp_suite = '@[CCPP_SUITE]'
 /
 
 &diag_manager_nml
@@ -155,6 +155,7 @@
        dspheat        = .true.
        hybedmf        = .true.
        satmedmf       = .false.
+       lheatstrg      = @[LHEATSTRG]
        random_clds    = .false.
        trans_trac     = .false.
        cnvcld         = .true.

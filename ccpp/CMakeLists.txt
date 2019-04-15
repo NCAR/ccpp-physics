@@ -109,7 +109,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
   elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
     # Specify aggressive optimization flags (to be overwritten for individual files in ccpp-physics' CMakeLists.txt)
     if (SIMDMULTIARCH)
-      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -axSSE4.2,AVX,CORE-AVX2")
+      set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512")
     else (SIMDMULTIARCH)
       set (CMAKE_Fortran_FLAGS_OPT "-no-prec-div -no-prec-sqrt -xCORE-AVX2")
     endif (SIMDMULTIARCH)
@@ -278,16 +278,6 @@ if(ESMF_LIB_DIR)
 else(ESMF_LIB_DIR)
   message (STATUS "Disable ESMF support")
 endif(ESMF_LIB_DIR)
-
-#------------------------------------------------------------------------------
-# Set netCDF flags for preprocessor, compiler and linker (if defined)
-if(NETCDF_DIR)
-  message (STATUS "NETCDF_DIR: ${NETCDF_DIR}")
-  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -L${NETCDF_DIR} -lnetcdff -lnetcdf")
-  message (STATUS "Enable netCDF support")
-else(NETCDF_DIR)
-  message (STATUS "Disable netCDF support")
-endif(NETCDF_DIR)
 
 #------------------------------------------------------------------------------
 # Build CCPP framework and physics

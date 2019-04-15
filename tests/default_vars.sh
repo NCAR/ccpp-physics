@@ -17,8 +17,15 @@ elif [ $MACHINE_ID = wcoss_cray ]; then
 
   TASKS_dflt=150 ; TPN_dflt=24 ; INPES_dflt=3 ; JNPES_dflt=8
   TASKS_thrd=84  ; TPN_thrd=12 ; INPES_thrd=3 ; JNPES_thrd=4
-  TASKS_stretch=48 ; TPN_stretch=12 ; INPES_stretch=2 ; JNPES_stretch=4
-  TASKS_strnest=96 ; TPN_strnest=12 ; INPES_strnest=2 ; JNPES_strnest=4
+  TASKS_stretch=48 ; TPN_stretch=24 ; INPES_stretch=2 ; JNPES_stretch=4
+  TASKS_strnest=96 ; TPN_strnest=24 ; INPES_strnest=2 ; JNPES_strnest=4
+
+elif [ $MACHINE_ID = wcoss_dell_p3 ]; then
+
+  TASKS_dflt=150 ; TPN_dflt=28 ; INPES_dflt=3 ; JNPES_dflt=8
+  TASKS_thrd=84  ; TPN_thrd=14 ; INPES_thrd=3 ; JNPES_thrd=4
+  TASKS_stretch=48 ; TPN_stretch=28 ; INPES_stretch=2 ; JNPES_stretch=4
+  TASKS_strnest=96 ; TPN_strnest=28 ; INPES_strnest=2 ; JNPES_strnest=4
 
 elif [[ $MACHINE_ID = theia.* ]]; then
 
@@ -98,9 +105,13 @@ export MAKE_NH=.T.
 export MOUNTAIN=.F.
 export SATMEDMF=.F.
 export HYBEDMF=.T.
+export LHEATSTRG=.F.
+export LGFDLMPRAD=.F.
+export EFFR_IN=.F.
 export NA_INIT=1
 export CPL=.F.
 export CPLFLX=.F.
+export CPLWAV=.F.
 export DAYS=1
 export NPX=97
 export NPY=97

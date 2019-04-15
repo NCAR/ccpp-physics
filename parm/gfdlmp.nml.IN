@@ -154,6 +154,9 @@
        dspheat        = .true.
        hybedmf        = @[HYBEDMF]
        satmedmf       = @[SATMEDMF]
+       lheatstrg      = @[LHEATSTRG]
+       lgfdlmprad     = @[LGFDLMPRAD]
+       effr_in        = @[EFFR_IN]
        random_clds    = .false.
        trans_trac     = .false.
        cnvcld         = .true.

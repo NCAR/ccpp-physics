@@ -71,13 +71,13 @@ ifneq ($(need),$(ok))
 $(error Need at least make version $(need).  Load module gmake/3.81)
 endif
 
-NETCDF_ROOT = $(NETCDF4)
+NETCDF_ROOT = $(NETCDF)
 INCLUDE = -I$(NETCDF_ROOT)/include
 NETCDF_INC = -I$(NETCDF_ROOT)/include
 ifneq ($(findstring netcdf/4,$(LOADEDMODULES)),)
-  NETCDF_LIB += -L$(NETCDF4)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 else
-  NETCDF_LIB += -L$(NETCDF4)/lib -lnetcdff -lnetcdf
+  NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
 
 FPPFLAGS := -fpp -Wp,-w $(INCLUDE)
@@ -118,8 +118,8 @@ FFLAGS += -qno-opt-dynamic-align
 CFLAGS += -qno-opt-dynamic-align
 else
 ifeq ($(AVX2),Y)
-FFLAGS += -axSSE4.2,AVX,CORE-AVX2 -qno-opt-dynamic-align
-CFLAGS += -axSSE4.2,AVX,CORE-AVX2 -qno-opt-dynamic-align
+FFLAGS += -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512 -qno-opt-dynamic-align
+CFLAGS += -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512 -qno-opt-dynamic-align
 else
 FFLAGS += -qno-opt-dynamic-align
 CFLAGS += -qno-opt-dynamic-align
@@ -205,7 +205,6 @@ ifeq ($(SION),Y)
 CPPDEFS += -DSION
 CFLAGS += $(SIONLIB_INC)
 FFLAGS += $(SIONLIB_INC)
-LDFLAGS += $(SIONLIB_LIB)
 endif
 
 LDFLAGS += $(LIBS)
@@ -213,5 +212,5 @@ LDFLAGS += $(LIBS)
 ifdef InNemsMakefile
 FFLAGS += $(ESMF_INC)
 CPPFLAGS += -traditional
-EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
+EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB) $(SIONLIB_LIB)
 endif

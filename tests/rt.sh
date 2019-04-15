@@ -73,30 +73,29 @@ if [[ $MACHINE_ID = wcoss ]]; then
   ROCOTORUN="/u/Christopher.W.Harrop/rocoto/bin/rocotorun"
   ROCOTOSTAT="/u/Christopher.W.Harrop/rocoto/bin/rocotostat"
   DISKNM=/nems/noscrub/emc.nemspara/RT
-  MDISK=/global/noscrub
   QUEUE=debug
   PARTITION=
   ACCNR=GFS-T2O
   STMP=/ptmpp$pex
   PTMP=/ptmpp$pex
   SCHEDULER=lsf
-  MPIEXEC=mpirun.lsf
-  MPIEXECOPTS=""
 # cp fv3_conf/fv3_bsub.IN_wcoss fv3_conf/fv3_bsub.IN
 
 elif [[ $MACHINE_ID = wcoss_cray ]]; then
 
   source $PATHTR/NEMS/src/conf/module-setup.sh.inc
   module load xt-lsfhpc
-
-  export PATH=/gpfs/hps/nco/ops/ecf/ecfdir/ecflow.v4.1.0.intel/bin:$PATH
-  export PYTHONPATH=/gpfs/hps/nco/ops/ecf/ecfdir/ecflow.v4.1.0.intel/lib/python2.6/site-packages
-  ECFLOW_START=/gpfs/hps/nco/ops/ecf/ecfdir/ecflow.v4.1.0.intel/bin/ecflow_start.sh
+  module use /usrx/local/emc_rocoto/modulefiles
+  module load rocoto/1.2.4-RC3
+  ROCOTORUN=$(which rocotorun)
+  ROCOTOSTAT=$(which rocotostat)
+  module load ecflow/intel/4.7.1
+  ECFLOW_START=${ECF_ROOT}/intel/bin/ecflow_start.sh
+  ECF_PORT=$(grep $USER /usrx/local/sys/ecflow/assigned_ports.txt | awk '{print $2}')
   DISKNM=/gpfs/hps3/emc/nems/noscrub/emc.nemspara/RT
-  MDISK=/gpfs/hps3/emc/global/noscrub
   QUEUE=debug
   PARTITION=
-  ACCNR=dev
+  ACCNR=GFS-T2O
   if [[ -d /gpfs/hps3/ptmp ]] ; then
       STMP=/gpfs/hps3/stmp
       PTMP=/gpfs/hps3/stmp
@@ -105,9 +104,28 @@ elif [[ $MACHINE_ID = wcoss_cray ]]; then
       PTMP=/gpfs/hps3/ptmp
   fi
   SCHEDULER=lsf
-  MPIEXEC=aprun
-  MPIEXECOPTS="\"-j 1 -n @[TASKS] -N @[TPN] -d 1\""
   cp fv3_conf/fv3_bsub.IN_wcoss_cray fv3_conf/fv3_bsub.IN
+
+elif [[ $MACHINE_ID = wcoss_dell_p3 ]]; then
+
+  source $PATHTR/NEMS/src/conf/module-setup.sh.inc
+  module load lsf/10.1
+  module use /usrx/local/dev/emc_rocoto/modulefiles
+  module load ruby/2.5.1 rocoto/complete
+  ROCOTORUN=$(which rocotorun)
+  ROCOTOSTAT=$(which rocotostat)
+  module load ips/18.0.1.163
+  module load ecflow/4.7.1
+  ECFLOW_START=${ECF_ROOT}/intel/bin/ecflow_start.sh
+  ECF_PORT=$(grep $USER /usrx/local/sys/ecflow/assigned_ports.txt | awk '{print $2}')
+  DISKNM=/gpfs/dell2/emc/modeling/noscrub/emc.nemspara/RT
+  QUEUE=debug
+  PARTITION=
+  ACCNR=FV3GFS-T2O
+  STMP=/gpfs/dell2/stmp
+  PTMP=/gpfs/dell2/ptmp
+  SCHEDULER=lsf
+  cp fv3_conf/fv3_bsub.IN_wcoss_dell_p3 fv3_conf/fv3_bsub.IN
 
 elif [[ $MACHINE_ID = gaea.* ]]; then
 
@@ -125,8 +143,6 @@ elif [[ $MACHINE_ID = gaea.* ]]; then
   STMP=/lustre/f2/scratch
   PTMP=/lustre/f2/scratch
   SCHEDULER=moab
-  MPIEXEC=aprun
-  MPIEXECOPTS="\"-j 1 -n @[TASKS] -N @[TPN] -d @[THRD]\""
   cp fv3_conf/fv3_msub.IN_gaea fv3_conf/fv3_msub.IN
 
 elif [[ $MACHINE_ID = theia.* ]]; then
@@ -135,12 +151,14 @@ elif [[ $MACHINE_ID = theia.* ]]; then
   # Re-instantiate COMPILER in case it gets deleted by module purge
   COMPILER=${NEMS_COMPILER:-intel}
 
+  module load slurm
   module load rocoto
   ROCOTORUN=$(which rocotorun)
   ROCOTOSTAT=$(which rocotostat)
   export PATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin:$PATH
-  export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.6/site-packages
+  export PYTHONPATH=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/lib/python2.7/site-packages
   ECFLOW_START=/scratch4/NCEPDEV/meso/save/Dusan.Jovic/ecflow/bin/ecflow_start.sh
+  ECF_PORT=$(( $(id -u) + 1500 ))
   QUEUE=debug
 #  ACCNR=fv3-cpu
   PARTITION=
@@ -148,9 +166,13 @@ elif [[ $MACHINE_ID = theia.* ]]; then
   DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
   STMP=$dprefix/stmp4
   PTMP=$dprefix/stmp3
+
+  # uncomment after SLURM becomes default scheduler on Theia
+  #SCHEDULER=slurm
+  #cp fv3_conf/fv3_slurm.IN_theia fv3_conf/fv3_slurm.IN
+
+  # temporary. while we transition from Moab/Torque to SLURM
   SCHEDULER=pbs
-  MPIEXEC=mpirun
-  MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_theia fv3_conf/fv3_qsub.IN
 
 elif [[ $MACHINE_ID = jet.* ]]; then
@@ -192,8 +214,6 @@ elif [[ $MACHINE_ID = cheyenne.* ]]; then
   STMP=$dprefix
   PTMP=$dprefix
   SCHEDULER=pbs
-  MPIEXEC=mpiexec_mpt
-  MPIEXECOPTS=
   cp fv3_conf/fv3_qsub.IN_cheyenne fv3_conf/fv3_qsub.IN
 
 elif [[ $MACHINE_ID = stampede.* ]]; then
@@ -280,9 +300,9 @@ while getopts ":cfsl:mreh" opt; do
 done
 
 if [[ $MACHINE_ID = cheyenne.* ]]; then
-  RTPWD=${RTPWD:-$DISKNM/trunk-20181105/${COMPILER^^}}
+  RTPWD=${RTPWD:-$DISKNM/trunk-20190315/${COMPILER^^}}
 else
-  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20181105}
+  RTPWD=${RTPWD:-$DISKNM/NEMSfv3gfs/trunk-20190315}
 fi
 
 shift $((OPTIND-1))
@@ -328,6 +348,14 @@ if [[ $ROCOTO == true ]]; then
   if [[ $MACHINE_ID = wcoss ]]; then
     QUEUE=dev
     COMPILE_QUEUE=dev
+    ROCOTO_SCHEDULER=lsf
+  elif [[ $MACHINE_ID = wcoss_cray ]]; then
+    QUEUE=dev
+    COMPILE_QUEUE=dev
+    ROCOTO_SCHEDULER=lsfcray
+  elif [[ $MACHINE_ID = wcoss_dell_p3 ]]; then
+    QUEUE=dev
+    COMPILE_QUEUE=dev_transfer
     ROCOTO_SCHEDULER=lsf
   elif [[ $MACHINE_ID = theia.* ]]; then
     QUEUE=batch
@@ -379,6 +407,8 @@ EOF
     QUEUE=dev
   elif [[ $MACHINE_ID = wcoss_cray ]]; then
     QUEUE=dev
+  elif [[ $MACHINE_ID = wcoss_dell_p3 ]]; then
+    QUEUE=dev
   elif [[ $MACHINE_ID = theia.* ]]; then
     QUEUE=batch
   elif [[ $MACHINE_ID = jet.* ]]; then
@@ -405,7 +435,7 @@ while read -r line; do
 
   if [[ $line == COMPILE* ]] ; then
 
-      unset APP
+      APP=''
       NEMS_VER=$(echo $line | cut -d'|' -f2 | sed -e 's/^ *//' -e 's/ *$//')
       SET=$(     echo $line | cut -d'|' -f3)
       MACHINES=$(echo $line | cut -d'|' -f4 | sed -e 's/^ *//' -e 's/ *$//')
@@ -430,7 +460,6 @@ while read -r line; do
 
   elif [[ $line == APPBUILD* ]] ; then
 
-      unset NEMS_VER
       APP=$(echo $line | cut -d'|' -f2 | sed -e 's/^ *//' -e 's/ *$//')
       SET=$(     echo $line | cut -d'|' -f3)
       MACHINES=$(echo $line | cut -d'|' -f4 | sed -e 's/^ *//' -e 's/ *$//')
@@ -454,6 +483,7 @@ while read -r line; do
       fi
 
       unset APP
+    continue
 
   elif [[ $line == RUN* ]] ; then
 
@@ -486,8 +516,6 @@ EOF
       export PATHRT=${PATHRT}
       export PATHTR=${PATHTR}
       export NEW_BASELINE=${NEW_BASELINE}
-      export MPIEXEC=${MPIEXEC}
-      export MPIEXECOPTS=${MPIEXECOPTS}
       export CREATE_BASELINE=${CREATE_BASELINE}
       export SCHEDULER=${SCHEDULER}
       export ACCNR=${ACCNR}
