@@ -306,7 +306,6 @@
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
 
-      integer, dimension(im), intent(in) :: islimsk
       real (kind=kind_phys), intent(in)  :: delt
 
       logical, intent(in) :: flag_iter(im), mom4ice
