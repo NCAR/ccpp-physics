@@ -354,6 +354,9 @@
 ! ================
 
          subroutine rrtmg_lw_init ()
+           open(59,file='rrtmg_aux_dump.txt',status='unknown')
+           open(60,file='rrtmg_aux_tautot.txt',status='unknown')
+           open(61,file='rrtmg_aux_taucld.txt',status='unknown')
          end subroutine rrtmg_lw_init
 
 !> \defgroup module_radlw_main GFS radlw Main
@@ -1286,14 +1289,28 @@
           endif
 
         endif                       ! if_ivflip
-
+      write(59,*) "#"
+      write(60,*) "#"
+      do j=1,nLay
+         write(59,"(9F10.3)") plyr(1,j),tlyr(1,j),cld_lwp(1,j),         &
+     &      cld_iwp(1,j), cld_cf(1,j), sum(totuclfl(j-1:j))/2.,         &
+     &       sum(totdclfl(j-1:j))/2., sum(totuflux(j-1:j))/2.,          &
+     &       sum(totdflux(j-1:j))/2.
+         write(60,*) tautot(:,j)
+         write(61,*) taucld(:,j)
+        enddo
       enddo  lab_do_iplon
+
+
 
 !...................................
       end subroutine rrtmg_lw_run
 !-----------------------------------
 !> @}
       subroutine rrtmg_lw_finalize ()
+        close(59)
+        close(60)
+        close(61)
       end subroutine rrtmg_lw_finalize 
 
 
@@ -1725,6 +1742,7 @@
                 do ib = 1, nbands
                   tauliq(ib) = max(f_zero, cldliq*(absliq1(index,ib)    &
      &              + fint*(absliq1(index+1,ib)-absliq1(index,ib)) ))
+
                 enddo
               endif   ! end if_ilwcliq_block
             endif   ! end if_cldliq_block
@@ -1784,7 +1802,7 @@
             endif   ! end if_cldice_block
 
             do ib = 1, nbands
-              taucld(ib,k) = tauice(ib) + tauliq(ib) + tauran + tausnw
+               taucld(ib,k) = tauice(ib) + tauliq(ib) + tauran + tausnw
             enddo
 
           endif  lab_if_cld

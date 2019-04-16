@@ -1,21 +1,22 @@
 ! ###########################################################################################
 ! ###########################################################################################
 module rrtmgp_lw
-  use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
-  use mo_gas_concentrations,   only: ty_gas_concs
-  use mo_fluxes,               only: ty_fluxes_broadband
-  use mo_optical_props,        only: ty_optical_props_1scl,ty_optical_props_2str
-  use mo_source_functions,     only: ty_source_func_lw
-  use mo_rte_lw,               only: rte_lw
-  use mo_rte_kind,             only: wl
-  use mo_heating_rates,        only: compute_heating_rate
-  use mo_cloud_optics,         only: ty_cloud_optics
-  use machine,                 only: kind_phys
-  use module_radlw_parameters, only: topflw_type, sfcflw_type, proflw_type
-  use physparam,               only: ilwcliq,isubclw
-  use GFS_typedefs,            only: GFS_control_type
-  use mo_rrtmgp_constants,     only: grav, avogad
-  use mo_rrtmgp_lw_cloud_optics
+  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
+  use mo_gas_concentrations,     only: ty_gas_concs
+  use mo_fluxes,                 only: ty_fluxes_broadband
+  use mo_optical_props,          only: ty_optical_props_1scl,ty_optical_props_2str
+  use mo_source_functions,       only: ty_source_func_lw
+  use mo_rte_lw,                 only: rte_lw
+  use mo_rte_kind,               only: wl
+  use mo_heating_rates,          only: compute_heating_rate
+  use mo_cloud_optics,           only: ty_cloud_optics
+  use machine,                   only: kind_phys
+  use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
+  use physparam,                 only: ilwcliq,isubclw,iovrlw,ilwrgas,icldflg,ilwrate
+  use GFS_typedefs,              only: GFS_control_type
+  use mo_rrtmgp_constants,       only: grav, avogad
+  use mo_rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics, diffusivityB1410,diffusivityHigh, &
+       diffusivityLow, a0, a1, a2, cldmin, absrain, abssnow0, mcica_subcol_lw
   implicit none
 
   ! Parameters
@@ -195,53 +196,82 @@ contains
          npairsLWcldy                       ! used by RRTGMP cloud optics 
 
     ! Local variables
-    integer :: ncid,dimID,varID,status,igpt,iGas,ij,ierr
+    integer :: ncid_lw,dimID,varID,status,igpt,iGas,ij,ierr,ncid_lw_clds
     integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4,temp_log_array1,&
     	temp_log_array2, temp_log_array3, temp_log_array4
     character(len=264) :: kdist_file,kdist_cldy_file
     integer,parameter :: max_strlen=256
 
+    open(59,file='rrtmgp_aux_dump.txt',status='unknown')
+    open(60,file='rrtmgp_aux_tautot.txt',status='unknown')
+    open(61,file='rrtmgp_aux_taucld.txt',status='unknown')
+
+    ! Initialize
+    errmsg = ''
+    errflg = 0
+
+    ! Ensure that requested cloud overlap is reasonable.
+    if ( iovrlw .lt. 0 .or. iovrlw .gt. 3 ) then
+       print *,'  *** Error in specification of cloud overlap flag',   &
+            ' IOVRLW=',iovrlw,' in RLWINIT !!'
+       stop
+    elseif ( iovrlw .ge. 2 .and. isubclw .eq. 0 ) then 
+       print *,'  *** IOVRLW=',iovrlw,' is not available for',         &
+            ' ISUBCLW=0 setting!!'
+       print *,'      The program uses maximum/random overlap',        &
+            ' instead.'
+       iovrlw = 1
+    endif
+
+    ! Check cloud flags for consistency.
+    if ((icldflg .eq. 0 .and. ilwcliq .ne. 0) .or. &
+        (icldflg .eq. 1 .and. ilwcliq .eq. 0)) then
+       print *,'  *** Model cloud scheme inconsistent with LW',        &
+            ' radiation cloud radiative property setup !!'
+       stop
+    endif
+
     ! How are we handling cloud-optics?
     rrtmgp_lw_cld_phys = Model%rrtmgp_lw_cld_phys
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
-    kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_file_gas)
-    kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_file_clouds)
+    kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_gas)
+    kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_clouds)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
     if (mpirank .eq. mpiroot) then
-       if(nf90_open(trim(kdist_file), NF90_WRITE, ncid) == NF90_NOERR) then
-          status = nf90_inq_dimid(ncid, 'temperature', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ntemps)
-          status = nf90_inq_dimid(ncid, 'pressure', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=npress)
-          status = nf90_inq_dimid(ncid, 'absorber', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nabsorbers)
-          status = nf90_inq_dimid(ncid, 'minor_absorber', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nminorabsorbers)
-          status = nf90_inq_dimid(ncid, 'absorber_ext', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nextrabsorbers)
-          status = nf90_inq_dimid(ncid, 'mixing_fraction', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nmixingfracs)
-          status = nf90_inq_dimid(ncid, 'atmos_layer', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nlayers)
-          status = nf90_inq_dimid(ncid, 'bnd', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nbnds)
-          status = nf90_inq_dimid(ncid, 'gpt', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ngpts)
-          status = nf90_inq_dimid(ncid, 'pair', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=npairs)
-          status = nf90_inq_dimid(ncid, 'contributors_lower', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ncontributors_lower)
-          status = nf90_inq_dimid(ncid, 'contributors_upper', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ncontributors_upper)
-          status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_lower', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nminor_absorber_intervals_lower)
-          status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_upper', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nminor_absorber_intervals_upper)
-          status = nf90_inq_dimid(ncid, 'temperature_Planck', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ninternalSourcetemps)
-          status = nf90_close(ncid)
+       if(nf90_open(trim(kdist_file), NF90_WRITE, ncid_lw) .eq. NF90_NOERR) then
+          status = nf90_inq_dimid(ncid_lw, 'temperature', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=ntemps)
+          status = nf90_inq_dimid(ncid_lw, 'pressure', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=npress)
+          status = nf90_inq_dimid(ncid_lw, 'absorber', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nabsorbers)
+          status = nf90_inq_dimid(ncid_lw, 'minor_absorber', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nminorabsorbers)
+          status = nf90_inq_dimid(ncid_lw, 'absorber_ext', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nextrabsorbers)
+          status = nf90_inq_dimid(ncid_lw, 'mixing_fraction', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nmixingfracs)
+          status = nf90_inq_dimid(ncid_lw, 'atmos_layer', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nlayers)
+          status = nf90_inq_dimid(ncid_lw, 'bnd', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nbnds)
+          status = nf90_inq_dimid(ncid_lw, 'gpt', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=ngpts)
+          status = nf90_inq_dimid(ncid_lw, 'pair', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=npairs)
+          status = nf90_inq_dimid(ncid_lw, 'contributors_lower', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=ncontributors_lower)
+          status = nf90_inq_dimid(ncid_lw, 'contributors_upper', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=ncontributors_upper)
+          status = nf90_inq_dimid(ncid_lw, 'minor_absorber_intervals_lower', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nminor_absorber_intervals_lower)
+          status = nf90_inq_dimid(ncid_lw, 'minor_absorber_intervals_upper', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=nminor_absorber_intervals_upper)
+          status = nf90_inq_dimid(ncid_lw, 'temperature_Planck', dimid)
+          status = nf90_inquire_dimension(ncid_lw, dimid, len=ninternalSourcetemps)
+          status = nf90_close(ncid_lw)
        endif
     endif
     
@@ -299,105 +329,105 @@ contains
        allocate(planck_frac(ngpts, nmixingfracs, npress+1, ntemps))
 
        ! Read in fields from file
-       if(nf90_open(trim(kdist_file), NF90_WRITE, ncid) == NF90_NOERR) then
-          status = nf90_inq_varid(ncid,'gas_names',varID)
-          status = nf90_get_var(ncid,varID,gas_names)
+       if(nf90_open(trim(kdist_file), NF90_WRITE, ncid_lw) .eq. NF90_NOERR) then
+          status = nf90_inq_varid(ncid_lw,'gas_names',varID)
+          status = nf90_get_var(ncid_lw,varID,gas_names)
           !
-          status = nf90_inq_varid(ncid,'scaling_gas_lower',varID)
-          status = nf90_get_var(ncid,varID,scaling_gas_lower)
+          status = nf90_inq_varid(ncid_lw,'scaling_gas_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,scaling_gas_lower)
           !
-          status = nf90_inq_varid(ncid,'scaling_gas_upper',varID)
-          status = nf90_get_var(ncid,varID,scaling_gas_upper)
+          status = nf90_inq_varid(ncid_lw,'scaling_gas_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,scaling_gas_upper)
           !
-          status = nf90_inq_varid(ncid,'gas_minor',varID)
-          status = nf90_get_var(ncid,varID,gas_minor)
+          status = nf90_inq_varid(ncid_lw,'gas_minor',varID)
+          status = nf90_get_var(ncid_lw,varID,gas_minor)
           !
-          status = nf90_inq_varid(ncid,'identifier_minor',varID)
-          status = nf90_get_var(ncid,varID,identifier_minor)
+          status = nf90_inq_varid(ncid_lw,'identifier_minor',varID)
+          status = nf90_get_var(ncid_lw,varID,identifier_minor)
           !
-          status = nf90_inq_varid(ncid,'minor_gases_lower',varID)
-          status = nf90_get_var(ncid,varID,minor_gases_lower)
+          status = nf90_inq_varid(ncid_lw,'minor_gases_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,minor_gases_lower)
           !
-          status = nf90_inq_varid(ncid,'minor_gases_upper',varID)
-          status = nf90_get_var(ncid,varID,minor_gases_upper)
+          status = nf90_inq_varid(ncid_lw,'minor_gases_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,minor_gases_upper)
           !
-          status = nf90_inq_varid(ncid,'minor_limits_gpt_lower',varID)
-          status = nf90_get_var(ncid,varID,minor_limits_gpt_lower)
+          status = nf90_inq_varid(ncid_lw,'minor_limits_gpt_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,minor_limits_gpt_lower)
           !
-          status = nf90_inq_varid(ncid,'minor_limits_gpt_upper',varID)
-          status = nf90_get_var(ncid,varID,minor_limits_gpt_upper)
+          status = nf90_inq_varid(ncid_lw,'minor_limits_gpt_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,minor_limits_gpt_upper)
           !
-          status = nf90_inq_varid(ncid,'bnd_limits_gpt',varID)
-          status = nf90_get_var(ncid,varID,band2gpt)
+          status = nf90_inq_varid(ncid_lw,'bnd_limits_gpt',varID)
+          status = nf90_get_var(ncid_lw,varID,band2gpt)
           !
-          status = nf90_inq_varid(ncid,'key_species',varID)
-          status = nf90_get_var(ncid,varID,key_species)
+          status = nf90_inq_varid(ncid_lw,'key_species',varID)
+          status = nf90_get_var(ncid_lw,varID,key_species)
           !
-          status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
-          status = nf90_get_var(ncid,varID,band_lims)
+          status = nf90_inq_varid(ncid_lw,'bnd_limits_wavenumber',varID)
+          status = nf90_get_var(ncid_lw,varID,band_lims)
           !
-          status = nf90_inq_varid(ncid,'press_ref',varID)
-          status = nf90_get_var(ncid,varID,press_ref)
+          status = nf90_inq_varid(ncid_lw,'press_ref',varID)
+          status = nf90_get_var(ncid_lw,varID,press_ref)
           !
-          status = nf90_inq_varid(ncid,'temp_ref',varID)
-          status = nf90_get_var(ncid,varID,temp_ref)
+          status = nf90_inq_varid(ncid_lw,'temp_ref',varID)
+          status = nf90_get_var(ncid_lw,varID,temp_ref)
           !
-          status = nf90_inq_varid(ncid,'absorption_coefficient_ref_P',varID)
-          status = nf90_get_var(ncid,varID,temp_ref_p)
+          status = nf90_inq_varid(ncid_lw,'absorption_coefficient_ref_P',varID)
+          status = nf90_get_var(ncid_lw,varID,temp_ref_p)
           !
-          status = nf90_inq_varid(ncid,'absorption_coefficient_ref_T',varID)
-          status = nf90_get_var(ncid,varID,temp_ref_t)
+          status = nf90_inq_varid(ncid_lw,'absorption_coefficient_ref_T',varID)
+          status = nf90_get_var(ncid_lw,varID,temp_ref_t)
           !
-          status = nf90_inq_varid(ncid,'press_ref_trop',varID)
-          status = nf90_get_var(ncid,varID,press_ref_trop)
+          status = nf90_inq_varid(ncid_lw,'press_ref_trop',varID)
+          status = nf90_get_var(ncid_lw,varID,press_ref_trop)
           !
-          status = nf90_inq_varid(ncid,'kminor_lower',varID)
-          status = nf90_get_var(ncid,varID,kminor_lower)
+          status = nf90_inq_varid(ncid_lw,'kminor_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,kminor_lower)
           !
-          status = nf90_inq_varid(ncid,'kminor_upper',varID)
-          status = nf90_get_var(ncid,varID,kminor_upper)
+          status = nf90_inq_varid(ncid_lw,'kminor_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,kminor_upper)
           !
-          status = nf90_inq_varid(ncid,'vmr_ref',varID)
-          status = nf90_get_var(ncid,varID,vmr_ref)
+          status = nf90_inq_varid(ncid_lw,'vmr_ref',varID)
+          status = nf90_get_var(ncid_lw,varID,vmr_ref)
           !
-          status = nf90_inq_varid(ncid,'kmajor',varID)
-          status = nf90_get_var(ncid,varID,kmajor)
+          status = nf90_inq_varid(ncid_lw,'kmajor',varID)
+          status = nf90_get_var(ncid_lw,varID,kmajor)
           !
-          status = nf90_inq_varid(ncid,'kminor_start_lower',varID)
-          status = nf90_get_var(ncid,varID,kminor_start_lower)
+          status = nf90_inq_varid(ncid_lw,'kminor_start_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,kminor_start_lower)
           !
-          status = nf90_inq_varid(ncid,'kminor_start_upper',varID)
-          status = nf90_get_var(ncid,varID,kminor_start_upper)
+          status = nf90_inq_varid(ncid_lw,'kminor_start_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,kminor_start_upper)
           !
-          status = nf90_inq_varid(ncid,'totplnk',varID)
-          status = nf90_get_var(ncid,varID,totplnk)
+          status = nf90_inq_varid(ncid_lw,'totplnk',varID)
+          status = nf90_get_var(ncid_lw,varID,totplnk)
           !
-          status = nf90_inq_varid(ncid,'plank_fraction',varID)
-          status = nf90_get_var(ncid,varID,planck_frac)
+          status = nf90_inq_varid(ncid_lw,'plank_fraction',varID)
+          status = nf90_get_var(ncid_lw,varID,planck_frac)
           
           ! Logical fields are read in as integers and then converted to logicals.
-          status = nf90_inq_varid(ncid,'minor_scales_with_density_lower',varID)
-          status = nf90_get_var(ncid,varID,temp1)
+          status = nf90_inq_varid(ncid_lw,'minor_scales_with_density_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,temp1)
           minor_scales_with_density_lower(:) = .false.
           where(temp1 .eq. 1) minor_scales_with_density_lower(:) = .true.
           !
-          status = nf90_inq_varid(ncid,'minor_scales_with_density_upper',varID)
-          status = nf90_get_var(ncid,varID,temp2)
+          status = nf90_inq_varid(ncid_lw,'minor_scales_with_density_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,temp2)
           minor_scales_with_density_upper(:) = .false.
           where(temp2 .eq. 1) minor_scales_with_density_upper(:) = .true.
           !
-          status = nf90_inq_varid(ncid,'scale_by_complement_lower',varID)
-          status = nf90_get_var(ncid,varID,temp3)
+          status = nf90_inq_varid(ncid_lw,'scale_by_complement_lower',varID)
+          status = nf90_get_var(ncid_lw,varID,temp3)
           scale_by_complement_lower(:) = .false.
           where(temp3 .eq. 1) scale_by_complement_lower(:) = .true.
           !
-          status = nf90_inq_varid(ncid,'scale_by_complement_upper',varID)
-          status = nf90_get_var(ncid,varID,temp4)
+          status = nf90_inq_varid(ncid_lw,'scale_by_complement_upper',varID)
+          status = nf90_get_var(ncid_lw,varID,temp4)
           scale_by_complement_upper(:) = .false.
           where(temp4 .eq. 1) scale_by_complement_upper(:) = .true.
           
           ! Close
-          status = nf90_close(ncid)
+          status = nf90_close(ncid_lw)
        endif
     endif
 
@@ -499,26 +529,26 @@ contains
     ! #######################################################################################
     ! Read dimensions for k-distribution fields (only on master processor(0))
     if (mpirank .eq. mpiroot) then
-       if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid) == NF90_NOERR) then
-          status = nf90_inq_dimid(ncid, 'nband', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nbandLWcldy)
-          status = nf90_inq_dimid(ncid, 'nrghice', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nrghice)
-          status = nf90_inq_dimid(ncid, 'nsize_liq', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nsize_liq)
-          status = nf90_inq_dimid(ncid, 'nsize_ice', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nsize_ice)
-          status = nf90_inq_dimid(ncid, 'nsizereg', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nsizereg)
-          status = nf90_inq_dimid(ncid, 'ncoeff_ext', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ncoeff_ext)
-          status = nf90_inq_dimid(ncid, 'ncoeff_ssa_g', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=ncoeff_ssa_g)
-          status = nf90_inq_dimid(ncid, 'nbound', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=nbound)
-          status = nf90_inq_dimid(ncid, 'pair', dimid)
-          status = nf90_inquire_dimension(ncid, dimid, len=npairsLWcldy)
-          status = nf90_close(ncid)
+       if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
+          status = nf90_inq_dimid(ncid_lw_clds, 'nband', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nbandLWcldy)
+          status = nf90_inq_dimid(ncid_lw_clds, 'nrghice', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nrghice)
+          status = nf90_inq_dimid(ncid_lw_clds, 'nsize_liq', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nsize_liq)
+          status = nf90_inq_dimid(ncid_lw_clds, 'nsize_ice', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nsize_ice)
+          status = nf90_inq_dimid(ncid_lw_clds, 'nsizereg', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nsizereg)
+          status = nf90_inq_dimid(ncid_lw_clds, 'ncoeff_ext', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=ncoeff_ext)
+          status = nf90_inq_dimid(ncid_lw_clds, 'ncoeff_ssa_g', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=ncoeff_ssa_g)
+          status = nf90_inq_dimid(ncid_lw_clds, 'nbound', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nbound)
+          status = nf90_inq_dimid(ncid_lw_clds, 'pair', dimid)
+          status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=npairsLWcldy)
+          status = nf90_close(ncid_lw_clds)
        endif
     endif
 
@@ -549,33 +579,34 @@ contains
           allocate(lut_asyice(nsize_ice, nBandLWcldy, nrghice))
           allocate(band_lims_cldy(2, nBandLWcldy))
           !
-          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid) == NF90_NOERR) then
-             status = nf90_inq_varid(ncid,'radliq_lwr',varID)
-             status = nf90_get_var(ncid,varID,radliq_lwr)
-             status = nf90_inq_varid(ncid,'radliq_upr',varID)
-             status = nf90_get_var(ncid,varID,radliq_upr)
-             status = nf90_inq_varid(ncid,'radliq_fac',varID)
-             status = nf90_get_var(ncid,varID,radliq_fac)
-             status = nf90_inq_varid(ncid,'radice_lwr',varID)
-             status = nf90_get_var(ncid,varID,radice_lwr)
-             status = nf90_inq_varid(ncid,'radice_upr',varID)
-             status = nf90_get_var(ncid,varID,radice_upr)
-             status = nf90_inq_varid(ncid,'radice_fac',varID)
-             status = nf90_get_var(ncid,varID,radice_fac)
-             status = nf90_inq_varid(ncid,'lut_extliq',varID)
-             status = nf90_get_var(ncid,varID,lut_extliq)
-             status = nf90_inq_varid(ncid,'lut_ssaliq',varID)
-             status = nf90_get_var(ncid,varID,lut_ssaliq)
-             status = nf90_inq_varid(ncid,'lut_asyliq',varID)
-             status = nf90_get_var(ncid,varID,lut_asyliq)
-             status = nf90_inq_varid(ncid,'lut_extice',varID)
-             status = nf90_get_var(ncid,varID,lut_extice)
-             status = nf90_inq_varid(ncid,'lut_ssaice',varID)
-             status = nf90_get_var(ncid,varID,lut_ssaice)
-             status = nf90_inq_varid(ncid,'lut_asyice',varID)
-             status = nf90_get_var(ncid,varID,lut_asyice)
-             status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
-             status = nf90_get_var(ncid,varID,band_lims_cldy)
+          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_lwr)
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_upr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_upr)
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_fac',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_fac)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_lwr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_lwr)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_upr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_upr)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_fac',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_fac)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_extliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_extliq)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_ssaliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_ssaliq)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_asyliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_asyliq)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_extice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_extice)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_ssaice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_ssaice)
+             status = nf90_inq_varid(ncid_lw_clds,'lut_asyice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,lut_asyice)
+             status = nf90_inq_varid(ncid_lw_clds,'bnd_limits_wavenumber',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,band_lims_cldy)
+             status = nf90_close(ncid_lw_clds)
           endif
        endif
        !
@@ -594,45 +625,46 @@ contains
           allocate(pade_sizereg_asyice(nbound))
           allocate(band_lims_cldy(2,nbandLWcldy))
           !
-          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid) == NF90_NOERR) then
-             status = nf90_inq_varid(ncid,'radliq_lwr',varID)
-             status = nf90_get_var(ncid,varID,radliq_lwr)
-             status = nf90_inq_varid(ncid,'radliq_upr',varID)
-             status = nf90_get_var(ncid,varID,radliq_upr)
-             status = nf90_inq_varid(ncid,'radliq_fac',varID)
-             status = nf90_get_var(ncid,varID,radliq_fac)
-             status = nf90_inq_varid(ncid,'radice_lwr',varID)
-             status = nf90_get_var(ncid,varID,radice_lwr)
-             status = nf90_inq_varid(ncid,'radice_upr',varID)
-             status = nf90_get_var(ncid,varID,radice_upr)
-             status = nf90_inq_varid(ncid,'radice_fac',varID)
-             status = nf90_get_var(ncid,varID,radice_fac)
-             status = nf90_inq_varid(ncid,'pade_extliq',varID)
-             status = nf90_get_var(ncid,varID,pade_extliq)
-             status = nf90_inq_varid(ncid,'pade_ssaliq',varID)
-             status = nf90_get_var(ncid,varID,pade_ssaliq)
-             status = nf90_inq_varid(ncid,'pade_asyliq',varID)
-             status = nf90_get_var(ncid,varID,pade_asyliq)
-             status = nf90_inq_varid(ncid,'pade_extice',varID)
-             status = nf90_get_var(ncid,varID,pade_extice)
-             status = nf90_inq_varid(ncid,'pade_ssaice',varID)
-             status = nf90_get_var(ncid,varID,pade_ssaice)
-             status = nf90_inq_varid(ncid,'pade_asyice',varID)
-             status = nf90_get_var(ncid,varID,pade_asyice)
-             status = nf90_inq_varid(ncid,'pade_sizereg_extliq',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_extliq)
-             status = nf90_inq_varid(ncid,'pade_sizereg_ssaliq',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_ssaliq)
-             status = nf90_inq_varid(ncid,'pade_sizereg_asyliq',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_asyliq)
-             status = nf90_inq_varid(ncid,'pade_sizereg_extice',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_extice)
-             status = nf90_inq_varid(ncid,'pade_sizereg_ssaice',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_ssaice)
-             status = nf90_inq_varid(ncid,'pade_sizereg_asyice',varID)
-             status = nf90_get_var(ncid,varID,pade_sizereg_asyice)
-             status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
-             status = nf90_get_var(ncid,varID,band_lims_cldy)
+          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_lwr)
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_upr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_upr)
+             status = nf90_inq_varid(ncid_lw_clds,'radliq_fac',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radliq_fac)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_lwr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_lwr)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_upr',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_upr)
+             status = nf90_inq_varid(ncid_lw_clds,'radice_fac',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,radice_fac)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_extliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_extliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_ssaliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_ssaliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_asyliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_asyliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_extice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_extice)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_ssaice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_ssaice)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_asyice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_asyice)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_extliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_extliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_ssaliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_ssaliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_asyliq',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_asyliq)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_extice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_extice)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_ssaice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_ssaice)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_asyice',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_asyice)
+             status = nf90_inq_varid(ncid_lw_clds,'bnd_limits_wavenumber',varID)
+             status = nf90_get_var(ncid_lw_clds,varID,band_lims_cldy)
+             status = nf90_close(ncid_lw_clds)
           endif
        endif
     endif
@@ -731,8 +763,6 @@ contains
 !! | topflx          | lw_fluxes_top_atmosphere                                                                      | longwave total sky fluxes at the top of the atm           | W m-2   |    1 | topflw_type |           | inout  | F        |
 !! | sfcflx          | lw_fluxes_sfc                                                                                 | longwave total sky fluxes at the Earth surface            | W m-2   |    1 | sfcflw_type |           | inout  | F        |
 !! | cldtau          | cloud_optical_depth_layers_at_10mu_band                                                       | approx 10mu band layer cloud optical depth                | none    |    2 | real        | kind_phys | inout  | F        |
-!! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | T        |
 !! | hlwb            | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                | K s-1   |    3 | real        | kind_phys | inout  | T        |
 !! | flxprf          | lw_fluxes                                                                                     | lw fluxes total sky / csk and up / down at levels         | W m-2   |    2 | proflw_type |           | inout  | T        |
@@ -745,15 +775,17 @@ contains
 !! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
 !! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
+!! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !!
   ! #########################################################################################
   subroutine rrtmgp_lw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o,     & ! IN
        vmr_ch4, vmr_o2, vmr_co, vmr_cfc11, vmr_cfc12, vmr_cfc22, vmr_ccl4, icseed, tau_aer, & ! IN
        ssa_aer, sfc_emiss, skt, dzlyr, delpin, de_lgth, ncol, nlay, lprint, cldfrac, lslwr, & ! IN
-       hlwc, topflx, sfcflx, cldtau, errmsg, errflg,                                        & ! OUT
+       hlwc, topflx, sfcflx, cldtau,                                                        & ! OUT
        hlw0, hlwb, flxprf,                                                                  & ! OPT(out)
        cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp,          & ! OPT(in)
-       cld_ref_snow, cld_od)                                                                  ! OPT(in)
+       cld_ref_snow, cld_od, errmsg, errflg)                                                  ! OPT(in)
 
     ! Inputs
     integer,intent(in) :: &
@@ -864,8 +896,6 @@ contains
          optical_props_clr,  & ! Optical properties for gaseous atmosphere
          optical_props_cldy, & ! Optical properties for clouds
          optical_props_aer     ! Optical properties for aerosols
-    !type(ty_optical_props_2str) :: &
-    !     optical_props_cldy  ! Optical properties for clouds
 
     type(ty_source_func_lw) :: &
          sources               ! source function
@@ -878,15 +908,14 @@ contains
     errflg = 0
     if (.not. lslwr) return
 
-    ! What is vertical ordering?
-    top_at_1 = (p_lay(1,1) .lt. p_lay(1,nlay))
+    ! Some consistency checks...
 
-    ! Check for optional arguments.
+    ! Are any optional outputs requested?
     l_ClrSky_HR        = present(hlw0)
     l_AllSky_HR_byband = present(hlwb)
     l_fluxes2D         = present(flxprf)
 
-    ! Check for optional input arguments, depending on cloud method
+    ! Check for optional input arguments, this depends on cloud method
     if (ilwcliq > 0) then    ! use prognostic cloud method
        if (.not. present(cld_lwp) .or. .not. present(cld_ref_liq)  .or. &
            .not. present(cld_iwp) .or. .not. present(cld_ref_ice)  .or. &
@@ -910,6 +939,9 @@ contains
        end if
     end if
 
+    ! What is vertical ordering?
+    top_at_1 = (p_lay(1,1) .lt. p_lay(1,nlay))
+
     ! Change random number seed value for each radiation invocation (isubclw =1 or 2).
     if(isubclw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
@@ -922,19 +954,19 @@ contains
     endif
 
     ! Surface emissivity
-    semiss(:,:) = 1._kind_phys
+    semiss(:,:) = 1.
     do iBand=1,nBandsLW
        where(sfc_emiss .gt. epsilon .and. sfc_emiss .le. 1) semiss(iBand,:) = sfc_emiss
     enddo
 
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
-    vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0._kind_phys, q_lay  .ne. 1._kind_phys)
-    vmr_o3  = merge(o3_lay*amdo3,           0._kind_phys, o3_lay .gt. 0._kind_phys)
+    vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
+    vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
 
     ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
-    ! pressure needs to be slightly greateer than that, ~1.00518Pa
+    ! pressure needs to be slightly greater than that, ~1.00518Pa
     p_lev2=p_lev
-    p_lev2(:,nlay+1) = kdist_lw_clr%get_press_min()/100._kind_phys
+    p_lev2(:,nlay+1) = kdist_lw_clr%get_press_min()/100.
 
     ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
     liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
@@ -942,17 +974,17 @@ contains
 
     ! Conpute diffusivity angle adjustments.
     ! First need to compute precipitable water in each column
-    tem0   = (1._kind_phys - vmr_h2o)*amd + vmr_h2o*amw
-    coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1._kind_phys + vmr_h2o))
-    colamt = max(0._kind_phys, coldry*vmr_h2o)
-    tem1   = 0._kind_phys
-    tem2   = 0._kind_phys
+    tem0   = (1. - vmr_h2o)*amd + vmr_h2o*amw
+    coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1. + vmr_h2o))
+    colamt = max(0., coldry*vmr_h2o)
+    tem1   = 0.
+    tem2   = 0.
     do iCol=1,nCol
        do iLay=1,nLay
           tem1 = tem1 + coldry(iCol,iLay)+colamt(iCol,iLay)
           tem2 = tem2 + colamt(iCol,iLay)
        enddo
-       precipitableH2o(iCol) = p_lev(iCol,1)*(10._kind_phys*tem2 / (amdw*tem1*grav))
+       precipitableH2o(iCol) = p_lev(iCol,1)*(10.*tem2 / (amdw*tem1*grav))
     enddo
 
     ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
@@ -1012,8 +1044,8 @@ contains
     !    from pressures, temperatures, and gas concentrations...
     print*,'Clear-Sky(LW): Optics'
     call check_error_msg(kdist_lw_clr%gas_optics(      &
-         p_lay(1:ncol,1:nlay)*100._kind_phys,      &
-         p_lev2(1:ncol,1:nlay+1)*100._kind_phys,   &
+         p_lay(1:ncol,1:nlay)*100.,      &
+         p_lev2(1:ncol,1:nlay+1)*100.,   &
          t_lay(1:ncol,1:nlay),                     &
          skt(1:ncol),                              &
          gas_concs_lw,                             &
@@ -1021,17 +1053,15 @@ contains
          sources,                                  &
          tlev = t_lev(1:ncol,1:nlay+1)))
 
-    ! 1c) Add contribution from aerosols.
+    ! 1c) Add contribution from aerosols. Also, apply diffusivity angle
     print*,'Clear-Sky(LW): Increment Aerosol'
-    optical_props_aer%tau(1:ncol,1:nlay,1:nBandsLW) = tau_aer * (1._kind_phys - ssa_aer)
-    call check_error_msg(optical_props_aer%increment(optical_props_clr))
-
-    ! 1c2) Apply diffusivity angle 
     do iCol=1,nCol
-       do iBand=1,nBandsLW
-          optical_props_clr%tau(iCol,1:nlay,iBand) = optical_props_clr%tau(iCol,1:nlay,iBand)*secdiff(iBand,iCol)
+       do iGpt=1,nGptsLW
+          iBand = kdist_lw_clr%convert_gpt2band(iGpt)
+          optical_props_aer%tau(iCol,1:nlay,iGpt) = tau_aer(iCol,1:nlay,iBand) * (1. - ssa_aer(iCol,1:nlay,iBand)) * secdiff(iBand,iCol)
        enddo
     enddo
+    call check_error_msg(optical_props_aer%increment(optical_props_clr))
 
     ! 1d) Compute the clear-sky broadband fluxes
     print*,'Clear-Sky(LW): Fluxes'
@@ -1047,7 +1077,7 @@ contains
     call check_error_msg(compute_heating_rate(   &
          fluxClrSky%flux_up,                     &
          fluxClrSky%flux_dn,                     &
-         p_lev2(1:ncol,1:nlay+1)*100._kind_phys, &
+         p_lev2(1:ncol,1:nlay+1)*100., &
          thetaTendClrSky))
 
     ! #######################################################################################
@@ -1055,7 +1085,7 @@ contains
     ! #######################################################################################
     ! 2a) Compute in-cloud optics
     print*,'All-Sky(LW): Optics '
-    tau_cld(:,:,:) = 0._kind_phys
+    tau_cld(:,:,:) = 0.
     if (any(cldfrac .gt. 0)) then
        ! If using RRTMG cloud-physics. Model can provide either cloud-optics (cld_od) or 
        ! cloud-properties by type (cloud LWP,snow effective radius, etc...)
@@ -1073,7 +1103,7 @@ contains
                    if (cldfrac(iCol,iLay) .gt. cldmin) then
                       tau_cld(:,iCol,iLay) = cld_od(iCol,iLay)*secdiff(:,iCol)
                    else
-                      tau_cld(:,iCol,iLay) = 0._kind_phys
+                      tau_cld(:,iCol,iLay) = 0.
                    endif
                 end do
              end do
@@ -1093,10 +1123,10 @@ contains
                    ! Rain optical-depth
                    tau_rain(iCol,iLay) = absrain*cld_rwp(iCol,iLay)
                    ! Snow optical-depth
-                   if (cld_swp(iCol,iLay) .gt. 0._kind_phys .and. cld_ref_snow(iCol,iLay) .gt. 10._kind_phys) then
+                   if (cld_swp(iCol,iLay) .gt. 0. .and. cld_ref_snow(iCol,iLay) .gt. 10.) then
                       tau_snow(iCol,iLay) = abssnow0*1.05756*cld_swp(iCol,iLay)/cld_ref_snow(iCol,iLay)
                    else
-                      tau_snow(iCol,iLay) = 0._kind_phys
+                      tau_snow(iCol,iLay) = 0.
                    endif
                 endif
              enddo
@@ -1108,10 +1138,10 @@ contains
     endif
 
     ! 2b) Call McICA to generate subcolumns.
-    tau_gpt(:,:,:) = 0._kind_phys
+    tau_gpt(:,:,:) = 0.
     if (isubclw .gt. 0) then
        print*,'All-Sky(LW): McICA'
-       cldfrac2 = merge(cldfrac,0._kind_phys,cldfrac .gt. cldmin)
+       cldfrac2 = merge(cldfrac,0.,cldfrac .gt. cldmin)
        call mcica_subcol_lw(ncol, nlay, nGptsLW, cldfrac2, ipseed, dzlyr, de_lgth, cldfracMCICA)
        
        ! Map band optical depth to each g-point using McICA
@@ -1119,10 +1149,10 @@ contains
           do iLay=1,nLay
              do iGpt=1,nGptsLW
                 iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-                if (cldfracMCICA(iBand,iCol,iLay) .gt. 0._kind_phys) then
+                if (cldfracMCICA(iBand,iCol,iLay) .gt. 0.) then
                    tau_gpt(iCol,iLay,iGpt) = tau_cld(iband,iCol,iLay)*secdiff(iBand,iCol)
                 else
-                   tau_gpt(iCol,iLay,iGpt) = 0._kind_phys
+                   tau_gpt(iCol,iLay,iGpt) = 0.
                 endif
              enddo
           enddo
@@ -1148,9 +1178,20 @@ contains
     call check_error_msg(compute_heating_rate(  &
          fluxAllSky%flux_up,                    &
          fluxAllSky%flux_dn,                    &
-         p_lev(1:ncol,1:nlay+1)*100._kind_phys, &
+         p_lev(1:ncol,1:nlay+1)*100., &
          thetaTendAllSky))
 
+    write(59,*) "#"
+    write(60,*) "#"
+    write(61,*) "#"
+    do iLay=1,nLay
+       write(59,"(9F10.3)") p_lay(1,iLay)*100.,t_lay(1,iLay),cld_lwp(1,iLay),cld_iwp(1,iLay),&
+            cldfrac(1,iLay),sum(fluxClrSky%flux_up(1,iLay:iLay+1))/2.,&
+            sum(fluxClrSky%flux_dn(1,iLay:iLay+1))/2.,sum(fluxAllSky%flux_up(1,iLay:iLay+1))/2.,&
+            sum(fluxAllSky%flux_dn(1,iLay:iLay+1))/2.
+       write(60,*) optical_props_clr%tau(1,iLay,:)
+       write(61,*) tau_cld(:,1,iLay)*secdiff(:,1)
+    enddo
     ! #######################################################################################
     ! Copy fluxes from RRTGMP types into model radiation types.
     ! #######################################################################################
@@ -1183,6 +1224,9 @@ contains
   end subroutine rrtmgp_lw_run
   !
   subroutine rrtmgp_lw_finalize()
+    close(59)
+    close(60)
+    close(61)
   end subroutine rrtmgp_lw_finalize
 
   ! #########################################################################################

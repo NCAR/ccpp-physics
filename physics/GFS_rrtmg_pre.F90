@@ -11,6 +11,7 @@
 !! \section arg_table_GFS_rrtmg_pre_init Argument Table
 !!
       subroutine GFS_rrtmg_pre_init ()
+        open(58,file='GFS_rrtmg_aux_dump.txt',status='unknown')
       end subroutine GFS_rrtmg_pre_init
 
 !> \section arg_table_GFS_rrtmg_pre_run Argument Table
@@ -205,6 +206,8 @@
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
                           cldcov, deltaq, cnvc, cnvw,                      &
                           effrl, effri, effrr, effrs
+      real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value, tem1, tem2, tem3
+      real (kind=kind_phys), parameter :: xrc3 = 100.
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: tem2db
 !     real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: hz
@@ -640,31 +643,6 @@
           enddo
         endif
 !
-        if (Model%uni_cld) then
-          if (Model%effr_in) then
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
-                effri(i,k1)  = Tbd%phy_f3d(i,k,3)
-                effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
-                effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
-              enddo
-            enddo
-          else
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-              enddo
-            enddo
-          endif
-        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-          cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
-        else                                                           ! neither of the other two cases
-          cldcov = 0.0
-        endif
 
 !
 !  --- add suspended convective cloud water to grid-scale cloud water
@@ -722,6 +700,90 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
+        if (Model%imp_physics == 10) then
+          ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK) + ccnd(1:IM,1:LMK,2)
+        endif
+
+! DJS2019: START        
+        ! Compute layer cloud fraction.
+        clwmin = 0.0
+        if (.not. Model%lmfshal) then
+          do k = 1, LMK
+             do i = 1, IM
+                clwt = 1.0e-6 * (plyr(i,k)*0.001)
+                if (ccnd(i,k,1) > 0.) then
+                   onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+                   clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+                   tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+                   tem1  = 2000.0 / tem1
+                   value = max( min( tem1*(ccnd(i,k,1)-clwm), 50.0 ), 0.0 )
+                   tem2  = sqrt( sqrt(rhly(i,k)) )
+                   cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+                endif
+             enddo
+          enddo
+       else
+          do k = 1, LMK
+             do i = 1, IM
+                clwt = 1.0e-6 * (plyr(i,k)*0.001)
+                if (ccnd(i,k,1) > 0.) then
+                   onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+                   clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+                   tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                   if (Model%lmfdeep2) then
+                      tem1  = xrc3 / tem1
+                   else
+                      tem1  = 100.0 / tem1
+                   endif
+                   value = max( min( tem1*(ccnd(i,k,1)-clwm), 50.0 ), 0.0 )
+                   tem2  = sqrt( sqrt(rhly(i,k)) )
+                   cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+                endif
+             enddo
+          enddo
+       endif
+! DJS2019: END
+
+        if (Model%uni_cld) then
+          if (Model%effr_in) then
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                 ! DJS2019: Tbd%phy_f3d(:,:,1) is mean layer temperature, not cloud amount
+                 cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                 cldcov(i,k1) = tracer1(i,k,Model%ntclamt)
+                 effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
+                 effri(i,k1)  = Tbd%phy_f3d(i,k,3)
+                 effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
+                 effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
+              enddo
+            enddo
+          else
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                 ! DJS2019: Tbd%phy_f3d(:,:,1) is mean layer temperature, not cloud amount
+                 !cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                 !if (tracer1(i,k,ntcw) .gt. 0 .or. tracer1(i,k,ntiw) .gt. 0) then
+                 !   cldcov(i,k1) = 0.1
+                 !else
+                 !   cldcov(i,k1) = 0.0
+                 !endif
+              enddo
+            enddo
+          endif
+        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
+          cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
+        else                                                           ! neither of the other two cases
+          !cldcov = 0.0
+        endif
+
+        write(58,*) "Model%imp_physics: ",Model%imp_physics
+        write(58,*) "Model%uni_cld:     ",Model%uni_cld
+        write(58,*) "Model%ncld:        ",Model%ncld
+        write(58,*) "Model%lgfdlmprad:  ",Model%lgfdlmprad
+        write(58,*) "Model%lmfshal:     ",Model%lmfshal
+        write(58,*) "Model%lmfdeep2:    ",Model%lmfdeep2
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
@@ -736,6 +798,8 @@
             call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,    & !  ---  inputs
                            ccnd(1:IM,1:LMK,1), Grid%xlat,Grid%xlon,     &
                            Sfcprop%slmsk, dz, delp, IM, LMK, LMP,       &
+!DJS2019: Pass uni_cld=true to use prescribed cloud-cover amount
+!                           .true., Model%lmfshal,                &
                            Model%uni_cld, Model%lmfshal,                &
                            Model%lmfdeep2, cldcov,                      &
                            effrl, effri, effrr, effrs, Model%effr_in,   &
@@ -812,6 +876,13 @@
          enddo
        enddo
 
+      write(58,*) "#"
+      do k=1,Model%levr+LTP
+         write(58,"(5F10.3)") plyr(1,k),tlyr(1,k),clouds2(1,k),          &
+     &      clouds4(1,k), clouds1(1,k)
+      enddo
+
+
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
 !  perturbation size
@@ -831,6 +902,7 @@
 !> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
 !!
       subroutine GFS_rrtmg_pre_finalize ()
+        close(58)
       end subroutine GFS_rrtmg_pre_finalize
 
 !! @}
