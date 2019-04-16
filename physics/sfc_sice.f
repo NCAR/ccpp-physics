@@ -247,7 +247,6 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
-!     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     ddvel    - real,                                             im   !
 !     flag_iter- logical,                                          im   !
 !     mom4ice  - logical,                                          im   !

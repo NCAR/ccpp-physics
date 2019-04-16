@@ -110,7 +110,7 @@
                           idry, iice, ilak, iocn, iwet, fice, cimin, zorl, zorlo, zorll, zorl_ocn,         &
                           zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,    &
                           tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_lnd,          &
-                          weasd_ice, evap_ocn, hflx_ocn, stress_ocn, ep1d_ice, sot, ivegsrc, stype, vtype, &
+                          weasd_ice, evap_ocn, hflx_ocn, stress_ocn, ep1d_ice, isot, ivegsrc, stype, vtype,&
                           slope, prsik_1, prslk_1, semis, adjsfcdlw, tsfc, tsfco, tsfcl, tsfc_ocn,         &
                           tsfc_lnd, tsfc_ice, tisfc, phil, con_g, sigmaf, soiltyp, vegtype, slopetyp,      &
                           work3, gabsbdlw, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice, zlvl, do_sppt, dtdtr,   &
@@ -326,7 +326,9 @@
       end module GFS_surface_generic_pre
 
       module GFS_surface_generic_post
-
+        
+      use machine,               only: kind_phys
+      
       implicit none
 
       private

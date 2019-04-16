@@ -784,7 +784,7 @@ cc
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn,
      &    zorl_ocn, cd_ocn, cdq_ocn, rb_ocn, stress_ocn, ffmm_ocn,
-     &    ffhh_ocn, uustar_ocn, fm10_ocn, fh2_ocn
+     &    ffhh_ocn, uustar_ocn, fm10_ocn, fh2_ocn, tseal
 
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
@@ -922,8 +922,7 @@ cc
 
       do i = 1, im
         if (iwet(i) == 1 .and. iice(i) == 0 ) then
-              tsurf_ocn(i) = tsurf_ocn(i)                                  &
-               - (oro(i)-oro_uf(i)) * rlapse
+              tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
         endif
       enddo
 
