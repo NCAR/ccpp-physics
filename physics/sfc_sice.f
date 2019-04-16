@@ -76,21 +76,12 @@
 
 !> This module contains the CCPP-compliant GFS sea ice scheme.
       module sfc_sice
-
-      use machine, only: kind_phys
-
-      implicit none
-
-      public
-
-      real (kind=kind_phys), parameter :: cimin = 0.15 !< minimum ice concentration
-
+      
       contains
 
       subroutine sfc_sice_init
       end subroutine sfc_sice_init
 !
-
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
@@ -279,6 +270,7 @@
 !                                                                       !
 ! ===================================================================== !
 !
+      use machine, only: kind_phys
       use funcphys, only : fpvs
 !
       implicit none
