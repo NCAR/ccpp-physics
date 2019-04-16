@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_time_vary_pre">
+  <subroutine name="GFS_time_vary_pre_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_time_vary_pre_run">
+    <variable name="GFS_control_type_instance">
+      <standard_name>GFS_control_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS model control parameters</long_name>
+      <units>DDT</units>
+      <local_name>Model</local_name>
+      <type>GFS_control_type</type>
+      <rank />
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_time_vary_pre_init">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_time_vary_pre SCHEME_GFS_time_vary_pre SUBROUTINE_GFS_time_vary_pre_init</container>
+    </variable>
+  </subroutine>
+</scheme>

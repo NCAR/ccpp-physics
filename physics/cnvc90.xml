@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="cnvc90">
+  <subroutine name="cnvc90_finalize" />
+  <subroutine name="cnvc90_init" />
+  <subroutine name="cnvc90_run">
+    <variable name="convective_cloud_switch">
+      <standard_name>convective_cloud_switch</standard_name>
+      <long_name>switch for saving convective clouds</long_name>
+      <units>none</units>
+      <local_name>clstp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="horizontal_dimension">
+      <standard_name>horizontal_dimension</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ix</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>convective rainfall amount on dynamics timestep</long_name>
+      <units>m</units>
+      <local_name>rn</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="vertical_index_at_cloud_base">
+      <standard_name>vertical_index_at_cloud_base</standard_name>
+      <long_name>vertical index at cloud base</long_name>
+      <units>index</units>
+      <local_name>kbot</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="vertical_index_at_cloud_top">
+      <standard_name>vertical_index_at_cloud_top</standard_name>
+      <long_name>vertical index at cloud top</long_name>
+      <units>index</units>
+      <local_name>ktop</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>number of vertical layers</long_name>
+      <units>count</units>
+      <local_name>km</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="air_pressure_at_interface">
+      <standard_name>air_pressure_at_interface</standard_name>
+      <long_name>interface pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90">
+      <standard_name>accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90</standard_name>
+      <long_name>accumulated convective rainfall amount for cnvc90 only</long_name>
+      <units>m</units>
+      <local_name>acv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="smallest_cloud_base_vertical_index_encountered_thus_far">
+      <standard_name>smallest_cloud_base_vertical_index_encountered_thus_far</standard_name>
+      <long_name>smallest cloud base vertical index encountered thus far</long_name>
+      <units>index</units>
+      <local_name>acvb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="largest_cloud_top_vertical_index_encountered_thus_far">
+      <standard_name>largest_cloud_top_vertical_index_encountered_thus_far</standard_name>
+      <long_name>largest cloud top vertical index encountered thus far</long_name>
+      <units>index</units>
+      <local_name>acvt</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="fraction_of_convective_cloud">
+      <standard_name>fraction_of_convective_cloud</standard_name>
+      <long_name>fraction of convective cloud</long_name>
+      <units>frac</units>
+      <local_name>cv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="pressure_at_bottom_of_convective_cloud">
+      <standard_name>pressure_at_bottom_of_convective_cloud</standard_name>
+      <long_name>pressure at bottom of convective cloud</long_name>
+      <units>Pa</units>
+      <local_name>cvb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="pressure_at_top_of_convective_cloud">
+      <standard_name>pressure_at_top_of_convective_cloud</standard_name>
+      <long_name>pressure at top of convective cloud</long_name>
+      <units>Pa</units>
+      <local_name>cvt</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cnvc90 SCHEME_cnvc90 SUBROUTINE_cnvc90_run</container>
+    </variable>
+  </subroutine>
+</scheme>

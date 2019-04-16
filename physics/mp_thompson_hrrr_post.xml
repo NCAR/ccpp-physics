@@ -1,0 +1,207 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="mp_thompson_hrrr_post">
+  <subroutine name="mp_thompson_hrrr_post_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="mp_thompson_hrrr_post_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>ncol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>number of vertical levels</long_name>
+      <units>count</units>
+      <local_name>nlev</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="air_temperature_save">
+      <standard_name>air_temperature_save</standard_name>
+      <long_name>air temperature before entering a physics scheme</long_name>
+      <units>K</units>
+      <local_name>tgrs_save</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>model layer mean temperature</long_name>
+      <units>K</units>
+      <local_name>tgrs</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="dimensionless_exner_function_at_model_layers">
+      <standard_name>dimensionless_exner_function_at_model_layers</standard_name>
+      <long_name>dimensionless Exner function at model layer centers</long_name>
+      <units>none</units>
+      <local_name>prslk</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics timestep</long_name>
+      <units>s</units>
+      <local_name>dtp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="mpi_comm">
+      <standard_name>mpi_comm</standard_name>
+      <long_name>MPI communicator</long_name>
+      <units>index</units>
+      <local_name>mpicomm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpirank</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="mpi_root">
+      <standard_name>mpi_root</standard_name>
+      <long_name>master MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpiroot</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="mp_thompson_hrrr_post_init">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>ncol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_init</container>
+    </variable>
+    <variable name="cell_area">
+      <standard_name>cell_area</standard_name>
+      <long_name>area of the grid cell</long_name>
+      <units>m2</units>
+      <local_name>area</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_init</container>
+    </variable>
+    <variable name="limit_for_temperature_tendency_for_microphysics">
+      <standard_name>limit_for_temperature_tendency_for_microphysics</standard_name>
+      <long_name>temperature tendency limiter per physics time step</long_name>
+      <units>K s-1</units>
+      <local_name>ttendlim</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr_post SCHEME_mp_thompson_hrrr_post SUBROUTINE_mp_thompson_hrrr_post_init</container>
+    </variable>
+  </subroutine>
+</scheme>

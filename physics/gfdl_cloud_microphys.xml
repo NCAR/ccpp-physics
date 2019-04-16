@@ -1,0 +1,504 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="gfdl_cloud_microphys">
+  <subroutine name="gfdl_cloud_microphys_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="gfdl_cloud_microphys_run">
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>number of vertical levels</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="gravitational_acceleration">
+      <standard_name>gravitational_acceleration</standard_name>
+      <long_name>gravitational acceleration</long_name>
+      <units>m s-2</units>
+      <local_name>con_g</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="ratio_of_vapor_to_dry_air_gas_constants_minus_one">
+      <standard_name>ratio_of_vapor_to_dry_air_gas_constants_minus_one</standard_name>
+      <long_name>rv/rd - 1 (rv = ideal gas constant for water vapor)</long_name>
+      <units>none</units>
+      <local_name>con_fvirt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="gas_constant_dry_air">
+      <standard_name>gas_constant_dry_air</standard_name>
+      <long_name>ideal gas constant for dry air</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>con_rd</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="land_area_fraction">
+      <standard_name>land_area_fraction</standard_name>
+      <long_name>land area fraction</long_name>
+      <units>frac</units>
+      <local_name>frland</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="cell_area">
+      <standard_name>cell_area</standard_name>
+      <long_name>area of grid cell</long_name>
+      <units>m2</units>
+      <local_name>garea</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_updated_by_physics">
+      <standard_name>water_vapor_specific_humidity_updated_by_physics</standard_name>
+      <long_name>water vapor specific humidity updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="cloud_condensed_water_mixing_ratio_updated_by_physics">
+      <standard_name>cloud_condensed_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>cloud condensed water mixing ratio updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_ntcw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="rain_water_mixing_ratio_updated_by_physics">
+      <standard_name>rain_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist mixing ratio of rain updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_ntrw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="ice_water_mixing_ratio_updated_by_physics">
+      <standard_name>ice_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist mixing ratio of cloud ice updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_ntiw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="snow_water_mixing_ratio_updated_by_physics">
+      <standard_name>snow_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist mixing ratio of snow updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_ntsw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="graupel_mixing_ratio_updated_by_physics">
+      <standard_name>graupel_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist mixing ratio of graupel updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_ntgl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="cloud_fraction_updated_by_physics">
+      <standard_name>cloud_fraction_updated_by_physics</standard_name>
+      <long_name>cloud fraction updated by physics</long_name>
+      <units>frac</units>
+      <local_name>gq0_ntclamt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>air temperature updated by physics</long_name>
+      <units>K</units>
+      <local_name>gt0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="x_wind_updated_by_physics">
+      <standard_name>x_wind_updated_by_physics</standard_name>
+      <long_name>zonal wind updated by physics</long_name>
+      <units>m s-1</units>
+      <local_name>gu0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="y_wind_updated_by_physics">
+      <standard_name>y_wind_updated_by_physics</standard_name>
+      <long_name>meridional wind updated by physics</long_name>
+      <units>m s-1</units>
+      <local_name>gv0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="omega">
+      <standard_name>omega</standard_name>
+      <long_name>layer mean vertical velocity</long_name>
+      <units>Pa s-1</units>
+      <local_name>vvl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>mean layer pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="geopotential_at_interface">
+      <standard_name>geopotential_at_interface</standard_name>
+      <long_name>geopotential at model layer interfaces</long_name>
+      <units>m2 s-2</units>
+      <local_name>phii</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="air_pressure_difference_between_midlayers">
+      <standard_name>air_pressure_difference_between_midlayers</standard_name>
+      <long_name>air pressure difference between mid-layers</long_name>
+      <units>Pa</units>
+      <local_name>del</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_rain_amount">
+      <standard_name>lwe_thickness_of_explicit_rain_amount</standard_name>
+      <long_name>explicit rain on physics timestep</long_name>
+      <units>m</units>
+      <local_name>rain0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_ice_amount">
+      <standard_name>lwe_thickness_of_ice_amount</standard_name>
+      <long_name>ice fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>ice0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount">
+      <standard_name>lwe_thickness_of_snow_amount</standard_name>
+      <long_name>snow fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>snow0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_graupel_amount">
+      <standard_name>lwe_thickness_of_graupel_amount</standard_name>
+      <long_name>graupel fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>graupel0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_precipitation_amount">
+      <standard_name>lwe_thickness_of_explicit_precipitation_amount</standard_name>
+      <long_name>explicit precipitation (rain, ice, snow, graupel) on physics timestep</long_name>
+      <units>m</units>
+      <local_name>prcp0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="ratio_of_snowfall_to_rainfall">
+      <standard_name>ratio_of_snowfall_to_rainfall</standard_name>
+      <long_name>snow ratio: ratio of snow to total precipitation</long_name>
+      <units>frac</units>
+      <local_name>sr</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics timestep</long_name>
+      <units>s</units>
+      <local_name>dtp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="flag_for_hydrostatic_solver">
+      <standard_name>flag_for_hydrostatic_solver</standard_name>
+      <long_name>flag indicating hydrostatic solver</long_name>
+      <units>flag</units>
+      <local_name>hydrostatic</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="flag_for_hydrostatic_heating_from_physics">
+      <standard_name>flag_for_hydrostatic_heating_from_physics</standard_name>
+      <long_name>flag indicating hydrostatic heating from physics</long_name>
+      <units>flag</units>
+      <local_name>phys_hydrostatic</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="gfdl_cloud_microphys_init">
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>MPI rank of current process</long_name>
+      <units>index</units>
+      <local_name>me</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="mpi_root">
+      <standard_name>mpi_root</standard_name>
+      <long_name>MPI rank of master process</long_name>
+      <units>index</units>
+      <local_name>master</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="iounit_namelist">
+      <standard_name>iounit_namelist</standard_name>
+      <long_name>fortran unit number for opening nameliust file</long_name>
+      <units>none</units>
+      <local_name>nlunit</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="namelist_filename_for_internal_file_reads">
+      <standard_name>namelist_filename_for_internal_file_reads</standard_name>
+      <long_name>character string to store full namelist contents</long_name>
+      <units>none</units>
+      <local_name>input_nml_file</local_name>
+      <type>character</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="iounit_log">
+      <standard_name>iounit_log</standard_name>
+      <long_name>fortran unit number for writing logfile</long_name>
+      <units>none</units>
+      <local_name>logunit</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="namelist_filename">
+      <standard_name>namelist_filename</standard_name>
+      <long_name>namelist filename</long_name>
+      <units>none</units>
+      <local_name>fn_nml</local_name>
+      <type>character</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="flag_for_gfdl_microphysics_scheme">
+      <standard_name>flag_for_gfdl_microphysics_scheme</standard_name>
+      <long_name>choice of GFDL microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_gfdl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="flag_for_shoc">
+      <standard_name>flag_for_shoc</standard_name>
+      <long_name>flag to indicate use of SHOC</long_name>
+      <units>flag</units>
+      <local_name>do_shoc</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_gfdl_cloud_microphys SCHEME_gfdl_cloud_microphys SUBROUTINE_gfdl_cloud_microphys_init</container>
+    </variable>
+  </subroutine>
+</scheme>

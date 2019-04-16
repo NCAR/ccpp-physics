@@ -1,0 +1,1152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="m_micro">
+  <subroutine name="m_micro_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="horizontal_dimension">
+      <standard_name>horizontal_dimension</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ix</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>lm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_flip">
+      <standard_name>flag_flip</standard_name>
+      <long_name>vertical flip logical</long_name>
+      <units>flag</units>
+      <local_name>flipv</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics time step</long_name>
+      <units>s</units>
+      <local_name>dt_i</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>layer mean pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="air_pressure_at_interface">
+      <standard_name>air_pressure_at_interface</standard_name>
+      <long_name>air pressure at model layer interfaces</long_name>
+      <units>Pa</units>
+      <local_name>prsi_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="geopotential">
+      <standard_name>geopotential</standard_name>
+      <long_name>geopotential at model layer centers</long_name>
+      <units>m2 s-2</units>
+      <local_name>phil</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="geopotential_at_interface">
+      <standard_name>geopotential_at_interface</standard_name>
+      <long_name>geopotential at model layer interfaces</long_name>
+      <units>m2 s-2</units>
+      <local_name>phii</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="omega">
+      <standard_name>omega</standard_name>
+      <long_name>layer mean vertical velocity</long_name>
+      <units>Pa s-1</units>
+      <local_name>omega_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cloud_condensed_water_mixing_ratio_convective_transport_tracer">
+      <standard_name>cloud_condensed_water_mixing_ratio_convective_transport_tracer</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array</long_name>
+      <units>kg kg-1</units>
+      <local_name>qlls_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="mass_fraction_of_convective_cloud_liquid_water">
+      <standard_name>mass_fraction_of_convective_cloud_liquid_water</standard_name>
+      <long_name>mass fraction of convective cloud liquid water</long_name>
+      <units>kg kg-1</units>
+      <local_name>qlcn_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ice_water_mixing_ratio_convective_transport_tracer">
+      <standard_name>ice_water_mixing_ratio_convective_transport_tracer</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array</long_name>
+      <units>kg kg-1</units>
+      <local_name>qils_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="mass_fraction_of_convective_cloud_ice">
+      <standard_name>mass_fraction_of_convective_cloud_ice</standard_name>
+      <long_name>mass fraction of convective cloud ice water</long_name>
+      <units>kg kg-1</units>
+      <local_name>qicn_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep">
+      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep</standard_name>
+      <long_name>total sky lw heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>lwheat_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep">
+      <standard_name>tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep</standard_name>
+      <long_name>total sky sw heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>swheat_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="vertical_velocity_for_updraft">
+      <standard_name>vertical_velocity_for_updraft</standard_name>
+      <long_name>vertical velocity for updraft</long_name>
+      <units>m s-1</units>
+      <local_name>w_upi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="convective_cloud_fraction_for_microphysics">
+      <standard_name>convective_cloud_fraction_for_microphysics</standard_name>
+      <long_name>convective cloud fraction for microphysics</long_name>
+      <units>frac</units>
+      <local_name>cf_upi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="land_area_fraction">
+      <standard_name>land_area_fraction</standard_name>
+      <long_name>land area fraction</long_name>
+      <units>frac</units>
+      <local_name>frland</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="atmosphere_boundary_layer_thickness">
+      <standard_name>atmosphere_boundary_layer_thickness</standard_name>
+      <long_name>pbl height</long_name>
+      <units>m</units>
+      <local_name>zpbl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="detrained_mass_flux">
+      <standard_name>detrained_mass_flux</standard_name>
+      <long_name>detrained mass flux</long_name>
+      <units>kg m-2 s-1</units>
+      <local_name>cnv_mfd_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="tendency_of_cloud_water_due_to_convective_microphysics">
+      <standard_name>tendency_of_cloud_water_due_to_convective_microphysics</standard_name>
+      <long_name>tendency of cloud water due to convective microphysics</long_name>
+      <units>kg m-2 s-1</units>
+      <local_name>cnv_dqldt_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="convective_cloud_volume_fraction">
+      <standard_name>convective_cloud_volume_fraction</standard_name>
+      <long_name>convective cloud volume fraction</long_name>
+      <units>frac</units>
+      <local_name>clcn_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="x_wind_updated_by_physics">
+      <standard_name>x_wind_updated_by_physics</standard_name>
+      <long_name>zonal wind updated by physics</long_name>
+      <units>m s-1</units>
+      <local_name>u_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="y_wind_updated_by_physics">
+      <standard_name>y_wind_updated_by_physics</standard_name>
+      <long_name>meridional wind updated by physics</long_name>
+      <units>m s-1</units>
+      <local_name>v_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc x momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>taugwx</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc y momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>taugwy</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="instantaneous_surface_x_momentum_flux">
+      <standard_name>instantaneous_surface_x_momentum_flux</standard_name>
+      <long_name>x momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>tauorox</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="instantaneous_surface_y_momentum_flux">
+      <standard_name>instantaneous_surface_y_momentum_flux</standard_name>
+      <long_name>y momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>tauoroy</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ice_fraction_in_convective_tower">
+      <standard_name>ice_fraction_in_convective_tower</standard_name>
+      <long_name>ice fraction in convective tower</long_name>
+      <units>frac</units>
+      <local_name>cnv_fice_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="number_concentration_of_cloud_liquid_water_particles_for_detrainment">
+      <standard_name>number_concentration_of_cloud_liquid_water_particles_for_detrainment</standard_name>
+      <long_name>droplet number concentration in convective detrainment</long_name>
+      <units>m-3</units>
+      <local_name>cnv_ndrop_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="number_concentration_of_ice_crystals_for_detrainment">
+      <standard_name>number_concentration_of_ice_crystals_for_detrainment</standard_name>
+      <long_name>crystal number concentration in convective detrainment</long_name>
+      <units>m-3</units>
+      <local_name>cnv_nice_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_updated_by_physics">
+      <standard_name>water_vapor_specific_humidity_updated_by_physics</standard_name>
+      <long_name>water vapor specific humidity updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>q_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cloud_condensed_water_mixing_ratio_updated_by_physics">
+      <standard_name>cloud_condensed_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>lwm_o</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ice_water_mixing_ratio_updated_by_physics">
+      <standard_name>ice_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>qi_o</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>temperature updated by physics</long_name>
+      <units>K</units>
+      <local_name>t_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_precipitation_amount">
+      <standard_name>lwe_thickness_of_explicit_precipitation_amount</standard_name>
+      <long_name>explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep</long_name>
+      <units>m</units>
+      <local_name>rn_o</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ratio_of_snowfall_to_rainfall">
+      <standard_name>ratio_of_snowfall_to_rainfall</standard_name>
+      <long_name>snow ratio: ratio of snow to total precipitation</long_name>
+      <units>frac</units>
+      <local_name>sr_o</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cloud_droplet_number_concentration_updated_by_physics">
+      <standard_name>cloud_droplet_number_concentration_updated_by_physics</standard_name>
+      <long_name>number concentration of cloud droplets updated by physics</long_name>
+      <units>kg-1</units>
+      <local_name>ncpl_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ice_number_concentration_updated_by_physics">
+      <standard_name>ice_number_concentration_updated_by_physics</standard_name>
+      <long_name>number concentration of ice updated by physics</long_name>
+      <units>kg-1</units>
+      <local_name>ncpi_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="number_of_frozen_precipitation_species">
+      <standard_name>number_of_frozen_precipitation_species</standard_name>
+      <long_name>number of frozen precipitation species</long_name>
+      <units>count</units>
+      <local_name>fprcp</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_rain_water_mixing_ratio">
+      <standard_name>local_rain_water_mixing_ratio</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of rain water local to physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>rnw_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_snow_water_mixing_ratio">
+      <standard_name>local_snow_water_mixing_ratio</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of snow water local to physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>snw_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_graupel_mixing_ratio">
+      <standard_name>local_graupel_mixing_ratio</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of graupel local to physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>qgl_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_rain_number_concentration">
+      <standard_name>local_rain_number_concentration</standard_name>
+      <long_name>number concentration of rain local to physics</long_name>
+      <units>kg-1</units>
+      <local_name>ncpr_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_snow_number_concentration">
+      <standard_name>local_snow_number_concentration</standard_name>
+      <long_name>number concentration of snow local to physics</long_name>
+      <units>kg-1</units>
+      <local_name>ncps_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="local_graupel_number_concentration">
+      <standard_name>local_graupel_number_concentration</standard_name>
+      <long_name>number concentration of graupel local to physics</long_name>
+      <units>kg-1</units>
+      <local_name>ncgl_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="cloud_fraction_for_MG">
+      <standard_name>cloud_fraction_for_MG</standard_name>
+      <long_name>cloud fraction used by Morrison-Gettelman MP</long_name>
+      <units>frac</units>
+      <local_name>clls_io</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="vertical_index_at_cloud_base">
+      <standard_name>vertical_index_at_cloud_base</standard_name>
+      <long_name>vertical index at cloud base</long_name>
+      <units>index</units>
+      <local_name>kcbl</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_liquid_water_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_liquid_water_particle_in_um</standard_name>
+      <long_name>effective radius of cloud liquid water particle in micrometer</long_name>
+      <units>um</units>
+      <local_name>cldreffl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_ice_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_ice_particle_in_um</standard_name>
+      <long_name>effective radius of cloud ice water particle in micrometers</long_name>
+      <units>um</units>
+      <local_name>cldreffi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_rain_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_rain_particle_in_um</standard_name>
+      <long_name>effective radius of cloud rain particle in micrometers</long_name>
+      <units>um</units>
+      <local_name>cldreffr</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_snow_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_snow_particle_in_um</standard_name>
+      <long_name>effective radius of cloud snow particle in micrometers</long_name>
+      <units>um</units>
+      <local_name>cldreffs</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_graupel_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_graupel_particle_in_um</standard_name>
+      <long_name>effective radius of cloud graupel particle in micrometers</long_name>
+      <units>um</units>
+      <local_name>cldreffg</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="aerosol_number_concentration_from_gocart_aerosol_climatology">
+      <standard_name>aerosol_number_concentration_from_gocart_aerosol_climatology</standard_name>
+      <long_name>GOCART aerosol climatology number concentration</long_name>
+      <units>kg-1?</units>
+      <local_name>aerfld_i</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_for_aerosol_input_MG">
+      <standard_name>flag_for_aerosol_input_MG</standard_name>
+      <long_name>flag for using aerosols in Morrison-Gettelman microphysics</long_name>
+      <units>flag</units>
+      <local_name>aero_in</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="in_number_concentration">
+      <standard_name>in_number_concentration</standard_name>
+      <long_name>IN number concentration</long_name>
+      <units>kg-1?</units>
+      <local_name>naai_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ccn_number_concentration">
+      <standard_name>ccn_number_concentration</standard_name>
+      <long_name>CCN number concentration</long_name>
+      <units>kg-1?</units>
+      <local_name>npccn_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics">
+      <standard_name>flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics</standard_name>
+      <long_name>flag for IN and CCN forcing for morrison gettelman microphysics</long_name>
+      <units>flag</units>
+      <local_name>iccn</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_skip_macro">
+      <standard_name>flag_skip_macro</standard_name>
+      <long_name>flag to skip cloud macrophysics in Morrison scheme</long_name>
+      <units>flag</units>
+      <local_name>skip_macro</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_print">
+      <standard_name>flag_print</standard_name>
+      <long_name>control flag for diagnostic print out</long_name>
+      <units>flag</units>
+      <local_name>lprnt</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="mg_tuning_factor_for_alphas">
+      <standard_name>mg_tuning_factor_for_alphas</standard_name>
+      <long_name>tuning factor for alphas (alpha = 1 - critical relative humidity)</long_name>
+      <units>none</units>
+      <local_name>alf_fac</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="mg_minimum_cloud_condensed_water_and_ice_mixing_ratio">
+      <standard_name>mg_minimum_cloud_condensed_water_and_ice_mixing_ratio</standard_name>
+      <long_name>minimum cloud condensed water and ice mixing ratio in MG macro clouds</long_name>
+      <units>kg kg-1</units>
+      <local_name>qc_min</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="flag_for_pdf_for_morrison_gettelman_microphysics_scheme">
+      <standard_name>flag_for_pdf_for_morrison_gettelman_microphysics_scheme</standard_name>
+      <long_name>pdf flag for MG macrophysics</long_name>
+      <units>flag</units>
+      <local_name>pdfflag</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="horizontal_index_of_printed_column">
+      <standard_name>horizontal_index_of_printed_column</standard_name>
+      <long_name>horizontal index of printed column</long_name>
+      <units>index</units>
+      <local_name>ipr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="index_of_time_step">
+      <standard_name>index_of_time_step</standard_name>
+      <long_name>current forecast iteration</long_name>
+      <units>index</units>
+      <local_name>kdt</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="latitude">
+      <standard_name>latitude</standard_name>
+      <long_name>latitude</long_name>
+      <units>radians</units>
+      <local_name>xlat</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="longitude">
+      <standard_name>longitude</standard_name>
+      <long_name>longitude</long_name>
+      <units>radians</units>
+      <local_name>xlon</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="critical_relative_humidity">
+      <standard_name>critical_relative_humidity</standard_name>
+      <long_name>critical relative humidity</long_name>
+      <units>frac</units>
+      <local_name>rhc_i</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="m_micro_init">
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="flag_for_morrison_gettelman_microphysics_scheme">
+      <standard_name>flag_for_morrison_gettelman_microphysics_scheme</standard_name>
+      <long_name>choice of Morrison-Gettelman rmicrophysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_mg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="number_of_frozen_precipitation_species">
+      <standard_name>number_of_frozen_precipitation_species</standard_name>
+      <long_name>number of frozen precipitation species</long_name>
+      <units>count</units>
+      <local_name>fprcp</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="gravitational_acceleration">
+      <standard_name>gravitational_acceleration</standard_name>
+      <long_name>gravitational acceleration</long_name>
+      <units>m s-2</units>
+      <local_name>gravit</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="gas_constant_dry_air">
+      <standard_name>gas_constant_dry_air</standard_name>
+      <long_name>ideal gas constant for dry air</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>rair</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="gas_constant_water_vapor">
+      <standard_name>gas_constant_water_vapor</standard_name>
+      <long_name>ideal gas constant for water vapor</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>rh2o</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="specific_heat_of_dry_air_at_constant_pressure">
+      <standard_name>specific_heat_of_dry_air_at_constant_pressure</standard_name>
+      <long_name>specific heat of dry air at constant pressure</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>cpair</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="triple_point_temperature_of_water">
+      <standard_name>triple_point_temperature_of_water</standard_name>
+      <long_name>triple point temperature of water</long_name>
+      <units>K</units>
+      <local_name>tmelt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="latent_heat_of_vaporization_of_water_at_0C">
+      <standard_name>latent_heat_of_vaporization_of_water_at_0C</standard_name>
+      <long_name>latent heat of evaporation/sublimation</long_name>
+      <units>J kg-1</units>
+      <local_name>latvap</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="latent_heat_of_fusion_of_water_at_0C">
+      <standard_name>latent_heat_of_fusion_of_water_at_0C</standard_name>
+      <long_name>latent heat of fusion</long_name>
+      <units>J kg-1</units>
+      <local_name>latice</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_autoconversion_size_threshold_ice_snow">
+      <standard_name>mg_autoconversion_size_threshold_ice_snow</standard_name>
+      <long_name>autoconversion size threshold for cloud ice to snow for MG microphysics</long_name>
+      <units>um</units>
+      <local_name>mg_dcs</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_cloud_water_variance">
+      <standard_name>mg_cloud_water_variance</standard_name>
+      <long_name>cloud water relative variance for MG microphysics</long_name>
+      <units />
+      <local_name>mg_qcvar</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_time_scale_for_autoconversion_of_ice">
+      <standard_name>mg_time_scale_for_autoconversion_of_ice</standard_name>
+      <long_name>autoconversion time scale for ice for MG microphysics</long_name>
+      <units>s</units>
+      <local_name>mg_ts_auto_ice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_minimum_rh_for_ice">
+      <standard_name>mg_minimum_rh_for_ice</standard_name>
+      <long_name>relative humidity threshold parameter for nucleating ice for MG microphysics</long_name>
+      <units>none</units>
+      <local_name>mg_rhmini</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_uniform_subcolumns">
+      <standard_name>mg_flag_for_uniform_subcolumns</standard_name>
+      <long_name>flag for uniform subcolumns for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>microp_uniform</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_cloud_ice_processes">
+      <standard_name>mg_flag_for_cloud_ice_processes</standard_name>
+      <long_name>flag for cloud ice processes for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>do_cldice</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_heterogeneous_freezing">
+      <standard_name>mg_flag_for_heterogeneous_freezing</standard_name>
+      <long_name>flag for heterogeneous freezing for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>hetfrz_classnuc</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_type_of_precip_fraction_method">
+      <standard_name>mg_type_of_precip_fraction_method</standard_name>
+      <long_name>type of precip fraction method for MG microphysics (in_cloud or max_overlap)</long_name>
+      <units>none</units>
+      <local_name>mg_precip_frac_method</local_name>
+      <type>character</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_bergeron_efficiency_factor">
+      <standard_name>mg_bergeron_efficiency_factor</standard_name>
+      <long_name>bergeron efficiency factor for MG microphysics</long_name>
+      <units>frac</units>
+      <local_name>mg_berg_eff_factor</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_allow_supersat_after_sed">
+      <standard_name>mg_allow_supersat_after_sed</standard_name>
+      <long_name>allow supersaturation after sedimentation for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>sed_supersat</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_sb2001_autoconversion">
+      <standard_name>mg_flag_for_sb2001_autoconversion</standard_name>
+      <long_name>flag for SB 2001 autoconversion or accretion for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>do_sb_physics</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_hail">
+      <standard_name>mg_flag_for_hail</standard_name>
+      <long_name>flag for hail for MG microphysics (graupel possible if false)</long_name>
+      <units>flag</units>
+      <local_name>mg_do_hail</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_graupel">
+      <standard_name>mg_flag_for_graupel</standard_name>
+      <long_name>flag for graupel for MG microphysics (hail possible if false)</long_name>
+      <units>flag</units>
+      <local_name>mg_do_graupel</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_drop_concentration_constant">
+      <standard_name>mg_flag_drop_concentration_constant</standard_name>
+      <long_name>flag for constant droplet concentration for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>mg_nccons</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_ice_concentration_constant">
+      <standard_name>mg_flag_ice_concentration_constant</standard_name>
+      <long_name>flag for constant ice concentration for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>mg_nicons</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_graupel_concentration_constant">
+      <standard_name>mg_flag_graupel_concentration_constant</standard_name>
+      <long_name>flag for constant graupel concentration for MG microphysics</long_name>
+      <units>flag</units>
+      <local_name>mg_ngcons</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_drop_concentration_constant">
+      <standard_name>mg_drop_concentration_constant</standard_name>
+      <long_name>droplet concentration constant for MG microphysics</long_name>
+      <units>m-3</units>
+      <local_name>mg_ncnst</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_ice_concentration_constant">
+      <standard_name>mg_ice_concentration_constant</standard_name>
+      <long_name>ice concentration constant for MG microphysics</long_name>
+      <units>m-3</units>
+      <local_name>mg_ninst</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_graupel_concentration_constant">
+      <standard_name>mg_graupel_concentration_constant</standard_name>
+      <long_name>graupel concentration constant for MG microphysics</long_name>
+      <units>m-3</units>
+      <local_name>mg_ngnst</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_gmao_ice_formulation">
+      <standard_name>mg_flag_for_gmao_ice_formulation</standard_name>
+      <long_name>flag for gmao ice formulation</long_name>
+      <units>flag</units>
+      <local_name>mg_do_ice_gmao</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="mg_flag_for_liu_liquid_treatment">
+      <standard_name>mg_flag_for_liu_liquid_treatment</standard_name>
+      <long_name>flag for liu liquid treatment</long_name>
+      <units>flag</units>
+      <local_name>mg_do_liq_liu</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_m_micro SCHEME_m_micro SUBROUTINE_m_micro_init</container>
+    </variable>
+  </subroutine>
+  <subroutine name="m_micro_finalize" />
+</scheme>

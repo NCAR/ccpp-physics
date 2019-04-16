@@ -1,0 +1,359 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_suite_interstitial_4">
+  <subroutine name="GFS_suite_interstitial_4_finalize" />
+  <subroutine name="GFS_suite_interstitial_4_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_aerosol_physics">
+      <standard_name>flag_for_aerosol_physics</standard_name>
+      <long_name>flag for aerosol physics</long_name>
+      <units>flag</units>
+      <local_name>ltaerosol</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_gocart">
+      <standard_name>flag_gocart</standard_name>
+      <long_name>flag for 3d diagnostic fields for gocart 1</long_name>
+      <units>flag</units>
+      <local_name>lgocart</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="number_of_total_tracers">
+      <standard_name>number_of_total_tracers</standard_name>
+      <long_name>total number of tracers</long_name>
+      <units>count</units>
+      <local_name>tracers_total</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="number_of_tracers">
+      <standard_name>number_of_tracers</standard_name>
+      <long_name>number of tracers</long_name>
+      <units>count</units>
+      <local_name>ntrac</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>tracer index for cloud condensate (or liquid water)</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_condensate">
+      <standard_name>index_for_ice_cloud_condensate</standard_name>
+      <long_name>tracer index for  ice water</long_name>
+      <units>index</units>
+      <local_name>ntiw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_cloud_amount">
+      <standard_name>index_for_cloud_amount</standard_name>
+      <long_name>tracer index for cloud amount integer</long_name>
+      <units>index</units>
+      <local_name>ntclamt</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_rain_water">
+      <standard_name>index_for_rain_water</standard_name>
+      <long_name>tracer index for rain water</long_name>
+      <units>index</units>
+      <local_name>ntrw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_snow_water">
+      <standard_name>index_for_snow_water</standard_name>
+      <long_name>tracer index for snow water</long_name>
+      <units>index</units>
+      <local_name>ntsw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_rain_number_concentration">
+      <standard_name>index_for_rain_number_concentration</standard_name>
+      <long_name>tracer index for rain   number concentration</long_name>
+      <units>index</units>
+      <local_name>ntrnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_snow_number_concentration">
+      <standard_name>index_for_snow_number_concentration</standard_name>
+      <long_name>tracer index for snow   number concentration</long_name>
+      <units>index</units>
+      <local_name>ntsnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_graupel">
+      <standard_name>index_for_graupel</standard_name>
+      <long_name>tracer index for graupel</long_name>
+      <units>index</units>
+      <local_name>ntgl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_graupel_number_concentration">
+      <standard_name>index_for_graupel_number_concentration</standard_name>
+      <long_name>tracer index for graupel number concentration</long_name>
+      <units>index</units>
+      <local_name>ntgnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_number_concentration">
+      <standard_name>index_for_liquid_cloud_number_concentration</standard_name>
+      <long_name>tracer index for liquid number concentration</long_name>
+      <units>index</units>
+      <local_name>ntlnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_number_concentration">
+      <standard_name>index_for_ice_cloud_number_concentration</standard_name>
+      <long_name>tracer index for ice    number concentration</long_name>
+      <units>index</units>
+      <local_name>ntinc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="number_of_tracers_for_convective_transport">
+      <standard_name>number_of_tracers_for_convective_transport</standard_name>
+      <long_name>number of tracers for convective transport</long_name>
+      <units>count</units>
+      <local_name>nn</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_gfdl_microphysics_scheme">
+      <standard_name>flag_for_gfdl_microphysics_scheme</standard_name>
+      <long_name>choice of GFDL microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_gfdl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_thompson_microphysics_scheme">
+      <standard_name>flag_for_thompson_microphysics_scheme</standard_name>
+      <long_name>choice of Thompson microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_thompson</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_zhao_carr_microphysics_scheme">
+      <standard_name>flag_for_zhao_carr_microphysics_scheme</standard_name>
+      <long_name>choice of Zhao-Carr microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_zhao_carr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="flag_for_zhao_carr_pdf_microphysics_scheme">
+      <standard_name>flag_for_zhao_carr_pdf_microphysics_scheme</standard_name>
+      <long_name>choice of Zhao-Carr microphysics scheme with PDF clouds</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_zhao_carr_pdf</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>dynamics timestep</long_name>
+      <units>s</units>
+      <local_name>dtf</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="cloud_condensed_water_mixing_ratio_save">
+      <standard_name>cloud_condensed_water_mixing_ratio_save</standard_name>
+      <long_name>moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>save_qc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="ice_water_mixing_ratio_save">
+      <standard_name>ice_water_mixing_ratio_save</standard_name>
+      <long_name>cloud ice water mixing ratio before entering a physics scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>save_qi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="pi">
+      <standard_name>pi</standard_name>
+      <long_name>ratio of a circle's circumference to its diameter</long_name>
+      <units>radians</units>
+      <local_name>con_pi</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="tracer_concentration_updated_by_physics">
+      <standard_name>tracer_concentration_updated_by_physics</standard_name>
+      <long_name>tracer concentration updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="convective_transportable_tracers">
+      <standard_name>convective_transportable_tracers</standard_name>
+      <long_name>array to contain cloud water and other convective trans. tracers</long_name>
+      <units>kg kg-1</units>
+      <local_name>clw</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="instantaneous_water_vapor_specific_humidity_tendency_due_to_convection">
+      <standard_name>instantaneous_water_vapor_specific_humidity_tendency_due_to_convection</standard_name>
+      <long_name>instantaneous moisture tendency due to convection</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>dqdti</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_4 SCHEME_GFS_suite_interstitial_4 SUBROUTINE_GFS_suite_interstitial_4_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_suite_interstitial_4_init" />
+</scheme>

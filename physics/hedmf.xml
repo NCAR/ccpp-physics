@@ -1,0 +1,612 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="hedmf">
+  <subroutine name="hedmf_run">
+    <variable name="horizontal_dimension">
+      <standard_name>horizontal_dimension</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ix</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>km</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="number_of_vertical_diffusion_tracers">
+      <standard_name>number_of_vertical_diffusion_tracers</standard_name>
+      <long_name>number of tracers to diffuse vertically</long_name>
+      <units>count</units>
+      <local_name>ntrac</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>cloud condensate index in tracer array</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_y_wind_due_to_model_physics">
+      <standard_name>tendency_of_y_wind_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the y wind</long_name>
+      <units>m s-2</units>
+      <local_name>dv</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_x_wind_due_to_model_physics">
+      <standard_name>tendency_of_x_wind_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the x wind</long_name>
+      <units>m s-2</units>
+      <local_name>du</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_model_physics">
+      <standard_name>tendency_of_air_temperature_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the temperature</long_name>
+      <units>K s-1</units>
+      <local_name>tau</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_vertically_diffused_tracer_concentration">
+      <standard_name>tendency_of_vertically_diffused_tracer_concentration</standard_name>
+      <long_name>updated tendency of the tracers due to vertical diffusion in PBL scheme</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>rtg</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="x_wind">
+      <standard_name>x_wind</standard_name>
+      <long_name>x component of layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>u1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="y_wind">
+      <standard_name>y_wind</standard_name>
+      <long_name>y component of layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>v1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="air_temperature">
+      <standard_name>air_temperature</standard_name>
+      <long_name>layer mean air temperature</long_name>
+      <units>K</units>
+      <local_name>t1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="vertically_diffused_tracer_concentration">
+      <standard_name>vertically_diffused_tracer_concentration</standard_name>
+      <long_name>tracer concentration diffused by PBL scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>q1</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step">
+      <standard_name>tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step</standard_name>
+      <long_name>total sky shortwave heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>swh</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step">
+      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step</standard_name>
+      <long_name>total sky longwave heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>hlw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes">
+      <standard_name>zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes</standard_name>
+      <long_name>zenith angle temporal adjustment factor for shortwave</long_name>
+      <units>none</units>
+      <local_name>xmu</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="dimensionless_exner_function_at_lowest_model_interface">
+      <standard_name>dimensionless_exner_function_at_lowest_model_interface</standard_name>
+      <long_name>dimensionless Exner function at the surface interface</long_name>
+      <units>none</units>
+      <local_name>psk</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="bulk_richardson_number_at_lowest_model_level">
+      <standard_name>bulk_richardson_number_at_lowest_model_level</standard_name>
+      <long_name>bulk Richardson number at the surface</long_name>
+      <units>none</units>
+      <local_name>rbsoil</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="surface_roughness_length">
+      <standard_name>surface_roughness_length</standard_name>
+      <long_name>surface roughness length in cm</long_name>
+      <units>cm</units>
+      <local_name>zorl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="x_wind_at_10m">
+      <standard_name>x_wind_at_10m</standard_name>
+      <long_name>x component of wind at 10 m</long_name>
+      <units>m s-1</units>
+      <local_name>u10m</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="y_wind_at_10m">
+      <standard_name>y_wind_at_10m</standard_name>
+      <long_name>y component of wind at 10 m</long_name>
+      <units>m s-1</units>
+      <local_name>v10m</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="Monin-Obukhov_similarity_function_for_momentum">
+      <standard_name>Monin-Obukhov_similarity_function_for_momentum</standard_name>
+      <long_name>Monin-Obukhov similarity function for momentum</long_name>
+      <units>none</units>
+      <local_name>fm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="Monin-Obukhov_similarity_function_for_heat">
+      <standard_name>Monin-Obukhov_similarity_function_for_heat</standard_name>
+      <long_name>Monin-Obukhov similarity function for heat</long_name>
+      <units>none</units>
+      <local_name>fh</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="surface_skin_temperature">
+      <standard_name>surface_skin_temperature</standard_name>
+      <long_name>surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tsea</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_sensible_heat_flux">
+      <standard_name>kinematic_surface_upward_sensible_heat_flux</standard_name>
+      <long_name>kinematic surface upward sensible heat flux</long_name>
+      <units>K m s-1</units>
+      <local_name>heat</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_latent_heat_flux">
+      <standard_name>kinematic_surface_upward_latent_heat_flux</standard_name>
+      <long_name>kinematic surface upward latent heat flux</long_name>
+      <units>kg kg-1 m s-1</units>
+      <local_name>evap</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="surface_wind_stress">
+      <standard_name>surface_wind_stress</standard_name>
+      <long_name>surface wind stress</long_name>
+      <units>m2 s-2</units>
+      <local_name>stress</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="wind_speed_at_lowest_model_layer">
+      <standard_name>wind_speed_at_lowest_model_layer</standard_name>
+      <long_name>wind speed at lowest model level</long_name>
+      <units>m s-1</units>
+      <local_name>spd1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="vertical_index_at_top_of_atmosphere_boundary_layer">
+      <standard_name>vertical_index_at_top_of_atmosphere_boundary_layer</standard_name>
+      <long_name>PBL top model level index</long_name>
+      <units>index</units>
+      <local_name>kpbl</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="air_pressure_at_interface">
+      <standard_name>air_pressure_at_interface</standard_name>
+      <long_name>air pressure at model layer interfaces</long_name>
+      <units>Pa</units>
+      <local_name>prsi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="air_pressure_difference_between_midlayers">
+      <standard_name>air_pressure_difference_between_midlayers</standard_name>
+      <long_name>pres(k) - pres(k+1)</long_name>
+      <units>Pa</units>
+      <local_name>del</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>mean layer pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="dimensionless_exner_function_at_model_layers">
+      <standard_name>dimensionless_exner_function_at_model_layers</standard_name>
+      <long_name>Exner function at layers</long_name>
+      <units>none</units>
+      <local_name>prslk</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="geopotential_at_interface">
+      <standard_name>geopotential_at_interface</standard_name>
+      <long_name>geopotential at model layer interfaces</long_name>
+      <units>m2 s-2</units>
+      <local_name>phii</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="geopotential">
+      <standard_name>geopotential</standard_name>
+      <long_name>geopotential at model layer centers</long_name>
+      <units>m2 s-2</units>
+      <local_name>phil</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>time step for physics</long_name>
+      <units>s</units>
+      <local_name>delt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="flag_TKE_dissipation_heating">
+      <standard_name>flag_TKE_dissipation_heating</standard_name>
+      <long_name>flag for using TKE dissipation heating</long_name>
+      <units>flag</units>
+      <local_name>dspheat</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="instantaneous_surface_x_momentum_flux">
+      <standard_name>instantaneous_surface_x_momentum_flux</standard_name>
+      <long_name>x momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>dusfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="instantaneous_surface_y_momentum_flux">
+      <standard_name>instantaneous_surface_y_momentum_flux</standard_name>
+      <long_name>y momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>dvsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_sensible_heat_flux">
+      <standard_name>instantaneous_surface_upward_sensible_heat_flux</standard_name>
+      <long_name>surface upward sensible heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>dtsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_latent_heat_flux">
+      <standard_name>instantaneous_surface_upward_latent_heat_flux</standard_name>
+      <long_name>surface upward latent heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>dqsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_boundary_layer_thickness">
+      <standard_name>atmosphere_boundary_layer_thickness</standard_name>
+      <long_name>PBL thickness</long_name>
+      <units>m</units>
+      <local_name>hpbl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="countergradient_mixing_term_for_temperature">
+      <standard_name>countergradient_mixing_term_for_temperature</standard_name>
+      <long_name>countergradient mixing term for temperature</long_name>
+      <units>K</units>
+      <local_name>hgamt</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="countergradient_mixing_term_for_water_vapor">
+      <standard_name>countergradient_mixing_term_for_water_vapor</standard_name>
+      <long_name>countergradient mixing term for water vapor</long_name>
+      <units>kg kg-1</units>
+      <local_name>hgamq</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_heat_diffusivity">
+      <standard_name>atmosphere_heat_diffusivity</standard_name>
+      <long_name>diffusivity for heat</long_name>
+      <units>m2 s-1</units>
+      <local_name>dkt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="index_of_highest_temperature_inversion">
+      <standard_name>index_of_highest_temperature_inversion</standard_name>
+      <long_name>index of highest temperature inversion</long_name>
+      <units>index</units>
+      <local_name>kinver</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_momentum_diffusivity_background">
+      <standard_name>atmosphere_momentum_diffusivity_background</standard_name>
+      <long_name>background value of momentum diffusivity</long_name>
+      <units>m2 s-1</units>
+      <local_name>xkzm_m</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_heat_diffusivity_background">
+      <standard_name>atmosphere_heat_diffusivity_background</standard_name>
+      <long_name>background value of heat diffusivity</long_name>
+      <units>m2 s-1</units>
+      <local_name>xkzm_h</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="diffusivity_background_sigma_level">
+      <standard_name>diffusivity_background_sigma_level</standard_name>
+      <long_name>sigma level threshold for background diffusivity</long_name>
+      <units>none</units>
+      <local_name>xkzm_s</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="flag_print">
+      <standard_name>flag_print</standard_name>
+      <long_name>flag for printing diagnostics to output</long_name>
+      <units>flag</units>
+      <local_name>lprnt</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="horizontal_index_of_printed_column">
+      <standard_name>horizontal_index_of_printed_column</standard_name>
+      <long_name>horizontal index of printed column</long_name>
+      <units>index</units>
+      <local_name>ipr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_heat_diffusivity_background_maximum">
+      <standard_name>atmosphere_heat_diffusivity_background_maximum</standard_name>
+      <long_name>maximum background value of heat diffusivity</long_name>
+      <units>m2 s-1</units>
+      <local_name>xkzminv</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="atmosphere_diffusivity_coefficient_factor">
+      <standard_name>atmosphere_diffusivity_coefficient_factor</standard_name>
+      <long_name>multiplicative constant for atmospheric diffusivities</long_name>
+      <units>none</units>
+      <local_name>moninq_fac</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_hedmf SCHEME_hedmf SUBROUTINE_hedmf_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="hedmf_init" />
+  <subroutine name="hedmf_finalize" />
+</scheme>

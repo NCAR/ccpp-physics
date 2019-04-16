@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_surface_loop_control_part1">
+  <subroutine name="GFS_surface_loop_control_part1_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+    <variable name="ccpp_loop_counter">
+      <standard_name>ccpp_loop_counter</standard_name>
+      <long_name>loop counter for subcycling loops in CCPP</long_name>
+      <units>index</units>
+      <local_name>iter</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+    <variable name="wind_speed_at_lowest_model_layer">
+      <standard_name>wind_speed_at_lowest_model_layer</standard_name>
+      <long_name>wind speed at lowest model level</long_name>
+      <units>m s-1</units>
+      <local_name>wind</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+    <variable name="flag_for_guess_run">
+      <standard_name>flag_for_guess_run</standard_name>
+      <long_name>flag for guess run</long_name>
+      <units>flag</units>
+      <local_name>flag_guess</local_name>
+      <type>logical</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_surface_loop_control_part1 SCHEME_GFS_surface_loop_control_part1 SUBROUTINE_GFS_surface_loop_control_part1_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_surface_loop_control_part1_finalize" />
+  <subroutine name="GFS_surface_loop_control_part1_init" />
+</scheme>

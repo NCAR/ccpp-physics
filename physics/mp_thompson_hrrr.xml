@@ -1,0 +1,625 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="mp_thompson_hrrr">
+  <subroutine name="mp_thompson_hrrr_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="mp_thompson_hrrr_init">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>ncol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>number of vertical levels</long_name>
+      <units>count</units>
+      <local_name>nlev</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="flag_for_aerosol_physics">
+      <standard_name>flag_for_aerosol_physics</standard_name>
+      <long_name>flag for aerosol-aware physics</long_name>
+      <units>flag</units>
+      <local_name>is_aerosol_aware</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="tendency_of_water_friendly_aerosols_at_surface">
+      <standard_name>tendency_of_water_friendly_aerosols_at_surface</standard_name>
+      <long_name>instantaneous fake water-friendly surface aerosol source</long_name>
+      <units>kg-1 s-1</units>
+      <local_name>nwfa2d</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="tendency_of_ice_friendly_aerosols_at_surface">
+      <standard_name>tendency_of_ice_friendly_aerosols_at_surface</standard_name>
+      <long_name>instantaneous fake ice-friendly surface aerosol source</long_name>
+      <units>kg-1 s-1</units>
+      <local_name>nifa2d</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="water_friendly_aerosol_number_concentration">
+      <standard_name>water_friendly_aerosol_number_concentration</standard_name>
+      <long_name>number concentration of water-friendly aerosols</long_name>
+      <units>kg-1</units>
+      <local_name>nwfa</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="ice_friendly_aerosol_number_concentration">
+      <standard_name>ice_friendly_aerosol_number_concentration</standard_name>
+      <long_name>number concentration of ice-friendly aerosols</long_name>
+      <units>kg-1</units>
+      <local_name>nifa</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="mpi_comm">
+      <standard_name>mpi_comm</standard_name>
+      <long_name>MPI communicator</long_name>
+      <units>index</units>
+      <local_name>mpicomm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpirank</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="mpi_root">
+      <standard_name>mpi_root</standard_name>
+      <long_name>master MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpiroot</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="omp_threads">
+      <standard_name>omp_threads</standard_name>
+      <long_name>number of OpenMP threads available to scheme</long_name>
+      <units>count</units>
+      <local_name>threads</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="flag_for_thompson_microphysics_scheme">
+      <standard_name>flag_for_thompson_microphysics_scheme</standard_name>
+      <long_name>choice of Thompson microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_thompson</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_init</container>
+    </variable>
+  </subroutine>
+  <subroutine name="mp_thompson_hrrr_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>ncol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>number of vertical levels</long_name>
+      <units>count</units>
+      <local_name>nlev</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="gravitational_acceleration">
+      <standard_name>gravitational_acceleration</standard_name>
+      <long_name>gravitational acceleration</long_name>
+      <units>m s-2</units>
+      <local_name>con_g</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="gas_constant_dry_air">
+      <standard_name>gas_constant_dry_air</standard_name>
+      <long_name>ideal gas constant for dry air</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>con_rd</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_updated_by_physics">
+      <standard_name>water_vapor_specific_humidity_updated_by_physics</standard_name>
+      <long_name>water vapor specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>spechum</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="cloud_condensed_water_mixing_ratio_updated_by_physics">
+      <standard_name>cloud_condensed_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>cloud water mixing ratio wrt dry+vapor (no condensates)</long_name>
+      <units>kg kg-1</units>
+      <local_name>qc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="rain_water_mixing_ratio_updated_by_physics">
+      <standard_name>rain_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>rain water mixing ratio wrt dry+vapor (no condensates)</long_name>
+      <units>kg kg-1</units>
+      <local_name>qr</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ice_water_mixing_ratio_updated_by_physics">
+      <standard_name>ice_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>ice water mixing ratio wrt dry+vapor (no condensates)</long_name>
+      <units>kg kg-1</units>
+      <local_name>qi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="snow_water_mixing_ratio_updated_by_physics">
+      <standard_name>snow_water_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>snow water mixing ratio wrt dry+vapor (no condensates)</long_name>
+      <units>kg kg-1</units>
+      <local_name>qs</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="graupel_mixing_ratio_updated_by_physics">
+      <standard_name>graupel_mixing_ratio_updated_by_physics</standard_name>
+      <long_name>graupel mixing ratio wrt dry+vapor (no condensates)</long_name>
+      <units>kg kg-1</units>
+      <local_name>qg</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ice_number_concentration_updated_by_physics">
+      <standard_name>ice_number_concentration_updated_by_physics</standard_name>
+      <long_name>ice number concentration</long_name>
+      <units>kg-1</units>
+      <local_name>ni</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="rain_number_concentration_updated_by_physics">
+      <standard_name>rain_number_concentration_updated_by_physics</standard_name>
+      <long_name>rain number concentration</long_name>
+      <units>kg-1</units>
+      <local_name>nr</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="flag_for_aerosol_physics">
+      <standard_name>flag_for_aerosol_physics</standard_name>
+      <long_name>flag for aerosol-aware physics</long_name>
+      <units>flag</units>
+      <local_name>is_aerosol_aware</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="cloud_droplet_number_concentration_updated_by_physics">
+      <standard_name>cloud_droplet_number_concentration_updated_by_physics</standard_name>
+      <long_name>cloud droplet number concentration</long_name>
+      <units>kg-1</units>
+      <local_name>nc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="water_friendly_aerosol_number_concentration_updated_by_physics">
+      <standard_name>water_friendly_aerosol_number_concentration_updated_by_physics</standard_name>
+      <long_name>number concentration of water-friendly aerosols</long_name>
+      <units>kg-1</units>
+      <local_name>nwfa</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ice_friendly_aerosol_number_concentration_updated_by_physics">
+      <standard_name>ice_friendly_aerosol_number_concentration_updated_by_physics</standard_name>
+      <long_name>number concentration of ice-friendly aerosols</long_name>
+      <units>kg-1</units>
+      <local_name>nifa</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="tendency_of_water_friendly_aerosols_at_surface">
+      <standard_name>tendency_of_water_friendly_aerosols_at_surface</standard_name>
+      <long_name>instantaneous fake water-friendly surface aerosol source</long_name>
+      <units>kg-1 s-1</units>
+      <local_name>nwfa2d</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="tendency_of_ice_friendly_aerosols_at_surface">
+      <standard_name>tendency_of_ice_friendly_aerosols_at_surface</standard_name>
+      <long_name>instantaneous fake ice-friendly surface aerosol source</long_name>
+      <units>kg-1 s-1</units>
+      <local_name>nifa2d</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>T</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>model layer mean temperature</long_name>
+      <units>K</units>
+      <local_name>tgrs</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>mean layer pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="geopotential_at_interface">
+      <standard_name>geopotential_at_interface</standard_name>
+      <long_name>geopotential at model layer interfaces</long_name>
+      <units>m2 s-2</units>
+      <local_name>phii</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="omega">
+      <standard_name>omega</standard_name>
+      <long_name>layer mean vertical velocity</long_name>
+      <units>Pa s-1</units>
+      <local_name>omega</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics timestep</long_name>
+      <units>s</units>
+      <local_name>dtp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_precipitation_amount">
+      <standard_name>lwe_thickness_of_explicit_precipitation_amount</standard_name>
+      <long_name>explicit precipitation (rain, ice, snow, graupel) on physics timestep</long_name>
+      <units>m</units>
+      <local_name>prcp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_rain_amount">
+      <standard_name>lwe_thickness_of_explicit_rain_amount</standard_name>
+      <long_name>explicit rain fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>rain</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_graupel_amount">
+      <standard_name>lwe_thickness_of_graupel_amount</standard_name>
+      <long_name>graupel fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>graupel</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_ice_amount">
+      <standard_name>lwe_thickness_of_ice_amount</standard_name>
+      <long_name>ice fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>ice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount">
+      <standard_name>lwe_thickness_of_snow_amount</standard_name>
+      <long_name>snow fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>snow</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ratio_of_snowfall_to_rainfall">
+      <standard_name>ratio_of_snowfall_to_rainfall</standard_name>
+      <long_name>ratio of snowfall to large-scale rainfall</long_name>
+      <units>frac</units>
+      <local_name>sr</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="radar_reflectivity_10cm">
+      <standard_name>radar_reflectivity_10cm</standard_name>
+      <long_name>instantaneous refl_10cm</long_name>
+      <units>dBZ</units>
+      <local_name>refl_10cm</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="flag_for_radar_reflectivity">
+      <standard_name>flag_for_radar_reflectivity</standard_name>
+      <long_name>flag for radar reflectivity</long_name>
+      <units>flag</units>
+      <local_name>do_radar_ref</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_liquid_water_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_liquid_water_particle_in_um</standard_name>
+      <long_name>eff. radius of cloud liquid water particle in micrometer</long_name>
+      <units>um</units>
+      <local_name>re_cloud</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>none</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_ice_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_ice_particle_in_um</standard_name>
+      <long_name>eff. radius of cloud ice water particle in micrometer</long_name>
+      <units>um</units>
+      <local_name>re_ice</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>none</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="effective_radius_of_stratiform_cloud_snow_particle_in_um">
+      <standard_name>effective_radius_of_stratiform_cloud_snow_particle_in_um</standard_name>
+      <long_name>effective radius of cloud snow particle in micrometers</long_name>
+      <units>um</units>
+      <local_name>re_snow</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>none</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="mpi_comm">
+      <standard_name>mpi_comm</standard_name>
+      <long_name>MPI communicator</long_name>
+      <units>index</units>
+      <local_name>mpicomm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpirank</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="mpi_root">
+      <standard_name>mpi_root</standard_name>
+      <long_name>master MPI-rank</long_name>
+      <units>index</units>
+      <local_name>mpiroot</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_mp_thompson_hrrr SCHEME_mp_thompson_hrrr SUBROUTINE_mp_thompson_hrrr_run</container>
+    </variable>
+  </subroutine>
+</scheme>

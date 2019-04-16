@@ -1,0 +1,504 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_rrtmgp_setup">
+  <subroutine name="GFS_rrtmgp_setup_run">
+    <variable name="date_and_time_at_model_initialization">
+      <standard_name>date_and_time_at_model_initialization</standard_name>
+      <long_name>initialization date and time</long_name>
+      <units>none</units>
+      <local_name>idate</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="forecast_date_and_time">
+      <standard_name>forecast_date_and_time</standard_name>
+      <long_name>current forecast date and time</long_name>
+      <units>none</units>
+      <local_name>jdate</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="frequency_for_shortwave_radiation">
+      <standard_name>frequency_for_shortwave_radiation</standard_name>
+      <long_name>frequency for shortwave radiation</long_name>
+      <units>s</units>
+      <local_name>deltsw</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>dynamics timestep</long_name>
+      <units>s</units>
+      <local_name>deltim</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="flag_to_calc_sw">
+      <standard_name>flag_to_calc_sw</standard_name>
+      <long_name>logical flags for sw radiation calls</long_name>
+      <units>flag</units>
+      <local_name>lsswr</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>me</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="equation_of_time">
+      <standard_name>equation_of_time</standard_name>
+      <long_name>equation of time (radian)</long_name>
+      <units>radians</units>
+      <local_name>slag</local_name>
+      <type>real</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="sine_of_solar_declination_angle">
+      <standard_name>sine_of_solar_declination_angle</standard_name>
+      <long_name>sin of the solar declination angle</long_name>
+      <units>none</units>
+      <local_name>sdec</local_name>
+      <type>real</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="cosine_of_solar_declination_angle">
+      <standard_name>cosine_of_solar_declination_angle</standard_name>
+      <long_name>cos of the solar declination angle</long_name>
+      <units>none</units>
+      <local_name>cdec</local_name>
+      <type>real</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="solar_constant">
+      <standard_name>solar_constant</standard_name>
+      <long_name>solar constant (sun-earth distant adjusted)</long_name>
+      <units>W m-2</units>
+      <local_name>solcon</local_name>
+      <type>real</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_rrtmgp_setup_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_rrtmgp_setup_init">
+    <variable name="vertical_sigma_coordinate_for_radiation_initialization">
+      <standard_name>vertical_sigma_coordinate_for_radiation_initialization</standard_name>
+      <long_name>vertical sigma coordinate for radiation initialization</long_name>
+      <units>none</units>
+      <local_name>si</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="number_of_vertical_layers_for_radiation_calculations">
+      <standard_name>number_of_vertical_layers_for_radiation_calculations</standard_name>
+      <long_name>number of vertical levels for radiation calculations</long_name>
+      <units>count</units>
+      <local_name>levr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_initial_time-date_control">
+      <standard_name>flag_for_initial_time-date_control</standard_name>
+      <long_name>flag for initial conditions and forcing</long_name>
+      <units>flag</units>
+      <local_name>ictm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_solar_constant">
+      <standard_name>flag_for_solar_constant</standard_name>
+      <long_name>use prescribed solar constant</long_name>
+      <units>flag</units>
+      <local_name>isol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_using_prescribed_global_mean_co2_value">
+      <standard_name>flag_for_using_prescribed_global_mean_co2_value</standard_name>
+      <long_name>prescribed global mean value (old opernl)</long_name>
+      <units>flag</units>
+      <local_name>ico2</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_default_aerosol_effect_in_shortwave_radiation">
+      <standard_name>flag_for_default_aerosol_effect_in_shortwave_radiation</standard_name>
+      <long_name>default aerosol effect in sw only</long_name>
+      <units>flag</units>
+      <local_name>iaer</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_using_climatology_albedo">
+      <standard_name>flag_for_using_climatology_albedo</standard_name>
+      <long_name>flag for using climatology alb, based on sfc type</long_name>
+      <units>flag</units>
+      <local_name>ialb</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_surface_emissivity_control">
+      <standard_name>flag_for_surface_emissivity_control</standard_name>
+      <long_name>surface emissivity control flag, use fixed value of 1</long_name>
+      <units>flag</units>
+      <local_name>iems</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>tracer index for cloud condensate (or liquid water)</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="array_dimension_of_2d_arrays_for_microphysics">
+      <standard_name>array_dimension_of_2d_arrays_for_microphysics</standard_name>
+      <long_name>number of 2D arrays needed for microphysics</long_name>
+      <units>count</units>
+      <local_name>num_p2d</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="array_dimension_of_3d_arrays_for_microphysics">
+      <standard_name>array_dimension_of_3d_arrays_for_microphysics</standard_name>
+      <long_name>number of 3D arrays needed for microphysics</long_name>
+      <units>count</units>
+      <local_name>num_p3d</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="number_of_3d_arrays_associated_with_pdf-based_clouds">
+      <standard_name>number_of_3d_arrays_associated_with_pdf-based_clouds</standard_name>
+      <long_name>number of 3d arrays associated with pdf based clouds/mp</long_name>
+      <units>count</units>
+      <local_name>npdf3d</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="index_for_ozone">
+      <standard_name>index_for_ozone</standard_name>
+      <long_name>tracer index for ozone mixing ratio</long_name>
+      <units>index</units>
+      <local_name>ntoz</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_max-random_overlap_clouds_for_shortwave_radiation">
+      <standard_name>flag_for_max-random_overlap_clouds_for_shortwave_radiation</standard_name>
+      <long_name>sw: max-random overlap clouds</long_name>
+      <units>flag</units>
+      <local_name>iovr_sw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_max-random_overlap_clouds_for_longwave_radiation">
+      <standard_name>flag_for_max-random_overlap_clouds_for_longwave_radiation</standard_name>
+      <long_name>lw: max-random overlap clouds</long_name>
+      <units>flag</units>
+      <local_name>iovr_lw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_sw_clouds_without_sub-grid_approximation">
+      <standard_name>flag_for_sw_clouds_without_sub-grid_approximation</standard_name>
+      <long_name>flag for sw clouds without sub-grid approximation</long_name>
+      <units>flag</units>
+      <local_name>isubc_sw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_lw_clouds_without_sub-grid_approximation">
+      <standard_name>flag_for_lw_clouds_without_sub-grid_approximation</standard_name>
+      <long_name>flag for lw clouds without sub-grid approximation</long_name>
+      <units>flag</units>
+      <local_name>isubc_lw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation">
+      <standard_name>flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation</standard_name>
+      <long_name>sw optical property for liquid clouds</long_name>
+      <units>flag</units>
+      <local_name>icliq_sw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_CRICK-proof_cloud_water">
+      <standard_name>flag_for_CRICK-proof_cloud_water</standard_name>
+      <long_name>flag for CRICK-Proof cloud water</long_name>
+      <units>flag</units>
+      <local_name>crick_proof</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_cloud_condensate_normalized_by_cloud_cover">
+      <standard_name>flag_for_cloud_condensate_normalized_by_cloud_cover</standard_name>
+      <long_name>flag for cloud condensate normalized by cloud cover</long_name>
+      <units>flag</units>
+      <local_name>ccnorm</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_precipitation_effect_on_radiation">
+      <standard_name>flag_for_precipitation_effect_on_radiation</standard_name>
+      <long_name>radiation precip flag for Ferrier/Moorthi</long_name>
+      <units>flag</units>
+      <local_name>norad_precip</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="date_and_time_at_model_initialization_reordered">
+      <standard_name>date_and_time_at_model_initialization_reordered</standard_name>
+      <long_name>initialization date and time</long_name>
+      <units>none</units>
+      <local_name>idate</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="flag_for_vertical_index_direction_control">
+      <standard_name>flag_for_vertical_index_direction_control</standard_name>
+      <long_name>flag for vertical index direction control</long_name>
+      <units>flag</units>
+      <local_name>iflip</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="aerosol_optical_properties_for_longwave_bands_01-16">
+      <standard_name>aerosol_optical_properties_for_longwave_bands_01-16</standard_name>
+      <long_name>optical properties for longwave bands 01-16</long_name>
+      <units>various</units>
+      <local_name>faerlw</local_name>
+      <type>real</type>
+      <rank>(:,:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="aerosol_optical_properties_for_shortwave_bands_01-16">
+      <standard_name>aerosol_optical_properties_for_shortwave_bands_01-16</standard_name>
+      <long_name>aerosol optical properties for shortwave bands 01-16</long_name>
+      <units>various</units>
+      <local_name>faersw</local_name>
+      <type>real</type>
+      <rank>(:,:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="atmosphere_optical_thickness_due_to_ambient_aerosol_particles">
+      <standard_name>atmosphere_optical_thickness_due_to_ambient_aerosol_particles</standard_name>
+      <long_name>vertical integrated optical depth for various aerosol species</long_name>
+      <units>none</units>
+      <local_name>aerodp</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>me</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_rrtmgp_setup SCHEME_GFS_rrtmgp_setup SUBROUTINE_GFS_rrtmgp_setup_init</container>
+    </variable>
+  </subroutine>
+</scheme>

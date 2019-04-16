@@ -1,0 +1,856 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="lsm_noah">
+  <subroutine name="lsm_noah_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_vertical_dimension">
+      <standard_name>soil_vertical_dimension</standard_name>
+      <long_name>soil vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>km</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_air_pressure">
+      <standard_name>surface_air_pressure</standard_name>
+      <long_name>surface pressure</long_name>
+      <units>Pa</units>
+      <local_name>ps</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="x_wind_at_lowest_model_layer">
+      <standard_name>x_wind_at_lowest_model_layer</standard_name>
+      <long_name>x component of 1st model layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>u1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="y_wind_at_lowest_model_layer">
+      <standard_name>y_wind_at_lowest_model_layer</standard_name>
+      <long_name>y component of 1st model layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>v1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="air_temperature_at_lowest_model_layer">
+      <standard_name>air_temperature_at_lowest_model_layer</standard_name>
+      <long_name>1st model layer air temperature</long_name>
+      <units>K</units>
+      <local_name>t1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_at_lowest_model_layer">
+      <standard_name>water_vapor_specific_humidity_at_lowest_model_layer</standard_name>
+      <long_name>1st model layer specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>q1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_type_classification">
+      <standard_name>soil_type_classification</standard_name>
+      <long_name>soil type at each grid cell</long_name>
+      <units>index</units>
+      <local_name>soiltyp</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="vegetation_type_classification">
+      <standard_name>vegetation_type_classification</standard_name>
+      <long_name>vegetation type at each grid cell</long_name>
+      <units>index</units>
+      <local_name>vegtype</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="bounded_vegetation_area_fraction">
+      <standard_name>bounded_vegetation_area_fraction</standard_name>
+      <long_name>areal fractional cover of green vegetation bounded on the bottom</long_name>
+      <units>frac</units>
+      <local_name>sigmaf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_longwave_emissivity">
+      <standard_name>surface_longwave_emissivity</standard_name>
+      <long_name>surface longwave emissivity</long_name>
+      <units>frac</units>
+      <local_name>sfcemis</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_downwelling_longwave_flux_absorbed_by_ground">
+      <standard_name>surface_downwelling_longwave_flux_absorbed_by_ground</standard_name>
+      <long_name>total sky surface downward longwave flux absorbed by the ground</long_name>
+      <units>W m-2</units>
+      <local_name>dlwflx</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_downwelling_shortwave_flux">
+      <standard_name>surface_downwelling_shortwave_flux</standard_name>
+      <long_name>total sky surface downward shortwave flux</long_name>
+      <units>W m-2</units>
+      <local_name>dswsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_net_downwelling_shortwave_flux">
+      <standard_name>surface_net_downwelling_shortwave_flux</standard_name>
+      <long_name>total sky surface net shortwave flux</long_name>
+      <units>W m-2</units>
+      <local_name>snet</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>dynamics time step</long_name>
+      <units>s</units>
+      <local_name>delt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="deep_soil_temperature">
+      <standard_name>deep_soil_temperature</standard_name>
+      <long_name>bottom soil temperature</long_name>
+      <units>K</units>
+      <local_name>tg3</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_drag_coefficient_for_momentum_in_air">
+      <standard_name>surface_drag_coefficient_for_momentum_in_air</standard_name>
+      <long_name>surface exchange coeff for momentum</long_name>
+      <units>none</units>
+      <local_name>cm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_drag_coefficient_for_heat_and_moisture_in_air">
+      <standard_name>surface_drag_coefficient_for_heat_and_moisture_in_air</standard_name>
+      <long_name>surface exchange coeff heat   moisture</long_name>
+      <units>none</units>
+      <local_name>ch</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="air_pressure_at_lowest_model_layer">
+      <standard_name>air_pressure_at_lowest_model_layer</standard_name>
+      <long_name>Model layer 1 mean pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer">
+      <standard_name>ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer</standard_name>
+      <long_name>Exner function ratio bt midlayer and interface at 1st layer</long_name>
+      <units>ratio</units>
+      <local_name>prslki</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="height_above_ground_at_lowest_model_layer">
+      <standard_name>height_above_ground_at_lowest_model_layer</standard_name>
+      <long_name>height above ground at 1st model layer</long_name>
+      <units>m</units>
+      <local_name>zf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="sea_land_ice_mask">
+      <standard_name>sea_land_ice_mask</standard_name>
+      <long_name>landmask: sea/land/ice=0/1/2</long_name>
+      <units>flag</units>
+      <local_name>islimsk</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_wind_enhancement_due_to_convection">
+      <standard_name>surface_wind_enhancement_due_to_convection</standard_name>
+      <long_name>surface wind enhancement due to convection</long_name>
+      <units>m s-1</units>
+      <local_name>ddvel</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_slope_classification">
+      <standard_name>surface_slope_classification</standard_name>
+      <long_name>surface slope type at each grid cell</long_name>
+      <units>index</units>
+      <local_name>slopetyp</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="minimum_vegetation_area_fraction">
+      <standard_name>minimum_vegetation_area_fraction</standard_name>
+      <long_name>min fractional coverage of green veg</long_name>
+      <units>frac</units>
+      <local_name>shdmin</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="maximum_vegetation_area_fraction">
+      <standard_name>maximum_vegetation_area_fraction</standard_name>
+      <long_name>max fractnl cover of green veg (not used)</long_name>
+      <units>frac</units>
+      <local_name>shdmax</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="upper_bound_on_max_albedo_over_deep_snow">
+      <standard_name>upper_bound_on_max_albedo_over_deep_snow</standard_name>
+      <long_name>upper bound on max albedo over deep snow</long_name>
+      <units>frac</units>
+      <local_name>snoalb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_diffused_shortwave_albedo">
+      <standard_name>surface_diffused_shortwave_albedo</standard_name>
+      <long_name>mean surface diffused shortwave albedo</long_name>
+      <units>frac</units>
+      <local_name>sfalb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="flag_for_iteration">
+      <standard_name>flag_for_iteration</standard_name>
+      <long_name>flag for iteration</long_name>
+      <units>flag</units>
+      <local_name>flag_iter</local_name>
+      <type>logical</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="flag_for_guess_run">
+      <standard_name>flag_for_guess_run</standard_name>
+      <long_name>flag for guess run</long_name>
+      <units>flag</units>
+      <local_name>flag_guess</local_name>
+      <type>logical</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_type_dataset_choice">
+      <standard_name>soil_type_dataset_choice</standard_name>
+      <long_name>soil type dataset choice</long_name>
+      <units>index</units>
+      <local_name>isot</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="vegetation_type_dataset_choice">
+      <standard_name>vegetation_type_dataset_choice</standard_name>
+      <long_name>land use dataset choice</long_name>
+      <units>index</units>
+      <local_name>ivegsrc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="perturbation_of_soil_type_b_parameter">
+      <standard_name>perturbation_of_soil_type_b_parameter</standard_name>
+      <long_name>perturbation of soil type "b" parameter</long_name>
+      <units>frac</units>
+      <local_name>bexppert</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="perturbation_of_leaf_area_index">
+      <standard_name>perturbation_of_leaf_area_index</standard_name>
+      <long_name>perturbation of leaf area index</long_name>
+      <units>frac</units>
+      <local_name>xlaipert</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="perturbation_of_vegetation_fraction">
+      <standard_name>perturbation_of_vegetation_fraction</standard_name>
+      <long_name>perturbation of vegetation fraction</long_name>
+      <units>frac</units>
+      <local_name>vegfpert</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="magnitude_of_perturbation_of_vegetation_fraction">
+      <standard_name>magnitude_of_perturbation_of_vegetation_fraction</standard_name>
+      <long_name>magnitude of perturbation of vegetation fraction</long_name>
+      <units>frac</units>
+      <local_name>pertvegf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="water_equivalent_accumulated_snow_depth">
+      <standard_name>water_equivalent_accumulated_snow_depth</standard_name>
+      <long_name>water equivalent accumulated snow depth</long_name>
+      <units>mm</units>
+      <local_name>weasd</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_snow_thickness_water_equivalent">
+      <standard_name>surface_snow_thickness_water_equivalent</standard_name>
+      <long_name>water equivalent snow depth over land</long_name>
+      <units>mm</units>
+      <local_name>snwdph</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_skin_temperature">
+      <standard_name>surface_skin_temperature</standard_name>
+      <long_name>surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tskin</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep">
+      <standard_name>nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>nonnegative precipitation amount in one dynamics time step</long_name>
+      <units>m</units>
+      <local_name>tprcp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="flag_for_precipitation_type">
+      <standard_name>flag_for_precipitation_type</standard_name>
+      <long_name>flag for snow or rain precipitation</long_name>
+      <units>flag</units>
+      <local_name>srflag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="volume_fraction_of_soil_moisture">
+      <standard_name>volume_fraction_of_soil_moisture</standard_name>
+      <long_name>volumetric fraction of soil moisture</long_name>
+      <units>frac</units>
+      <local_name>smc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_temperature">
+      <standard_name>soil_temperature</standard_name>
+      <long_name>soil temperature</long_name>
+      <units>K</units>
+      <local_name>stc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="volume_fraction_of_unfrozen_soil_moisture">
+      <standard_name>volume_fraction_of_unfrozen_soil_moisture</standard_name>
+      <long_name>volume fraction of unfrozen soil moisture</long_name>
+      <units>frac</units>
+      <local_name>slc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="canopy_water_amount">
+      <standard_name>canopy_water_amount</standard_name>
+      <long_name>canopy moisture content</long_name>
+      <units>kg m-2</units>
+      <local_name>canopy</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="transpiration_flux">
+      <standard_name>transpiration_flux</standard_name>
+      <long_name>total plant transpiration rate</long_name>
+      <units>kg m-2 s-1</units>
+      <local_name>trans</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_skin_temperature_after_iteration">
+      <standard_name>surface_skin_temperature_after_iteration</standard_name>
+      <long_name>surface skin temperature after iteration</long_name>
+      <units>K</units>
+      <local_name>tsurf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_roughness_length">
+      <standard_name>surface_roughness_length</standard_name>
+      <long_name>surface roughness length</long_name>
+      <units>cm</units>
+      <local_name>zorl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_snow_area_fraction_for_diagnostics">
+      <standard_name>surface_snow_area_fraction_for_diagnostics</standard_name>
+      <long_name>surface snow area fraction</long_name>
+      <units>frac</units>
+      <local_name>sncovr1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_specific_humidity">
+      <standard_name>surface_specific_humidity</standard_name>
+      <long_name>surface specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>qsurf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="upward_heat_flux_in_soil">
+      <standard_name>upward_heat_flux_in_soil</standard_name>
+      <long_name>upward soil heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>gflux</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="subsurface_runoff_flux">
+      <standard_name>subsurface_runoff_flux</standard_name>
+      <long_name>subsurface runoff flux</long_name>
+      <units>g m-2 s-1</units>
+      <local_name>drain</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_latent_heat_flux">
+      <standard_name>kinematic_surface_upward_latent_heat_flux</standard_name>
+      <long_name>surface upward evaporation flux</long_name>
+      <units>kg kg-1 m s-1</units>
+      <local_name>evap</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_sensible_heat_flux">
+      <standard_name>kinematic_surface_upward_sensible_heat_flux</standard_name>
+      <long_name>surface upward sensible heat flux</long_name>
+      <units>K m s-1</units>
+      <local_name>hflx</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_upward_potential_latent_heat_flux">
+      <standard_name>surface_upward_potential_latent_heat_flux</standard_name>
+      <long_name>surface upward potential latent heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>ep</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_runoff_flux">
+      <standard_name>surface_runoff_flux</standard_name>
+      <long_name>surface runoff flux</long_name>
+      <units>g m-2 s-1</units>
+      <local_name>runoff</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_drag_wind_speed_for_momentum_in_air">
+      <standard_name>surface_drag_wind_speed_for_momentum_in_air</standard_name>
+      <long_name>surf mom exch coef time mean surf wind</long_name>
+      <units>m s-1</units>
+      <local_name>cmm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_drag_mass_flux_for_heat_and_moisture_in_air">
+      <standard_name>surface_drag_mass_flux_for_heat_and_moisture_in_air</standard_name>
+      <long_name>surf h m exch coef time surf wind   density</long_name>
+      <units>kg m-2 s-1</units>
+      <local_name>chh</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_upward_latent_heat_flux">
+      <standard_name>soil_upward_latent_heat_flux</standard_name>
+      <long_name>soil upward latent heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>evbs</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="canopy_upward_latent_heat_flux">
+      <standard_name>canopy_upward_latent_heat_flux</standard_name>
+      <long_name>canopy upward latent heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>evcw</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="snow_deposition_sublimation_upward_latent_heat_flux">
+      <standard_name>snow_deposition_sublimation_upward_latent_heat_flux</standard_name>
+      <long_name>latent heat flux from snow depo/subl</long_name>
+      <units>W m-2</units>
+      <local_name>sbsno</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="surface_snow_area_fraction">
+      <standard_name>surface_snow_area_fraction</standard_name>
+      <long_name>surface snow area fraction</long_name>
+      <units>frac</units>
+      <local_name>snowc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="soil_moisture_content">
+      <standard_name>soil_moisture_content</standard_name>
+      <long_name>soil moisture content</long_name>
+      <units>kg m-2</units>
+      <local_name>stm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="snow_freezing_rain_upward_latent_heat_flux">
+      <standard_name>snow_freezing_rain_upward_latent_heat_flux</standard_name>
+      <long_name>latent heat flux due to snow and frz rain</long_name>
+      <units>W m-2</units>
+      <local_name>snohf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="volume_fraction_of_condensed_water_in_soil_at_wilting_point">
+      <standard_name>volume_fraction_of_condensed_water_in_soil_at_wilting_point</standard_name>
+      <long_name>soil water fraction at wilting point</long_name>
+      <units>frac</units>
+      <local_name>smcwlt2</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="threshold_volume_fraction_of_condensed_water_in_soil">
+      <standard_name>threshold_volume_fraction_of_condensed_water_in_soil</standard_name>
+      <long_name>soil moisture threshold</long_name>
+      <units>frac</units>
+      <local_name>smcref2</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="normalized_soil_wetness">
+      <standard_name>normalized_soil_wetness</standard_name>
+      <long_name>normalized soil wetness</long_name>
+      <units>frac</units>
+      <local_name>wet1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="lsm_noah_finalize">
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_finalize</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_finalize</container>
+    </variable>
+  </subroutine>
+  <subroutine name="lsm_noah_init">
+    <variable name="mpi_rank">
+      <standard_name>mpi_rank</standard_name>
+      <long_name>current MPI-rank</long_name>
+      <units>index</units>
+      <local_name>me</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+    <variable name="soil_type_dataset_choice">
+      <standard_name>soil_type_dataset_choice</standard_name>
+      <long_name>soil type dataset choice</long_name>
+      <units>index</units>
+      <local_name>isot</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+    <variable name="vegetation_type_dataset_choice">
+      <standard_name>vegetation_type_dataset_choice</standard_name>
+      <long_name>land use dataset choice</long_name>
+      <units>index</units>
+      <local_name>ivegsrc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+    <variable name="iounit_namelist">
+      <standard_name>iounit_namelist</standard_name>
+      <long_name>fortran unit number for file opens</long_name>
+      <units>none</units>
+      <local_name>nlunit</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_lsm_noah SCHEME_lsm_noah SUBROUTINE_lsm_noah_init</container>
+    </variable>
+  </subroutine>
+</scheme>

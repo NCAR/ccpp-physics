@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<definition module="machine">
+  <variable name="kind_dyn">
+    <standard_name>kind_dyn</standard_name>
+    <long_name>definition of kind_dyn</long_name>
+    <units>none</units>
+    <local_name>kind_dyn</local_name>
+    <type>integer</type>
+    <rank />
+    <intent>none</intent>
+    <optional>F</optional>
+    <container>MODULE_machine</container>
+  </variable>
+  <variable name="kind_grid">
+    <standard_name>kind_grid</standard_name>
+    <long_name>definition of kind_grid</long_name>
+    <units>none</units>
+    <local_name>kind_grid</local_name>
+    <type>integer</type>
+    <rank />
+    <intent>none</intent>
+    <optional>F</optional>
+    <container>MODULE_machine</container>
+  </variable>
+  <variable name="kind_phys">
+    <standard_name>kind_phys</standard_name>
+    <long_name>definition of kind_phys</long_name>
+    <units>none</units>
+    <local_name>kind_phys</local_name>
+    <type>integer</type>
+    <rank />
+    <intent>none</intent>
+    <optional>F</optional>
+    <container>MODULE_machine</container>
+  </variable>
+</definition>

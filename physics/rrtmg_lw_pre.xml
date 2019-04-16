@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="rrtmg_lw_pre">
+  <subroutine name="rrtmg_lw_pre_run">
+    <variable name="GFS_control_type_instance">
+      <standard_name>GFS_control_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS model control parameters</long_name>
+      <units>DDT</units>
+      <local_name>Model</local_name>
+      <type>GFS_control_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="GFS_grid_type_instance">
+      <standard_name>GFS_grid_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS grid and interpolation related data</long_name>
+      <units>DDT</units>
+      <local_name>Grid</local_name>
+      <type>GFS_grid_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="GFS_sfcprop_type_instance">
+      <standard_name>GFS_sfcprop_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS surface fields</long_name>
+      <units>DDT</units>
+      <local_name>Sfcprop</local_name>
+      <type>GFS_sfcprop_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="GFS_radtend_type_instance">
+      <standard_name>GFS_radtend_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS radiation tendencies</long_name>
+      <units>DDT</units>
+      <local_name>Radtend</local_name>
+      <type>GFS_radtend_type</type>
+      <rank />
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="surface_ground_temperature_for_radiation">
+      <standard_name>surface_ground_temperature_for_radiation</standard_name>
+      <long_name>surface ground temperature for radiation</long_name>
+      <units>K</units>
+      <local_name>tsfg</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="surface_air_temperature_for_radiation">
+      <standard_name>surface_air_temperature_for_radiation</standard_name>
+      <long_name>lowest model layer air temperature for radiation</long_name>
+      <units>K</units>
+      <local_name>tsfa</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmg_lw_pre SCHEME_rrtmg_lw_pre SUBROUTINE_rrtmg_lw_pre_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="rrtmg_lw_pre_init" />
+  <subroutine name="rrtmg_lw_pre_finalize" />
+</scheme>

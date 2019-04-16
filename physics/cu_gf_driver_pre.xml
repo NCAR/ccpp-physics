@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="cu_gf_driver_pre">
+  <subroutine name="cu_gf_driver_pre_init" />
+  <subroutine name="cu_gf_driver_pre_finalize" />
+  <subroutine name="cu_gf_driver_pre_run">
+    <variable name="flag_for_first_time_step">
+      <standard_name>flag_for_first_time_step</standard_name>
+      <long_name>flag signaling first time step for time integration loop</long_name>
+      <units>flag</units>
+      <local_name>flag_init</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="flag_for_restart">
+      <standard_name>flag_for_restart</standard_name>
+      <long_name>flag for restart (warmstart) or coldstart</long_name>
+      <units>flag</units>
+      <local_name>flag_restart</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="index_of_time_step">
+      <standard_name>index_of_time_step</standard_name>
+      <long_name>current forecast iteration</long_name>
+      <units>index</units>
+      <local_name>kdt</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="forecast_time">
+      <standard_name>forecast_time</standard_name>
+      <long_name>curent forecast time</long_name>
+      <units>h</units>
+      <local_name>fhour</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics timestep</long_name>
+      <units>s</units>
+      <local_name>dtp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="air_temperature">
+      <standard_name>air_temperature</standard_name>
+      <long_name>model layer mean temperature</long_name>
+      <units>K</units>
+      <local_name>t</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity">
+      <standard_name>water_vapor_specific_humidity</standard_name>
+      <long_name>water vapor specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>q</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="temperature_from_previous_timestep">
+      <standard_name>temperature_from_previous_timestep</standard_name>
+      <long_name>temperature from previous time step</long_name>
+      <units>K</units>
+      <local_name>prevst</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="moisture_from_previous_timestep">
+      <standard_name>moisture_from_previous_timestep</standard_name>
+      <long_name>moisture from previous time step</long_name>
+      <units>kg kg-1</units>
+      <local_name>prevsq</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="temperature_tendency_due_to_dynamics">
+      <standard_name>temperature_tendency_due_to_dynamics</standard_name>
+      <long_name>temperature tendency due to dynamics only</long_name>
+      <units>K s-1</units>
+      <local_name>forcet</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="moisture_tendency_due_to_dynamics">
+      <standard_name>moisture_tendency_due_to_dynamics</standard_name>
+      <long_name>moisture tendency due to dynamics only</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>forceq</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="conv_activity_counter">
+      <standard_name>conv_activity_counter</standard_name>
+      <long_name>convective activity memory</long_name>
+      <units>none</units>
+      <local_name>cactiv</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="gf_memory_counter">
+      <standard_name>gf_memory_counter</standard_name>
+      <long_name>Memory counter for GF</long_name>
+      <units>none</units>
+      <local_name>conv_act</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_cu_gf_driver_pre SCHEME_cu_gf_driver_pre SUBROUTINE_cu_gf_driver_pre_run</container>
+    </variable>
+  </subroutine>
+</scheme>

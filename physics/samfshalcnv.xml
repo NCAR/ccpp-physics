@@ -1,0 +1,513 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="samfshalcnv">
+  <subroutine name="samfshalcnv_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="horizontal_dimension">
+      <standard_name>horizontal_dimension</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ix</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>km</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="specific_heat_of_liquid_water_at_constant_pressure">
+      <standard_name>specific_heat_of_liquid_water_at_constant_pressure</standard_name>
+      <long_name>specific heat of liquid water at constant pressure</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>cliq</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="specific_heat_of_dry_air_at_constant_pressure">
+      <standard_name>specific_heat_of_dry_air_at_constant_pressure</standard_name>
+      <long_name>specific heat of dry air at constant pressure</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>cp</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="specific_heat_of_water_vapor_at_constant_pressure">
+      <standard_name>specific_heat_of_water_vapor_at_constant_pressure</standard_name>
+      <long_name>specific heat of water vapor at constant pressure</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>cvap</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="ratio_of_dry_air_to_water_vapor_gas_constants">
+      <standard_name>ratio_of_dry_air_to_water_vapor_gas_constants</standard_name>
+      <long_name>rd/rv</long_name>
+      <units>none</units>
+      <local_name>eps</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="ratio_of_dry_air_to_water_vapor_gas_constants_minus_one">
+      <standard_name>ratio_of_dry_air_to_water_vapor_gas_constants_minus_one</standard_name>
+      <long_name>(rd/rv) - 1</long_name>
+      <units>none</units>
+      <local_name>epsm1</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="ratio_of_vapor_to_dry_air_gas_constants_minus_one">
+      <standard_name>ratio_of_vapor_to_dry_air_gas_constants_minus_one</standard_name>
+      <long_name>(rv/rd) - 1 (rv = ideal gas constant for water vapor)</long_name>
+      <units>none</units>
+      <local_name>fv</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="gravitational_acceleration">
+      <standard_name>gravitational_acceleration</standard_name>
+      <long_name>gravitational acceleration</long_name>
+      <units>m s-2</units>
+      <local_name>grav</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="latent_heat_of_vaporization_of_water_at_0C">
+      <standard_name>latent_heat_of_vaporization_of_water_at_0C</standard_name>
+      <long_name>latent heat of evaporation/sublimation</long_name>
+      <units>J kg-1</units>
+      <local_name>hvap</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="gas_constant_dry_air">
+      <standard_name>gas_constant_dry_air</standard_name>
+      <long_name>ideal gas constant for dry air</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>rd</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="gas_constant_water_vapor">
+      <standard_name>gas_constant_water_vapor</standard_name>
+      <long_name>ideal gas constant for water vapor</long_name>
+      <units>J kg-1 K-1</units>
+      <local_name>rv</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="temperature_at_zero_celsius">
+      <standard_name>temperature_at_zero_celsius</standard_name>
+      <long_name>temperature at 0 degrees Celsius</long_name>
+      <units>K</units>
+      <local_name>t0c</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="time_step_for_physics">
+      <standard_name>time_step_for_physics</standard_name>
+      <long_name>physics time step</long_name>
+      <units>s</units>
+      <local_name>delt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="index_for_turbulent_kinetic_energy_convective_transport_tracer">
+      <standard_name>index_for_turbulent_kinetic_energy_convective_transport_tracer</standard_name>
+      <long_name>index for turbulent kinetic energy in the convectively transported tracer array</long_name>
+      <units>index</units>
+      <local_name>ntk</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="number_of_tracers_for_samf">
+      <standard_name>number_of_tracers_for_samf</standard_name>
+      <long_name>number of tracers for scale-aware mass flux schemes</long_name>
+      <units>count</units>
+      <local_name>ntr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="air_pressure_difference_between_midlayers">
+      <standard_name>air_pressure_difference_between_midlayers</standard_name>
+      <long_name>pres(k) - pres(k+1)</long_name>
+      <units>Pa</units>
+      <local_name>delp</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>mean layer pressure</long_name>
+      <units>Pa</units>
+      <local_name>prslp</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="surface_air_pressure">
+      <standard_name>surface_air_pressure</standard_name>
+      <long_name>surface pressure</long_name>
+      <units>Pa</units>
+      <local_name>psp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="geopotential">
+      <standard_name>geopotential</standard_name>
+      <long_name>layer geopotential</long_name>
+      <units>m2 s-2</units>
+      <local_name>phil</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="convective_transportable_tracers">
+      <standard_name>convective_transportable_tracers</standard_name>
+      <long_name>array to contain cloud water and other convective trans. tracers</long_name>
+      <units>kg kg-1</units>
+      <local_name>qtr</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_updated_by_physics">
+      <standard_name>water_vapor_specific_humidity_updated_by_physics</standard_name>
+      <long_name>updated vapor specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>q1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>updated temperature</long_name>
+      <units>K</units>
+      <local_name>t1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="x_wind_updated_by_physics">
+      <standard_name>x_wind_updated_by_physics</standard_name>
+      <long_name>updated x-direction wind</long_name>
+      <units>m s-1</units>
+      <local_name>u1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="y_wind_updated_by_physics">
+      <standard_name>y_wind_updated_by_physics</standard_name>
+      <long_name>updated y-direction wind</long_name>
+      <units>m s-1</units>
+      <local_name>v1</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_shallow_convective_precipitation_amount">
+      <standard_name>lwe_thickness_of_shallow_convective_precipitation_amount</standard_name>
+      <long_name>shallow convective rainfall amount on physics timestep</long_name>
+      <units>m</units>
+      <local_name>rn</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="vertical_index_at_cloud_base">
+      <standard_name>vertical_index_at_cloud_base</standard_name>
+      <long_name>index at cloud base</long_name>
+      <units>index</units>
+      <local_name>kbot</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="vertical_index_at_cloud_top">
+      <standard_name>vertical_index_at_cloud_top</standard_name>
+      <long_name>index at cloud top</long_name>
+      <units>index</units>
+      <local_name>ktop</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="flag_deep_convection">
+      <standard_name>flag_deep_convection</standard_name>
+      <long_name>deep convection: 0=no, 1=yes</long_name>
+      <units>flag</units>
+      <local_name>kcnv</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="sea_land_ice_mask">
+      <standard_name>sea_land_ice_mask</standard_name>
+      <long_name>landmask: sea/land/ice=0/1/2</long_name>
+      <units>flag</units>
+      <local_name>islimsk</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="cell_area">
+      <standard_name>cell_area</standard_name>
+      <long_name>grid cell area</long_name>
+      <units>m2</units>
+      <local_name>garea</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="omega">
+      <standard_name>omega</standard_name>
+      <long_name>layer mean vertical velocity</long_name>
+      <units>Pa s-1</units>
+      <local_name>dot</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="number_of_hydrometeors">
+      <standard_name>number_of_hydrometeors</standard_name>
+      <long_name>number of hydrometeors</long_name>
+      <units>count</units>
+      <local_name>ncloud</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="atmosphere_boundary_layer_thickness">
+      <standard_name>atmosphere_boundary_layer_thickness</standard_name>
+      <long_name>PBL top height</long_name>
+      <units>m</units>
+      <local_name>hpbl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="instantaneous_atmosphere_updraft_convective_mass_flux">
+      <standard_name>instantaneous_atmosphere_updraft_convective_mass_flux</standard_name>
+      <long_name>(updraft mass flux) * delt</long_name>
+      <units>kg m-2</units>
+      <local_name>ud_mf</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="instantaneous_atmosphere_detrainment_convective_mass_flux">
+      <standard_name>instantaneous_atmosphere_detrainment_convective_mass_flux</standard_name>
+      <long_name>(detrainment mass flux) * delt</long_name>
+      <units>kg m-2</units>
+      <local_name>dt_mf</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="convective_cloud_water_mixing_ratio">
+      <standard_name>convective_cloud_water_mixing_ratio</standard_name>
+      <long_name>moist convective cloud water mixing ratio</long_name>
+      <units>kg kg-1</units>
+      <local_name>cnvw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="convective_cloud_cover">
+      <standard_name>convective_cloud_cover</standard_name>
+      <long_name>convective cloud cover</long_name>
+      <units>frac</units>
+      <local_name>cnvc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="entrainment_rate_coefficient_shallow_convection">
+      <standard_name>entrainment_rate_coefficient_shallow_convection</standard_name>
+      <long_name>entrainment rate coefficient for shal conv.</long_name>
+      <units>none</units>
+      <local_name>clam</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="rain_conversion_parameter_shallow_convection">
+      <standard_name>rain_conversion_parameter_shallow_convection</standard_name>
+      <long_name>convective rain conversion parameter for shal conv.</long_name>
+      <units>m-1</units>
+      <local_name>c0s</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="detrainment_conversion_parameter_shallow_convection">
+      <standard_name>detrainment_conversion_parameter_shallow_convection</standard_name>
+      <long_name>convective detrainment conversion parameter for shal conv.</long_name>
+      <units>m-1</units>
+      <local_name>c1</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="momentum_transport_reduction_factor_pgf_shallow_convection">
+      <standard_name>momentum_transport_reduction_factor_pgf_shallow_convection</standard_name>
+      <long_name>reduction factor in momentum transport due to shal conv. induced pressure gradient force</long_name>
+      <units>frac</units>
+      <local_name>pgcon</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="aerosol_aware_parameter_shallow_convection">
+      <standard_name>aerosol_aware_parameter_shallow_convection</standard_name>
+      <long_name>aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv.</long_name>
+      <units>none</units>
+      <local_name>asolfac</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_samfshalcnv SCHEME_samfshalcnv SUBROUTINE_samfshalcnv_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="samfshalcnv_finalize" />
+  <subroutine name="samfshalcnv_init" />
+</scheme>

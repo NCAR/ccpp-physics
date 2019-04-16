@@ -1,0 +1,766 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_PBL_generic_post">
+  <subroutine name="GFS_PBL_generic_post_init" />
+  <subroutine name="GFS_PBL_generic_post_finalize" />
+  <subroutine name="GFS_PBL_generic_post_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="number_of_vertical_diffusion_tracers">
+      <standard_name>number_of_vertical_diffusion_tracers</standard_name>
+      <long_name>number of tracers to diffuse vertically</long_name>
+      <units>count</units>
+      <local_name>nvdiff</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="number_of_tracers">
+      <standard_name>number_of_tracers</standard_name>
+      <long_name>number of tracers</long_name>
+      <units>count</units>
+      <local_name>ntrac</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_water_vapor">
+      <standard_name>index_for_water_vapor</standard_name>
+      <long_name>tracer index for water vapor (specific humidity)</long_name>
+      <units>index</units>
+      <local_name>ntqv</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>tracer index for cloud condensate (or liquid water)</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_condensate">
+      <standard_name>index_for_ice_cloud_condensate</standard_name>
+      <long_name>tracer index for  ice water</long_name>
+      <units>index</units>
+      <local_name>ntiw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_rain_water">
+      <standard_name>index_for_rain_water</standard_name>
+      <long_name>tracer index for rain water</long_name>
+      <units>index</units>
+      <local_name>ntrw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_snow_water">
+      <standard_name>index_for_snow_water</standard_name>
+      <long_name>tracer index for snow water</long_name>
+      <units>index</units>
+      <local_name>ntsw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_number_concentration">
+      <standard_name>index_for_liquid_cloud_number_concentration</standard_name>
+      <long_name>tracer index for liquid number concentration</long_name>
+      <units>index</units>
+      <local_name>ntlnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_number_concentration">
+      <standard_name>index_for_ice_cloud_number_concentration</standard_name>
+      <long_name>tracer index for ice    number concentration</long_name>
+      <units>index</units>
+      <local_name>ntinc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_water_friendly_aerosols">
+      <standard_name>index_for_water_friendly_aerosols</standard_name>
+      <long_name>tracer index for water friendly aerosol</long_name>
+      <units>index</units>
+      <local_name>ntwa</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_ice_friendly_aerosols">
+      <standard_name>index_for_ice_friendly_aerosols</standard_name>
+      <long_name>tracer index for ice friendly aerosol</long_name>
+      <units>index</units>
+      <local_name>ntia</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_graupel">
+      <standard_name>index_for_graupel</standard_name>
+      <long_name>tracer index for graupel</long_name>
+      <units>index</units>
+      <local_name>ntgl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_ozone">
+      <standard_name>index_for_ozone</standard_name>
+      <long_name>tracer index for ozone mixing ratio</long_name>
+      <units>index</units>
+      <local_name>ntoz</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_turbulent_kinetic_energy">
+      <standard_name>index_for_turbulent_kinetic_energy</standard_name>
+      <long_name>tracer index for turbulent kinetic energy</long_name>
+      <units>index</units>
+      <local_name>ntke</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="index_for_turbulent_kinetic_energy_vertical_diffusion_tracer">
+      <standard_name>index_for_turbulent_kinetic_energy_vertical_diffusion_tracer</standard_name>
+      <long_name>index for turbulent kinetic energy in the vertically diffused tracer array</long_name>
+      <units>index</units>
+      <local_name>ntkev</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_gfdl_microphysics_scheme">
+      <standard_name>flag_for_gfdl_microphysics_scheme</standard_name>
+      <long_name>choice of GFDL microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_gfdl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_thompson_microphysics_scheme">
+      <standard_name>flag_for_thompson_microphysics_scheme</standard_name>
+      <long_name>choice of Thompson microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_thompson</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_wsm6_microphysics_scheme">
+      <standard_name>flag_for_wsm6_microphysics_scheme</standard_name>
+      <long_name>choice of WSM6 microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_wsm6</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_aerosol_physics">
+      <standard_name>flag_for_aerosol_physics</standard_name>
+      <long_name>flag for aerosol physics</long_name>
+      <units>flag</units>
+      <local_name>ltaerosol</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_flux_coupling">
+      <standard_name>flag_for_flux_coupling</standard_name>
+      <long_name>flag controlling cplflx collection (default off)</long_name>
+      <units>flag</units>
+      <local_name>cplflx</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics">
+      <standard_name>flag_diagnostics</standard_name>
+      <long_name>logical flag for storing diagnostics</long_name>
+      <units>flag</units>
+      <local_name>lssav</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics_3D">
+      <standard_name>flag_diagnostics_3D</standard_name>
+      <long_name>flag for 3d diagnostic fields</long_name>
+      <units>flag</units>
+      <local_name>ldiag3d</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_idealized_physics">
+      <standard_name>flag_idealized_physics</standard_name>
+      <long_name>flag for idealized physics</long_name>
+      <units>flag</units>
+      <local_name>lsidea</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_hedmf">
+      <standard_name>flag_for_hedmf</standard_name>
+      <long_name>flag for hybrid edmf pbl scheme (moninedmf)</long_name>
+      <units>flag</units>
+      <local_name>hybedmf</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_shoc">
+      <standard_name>flag_for_shoc</standard_name>
+      <long_name>flag for SHOC</long_name>
+      <units>flag</units>
+      <local_name>do_shoc</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_scale_aware_TKE_moist_EDMF_PBL">
+      <standard_name>flag_for_scale_aware_TKE_moist_EDMF_PBL</standard_name>
+      <long_name>flag for scale-aware TKE moist EDMF PBL scheme</long_name>
+      <units>flag</units>
+      <local_name>satmedmf</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_scale_aware_Shinhong_PBL">
+      <standard_name>flag_for_scale_aware_Shinhong_PBL</standard_name>
+      <long_name>flag for scale-aware Shinhong PBL scheme</long_name>
+      <units>flag</units>
+      <local_name>shinhong</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_ysu">
+      <standard_name>flag_for_ysu</standard_name>
+      <long_name>flag for YSU PBL scheme</long_name>
+      <units>flag</units>
+      <local_name>do_ysu</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_vertically_diffused_tracer_concentration">
+      <standard_name>tendency_of_vertically_diffused_tracer_concentration</standard_name>
+      <long_name>updated tendency of the tracers due to vertical diffusion in PBL scheme</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>dvdftra</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_x_momentum_flux">
+      <standard_name>instantaneous_surface_x_momentum_flux</standard_name>
+      <long_name>surface momentum flux in the x-direction valid for current call</long_name>
+      <units>Pa</units>
+      <local_name>dusfc1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_y_momentum_flux">
+      <standard_name>instantaneous_surface_y_momentum_flux</standard_name>
+      <long_name>surface momentum flux in the y-direction valid for current call</long_name>
+      <units>Pa</units>
+      <local_name>dvsfc1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_sensible_heat_flux">
+      <standard_name>instantaneous_surface_upward_sensible_heat_flux</standard_name>
+      <long_name>surface upward sensible heat flux valid for current call</long_name>
+      <units>W m-2</units>
+      <local_name>dtsfc1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_latent_heat_flux">
+      <standard_name>instantaneous_surface_upward_latent_heat_flux</standard_name>
+      <long_name>surface upward latent heat flux valid for current call</long_name>
+      <units>W m-2</units>
+      <local_name>dqsfc1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>dynamics timestep</long_name>
+      <units>s</units>
+      <local_name>dtf</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_x_wind_due_to_model_physics">
+      <standard_name>tendency_of_x_wind_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the x wind</long_name>
+      <units>m s-2</units>
+      <local_name>dudt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_y_wind_due_to_model_physics">
+      <standard_name>tendency_of_y_wind_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the y wind</long_name>
+      <units>m s-2</units>
+      <local_name>dvdt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_model_physics">
+      <standard_name>tendency_of_air_temperature_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the temperature</long_name>
+      <units>K s-1</units>
+      <local_name>dtdt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep">
+      <standard_name>tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep</standard_name>
+      <long_name>total sky sw heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>htrsw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep">
+      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep</standard_name>
+      <long_name>total sky lw heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>htrlw</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes">
+      <standard_name>zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes</standard_name>
+      <long_name>zenith angle temporal adjustment factor for shortwave</long_name>
+      <units>none</units>
+      <local_name>xmu</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_tracers_due_to_model_physics">
+      <standard_name>tendency_of_tracers_due_to_model_physics</standard_name>
+      <long_name>updated tendency of the tracers due to model physics</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>dqdt</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep">
+      <standard_name>cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc u momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>dusfc_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep">
+      <standard_name>cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc v momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>dvsfc_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep">
+      <standard_name>cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc sensible heat flux multiplied by timestep</long_name>
+      <units>W m-2 s</units>
+      <local_name>dtsfc_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep">
+      <standard_name>cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc latent heat flux multiplied by timestep</long_name>
+      <units>W m-2 s</units>
+      <local_name>dqsfc_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_x_momentum_flux_for_coupling">
+      <standard_name>instantaneous_surface_x_momentum_flux_for_coupling</standard_name>
+      <long_name>instantaneous sfc u momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>dusfci_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_y_momentum_flux_for_coupling">
+      <standard_name>instantaneous_surface_y_momentum_flux_for_coupling</standard_name>
+      <long_name>instantaneous sfc v momentum flux</long_name>
+      <units>Pa</units>
+      <local_name>dvsfci_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_sensible_heat_flux_for_coupling">
+      <standard_name>instantaneous_surface_upward_sensible_heat_flux_for_coupling</standard_name>
+      <long_name>instantaneous sfc sensible heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>dtsfci_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_latent_heat_flux_for_coupling">
+      <standard_name>instantaneous_surface_upward_latent_heat_flux_for_coupling</standard_name>
+      <long_name>instantaneous sfc latent heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>dqsfci_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc x momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>dusfc_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc y momentum flux multiplied by timestep</long_name>
+      <units>Pa s</units>
+      <local_name>dvsfc_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc sensible heat flux multiplied by timestep</long_name>
+      <units>W m-2 s</units>
+      <local_name>dtsfc_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep">
+      <standard_name>cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep</standard_name>
+      <long_name>cumulative sfc latent heat flux multiplied by timestep</long_name>
+      <units>W m-2 s</units>
+      <local_name>dqsfc_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_x_momentum_flux_for_diag">
+      <standard_name>instantaneous_surface_x_momentum_flux_for_diag</standard_name>
+      <long_name>instantaneous sfc x momentum flux multiplied by timestep</long_name>
+      <units>Pa</units>
+      <local_name>dusfci_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_y_momentum_flux_for_diag">
+      <standard_name>instantaneous_surface_y_momentum_flux_for_diag</standard_name>
+      <long_name>instantaneous sfc y momentum flux multiplied by timestep</long_name>
+      <units>Pa</units>
+      <local_name>dvsfci_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_sensible_heat_flux_for_diag">
+      <standard_name>instantaneous_surface_upward_sensible_heat_flux_for_diag</standard_name>
+      <long_name>instantaneous sfc sensible heat flux multiplied by timestep</long_name>
+      <units>W m-2</units>
+      <local_name>dtsfci_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_surface_upward_latent_heat_flux_for_diag">
+      <standard_name>instantaneous_surface_upward_latent_heat_flux_for_diag</standard_name>
+      <long_name>instantaneous sfc latent heat flux multiplied by timestep</long_name>
+      <units>W m-2</units>
+      <local_name>dqsfci_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_temperature_due_to_PBL">
+      <standard_name>cumulative_change_in_temperature_due_to_PBL</standard_name>
+      <long_name>cumulative change in temperature due to PBL</long_name>
+      <units>K</units>
+      <local_name>dt3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_x_wind_due_to_PBL">
+      <standard_name>cumulative_change_in_x_wind_due_to_PBL</standard_name>
+      <long_name>cumulative change in x wind due to PBL</long_name>
+      <units>m s-1</units>
+      <local_name>du3dt_PBL</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag">
+      <standard_name>cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag</standard_name>
+      <long_name>cumulative change in x wind due to orographic gravity wave drag</long_name>
+      <units>m s-1</units>
+      <local_name>du3dt_OGWD</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_y_wind_due_to_PBL">
+      <standard_name>cumulative_change_in_y_wind_due_to_PBL</standard_name>
+      <long_name>cumulative change in y wind due to PBL</long_name>
+      <units>m s-1</units>
+      <local_name>dv3dt_PBL</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag">
+      <standard_name>cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag</standard_name>
+      <long_name>cumulative change in y wind due to orographic gravity wave drag</long_name>
+      <units>m s-1</units>
+      <local_name>dv3dt_OGWD</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_water_vapor_specific_humidity_due_to_PBL">
+      <standard_name>cumulative_change_in_water_vapor_specific_humidity_due_to_PBL</standard_name>
+      <long_name>cumulative change in water vapor specific humidity due to PBL</long_name>
+      <units>kg kg-1</units>
+      <local_name>dq3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_ozone_mixing_ratio_due_to_PBL">
+      <standard_name>cumulative_change_in_ozone_mixing_ratio_due_to_PBL</standard_name>
+      <long_name>cumulative change in ozone mixing ratio due to PBL</long_name>
+      <units>kg kg-1</units>
+      <local_name>dq3dt_ozone</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_post SCHEME_GFS_PBL_generic_post SUBROUTINE_GFS_PBL_generic_post_run</container>
+    </variable>
+  </subroutine>
+</scheme>

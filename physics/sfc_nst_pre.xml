@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="sfc_nst_pre">
+  <subroutine name="sfc_nst_pre_init" />
+  <subroutine name="sfc_nst_pre_finalize" />
+  <subroutine name="sfc_nst_pre_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="sea_land_ice_mask">
+      <standard_name>sea_land_ice_mask</standard_name>
+      <long_name>landmask: sea/land/ice=0/1/2</long_name>
+      <units>flag</units>
+      <local_name>islimsk</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="orography">
+      <standard_name>orography</standard_name>
+      <long_name>orography</long_name>
+      <units>m</units>
+      <local_name>oro</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="orography_unfiltered">
+      <standard_name>orography_unfiltered</standard_name>
+      <long_name>unfiltered orographyo</long_name>
+      <units>m</units>
+      <local_name>oro_uf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="surface_skin_temperature">
+      <standard_name>surface_skin_temperature</standard_name>
+      <long_name>surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="surface_skin_temperature_after_iteration">
+      <standard_name>surface_skin_temperature_after_iteration</standard_name>
+      <long_name>ocean surface skin temperature for guess run</long_name>
+      <units>K</units>
+      <local_name>tsurf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="surface_skin_temperature_for_nsst">
+      <standard_name>surface_skin_temperature_for_nsst</standard_name>
+      <long_name>ocean surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tskin</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_nst_pre SCHEME_sfc_nst_pre SUBROUTINE_sfc_nst_pre_run</container>
+    </variable>
+  </subroutine>
+</scheme>

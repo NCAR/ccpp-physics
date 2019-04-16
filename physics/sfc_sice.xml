@@ -1,0 +1,469 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="sfc_sice">
+  <subroutine name="sfc_sice_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="soil_vertical_dimension">
+      <standard_name>soil_vertical_dimension</standard_name>
+      <long_name>vertical loop extent for soil levels, start at 1</long_name>
+      <units>count</units>
+      <local_name>km</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_air_pressure">
+      <standard_name>surface_air_pressure</standard_name>
+      <long_name>surface pressure</long_name>
+      <units>Pa</units>
+      <local_name>ps</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="x_wind_at_lowest_model_layer">
+      <standard_name>x_wind_at_lowest_model_layer</standard_name>
+      <long_name>u component of surface layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>u1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="y_wind_at_lowest_model_layer">
+      <standard_name>y_wind_at_lowest_model_layer</standard_name>
+      <long_name>v component of surface layer wind</long_name>
+      <units>m s-1</units>
+      <local_name>v1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="air_temperature_at_lowest_model_layer">
+      <standard_name>air_temperature_at_lowest_model_layer</standard_name>
+      <long_name>surface layer mean temperature</long_name>
+      <units>K</units>
+      <local_name>t1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_at_lowest_model_layer">
+      <standard_name>water_vapor_specific_humidity_at_lowest_model_layer</standard_name>
+      <long_name>surface layer mean specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>q1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>time step</long_name>
+      <units>s</units>
+      <local_name>delt</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_longwave_emissivity">
+      <standard_name>surface_longwave_emissivity</standard_name>
+      <long_name>sfc lw emissivity</long_name>
+      <units>frac</units>
+      <local_name>sfcemis</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_downwelling_longwave_flux_absorbed_by_ground">
+      <standard_name>surface_downwelling_longwave_flux_absorbed_by_ground</standard_name>
+      <long_name>total sky surface downward longwave flux absorbed by the ground</long_name>
+      <units>W m-2</units>
+      <local_name>dlwflx</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_net_downwelling_shortwave_flux">
+      <standard_name>surface_net_downwelling_shortwave_flux</standard_name>
+      <long_name>total sky sfc netsw flx into ground</long_name>
+      <units>W m-2</units>
+      <local_name>sfcnsw</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_downwelling_shortwave_flux">
+      <standard_name>surface_downwelling_shortwave_flux</standard_name>
+      <long_name>total sky sfc downward sw flux</long_name>
+      <units>W m-2</units>
+      <local_name>sfcdsw</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="flag_for_precipitation_type">
+      <standard_name>flag_for_precipitation_type</standard_name>
+      <long_name>snow/rain flag for precipitation</long_name>
+      <units>flag</units>
+      <local_name>srflag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_drag_coefficient_for_momentum_in_air">
+      <standard_name>surface_drag_coefficient_for_momentum_in_air</standard_name>
+      <long_name>surface exchange coeff for momentum</long_name>
+      <units>none</units>
+      <local_name>cm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_drag_coefficient_for_heat_and_moisture_in_air">
+      <standard_name>surface_drag_coefficient_for_heat_and_moisture_in_air</standard_name>
+      <long_name>surface exchange coeff heat   moisture</long_name>
+      <units>none</units>
+      <local_name>ch</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="air_pressure_at_lowest_model_layer">
+      <standard_name>air_pressure_at_lowest_model_layer</standard_name>
+      <long_name>surface layer mean pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer">
+      <standard_name>ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer</standard_name>
+      <long_name>Exner function ratio bt midlayer and interface at 1st layer</long_name>
+      <units>ratio</units>
+      <local_name>prslki</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="sea_land_ice_mask">
+      <standard_name>sea_land_ice_mask</standard_name>
+      <long_name>sea/land/ice mask (=0/1/2)</long_name>
+      <units>flag</units>
+      <local_name>islimsk</local_name>
+      <type>integer</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_wind_enhancement_due_to_convection">
+      <standard_name>surface_wind_enhancement_due_to_convection</standard_name>
+      <long_name>wind enhancement due to convection</long_name>
+      <units>m s-1</units>
+      <local_name>ddvel</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="flag_for_iteration">
+      <standard_name>flag_for_iteration</standard_name>
+      <long_name>flag for iteration</long_name>
+      <units>flag</units>
+      <local_name>flag_iter</local_name>
+      <type>logical</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="flag_for_mom4_coupling">
+      <standard_name>flag_for_mom4_coupling</standard_name>
+      <long_name>flag for Mom4 coupling</long_name>
+      <units>flag</units>
+      <local_name>mom4ice</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="flag_for_land_surface_scheme">
+      <standard_name>flag_for_land_surface_scheme</standard_name>
+      <long_name>flag for land sfc scheme =0: osu; =1: noah</long_name>
+      <units>flag</units>
+      <local_name>lsm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="flag_print">
+      <standard_name>flag_print</standard_name>
+      <long_name>switch for printing sample column to stdout</long_name>
+      <units>flag</units>
+      <local_name>lprnt</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="horizontal_index_of_printed_column">
+      <standard_name>horizontal_index_of_printed_column</standard_name>
+      <long_name>horizontal index of printed column</long_name>
+      <units>index</units>
+      <local_name>ipr</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="sea_ice_thickness">
+      <standard_name>sea_ice_thickness</standard_name>
+      <long_name>sea-ice thickness</long_name>
+      <units>m</units>
+      <local_name>hice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="sea_ice_concentration">
+      <standard_name>sea_ice_concentration</standard_name>
+      <long_name>sea-ice concentration [0,1]</long_name>
+      <units>frac</units>
+      <local_name>fice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="sea_ice_temperature">
+      <standard_name>sea_ice_temperature</standard_name>
+      <long_name>sea-ice surface temperature</long_name>
+      <units>K</units>
+      <local_name>tice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="water_equivalent_accumulated_snow_depth">
+      <standard_name>water_equivalent_accumulated_snow_depth</standard_name>
+      <long_name>water equivalent accumulated snow depth</long_name>
+      <units>mm</units>
+      <local_name>weasd</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_skin_temperature">
+      <standard_name>surface_skin_temperature</standard_name>
+      <long_name>surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tskin</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep">
+      <standard_name>nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>nonnegative precipitation amount in one dynamics time step</long_name>
+      <units>m</units>
+      <local_name>tprcp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="soil_temperature">
+      <standard_name>soil_temperature</standard_name>
+      <long_name>soil temp</long_name>
+      <units>K</units>
+      <local_name>stc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_upward_potential_latent_heat_flux">
+      <standard_name>surface_upward_potential_latent_heat_flux</standard_name>
+      <long_name>potential evaporation</long_name>
+      <units>W m-2</units>
+      <local_name>ep</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_snow_thickness_water_equivalent">
+      <standard_name>surface_snow_thickness_water_equivalent</standard_name>
+      <long_name>water equivalent snow depth</long_name>
+      <units>mm</units>
+      <local_name>snwdph</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_specific_humidity">
+      <standard_name>surface_specific_humidity</standard_name>
+      <long_name>sfc air saturation specific humidity</long_name>
+      <units>kg kg-1</units>
+      <local_name>qsurf</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_snow_melt">
+      <standard_name>surface_snow_melt</standard_name>
+      <long_name>snow melt during timestep</long_name>
+      <units>m</units>
+      <local_name>snowmt</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="upward_heat_flux_in_soil">
+      <standard_name>upward_heat_flux_in_soil</standard_name>
+      <long_name>soil heat flux</long_name>
+      <units>W m-2</units>
+      <local_name>gflux</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_drag_wind_speed_for_momentum_in_air">
+      <standard_name>surface_drag_wind_speed_for_momentum_in_air</standard_name>
+      <long_name>surf mom exch coef time mean surf wind</long_name>
+      <units>m s-1</units>
+      <local_name>cmm</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="surface_drag_mass_flux_for_heat_and_moisture_in_air">
+      <standard_name>surface_drag_mass_flux_for_heat_and_moisture_in_air</standard_name>
+      <long_name>surf h m exch coef time surf wind   density</long_name>
+      <units>kg m-2 s-1</units>
+      <local_name>chh</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_latent_heat_flux">
+      <standard_name>kinematic_surface_upward_latent_heat_flux</standard_name>
+      <long_name>evaporative latent heat flux</long_name>
+      <units>kg kg-1 m s-1</units>
+      <local_name>evap</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="kinematic_surface_upward_sensible_heat_flux">
+      <standard_name>kinematic_surface_upward_sensible_heat_flux</standard_name>
+      <long_name>kinematic sensible heat flux</long_name>
+      <units>K m s-1</units>
+      <local_name>hflx</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_sfc_sice SCHEME_sfc_sice SUBROUTINE_sfc_sice_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="sfc_sice_finalize" />
+  <subroutine name="sfc_sice_init" />
+</scheme>

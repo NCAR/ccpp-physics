@@ -1,0 +1,326 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_PBL_generic_pre">
+  <subroutine name="GFS_PBL_generic_pre_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="number_of_vertical_diffusion_tracers">
+      <standard_name>number_of_vertical_diffusion_tracers</standard_name>
+      <long_name>number of tracers to diffuse vertically</long_name>
+      <units>count</units>
+      <local_name>nvdiff</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="number_of_tracers">
+      <standard_name>number_of_tracers</standard_name>
+      <long_name>number of tracers</long_name>
+      <units>count</units>
+      <local_name>ntrac</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_water_vapor">
+      <standard_name>index_for_water_vapor</standard_name>
+      <long_name>tracer index for water vapor (specific humidity)</long_name>
+      <units>index</units>
+      <local_name>ntqv</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>tracer index for cloud condensate (or liquid water)</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_condensate">
+      <standard_name>index_for_ice_cloud_condensate</standard_name>
+      <long_name>tracer index for  ice water</long_name>
+      <units>index</units>
+      <local_name>ntiw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_rain_water">
+      <standard_name>index_for_rain_water</standard_name>
+      <long_name>tracer index for rain water</long_name>
+      <units>index</units>
+      <local_name>ntrw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_snow_water">
+      <standard_name>index_for_snow_water</standard_name>
+      <long_name>tracer index for snow water</long_name>
+      <units>index</units>
+      <local_name>ntsw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_number_concentration">
+      <standard_name>index_for_liquid_cloud_number_concentration</standard_name>
+      <long_name>tracer index for liquid number concentration</long_name>
+      <units>index</units>
+      <local_name>ntlnc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_ice_cloud_number_concentration">
+      <standard_name>index_for_ice_cloud_number_concentration</standard_name>
+      <long_name>tracer index for ice    number concentration</long_name>
+      <units>index</units>
+      <local_name>ntinc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_water_friendly_aerosols">
+      <standard_name>index_for_water_friendly_aerosols</standard_name>
+      <long_name>tracer index for water friendly aerosol</long_name>
+      <units>index</units>
+      <local_name>ntwa</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_ice_friendly_aerosols">
+      <standard_name>index_for_ice_friendly_aerosols</standard_name>
+      <long_name>tracer index for ice friendly aerosol</long_name>
+      <units>index</units>
+      <local_name>ntia</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_graupel">
+      <standard_name>index_for_graupel</standard_name>
+      <long_name>tracer index for graupel</long_name>
+      <units>index</units>
+      <local_name>ntgl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_ozone">
+      <standard_name>index_for_ozone</standard_name>
+      <long_name>tracer index for ozone mixing ratio</long_name>
+      <units>index</units>
+      <local_name>ntoz</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_turbulent_kinetic_energy">
+      <standard_name>index_for_turbulent_kinetic_energy</standard_name>
+      <long_name>tracer index for turbulent kinetic energy</long_name>
+      <units>index</units>
+      <local_name>ntke</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="index_for_turbulent_kinetic_energy_vertical_diffusion_tracer">
+      <standard_name>index_for_turbulent_kinetic_energy_vertical_diffusion_tracer</standard_name>
+      <long_name>index for turbulent kinetic energy in the vertically diffused tracer array</long_name>
+      <units>index</units>
+      <local_name>ntkev</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_gfdl_microphysics_scheme">
+      <standard_name>flag_for_gfdl_microphysics_scheme</standard_name>
+      <long_name>choice of GFDL microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_gfdl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_thompson_microphysics_scheme">
+      <standard_name>flag_for_thompson_microphysics_scheme</standard_name>
+      <long_name>choice of Thompson microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_thompson</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_wsm6_microphysics_scheme">
+      <standard_name>flag_for_wsm6_microphysics_scheme</standard_name>
+      <long_name>choice of WSM6 microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_wsm6</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_aerosol_physics">
+      <standard_name>flag_for_aerosol_physics</standard_name>
+      <long_name>flag for aerosol physics</long_name>
+      <units>flag</units>
+      <local_name>ltaerosol</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_hedmf">
+      <standard_name>flag_for_hedmf</standard_name>
+      <long_name>flag for hybrid edmf pbl scheme (moninedmf)</long_name>
+      <units>flag</units>
+      <local_name>hybedmf</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_shoc">
+      <standard_name>flag_for_shoc</standard_name>
+      <long_name>flag for SHOC</long_name>
+      <units>flag</units>
+      <local_name>do_shoc</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="flag_for_scale_aware_TKE_moist_EDMF_PBL">
+      <standard_name>flag_for_scale_aware_TKE_moist_EDMF_PBL</standard_name>
+      <long_name>flag for scale-aware TKE moist EDMF PBL scheme</long_name>
+      <units>flag</units>
+      <local_name>satmedmf</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="tracer_concentration">
+      <standard_name>tracer_concentration</standard_name>
+      <long_name>model layer mean tracer concentration</long_name>
+      <units>kg kg-1</units>
+      <local_name>qgrs</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="vertically_diffused_tracer_concentration">
+      <standard_name>vertically_diffused_tracer_concentration</standard_name>
+      <long_name>tracer concentration diffused by PBL scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>vdftra</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_PBL_generic_pre SCHEME_GFS_PBL_generic_pre SUBROUTINE_GFS_PBL_generic_pre_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_PBL_generic_pre_finalize" />
+  <subroutine name="GFS_PBL_generic_pre_init" />
+</scheme>

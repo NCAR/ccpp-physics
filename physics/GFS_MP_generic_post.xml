@@ -1,0 +1,832 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_MP_generic_post">
+  <subroutine name="GFS_MP_generic_post_init" />
+  <subroutine name="GFS_MP_generic_post_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="horizontal_dimension">
+      <standard_name>horizontal_dimension</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ix</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="index_of_time_step">
+      <standard_name>index_of_time_step</standard_name>
+      <long_name>current time step index</long_name>
+      <units>index</units>
+      <local_name>kdt</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="array_dimension_of_random_number">
+      <standard_name>array_dimension_of_random_number</standard_name>
+      <long_name>second dimension of random number stream for RAS</long_name>
+      <units>count</units>
+      <local_name>nrcm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="number_of_hydrometeors">
+      <standard_name>number_of_hydrometeors</standard_name>
+      <long_name>choice of cloud scheme / number of hydrometeors</long_name>
+      <units>count</units>
+      <local_name>ncld</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="number_of_tracers_for_cloud_condensate">
+      <standard_name>number_of_tracers_for_cloud_condensate</standard_name>
+      <long_name>number of tracers for cloud condensate</long_name>
+      <units>count</units>
+      <local_name>nncl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="index_for_liquid_cloud_condensate">
+      <standard_name>index_for_liquid_cloud_condensate</standard_name>
+      <long_name>tracer index for cloud condensate (or liquid water)</long_name>
+      <units>index</units>
+      <local_name>ntcw</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="number_of_tracers">
+      <standard_name>number_of_tracers</standard_name>
+      <long_name>number of tracers</long_name>
+      <units>count</units>
+      <local_name>ntrac</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_microphysics_scheme">
+      <standard_name>flag_for_microphysics_scheme</standard_name>
+      <long_name>choice of microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_gfdl_microphysics_scheme">
+      <standard_name>flag_for_gfdl_microphysics_scheme</standard_name>
+      <long_name>choice of GFDL microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_gfdl</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_thompson_microphysics_scheme">
+      <standard_name>flag_for_thompson_microphysics_scheme</standard_name>
+      <long_name>choice of Thompson microphysics scheme</long_name>
+      <units>flag</units>
+      <local_name>imp_physics_thompson</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_precipitation_type_algorithm">
+      <standard_name>flag_for_precipitation_type_algorithm</standard_name>
+      <long_name>flag controls precip type algorithm</long_name>
+      <units>flag</units>
+      <local_name>cal_pre</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics">
+      <standard_name>flag_diagnostics</standard_name>
+      <long_name>logical flag for storing diagnostics</long_name>
+      <units>flag</units>
+      <local_name>lssav</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics_3D">
+      <standard_name>flag_diagnostics_3D</standard_name>
+      <long_name>flag for 3d diagnostic fields</long_name>
+      <units>flag</units>
+      <local_name>ldiag3d</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_flux_coupling">
+      <standard_name>flag_for_flux_coupling</standard_name>
+      <long_name>flag controlling cplflx collection (default off)</long_name>
+      <units>flag</units>
+      <local_name>cplflx</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_chemistry_coupling">
+      <standard_name>flag_for_chemistry_coupling</standard_name>
+      <long_name>flag controlling cplchm collection (default off)</long_name>
+      <units>flag</units>
+      <local_name>cplchm</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="gravitational_acceleration">
+      <standard_name>gravitational_acceleration</standard_name>
+      <long_name>gravitational acceleration</long_name>
+      <units>m s-2</units>
+      <local_name>con_g</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="time_step_for_dynamics">
+      <standard_name>time_step_for_dynamics</standard_name>
+      <long_name>dynamics timestep</long_name>
+      <units>s</units>
+      <local_name>dtf</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="dynamics_to_physics_timestep_ratio">
+      <standard_name>dynamics_to_physics_timestep_ratio</standard_name>
+      <long_name>ratio of dynamics timestep to physics timestep</long_name>
+      <units>none</units>
+      <local_name>frain</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>convective rain at this time step</long_name>
+      <units>m</units>
+      <local_name>rainc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_precipitation_amount">
+      <standard_name>lwe_thickness_of_explicit_precipitation_amount</standard_name>
+      <long_name>explicit rainfall amount on physics timestep</long_name>
+      <units>m</units>
+      <local_name>rain1</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="random_number_array">
+      <standard_name>random_number_array</standard_name>
+      <long_name>random number array (0-1)</long_name>
+      <units>none</units>
+      <local_name>rann</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="latitude">
+      <standard_name>latitude</standard_name>
+      <long_name>latitude</long_name>
+      <units>radians</units>
+      <local_name>xlat</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="longitude">
+      <standard_name>longitude</standard_name>
+      <long_name>longitude</long_name>
+      <units>radians</units>
+      <local_name>xlon</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>temperature updated by physics</long_name>
+      <units>K</units>
+      <local_name>gt0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="tracer_concentration_updated_by_physics">
+      <standard_name>tracer_concentration_updated_by_physics</standard_name>
+      <long_name>tracer concentration updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="air_pressure">
+      <standard_name>air_pressure</standard_name>
+      <long_name>layer mean pressure</long_name>
+      <units>Pa</units>
+      <local_name>prsl</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="air_pressure_at_interface">
+      <standard_name>air_pressure_at_interface</standard_name>
+      <long_name>pressure at layer interface</long_name>
+      <units>Pa</units>
+      <local_name>prsi</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="geopotential_at_interface">
+      <standard_name>geopotential_at_interface</standard_name>
+      <long_name>geopotential at model layer interfaces</long_name>
+      <units>m2 s-2</units>
+      <local_name>phii</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="surface_skin_temperature">
+      <standard_name>surface_skin_temperature</standard_name>
+      <long_name>surface skin temperature</long_name>
+      <units>K</units>
+      <local_name>tsfc</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_ice_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_ice_amount_on_dynamics_timestep</standard_name>
+      <long_name>ice fall at this time step</long_name>
+      <units>m</units>
+      <local_name>ice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_snow_amount_on_dynamics_timestep</standard_name>
+      <long_name>snow fall at this time step</long_name>
+      <units>m</units>
+      <local_name>snow</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_graupel_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_graupel_amount_on_dynamics_timestep</standard_name>
+      <long_name>graupel fall at this time step</long_name>
+      <units>m</units>
+      <local_name>graupel</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="air_temperature_save">
+      <standard_name>air_temperature_save</standard_name>
+      <long_name>air temperature before entering a physics scheme</long_name>
+      <units>K</units>
+      <local_name>save_t</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_save">
+      <standard_name>water_vapor_specific_humidity_save</standard_name>
+      <long_name>water vapor specific humidity before entering a physics scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>save_qv</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_ice_amount">
+      <standard_name>lwe_thickness_of_ice_amount</standard_name>
+      <long_name>ice fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>ice0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount">
+      <standard_name>lwe_thickness_of_snow_amount</standard_name>
+      <long_name>snow fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>snow0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_graupel_amount">
+      <standard_name>lwe_thickness_of_graupel_amount</standard_name>
+      <long_name>graupel fall on physics timestep</long_name>
+      <units>m</units>
+      <local_name>graupel0</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="air_pressure_difference_between_midlayers">
+      <standard_name>air_pressure_difference_between_midlayers</standard_name>
+      <long_name>air pressure difference between midlayers</long_name>
+      <units>Pa</units>
+      <local_name>del</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_precipitation_amount_on_dynamics_timestep">
+      <standard_name>lwe_thickness_of_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>total rain at this time step</long_name>
+      <units>m</units>
+      <local_name>rain</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="dominant_rain_type">
+      <standard_name>dominant_rain_type</standard_name>
+      <long_name>dominant rain type</long_name>
+      <units>none</units>
+      <local_name>domr_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="dominant_freezing_rain_type">
+      <standard_name>dominant_freezing_rain_type</standard_name>
+      <long_name>dominant freezing rain type</long_name>
+      <units>none</units>
+      <local_name>domzr_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="dominant_sleet_type">
+      <standard_name>dominant_sleet_type</standard_name>
+      <long_name>dominant sleet type</long_name>
+      <units>none</units>
+      <local_name>domip_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="dominant_snow_type">
+      <standard_name>dominant_snow_type</standard_name>
+      <long_name>dominant snow type</long_name>
+      <units>none</units>
+      <local_name>doms_diag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep">
+      <standard_name>nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep</standard_name>
+      <long_name>total precipitation amount in each time step</long_name>
+      <units>m</units>
+      <local_name>tprcp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_precipitation_type">
+      <standard_name>flag_for_precipitation_type</standard_name>
+      <long_name>snow/rain flag for precipitation</long_name>
+      <units>flag</units>
+      <local_name>srflag</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_precipitation_amount">
+      <standard_name>accumulated_lwe_thickness_of_precipitation_amount</standard_name>
+      <long_name>accumulated total precipitation</long_name>
+      <units>m</units>
+      <local_name>totprcp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_ice_amount">
+      <standard_name>accumulated_lwe_thickness_of_ice_amount</standard_name>
+      <long_name>accumulated ice precipitation</long_name>
+      <units>kg m-2</units>
+      <local_name>totice</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_snow_amount">
+      <standard_name>accumulated_lwe_thickness_of_snow_amount</standard_name>
+      <long_name>accumulated snow precipitation</long_name>
+      <units>kg m-2</units>
+      <local_name>totsnw</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_graupel_amount">
+      <standard_name>accumulated_lwe_thickness_of_graupel_amount</standard_name>
+      <long_name>accumulated graupel precipitation</long_name>
+      <units>kg m-2</units>
+      <local_name>totgrp</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_precipitation_amount_in_bucket">
+      <standard_name>accumulated_lwe_thickness_of_precipitation_amount_in_bucket</standard_name>
+      <long_name>accumulated total precipitation in bucket</long_name>
+      <units>m</units>
+      <local_name>totprcpb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_ice_amount_in_bucket">
+      <standard_name>accumulated_lwe_thickness_of_ice_amount_in_bucket</standard_name>
+      <long_name>accumulated ice precipitation in bucket</long_name>
+      <units>kg m-2</units>
+      <local_name>toticeb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_snow_amount_in_bucket">
+      <standard_name>accumulated_lwe_thickness_of_snow_amount_in_bucket</standard_name>
+      <long_name>accumulated snow precipitation in bucket</long_name>
+      <units>kg m-2</units>
+      <local_name>totsnwb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="accumulated_lwe_thickness_of_graupel_amount_in_bucket">
+      <standard_name>accumulated_lwe_thickness_of_graupel_amount_in_bucket</standard_name>
+      <long_name>accumulated graupel precipitation in bucket</long_name>
+      <units>kg m-2</units>
+      <local_name>totgrpb</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_temperature_due_to_microphysics">
+      <standard_name>cumulative_change_in_temperature_due_to_microphysics</standard_name>
+      <long_name>cumulative change in temperature due to microphysics</long_name>
+      <units>K</units>
+      <local_name>dt3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics">
+      <standard_name>cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics</standard_name>
+      <long_name>cumulative change in water vapor specific humidity due to microphysics</long_name>
+      <units>kg kg-1</units>
+      <local_name>dq3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_precipitation_amount_for_coupling">
+      <standard_name>lwe_thickness_of_precipitation_amount_for_coupling</standard_name>
+      <long_name>total rain precipitation</long_name>
+      <units>m</units>
+      <local_name>rain_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_convective_precipitation_amount_for_coupling">
+      <standard_name>lwe_thickness_of_convective_precipitation_amount_for_coupling</standard_name>
+      <long_name>total convective precipitation</long_name>
+      <units>m</units>
+      <local_name>rainc_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount_for_coupling">
+      <standard_name>lwe_thickness_of_snow_amount_for_coupling</standard_name>
+      <long_name>total snow precipitation</long_name>
+      <units>m</units>
+      <local_name>snow_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="column_precipitable_water">
+      <standard_name>column_precipitable_water</standard_name>
+      <long_name>precipitable water</long_name>
+      <units>kg m-2</units>
+      <local_name>pwat</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_stochastic_surface_physics_perturbations">
+      <standard_name>flag_for_stochastic_surface_physics_perturbations</standard_name>
+      <long_name>flag for stochastic surface physics perturbations</long_name>
+      <units>flag</units>
+      <local_name>do_sppt</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step">
+      <standard_name>tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step</standard_name>
+      <long_name>temp. change due to radiative heating per time step</long_name>
+      <units>K</units>
+      <local_name>dtdtr</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky">
+      <standard_name>tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky</standard_name>
+      <long_name>clear sky radiative (shortwave + longwave) heating rate at current time</long_name>
+      <units>K s-1</units>
+      <local_name>dtdtc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_lwe_thickness_of_precipitation_amount_for_coupling">
+      <standard_name>tendency_of_lwe_thickness_of_precipitation_amount_for_coupling</standard_name>
+      <long_name>change in rain_cpl (coupling_type)</long_name>
+      <units>m</units>
+      <local_name>drain_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="tendency_of_lwe_thickness_of_snow_amount_for_coupling">
+      <standard_name>tendency_of_lwe_thickness_of_snow_amount_for_coupling</standard_name>
+      <long_name>change in show_cpl (coupling_type)</long_name>
+      <units>m</units>
+      <local_name>dsnow_cpl</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_land_surface_scheme">
+      <standard_name>flag_for_land_surface_scheme</standard_name>
+      <long_name>flag for land surface model</long_name>
+      <units>flag</units>
+      <local_name>lsm</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="flag_for_ruc_land_surface_scheme">
+      <standard_name>flag_for_ruc_land_surface_scheme</standard_name>
+      <long_name>flag for RUC land surface model</long_name>
+      <units>flag</units>
+      <local_name>lsm_ruc</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep">
+      <standard_name>lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep</standard_name>
+      <long_name>explicit rainfall from previous timestep</long_name>
+      <units>m</units>
+      <local_name>raincprv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_convective_precipitation_amount_from_previous_timestep">
+      <standard_name>lwe_thickness_of_convective_precipitation_amount_from_previous_timestep</standard_name>
+      <long_name>convective_precipitation_amount from previous timestep</long_name>
+      <units>m</units>
+      <local_name>rainncprv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_ice_amount_from_previous_timestep">
+      <standard_name>lwe_thickness_of_ice_amount_from_previous_timestep</standard_name>
+      <long_name>ice amount from previous timestep</long_name>
+      <units>m</units>
+      <local_name>iceprv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_snow_amount_from_previous_timestep">
+      <standard_name>lwe_thickness_of_snow_amount_from_previous_timestep</standard_name>
+      <long_name>snow amount from previous timestep</long_name>
+      <units>m</units>
+      <local_name>snowprv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="lwe_thickness_of_graupel_amount_from_previous_timestep">
+      <standard_name>lwe_thickness_of_graupel_amount_from_previous_timestep</standard_name>
+      <long_name>graupel amount from previous timestep</long_name>
+      <units>m</units>
+      <local_name>graupelprv</local_name>
+      <type>real</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_MP_generic_post SCHEME_GFS_MP_generic_post SUBROUTINE_GFS_MP_generic_post_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_MP_generic_post_finalize" />
+</scheme>

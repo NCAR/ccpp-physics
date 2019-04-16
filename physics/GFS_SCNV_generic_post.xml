@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_SCNV_generic_post">
+  <subroutine name="GFS_SCNV_generic_post_run">
+    <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal loop extent</long_name>
+      <units>count</units>
+      <local_name>im</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="vertical_dimension">
+      <standard_name>vertical_dimension</standard_name>
+      <long_name>vertical layer dimension</long_name>
+      <units>count</units>
+      <local_name>levs</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="number_of_tracers_for_convective_transport">
+      <standard_name>number_of_tracers_for_convective_transport</standard_name>
+      <long_name>number of tracers for convective transport</long_name>
+      <units>count</units>
+      <local_name>nn</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics">
+      <standard_name>flag_diagnostics</standard_name>
+      <long_name>logical flag for storing diagnostics</long_name>
+      <units>flag</units>
+      <local_name>lssav</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="flag_diagnostics_3D">
+      <standard_name>flag_diagnostics_3D</standard_name>
+      <long_name>flag for 3d diagnostic fields</long_name>
+      <units>flag</units>
+      <local_name>ldiag3d</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="flag_gocart">
+      <standard_name>flag_gocart</standard_name>
+      <long_name>flag for 3d diagnostic fields for gocart 1</long_name>
+      <units>flag</units>
+      <local_name>lgocart</local_name>
+      <type>logical</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="dynamics_to_physics_timestep_ratio">
+      <standard_name>dynamics_to_physics_timestep_ratio</standard_name>
+      <long_name>ratio of dynamics timestep to physics timestep</long_name>
+      <units>none</units>
+      <local_name>frain</local_name>
+      <type>real</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="air_temperature_updated_by_physics">
+      <standard_name>air_temperature_updated_by_physics</standard_name>
+      <long_name>temperature updated by physics</long_name>
+      <units>K</units>
+      <local_name>gt0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_updated_by_physics">
+      <standard_name>water_vapor_specific_humidity_updated_by_physics</standard_name>
+      <long_name>water vapor specific humidity updated by physics</long_name>
+      <units>kg kg-1</units>
+      <local_name>gq0_water_vapor</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="air_temperature_save">
+      <standard_name>air_temperature_save</standard_name>
+      <long_name>air temperature before entering a physics scheme</long_name>
+      <units>K</units>
+      <local_name>save_t</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="water_vapor_specific_humidity_save">
+      <standard_name>water_vapor_specific_humidity_save</standard_name>
+      <long_name>water vapor specific humidity before entering a physics scheme</long_name>
+      <units>kg kg-1</units>
+      <local_name>save_qv</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="instantaneous_water_vapor_specific_humidity_tendency_due_to_convection">
+      <standard_name>instantaneous_water_vapor_specific_humidity_tendency_due_to_convection</standard_name>
+      <long_name>instantaneous moisture tendency due to convection</long_name>
+      <units>kg kg-1 s-1</units>
+      <local_name>dqdti</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_temperature_due_to_shal_convection">
+      <standard_name>cumulative_change_in_temperature_due_to_shal_convection</standard_name>
+      <long_name>cumulative change in temperature due to shal conv.</long_name>
+      <units>K</units>
+      <local_name>dt3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection">
+      <standard_name>cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection</standard_name>
+      <long_name>cumulative change in water vapor specific humidity due to shal conv.</long_name>
+      <units>kg kg-1</units>
+      <local_name>dq3dt</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="convective_transportable_tracers">
+      <standard_name>convective_transportable_tracers</standard_name>
+      <long_name>array to contain cloud water and other convective trans. tracers</long_name>
+      <units>kg kg-1</units>
+      <local_name>clw</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_SCNV_generic_post SCHEME_GFS_SCNV_generic_post SUBROUTINE_GFS_SCNV_generic_post_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_SCNV_generic_post_init" />
+  <subroutine name="GFS_SCNV_generic_post_finalize" />
+</scheme>

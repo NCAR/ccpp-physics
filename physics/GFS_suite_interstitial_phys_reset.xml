@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="GFS_suite_interstitial_phys_reset">
+  <subroutine name="GFS_suite_interstitial_phys_reset_finalize" />
+  <subroutine name="GFS_suite_interstitial_phys_reset_run">
+    <variable name="GFS_interstitial_type_instance">
+      <standard_name>GFS_interstitial_type_instance</standard_name>
+      <long_name>derived type GFS_interstitial_type in FV3</long_name>
+      <units>DDT</units>
+      <local_name>Interstitial</local_name>
+      <type>GFS_interstitial_type</type>
+      <rank />
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_phys_reset SCHEME_GFS_suite_interstitial_phys_reset SUBROUTINE_GFS_suite_interstitial_phys_reset_run</container>
+    </variable>
+    <variable name="GFS_control_type_instance">
+      <standard_name>GFS_control_type_instance</standard_name>
+      <long_name>Fortran DDT containing FV3-GFS model control parameters</long_name>
+      <units>DDT</units>
+      <local_name>Model</local_name>
+      <type>GFS_control_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_phys_reset SCHEME_GFS_suite_interstitial_phys_reset SUBROUTINE_GFS_suite_interstitial_phys_reset_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_phys_reset SCHEME_GFS_suite_interstitial_phys_reset SUBROUTINE_GFS_suite_interstitial_phys_reset_run</container>
+    </variable>
+    <variable name="ccpp_error_flag">
+      <standard_name>ccpp_error_flag</standard_name>
+      <long_name>error flag for error handling in CCPP</long_name>
+      <units>flag</units>
+      <local_name>errflg</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_GFS_suite_interstitial_phys_reset SCHEME_GFS_suite_interstitial_phys_reset SUBROUTINE_GFS_suite_interstitial_phys_reset_run</container>
+    </variable>
+  </subroutine>
+  <subroutine name="GFS_suite_interstitial_phys_reset_init" />
+</scheme>
