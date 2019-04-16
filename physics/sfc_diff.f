@@ -356,7 +356,7 @@
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_ocn(i),thv1,wind(i),
-     &      z0max_ocn,ztmax_ocn,tvs_ocn,
+     &      z0max_ocn,ztmax_ocn,tvs_ocn,grav,
 !  ---  outputs:
      &      rb_ocn(i),fm_ocn(i),fh_ocn(i),fm10_ocn(i),fh2_ocn(i),
      &      cm_ocn(i),ch_ocn(i),stress_ocn(i),ustar_ocn(i))
@@ -366,7 +366,7 @@
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_lnd(i),thv1,wind(i),
-     &      z0max_lnd,ztmax_lnd,tvs_lnd,
+     &      z0max_lnd,ztmax_lnd,tvs_lnd,grav,
 !  ---  outputs:
      &      rb_lnd(i),fm_lnd(i),fh_lnd(i),fm10_lnd(i),fh2_lnd(i),
      &      cm_lnd(i),ch_lnd(i),stress_lnd(i),ustar_lnd(i))
@@ -376,7 +376,7 @@
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_ice(i),thv1,wind(i),
-     &      z0max_ice,ztmax_ice,tvs_ice,
+     &      z0max_ice,ztmax_ice,tvs_ice,grav,
 !  ---  outputs:
      &      rb_ice(i),fm_ice(i),fh_ice(i),fm10_ice(i),fh2_ice(i),
      &      cm_ice(i),ch_ice(i),stress_ice(i),ustar_ice(i))
@@ -416,14 +416,14 @@
       subroutine stability
 !........................................
 !  ---  inputs:
-     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs,                 &
+     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           &
 !  ---  outputs:
      &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
 !-----
 
 !  ---  inputs:
       real(kind=kind_phys), intent(in) ::                               &
-     &       z1, snwdph, thv1, wind, z0max, ztmax, tvs
+     &       z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav
 
 !  ---  outputs:
       real(kind=kind_phys), intent(out) ::                              &
