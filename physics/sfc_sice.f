@@ -104,6 +104,7 @@
 !! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
 !! | t0c            | temperature_at_zero_celsius                                                  | temperature at 0 degrees Celsius                                | K             |    0 | real      | kind_phys | in     | F        |
 !! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                   | frac          |    0 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                                | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | u component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | v component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
@@ -174,7 +175,7 @@
       subroutine sfc_sice_run                                           &
 !  ---  inputs:
      &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    &
-     &       t0c, rd, ps, u1, v1, t1, q1, delt,                         &
+     &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, ddvel,                              &
      &       flag_iter, mom4ice, lsm, lprnt, ipr, cplflx, iocn, ilak,   &
@@ -289,7 +290,7 @@
       logical, intent(in) :: lprnt, cplflx
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
-     &       epsm1, grav, rvrdm1, t0c, rd
+     &       epsm1, grav, rvrdm1, t0c, rd, cimin
 
       integer, dimension(im), intent(in) :: iocn, ilak
 
