@@ -31,13 +31,14 @@
 !! This subroutine includes the surface roughness length formulation
 !! based on the surface sublayer scheme in
 !! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998.
-!> \section arg_table_sfc_ex_coef_run Argument Table
+!> \section arg_table_sfc_diff_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                           | count      |    0 | integer   |           | in     | F        |
 !! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)            | none       |    0 | real      | kind_phys | in     | F        |
 !! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                            | none       |    0 | real      | kind_phys | in     | F        |
 !! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                      | none       |    0 | real      | kind_phys | in     | F        |
+!! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                       | m s-2      |    0 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                                 | Pa         |    1 | real      | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                              | m s-1      |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                              | m s-1      |    1 | real      | kind_phys | in     | F        |
@@ -129,7 +130,7 @@
 !!\f]
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-      subroutine sfc_diff_run(im,rvrdm1,eps,epsm1,              !intent(in)
+      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,        !intent(in)
      &                    ps,u1,v1,t1,q1,z1,                    !intent(in)
      &                    prsl1,prslki,ddvel,                   !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,        !intent(in)
@@ -167,7 +168,7 @@
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       logical, dimension(im), intent(in) :: flag_iter ! added by s.lu
 
-      real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1
+      real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(im), intent(in)    ::
      &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,ddvel,
      &                    sigmaf,shdmax,
