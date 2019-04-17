@@ -1,0 +1,34 @@
+/**
+\page CS_AW Scale-Aware Mass-Flux Deep Convection Scheme
+\section des_deep Description
+ CS (Chikira Sugiyama) deep convection has many unique features that makes it the best 
+ cadidate (not one of many!) to use Arakawa-Wu (AW) scale-aware parameterizations:
+-# A spectrum of  cloud types defined by cloud base vertical velocity. Liquid and ice detrained to environment. 
+-# Vertical velocity calculated at each level for easy implementation of AW scale-awareness for the spectrum of clouds. 
+-# Entrainment proportional to parcel buoyancy, more physical reasonable
+-# Simple downdraft plume initiated by precipitation, more sophisticated scheme developing in CSU. 
+-# Convective Kinetic Energy based assumption, Quasi-equilibrium not needed. 
+-# Full tracer transport capability.
+ 
+\cite Arakawa_Wu_2013
+\cite Chikira_Sugiyama_2010
+
+\section CS_AW Algorithm description
+ + Cloud base property for each cloud type
+ + CAPE and CIN 
+ + Found cloud base height
+ + Updraft properties caculation for each cloud type
+ + AW scale-awareness parameterization from updraft properties
+ + Cloud mass fluxes and precipitation
+ + Detrainment for non-flux form
+ + Downdraft
+ + Convective tracer transport
+ + Mass conservation check and fix
+
+\section non entry-point of the scheme
+ + CUMBAS: Cloud base property calculation
+ + CUMUP: Updraft property calculation
+ + CUMBMX: Cloud base mass flux calculation
+ + CUMDWN: Downdraft calculation
+
+*/

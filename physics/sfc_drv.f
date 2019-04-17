@@ -253,7 +253,7 @@
 !!
 !> \section general_noah_drv GFS sfc_drv General Algorithm
 !>  @{
-      subroutine lsm_noah_run                                            &
+      subroutine lsm_noah_run                                           &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, islimsk, ddvel, slopetyp,               &

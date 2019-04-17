@@ -1,8 +1,12 @@
 !> \file m_micro.F90
-!! This file contains the subroutine that call Morrison-Gettelman microphysics (MG2 and MG3)
-!! \cite Morrison and Gettelman.
+!! This file contains the subroutine that call Morrison-Gettelman microphysics (MG1, MG2 and MG3)
+!! MG1 forecasts cloud ice and cloud liquid and their number
+!! MG2 forecasts cloud ice, cloud liquid, rain, snow,  and their number
+!! MG3 forecasts cloud ice, cloud liquid, rain, snow, Graupel/Hail  and their number
+!! \cite Gettelman_Morrison_2015.
+!! \cite Gettelman_et_al_2015.
 
-!> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG2 and MG3) driver scheme.
+!> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG1, MG2 and MG3) scheme.
 module m_micro
 
   implicit none
@@ -135,7 +139,7 @@ end subroutine m_micro_init
 #if 0
 
 !> \defgroup mg2mg3 FV3GFS Morrison-Gettelman MP scheme Module
-!! @{
+!> @{
 !> \defgroup mg_driver Morrison-Gettelman MP Driver Module
 !! \brief This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
@@ -1985,6 +1989,6 @@ end subroutine m_micro_init
 
 
       end subroutine find_cldtop
-!! @}
+!> @}
 
 end module m_micro

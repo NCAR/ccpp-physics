@@ -1,5 +1,9 @@
 !>  \file cs_conv_aw_adj.f90
-!!  This file contains the Arakawa-Wu adjustment of large-scale microphysics tendencies.
+!!  Driver for CS (Chikira Sugiyama) deep convection upgraded with Arakawa-Wu (AW) scale-aware parameterization
+!!  A spectrum of  cloud types defined by cloud base vertical velocity by CS
+!!  Vertical velocity calculated at each level and each cloud type for AW scale-awareness 
+!!  basic idea is m=rou*sigma*w, so  sigma=m/rou/w
+!!  
 
 module cs_conv_aw_adj
 
