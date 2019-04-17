@@ -7,11 +7,17 @@
 
       use h2ointerp, only : setindxh2o, h2ointerpol
 
+      use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
+
+      use iccn_def,   only : ciplin, ccnin, ci_pres
+
       implicit none
 
       private
 
       public GFS_phys_time_vary_init, GFS_phys_time_vary_run, GFS_phys_time_vary_finalize
+
+      logical :: is_initialized = .false.
 
       contains
 
@@ -39,24 +45,85 @@
          integer,                          intent(out)   :: errflg
 
          ! Local variables
-         integer :: nb
+         integer :: i, j, ix, nb
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-         nb = Tbd%blkno
+         nb = 1
 
-         !--- initialize ozone and water
+         if (Model%aero_in) then
+            ! ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
+            ! ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
+            ! if (size(Tbd%aer_nm, dim=3).ne.ntrcaerm) then
+            !    write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+            !          "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
+            !          ntrcaerm, " /= ", size(Tbd%aer_nm, dim=3)
+            !    errflg = 1
+            !    return
+            ! end if
+            ! ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+            ! ntrcaer = size(Tbd%aer_nm, dim=3)
+            ! ! Read aerosol climatology
+            ! call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+         else
+            ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! If Model%aero_in is .false., then ntrcaer == 1
+            ntrcaer = size(Tbd%aer_nm, dim=3)
+         endif
+         if (Model%iccn) then
+          !  call read_cidata  ( Model%me, Model%master)
+          !  ! No consistency check needed for in/ccn data, all values are
+          !  ! hardcoded in module iccn_def.F and GFS_typedefs.F90
+         endif
+
+         !--- read in and initialize ozone
          if (Model%ntoz > 0) then
             call setindxoz (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_o3, &
                             Grid%jindx2_o3, Grid%ddy_o3)
          endif
 
+         !--- read in and initialize stratospheric water
          if (Model%h2o_phys) then
             call setindxh2o (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_h, &
                              Grid%jindx2_h, Grid%ddy_h)
          endif
+
+         !--- read in and initialize aerosols
+        !  if (Model%aero_in) then
+        !    call setindxaer (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_aer,           &
+        !                       Grid%jindx2_aer, Grid%ddy_aer, Grid%xlon_d,     &
+        !                       Grid%iindx1_aer, Grid%iindx2_aer, Grid%ddx_aer, &
+        !                       Model%me, Model%master)
+        !  endif
+        !   !--- read in and initialize IN and CCN
+        !  if (Model%iccn) then
+        !      call setindxci (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_ci,       &
+        !                      Grid%jindx2_ci, Grid%ddy_ci, Grid%xlon_d,  &
+        !                      Grid%iindx1_ci, Grid%iindx2_ci, Grid%ddx_ci)
+        !  endif
+
+        !--- initial calculation of maps local ix -> global i and j, store in Tbd
+         ix = 0
+         nb = 1
+         do j = 1,Model%ny
+           do i = 1,Model%nx
+             ix = ix + 1
+             if (ix .gt. Model%blksz(nb)) then
+               ix = 1
+               nb = nb + 1
+             endif
+             Tbd%jmap(ix) = j
+             Tbd%imap(ix) = i
+           enddo
+         enddo
+
+         is_initialized = .true.
+
 
       end subroutine GFS_phys_time_vary_init
 
@@ -107,69 +174,84 @@
         errmsg = ''
         errflg = 0
 
-        if (Tbd%blkno==1) then
-          !--- switch for saving convective clouds - cnvc90.f
-          !--- aka Ken Campana/Yu-Tai Hou legacy
-          if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
-            !--- initialize,accumulate,convert
-            Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-          elseif (mod(Model%kdt,Model%nsswr) == 0) then
-            !--- accumulate,convert
-            Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-          elseif (Model%lsswr) then
-            !--- initialize,accumulate
-            Model%clstp = 1100
-          else
-            !--- accumulate
-            Model%clstp = 0100
-          endif
+        ! Check initialization status
+        if (.not.is_initialized) then
+           write(errmsg,'(*(a))') "Logic error: GFS_phys_time_vary_run called before GFS_phys_time_vary_init"
+           errflg = 1
+           return
+        end if
+
+        nb = 1
+
+        !--- switch for saving convective clouds - cnvc90.f
+        !--- aka Ken Campana/Yu-Tai Hou legacy
+        if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
+          !--- initialize,accumulate,convert
+          Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+        elseif (mod(Model%kdt,Model%nsswr) == 0) then
+          !--- accumulate,convert
+          Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
+        elseif (Model%lsswr) then
+          !--- initialize,accumulate
+          Model%clstp = 1100
+        else
+          !--- accumulate
+          Model%clstp = 0100
         endif
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-        if ( ((Model%imfdeepcnv <= 0) .or. (Model%cal_pre)) .and. (Model%random_clds) ) then
+        if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
           iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
           call random_setseed(iseed)
           call random_number(wrk)
           do i = 1,Model%cnx*Model%nrcm
-            iseed = iseed + nint(wrk(1)) * i
+            iseed = iseed + nint(wrk(1)*1000.0) * i
             call random_setseed(iseed)
             call random_number(rannie)
             rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
           enddo
 
-          ! DH* TODO - this could be sped up by saving jsc, jec, isc, iec in Tbd (for example)
-          ! and looping just over them; ix would then run from 1 to blksz(nb); one could also
-          ! use OpenMP to speed up this loop or the inside loops *DH
           do k = 1,Model%nrcm
             iskip = (k-1)*Model%cnx*Model%cny
-            ix = 0
-            nb = 1
-            do j = 1,Model%ny
-              do i = 1,Model%nx
-                ix = ix + 1
-                if (ix .gt. Model%blksz(nb)) then
-                  ix = 1
-                  nb = nb + 1
-                endif
-                if (nb == Tbd%blkno) then
-                  Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
-                endif
+            do ix=1,Model%blksz(nb)
+                j = Tbd%jmap(ix)
+                i = Tbd%imap(ix)
+                Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
               enddo
-            enddo
           enddo
         endif  ! imfdeepcnv, cal_re, random_clds
 
         !--- o3 interpolation
         if (Model%ntoz > 0) then
-          call ozinterpol (Model%me, Model%blksz(Tbd%blkno), Model%idate, Model%fhour, &
+          call ozinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
                            Grid%jindx1_o3, Grid%jindx2_o3, Tbd%ozpl, Grid%ddy_o3)
         endif
 
         !--- h2o interpolation
         if (Model%h2o_phys) then
-          call h2ointerpol (Model%me, Model%blksz(Tbd%blkno), Model%idate, Model%fhour, &
+          call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
                             Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
         endif
+
+        !--- aerosol interpolation
+        ! if (Model%aero_in) then
+        !   call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
+        !                      Model%idate, Model%fhour,                            &
+        !                      Grid%jindx1_aer, Grid%jindx2_aer,  &
+        !                      Grid%ddy_aer,Grid%iindx1_aer,      &
+        !                      Grid%iindx2_aer,Grid%ddx_aer,      &
+        !                      Model%levs,Statein%prsl,                    &
+        !                      Tbd%aer_nm)
+        ! endif
+        !  !--- ICCN interpolation
+        ! if (Model%iccn) then
+        !     call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
+        !                      Grid%jindx1_ci, Grid%jindx2_ci,    &
+        !                      Grid%ddy_ci,Grid%iindx1_ci,        &
+        !                      Grid%iindx2_ci,Grid%ddx_ci,        &
+        !                      Model%levs,Statein%prsl,                    &
+        !                      Tbd%in_nm, Tbd%ccn_nm)
+        ! endif
 
         !--- original FV3 code, not needed for SCM; also not compatible with the way
         !    the time vary steps are run (over each block) --> cannot use

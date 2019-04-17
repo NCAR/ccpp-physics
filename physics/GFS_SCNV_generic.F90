@@ -53,13 +53,13 @@
             enddo
           enddo
         endif
-        if (ldiag3d .or. lgocart) then
-          do k=1,levs
-            do i=1,im
-              save_qv(i,k) = gq0_water_vapor(i,k)
-            enddo
-          enddo
-        endif
+!        if (ldiag3d .or. lgocart) then
+!          do k=1,levs
+!            do i=1,im
+!              save_qv(i,k) = gq0_water_vapor(i,k)
+!            enddo
+!          enddo
+!        endif
 
     end subroutine GFS_SCNV_generic_pre_run
 
@@ -139,7 +139,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)  - save_t(i,k))   * frain
-              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
+!              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
             enddo
           enddo
         endif
