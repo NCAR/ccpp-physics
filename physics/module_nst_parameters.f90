@@ -1,10 +1,10 @@
 !>\file module_nst_parameters.f90
-!>\defgroup nst_parameters GFS NSST Parameter Module
-!> This module contains constants and parameters used in GFS
+!! This file contains constants and paramters used in GFS
 !! near surface sea temperature scheme.
-!! \ingroup gfs_nst_main
 
-!> This module contains constants and parameters used in GFS
+!>\defgroup nst_parameters GFS NSST Parameter Module
+!! \ingroup gfs_nst_main
+!! This module contains constants and parameters used in GFS
 !! near surface sea temperature scheme.
 module module_nst_parameters
   use machine, only :  kind_phys &
@@ -12,16 +12,16 @@ module module_nst_parameters
   !
   ! air constants and coefficients from the atmospehric model
   use physcons, only: &
-       eps =>  con_eps & 
-       ,cp_a => con_cp &          ! spec heat air @p    (j/kg/k)
-       , epsm1 => con_epsm1 & 
-       , hvap => con_hvap &       ! lat heat h2o cond   (j/kg)
-       ,sigma_r => con_sbc  &     ! stefan-boltzmann    (w/m2/k4)
-       ,grav => con_g         &   ! acceleration due to gravity (kg/m/s^2)
-       ,omega => con_omega    &    ! ang vel of earth    (1/s)
+       eps =>  con_eps &
+       ,cp_a => con_cp &          !< spec heat air @p    (j/kg/k)
+       , epsm1 => con_epsm1 &
+       , hvap => con_hvap &       !< lat heat h2o cond   (j/kg)
+       ,sigma_r => con_sbc  &     !< stefan-boltzmann    (w/m2/k4)
+       ,grav => con_g         &   !< acceleration due to gravity (kg/m/s^2)
+       ,omega => con_omega    &    !< ang vel of earth    (1/s)
        ,rvrdm1 => con_fvirt &
        ,rd => con_rd &
-       ,rocp => con_rocp  &        ! r/cp          
+       ,rocp => con_rocp  &        !< r/cp          
        ,pi => con_pi
   !
   ! note: take timestep from here later

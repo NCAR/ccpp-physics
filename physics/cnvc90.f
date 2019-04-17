@@ -1,3 +1,7 @@
+!>\file cnvc90.f
+!! This file contains the calculation of fraction of convective cloud,
+!! pressure at bottom of convective cloud and at top of convective
+!! cloud.
       module cnvc90
 
       contains
@@ -8,7 +12,11 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-!! \section arg_table_cnvc90_run Argument Table
+!>\defgroup GFS_cnvc90 FV3GFS cnvc90 Module
+!! This module contains the calculation of fraction of convective cloud,
+!! pressure at bottom of convective cloud and at top of convective
+!! cloud.
+!> \section arg_table_cnvc90_run Argument Table
 !! | local_name     | standard_name                                                         | long_name                                               | units | rank | type      | kind      | intent | optional |
 !! |----------------|-----------------------------------------------------------------------|---------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
 !! | clstp          | convective_cloud_switch                                               | switch for saving convective clouds                     | none  |    0 | real      | kind_phys | in     | F        |
@@ -28,6 +36,7 @@
 !! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
+!>\section gen_cnvc90 FV3GFS cnvc90_run General Algorithm
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 

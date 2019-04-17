@@ -1,0 +1,74 @@
+/**
+\page ccppphys_nml  CCPP Physics Namelist Page
+
+\section gfs_physics_nml  GFS Physics NML
+\tableofcontents
+|   Name           | Kind    | Opr. Value | Def. Value |  Description                                                           | Unit |
+|------------------|---------|------------|------------|-----------------------------------------------------------|------|
+| fhzero           |         |  6
+| h2o_phys         | logical |  .true.
+| ldiag3d          | logical |  .false.
+| fhcyc            |         |  24
+| use_ufo          | logical |  .true.
+| pre_rad          | logical |  .false.
+| ncld             | integer |  5
+| imp_physics      | integer |  11 
+| pdfcld           | logical | .false. 
+\ref fhswr       
+\param fhswr
+\tableofcontents
+
+
+\section gfdl_cloud_microphysics_nml  GFDL Cloud Microphysics NML
+\tableofcontents
+|   Name           | Kind    | Opr. Value | Def. Value |  Description                                                              | Unit |
+|------------------|---------|------------|------------|---   ---------------------------------------------------------------------|------|     
+| sedi_transport   | logical |  .true.    |  .true.    | \e true to turn on horizontal momentum transport during sedimentation   |      |
+| do_sedi_heat     | logical |  .false.   |  .true.    | \e true to turn on horizontal heat transport during sedimentation       |      |
+| rad_snow         | logical |  .true.    |  .true.    | \a true to consider snow in cloud fraction calculation                  |      |
+| rad_graupel      | logical |  .true.    |  .true.    | \a true to consider graupel in cloud fraction calculation               |      |
+| rad_rain         | logical |  .true.    |  .true.    | \a .true. to consider rain in cloud fraction calculation                  |      |
+| const_vi         | logical |  .false.   |  .false.   | \a .true. to use constant cloud ice fall speed                            |      |
+| const_vs         | logical |  .false.   |  .false.   | \a .true. to use constant snow fall speed                                 |      |
+| const_vg         | logical |  .false.   |  .false.   | \a .true. to use constant graupel fall speed                              |      |
+| const_vr         | logical |  .false.   |  .false.   | \a .true. to use constant rain fall speed                                 |      |
+| vi_max           | real    |  1.        |    0.5     | Maximum fall speed for cloud ice                                          | m s-1| 
+| vs_max           | real    |  2.        |    5.0     | Maximum fall speed for snow                                               | m s-1| 
+| vg_max           | real    |  12.       |    8.0     | Maximum fall speed for graupel                                            | m s-1|
+| vr_max           | real    |  12.       |   12.0     | Maximum fall speed for rain                                               | m s-1|
+| qi_lim           | real    |  1.        |    1.0     | Cloud ice limiter to prevent large ice built up in cloud ice freezing and deposition |      |
+| prog_ccn         | logical |  .false.   |  .false.   | \a .true. to activate prognostic CCN (not supported in GFS Physics)       |      |
+| do_qa            | logical |  .true.    |  .true.    | \a .true. to activate inline cloud fraction diagnosis in fast sat. adj.   |      |
+| fast_sat_adj     | logical |  .true.    |  .true.    | \a .true. to adjust cloud water evaporation/freezing, cloud ice deposition when fast saturation adjustment is activated (do_sat_adj=.true. in \b fv_core_nml block) |      |
+| tau_l2v          | real    |  225.      |  300.      | Time scale for evaporation of cloud water to water vapor. Increasing/decreasing \b tau_l2v can decrease/boost deposition of cloud water to water vapor |      |
+| tau_v2l          | real    |  150.      |  150.      | Time scale for condensation of water vapor to cloud water. Increasing/decreasing \b tau_v2l can decrease/boost condensation of water vapor to cloud water  |      |
+| tau_g2v          | real    |  900.      |  900.      | Time scale for sublimation of graupel to water vapor. Increasing/decreasing \b tau_g2v can decrease/boost sublimation of graupel to water vapor  |      |
+| rthresh          | real    | 10.e-6     | 1.e-5      | Critical cloud water radius for autoconversion (cloud water -> rain). Increasing/decreasing of \b rthresh makes the autoconversion harder/easier |      |
+| dw_land          | real    | 0.16       |   0.2      | Base value for subgrid deviation/variability over land                 |       |
+| dw_ocean         | real    | 0.10       |   0.1      | Base value for subgrid deviation/variability over ocean                |       |
+| ql_gen           | real    | 1.0e-3     | 1.0e-3     | Maximum value for cloud water generated from condensation of water vapor (water vapor -> cloud water). Increasing/decreasing \b ql_gen can increase/decrease cloud water  |     |
+| ql_mlt           | real    | 1.0e-3     | 2.0e-3     | Maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain). Exceedance of which will become rain. Increasing/decreasing \b ql_mlt can increase/decrease cloud water and decrease/increase rain  |     |
+| qi0_crt          | real    | 8.0e-5     | 1.0e-4     | Threshold of cloud ice to snow autoconversion (cloud ice -> snow). Increasing/decreasing \b qi0_crt can increase/decrease cloud ice and decrease/increase snow |    |
+| qs0_crt          | real    | 1.0e-3     | 1.0e-3     | Threshold of snow to graupel autoconversion (snow -> graupel). Increasing/decreasing \b qs0_crt can increase/decrease snow and decrease/increase graupel  |    |
+| tau_i2s          | real    | 1000.      | 1000.      | Time scale for autoconversion of cloud ice to snow. Increasing/decreasing \b tau_i2s can decrease/boost autoconversion of cloud ice to snow (cloud ice -> snow) |    |
+| c_psaci          | real    | 0.05       | 0.02       | Accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing/decreasing of \b c_psaci can boost/decrease the accretion of cloud ice to snow   |      |
+| c_pgacs          | real    | 0.01       | 2.0e-3     | Accretion efficiency of snow to graupel (snow-> graupel). Increasing/decreasing of \b c_pgacs can boost/decrease the accretion of snow to graupel    |      |
+| rh_inc           | real    | 0.30       | 0.25       | Relative humidity increment for complete evaporation of cloud water and cloud ice     |        |
+| rh_inr           | real    | 0.30       | 0.25       | Relative humidity increment for sublimation of snow                                   |        |
+| rh_ins           | real    | 0.30       | 0.25       | Relative humidity increment for minimum evaporation of rain                           |        |
+| ccn_l            | real    | 300.       | 270.       | Base CCN over land. Increasing/decreasing \b ccn_l can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier   |        |
+| ccn_o            | real    | 100.       |  90.       | Base CCN over ocean. Increasing/decreasing \b ccn_o can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier  |        |
+| c_paut           | real    | 0.5        | 0.55       | Autoconversion efficiency of cloud water to rain (cloud water -> rain). Increasing/decreasing of \b c_paut can boost/decrease the autoconversion of cloud water to rain   |     |
+| c_cracw          | real    | 0.8        | 0.9        | Accretion efficiency of cloud water to rain (cloud water -> rain).       |       |
+| use_ppm          | logical | .false.    | .false.    | \a .true. to use PPM fall scheme; .false. to use time-implicit monotonic fall scheme     |        |
+| use_ccn          | logical | .true.     | .true.     | \a .true. to compute prescribed CCN. It should be .true. when \b prog_ccn is .false.     |        |
+| mono_prof        | logical | .true.     | .true.     | \a .true. to turn on terminal fall with monotonic PPM scheme. This is used together with \b use_ppm=.true |      |
+| z_slope_liq      | logical | .true.     | .true.     | \a .true. to turn on vertically subgrid linear monotonic slope for autoconversion of cloud water to rain  |      |
+| z_slope_ice      | logical | .true.     | .false.    | \a .true. to turn on vertically subgrid linear monotonic slope for autoconversion of cloud ice to snow    |      |
+| de_ice           | logical | .false.    | .false.    | \a .true. to convert excessive cloud ice to snow to prevent ice over-built from other sources like convection scheme (not supported in GFS physics)   |      |
+| fix_negative     | logical | .true.     | .false.    | \a .true. to fix negative water species using nearby points               |       |
+| icloud_f         | integer | 1          |  0         | Flag (0,1,or 2) for cloud fraction diagnostic scheme.                     |       |
+| mp_time          | real    | 150.       | 150.       | Time step of GFDL cloud microphysics                                      |       |
+\tableofcontents
+
+*/

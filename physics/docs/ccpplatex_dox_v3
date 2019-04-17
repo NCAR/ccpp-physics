@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
-PROJECT_NUMBER         = "Version 2.0"
+PROJECT_NUMBER         = "Version 2.0beta"
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -85,8 +85,8 @@ GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
-SHOW_USED_FILES        = YES
-SHOW_FILES             = YES
+SHOW_USED_FILES        = NO 
+SHOW_FILES             = NO
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            = ccpp_dox_layout.xml
@@ -99,36 +99,44 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
 WARN_LOGFILE           =
-INPUT                  =  pdftxt/mainpage.txt     \
-                          pdftxt/code_overview.txt \
-                          pdftxt/GFS_RRTMG.txt    \
-                          pdftxt/GFS_SFCLYR.txt   \
-                          pdftxt/GFS_NSST.txt     \
-                          pdftxt/GFS_NOAH.txt     \
-                          pdftxt/GFS_SFCSICE.txt  \
-                          pdftxt/GFS_HEDMF.txt    \
-                          pdftxt/GFS_GWDPS.txt    \
-                          pdftxt/GFS_OZPHYS.txt   \
-                          pdftxt/GFS_H2OPHYS.txt  \
-                          pdftxt/GFS_RAYLEIGH.txt \
-                          pdftxt/GFS_SAMFdeep.txt \
-                          pdftxt/GFS_GWDC.txt     \
-                          pdftxt/GFS_SAMFshal.txt \
-                          pdftxt/GFS_ZHAOC.txt    \
-                          pdftxt/GFDL_cloud.txt   \
+INPUT                  =  pdftxt/mainpage.txt            \
+                          pdftxt/code_overview.txt       \
+                          pdftxt/GFS_RRTMG.txt           \
+                          pdftxt/GFS_SFCLYR.txt          \
+                          pdftxt/GFS_NSST.txt            \
+                          pdftxt/GFS_NOAH.txt            \
+                          pdftxt/GFS_SFCSICE.txt         \
+                          pdftxt/GFS_HEDMF.txt           \
+                          pdftxt/GFS_GWDPS.txt           \
+                          pdftxt/GFS_OZPHYS.txt          \
+                          pdftxt/GFS_H2OPHYS.txt         \
+                          pdftxt/GFS_RAYLEIGH.txt        \
+                          pdftxt/GFS_SAMFdeep.txt        \
+                          pdftxt/GFS_GWDC.txt            \
+                          pdftxt/GFS_SAMFshal.txt        \
+                          pdftxt/GFS_ZHAOC.txt           \
+                          pdftxt/GFDL_cloud.txt          \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \
+                          pdftxt/rad_cld.txt             \
+                          pdftxt/GFS_STOCHY_PHYS.txt     \
+                          pdftxt/GFS_SURFACE_PERT.txt    \
+                          pdftxt/CPT_CSAW.txt            \
+                          pdftxt/MYNN_EDMF.txt           \
+                          pdftxt/GFDL_MP_namelist.txt    \
 ### Radiation
-                        ../radlw_main.f \
-                        ../radsw_main.f \
-                        ../radiation_aerosols.f \
-                        ../radiation_astronomy.f \
-                        ../radiation_clouds.f \
-                        ../radiation_gases.f \
+
+                        ../radlw_main.f                  \
+                        ../radsw_main.f                  \
+                        ../radiation_aerosols.f          \
+                        ../radiation_astronomy.f         \
+                        ../radiation_clouds.f            \
+                        ../radiation_gases.f             \
                         ../radiation_surface.f \
                         ../radlw_param.f \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
+                        ../dcyc2.f        \
 ### Land Surface
                         ../sfc_diff.f \
                         ../sfc_nst.f \
@@ -137,6 +145,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_nst_water_prop.f90  \
                         ../sfc_drv.f \
                         ../sflx.f    \
+                        ../namelist_soilveg.f   \
+                        ../set_soilveg.f        \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -148,7 +158,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Rayleigh Dampling
                         ../rayleigh_damp.f  \
 ### Prognostic Ozone
-                        ../ozphys.f \
+                        ../ozphys_2015.f \
 ### stratospheric h2o
                         ../h2ophys.f \
 ### Deep Convection
@@ -168,14 +178,50 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
-###                     ../GFS_stochastics.F90   \
-###                     ../surface_perturbation.F90 \
-###                     ../../stochastic_physics/stochastic_physics.F90  \
+                        ../GFS_stochastics.F90   \
+                        ../../stochastic_physics/get_stochy_pattern.F90 \
+                        ../../stochastic_physics/stochastic_physics.F90  \
+                        ../../stochastic_physics/stochy_data_mod.F90 \
+                        ../../stochastic_physics/compns_stochy.F90          \
+### surface perturbation
+                        ../surface_perturbation.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.f90     \
-                        ../radcons.f90
+                        ../radcons.f90      \
+                        ../mersenne_twister.f  \
+### CPT
+                        ../m_micro.F90       \
+                        ../micro_mg2_0.F90   \
+                        ../micro_mg3_0.F90   \
+                        ../micro_mg_utils.F90 \
+                        ../cldmacro.F        \
+                        ../aer_cloud.F       \
+                        ../cldwat2m_micro.F  \
+                        ../wv_saturation.F   \
+                        ../cs_conv.F90       \
+### satmedmf
+                        ../satmedmfvdif.F \
+                        ../mfpblt.f         \
+                        ../mfscu.f          \
+                        ../tridi.f          \
+### GSD
+                        ../cu_gf_driver.F90 \
+                        ../cu_gf_deep.F90   \
+                        ../cu_gf_sh.F90     \
+                        ../module_MYNNPBL_wrapper.F90 \
+                        ../module_bl_mynn.F90   \
+                        ../module_MYNNSFC_wrapper.F90 \
+                        ../module_sf_mynn.F90  \
+                        ../sfc_drv_ruc.F90   \
+                        ../module_sf_ruclsm.F90    \
+                        ../namelist_soilveg_ruc.F90 \
+                        ../set_soilveg_ruc.F90   \
+                        ../module_soil_pre.F90   \
+                        ../mp_thompson_hrrr.F90    \
+                        ../module_mp_thompson_hrrr.F90 \
+                        ../module_mp_thompson_hrrr_radar.F90
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
@@ -255,7 +301,7 @@ FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
 USE_MATHJAX            = YES
 MATHJAX_FORMAT         = HTML-CSS
-MATHJAX_RELPATH        =  https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2
+MATHJAX_RELPATH        =  https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1
 MATHJAX_EXTENSIONS     =
 MATHJAX_CODEFILE       =
 SEARCHENGINE           = YES
@@ -312,7 +358,7 @@ PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = NO
-EXPAND_ONLY_PREDEF     = NO
+EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
@@ -337,7 +383,7 @@ DOT_FONTPATH           =
 CLASS_GRAPH            = NO
 COLLABORATION_GRAPH    = NO
 GROUP_GRAPHS           = YES
-UML_LOOK               = YES
+UML_LOOK               = NO
 UML_LIMIT_NUM_FIELDS   = 10
 TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
@@ -347,7 +393,7 @@ CALLER_GRAPH           = NO
 GRAPHICAL_HIERARCHY    = NO
 DIRECTORY_GRAPH        = YES
 DOT_IMAGE_FORMAT       = svg
-INTERACTIVE_SVG        = YES
+INTERACTIVE_SVG        = NO
 DOT_PATH               =
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =

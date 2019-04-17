@@ -1,10 +1,9 @@
 !>\file module_nst_water_prop.f90
-!>\defgroup waterprop GFS NSST Water Property
-!>This module contains GFS NSST water property subroutines.
-!! @{
-!>\ingroup gfs_nst_main
+!! This file contains GFS NSST water property subroutines.
 
-!> This module contains GFS NSST water property subroutines.
+!>\defgroup waterprop GFS NSST Water Property
+!!This module contains GFS NSST water property subroutines.
+!!\ingroup gfs_nst_main
 module module_nst_water_prop
   use machine, only : kind_phys
   use module_nst_parameters, only : t0k
@@ -42,7 +41,7 @@ module module_nst_water_prop
 contains
   ! ------------------------------------------------------
 !>\ingroup waterprop
-!> This subroutine computes thermal expansion coefficient (alpha)
+!! This subroutine computes thermal expansion coefficient (alpha)
 !! and saline contraction coefficient (beta). 
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
@@ -87,7 +86,7 @@ contains
   end subroutine rhocoef
   ! ----------------------------------------
 !>\ingroup waterprop
-!> This subroutine computes sea water density.
+!! This subroutine computes sea water density.
   subroutine density(t, s, rho)
     ! ----------------------------------------
     implicit none
@@ -125,7 +124,7 @@ contains
   !======================
   !
 !>\ingroup waterprop
-!> This subroutine computes the fraction of the solar radiation absorbed 
+!! This subroutine computes the fraction of the solar radiation absorbed 
 !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
@@ -160,6 +159,7 @@ contains
   !======================
   !
 !>\ingroup waterprop
+!! This subroutine
   elemental subroutine sw_ps_9b_aw(z,aw)
     !
     ! d(fw)/d(z) for 9-band 
@@ -224,6 +224,9 @@ contains
   !
   !
 !>\ingroup waterprop
+!! This subroutine calculates fraction of the solar radiation absorbed by the
+!! ocean at the depth z (fairall et al.(1996) \cite fairall_et_al_1996; p.1298)
+!! following Paulson and Simpson (1981) \cite paulson_and_simpson_1981.
   elemental subroutine sw_fairall_6exp_v1_aw(z,aw)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -298,9 +301,9 @@ contains
 !>\ingroup waterprop
 !! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996) 
 !! \cite fairall_et_al_1996, p.1298)
-!>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
-!>\param[in] z           depth (m)
-!>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
+!!\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+!!\param[in] z           depth (m)
+!!\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_fairall_simple_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -758,4 +761,3 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_2d
 
 end module module_nst_water_prop
-!! @}

@@ -13,8 +13,8 @@
       subroutine mynnrad_pre_finalize ()
       end subroutine mynnrad_pre_finalize
 
-!!
-!> \brief This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
+!>\defgroup gsd_mynnrad_pre GSD mynnrad_pre_run Module
+! \brief This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
 #if 0
 !! \section arg_table_mynnrad_pre_run Argument Table
 !! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |

@@ -171,7 +171,6 @@
 !  ====================    end of description    =====================  !
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!> @{
 !! \brief This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well
@@ -250,7 +249,7 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !> \section general_noah_drv GFS sfc_drv General Algorithm
-!!  @{
+!>  @{
       subroutine lsm_noah_run                                            &
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
@@ -731,7 +730,6 @@
 !...................................
       end subroutine lsm_noah_run
 !-----------------------------
-!! @}
 !> @}
 
       end module lsm_noah

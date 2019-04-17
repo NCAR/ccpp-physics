@@ -1,8 +1,8 @@
 !>\file dcyc2.f
-
-!> This module contains the CCPP-compliant dcyc2t3 codes that fits 
-!! radiative fluxes and heating rates from a coarse radiation 
+!! This file contains the CCPP-compliant dcyc2t3 codes that fits
+!! radiative fluxes and heating rates from a coarse radiation
 !! calculation time interval into model's more frequent time steps.
+
       module dcyc2t3
 
       implicit none
