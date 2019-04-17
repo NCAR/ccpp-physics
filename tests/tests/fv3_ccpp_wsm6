@@ -79,7 +79,7 @@ DT_ATMOS="1200"
 export LRADAR=.T.
 
 export FV3_RUN=ccpp_wsm6_run.IN
-export CCPP_SUITE=FV3_GFS_2017_updated_wsm6
+export CCPP_SUITE=FV3_GFS_2017_wsm6
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_wsm6.nml.IN
 

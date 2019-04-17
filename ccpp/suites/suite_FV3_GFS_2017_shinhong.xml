@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_wsm6" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_2017_shinhong" lib="ccppphys" ver="2">
   <!-- <init></init> -->
+  <group name="fast_physics">
+    <subcycle loop="1">
+      <scheme>fv_sat_adj</scheme>
+    </subcycle>
+  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
@@ -52,8 +57,7 @@
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
-      <scheme>GFS_PBL_generic_pre</scheme>
-      <scheme>hedmf</scheme>
+      <scheme>shinhongvdif</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>gwdps_pre</scheme>
       <scheme>gwdps</scheme>
@@ -76,6 +80,7 @@
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
+      <scheme>gfdl_cloud_microphys</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
     </subcycle>

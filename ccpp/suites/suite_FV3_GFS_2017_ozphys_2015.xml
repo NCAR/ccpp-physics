@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_2017_ozphys_2015" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -60,7 +60,7 @@
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys</scheme>
+      <scheme>ozphys_2015</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
@@ -80,7 +80,6 @@
       <scheme>zhaocarr_precpd</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
-      <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>
   <group name="stochastics">
