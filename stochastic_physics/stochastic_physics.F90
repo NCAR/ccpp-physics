@@ -78,6 +78,10 @@ nodes=Model%ntasks
 gis_stochy%me=me
 gis_stochy%nodes=nodes
 call init_stochdata(Model%levs,Model%dtp,Model%input_nml_file,Model%fn_nml,Model%nlunit,iret)
+! check to see decomposition
+!if(Model%isppt_deep == .true.)then
+!do_sppt = .true.
+!endif
 ! check namelist entries for consistency
 if (Model%do_sppt.neqv.do_sppt) then
    write(errmsg,'(*(a))') 'Logic error in stochastic_physics_init: incompatible', &
@@ -355,7 +359,6 @@ use stochy_data_mod, only : rad2deg,INTTYP,wlon,rnlat,gis_stochy, rpattern_sfc,n
 use get_stochy_pattern_mod,only : get_random_pattern_sfc_fv3                                          ! mg, sfc-perts
 use stochy_resol_def , only : latg,lonf
 use stochy_namelist_def
-use spectral_layout_mod,only:me
 use GFS_typedefs, only: GFS_control_type, GFS_data_type
 implicit none
 type(GFS_control_type),   intent(in)    :: Model

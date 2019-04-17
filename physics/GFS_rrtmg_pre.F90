@@ -662,6 +662,27 @@
           endif
         elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
           cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
+          if(Model%effr_in) then
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                effrl(i,k1) = Tbd%phy_f3d(i,k,1)
+                effri(i,k1) = Tbd%phy_f3d(i,k,2)
+                effrr(i,k1) = Tbd%phy_f3d(i,k,3)
+                effrs(i,k1) = Tbd%phy_f3d(i,k,4)
+!                if(Model%me==0) then
+!                  if(effrl(i,k1)> 5.0) then
+!                    write(6,*) 'rad driver:cloud radii:',Model%kdt, i,k1,       &
+!                    effrl(i,k1)
+!                  endif
+!                  if(effrs(i,k1)==0.0) then
+!                    write(6,*) 'rad driver:snow mixing ratio:',Model%kdt, i,k1,        &
+!                    tracer1(i,k,ntsw)
+!                  endif
+!                endif
+              enddo
+            enddo
+          endif
         else                                                           ! neither of the other two cases
           cldcov = 0.0
         endif

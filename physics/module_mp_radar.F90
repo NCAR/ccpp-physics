@@ -24,7 +24,7 @@
 !! calculations based on 50 individual size bins of the distributions.
 !+---+-----------------------------------------------------------------+
 
-   MODULE module_mp_thompson_hrrr_radar
+      MODULE module_mp_radar
 
       PUBLIC :: rayleigh_soak_wetgraupel
       PUBLIC :: radar_init
@@ -622,5 +622,5 @@
       END FUNCTION WGAMMA
 
 !+---+-----------------------------------------------------------------+
-   END MODULE module_mp_thompson_hrrr_radar
+      END MODULE module_mp_radar
 !+---+-----------------------------------------------------------------+
