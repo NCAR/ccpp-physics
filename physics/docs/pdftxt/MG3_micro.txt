@@ -1,0 +1,50 @@
+/**
+\page Morrison-Gettelman version 3 Cloud Microphysics Scheme (MG3)
+\section des_MG3_cloud Description
+MG3 microphysics (MP) scheme is a six-category double momentum bulk scheme. It forecasts mass of ten 
+hydrometeors (cloud water, cloud ice, rain, snow and graupel) and their number concentrations in addition to mass of water vapor.
+\cite Gettelman_Morrison_2015,
+\cite Gettelman_et_al_2015. 
+Physics processes of MG3 cloud MP are described in Figure 1. 
+
+\image  html  MG3_MP_diagram.GIF "Figure: MG3 MP at a glance" width=10cm
+
+Some unique attributes of MG3 cloud microphysics include:
+
+-# Consistent treatment of cloud fraction in cloud macrophysics and radiation
+-# Subgrid-scale microphysics
+-# Max-overlap and in-cloud precipitation fraction area
+-# Options for subcolumn microphysics
+-# Options to run MG2 using the same code as MG3
+-# Options to run MG1 
+-# Completely aerosol awareness with 1) 1) constant aerosol mixing ratio, 2) climatology IN/CCN from CAM5,  3) climatology aerosol from MERRA2 , 4) GOCART, and  5) MAM7
+-# Options to call fast physics as GFDL microphysics
+-# Number concentration of all species forcasted and has local storage
+-# Sub-step semi-implicit sedimentation
+
+
+
+\section MG3 Algorithm description 
+ + IN and CNN activation 
+ + GMAO cloud fraction and condensation calculation based on three different pdfs: 1) delta, 2) triangle, and 3) normal
+ + Autoconversion calculations
+ + Immersion freezing
+ + Contact freezing
+ + Aggregation
+ + Accretion
+ + Heterogeneous rain freezing
+ + Bergeron process
+ + Deposition/evaporation/sublimation
+ + Mass conservation control
+ + precipitatin/sedimentation
+ 
+\section non entry-point of the scheme
+ + aer_cloud: aerosol activation module
+ + cldmacro: GMAO macrophysics
+ + micro_mg_utils: utility for MG3
+ + cldwat2m_micro: MG1/2
+ + micro_mg2_0: MG2
+ + micro_mg3_0: MG3/2
+
+
+*/

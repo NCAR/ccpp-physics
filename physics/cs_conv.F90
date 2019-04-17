@@ -303,7 +303,12 @@ module cs_conv
 
 !>\defgroup cs_scheme FV3GFS Chikira-Sugiyama Cumulus Scheme Module
 !! @{
-!> \brief The subroutine contains the entirety of the Chikira-Sugiyama convection scheme.
+!> \brief The subroutine contains the entirety of the CS convection scheme.
+!!
+!! JLS NOTE:  The convective mass fluxes (dt_mf, dd_mf and ud_mf) passed in and out of cs_conv have not been multiplied by
+!!            the timestep (kg/m2/sec) as they are in all other convective schemes.  EMC is aware of this problem, 
+!!            and in the future will be fixing this discrepancy.  In the meantime, CCPP will use the same mass flux standard_name
+!!            and long_name as the other convective schemes, where the units are in kg/m2. (Aug 2018)
 !!
 !! \section arg_table_cs_conv_run Argument Table
 !! | local_name | standard_name                                             | long_name                                                                                             | units      | rank | type      |    kind   | intent | optional |
@@ -363,7 +368,6 @@ module cs_conv
 !! | errflg     | ccpp_error_flag                                           | error flag for error handling in CCPP                                                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_cs_conv CS Convection Scheme General Algorithm
-!! This is the main driver for Chikira-Sugiyama convective scheme.
 !!  -# Add comments
 !!
 !!  \section detailed_cs_conv CS Convection Scheme Detailed Algorithm
