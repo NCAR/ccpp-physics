@@ -252,14 +252,8 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !> \section general_noah_drv GFS sfc_drv General Algorithm
-<<<<<<< HEAD
 !>  @{
       subroutine lsm_noah_run                                            &
-=======
-!!  @{
-      subroutine lsm_noah_run                                           &
-!  ---  inputs:
->>>>>>> 465a11daf25f968147b54d8789e41c725d01060c
      &     ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, islimsk, ddvel, slopetyp,               &
