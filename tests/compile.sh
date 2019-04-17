@@ -1,10 +1,6 @@
 #!/bin/bash
 set -eux
 
-# DH* note: currently, the default options for MAKE_OPT in conf/configure.fv3.* are not
-# used by CCPP. However, the default options for MAKE_OPT in conf/configure.fv3.* are
-# currently matched to those for CCPP (c.f. conf/configure.fv3.* and ccpp/build_ccpp.sh).
-
 SECONDS=0
 
 if [[ $# -lt 2 ]]; then
