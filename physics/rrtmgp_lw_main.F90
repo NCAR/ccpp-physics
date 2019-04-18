@@ -1149,7 +1149,7 @@ contains
           do iLay=1,nLay
              do iGpt=1,nGptsLW
                 iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-                if (cldfracMCICA(iBand,iCol,iLay) .gt. 0.) then
+                if (cldfracMCICA(iGpt,iCol,iLay) .gt. 0.) then
                    tau_gpt(iCol,iLay,iGpt) = tau_cld(iband,iCol,iLay)*secdiff(iBand,iCol)
                 else
                    tau_gpt(iCol,iLay,iGpt) = 0.

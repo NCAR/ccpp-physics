@@ -13,13 +13,14 @@ module rrtmgp_sw
   use mo_heating_rates,          only: compute_heating_rate
   use mo_rrtmgp_constants,       only: grav, avogad
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, profsw_type, cmpfsw_type
-
+  use mo_rrtmgp_sw_cloud_optics, only: rrtmgp_sw_cloud_optics, mcica_subcol_sw
 
   implicit none
 
   ! Parameters
   integer,parameter :: nGases = 6
   real(kind_phys),parameter :: epsilon=1.0e-6
+  real (kind=kind_phys), parameter :: ftiny   = 1.0e-12
   character(len=3),parameter, dimension(nGases) :: &
        active_gases = (/ 'h2o', 'co2', 'o3 ', 'n2o', 'ch4', 'o2 '/)
 
@@ -643,23 +644,28 @@ contains
 
     ! RTE+RRTMGP classes
     type(ty_optical_props_2str) :: &
-         optical_props_clr  ! Optical properties for gaseous atmosphere
-    type(ty_optical_props_2str) :: &
-         optical_props_aer  ! Optical properties for aerosols
+         optical_props_clr, & ! Optical properties for gaseous atmosphere
+         optical_props_aer, & ! Optical properties for aerosols
+         optical_props_cldy   ! Optical properties for clouds
     type(ty_fluxes_broadband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
 
     ! Local variables
-    integer :: iCol, iBand, iGpt, iDay
+    integer :: iCol, iBand, iGpt, iDay, iLay
     integer,dimension(ncol) :: ipseed
-    real(kind_phys) :: solAdjFac
+    real(kind_phys) :: solAdjFac,cfrac
     logical :: top_at_1=.false.
+    real(kind_phys), dimension(ncol) :: clrfracSFC, cldfracSFC
     real(kind_phys), dimension(ncol,nlay) :: vmr_o3, vmr_h2o, thetaTendClrSky, &
          thetaTendAllSky,coldry,tem0
+    real(kind_phys), dimension(nday,nlay) :: cldfrac2
     real(kind_phys), dimension(nday,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
     real(kind_phys), dimension(nday,nGptsSW) :: toa_flux
+    real(kind_phys), dimension(nBandsSW,nday,nlay) :: tau_cld, asy_cld, ssa_cld
+    real(kind_phys), dimension(nGptsSW,nday,nlay) :: cldfracMCICA
+    real(kind_phys), dimension(:,:,:),allocatable :: tau, asy, ssa
 
     ! Initialize
     errmsg = ''
@@ -729,6 +735,34 @@ contains
     ! Compute solar constant adjustment factor..
     solAdjFac = solcon / s0
 
+    ! Compute fractions of clear sky view at surface
+    clrfracSFC   = 1._kind_phys
+    cldfracSFC   = 1._kind_phys
+    if (iovrsw == 0) then                    ! random overlapping
+       do iCol=1,nCol
+          do iLay = 1, nlay
+             clrfracSFC(iCol) = clrfracSFC(iCol) * (1._kind_phys - cldfrac(iCol,iLay))
+          enddo
+       enddo
+    else if (iovrsw == 1) then               ! max/ran overlapping
+       do iLay = 1, nlay
+          if (cldfrac(iCol,iLay) > ftiny) then                ! cloudy layer
+             cldfracSFC(iCol) = min ( cldfracSFC(iCol), 1._kind_phys-cldfrac(iCol,iLay) )
+          elseif (cldfracSFC(iCol) < 1._kind_phys) then                ! clear layer
+             clrfracSFC(iCol) = clrfracSFC(iCol) * cldfracSFC(iCol)
+             cldfracSFC(iCol) = 1._kind_phys
+          endif
+       enddo
+       clrfracSFC(iCol) = clrfracSFC(iCol) * cldfracSFC(iCol)
+    else if (iovrsw >= 2) then
+       do iLay = 1, nlay
+          clrfracSFC(iCol) = min ( clrfracSFC(iCol), 1._kind_phys-cldfrac(iCol,iLay) )  ! used only as clear/cloudy indicator
+       enddo
+    endif
+    if (clrfracSFC(iCol) <= ftiny) clrfracSFC(iCol) = 0._kind_phys
+    if (clrfracSFC(iCol) > (1._kind_phys-epsilon)) clrfracSFC(iCol) = 1._kind_phys
+    cldfracSFC(iCol) = 1._kind_phys - clrfracSFC(iCol)
+    
     ! Initialize outputs
     hswc(:,:)   = 0.
     cldtau(:,:) = 0.
@@ -753,8 +787,9 @@ contains
     if (nDay .gt. 0) then
 
        ! Allocate space for source functions and gas optical properties
-       call check_error_msg(optical_props_clr%alloc_2str(nday, nlay, kdist_sw_clr))
-       call check_error_msg(optical_props_aer%alloc_2str(nday, nlay, kdist_sw_clr))
+       call check_error_msg(optical_props_clr%alloc_2str(nday,  nlay, kdist_sw_clr))
+       call check_error_msg(optical_props_aer%alloc_2str(nday,  nlay, kdist_sw_clr))
+       call check_error_msg(optical_props_cldy%alloc_2str(nday, nlay, kdist_sw_clr))
 
        ! Initialize RRTMGP files
        fluxAllSky%flux_up => flux_up_allSky
@@ -797,23 +832,128 @@ contains
           enddo
        enddo
        call check_error_msg(optical_props_aer%increment(optical_props_clr))
-
-       ! 1c) Compute the clear-sky broadband fluxes
+ 
+       ! 1d) Compute the clear-sky broadband fluxes
        print*,'Clear-Sky(SW): Fluxes'
        call check_error_msg(rte_sw(optical_props_clr, top_at_1, cossza(idxday), toa_flux,&
             spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
             spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
             fluxClrSky))
 
-       ! 1d) Compute heating rates
+       ! 1e) Compute heating rates
        print*,'Clear-Sky(SW): Heating-rates'
        call check_error_msg(compute_heating_rate(   &
             fluxClrSky%flux_up,                     &
             fluxClrSky%flux_dn,                     &
             p_lev2(idxday,1:nlay+1)*100., &
             thetaTendClrSky))
-       thetaTendAllSky = thetaTendClrSky
    
+       ! ####################################################################################
+       ! 2) Compute broadband all-sky calculation.
+       ! ####################################################################################
+       ! 2a) Compute in-cloud optics
+       print*,'All-Sky(SW): Optics '
+       tau_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
+       asy_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
+       ssa_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
+       if (any(cldfrac(idxday,:) .gt. 0)) then
+          ! Cloud-optical properties by type provided. Compute optical-depth, single-       
+          ! scattering  albedo, and asymmetry parameter
+          if (.not. present(cld_od)) then
+             call rrtmgp_sw_cloud_optics(nday, nlay, nBandsSW,         &
+                  cld_lwp(idxday,1:nLay), cld_ref_liq(idxday,1:nLay),  &
+                  cld_iwp(idxday,1:nLay), cld_ref_ice(idxday,1:nLay),  &
+                  cld_rwp(idxday,1:nLay), cld_ref_rain(idxday,1:nLay), &
+                  cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
+                  cldfrac(idxday,1:nLay),                              &
+                  tau_cld(:,:,:), ssa_cld(:,:,:), asy_cld(:,:,:))
+          else
+             ! Cloud-optical depth, single scattering albedo, and asymmetry parameter provided.
+             do iDay=1,nDay
+                do iLay=1,nLay
+                   if (cldfrac(iCol,iLay) .gt. 1e-20_kind_phys) then
+                      tau_cld(:,iDay,iLay) = cld_od(idxday(iDay),iLay)
+                      ssa_cld(:,iDay,iLay) = cld_ssa(idxday(iDay),iLay)
+                      asy_cld(:,iDay,iLay) = cld_asy(idxday(iDay),iLay)
+                   else
+                      tau_cld(:,iDay,iLay) = 0.
+                      ssa_cld(:,iDay,iLay) = 0.
+                      asy_cld(:,iDay,iLay) = 0.
+                   endif
+                end do
+             end do
+          endif
+       endif
+
+       ! 2b) Call McICA to sample clouds.
+       if (isubcsw .gt. 0) then
+          print*,'All-Sky(SW): McICA'
+          allocate(tau(nDay,nLay,nGptsSW),asy(nDay,nLay,nGptsSW),ssa(nDay,nLay,nGptsSW))
+          cldfrac2 = merge(cldfrac(idxday,:), 0., cldfrac(idxday,:) .gt. 0._kind_phys)
+          call mcica_subcol_sw(nday, nlay, nGptsSW, cldfrac2, ipseed(idxday), dzlyr(idxday,:), &
+               de_lgth(idxday), cldfracMCICA)
+          
+          ! Map band optical depth to each g-point using McICA
+          do iDay=1,nDay
+             do iLay=1,nLay
+                do iGpt=1,nGptsSW
+                   iBand = kdist_sw_clr%convert_gpt2band(iGpt)
+                   if (cldfracMCICA(iGpt,iDay,iLay) .gt. 0.) then
+                      tau(iDay,iLay,iGpt) = tau_cld(iband,iDay,iLay)
+                      asy(iDay,iLay,iGpt) = asy_cld(iband,iDay,iLay)
+                      ssa(iDay,iLay,iGpt) = ssa_cld(iband,iDay,iLay)
+                   else
+                      tau(iDay,iLay,iGpt) = 0.
+                      ssa(iDay,iLay,iGpt) = 0.
+                      asy(iDay,iLay,iGpt) = 0.
+                   endif
+                enddo
+             enddo
+          enddo
+       ! 2b) Or do calcualtion by band.
+       else
+          print*,'All-Sky(SW): Not using McICA. Computing quantities by band.'
+          allocate(tau(nDay,nLay,nBandsSW),asy(nDay,nLay,nBandsSW),ssa(nDay,nLay,nBandsSW))
+          do iDay=1,nDay
+             do iLay=1,nLay
+                cfrac = cldfrac(idxday(iDay),iLay)/cldfracSFC(idxday(iDay))
+                if (cfrac .gt. 0.) then
+                   do iBand=1,nBandsSW
+                      tau(iDay,iLay,iBand) = tau_cld(iBand,iDay,iLay)
+                      asy(iDay,iLay,iBand) = asy_cld(iBand,iDay,iLay)
+                      ssa(iDay,iLay,iBand) = ssa_cld(iBand,iDay,iLay)
+                   enddo
+                else
+                   tau(iDay,iLay,:) = 0.
+                   asy(iDay,iLay,:) = 0.
+                   ssa(iDay,iLay,:) = 0.
+                endif
+             enddo
+          enddo
+       endif
+       optical_props_cldy%tau = tau
+       optical_props_cldy%ssa = ssa
+       optical_props_cldy%g   = asy
+
+       ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
+       print*,'All-Sky(SW): Increment'
+       call check_error_msg(optical_props_clr%increment(optical_props_cldy))
+
+       ! 2d) Compute broadband fluxes
+       print*,'All-Sky(SW): Fluxes'
+       call check_error_msg(rte_sw(optical_props_cldy, top_at_1, cossza(idxday), toa_flux,&
+            spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
+            spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
+            fluxAllSky))
+
+       ! 2e) Compute heating rates
+       print*,'All-Sky(SW): Heating-rates'
+       call check_error_msg(compute_heating_rate(  &
+            fluxAllSky%flux_up,                    &
+            fluxAllSky%flux_dn,                    &
+            p_lev(idxday,1:nlay+1)*100., &
+            thetaTendAllSky))
+
     end if ! Daylit days
 
     ! #######################################################################################
