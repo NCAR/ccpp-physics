@@ -280,6 +280,15 @@ else(ESMF_LIB_DIR)
 endif(ESMF_LIB_DIR)
 
 #------------------------------------------------------------------------------
+# Set multi-gases flags for preprocessor (if defined)
+if(MULTI_GASES)
+  message (STATUS "Enable multi-gases physics")
+  ADD_DEFINITIONS(-DMULTI_GASES)
+else(MULTI_GASES)
+  message (STATUS "Disable multi-gases physics")
+endif(MULTI_GASES)
+
+#------------------------------------------------------------------------------
 # Build CCPP framework and physics
 
 SET(CCPP_FRAMEWORK_SRC ${CMAKE_SOURCE_DIR}/framework)
