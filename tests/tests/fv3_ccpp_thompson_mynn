@@ -80,7 +80,7 @@ export LRADAR=.T.
 export LTAEROSOL=.F.
 
 export FV3_RUN=ccpp_thompson_mynn_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_thompson_mynn.xml
+export CCPP_SUITE=FV3_GFS_2017_thompson_mynn
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_thompson_mynn.nml.IN
 

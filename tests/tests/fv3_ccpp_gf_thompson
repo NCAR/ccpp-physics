@@ -80,7 +80,7 @@ export LRADAR=.T.
 export LTAEROSOL=.F.
 
 export FV3_RUN=ccpp_gf_thompson_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_gf_thompson.xml
+export CCPP_SUITE=FV3_GFS_2017_gf_thompson
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gf_thompson.nml.IN
 

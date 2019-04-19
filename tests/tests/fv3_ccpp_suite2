@@ -81,7 +81,7 @@ export HYBEDMF=.F.
 DT_ATMOS="1200"
 
 export FV3_RUN=ccpp_suite2_run.IN
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_suite2.xml
+export CCPP_SUITE=FV3_GFS_suite2
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gfdlmp.nml.IN
 

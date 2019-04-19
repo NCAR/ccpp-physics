@@ -106,7 +106,7 @@ build fv3_ccpp_control.exe {
     # build: script to build the NEMS.x.  For now, this is an embedded
     # bash script.
     build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
-                    MAKE_OPTS="\'CCPP=Y HYBRID=N STATIC=Y SUITE=suite_FV3_GFS_2017_updated.xml\'")
+                    MAKE_OPTS="\'CCPP=Y HYBRID=N STATIC=Y SUITES=FV3_GFS_2017\'")
 }
 
 build fv3_32bit.exe {
@@ -443,7 +443,7 @@ test fv3_ccpp_control: fv3_ccpp_control.exe {
            '*configure' <=copyfrom= "@[FV3_input_data]"
                 'INPUT' <=copy=     "@[FV3_input_data]/INPUT"
   'global_o3prdlos.f77' <=copy= "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
-       'ccpp_suite.xml' <=copy= "@[HOMEnems]/ccpp/suites/suite_FV3_GFS_2017_updated.xml"
+       'ccpp_suite.xml' <=copy= "@[HOMEnems]/ccpp/suites/suite_FV3_GFS_2017.xml"
     }
 
     # Specify output files:
