@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_gfdlmp" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_2017_stretched" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -63,7 +63,6 @@
       <scheme>gwdps_pre</scheme>
       <scheme>gwdps</scheme>
       <scheme>gwdps_post</scheme>
-      <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
@@ -84,7 +83,6 @@
       <scheme>gfdl_cloud_microphys</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
-      <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>
   <group name="stochastics">

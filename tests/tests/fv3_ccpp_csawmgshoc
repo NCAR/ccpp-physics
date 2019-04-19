@@ -63,7 +63,7 @@ export OUTPUT_FILE="'nemsio'"
 export WRITE_NEMSIOFLIP=.true.
 export WRITE_FSYNCFLAG=.true.
 
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_csawmgshoc.xml
+export CCPP_SUITE=FV3_GFS_2017_csawmgshoc
 export CCPP_LIB_DIR=ccpp/lib
 
 export NODES=$(expr $TASKS / $TPN + 1)

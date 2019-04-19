@@ -217,6 +217,9 @@ CAPS_CMAKEFILE = 'ccpp/physics/CCPP_CAPS.cmake'
 # Directory where to put all auto-generated physics caps
 CAPS_DIR = 'ccpp/physics/physics'
 
+# Directory where the suite definition files are stored
+SUITES_DIR = 'ccpp/suites'
+
 # Optional arguments - only required for schemes that use
 # optional arguments. ccpp_prebuild.py will throw an exception
 # if it encounters a scheme subroutine with optional arguments

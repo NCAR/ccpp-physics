@@ -79,7 +79,7 @@ DT_ATMOS="1200"
 export LGFDLMPRAD=.true.
 export EFFR_IN=.true.
 
-export CCPP_SDF=ccpp/suites/suite_FV3_GFS_2017_updated_gfdlmp.xml
+export CCPP_SUITE=FV3_GFS_2017_gfdlmp
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gfdlmp.nml.IN
 export FV3_RUN=ccpp_gfdlmp_run.IN
