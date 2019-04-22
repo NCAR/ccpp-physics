@@ -230,6 +230,10 @@ contains
       real(kind=kind_phys), dimension(:,:), allocatable :: den
       real(kind=kind_phys) :: onebg
       real(kind=kind_phys) :: tem
+#ifdef TRANSITION
+      real(kind=kind_phys), volatile :: volatile_var
+#endif
+
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -317,10 +321,17 @@ contains
       ! calculate fraction of frozen precipitation using unscaled
       ! values of rain0, ice0, snow0, graupel0 (for bit-for-bit)
       do i=1,im
+#ifdef TRANSITION
+        volatile_var = rain0(i)+snow0(i)+ice0(i)+graupel0(i)
+        prcp0(i) = volatile_var * tem
+        if ( volatile_var * tem > rainmin ) then
+          sr(i) = (snow0(i) + ice0(i)  + graupel0(i)) / volatile_var
+#else
         prcp0(i) = (rain0(i)+snow0(i)+ice0(i)+graupel0(i)) * tem
         if ( prcp0(i) > rainmin ) then
           sr(i) = (snow0(i) + ice0(i)  + graupel0(i)) &
                       / (rain0(i) + snow0(i) + ice0(i) + graupel0(i))
+#endif
         else
           sr(i) = 0.0
         endif
