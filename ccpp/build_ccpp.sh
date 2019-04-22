@@ -16,14 +16,15 @@ function usage   {
   echo "           ESMF_MK      [required] is the location/name of the ESMF makefile fragement"
   echo "           MAKE_OPT     [optional] can be any of the NEMSfv3gfs MAKE_OPT options,"
   echo "                                   enclosed in a single string; used:"
-  echo "                                   SION=Y/N   (default N)"
-  echo "                                   DEBUG=Y/N  (default N)"
-  echo "                                   REPRO=Y/N  (default N)"
-  echo "                                   TRANSITION=Y/N (default N)"
-  echo "                                   OPENMP=Y/N (default Y)"
-  echo "                                   HYBRID=Y/N (default Y)"
-  echo "                                   32BIT=Y/N  (default N, affects dynamics/fast physics only)"
-  echo "                                   STATIC=Y/N (default N, STATIC=Y requires HYBRID=N)"
+  echo "                                   SION=Y/N        (default N)"
+  echo "                                   DEBUG=Y/N       (default N)"
+  echo "                                   REPRO=Y/N       (default N)"
+  echo "                                   TRANSITION=Y/N  (default N)"
+  echo "                                   OPENMP=Y/N      (default Y)"
+  echo "                                   HYBRID=Y/N      (default Y)"
+  echo "                                   32BIT=Y/N       (default N, affects dynamics/fast physics only)"
+  echo "                                   STATIC=Y/N      (default N, STATIC=Y requires HYBRID=N)"
+  echo "                                   MULTI_GASES=Y/N (default N)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
   echo "           clean_after  [optional] can be 'YES' (default) or 'NO'"
   exit 1
@@ -127,6 +128,11 @@ if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
 else
   # Dynamic builds require linking the NCEPlibs, provide path to them
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNCEPLIBS_DIR=${NCEPLIBS_DIR}"
+fi
+if [[ "${MAKE_OPT}" == *"MULTI_GASES=Y"* ]]; then
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMULTI_GASES=ON"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMULTI_GASES=OFF"
 fi
 
 CCPP_CMAKE_FLAGS=$(trim "${CCPP_CMAKE_FLAGS}")
