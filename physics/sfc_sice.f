@@ -361,7 +361,7 @@
             iice(i) = 0
           endif
         enddo
-      else ! Uncoupled: use cimin
+      else ! Uncoupled
         do i = 1, im
           flag(i) = fice(i) >= cimin .and. flag_iter(i)
           if (flag_iter(i) .and. .not. flag(i)) then

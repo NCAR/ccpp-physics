@@ -380,8 +380,8 @@
 !               tem1 = max(Diag%q1(i), 1.e-8)
 !               rho = Statein%prsl(i,1) / (con_rd*Diag%t1(i)*(1.0+con_fvirt*tem1))
 !               if (wind(i) > 0.) then
-!                 Coupling%dusfci_cpl(i) = -1 * rho * stress_ocn(i) * Statein%ugrs(i,1) / wind(i) ! U-momentum flux
-!                 Coupling%dvsfci_cpl(i) = -1 * rho * stress_ocn(i) * Statein%vgrs(i,1) / wind(i) ! V-momentum flux
+!                 Coupling%dusfci_cpl(i) = -rho * stress_ocn(i) * Statein%ugrs(i,1) / wind(i) ! U-momentum flux
+!                 Coupling%dvsfci_cpl(i) = -rho * stress_ocn(i) * Statein%vgrs(i,1) / wind(i) ! V-momentum flux
 !               else
 !                 Coupling%dusfci_cpl(i) = 0.
 !                 Coupling%dvsfci_cpl(i) = 0.

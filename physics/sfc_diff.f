@@ -236,6 +236,7 @@
 !  surface roughness length is converted to m from cm
 !
       do i=1,im
+        ztmax_ocn = 0.; ztmax_lnd = 0.; ztmax_ice = 0.
         if(flag_iter(i)) then
           wind(i) = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))
      &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
@@ -258,7 +259,6 @@
 !  this portion of the code is presently suppressed
 !
 
-!          if(islimsk(i) == 0) then            ! over ocean
           if(iwet(i)==1 .and. covice(i)<1.) then ! some open ocean
             ustar_ocn(i) = sqrt(grav * z0_ocn / charnock)
 
@@ -278,7 +278,6 @@
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax_ocn  = z0max_ocn * exp(-rat)
           endif ! Open ocean
-!          else                                ! over land and sea ice
           if(idry(i)==1 .or. iice(i)==1) then ! over land and sea ice
 !** xubin's new z0  over land and sea ice
             tem1 = 1.0 - shdmax(i)
@@ -560,8 +559,8 @@
           cm        = ca * ca / (fm * fm)
           ch        = ca * ca / (fm * fh)
           tem1      = 0.00001/z1
-          cm    = max(cm, tem1)
-          ch    = max(ch, tem1)
+          cm        = max(cm, tem1)
+          ch        = max(ch, tem1)
           stress    = cm * wind * wind
           ustar     = sqrt(stress)
 
