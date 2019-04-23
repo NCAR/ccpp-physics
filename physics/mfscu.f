@@ -2,7 +2,8 @@
 !! This file contains 
 
 !>\ingroup satmedmf
-!! This subroutine is
+!! This subroutine computes mass flux and downdraft parcel properties
+!! for stratocumulus-top-driven turbulence.
       subroutine mfscu(im,ix,km,kmscu,ntcw,ntrac1,delt,                 &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,                             &
      &   thlx,thvx,thlvx,gdx,thetae,radj,                               &

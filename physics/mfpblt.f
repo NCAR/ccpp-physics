@@ -1,8 +1,13 @@
 !>\file mfpblt.f
-!! This file contains
+!! This file contains the subroutine that calculates mass flux and
+!! updraft parcel properties for thermals driven by surface heating 
+!! for use in the TKE-EDMF PBL scheme.
 
 !>\ingroup satmedmf
-!! This subroutine  
+!! This subroutine computes mass flux and updraft parcel properties for
+!! thermals driven by surface heating. 
+!!\param
+!!
       subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
      &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &
