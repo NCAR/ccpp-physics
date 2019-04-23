@@ -855,8 +855,8 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         if (fix_negative) &
             call neg_adj (ktop, kbot, tz, dp1, qvz, qlz, qrz, qiz, qsz, qgz)
 
-        m2_rain (:, :) = 0.
-        m2_sol (:, :) = 0.
+        m2_rain (i, :) = 0.
+        m2_sol (i, :) = 0.
 
         !> - Do loop on cloud microphysics sub time step.
         do n = 1, ntimes
@@ -941,6 +941,10 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
                 denfac, vtsz, vtgz, vtrz, qaz, rh_adj, rh_rain, dts, h_var)
 
         enddo
+
+        ! convert units from Pa*kg/kg to kg/m^2/s
+        m2_rain (i, :) = m2_rain (i, :) * rdt * rgrav
+        m2_sol (i, :) = m2_sol (i, :) * rdt * rgrav
 
         ! -----------------------------------------------------------------------
         !> - Calculate momentum transportation during sedimentation.
