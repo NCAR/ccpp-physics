@@ -1,4 +1,4 @@
-!>\file module_mp_thompson_hrrr_radar.F90
+!>\file module_mp_radar.F90
 !! This set of routines facilitates computing radar reflectivity.
 
 !>\ingroup thompson

@@ -1,0 +1,73 @@
+/**
+\page allscheme_page CCPP V3.0 Physics Parameterizations 
+
+\section allscheme_overview Overview
+In the CCPP-Physics v3.0 code, each parameterization is placed in its own modern Fortran module, which facilitates model development and
+code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
+parameterizations in suites. 
+
+
+- For PBL and turbulence parameterizations
+ - \ref GFS_HEDMF
+ - \ref GFS_SATMEDMF
+ - \ref GSD_MYNNEDMF
+
+- For land surface model
+ - \ref GFS_NOAH
+ - \ref GSD_RUCLSM
+
+- For cumulus parameterizations:
+ - \ref CSAW_deep
+ - \ref GFS_SAMFdeep
+ - \ref GSD_GFDEEP
+
+
+ - \subpage GFS_RRTMG
+ - \subpage GFS_SFCLYR
+ - \subpage GFS_NSST
+ - \subpage GFS_NOAH
+ - \subpage GFS_SFCSICE
+ - \subpage GFS_HEDMF
+ - \subpage GFS_SATMEDMF
+ - \subpage GFS_GWDPS
+ - \subpage GFS_RAYLEIGH
+ - \subpage GFS_OZPHYS
+ - \subpage GFS_H2OPHYS
+ - \subpage GFS_SAMFdeep
+ - \subpage CSAW_deep
+ - \subpage GFS_GWDC
+ - \subpage GFS_SAMFshal
+ - \subpage GFDL_cloud
+ - \subpage GFS_ZHAOC
+ - \subpage GFS_CALPRECIPTYPE
+ - \subpage fast_sat_adj
+ - \subpage RAD_CLD
+ - \subpage STOCHY_PHYS
+ - \subpage CSAW_deep
+ - \subpage CPT_MG3
+ - \subpage GSD_MYNNEDMF
+ - \subpage GSD_CU_GF_deep
+ - \subpage GSD_RUN_LSM
+
+In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
+ - \subpage func_phys
+ - \subpage phy_sparam
+ - \subpgae physcons
+ - \subpage radcons
+
+The parameterizations included in the CCPP-Physics v3.0 are all column-based, that is, computations are performed only in the vertical.
+The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
+specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
+ dynamical tendencies for the same variables and various surface fields, both fixed and variable.
+
+The time integration of the GFS physics suite is based on the following:
+- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines;
+- The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer,
+orographic gravity wave drag, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting (Donahue and Caldwell(2018)
+\cite donahue_and_caldwell_2018), a method in which the various parameterizations use the same model state as input but feel the effect of the preceding
+parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
+- The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric \f$H_2O\f$, deep convection, convective gravity wave drag,
+shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
+to the parameterization.
+
+*/

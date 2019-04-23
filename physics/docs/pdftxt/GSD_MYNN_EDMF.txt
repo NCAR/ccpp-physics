@@ -1,0 +1,62 @@
+/**
+\page GSD_MYNNEDMF GSD MYNN-EDMF Boundary Layer and Shallow Cloud Scheme
+\section mynnedmf_descrip  Description
+
+The Mellor-Yamada-Nakanishi-Niino (MYNN) eddy diffusivity mass-flux
+(EDMF) boundary layer and shallow cloud scheme belong to the family of
+eddy diffusivity mass-flux schemes for vertical turbulent mixing in
+mesoscale models. While it is commonly called "PBL scheme,"it is worth
+noting that they are responsible for all vertical turbulent mixing, not
+only that occurring in the planetary boundary  layer. EDMF schemes
+provide  a natural, physically appealing way to handle the problem of
+nonlocal transport in the convective boundary layer, and a natural
+expression of the connection between dry thermals and cumulus clouds.
+Because shallow cumulus schemes are part of the boundary layer, the
+preferred solution is an integrated boundary layer and shallow cumulus
+scheme rather than separate schemes (Arakawa(2004) \cite Arakawa_2004).
+Using EMF, there is no need for a triggering condition for cumulus
+clouds to form, or for a closure formulation at cloud base. 
+
+Chatfield and Brost (1987) may have been the first to combine eddy
+diffusivity, commonly used for PBL mixing, with mass flux, commonly used
+to represent the vertical transport within cumulus clouds. Since about
+the year 2000, many EDMF schemes have been developed (Angevine 2005;
+Hourdin et al. 2002; Pergaud et al. 2009; Rio and Hourdin 2008; Siebesma
+and Teixeira 2000; Siebesma et al. 2007; Neggers et al. 2009;
+Su \&scaron elj et al. 2012,2013,2014) and several have been implemented in
+operational models including the ECMWF Integrated Forecast System
+(K \&ouml hler et al.2011), the U.S. Navy Global Environmental Model
+(Su \&scaron elj et al. 2014), and the NCEP GFS (Han et al. 2016).
+
+MYNN-EDMF is an enhancement of the Mellor-Yamada-Nakanishii-Niino PBL 
+
+Goal: unif
+shallow :
+
+
+\section intra_mynnpbl Intraphysics Communication
+\ref arg_table_mynnedmf_wrapper_run
+
+\section gen_mynnedmf_conv GSD MYNN-EDMF Scheme  General Algorithm
+Within the MYNN-EDMF, there is a dependecy check for the first time step. If true.
+a three-dimensional initialization loop is entered. within this loop, several arrays
+are initialized in three subroutines below:
+- get_pblh(): calculates the hybrid \f$\theta_{vli}-TKE\f$ PBL height
+- scale_aware(): calculates the similarity functions, \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$,
+  to control the scale-adaptive behavior for the local and nonlocal components, respectively
+- mym_initialize(): initializes the mixing length, TKE, \f$\theta^{'2}\f$,\f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
+These variables are calculated after obtaining prerequisite variables by calling the following subroutines from 
+within mym_initialize():
+  - mym_level2(): caluclates the level 2, non-dimensional wind shear \f$G_{M}\f$ and vertical temperature
+gradient \f$G_{H}\f$ as well as the level 2 stability functions \f$S_{h}\f$ and \f$S_{m}\f$
+  - mym_length(): calculates the mixing lengths
+
+After initializing all required variables, the regular procedures performed at every time step are ready
+for execution. The main subroutine mynn_bl_driver() encompasses the majority of the subroutines that comprise
+the procedures that ultimately solve for tendencies of \f$U\f$, \f$V\f$, \f$\theta\f$, \f$q_v\f$, \f$q_c\f$,
+and \f$q_i\f$. Figure 1 shows the full order of procedure/subroutines called within mynn_bl_driver().
+
+\image html  MYNN-EDMF_call_order.png "Figure.The order of subroutines within the MYNN-EDMF. The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=10cm
+\ref gen_mynn_bl_driver
+
+*/

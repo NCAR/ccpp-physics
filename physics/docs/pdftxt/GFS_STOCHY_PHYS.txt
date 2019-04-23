@@ -1,5 +1,5 @@
 /**
-\page STOCHY_PHYS FV3GFS Stochastic Physics
+\page STOCHY_PHYS GFS Stochastic Physics
 \section des_stochy Description
 Quantification of forecast uncertainties became established in operational numerical weather prediction (NWP) in the 1990s
 using ensemble forecasting techniques (Lewis(2005) \cite Lewis_2005). Building an ensemble forecast system requires the 

@@ -1,0 +1,13 @@
+/**
+\page GSD_RUC_LSM GSD RUN Land Surface Model
+\section ruclsm_descrip  Description
+
+--PLACEHOLDER
+
+\section intra_ruclsm Intraphysics Communication
+\ref arg_table_ruclsm_run
+
+\section gen_ruclsm General Algorithm
+\ref general_ruclsm
+
+*/

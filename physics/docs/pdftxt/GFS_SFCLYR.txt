@@ -1,5 +1,5 @@
 /**
-\page GFS_SFCLYR FV3GFS Surface Layer Scheme
+\page GFS_SFCLYR GFS Surface Layer Scheme
 \section des_rough  Description
 
  The lowest model layer is assumed to be the surface layer and apply the 

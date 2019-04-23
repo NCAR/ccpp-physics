@@ -1,0 +1,19 @@
+/**
+\page GFS_SATMEDMF GFS Scale-aware TKE-based Moist Eddy-Diffusion Mass-Flux (EDMF) PBL and Free Atmospheric Turbulence Scheme
+\section des_satmedmf Description
+
+TKE-EDMF is an extended version of \ref GFS_HEDMF (currently operational vertical turbulent mixing schemel) with below advancement:
+-# eddy diffusivity (K) is now a function of TKE which is prognostically predicted.
+-# EDMF approach is appled for all the unstable PBL (in \ref GFS_HEDMF, it is applied only for strongly unstable PBL) 
+-# EDMF approach is also applied to the stratocumulus-top-driven turbulence mixing
+-# it includes a moist-adiabatic process when updraft thermal becomes saturated
+-# it has a scale-aware capability
+-# it includes interaction between TKE and cumulus convection
+
+\section intra_satmedmf Intraphysics Communication
+\ref arg_table_satmedmfvdif_run
+
+\section gen_pbl  General Algorithm
+\ref gen_satmedmfvdif
+
+*/

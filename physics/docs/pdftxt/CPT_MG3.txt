@@ -1,5 +1,5 @@
 /**
-\page Morrison-Gettelman version 3 Cloud Microphysics Scheme (MG3)
+\page CPT_MG3 CPT MG3 Cloud Microphysics Scheme 
 \section des_MG3_cloud Description
 MG3 microphysics (MP) scheme is a six-category double momentum bulk scheme. It forecasts mass of ten 
 hydrometeors (cloud water, cloud ice, rain, snow and graupel) and their number concentrations in addition to mass of water vapor.
@@ -7,7 +7,7 @@ hydrometeors (cloud water, cloud ice, rain, snow and graupel) and their number c
 \cite Gettelman_et_al_2015. 
 Physics processes of MG3 cloud MP are described in Figure 1. 
 
-\image  html  MG3_MP_diagram.GIF "Figure: MG3 MP at a glance" width=10cm
+\image  html  MG3_MP_diagram.png "Figure: MG3 MP at a glance" width=10cm
 
 Some unique attributes of MG3 cloud microphysics include:
 

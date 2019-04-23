@@ -1,5 +1,5 @@
 /**
-\page GFS_HEDMF FV3GFS Hybrid Eddy-Diffusivity Mass-Flux PBL and Free Atmospheric Turbulence Scheme
+\page GFS_HEDMF GFS Hybrid Eddy-Diffusivity Mass-Flux PBL and Free Atmospheric Turbulence Scheme
 \section des_pbl Description
 The Hybrid EDMF scheme is a first-order turbulent transport 
 scheme used for subgrid-scale vertical turbulent mixing in the PBL 

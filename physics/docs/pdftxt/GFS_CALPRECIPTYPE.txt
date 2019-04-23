@@ -1,5 +1,5 @@
 /**
-\page GFS_CALPRECIPTYPE FV3GFS Precipitation Type Diagnosis Scheme
+\page GFS_CALPRECIPTYPE GFS Precipitation Type Diagnosis Scheme
 \section des_calprecip  Description
 The forecast of precipitation type from operational numerical weather prediction models can have a substantial impact on 
 downstream users, such as those concerned with air and

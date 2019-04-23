@@ -26,7 +26,7 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup satmedmf FV3GFS satmedmfvdif Main
+!> \defgroup satmedmf GFS satmedmfvdif Main
 !! @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
@@ -95,7 +95,7 @@
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-!>\section gen_satmedmfvdif FV3GFS satmedmfvdif General Algorithim
+!>\section gen_satmedmfvdif GFS satmedmfvdif General Algorithm
       subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &

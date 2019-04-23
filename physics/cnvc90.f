@@ -12,7 +12,7 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-!>\defgroup GFS_cnvc90 FV3GFS cnvc90 Module
+!>\defgroup GFS_cnvc90 GFS cnvc90 Main
 !! This module contains the calculation of fraction of convective cloud,
 !! pressure at bottom of convective cloud and at top of convective
 !! cloud.

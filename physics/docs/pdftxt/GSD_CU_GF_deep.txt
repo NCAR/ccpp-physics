@@ -1,5 +1,5 @@
 /**
-\page MYNN-EDMF_scheme MYNN-EDMF Boundary Layer and Shallow Cloud Scheme
+\page GSD_CU_GF_deep GSD Grell-Freitas Deep Convection Scheme
 \section mynnedmf_descrip  Description
 
 The Mellor-Yamada-Nakanishi-Niino (MYNN) eddy diffusivity mass-flux

@@ -165,54 +165,9 @@ module cs_conv
 !>---------------------------------------------------------------------------------
 ! Purpose:
 !
-! Interface for Chikira-Sugiyama convection scheme 
-!
-! Author: Minoru Chikira
-! History:
-!  June 26 2014  D. Dazlich - Modified for GFS
-!  Apr 10 2015 : S. Moorthi - check for allocatable arrays and fix argument for cbmfx
-!  Oct    2015 : D. Dazlich - Add computation of updraft area fraction (sigma) for
-!                             diagnostic purposes.
-!  Aug    2016 : D. Dazlich - Create flux form of tendencies and multiply by
-!                             Arakawa-Wu functions of sigma
-!  Sep    2016 : S. Moorthi - found two bugs - cleanup and some optimization
-!  Oct    2016 : S. Moorthi - added sigma affects on tracers and CUMFLX and CUMDET
-!                             made many cosmetic changes
-!  Nov    2016 : S. Moorthi - further optimization and cleanup and several bug fixes
-!  April  2017 : S. moorthi - many changes including removing elam and making gcym
-!                             a function of cloud type.  This makes it possible for
-!                             AW affect propagate to other routines such as CUMUPR
-! Apr 12, 2017 : S. Moorthi   Added flx_form logical and relevant code to compute AW
-!                             without flux form when false.
-! May 17, 2017 : S. Moorthi - Added routine CUMSBW for just momentum change
-!                             in advective form
-! Sep 08, 2017 : D. Dazlich - tracers in flux form for AW
-! Nov --  2017 : S. Moorthi - fix some bugs and fix fluxform for tracers
-! Nov 22  2017 : S. Moorthi - add kcnv array to identify points where deep convection
-!                             operates - 0 - no convection 1 - with convection
-! Jan 30 2018  : S, Moorthi - fixed sigmad dimension error in CUMDWN and an error when adjustp=.true.
-!
-! May -- 2018  : S. Moorthi - modified cumup to compute total workfunction (positive plus negative)
-!                             and negative part only and to let a particular ensemble exist only if
-!                             the ratio of negative to total is less than some prescribed percent.
-!                             Also, added an extra iteration in this k loop. Reduced some memory.
-! June   2018  : S. Moorthi - the output mass fluxes ud_mf, dd_mf and dt_mf are over time step delta
-!
-!  Arakawa-Wu implemtation: for background, consult An Introduction to the 
-!      General Circulation of the Atmosphere, Randall, chapter six.
-!    Traditional parameterizations compute tendencies like those in eq 103, 105 and 106.
-!    Because Arakawa-Wu applies different functions to different components to the
-!    terms within these equations, it requires the terms used in alternate eqns 91 - 93.
-!    The code required to compute these terms is added within, and the appropriate
-!    functions of updraft area fraction (sigma) are applied. Thus, AW requires three
-!    steps:
-!       computation of the updraft area fraction
-!       alternative representation of the tendency terms
-!       application of functions of sigma to the alternative tendency terms
-!       here, and in gbphys to the large-scale microphysics tendencies.
-!
-!  The bulk of AW is implemented within subroutine CS_CUMLUS, and the routines it calls.
-!
+!> Interface for Chikira-Sugiyama convection scheme 
+!!
+!! Author: Minoru Chikira
 !---------------------------------------------------------------------------------
 !
   use machine ,   only : r8    => kind_phys
@@ -234,26 +189,26 @@ module cs_conv
                           elocp=el/cp, oneocp=one/cp, gocp=grav/cp, gravi=one/grav,&
                           emeltocp=emelt/cp, cpoemelt=cp/emelt, epsln=1.e-10_r8
 
-   real(r8), parameter :: fact1=(cvap-cliq)/rvap, fact2=el/rvap-fact1*t0c ! to calculate d(qs)/dT
+   real(r8), parameter :: fact1=(cvap-cliq)/rvap, fact2=el/rvap-fact1*t0c !< to calculate d(qs)/dT
 
    logical,  parameter :: adjustp=.true.
 !  logical,  parameter :: adjustp=.false.
 
 ! Tuning parameters set from namelist
 !
-!  real(r8), parameter, public :: CLMD = 0.60,   & ! entrainment efficiency (now thru argument)
+!  real(r8), parameter, public :: CLMD = 0.60,   & !< entrainment efficiency (now thru argument)
    real(r8), parameter, public ::                &
-                                  PA=0.15,       & ! factor for buoyancy to affect updraft velocity
-                                  CPRES = 0.55,  & ! pressure factor for momentum transport
-                                  ALP0 = 5.0e7,  & ! alpha parameter in prognostic closure
-!                                 ALP0 = 8.0e7,  & ! alpha parameter in prognostic closure
+                                  PA=0.15,       & !< factor for buoyancy to affect updraft velocity
+                                  CPRES = 0.55,  & !< pressure factor for momentum transport
+                                  ALP0 = 5.0e7,  & !< alpha parameter in prognostic closure
+!                                 ALP0 = 8.0e7,  & !< alpha parameter in prognostic closure
 !                                 CLMP = (one-CLMD)*(PA+PA), &
 !                                 CLMDPA = CLMD*PA,          &
-                                  spblmin=0.05, &  ! minimum cloudbase height in p/ps
-                                  spblmax=0.30, &  ! maximum cloudbase height in p/ps
-!                                 spblcrit=0.03, & ! minimum cloudbase height in p/ps
-!                                 spblcrit=0.035,& ! minimum cloudbase height in p/ps
-!                                 spblcrit=0.025,& ! minimum cloudbase height in p/ps
+                                  spblmin=0.05, &  !< minimum cloudbase height in p/ps
+                                  spblmax=0.30, &  !< maximum cloudbase height in p/ps
+!                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
+!                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
+!                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
                                   cincrit=-150.0
 !                                 cincrit=-120.0
 !                                 cincrit=-100.0
@@ -267,7 +222,7 @@ module cs_conv
 !
   real(r8), parameter     :: unset_r8 = -999._r8   ! missing value
 !
-  integer :: iulog ! unit to write debugging and diagnostic output
+  integer :: iulog !< unit to write debugging and diagnostic output
                    !DD Note - see if I can find corresponding variable in a GFS module
 !
 ! Shared variables
@@ -301,9 +256,57 @@ module cs_conv
    subroutine cs_conv_finalize()
    end subroutine cs_conv_finalize
 
-!>\defgroup cs_scheme FV3GFS Chikira-Sugiyama Cumulus Scheme Module
+!>\defgroup cs_scheme CPT Chikira-Sugiyama Cumulus Scheme Module
 !! @{
-!> \brief The subroutine contains the entirety of the CS convection scheme.
+!> \brief The subroutine contains the main driver for Chikira-Sugiyama convective scheme.
+!!
+!! \author Minoru Chikira
+!!
+!! History:
+!! - Jun 26 2014 : D. Dazlich - Modified for GFS
+!! - Apr 10 2015 : S. Moorthi - check for allocatable arrays and fix argument for cbmfx
+!! - Oct    2015 : D. Dazlich - Add computation of updraft area fraction (sigma) for
+!!                             diagnostic purposes.
+!! - Aug    2016 : D. Dazlich - Create flux form of tendencies and multiply by
+!!                             Arakawa-Wu functions of sigma
+!! - Sep    2016 : S. Moorthi - found two bugs - cleanup and some optimization
+!! - Oct    2016 : S. Moorthi - added sigma affects on tracers and CUMFLX and CUMDET
+!!                             made many cosmetic changes
+!! - Nov    2016 : S. Moorthi - further optimization and cleanup and several bug fixes
+!! - April  2017 : S. moorthi - many changes including removing elam and making gcym
+!!                             a function of cloud type.  This makes it possible for
+!!                             AW affect propagate to other routines such as CUMUPR
+!! - Apr 12, 2017 : S. Moorthi - Added flx_form logical and relevant code to compute AW
+!!                             without flux form when false.
+!! - May 17, 2017 : S. Moorthi - Added routine CUMSBW for just momentum change
+!!                             in advective form
+!! - Sep 08, 2017 : D. Dazlich - tracers in flux form for AW
+!! - Nov     2017 : S. Moorthi - fix some bugs and fix fluxform for tracers
+!! - Nov 22  2017 : S. Moorthi - add kcnv array to identify points where deep convection
+!!                             operates - 0 - no convection 1 - with convection
+!! - Jan 30 2018  : S. Moorthi - fixed sigmad dimension error in CUMDWN and an error when adjustp=.true.
+!! - May    2018  : S. Moorthi - modified cumup to compute total workfunction (positive plus negative)
+!!                             and negative part only and to let a particular ensemble exist only if
+!!                             the ratio of negative to total is less than some prescribed percent.
+!!                             Also, added an extra iteration in this k loop. Reduced some memory.
+!! - June   2018  : S. Moorthi - the output mass fluxes ud_mf, dd_mf and dt_mf are over time step delta
+!!
+!! \b Arakawa-Wu \b implemtation: 
+!! for background, consult An Introduction to the
+!! General Circulation of the Atmosphere, Randall, chapter six.
+!! Traditional parameterizations compute tendencies like those in eq 103, 105 and 106.
+!! Because Arakawa-Wu applies different functions to different components to the
+!! terms within these equations, it requires the terms used in alternate eqns 91 - 93.
+!! The code required to compute these terms is added within, and the appropriate
+!! functions of updraft area fraction (sigma) are applied. Thus, AW requires three
+!! steps:
+!! -# computation of the updraft area fraction
+!! -# alternative representation of the tendency terms
+!! -# application of functions of sigma to the alternative tendency terms
+!!  here, and in gbphys to the large-scale microphysics tendencies.
+!!
+!!  The bulk of AW is implemented within subroutine CS_CUMLUS, and the routines it calls.
+!!
 !!
 !! JLS NOTE:  The convective mass fluxes (dt_mf, dd_mf and ud_mf) passed in and out of cs_conv have not been multiplied by
 !!            the timestep (kg/m2/sec) as they are in all other convective schemes.  EMC is aware of this problem, 
@@ -367,13 +370,8 @@ module cs_conv
 !! | errmsg     | ccpp_error_message                                        | error message for error handling in CCPP                                                              | none       |    0 | character | len=*     | out    | F        |
 !! | errflg     | ccpp_error_flag                                           | error flag for error handling in CCPP                                                                 | flag       |    0 | integer   |           | out    | F        |
 !!
-!>  \section general_cs_conv CS Convection Scheme General Algorithm
-!!  -# Add comments
-!!
-!!  \section detailed_cs_conv CS Convection Scheme Detailed Algorithm
-!!  @{
-
-!---------------------------------------------------------------------------------
+!!  \section general_cs_conv CS Convection Scheme General Algorithm
+!> @{
    subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , ntracp1 , NN,       &
                           NTR    , nctp   ,                                 & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
@@ -384,69 +382,59 @@ module cs_conv
                           cbmfx  , mype   ,  wcbmaxm  , precz0in, preczhin, &
                           clmdin , sigma  , do_aw     , do_awdd , flx_form, &
                           lprnt  , ipr, kcnv,                               &
-! for coupling to MG microphysics
-                          QLCN, QICN, w_upi, cf_upi, CNV_MFD,               &
-!                          QLCN, QICN, w_upi, cf_upi, CNV_MFD, CNV_PRC3,    &
+                          QLCN, QICN, w_upi, cf_upi, CNV_MFD,               & ! for coupling to MG microphysics
                           CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,       &
                           mp_phys,errmsg,errflg)
 
-!---------------------------------------------------------------------------------
-! Purpose:
-!
-! Main driver for Chikira-Sugiyama convective scheme 
-!
-! Author: Minoru Chikira
-!
-!---------------------------------------------------------------------------------
 
    implicit none
 !
 ! input arguments
 !
    INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, NN, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(ntracp1,2)   !< otspt(:,1) - on/off switch for tracer transport by updraft and
-                                                 !!              downdraft. should not include subgrid PDF and turbulence
-                                                 !! otspt(:,2) - on/off switch for tracer transport by subsidence
-                                                 !!              should include subgrid PDF and turbulence
+   logical, intent(in)     :: otspt(ntracp1,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
+                                                 !              downdraft. should not include subgrid PDF and turbulence
+                                                 ! otspt(:,2) - on/off switch for tracer transport by subsidence
+                                                 !              should include subgrid PDF and turbulence
 
-   real(r8), intent(inout) :: t(IM,KMAX)          !< temperature at mid-layer (K)
-   real(r8), intent(inout) :: q(IM,KMAX)          !< water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,NN)     !< tracer array including cloud condensate (kg/kg)
-   real(r8), intent(in)    :: pap(IM,KMAX)        !< pressure at mid-layer (Pa)
-   real(r8), intent(in)    :: paph(IM,KMAX+1)     !< pressure at boundaries (Pa)
-   real(r8), intent(in)    :: zm(IM,KMAX)         !< geopotential at mid-layer (m)
-   real(r8), intent(in)    :: zi(IM,KMAX+1)       !< geopotential at boundaries (m)
+   real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
+   real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
+   real(r8), intent(inout) :: clw(IM,KMAX,NN)     ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
+   real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
+   real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
+   real(r8), intent(in)    :: zi(IM,KMAX+1)       ! geopotential at boundaries (m)
    real(r8), intent(in)    :: fscav(ntr), fswtr(ntr), wcbmaxm(ijsdim)
    real(r8), intent(in)    :: precz0in, preczhin, clmdin
 ! added for cs_convr
-   real(r8), intent(inout) :: u(IM,KMAX)          !< zonal wind at mid-layer (m/s)
-   real(r8), intent(inout) :: v(IM,KMAX)          !< meridional wind at mid-layer (m/s)
+   real(r8), intent(inout) :: u(IM,KMAX)          ! zonal wind at mid-layer (m/s)
+   real(r8), intent(inout) :: v(IM,KMAX)          ! meridional wind at mid-layer (m/s)
    
-   real(r8), intent(in)    :: DELTA               !< physics time step
-   real(r8), intent(in)    :: DELTI               !< dynamics time step (model time increment in seconds)
+   real(r8), intent(in)    :: DELTA               ! physics time step
+   real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
    logical,  intent(in)    :: do_aw, do_awdd, flx_form
 !
 ! modified arguments
 !
-   real(r8), intent(inout) :: CBMFX(IM,nctp)      !< cloud base mass flux (kg/m2/s)
+   real(r8), intent(inout) :: CBMFX(IM,nctp)      ! cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
-!>  updraft, downdraft, and detrainment mass flux (kg/m2/s)
+!  updraft, downdraft, and detrainment mass flux (kg/m2/s)
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
-   real(r8), intent(out)   :: rain1(IJSDIM)       !< lwe thickness of deep convective precipitation amount (m)
+   real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
    real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd, cnv_prc3,&
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
-   integer, intent(inout) :: kcnv(im)             !< zero if no deep convection and 1 otherwise
+   integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
 !DDsigma - output added for AW sigma diagnostics
 !  interface sigma and vertical velocity by cloud type (1=sfc) 
 !  real(r8), intent(out), dimension(IM,KMAX,nctp)  :: sigmai, vverti
-   real(r8), intent(out), dimension(IM,KMAX)       :: sigma  !< sigma  sigma totaled over cloud type - on interfaces (1=sfc)
+   real(r8), intent(out), dimension(IM,KMAX)       :: sigma  ! sigma  sigma totaled over cloud type - on interfaces (1=sfc)
 !   sigma  terms in eq 91 and 92
 !  real(r8), dimension(IM,KMAX)                    :: sfluxterm, qvfluxterm, condterm
 !DDsigma
@@ -573,7 +561,7 @@ module cs_conv
 !
 !***************************************************************************************
 !
-! calculate temperature at interfaces
+!> - Calculate temperature at interfaces.
 !
 
    DO K=2,KMAX
@@ -590,7 +578,7 @@ module cs_conv
      GDTM(I,1)      = GDT(I,1)        ! Is this a good approximation ? - Moorthi
    ENDDO
 
-!DDsigma - initialize the sigma diagnostics
+!> - Initialize the sigma diagnostics.
    do n=1,nctp
      do k=1,kmax
        do i=ists,iens
@@ -604,7 +592,7 @@ module cs_conv
      enddo
    enddo
 !
-!***************************************************************************************
+!> - Call cs_cumlus() for CS cumulus parameterization.
    call CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    &  !DD dimensions
                    otspt(1:ntr,1), otspt(1:ntr,2),    &
                    lprnt , ipr   ,                    &
@@ -737,7 +725,7 @@ module cs_conv
      endif
    enddo
 
-! multiplying mass fluxes by the time step
+!> - Multiplying mass fluxes by the time step
 
    do k=1,kmax
      do i=1,ijsdim
@@ -764,36 +752,41 @@ module cs_conv
 !    endif
 
    end subroutine cs_conv_run
+!> @}
 
 
 !************************************************************************
-!* Original source code in MIROC5
-!*
-!* PACKAGE PCUMC  !!  physics: cumulus parameterization with
-!*                             state-dependent entrainment rate
-!*                             developed by Minoru Chikira
-!* [Note]
-!* -This routine works as the prognostic Arakawa-Schubert scheme
-!*  if OPT_ASMODE is specified.
-!* -Specify OPT_NS02 to use entrainment rate of Neggers et al. (2002)
-!* -Specify OPT_CUMBGT to check water and energy budget.
-!* -Specify OPT_CUMCHK to check range of output values.
-!*
-!*   [HIS] 08/09/19(chikira)   MIROC4.1
-!*         08/10/30(hiro)      CMT modified
-!*         08/11/11(chikira)   Neggers et al. (2002)
-!*         08/12/3 (chikira)   downdraft detrainment modified
-!*         08/12/3 (chikira)   COSP output
-!*         09/02/24(chikira)   fix convective inhibition
-!*         09/04/16(hiro)      CMIP5 output (cbasep,ctopp)
-!*         09/09/03(yokohata)  COSP
-!*         10/11/19(toshi)     small bug fix
-!*         14/02/07(chikira)   CUMDWN bug fix, CMT modified
-!************************************************************************
-! cumulus main routine
-! --------------------
-!> This subroutine includes cumulus parameterization with state-dependent
-!! entrainment rate developed by Minoru Chikira.
+!>\ingroup cs_scheme
+!! This subroutine includes cumulus parameterization with
+!! state-dependent entrainment rate developed by Minoru Chikira.
+!! \n Note
+!! -This routine works as the prognostic Arakawa-Schubert scheme
+!!  if OPT_ASMODE is specified.
+!! -Specify OPT_NS02 to use entrainment rate of Neggers et al. (2002)
+!! -Specify OPT_CUMBGT to check water and energy budget.
+!! -Specify OPT_CUMCHK to check range of output values.
+!!
+!! History:
+!! - 08/09/19(chikira)   MIROC4.1
+!! - 08/10/30(hiro)      CMT modified
+!! - 08/11/11(chikira)   Neggers et al. (2002)
+!! - 08/12/3 (chikira)   downdraft detrainment modified
+!! - 08/12/3 (chikira)   COSP output
+!! - 09/02/24(chikira)   fix convective inhibition
+!! - 09/04/16(hiro)      CMIP5 output (cbasep,ctopp)
+!! - 09/09/03(yokohata)  COSP
+!! - 10/11/19(toshi)     small bug fix
+!! - 14/02/07(chikira)   CUMDWN bug fix, CMT modified
+!!
+!!\param[in] im
+!!\param[in] ijsdim
+!!\param[in] kmax
+!!\param[in] ntr
+!!\param[in] otspt1
+!!\param[in] otspt2
+!!\param[in] lprnt
+!!\param[in] ipr
+!!\param[in] flx_form  switch to apply Arakawa-Wu to the tendencies
    SUBROUTINE CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    & !DD dimensions
                          otspt1, otspt2, lprnt , ipr   ,    &
                          GTT   , GTQ   , GTU   , GTV   ,    & ! output
@@ -838,7 +831,7 @@ module cs_conv
 
 !DDsigma - output added for AW sigma diagnostics
 ! sigma and vert. velocity as a function of cloud type (1==sfc)
-   real(r8), intent(out), dimension(IM,KMAX)        :: sigma       !DDsigma sigma totaled over cloud type - on interfaces (1=sfc)
+   real(r8), intent(out), dimension(IM,KMAX)        :: sigma       !sigma totaled over cloud type - on interfaces (1=sfc)
    real(r8), intent(out), dimension(IM,KMAX,nctp)   :: vverti
 
 ! for computing AW flux form of tendencies
@@ -972,7 +965,7 @@ module cs_conv
 ! tendency profiles - condensation heating, condensation moistening, heating due to
 !                     freezing, total precip production, frozen precip production
    REAL(r8), dimension(ijsdim,Kmax)   :: dtcondtem, dqcondtem, dtfrztem, dqprectem,& ! Moorthi
-                                         dfrzprectem, lamdaprod ! product of (1+lamda) through cloud type ctp
+                                         dfrzprectem, lamdaprod !< product of (1+lamda) through cloud type ctp
    REAL(r8), dimension(ijsdim,Kmax)   :: dtevap, dqevap, dtmelt, dtsubl
 
 ! factor to modify precip rate to force conservation of water. With bug fixes it's
@@ -1138,7 +1131,7 @@ module cs_conv
 !DDsigma - arguments added to get subcloud profiles in updraft
 !          so AW eddy flux tendencies can be computed
 
-!! Cloud Base properties
+! Call cumbas() to compute cloud base properties.
    CALL CUMBAS(IJSDIM, KMAX  ,                           & !DD dimensions
                KB    , GCYM(1,1,1)  , KBMX  ,            & ! output
                ntr   , ntrq  ,                           &
@@ -1151,7 +1144,7 @@ module cs_conv
                ISTS  , IENS                  ,           & !)   ! input
                gctbl, gcqbl,gdq,gcwbl, gcqlbl, gcqibl, gctrbl) ! sub cloud tendencies
 !
-! Compute CAPE and CIN
+!> - Compute CAPE and CIN.
 !
      DO I=ISTS,IENS
        CAPE(i)  = zero
@@ -1216,12 +1209,12 @@ module cs_conv
 ! getting more incloud profiles of variables to compute eddy flux tendencies
 !    and condensation rates
 
-!! CUMUP computes In-cloud Properties
 
 ! DH* GNU crashes - check all arguments to CUMUP for their dimensions
 ! before and after CUMUP (i.e. here), and inside the routine, in
 ! particular: gctm, gcqm, gcwm, gchm, gcwt, gclm, gcim,gctrm
 ! also, inside, check that no reads/writes out of bounds occur *DH
+!> - Call cumup() to compute in-cloud properties.
      CALL CUMUP(IJSDIM, KMAX, NTR,   ntrq,                          & !DD dimensions
                 ACWF        ,                                       & ! output
                 GCLZ        , GCIZ        , GPRCIZ      , GSNWIZ,   & ! output
@@ -1242,8 +1235,7 @@ module cs_conv
                 gctm  , gcqm, gcwm, gchm, gcwt, gclm, gcim, gctrm,  & ! additional incloud profiles and cloud top total water
                 lprnt , ipr )
 !
-!> - Call CUMBMX() to compute Cloud Base Mass Flux.
-
+!> - Call cumbmx() to compute cloud base mass flux.
      CALL CUMBMX(IJSDIM, KMAX,                                      & !DD dimensions
                  CBMFX(1,CTP),                                      & ! modified
                  ACWF        , GCYT(1,CTP), GDZM     ,              & ! input
@@ -1431,7 +1423,7 @@ module cs_conv
 !                dfrzprectem(i,km1) = cbmfl * GSNWIZ(i,k)
                  dfrzprectem(i,km1) = tem * GSNWIZ(i,k)                  ! production of frozen precip
                  dtfrztem(i,km1)    = rhs_h*oneocp                       ! heating due to freezing
-! total temperature tendency due to in cloud microphysics
+!> - total temperature tendency due to in cloud microphysics
                  dtcondtem(i,km1)   = - elocp * dqcondtem(i,km1) + dtfrztem(i,km1)
 
              endif ! if(k > kbi) then
@@ -1446,14 +1438,14 @@ module cs_conv
        if (flx_form) then
          do k = 1,kk
            delpinv          = delpi(i,k)
-! sum single cloud microphysical tendencies over all cloud types
+!> - Sum single cloud microphysical tendencies over all cloud types
            condtermt(i,k)   = condtermt(i,k)   + dtcondtem(i,k)   * delpinv
            condtermq(i,k)   = condtermq(i,k)   + dqcondtem(i,k)   * delpinv
            prectermq(i,k)   = prectermq(i,k)   + dqprectem(i,k)   * delpinv
            prectermfrz(i,k) = prectermfrz(i,k) + dfrzprectem(i,k) * delpinv
            frzterm(i,k)     = frzterm(i,k)     + dtfrztem(i,k)    * delpinv
 
-! flux tendencies - compute the vertical flux divergence
+!> - flux tendencies - compute the vertical flux divergence
            sfluxterm(i,k)  = sfluxterm(i,k)  - (sfluxtem(k+1)  - sfluxtem(k))  * delpinv
            qvfluxterm(i,k) = qvfluxterm(i,k) - (qvfluxtem(k+1) - qvfluxtem(k)) * delpinv
            qlfluxterm(i,k) = qlfluxterm(i,k) - (qlfluxtem(k+1) - qlfluxtem(k)) * delpinv
@@ -1501,7 +1493,7 @@ module cs_conv
      enddo
 
 !
-!> - Call CUMFLX() to compute Cloud Mass Flux & Precip.
+!> - Call cumflx() to compute Cloud Mass Flux & Precip.
      CALL CUMFLX(IM    , IJSDIM, KMAX  ,                               & !DD dimensions
                  GMFX0 , GPRCI , GSNWI , CMDET,                        & ! output
                  QLIQ  , QICE  , GTPRC0,                               & ! output
@@ -1538,7 +1530,7 @@ module cs_conv
 !              CUMFRC,                                        & ! output
 !              GMFLX , KTMXT , ISTS  , IENS    )                ! input
 !
-! Cloud Detrainment Heating
+!> - Call cumdet() to compute cloud detrainment heating.
    if (.not. flx_form) then
      CALL CUMDET(im    , IJSDIM, KMAX  , NTR   , ntrq  ,      & !DD dimensions
                  GTT   , GTQ   ,         GTU   , GTV   ,      & ! modified
@@ -1561,7 +1553,7 @@ module cs_conv
      enddo
    enddo
 
-! cumulus downdraft - Melt & Freeze & Evaporation
+!> - Call cumdwn() to compute cumulus downdraft - Melt & Freeze & Evaporation.
    CALL CUMDWN(IM    , IJSDIM, KMAX  , NTR   , ntrq  ,   & ! DD dimensions
                GTT   , GTQ   , GTU   , GTV   ,           & ! modified
                        GMFLX ,                           & ! modified updraft+downdraft flux
@@ -1585,6 +1577,7 @@ module cs_conv
 !      enddo
 !    enddo
 
+!> - Call cumsbh() or cumsbw() to compute cloud subsidence heating.
    if (.not. flx_form) then
 !  Cloud Subsidence Heating
 !  -----------------------=
@@ -1731,7 +1724,7 @@ module cs_conv
 !    enddo
 !  enddo
 !
-! Tracer mass fixer without detrainment
+!> - Call cumfxr() for tracer mass fixer without detrainment.
    CALL CUMFXR(IM    , IJSDIM, KMAX  , NTR   ,           & !DD dimensions
                GTQ   ,                                   & ! modified
                GDQ   , DELP  , DELTA , KTMXT , IMFXR,    & ! input
@@ -1850,8 +1843,9 @@ module cs_conv
 !
       END SUBROUTINE CS_CUMLUS
 !***********************************************************************
-!> This subroutine calculates cloud base properties.
-      SUBROUTINE CUMBAS                            & !! cloud base
+!>\ingroup cs_scheme
+!! This subroutine calculates cloud base properties.
+      SUBROUTINE CUMBAS                            & !< cloud base
                ( IJSDIM, KMAX  ,                   & !DD dimensions
                  KB    , GCYM  , KBMX  ,           & ! output
                  ntr   , ntrq  ,                   &
@@ -1873,19 +1867,19 @@ module cs_conv
       logical  lprnt
 !
 !   [OUTPUT]
-      INTEGER    KB    (IJSDIM)         ! cloud base
-      REAL(r8)   GCYM  (IJSDIM, KMAX)   ! norm. mass flux (half lev)
+      INTEGER    KB    (IJSDIM)         !< cloud base
+      REAL(r8)   GCYM  (IJSDIM, KMAX)   !< norm. mass flux (half lev)
       INTEGER    KBMX
-      REAL(r8)   GCHB  (IJSDIM)         ! cloud base MSE
-      REAL(r8)   GCWB  (IJSDIM)         ! cloud base total water
-      REAL(r8)   GCUB  (IJSDIM)         ! cloud base U
-      REAL(r8)   GCVB  (IJSDIM)         ! cloud base V
-      REAL(r8)   GCIB  (IJSDIM)         ! cloud base ice
-      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     ! cloud base tracer
+      REAL(r8)   GCHB  (IJSDIM)         !< cloud base MSE
+      REAL(r8)   GCWB  (IJSDIM)         !< cloud base total water
+      REAL(r8)   GCUB  (IJSDIM)         !< cloud base U
+      REAL(r8)   GCVB  (IJSDIM)         !< cloud base V
+      REAL(r8)   GCIB  (IJSDIM)         !< cloud base ice
+      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     !< cloud base tracer
 
 !DDsigma added to arglist for AW, subcloud updraft profiles: temperature, water vapor
 !                               total water, cloud water, and cloud ice respectively
-      REAL(r8), dimension(ijsdim,kmax)     :: gctbl, gcqbl, gcwbl, gcqlbl, gcqibl   !DDsigmadiag
+      REAL(r8), dimension(ijsdim,kmax)     :: gctbl, gcqbl, gcwbl, gcqlbl, gcqibl   !>DDsigmadiag
       REAL(r8), dimension(ijsdim,kmax,ntrq:ntr) :: gctrbl   !DDsigmadiag
 !
 !   [INPUT]

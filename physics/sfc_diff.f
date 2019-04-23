@@ -14,7 +14,7 @@
       end subroutine sfc_ex_coef_finalize
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
-!! @{
+!> @{
 !> \brief This subroutine calculates surface roughness length.
 !!
 !! This subroutine includes the surface roughness length formulation
@@ -439,5 +439,5 @@
       return
       end subroutine sfc_ex_coef_run
 !! @}
-!! @}
+!> @}
       end module sfc_ex_coef

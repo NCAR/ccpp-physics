@@ -2,7 +2,7 @@
 !! This file contains
 
 !>\ingroup satmedmf
-!! This subroutine 
+!! This subroutine  
       subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
      &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &

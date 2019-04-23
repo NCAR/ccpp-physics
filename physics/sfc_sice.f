@@ -154,7 +154,7 @@
 !! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
-!!  @{
+!>  @{
       subroutine sfc_sice_run                                           &
 !  ---  inputs:
      &     ( im, km, ps, u1, v1, t1, q1, delt,                          &
@@ -867,5 +867,5 @@
       end subroutine sfc_sice_run
 !-----------------------------------
 !! @}
-!! @}
+!> @}
       end module sfc_sice

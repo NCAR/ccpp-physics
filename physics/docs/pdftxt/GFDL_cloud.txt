@@ -1,5 +1,5 @@
 /**
-\page GFDL_cloud FV3GFS GFDL Cloud Microphysics Scheme 
+\page GFDL_cloud GFS GFDL Cloud Microphysics Scheme 
 \section des_GFDL_cloud Description
 GFDL cloud microphysics (MP) scheme is a six-category MP scheme to replace Zhao-Carr MP scheme, and moves the GFS from
 a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).
@@ -44,6 +44,9 @@ Where \f$A_{r}\f$ is cell area, \f$D_{land}\f$ and \f$D_{ocean}\f$ are base valu
 and ocean (larger sub-grid variability appears in larger area). Horizontal sub-grid variability is used in cloud fraction,
 relative humidity calculation, evaporation and condensation processes.  Scale-awareness is achieved by this horizontal subgrid variability and a \f$2^{nd}\f$
 order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994). 
+
+\section nml_opt Namelist Option
+\ref gfdl_cloud_microphysics_nml 
 
 \section intro_GFDL_cloud Intraphysics Communication
  + For GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run

@@ -1,5 +1,5 @@
 /**
-\page GFS_GWDPS FV3GFS Orographic Gravity Wave Drag Scheme
+\page GFS_GWDPS GFS Orographic Gravity Wave Drag Scheme
 \section des_gwdps Description
  The GFS orographic gravity wave drag parameterization calculates the
  effect of gravity waves produced by flow over irregularities at the
