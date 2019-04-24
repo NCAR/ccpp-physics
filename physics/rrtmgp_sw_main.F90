@@ -154,6 +154,9 @@ contains
     integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4,temp_log_array1,&
          temp_log_array2, temp_log_array3, temp_log_array4
 
+    open(69,file='rrtmgp_sw_aux_dump.txt',status='unknown')
+    open(70,file='rrtmgp_sw_aux_taucld.txt',status='unknown')
+
     ! Initialize
     errmsg = ''
     errflg = 0
@@ -644,9 +647,10 @@ contains
 
     ! RTE+RRTMGP classes
     type(ty_optical_props_2str) :: &
-         optical_props_clr, & ! Optical properties for gaseous atmosphere
-         optical_props_aer, & ! Optical properties for aerosols
-         optical_props_cldy   ! Optical properties for clouds
+         optical_props_clr,     & ! Optical properties for gaseous atmosphere
+         optical_props_aer,     & ! Optical properties for aerosols
+         optical_props_cldy       ! Optical properties for clouds
+
     type(ty_fluxes_broadband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
@@ -654,12 +658,12 @@ contains
     ! Local variables
     integer :: iCol, iBand, iGpt, iDay, iLay
     integer,dimension(ncol) :: ipseed
-    real(kind_phys) :: solAdjFac,cfrac
+    real(kind_phys) :: solAdjFac, cfrac, asyw, ssaw, za1, za2
     logical :: top_at_1=.false.
     real(kind_phys), dimension(ncol) :: clrfracSFC, cldfracSFC
     real(kind_phys), dimension(ncol,nlay) :: vmr_o3, vmr_h2o, thetaTendClrSky, &
          thetaTendAllSky,coldry,tem0
-    real(kind_phys), dimension(nday,nlay) :: cldfrac2
+    real(kind_phys), dimension(nday,nlay) :: cldfrac2, cld_lwp2
     real(kind_phys), dimension(nday,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
     real(kind_phys), dimension(nday,nGptsSW) :: toa_flux
@@ -821,7 +825,7 @@ contains
             optical_props_clr,              &
             toa_flux))
 
-       ! 1c) Add contribution from aerosols. Also, apply diffusivity angle
+       ! 1c) Add contribution from aerosols.
        print*,'Clear-Sky(SW): Increment Aerosol'
        do iDay=1,nDay
           do iGpt=1,nGptsSW
@@ -831,7 +835,7 @@ contains
              optical_props_aer%g(iDay,1:nlay,iGpt)   = asy_aer(idxday(iDay),1:nlay,iBand)
           enddo
        enddo
-       call check_error_msg(optical_props_aer%increment(optical_props_clr))
+       !call check_error_msg(optical_props_aer%increment(optical_props_clr))
  
        ! 1d) Compute the clear-sky broadband fluxes
        print*,'Clear-Sky(SW): Fluxes'
@@ -853,9 +857,11 @@ contains
        ! ####################################################################################
        ! 2a) Compute in-cloud optics
        print*,'All-Sky(SW): Optics '
-       tau_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
-       asy_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
-       ssa_cld(1:nBandsSW,1:nDay,1:nLay) = 0._kind_phys
+       tau_cld(:,:,:)  = 0._kind_phys
+       asy_cld(:,:,:)  = 0._kind_phys
+       ssa_cld(:,:,:)  = 0._kind_phys
+
+       cldfrac2 = merge(cldfrac(idxday,:), 0., cldfrac(idxday,:) .gt. 0._kind_phys)
        if (any(cldfrac(idxday,:) .gt. 0)) then
           ! Cloud-optical properties by type provided. Compute optical-depth, single-       
           ! scattering  albedo, and asymmetry parameter
@@ -866,7 +872,7 @@ contains
                   cld_rwp(idxday,1:nLay), cld_ref_rain(idxday,1:nLay), &
                   cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
                   cldfrac(idxday,1:nLay),                              &
-                  tau_cld(:,:,:), ssa_cld(:,:,:), asy_cld(:,:,:))
+                  tau_cld, ssa_cld, asy_cld)
           else
              ! Cloud-optical depth, single scattering albedo, and asymmetry parameter provided.
              do iDay=1,nDay
@@ -877,7 +883,7 @@ contains
                       asy_cld(:,iDay,iLay) = cld_asy(idxday(iDay),iLay)
                    else
                       tau_cld(:,iDay,iLay) = 0.
-                      ssa_cld(:,iDay,iLay) = 0.
+                      ssa_cld(:,iDay,iLay) = 1.
                       asy_cld(:,iDay,iLay) = 0.
                    endif
                 end do
@@ -885,11 +891,21 @@ contains
           endif
        endif
 
+       write(69,'(a20)') "RRTMGP TAUs" 
+       write(70,*) "#"
+       do iDay=1,nDay
+          do iLay=1,nlay
+             write(69,'(a5,i2,4f12.3)') '',iLay,p_lay(idxday(iDay),iLay),sum(optical_props_clr%tau(iDay,iLay,:))
+             write(70,'(16f12.3)') tau_cld(:,1,iLay)
+             write(70,'(16f12.3)') ssa_cld(:,1,iLay)
+             write(70,'(16f12.3)') asy_cld(:,1,iLay)
+          enddo
+       enddo
+
        ! 2b) Call McICA to sample clouds.
        if (isubcsw .gt. 0) then
           print*,'All-Sky(SW): McICA'
           allocate(tau(nDay,nLay,nGptsSW),asy(nDay,nLay,nGptsSW),ssa(nDay,nLay,nGptsSW))
-          cldfrac2 = merge(cldfrac(idxday,:), 0., cldfrac(idxday,:) .gt. 0._kind_phys)
           call mcica_subcol_sw(nday, nlay, nGptsSW, cldfrac2, ipseed(idxday), dzlyr(idxday,:), &
                de_lgth(idxday), cldfracMCICA)
           
@@ -899,13 +915,13 @@ contains
                 do iGpt=1,nGptsSW
                    iBand = kdist_sw_clr%convert_gpt2band(iGpt)
                    if (cldfracMCICA(iGpt,iDay,iLay) .gt. 0.) then
-                      tau(iDay,iLay,iGpt) = tau_cld(iband,iDay,iLay)
-                      asy(iDay,iLay,iGpt) = asy_cld(iband,iDay,iLay)
-                      ssa(iDay,iLay,iGpt) = ssa_cld(iband,iDay,iLay)
+                      optical_props_cldy%tau(iDay,iLay,iGpt) = tau_cld(iband,iDay,iLay) 
+                      optical_props_cldy%ssa(iDay,iLay,iGpt) = ssa_cld(iBand,iDay,iLay)
+                      optical_props_cldy%g(iDay,iLay,iGpt)   = asy_cld(iBand,iDay,iLay)
                    else
-                      tau(iDay,iLay,iGpt) = 0.
-                      ssa(iDay,iLay,iGpt) = 0.
-                      asy(iDay,iLay,iGpt) = 0.
+                      optical_props_cldy%tau(iDay,iLay,iGpt) = 0._kind_phys
+                      optical_props_cldy%ssa(iDay,iLay,iGpt) = 1._kind_phys
+                      optical_props_cldy%g(iDay,iLay,iGpt)   = 0._kind_phys
                    endif
                 enddo
              enddo
@@ -919,21 +935,18 @@ contains
                 cfrac = cldfrac(idxday(iDay),iLay)/cldfracSFC(idxday(iDay))
                 if (cfrac .gt. 0.) then
                    do iBand=1,nBandsSW
-                      tau(iDay,iLay,iBand) = tau_cld(iBand,iDay,iLay)
-                      asy(iDay,iLay,iBand) = asy_cld(iBand,iDay,iLay)
-                      ssa(iDay,iLay,iBand) = ssa_cld(iBand,iDay,iLay)
+                      optical_props_cldy%tau(iDay,iLay,iBand) = tau_cld(iBand,iDay,iLay)
+                      optical_props_cldy%g(iDay,iLay,iBand)   = asy_cld(iBand,iDay,iLay)
+                      optical_props_cldy%ssa(iDay,iLay,iBand) = ssa_cld(iBand,iDay,iLay)
                    enddo
                 else
-                   tau(iDay,iLay,:) = 0.
-                   asy(iDay,iLay,:) = 0.
-                   ssa(iDay,iLay,:) = 0.
+                   optical_props_cldy%tau(iDay,iLay,:) = 0._kind_phys
+                   optical_props_cldy%g(iDay,iLay,:)   = 1._kind_phys
+                   optical_props_cldy%ssa(iDay,iLay,:) = 0._kind_phys
                 endif
              enddo
           enddo
        endif
-       optical_props_cldy%tau = tau
-       optical_props_cldy%ssa = ssa
-       optical_props_cldy%g   = asy
 
        ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
        print*,'All-Sky(SW): Increment'
@@ -966,7 +979,7 @@ contains
     sfcflx(idxday)%upfx0 = fluxClrSky%flux_up(:,1)
     sfcflx(idxday)%dnfxc = fluxAllSky%flux_dn(:,1)
     sfcflx(idxday)%dnfx0 = fluxClrSky%flux_dn(:,1)
-    cldtau(idxday,:)     = 0.
+    cldtau(idxday,:)     = tau(:,:,10)
     hswc(idxday,:)       = thetaTendAllSky
 
     ! Optional output
@@ -989,6 +1002,8 @@ contains
   ! #########################################################################################
   ! #########################################################################################
   subroutine rrtmgp_sw_finalize()
+    close(69)
+    close(70)
   end subroutine rrtmgp_sw_finalize
 
   ! #########################################################################################

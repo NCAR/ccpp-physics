@@ -1058,6 +1058,7 @@ contains
     do iCol=1,nCol
        do iGpt=1,nGptsLW
           iBand = kdist_lw_clr%convert_gpt2band(iGpt)
+          optical_props_clr%tau(iCol,1:nlay,iGpt) = optical_props_clr%tau(iCol,1:nlay,iGpt) * secdiff(iBand,iCol)
           optical_props_aer%tau(iCol,1:nlay,iGpt) = tau_aer(iCol,1:nlay,iBand) * (1. - ssa_aer(iCol,1:nlay,iBand)) * secdiff(iBand,iCol)
        enddo
     enddo
@@ -1190,7 +1191,7 @@ contains
             sum(fluxClrSky%flux_dn(1,iLay:iLay+1))/2.,sum(fluxAllSky%flux_up(1,iLay:iLay+1))/2.,&
             sum(fluxAllSky%flux_dn(1,iLay:iLay+1))/2.
        write(60,*) optical_props_clr%tau(1,iLay,:)
-       write(61,*) tau_cld(:,1,iLay)*secdiff(:,1)
+       write(61,'(16f12.3)') tau_cld(:,1,iLay)!*secdiff(:,1)
     enddo
     ! #######################################################################################
     ! Copy fluxes from RRTGMP types into model radiation types.

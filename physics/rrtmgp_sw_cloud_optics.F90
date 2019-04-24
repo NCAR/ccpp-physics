@@ -2070,25 +2070,35 @@ contains
 
     ! Local variables
     integer :: iCol, iLay, iBand, index, ia, istr
-    real(kind_phys) :: tau_rain, tau_snow, factor, fint, cld_ref_iceTemp
+    real(kind_phys) :: tau_rain, tau_snow, factor, fint, cld_ref_iceTemp,asyw,ssaw,za1,za2
+         
     real(kind_phys), dimension(nBandsSW) :: ssa_rain, ssa_snow, asy_rain, asy_snow, &
          tau_liq, ssa_liq, asy_liq, tau_ice, ssa_ice, asy_ice, forwliq, asycoliq,   &
-         forwice, extcoice, asycoice, ssacoice, fdelta, extcoliq, ssacoliq,         &
-         tau_iceORG, tau_liqORG
+         forwice, extcoice, asycoice, ssacoice, fdelta, extcoliq, ssacoliq
 
     ! Initialize
     tau_cld(:,:,:) = 0._kind_phys
-    ssa_cld(:,:,:) = 0._kind_phys
+    ssa_cld(:,:,:) = 1._kind_phys
     asy_cld(:,:,:) = 0._kind_phys
     
     ! Compute cloud radiative properties for cloud.
-    print*,'RRTMGP_CLOUD_OPTICS_CONFIG: '
-    print*,'iswcliq:  ',iswcliq
-    print*,'iswcice:  ',iswcice 
     if (iswcliq > 0) then
        do iCol=1,ncol
           do iLay=1,nlay
-             if (cld_frac(iCol,iLay) .gt. 0.) then
+             ! Initialize
+             tau_liq(:)  = 0._kind_phys
+             tau_ice(:)  = 0._kind_phys
+             tau_rain    = 0._kind_phys
+             tau_snow    = 0._kind_phys
+             ssa_liq(:)  = 0._kind_phys
+             ssa_ice(:)  = 0._kind_phys
+             ssa_rain(:) = 0._kind_phys
+             ssa_snow(:) = 0._kind_phys
+             asy_liq(:)  = 0._kind_phys
+             asy_ice(:)  = 0._kind_phys
+             asy_rain(:) = 0._kind_phys
+             asy_snow(:) = 0._kind_phys
+             if (cld_frac(iCol,iLay) .gt. 0._kind_phys) then
                 ! ###########################################################################
                 ! Rain clouds
                 ! ###########################################################################
@@ -2121,44 +2131,36 @@ contains
                 ! Liquid clouds
                 ! ###########################################################################
                 if (cld_lwp(iCol,iLay) .gt. 0) then
+                   ! Find index in coefficient LUT for corresponding partice size.
                    factor = cld_ref_liq(iCol,iLay) - 1.5
                    index  = max( 1, min( 57, int( factor ) ))
                    fint   = factor - float(index)
-                   if ( iswcliq == 1 ) then
-                      do iBand=1,nBandsSW
-                         extcoliq(iBand) = extliq1(index,iBand) + fint*(extliq1(index+1,iBand)-extliq1(index,iBand))
-                         ssacoliq(iBand) = ssaliq1(index,iBand) + fint*(ssaliq1(index+1,iBand)-ssaliq1(index,iBand))
-                         asycoliq(iBand) = asyliq1(index,iBand) + fint*(asyliq1(index+1,iBand)-asyliq1(index,iBand))
-                         if (fint .lt. 0._kind_phys .and. ssacoliq(iBand) .gt. 1._kind_phys) then
-                            ssacoliq(iBand) = ssaliq1(index,iBand)
-                         endif
-                         forwliq(iBand)    = asycoliq(iBand)*asycoliq(iBand)
-                         tau_liqORG(iBand) = cld_lwp(iCol,iLay) * extcoliq(iBand)
-                         tau_liq(iBand)    = (1._kind_phys - forwliq(iBand) * ssacoliq(iBand)) * tau_liqORG(iBand)
-                         ssa_liq(iBand)    = ssacoliq(iBand) * (1._kind_phys - forwliq(iBand)         ) / &
-                                                               (1._kind_phys - forwliq(iBand)*ssacoliq(iBand))
-                         asy_liq(iBand) = (asycoliq(iBand) - forwliq(iBand)) / (1._kind_phys - forwliq(iBand))
-                      enddo
-                   elseif ( iswcliq == 2 ) then   ! use updated coeffs
-                      do iBand=1,nBandsSW
-                         extcoliq(iBand) = extliq2(index,iBand) + fint*(extliq2(index+1,iBand)-extliq2(index,iBand))
-                         ssacoliq(iBand) = ssaliq2(index,iBand) + fint*(ssaliq2(index+1,iBand)-ssaliq2(index,iBand))
-                         asycoliq(iBand) = asyliq2(index,iBand) + fint*(asyliq2(index+1,iBand)-asyliq2(index,iBand))
-                         if (fint .lt. 0._kind_phys .and. ssacoliq(iBand) .gt. 1._kind_phys) then
-                            ssacoliq(iBand) = ssaliq2(index,iBand)
-                         endif
-                         forwliq(iBand)    = asycoliq(iBand)*asycoliq(iBand)
-                         tau_liqORG(iBand) = cld_lwp(iCol,iLay) * extcoliq(iBand)
-                         tau_liq(iBand)    = (1._kind_phys - forwliq(iBand) * ssacoliq(iBand)) * tau_liqORG(iBand)
-                         ssa_liq(iBand)    = ssacoliq(iBand) * (1._kind_phys - forwliq(iBand)         ) / &
-                                                               (1._kind_phys - forwliq(iBand)*ssacoliq(iBand))
-                         asy_liq(iBand) = (asycoliq(iBand) - forwliq(iBand)) / (1._kind_phys - forwliq(iBand))
-                      enddo
-                   endif
-                else ! Cloudy, but no liquid condensate present
-                   tau_liq(iBand) = 0._kind_phys
-                   ssa_liq(iBand) = 0._kind_phys 
-                   asy_liq(iBand) = 0._kind_phys
+
+                   ! Extract coefficents for all bands and compute radiative properties
+                   do iBand=1,nBandsSW
+                      ! Interpolate coefficients
+                      if ( iswcliq == 1 ) then
+                         extcoliq(iBand) = max(0._kind_phys, extliq1(index,iBand) + &
+                              fint*(extliq1(index+1,iBand)-extliq1(index,iBand)))
+                         ssacoliq(iBand) = max(0._kind_phys, min(1._kind_phys, ssaliq1(index,iBand) + &
+                              fint*(ssaliq1(index+1,iBand)-ssaliq1(index,iBand))))
+                         asycoliq(iBand) = max(0._kind_phys, min(1._kind_phys, asyliq1(index,iBand) + &
+                              fint*(asyliq1(index+1,iBand)-asyliq1(index,iBand))))
+                      elseif ( iswcliq == 2 ) then   ! use updated coeffs
+                         extcoliq(iBand) = max(0._kind_phys, extliq2(index,iBand) + &
+                              fint*(extliq2(index+1,iBand)-extliq2(index,iBand)))
+                         ssacoliq(iBand) = max(0._kind_phys, min(1._kind_phys, ssaliq2(index,iBand) + &
+                              fint*(ssaliq2(index+1,iBand)-ssaliq2(index,iBand))))
+                         asycoliq(iBand) = max(0._kind_phys, min(1._kind_phys, asyliq2(index,iBand) + &
+                              fint*(asyliq2(index+1,iBand)-asyliq2(index,iBand))))
+                      endif
+                      if (fint .lt. 0._kind_phys .and. ssacoliq(iBand) .gt. 1._kind_phys) then
+                         ssacoliq(iBand) = ssaliq1(index,iBand)
+                      endif
+                      tau_liq(iBand) = cld_lwp(iCol,iLay) * extcoliq(iBand)
+                      ssa_liq(iBand) = tau_liq(iBand)     * ssacoliq(iBand)
+                      asy_liq(iBand) = ssa_liq(iBand)     * asycoliq(iBand)
+                   enddo
                 endif  ! IF cloudy with liquid condensate
 
                 ! ###########################################################################
@@ -2186,9 +2188,12 @@ contains
                       index  = max( 1, min( 42, int( factor ) ))
                       fint   = factor - float(index)
                       do iBand = 1,nBandsSW
-                         extcoice(iBand) = extice2(index,iBand) + fint*(extice2(index+1,iBand)-extice2(index,iBand))
-                         ssacoice(iBand) = ssaice2(index,iBand) + fint*(ssaice2(index+1,iBand)-ssaice2(index,iBand))
-                         asycoice(iBand) = asyice2(index,iBand) + fint*(asyice2(index+1,iBand)-asyice2(index,iBand))
+                         extcoice(iBand) = extice2(index,iBand) + &
+                              fint*(extice2(index+1,iBand)-extice2(index,iBand))
+                         ssacoice(iBand) = ssaice2(index,iBand) + &
+                              fint*(ssaice2(index+1,iBand)-ssaice2(index,iBand))
+                         asycoice(iBand) = asyice2(index,iBand) + &
+                              fint*(asyice2(index+1,iBand)-asyice2(index,iBand))
                          tau_ice(iBand) = cld_iwp(iCol,iLay) * extcoice(iBand)
                          ssa_ice(iBand) = tau_ice(iBand)     * ssacoice(iBand)
                          asy_ice(iBand) = ssa_ice(iBand)     * asycoice(iBand)
@@ -2198,67 +2203,56 @@ contains
                    !  (generalized effective size from 5 to 140 microns).
                    ! https://doi.org/10.1175/1520-0442(1996)009<2058:AAPOTS>2.0.CO;2
                    elseif ( iswcice == 3 ) then
+                      cld_ref_iceTemp = max( 5.0, min( 140.0, 1.0315*cld_ref_ice(iCol,iLay) ))
                       ! Determine indices for table interpolation.
-                      factor = (cld_ref_ice(iCol,iLay) - 2._kind_phys) / 3._kind_phys
-                      index  = int( factor )
+                      factor = (cld_ref_iceTemp - 2._kind_phys) / 3._kind_phys
+                      index  = max( 1, min( 45, int( factor ) ))
                       fint   = factor - float(index)
                       do iBand = 1,nBandsSW
-                         ! Interpolate coefficient tables to appropriate ice-particle size and band.
-                         extcoice(iBand) = extice3(index,iBand) + fint*(extice3(index+1,iBand)-extice3(index,iBand)) ! eq (3.9a)
-                         ssacoice(iBand) = ssaice3(index,iBand) + fint*(ssaice3(index+1,iBand)-ssaice3(index,iBand)) ! eq (3.9b)
-                         asycoice(iBand) = asyice3(index,iBand) + fint*(asyice3(index+1,iBand)-asyice3(index,iBand)) ! eq (3.9c)
-                         fdelta(iBand)   = fdlice3(index,iBand) + fint*(fdlice3(index+1,iBand)-fdlice3(index,iBand)) ! eq (3.9d)
-                         forwice(iBand)  = fdelta(iBand) + 0.5_kind_phys/ssacoice(iBand)                             ! eq (3.8)
+                         ! Interpolate coefficient tables to appropriate ice-particle size.
+                         extcoice(iBand) = max(0._kind_phys, extice3(index,iBand) + &
+                              fint*(extice3(index+1,iBand)-extice3(index,iBand)))                       ! eq (3.9a)
+                         ssacoice(iBand) = max(0._kind_phys, min(1._kind_phys, ssaice3(index,iBand) + &
+                              fint*(ssaice3(index+1,iBand)-ssaice3(index,iBand))))                      ! eq (3.9b)
+                         asycoice(iBand) = max(0._kind_phys, min(1._kind_phys, asyice3(index,iBand) + &
+                              fint*(asyice3(index+1,iBand)-asyice3(index,iBand))))                      ! eq (3.9c)
+                         fdelta(iBand)   = fdlice3(index,iBand) + &
+                              fint*(fdlice3(index+1,iBand)-fdlice3(index,iBand))                        ! eq (3.9d)
+                         forwice(iBand) = fdelta(iBand) + 0.5_kind_phys / ssacoice(iBand)
                          if (forwice(iBand) .gt. asycoice(iBand)) forwice(iBand) = asycoice(iBand)
-
-                         ! Calculatice radiative properties
-                         tau_iceORG(iBand) = cld_iwp(iCol,iLay) * extcoice(iBand)
-                         tau_ice(iBand) = (1._kind_phys - forwice(iBand)*ssacoice(iBand)) * tau_iceORG(iBand)        ! eq (A.2a)
-                         ssa_ice(iBand) = ssacoice(iBand) * (1._kind_phys - forwice(iBand)         ) / &             ! eq (A.2b)
-                                                            (1._kind_phys - forwice(iBand)*ssacoice(iBand))
-                         asy_ice(iBand) = (asycoice(iBand) - forwice(iBand)) / &                                     ! eq (A.2c)
-                                          (1._kind_phys    - forwice(iBand))
+                         tau_ice(iBand) = cld_iwp(iCol,iLay) * extcoice(iBand)
+                         ssa_ice(iBand) = tau_ice(iBand)     * ssacoice(iBand)
+                         asy_ice(iBand) = ssa_ice(iBand)     * asycoice(iBand)
                       enddo
                    endif
-                else ! Cloudy, but no ice condensate present
-                   tau_ice(iBand) = 0._kind_phys
-                   ssa_ice(iBand) = 0._kind_phys 
-                   asy_ice(iBand) = 0._kind_phys
                 endif  ! IF cloudy column with ice condensate
-             else ! No clouds
-                tau_liq(:)  = 0._kind_phys
-                tau_ice(:)  = 0._kind_phys
-                tau_rain    = 0._kind_phys
-                tau_snow    = 0._kind_phys
-                ssa_liq(:)  = 0._kind_phys
-                ssa_ice(:)  = 0._kind_phys
-                ssa_rain(:) = 0._kind_phys
-                ssa_snow(:) = 0._kind_phys
-                asy_liq(:)  = 0._kind_phys
-                asy_ice(:)  = 0._kind_phys
-                asy_rain(:) = 0._kind_phys
-                asy_snow(:) = 0._kind_phys
              endif     ! IF cloudy column
 
              ! ###########################################################################
-             ! Compute total cloud optical depth
+             ! Compute total cloud radiative properties (tau, omega, and g)
              ! ###########################################################################
-             do iBand = 1,nBandsSW
-                tau_cld(iBand,iCol,iLay) = tau_liq(iBand) + tau_ice(iBand) + tau_rain + tau_snow
-                ssa_cld(iBand,iCol,iLay) = (tau_liq(iBand)  * ssa_liq(iBand)  +  &
-                                            tau_ice(iBand)  * ssa_ice(iBand)  +  &
-                                            tau_rain        * ssa_rain(iBand) +  &
-                                            tau_snow        * ssa_snow(iBand)) / &
-                                            (tau_liq(iBand) + tau_ice(iBand) + tau_rain + tau_snow)
-                asy_cld(iBand,iCol,iLay) = (tau_liq(iBand)  * ssa_liq(iBand)  * asy_liq(iBand)  +  &
-                                            tau_ice(iBand)  * ssa_ice(iBand)  * asy_ice(iBand)  +  &
-                                            tau_rain        * ssa_rain(iBand) * asy_rain(iBand) +  &
-                                            tau_snow        * ssa_snow(iBand) * asy_snow(iBand)) / &
-                                           (tau_liq(iBand)  * ssa_liq(iBand)  + &
-                                            tau_ice(iBand)  * ssa_ice(iBand)  + &
-                                            tau_rain        * ssa_rain(iBand) + &
-                                            tau_snow        * ssa_snow(iBand))
-             enddo     ! Loop over G-points
+             if (cld_frac(iCol,iLay) .gt. 0._kind_phys) then
+                do iBand = 1,nBandsSW
+                   ! Sum up radiative properties by type.
+                   tau_cld(iBand,iCol,iLay) = tau_liq(iBand) + tau_ice(iBand) + tau_rain        + tau_snow
+                   ssa_cld(iBand,iCol,iLay) = ssa_liq(iBand) + ssa_ice(iBand) + ssa_rain(iBand) + ssa_snow(iBand)
+                   asy_cld(iBand,iCol,iLay) = asy_liq(iBand) + asy_ice(iBand) + asy_rain(iBand) + asy_snow(iBand)
+                   ! Delta-scale 
+                   asyw = asy_cld(iband,iCol,iLay)/max(0._kind_phys, ssa_cld(iBand,iCol,iLay))
+                   ssaw = min(1._kind_phys-0.000001, ssa_cld(iBand,iCol,iLay)/tau_cld(iBand,iCol,iLay))
+                   za1  = asyw * asyw
+                   za2  = ssaw * za1
+                   tau_cld(iBand,iCol,iLay) = (1._kind_phys - za2) * tau_cld(iband,iCol,iLay) 
+                   ssa_cld(iBand,iCol,iLay) = (ssaw - za2) / (1._kind_phys - za2)
+                   asy_cld(iBand,iCol,iLay) = (asyw - za2/ssaw)/(1-za2/ssaw)
+                   !asy_cld(iBand,iCol,iLay) = (tau_liq(iBand)*ssa_liq(iBand)*(asycoliq(iBand)-asycoliq(iBand)**2)/&
+                   !                                                          (1 - asycoliq(iBand)**2) + &
+                   !                            tau_ice(iBand)*ssa_ice(iBand)*(asycoice(iBand)-forwice(iBand))/&
+                   !                                                          (1 - forwice(iBand)))/&
+                   !                           (tau_liq(iBand)*ssa_liq(iBand) + tau_ice(iBand)*ssa_ice(iBand))
+                enddo  ! Loop over SW bands
+             endif     ! END sum cloudy properties
+             !
           enddo        ! Loop over layers
        enddo           ! Loop over columns
     endif
@@ -2266,8 +2260,9 @@ contains
 
   ! #######################################################################################
    ! SUBROUTINE mcica_subcol_sw
-   ! #######################################################################################
-   subroutine mcica_subcol_sw(ncol, nlay, ngpts, cld_frac, icseed,  dzlyr, de_lgth, cld_frac_mcica)
+   ! ######################################################################################
+   subroutine mcica_subcol_sw(ncol, nlay, ngpts, cld_frac, icseed,  dzlyr, de_lgth,       &
+        cld_frac_mcica)
      ! Inputs
     integer,intent(in) :: &
          ncol,         & ! Number of horizontal gridpoints
