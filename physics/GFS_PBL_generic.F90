@@ -403,8 +403,8 @@
     !             Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + Coupling%dqsfci_cpl(i) * dtf
     ! !
     !           endif ! Ocean only, NO LAKES
-            enddo
-          endif
+    !        enddo
+    !      endif
           dusfc_cpl (i) = dusfc_cpl(i) + dusfc1(i)*dtf
           dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfc1(i)*dtf
           dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfc1(i)*dtf

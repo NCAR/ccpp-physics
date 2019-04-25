@@ -934,7 +934,7 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, wet, icy, zsea1, zsea2,                &
+     &                    z_c, wet, icy, zsea1, zsea2,                  &
      &                    im, 1, dtzm)
         do i = 1, im
           if ( wet(i)  .and. .not. icy(i) ) then
