@@ -72,7 +72,7 @@
 !  ---  inputs:                                                         !
 !          ( im, km, ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf,      !
 !            sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          !
-!            prsl1, prslki, zf, islimsk, ddvel, slopetyp,               !
+!            prsl1, prslki, zf, land, ddvel, slopetyp,                  !
 !            shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      !
 !            lheatstrg, isot, ivegsrc,                                  !
 !  ---  in/outs:                                                        !
@@ -119,7 +119,7 @@
 !     prsl1    - real, sfc layer 1 mean pressure (pa)              im   !
 !     prslki   - real, dimensionless exner function at layer 1     im   !
 !     zf       - real, height of bottom layer (m)                  im   !
-!     idry     - integer, =1 if any land, 0 otherwise              im   !
+!     land     - logical, = T if a point with any land             im   !
 !     ddvel    - real,                                             im   !
 !     slopetyp - integer, class of sfc slope (integer index)       im   !
 !     shdmin   - real, min fractional coverage of green veg        im   !
@@ -205,7 +205,7 @@
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | zf             | height_above_ground_at_lowest_model_layer                                    | height above ground at 1st model layer                          | m             |    1 | real      | kind_phys | in     | F        |
-!! | idry           | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction     | flag          |    1 | integer   |           | in     | F        |
+!! | land           | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction     | flag          |    1 | logical   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                      | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                            | index         |    1 | integer   |           | in     | F        |
 !! | shdmin         | minimum_vegetation_area_fraction                                             | min fractional coverage of green veg                            | frac          |    1 | real      | kind_phys | in     | F        |
@@ -262,7 +262,7 @@
      &     ( im, km, grav, cp, hvap, rd, eps, epsm1, rvrdm1, ps, u1,    &
      &       v1, t1, q1, soiltyp, vegtype, sigmaf,                      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
-     &       prsl1, prslki, zf, idry, ddvel, slopetyp,                  &
+     &       prsl1, prslki, zf, land, ddvel, slopetyp,                  &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
      &       lheatstrg, isot, ivegsrc,                                  &
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
@@ -306,10 +306,9 @@
      &       snoalb, sfalb, zf,                                         &
      &       bexppert, xlaipert, vegfpert
 
-      integer, dimension(im), intent(in) :: idry
       real (kind=kind_phys),  intent(in) :: delt
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
 
       logical, intent(in) :: lheatstrg
 
@@ -353,8 +352,6 @@
 
       integer :: couple, ice, nsoil, nroot, slope, stype, vtype
       integer :: i, k, iflag
-
-      logical :: flag(im)
 !
 !===> ...  begin here
 !
@@ -367,16 +364,10 @@
       errmsg = ''
       errflg = 0
 
-!> - Set flag for land points.
-
-      do i = 1, im
-        flag(i) = (idry(i) == 1)
-      enddo
-
 !> - Save land-related prognostic fields for guess run.
 
       do i = 1, im
-        if (flag(i) .and. flag_guess(i)) then
+        if (land(i) .and. flag_guess(i)) then
           weasd_old(i)  = weasd(i)
           snwdph_old(i) = snwdph(i)
           tskin_old(i)  = tskin(i)
@@ -389,13 +380,13 @@
             stc_old(i,k) = stc(i,k)
             slc_old(i,k) = slc(i,k)
           enddo
-        endif   ! flag & flag_guess
+        endif   ! land & flag_guess
       enddo
 
 !  --- ...  initialization block
 
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
           ep(i)     = 0.0
           evap (i)  = 0.0
           hflx (i)  = 0.0
@@ -409,13 +400,13 @@
           sbsno(i)  = 0.0
           snowc(i)  = 0.0
           snohf(i)  = 0.0
-        endif   ! flag_iter & flag
+        endif   ! flag_iter & land
       enddo
 
 !> - initialize variables wind, q, and rh at level 1.
 
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
           wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
      &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
 
@@ -426,19 +417,19 @@
           qs1(i) = fpvs( t1(i) )        !* qs1=sat. humidity at level 1 (kg/kg)
           qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), 1.e-8)
           q0 (i) = min(qs1(i), q0(i))
-        endif   ! flag_iter & flag
+        endif   ! flag_iter & land
       enddo
 
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
           do k = 1, km
             zsoil(i,k) = zsoil_noah(k)
           enddo
-        endif   ! flag_iter & flag
+        endif   ! flag_iter & land
       enddo
 
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
 
 !> - Prepare variables to run Noah LSM:
 !!  -   1. configuration information (c):
@@ -698,26 +689,26 @@
 !> - Compute specific humidity at surface (\a qsurf).
 
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
           rch(i)   = rho(i) * cp * ch(i) * wind(i)
           qsurf(i) = q1(i)  + evap(i) / (elocp * rch(i))
-        endif   ! flag_iter & flag
+        endif   ! flag_iter & land
       enddo
 
 !> - Compute surface upward sensible heat flux (\a hflx) and evaporation
 !! flux (\a evap).
       do i = 1, im
-        if (flag_iter(i) .and. flag(i)) then
+        if (flag_iter(i) .and. land(i)) then
           tem     = 1.0 / rho(i)
           hflx(i) = hflx(i) * tem * cpinv
           evap(i) = evap(i) * tem * hvapi
-        endif   ! flag_iter & flag
+        endif   ! flag_iter & land
       enddo
 
 !> - Restore land-related prognostic fields for guess run.
 
       do i = 1, im
-        if (flag(i)) then
+        if (land(i)) then
           if (flag_guess(i)) then
             weasd(i)  = weasd_old(i)
             snwdph(i) = snwdph_old(i)
@@ -734,7 +725,7 @@
           else    ! flag_guess = F
             tskin(i) = tsurf(i)
           endif   ! flag_guess
-        endif     ! flag
+        endif     ! land
       enddo
 !
       return

@@ -48,8 +48,8 @@
 !! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean             | surface exchange coeff heat & moisture over ocean           | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                 | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag |    1 | integer   |           | in     | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag |    1 | integer   |           | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag |    1 | logical   |           | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag |    1 | logical   |           | in     | F        |
 !! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
 !! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
 !! | stress         | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                              | m2 s-2        |    1 | real      | kind_phys | in     | F        |
@@ -103,7 +103,7 @@
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, iwet, iice, xlon, sinlat, stress,           &
+     &       prsl1, prslki, wet, icy, xlon, sinlat, stress,             &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
      &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
@@ -165,8 +165,8 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
-!     iwet     - integer, =1 if any ocn/lak water (0 otherwise)    im   !
-!     iice     - integer, =1 if "enough" ice (0 otherwise)         im   !
+!     wet      - logical, =T if any ocn/lak water (F otherwise)    im   !
+!     icy      - logical, =T if "enough" ice (F otherwise)         im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
 !     stress   - real, wind stress       (n/m**2)                  im   !
@@ -264,11 +264,12 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
-      integer, intent(in), dimension(im):: iwet, iice
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, intent(in) :: flag_iter(im), flag_guess(im), lprnt
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
+     &       icy
+      logical,                intent(in) :: lprnt
 
 !  ---  input/outputs:
 ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
@@ -330,13 +331,13 @@ cc
 ! flag for open water and where the iteration is on
 !
       do i = 1, im
-         flag(i) = iwet(i) == 1 .and. iice(i) == 0 .and. flag_iter(i)
+         flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
-        if(iwet(i) == 1 .and. iice(i) == 0 .and. flag_guess(i)) then
+        if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -645,7 +646,7 @@ cc
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
-        if(iwet(i) == 1 .and. iice(i) == 0 ) then
+        if(wet(i) .and. .not.icy(i)) then
           if(flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -668,7 +669,7 @@ cc
               tskin(i) = tsurf(i)
             endif               ! if ( nstf_name1 > 1  then
           endif                 ! if(flag_guess(i)) then
-        endif                   ! if((iwet(i)==1 .and. iice(i)==0) ) then
+        endif                   ! if(wet(i) .and. .not.icy(i)) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
@@ -730,8 +731,8 @@ cc
 !! |----------------|-------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                            | horizontal loop extent                                                | count         |    0 | integer     |           | in     | F        |
 !! | rlapse         | air_temperature_lapse_rate_constant                               | environmental air temperature lapse rate constant                     | K m-1         |    0 | real        | kind_phys | in     | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                             | flag indicating presence of some sea ice surface area fraction        | flag          |    1 | integer     |           | in     | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                                 | flag indicating presence of some ocean or lake surface area fraction  | flag          |    1 | integer     |           | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                             | flag indicating presence of some sea ice surface area fraction        | flag          |    1 | logical     |           | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                 | flag indicating presence of some ocean or lake surface area fraction  | flag          |    1 | logical     |           | in     | F        |
 !! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                  | surface roughness length over ocean (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | inout  | F        |
 !! | zorl_ice       | surface_roughness_length_over_ice_interstitial                    | surface roughness length over ice   (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | in     | F        |
 !! | cd_ocn         | surface_drag_coefficient_for_momentum_in_air_over_ocean           | surface exchange coeff for momentum over ocean                        | none          |    1 | real        | kind_phys | inout  | F        |
@@ -763,7 +764,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, rlapse, iice, iwet, zorl_ocn, zorl_ice, cd_ocn, cd_ice,
+     &    (im, rlapse, icy, wet, zorl_ocn, zorl_ice, cd_ocn, cd_ice,
      &     cdq_ocn, cdq_ice, rb_ocn, rb_ice, stress_ocn, stress_ice,
      &     ffmm_ocn, ffmm_ice, ffhh_ocn, ffhh_ice, uustar_ocn,
      &     uustar_ice, fm10_ocn, fm10_ice, fh2_ocn, fh2_ice, oro,
@@ -775,7 +776,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: iice, iwet
+      logical, dimension(im), intent(in) :: icy, wet
       real (kind=kind_phys), intent(in) :: rlapse
       real (kind=kind_phys), dimension(im), intent(in) :: zorl_ice,
      &    cd_ice, cdq_ice, rb_ice, stress_ice, ffmm_ice, ffhh_ice,
@@ -799,7 +800,7 @@ cc
       errflg = 0
 
       do i=1,im
-        if(iice(i) == 1) then
+        if(icy(i)) then
             zorl_ocn(i) = zorl_ice(i)
               cd_ocn(i) = cd_ice(i)
              cdq_ocn(i) = cdq_ice(i)
@@ -814,7 +815,7 @@ cc
       enddo
 
       do i=1,im
-        if ( iwet(i) == 1 .and. iice(i) == 0 ) then
+        if (wet(i) .and. .not. icy(i)) then
           tem      = (oro(i)-oro_uf(i)) * rlapse
           tseal(i) = tsfc_ocn(i)  + tem
           tsurf_ocn(i) = tsurf_ocn(i) + tem
@@ -854,8 +855,8 @@ cc
 !! |----------------|--------------------------------------------------------|----------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                 | horizontal loop extent                                               | count   |    0 | integer   |           | in     | F        |
 !! | rlapse         | air_temperature_lapse_rate_constant                    | environmental air temperature lapse rate constant                    | K m-1   |    0 | real      | kind_phys | in     | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                      | flag indicating presence of some ocean or lake surface area fraction | flag    |    1 | integer   |           | in     | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                  | flag indicating presence of some sea ice surface area fraction       | flag    |    1 | integer   |           | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                      | flag indicating presence of some ocean or lake surface area fraction | flag    |    1 | logical   |           | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                  | flag indicating presence of some sea ice surface area fraction       | flag    |    1 | logical   |           | in     | F        |
 !! | oro            | orography                                              | orography                                                            | m       |    1 | real      | kind_phys | in     | F        |
 !! | oro_uf         | orography_unfiltered                                   | unfiltered orography                                                 | m       |    1 | real      | kind_phys | in     | F        |
 !! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2                              | flag    |    0 | integer   |           | in     | F        |
@@ -878,7 +879,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, rlapse, iwet, iice, oro, oro_uf, nstf_name1,           &
+     &     ( im, rlapse, wet, icy, oro, oro_uf, nstf_name1,             &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
      &     )
@@ -890,7 +891,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: iwet, iice
+      logical, dimension(im), intent(in) :: wet, icy
       real (kind=kind_phys), intent(in) :: rlapse
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
@@ -921,7 +922,7 @@ cc
 !    &     ' kdt=',kdt
 
       do i = 1, im
-        if (iwet(i) == 1 .and. iice(i) == 0 ) then
+        if (wet(i) .and. .not. icy(i)) then
               tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
         endif
       enddo
@@ -933,10 +934,10 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, iwet, iice, zsea1, zsea2,                &
+     &                    z_c, wet, icy, zsea1, zsea2,                &
      &                    im, 1, dtzm)
         do i = 1, im
-          if ( iwet(i) == 1  .and. iice(i) == 0 ) then
+          if ( wet(i)  .and. .not. icy(i) ) then
             tsfc_ocn(i) = max(271.2,tref(i) + dtzm(i)) -                    &
      &                    (oro(i)-oro_uf(i))*rlapse
           endif

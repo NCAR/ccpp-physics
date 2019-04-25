@@ -20,14 +20,14 @@
 !! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                     | flag       |    0 | logical   |           | in     | F        |
 !! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                           | frac       |    1 | real      | kind_phys | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                         | flag       |    1 | integer   |           | in     | F        |
-!! | lndfrac        | land_area_fraction                                                           | fraction of horizontal grid area occupied by land                    | frac       |    1 | real      | kind_phys | in     | F        |
-!! | lakfrac        | lake_area_fraction                                                           | fraction of horizontal grid area occupied by lake                    | frac       |    1 | real      | kind_phys | in     | F        |
-!! | ocnfrac        | sea_area_fraction                                                            | fraction of horizontal grid area occupied by ocean                   | frac       |    1 | real      | kind_phys | in     | F        |
-!! | idry           | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction          | flag       |    1 | integer   |           | inout  | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag       |    1 | integer   |           | inout  | F        |
-!! | ilak           | flag_nonzero_lake_surface_fraction                                           | flag indicating presence of some lake surface area fraction          | flag       |    1 | integer   |           | inout  | F        |
-!! | iocn           | flag_nonzero_ocean_surface_fraction                                          | flag indicating presence of some ocean surface area fraction         | flag       |    1 | integer   |           | inout  | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag       |    1 | integer   |           | inout  | F        |
+!! | landfrac       | land_area_fraction                                                           | fraction of horizontal grid area occupied by land                    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | lakefrac       | lake_area_fraction                                                           | fraction of horizontal grid area occupied by lake                    | frac       |    1 | real      | kind_phys | in     | F        |
+!! | oceanfrac      | sea_area_fraction                                                            | fraction of horizontal grid area occupied by ocean                   | frac       |    1 | real      | kind_phys | in     | F        |
+!! | dry            | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction          | flag       |    1 | logical   |           | inout  | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag       |    1 | logical   |           | inout  | F        |
+!! | lake           | flag_nonzero_lake_surface_fraction                                           | flag indicating presence of some lake surface area fraction          | flag       |    1 | logical   |           | inout  | F        |
+!! | ocean          | flag_nonzero_ocean_surface_fraction                                          | flag indicating presence of some ocean surface area fraction         | flag       |    1 | logical   |           | inout  | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag       |    1 | logical   |           | inout  | F        |
 !! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                         | frac       |    1 | real      | kind_phys | in     | F        |
 !! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                        | frac       |    0 | real      | kind_phys | in     | F        |
 !! | zorl           | surface_roughness_length                                                     | surface roughness length                                             | cm         |    1 | real      | kind_phys | in     | F        |
@@ -106,8 +106,8 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                                | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_pre_run (im, levs, cplflx, vfrac, islmsk, lndfrac, lakfrac, ocnfrac,  &
-                          idry, iice, ilak, iocn, iwet, fice, cimin, zorl, zorlo, zorll, zorl_ocn,         &
+      subroutine GFS_surface_generic_pre_run (im, levs, cplflx, vfrac, islmsk, landfrac, lakefrac,         &
+                          oceanfrac, dry, icy, lake, ocean, wet, fice, cimin, zorl, zorlo, zorll, zorl_ocn,&
                           zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,    &
                           tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_lnd,          &
                           weasd_ice, evap_ocn, hflx_ocn, stress_ocn, ep1d_ice, isot, ivegsrc, stype, vtype,&
@@ -128,11 +128,11 @@
 
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
-        integer, dimension(im), intent(inout) :: idry, iice, ilak, iocn, iwet
+        logical, dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
 
         real(kind=kind_phys), intent(in) :: con_g, cimin
-        real(kind=kind_phys), dimension(im), intent(in) :: lndfrac, lakfrac, ocnfrac, fice
+        real(kind=kind_phys), dimension(im), intent(in) :: landfrac, lakefrac, oceanfrac, fice
         real(kind=kind_phys), dimension(im), intent(in) :: zorl, snowd, tprcp, uustar, weasd
         real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
           semis, adjsfcdlw, tsfc
@@ -226,11 +226,11 @@
         ! End of stochastic physics / surface perturbation
 
         do i = 1, im
-          if(lndfrac(i)<1.)    iwet(i) = 1
-          if(lndfrac(i)>0.)    idry(i) = 1
-          if(ocnfrac(i)>0.)    iocn(i) = 1
-          if(lakfrac(i)>0.)    ilak(i) = 1
-          if(iwet(i) == 1 .and. fice(i) >= cimin) iice(i) = 1
+          if(oceanfrac(i)>0.)         ocean(i) = .true.
+          if(landfrac(i) >0.)           dry(i) = .true.
+          if(lakefrac(i) >0.)          lake(i) = .true.
+          if(ocean(i) .or. lake(i))     wet(i) = .true.
+          if(fice(i) > cimin*max(oceanfrac(i),lakefrac(i))) icy(i) = .true.
         enddo
 
         do i=1,im
@@ -288,7 +288,7 @@
             tsfco(i) = tsfc(i)
             tisfc(i) = tsfc(i)
           end if
-          if(iwet(i) == 1) then
+          if(wet(i)) then
             snowd_ocn(i) = snowd(i)
             tprcp_ocn(i) = tprcp(i)
             zorl_ocn(i) = zorlo(i)
@@ -299,7 +299,7 @@
             stress_ocn(i) = 0.
           endif
   !
-          if (idry(i) == 1) then
+          if (dry(i)) then
             uustar_lnd(i) = uustar(i)
             weasd_lnd(i) = weasd(i)
             tprcp_lnd(i) = tprcp(i)
@@ -309,7 +309,7 @@
             snowd_lnd(i) = snowd(i)
           end if
   !
-          if (iice(i) == 1) then
+          if (icy(i)) then
             uustar_ice(i) = uustar(i)
             weasd_ice(i) = weasd(i)
             tprcp_ice(i) = tprcp(i)
@@ -350,10 +350,10 @@
 !! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
-!! | idry           | flag_nonzero_land_surface_fraction                                                                                  | flag indicating presence of some land surface area fraction                         | flag        |    1 | integer    |           | in     | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | integer    |           | in     | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | integer    |           | in     | F        |
-!! | ilak           | flag_nonzero_lake_surface_fraction                                                                                  | flag indicating presence of some lake surface area fraction                         | flag        |    1 | integer    |           | in     | F        |
+!! | dry            | flag_nonzero_land_surface_fraction                                                                                  | flag indicating presence of some land surface area fraction                         | flag        |    1 | logical    |           | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | logical    |           | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | logical    |           | in     | F        |
+!! | lake           | flag_nonzero_lake_surface_fraction                                                                                  | flag indicating presence of some lake surface area fraction                         | flag        |    1 | logical    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
 !! | tgrs_1         | air_temperature_at_lowest_model_layer                                                                               | mean temperature at lowest model layer                                              | K           |    1 | real       | kind_phys | in     | F        |
 !! | qgrs_1         | water_vapor_specific_humidity_at_lowest_model_layer                                                                 | specific humidity at lowest model layer                                             | kg kg-1     |    1 | real       | kind_phys | in     | F        |
@@ -530,7 +530,7 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, idry, iwet, iice, ilak, dtf, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, dry, wet, icy, lake, dtf, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
         t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -552,7 +552,7 @@
 
         integer,                              intent(in) :: im
         logical,                              intent(in) :: cplflx, cplwav, lssav
-        integer, dimension(im),               intent(in) :: idry, iwet, iice, ilak
+        logical, dimension(im),               intent(in) :: dry, wet, icy, lake
 
         real(kind=kind_phys),                 intent(in) :: dtf
 
@@ -651,7 +651,7 @@
 
   ! Two-way composites (fields already composited in sfc_sice)
   ! Three-way composites when coupled
-          if(cplflx .and. ilak(i) == 0) then  ! Lakes in coupled mode use sice?
+          if(cplflx .and. .not. lake(i)) then  ! Lakes in coupled mode use sice?
             evap(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
                                          lakfrac(i),cice(i),                  &
                                   evap_ocn(i),  evap_lnd(i),  evap_ice(i))
@@ -677,7 +677,7 @@
             tsfc(i)           = cmposit2(ocnfrac(i),lndfrac(i), &
                                          lakfrac(i),cice(i),            &
                                   tsfc_ocn(i),  tsfc_lnd(i),  tsfc_ice(i))
-            if(iice(i) == 1 .and. .not. cplflx) then
+            if(icy(i) .and. .not. cplflx) then
               cmm(i)           = cmm_ice(i)
               chh(i)           = chh_ice(i)
               gflx(i)          = gflx_ice(i)
@@ -690,8 +690,8 @@
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)
 
-          if (idry(i)==1) tsfcl(i) = tsfc_lnd(i)
-          if (iwet(i)==1) then
+          if (dry(i)) tsfcl(i) = tsfc_lnd(i)
+          if (wet(i)) then
             tsfco(i) = tsfc_ocn(i)
             tisfc(i) = tsfc_ice(i)
           end if
@@ -798,27 +798,28 @@
 
       end subroutine GFS_surface_generic_post_run
 
-      real function cmposit2(frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval)
-  ! --- 2-way compositing (use with ice/non-ice composited variables)
+      real function cmposit2(frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval)
+! --- 2-way compositing (use with ice/non-ice composited variables)
       implicit none
-      real(kind=kind_phys),intent(IN) :: frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval
+      real(kind=kind_phys),intent(IN) :: frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval
       real(kind=kind_phys)            :: frac_wet
 
-      frac_wet=max(frac_lak,frac_ocn)
+      frac_wet=max(frac_lake,frac_ocean)
       if (frac_ice.eq.0.) then
-        cmposit2 = frac_dry*lndval + frac_wet*ocnval
+        cmposit2 = frac_dry*landval + frac_wet*oceanval
       else
-        cmposit2 = frac_dry*lndval + frac_wet*iceval
+        cmposit2 = frac_dry*landval + frac_wet*iceval
       end if
       return
       end function cmposit2
 
-      real function cmposit3(frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval)
-  ! --- 3-way compositing
-      implicit none
-      real(kind=kind_phys),intent(IN) :: frac_ocn,frac_dry,frac_lak,frac_ice,ocnval,lndval,iceval
 
-      cmposit3 = frac_dry*lndval + frac_ice*iceval + (1.-frac_dry-frac_ice)*ocnval
+      real function cmposit3(frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval)
+! --- 3-way compositing
+      implicit none
+      real(kind=kind_phys),intent(IN) :: frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval
+
+      cmposit3 = frac_dry*landval + frac_ice*iceval + (1.-frac_dry-frac_ice)*oceanval
       return
       end function cmposit3
 

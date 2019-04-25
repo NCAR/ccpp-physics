@@ -56,10 +56,10 @@
 !! | ztpert         | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                               | flag       |    1 | logical   |           | in     | F        |
 !! | redrag         | flag_for_reduced_drag_coefficient_over_sea                                   | flag for reduced drag coefficient over sea                       | flag       |    0 | logical   |           | in     | F        |
-!! | iwet           | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag   |    1 | integer   |           | in     | F        |
-!! | idry           | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction      | flag       |    1 | integer   |           | in     | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction   | flag       |    1 | integer   |           | in     | F        |
-!! | covice         | sea_ice_concentration                                                        | ice fraction over open water                                     | frac       |    1 | real      | kind_phys | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag   |    1 | logical   |           | in     | F        |
+!! | dry            | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction      | flag       |    1 | logical   |           | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction   | flag       |    1 | logical   |           | in     | F        |
+!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                     | frac       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_ocn      | surface_skin_temperature_over_ocean_interstitial                             | surface skin temperature over ocean (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_lnd      | surface_skin_temperature_over_land_interstitial                              | surface skin temperature over land  (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_ice      | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
@@ -137,7 +137,7 @@
      &                    z0pert,ztpert,        ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                     !intent(in)
 !
-     &                    iwet,idry,iice,covice,                !intent(in)
+     &                    wet,dry,icy,fice,                     !intent(in)
 !
      &                    tskin_ocn, tskin_lnd, tskin_ice,      !intent(in)
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,      !intent(in)
@@ -162,11 +162,10 @@
       implicit none
 !
       integer, intent(in) :: im, ivegsrc
-      integer, dimension(im), intent(in) :: vegtype
-      integer, dimension(im), intent(in) :: iwet, idry, iice
+      integer, dimension(im), intent(in) :: vegtype 
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(im), intent(in) :: flag_iter ! added by s.lu
+      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy ! added by s.lu
 
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(im), intent(in)    ::
@@ -177,7 +176,7 @@
      &                    tskin_ocn, tskin_lnd, tskin_ice,
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,
      &                   snwdph_ocn,snwdph_lnd,snwdph_ice,
-     &                    covice
+     &                    fice
 
       real(kind=kind_phys), dimension(im), intent(inout) ::
      &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,
@@ -259,7 +258,7 @@
 !  this portion of the code is presently suppressed
 !
 
-          if(iwet(i)==1 .and. covice(i)<1.) then ! some open ocean
+          if (wet(i) .and. fice(i) < 1.) then ! some open ocean
             ustar_ocn(i) = sqrt(grav * z0_ocn / charnock)
 
 !**  test xubin's new z0
@@ -278,7 +277,7 @@
             rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
             ztmax_ocn  = z0max_ocn * exp(-rat)
           endif ! Open ocean
-          if(idry(i)==1 .or. iice(i)==1) then ! over land and sea ice
+          if (dry(i) .or. icy(i)) then ! over land or sea ice
 !** xubin's new z0  over land and sea ice
             tem1 = 1.0 - shdmax(i)
             tem2 = tem1 * tem1
@@ -321,7 +320,7 @@
             z0max_ice = z0max_lnd
 
 ! mg, sfc-perts: add surface perturbations to z0max over land
-            if ( idry(i) == 1 .and. z0pert(i) /= 0.0 ) then
+            if (dry(i) .and. z0pert(i) /= 0.0 ) then
               z0max_lnd = z0max_lnd * (10.**z0pert(i))
             endif
 
@@ -339,7 +338,7 @@
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
-            if ( idry(i) == 1  .and. ztpert(i) /= 0.0) then
+            if (dry(i) .and. ztpert(i) /= 0.0) then
               ztmax_lnd = ztmax_lnd * (10.**ztpert(i))
             endif
 
@@ -351,7 +350,7 @@
           ztmax_ice  = max(ztmax_ice,1.0e-6)
 
 ! BWG begin "stability" block, 2019-03-23
-      if(iwet(i)==1 .and. covice(i) < 1.) then ! Some open ocean
+      if (wet(i) .and. fice(i) < 1.) then ! Some open ocean
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_ocn(i),thv1,wind(i),
@@ -361,7 +360,7 @@
      &      cm_ocn(i),ch_ocn(i),stress_ocn(i),ustar_ocn(i))
       endif ! Open ocean points
 
-      if(idry(i)==1) then ! Some land
+      if (dry(i)) then ! Some land
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_lnd(i),thv1,wind(i),
@@ -371,7 +370,7 @@
      &      cm_lnd(i),ch_lnd(i),stress_lnd(i),ustar_lnd(i))
       endif ! Dry points
 
-      if(iice(i)==1) then ! Some ice
+      if (icy(i)) then ! Some ice
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_ice(i),thv1,wind(i),
@@ -387,7 +386,7 @@
 !
 !  update z0 over ocean
 !
-          if(iwet(i) == 1 .and. covice(i) < 1.) then
+          if (wet(i) .and. fice(i) < 1.) then
             z0_ocn = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
 
 ! mbek -- toga-coare flux algorithm

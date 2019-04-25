@@ -127,8 +127,8 @@
 !! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                              | index         |    0 | integer   |           | in     | F        |
 !! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
-!! | iocn           | flag_nonzero_ocean_surface_fraction                                          | flag indicating presence of some ocean surface area fraction    | flag          |    1 | integer   |           | in     | F        |
-!! | ilak           | flag_nonzero_lake_surface_fraction                                           | flag indicating presence of some lake surface area fraction     | flag          |    1 | integer   |           | in     | F        |
+!! | ocn            | flag_nonzero_ocean_surface_fraction                                          | flag indicating presence of some ocean surface area fraction    | flag          |    1 | logical   |           | in     | F        |
+!! | lake           | flag_nonzero_lake_surface_fraction                                           | flag indicating presence of some lake surface area fraction     | flag          |    1 | logical   |           | in     | F        |
 !! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                               | m             |    1 | real      | kind_phys | inout  | F        |
 !! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                     | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                     | K             |    1 | real      | kind_phys | inout  | F        |
@@ -137,7 +137,7 @@
 !! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice | total precipitation amount in each time step over ice        | m             |    1 | real      | kind_phys | inout  | F        |
 !! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux_over_ice                           | surface upward potential latent heat flux over ice              | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | iice           | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction  | flag          |    1 | integer   |           | inout  | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction  | flag          |    1 | logical   |           | inout  | F        |
 !! | snwdph         | surface_snow_thickness_water_equivalent_over_ice                             | water equivalent snow depth over ice                            | mm            |    1 | real      | kind_phys | inout  | F        |
 !! | qsurf          | surface_specific_humidity_over_ice                                           | surface air saturation specific humidity over ice               | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real      | kind_phys | inout  | F        |
@@ -178,9 +178,9 @@
      &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, ddvel,                              &
-     &       flag_iter, mom4ice, lsm, lprnt, ipr, cplflx, iocn, ilak,   &
+     &       flag_iter, mom4ice, lsm, lprnt, ipr, cplflx, ocn, lake,    &
 !  ---  input/outputs:
-     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep, iice,      &
+     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep, icy,       &
 !  ---  outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
      &       errmsg, errflg
@@ -243,8 +243,8 @@
 !     flag_iter- logical,                                          im   !
 !     mom4ice  - logical,                                          im   !
 !     cplflx   - logical, coupled flux                                  !
-!     iocn     - integer, ocean point flag                         im   !
-!     ilak     - integer, lake point flag                          im   !
+!     ocn      - logical, ocean point flag                         im   !
+!     lake     - logical, lake point flag                          im   !
 !     lsm      - integer, flag for land surface model scheme       1    !
 !                =0: use osu scheme; =1: use noah scheme                !
 !                                                                       !
@@ -257,7 +257,7 @@
 !     tprcp    - real, total precipitation                         im   !
 !     stc      - real, soil temp (k)                              im,km !
 !     ep       - real, potential evaporation                       im   !
-!     iice     - integer, ice flag                                      !
+!     icy      - logical, ice flag                                 im   !
 !                                                                       !
 !  outputs:                                                             !
 !     snwdph   - real, water equivalent snow depth (mm)            im   !
@@ -292,18 +292,17 @@
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd, cimin
 
-      integer, dimension(im), intent(in) :: iocn, ilak
-
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
 
       real (kind=kind_phys), intent(in)  :: delt
 
-      logical, intent(in) :: flag_iter(im), mom4ice
+      logical, dimension(im), intent(in) :: flag_iter, ocn, lake
+      logical,                intent(in) :: mom4ice
 
 !  ---  input/outputs:
-      integer, dimension(im), intent(inout) :: iice
+      logical, dimension(im), intent(inout) :: icy
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
      &       fice, tice, weasd, tskin, tprcp, ep
 
@@ -343,32 +342,37 @@
 !
 !> - Set flag for sea-ice.
 
-      if(cplflx) then ! Coupled: only compute over lake points
+      if (cplflx) then ! Coupled: only compute over lake points
         do i = 1, im
-          if(ilak(i) == 1) then  ! This block covers lake ice
-            flag(i) = fice(i) >= cimin .and. flag_iter(i)
-            if(flag_iter(i) .and. .not. flag(i)) then
-              hice(i) = 0.0
-              fice(i) = 0.0
-              iice(i) = 0
-            endif
-          elseif(iocn(i) == 1) then ! Sea ice
-            flag(i) = .false.  ! Sea ice when coupled: flag = false, use sfc_cice instead
-          else ! 100% land point
-            flag(i) = .false.
+          flag(i) = .false.
+          if (lake(i)) then  ! This block covers lakes
+            if (flag_iter(i)) then
+              if (fice(i) < cimin) then
+                hice(i) = 0.0
+                fice(i) = 0.0
+                icy(i) = .false.
+              else
+                flag(i) = .true.
+              end if
+            end if ! flag_iter(i)
+          elseif (.not.ocn(i)) then  ! 100% land point
             hice(i) = 0.0
             fice(i) = 0.0
-            iice(i) = 0
+            icy(i) = .false.
           endif
         enddo
       else ! Uncoupled
         do i = 1, im
-          flag(i) = fice(i) >= cimin .and. flag_iter(i)
-          if (flag_iter(i) .and. .not. flag(i)) then
-            hice(i) = 0.0
-            fice(i) = 0.0
-            iice(i) = 0
-          endif
+          flag(i) = .false.
+          if (flag_iter(i)) then
+            if (fice(i) < cimin) then
+              hice(i) = 0.0
+              fice(i) = 0.0
+              icy(i) = .false.
+            else
+              flag(i) = .true.
+            end if ! flag_iter(i)
+          end if
         enddo
       endif
 
@@ -384,10 +388,10 @@
 !
       if (mom4ice .or. cplflx) then
         do i = 1, im
-          if (flag(i) .and. ilak(i) == 0) then ! sea ice
+          if (flag(i) .and. .not. lake(i)) then ! sea ice
             hi_save(i) = hice(i)
             hs_save(i) = weasd(i) * 0.001
-          elseif(flag(i) .and. ilak(i) == 1) then ! lake ice
+          elseif(flag(i) .and. lake(i)) then ! lake ice
             if (srflag(i) == 1.0) then
               ep(i) = 0.0
               weasd(i) = weasd(i) + 1.e3*tprcp(i)
@@ -449,8 +453,7 @@
 
 !> - Convert snow depth in water equivalent from mm to m unit.
 
-!          if (mom4ice) then
-          if (mom4ice .or. (cplflx .and. ilak(i) == 0) ) then
+          if (mom4ice .or. (cplflx .and. .not.lake(i))) then
             snowd(i) = weasd(i) * 0.001 / fice(i)
           else
             snowd(i) = weasd(i) * 0.001
@@ -526,11 +529,9 @@
      &       snowd, hice, stsice, tice, snof, snowmt, gflux )           !
 
 !     if (lprnt) write(0,*)' tice3=',tice(ipr)
-!      if (mom4ice) then
       if (mom4ice .or. cplflx) then
         do i = 1, im
-!          if (flag(i)) then
-          if (flag(i) .and. ilak(i) == 0) then
+          if (flag(i) .and. .not.lake(i)) then
             hice(i)  = hi_save(i)
             snowd(i) = hs_save(i)
           endif
