@@ -15,12 +15,11 @@ of the NOAA Unified Forecast System (UFS).
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, and a description of
 the algorithm. 
+The latest CCPP public release is Version 3.0 (June 2019). While details on it may be found
+<a href="https://dtcenter.org/gmtb/users/ccpp/"> GMTB Common Community Physics Package (CCPP)</a> on the DTC website
 
--\subpage ccpp_overview
-
-\section release_v3 CCPP V3.0 Physics Scientific Upgrade
-The latest CCPP public release is Version 3.0 (June 2019). While details on it may be found 
-<a href="https://dtcenter.org/gmtb/users/ccpp/"> GMTB Common Community Physics Package (CCPP)</a> on the DTC website, 
+\section changelog Release Log
+## CCPP V3.0 Physics Scientific Upgrade
 some of V3.0's major physics improvements are as follows
 - Enhanced cloud-radiation interactions
   - In the previous fv3gfs, all hydrometeor species (liquid cloud, ice, rain, snow, graupel) are combined and re-partitioned and
@@ -42,22 +41,6 @@ total precipitation.
 
 \b nomenclatures: GFS, NEMSfv3gfs, or FV3GFS referred in this documentation are the Finite-volume Cubed-Sphere (FV3) 
 non-hydrostatic dynamic core in place of the long-running spectral Gaussian hydrostatic core.
-
-\section release_v2 CCPP V2.0 Physics Scientific Upgrade
-The most significant change with respect to CCPP-Physics v1.0 has been the inclusion of the 
-\ref GFDL_cloud, which is undergoing tests for possibly replacing the operational \ref GFS_ZHAOC
-in the operational NCEP global model in early 2019. With the GFDL microphysics, six prognostics 
-cloud species have been introduced to enable a more physically-based representation of water
-vapor, mixed-phase (liquid/ice) clouds and precipitating rain/snow/graupel hydrometeors. When used with 
-the FV3 dynamic solver, the GFDL microphysics uses a unique condensation adjustment when variables are
-mapped from Lagrangian to Eulerian surfaces.
-
-The public release of CCPP v2 is supported for use with the GMTB Single Column Model. The CCPP v2.0
-is currently being integrated with FV3GFS and is available for use by those working closely with
-NOAA in the development of the Unified Forecast System (UFS). Future direction for the CCPP includes broad support 
-for use with FV3 and addition of new parameterizations for potential transition to operations. 
-
-\b nomenclatures: ops GFS, NEMSGFS or GSM referred in this documentation are the same spectral model.
 
 
 */

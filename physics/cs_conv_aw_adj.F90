@@ -21,6 +21,7 @@ module cs_conv_aw_adj
    subroutine cs_conv_aw_adj_finalize()
    end subroutine cs_conv_aw_adj_finalize
 
+!>\ingroup cs_scheme
 !! \section arg_table_cs_conv_aw_adj_run Argument Table
 !! | local_name      | standard_name                                                 | long_name                                                                        | units   | rank | type      |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|

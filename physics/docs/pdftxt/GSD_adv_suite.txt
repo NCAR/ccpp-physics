@@ -7,7 +7,7 @@ The advanced GSD RAP/HRRR physics suite uses the parameterizations in the follow
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
- - \ref GSD_LSM_RUN
+ - \ref GSD_RUCLSM
  - \ref GSD_MYNNEDMF
  - \ref GFS_GWDPS
  - \ref GFS_RAYLEIGH
@@ -15,7 +15,7 @@ The advanced GSD RAP/HRRR physics suite uses the parameterizations in the follow
  - \ref GFS_H2OPHYS
  - \ref GSD_CU_GF
  - \ref GFS_GWDC
- - \ref GSD_THOMPSON_HRRR
+ - \ref GSD_THOMPSON
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gsdsuite Suite Definition File 

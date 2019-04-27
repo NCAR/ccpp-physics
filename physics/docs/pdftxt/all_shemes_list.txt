@@ -1,53 +1,50 @@
 /**
-\page allscheme_page CCPP V3.0 Physics Parameterizations 
+\page allscheme_page Physics Parameterizations and Suites Overview
 
-\section allscheme_overview Overview
-In the CCPP-Physics v3.0 code, each parameterization is placed in its own modern Fortran module, which facilitates model development and
+\section allscheme_overview Physics Parameterizations 
+
+In the CCPP-Physics v3.0 package, each parameterization is placed in its own modern Fortran module, which facilitates model development and
 code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
 parameterizations in suites. 
 
 
 - For PBL and turbulence parameterizations
- - \ref GFS_HEDMF
- - \ref GFS_SATMEDMF
- - \ref GSD_MYNNEDMF
-
-- For land surface model
- - \ref GFS_NOAH
- - \ref GSD_RUCLSM
-
-- For cumulus parameterizations:
- - \ref CSAW_deep
- - \ref GFS_SAMFdeep
- - \ref GSD_GFDEEP
-
-
- - \subpage GFS_RRTMG
- - \subpage GFS_SFCLYR
- - \subpage GFS_NSST
- - \subpage GFS_NOAH
- - \subpage GFS_SFCSICE
  - \subpage GFS_HEDMF
  - \subpage GFS_SATMEDMF
+ - \subpage GSD_MYNNEDMF
+
+- For land surface model
+ - \subpage GFS_NOAH
+ - \subpage GSD_RUCLSM
+
+- For cumulus parameterizations:
+ - \subpage GFS_SAMFdeep
+ - \subpage GFS_SAMFshal
+ - \subpage CSAW_scheme
+ - \subpage GSD_CU_GF_deep
+
+- For cloud microphysics parameterizations:
+ - \subpage GFS_ZHAOC
+ - \subpage GFDL_cloud
+ - \subpage fast_sat_adj
+ - \subpage RAD_CLD
+ - \subpage CPT_MG3
+ - \subpage GSD_THOMPSON
+
+- For radiation parameterizations;
+ - \subpage GFS_RRTMG
+
+- other parameterizations:
+ - \subpage GFS_SFCLYR
+ - \subpage GFS_NSST
+ - \subpage GFS_SFCSICE
  - \subpage GFS_GWDPS
  - \subpage GFS_RAYLEIGH
  - \subpage GFS_OZPHYS
  - \subpage GFS_H2OPHYS
- - \subpage GFS_SAMFdeep
- - \subpage CSAW_deep
  - \subpage GFS_GWDC
- - \subpage GFS_SAMFshal
- - \subpage GFDL_cloud
- - \subpage GFS_ZHAOC
  - \subpage GFS_CALPRECIPTYPE
- - \subpage fast_sat_adj
- - \subpage RAD_CLD
  - \subpage STOCHY_PHYS
- - \subpage CSAW_deep
- - \subpage CPT_MG3
- - \subpage GSD_MYNNEDMF
- - \subpage GSD_CU_GF_deep
- - \subpage GSD_RUN_LSM
 
 In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
  - \subpage func_phys
@@ -55,7 +52,6 @@ In addition to the physical schemes themselves, this scientific documentation al
  - \subpgae physcons
  - \subpage radcons
 
-The parameterizations included in the CCPP-Physics v3.0 are all column-based, that is, computations are performed only in the vertical.
 The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
  dynamical tendencies for the same variables and various surface fields, both fixed and variable.
@@ -69,5 +65,53 @@ parameterizations. The tendencies from the various parameterizations are then ad
 - The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric \f$H_2O\f$, deep convection, convective gravity wave drag,
 shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
 to the parameterization.
+
+\section allsuite_overview Physics Suites
+With funding from the Next Generation Global Prediction System (NGGPS) initiative and broad support from the community NCEP/EMC recently
+replaced the dynamic core in its flagship operational model, the GFS. Version 15 of the GFS (GFSv15), schedule for implementation in
+middle 2019, will include the Finite-volume Cubed-Sphere (FV3) non-hydrostatic dynamic core in place of the long-running spectral Gaussian
+hydrostatic core. This modeling system serves as the atmospheric foundation for the emerging Unified Forecast System (UFS) that is
+envisioned as a full community-based Earth-System model.
+
+The next major upgrade of the GFS is expected to be in the area of model physics.Physics upgrades are particular challenging.But community
+support, enhanced collaborations, and the CCPP framework are now making it feasible to accelerate advancements in operational model physics
+through wholesale replacement of individual parameterizations or even entire parameterizations suites.
+
+Current plans call for major changes to the GFSv15 parameterization suite in anticipation of the GFSv16 implementaion, schedule for FY2021.
+Several parameterizations have been identified as likely new components of the \b GFSv16 suite, including:
+- The \b RRTMGP radiation parameterization, developed by Robert Pincus and colleagues, is scheduled to replace the current \ref GFS_RRTMG
+- The \b Noah-MP land-surface parameterization is expected to replace the current \ref GFS_NOAH
+- A unified gravity-wave-drag (\b UGWD) parameterization, developed by Valery Yudin and collaborators, will replace the separate
+\ref GFS_GWDPS and \ref GFS_GWDC currently being used.
+- Fresh-water lake (\b FLAKE) and multi-layer snow parameterizations will be introduced to enhance the representation of earth-atmosphere
+interactions.
+
+In addition, new parameterizations for deep and shallow moist convection (CP), cloud microphysics (MP), and planetary boundary layer (PBLP)/
+turbulence are being considered. Unlike the parameterizations mentioned above, there are multiple viable options for parameterizing these
+processes in GFSv16, including the schemes currently used in GFSv15. The "suite" approach is being taken for this subset of all model
+parameterizations because the individual parameterizations within each candidate CP-MP-PBLP suite are highly interdependent. Thus, optimal
+performance typically has been achieved within the candidate suites through collective tuning of individual parameterizations. Developers
+have been invited to contribute their parameterizations as members of pre-tuned suites in hopes of optimizing performance in the GFS. This
+approach is one way of "leveling the playing field" so that parameterizations developed outside the GFS framework are not unduly handicapped
+by sub-optimal interactions with other GFS parameterizations.
+
+
+Two suites of CP-MP-PBLP parameterizations have been identified as possible replacements for the current GFSv15 suite. \b GSD \b suite is
+derived from the operational Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR) modeling system \cite Benjamin_2016 and was developed largely at NOAA/OAR/ESRL/GSD for mesoscale applications, while the second candidate, i.e., the \b CPT \b suite, has components that were
+developed at multiple ressearch centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Its individual
+parameterizations have been applied primarily to medium-range and longer prediction scales. For the GFSv15 suite, a very similar suite, but
+with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019, manuscript accepted by WAF).
+
+Table 1. Proposed physics-suite options for 2019 Advance Physics Testing. SA=Scale-aware; AA=aerosol aware
+\tableofcontents
+|   Phys suites    |   GFSv15              |   GFSv15+            |   CPT               |    GSD RAP/HRRR      |
+|------------------|-----------------------|----------------------|---------------------|----------------------|
+| Deep Cu          |  \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF_deep  |
+| Shallow Cu       |  \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF    |
+| Microphysics     |  \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
+| PBL/TURB         |  \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
+| Land             |  \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+\tableofcontents
+
 
 */

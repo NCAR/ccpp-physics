@@ -1,5 +1,5 @@
 /**
-\page GSD_RUC_LSM GSD RUN Land Surface Model
+\page GSD_RUCLSM GSD RUC Land Surface Model
 \section ruclsm_descrip  Description
 
 --PLACEHOLDER

@@ -1,4 +1,4 @@
-!> \file physcons.f90
+!> \file physcons.F90
 !! This file contains module physcons
 
 !  ==========================================================  !!!!!

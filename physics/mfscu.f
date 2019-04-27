@@ -1,9 +1,12 @@
 !>\file mfscu.f
-!! This file contains 
+!! This file contains the mass flux and downdraft parcel preperties
+!! parameterization for stratocumulus-top-driven turbulence.
 
 !>\ingroup satmedmf
 !! This subroutine computes mass flux and downdraft parcel properties
 !! for stratocumulus-top-driven turbulence.
+!! \section mfscu GFS mfscu General Algorithm
+!> @{
       subroutine mfscu(im,ix,km,kmscu,ntcw,ntrac1,delt,                 &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,                             &
      &   thlx,thvx,thlvx,gdx,thetae,radj,                               &
@@ -122,7 +125,7 @@ c  physical parameters
         endif
       enddo
 !
-!  specify downdraft fraction
+!> - Specify downdraft fraction
 !
       do i=1,im
         if(cnvflg(i)) then
@@ -131,8 +134,8 @@ c  physical parameters
         endif
       enddo
 !
-!  if the condition for cloud-top instability is met,
-!    increase downdraft fraction
+!> - If the condition for cloud-top instability is met,
+!! increase downdraft fraction
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -149,7 +152,7 @@ c  physical parameters
         endif
       enddo
 !
-! compute radiative flux jump at stratocumulus top
+!> - Compute radiative flux jump at stratocumulus top
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -157,7 +160,7 @@ c  physical parameters
         endif
       enddo
 !
-!   first-quess level of downdraft extension (mrad)
+!> - First-guess level of downdraft extension (mrad)
 ! 
       do i = 1, im
         flg(i) = cnvflg(i)
@@ -188,7 +191,7 @@ c  physical parameters
       if(totflg) return
 !!
 !
-!  compute entrainment rate
+!> - Compute entrainment rate
 !
       do k = 1, kmscu
         do i=1,im
@@ -211,7 +214,7 @@ c  physical parameters
         enddo
       enddo
 !
-!  compute buoyancy for downdraft air parcel
+!> - Compute buoyancy for downdraft air parcel
 !
       do k = kmscu,1,-1
         do i=1,im
@@ -247,7 +250,7 @@ c  physical parameters
         enddo
       enddo
 !
-!  compute downdraft velocity square(wd2)
+!> - Compute downdraft velocity square(wd2)
 !
 !     tem = 1.-2.*f1
 !     bb1 = 2. * b1 / tem
@@ -327,7 +330,7 @@ c
       if(totflg) return
 !!
 !
-!  update entrainment rate
+!> - Update entrainment rate
 !
       do k = 1, kmscu
         do i=1,im
@@ -350,7 +353,7 @@ c
         enddo
       enddo
 !
-!  compute entrainment rate averaged over the whole downdraft layers
+!> - Compute entrainment rate averaged over the whole downdraft layers
 !
       do i = 1, im
         xlamavg(i) = 0.
@@ -372,7 +375,7 @@ c
         endif
       enddo
 !
-!  compute downdraft mass flux
+!> - Compute downdraft mass flux
 !
       do k = kmscu, 1, -1
         do i = 1, im
@@ -388,8 +391,8 @@ c
         enddo
       enddo
 !
-!--- compute downdraft fraction as a function of mean entrainment rate
-!        (Grell & Freitas, 2014)
+!> - Compute downdraft fraction as a function of mean entrainment rate
+!! (Grell and Freitas(2014) \cite grell_and_freitas_2014
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -401,7 +404,8 @@ c
         endif
       enddo
 !
-!--- compute scale-aware function based on Arakawa & Wu (2013)
+!> - Compute scale-aware function based on 
+!! Arakawa and Wu (2013) \cite arakawa_and_wu_2013
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -414,7 +418,7 @@ c
         endif
       enddo
 !
-!  final scale-aware downdraft mass flux
+!> - Compute final scale-aware downdraft mass flux
 !
       do k = kmscu, 1, -1
         do i = 1, im
@@ -429,7 +433,7 @@ c
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute downdraft property using updated entranment rate
+!> - Compute downdraft property using updated entranment rate
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -549,3 +553,4 @@ c
 !
       return
       end
+!> @}

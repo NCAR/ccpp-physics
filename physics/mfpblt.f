@@ -6,8 +6,8 @@
 !>\ingroup satmedmf
 !! This subroutine computes mass flux and updraft parcel properties for
 !! thermals driven by surface heating. 
-!!\param
-!!
+!!\section mfpblt_gen GFS mfpblt General Algorithm 
+!> @{
       subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
      &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &
@@ -96,7 +96,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!  compute thermal excess
+!> - Compute thermal excess
 !
       do i=1,im
         if(cnvflg(i)) then
@@ -108,7 +108,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!  compute entrainment rate
+!> - Compute entrainment rate (eqn 30 of Han et al. (2019) \cite \Han_2019)
 !
       do k = 1, kmpbl
         do i=1,im
@@ -127,7 +127,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!  compute buoyancy for updraft air parcel
+!> - Compute buoyancy for updraft air parcel
 !
       do k = 2, kmpbl
         do i=1,im
@@ -163,7 +163,8 @@ c  local variables and arrays
         enddo
       enddo
 !
-!  compute updraft velocity square(wu2)
+!> - Compute updraft velocity square(wu2, eqn 13 in 
+!! Han et al.(2019) \cite Han_2019)
 !
 !     tem = 1.-2.*f1
 !     bb1 = 2. * b1 / tem
@@ -202,7 +203,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!  update pbl height as the height where updraft velocity vanishes
+!> - Update pbl height as the height where updraft velocity vanishes
 !
       do i=1,im
          flg(i)  = .true.
@@ -245,7 +246,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!  update entrainment rate
+!> - Update entrainment rate
 !
       do k = 1, kmpbl
         do i=1,im
@@ -264,7 +265,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!  compute entrainment rate averaged over the whole pbl
+!> - Compute entrainment rate averaged over the whole pbl
 !
       do i = 1, im
         xlamavg(i) = 0.
@@ -285,7 +286,8 @@ c  local variables and arrays
         endif
       enddo
 !
-!  updraft mass flux as a function of updraft velocity profile
+!> - Updraft mass flux as a function of updraft velocity profile
+!! (eqn 12 of Han et al.(2019) \cite Han_2019)
 !
       do k = 1, kmpbl
         do i = 1, im
@@ -300,8 +302,8 @@ c  local variables and arrays
         enddo
       enddo
 !
-!--- compute updraft fraction as a function of mean entrainment rate
-!        (Grell & Freitas, 2014)
+!> - Compute updraft fraction as a function of mean entrainment rate
+!!(Grell and Freitas (2014) \cite grell_and_freitas_2014
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -313,7 +315,8 @@ c  local variables and arrays
         endif
       enddo
 !
-!--- compute scale-aware function based on Arakawa & Wu (2013)
+!> - Compute scale-aware function based on 
+!! Arakawa and Wu (2013) \cite arakawa_and_wu_2013
 !
       do i = 1, im
         if(cnvflg(i)) then
@@ -326,7 +329,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!  final scale-aware updraft mass flux
+!> - Final scale-aware updraft mass flux
 !
       do k = 1, kmpbl
         do i = 1, im
@@ -340,7 +343,7 @@ c  local variables and arrays
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute updraft property using updated entranment rate
+!> - Compute updraft property using updated entranment rate
 !
       do i=1,im
         if(cnvflg(i)) then
@@ -448,3 +451,4 @@ c  local variables and arrays
 !
       return
       end
+!> @}
