@@ -376,7 +376,7 @@
 !          endif
 ! compute fractional srflag
           total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
-          if (total_precip*tem > rainmin) then
+          if (total_precip > rainmin) then
             srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
           endif
         enddo
