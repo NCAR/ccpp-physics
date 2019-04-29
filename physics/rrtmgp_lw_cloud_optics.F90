@@ -573,7 +573,7 @@ contains
          cld_ref_snow    ! Effective radius (snow-flake)          (micron)
 
      ! Outputs
-     real(kind_phys),dimension(nBandsLW,ncol,nlay),intent(out) :: &
+     real(kind_phys),dimension(ncol,nlay,nBandsLW),intent(out) :: &
           tau_cld       
 
      ! Local variables
@@ -654,7 +654,7 @@ contains
               endif
               ! Cloud optical depth
               do ib = 1, nBandsLW
-                 tau_cld(ib,ij,ik) = tau_ice(ib) + tau_liq(ib) + tau_rain + tau_snow
+                 tau_cld(ij,ik,ib) = tau_ice(ib) + tau_liq(ib) + tau_rain + tau_snow
               enddo
            end do
         end do
@@ -677,7 +677,8 @@ contains
          cld_frac,     & ! Cloud-fraction  
          dzlyr           ! Layer thinkness (km)
     ! Outputs
-    real(kind_phys),dimension(ngpts,ncol,nlay),intent(out) :: &
+    !real(kind_phys),dimension(ncol,nlay,ngpts),intent(out) :: &
+    logical,dimension(ncol,nlay,ngpts),intent(out) :: &
          cld_frac_mcica
     ! Local variables
     type(random_stat) :: stat
@@ -800,16 +801,16 @@ contains
        end select
        
        ! ###################################################################################
-       ! Generate subcolumn cloud mask (0/1 for clear/cloudy)
+       ! Generate subcolumn cloud mask (.false./.true. for clear/cloudy)
        ! ###################################################################################
        do k = 1, nlay
           tem1 = 1._kind_phys - cld_frac(icol,k)
           do n = 1, ngpts
              lcloudy(n,k) = cdfunc(n,k) >= tem1
              if (lcloudy(n,k)) then
-                cld_frac_mcica(n,icol,k) = 1._kind_phys
+                cld_frac_mcica(icol,k,n) = .true.
              else
-                cld_frac_mcica(n,icol,k) = 0._kind_phys
+                cld_frac_mcica(icol,k,n) = .false.
              endif
           enddo
        enddo

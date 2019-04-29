@@ -10,6 +10,7 @@ module rrtmgp_lw
   use mo_rte_kind,               only: wl
   use mo_heating_rates,          only: compute_heating_rate
   use mo_cloud_optics,           only: ty_cloud_optics
+  use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
   use physparam,                 only: ilwcliq,isubclw,iovrlw,ilwrgas,icldflg,ilwrate
@@ -46,11 +47,6 @@ module rrtmgp_lw
        nBandsLW,           & ! Number of LW bands
        nrghice,            & ! Number of ice roughness categories
        ipsdlw0               ! Initial see for McICA
-  real(kind_phys)  :: &
-       re_ice_min,         & ! Minimum ice particle size allowed by RRTGMP
-       re_ice_max,         & ! Maximum ice particle size allowed by RRTGMP
-       re_liq_min,         & ! Minimum liquid particle size allowed by RRTGMP
-       re_liq_max            ! Maximum liquid particle size allowed by RRTGMP
 
   integer,allocatable,dimension(:) :: &
        ngb_LW   ! Band index for each g-points
@@ -204,7 +200,7 @@ contains
 
     open(59,file='rrtmgp_aux_dump.txt',status='unknown')
     open(60,file='rrtmgp_aux_tautot.txt',status='unknown')
-    open(61,file='rrtmgp_aux_taucld.txt',status='unknown')
+    open(61,file='rrtmgp_lw_aux_taucld.txt',status='unknown')
 
     ! Initialize
     errmsg = ''
@@ -684,6 +680,7 @@ contains
        call MPI_BCAST(lut_extice,           size(lut_extice),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_ssaice,           size(lut_ssaice),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_asyice,           size(lut_asyice),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(band_lims_cldy),      size(band_lims_cldy),      kind_phys,   mpiroot, mpicomm, ierr)    
     endif
     if (rrtmgp_lw_cld_phys .eq. 2) then
        call MPI_BCAST(pade_extliq,          size(pade_extliq),         kind_phys,   mpiroot, mpicomm, ierr)
@@ -698,29 +695,25 @@ contains
        call MPI_BCAST(pade_sizereg_extice), size(pade_sizereg_extice), kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_sizereg_ssaice), size(pade_sizereg_ssaice), kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_sizereg_asyice), size(pade_sizereg_asyice), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(band_lims_cldy),      size(band_lims_cldy),      kind_phys,   mpiroot, mpicomm, ierr)    
     endif
-    call MPI_BCAST(band_lims_cldy),         size(band_lims_cldy),      kind_phys,   mpiroot, mpicomm, ierr)    
 #endif
 
     ! Load tables data for RRTGMP cloud-optics  
     if (rrtmgp_lw_cld_phys .eq. 1) then
        print*,'RRTMGP_INIT: ',shape(lut_extice)
+       call check_error_msg(kdist_lw_cldy%set_ice_roughness(nrghice))
        call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, radliq_lwr, radliq_upr, &
             radliq_fac, radice_lwr, radice_upr, radice_fac, lut_extliq, lut_ssaliq,    &
             lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (rrtmgp_lw_cld_phys .eq. 2) then
+       print*,'RRTMGP_INIT: ',shape(pade_extice)
+       call check_error_msg(kdist_lw_cldy%set_ice_roughness(nrghice))
        call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, pade_extliq,            &
             pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,           &
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,             &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
-    endif
-
-    if ((rrtmgp_lw_cld_phys .gt. 0)) then
-       re_ice_min = radice_lwr
-       re_ice_max = radice_upr
-       re_liq_min = radliq_lwr
-       re_liq_max = radliq_upr
     endif
 
   end subroutine rrtmgp_lw_init
@@ -882,19 +875,22 @@ contains
     real(kind_phys), dimension(ncol,nlay) :: &
          vmr_o3, vmr_h2o, cldfrac2, thetaTendClrSky,thetaTendAllSky, cld_ref_liq2, &
          cld_ref_ice2,tau_snow,tau_rain,coldry,tem0,colamt
+    real(kind_phys), dimension(ncol,nlay,nBandsLW) :: &
+         tau_cld
+    real(kind_phys), dimension(nGptsLW,nlay,ncol) :: &
+         ipseeds
     logical,dimension(ncol,nlay) :: &
          liqmask,icemask
-    real(kind_phys), dimension(nGptsLW,ncol,nlay) :: &
+    logical, dimension(ncol,nlay,nGptsLW) :: &
          cldfracMCICA
-    real(kind_phys), dimension(:,:,:), allocatable :: &
-         tau_cld,tau_gpt
     logical :: &
          top_at_1=.false.
 
     ! RTE+RRTMGP classes
     type(ty_optical_props_1scl) :: &
          optical_props_clr,  & ! Optical properties for gaseous atmosphere
-         optical_props_cldy, & ! Optical properties for clouds
+         optical_props_cldy, & ! Optical properties for clouds (by band)
+         optical_props_mcica,& ! Optical properties for clouds (sampled)
          optical_props_aer     ! Optical properties for aerosols
 
     type(ty_source_func_lw) :: &
@@ -968,10 +964,6 @@ contains
     p_lev2=p_lev
     p_lev2(:,nlay+1) = kdist_lw_clr%get_press_min()/100.
 
-    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
-    liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
-    icemask = (cldfrac .gt. 0 .and. cld_iwp .gt. 0)
-
     ! Conpute diffusivity angle adjustments.
     ! First need to compute precipitable water in each column
     tem0   = (1. - vmr_h2o)*amd + vmr_h2o*amw
@@ -1001,25 +993,29 @@ contains
        enddo
     enddo
 
-    ! RRTMGP cloud_optics expects particle size to be in a certain range. bound here
-    cld_ref_ice2 = cld_ref_ice
-    where(cld_ref_ice2 .gt. re_ice_max) cld_ref_ice2=re_ice_max
-    where(cld_ref_ice2 .lt. re_ice_min) cld_ref_ice2=re_ice_min
-    cld_ref_liq2 = cld_ref_liq
-    where(cld_ref_liq2 .gt. re_liq_max) cld_ref_liq2=re_liq_max
-    where(cld_ref_liq2 .lt. re_liq_min) cld_ref_liq2=re_liq_min
+    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
+    liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
+    icemask = (cldfrac .gt. 0 .and. cld_iwp .gt. 0)
 
-    allocate(tau_cld(nBandsLW, ncol, nlay))
-    allocate(tau_gpt(ncol, nlay, nGptsLW))
+    ! RRTMGP cloud_optics expects particle size to be in a certain range. bound here
+    if (rrtmgp_lw_cld_phys .gt. 0) then
+       cld_ref_ice2 = cld_ref_ice
+       where(cld_ref_ice2 .gt. kdist_lw_cldy%get_max_radius_ice()) cld_ref_ice2=kdist_lw_cldy%get_max_radius_ice()
+       where(cld_ref_ice2 .lt. kdist_lw_cldy%get_min_radius_ice()) cld_ref_ice2=kdist_lw_cldy%get_min_radius_ice()
+       cld_ref_liq2 = cld_ref_liq
+       where(cld_ref_liq2 .gt. kdist_lw_cldy%get_max_radius_liq()) cld_ref_liq2=kdist_lw_cldy%get_max_radius_liq()
+       where(cld_ref_liq2 .lt. kdist_lw_cldy%get_min_radius_liq()) cld_ref_liq2=kdist_lw_cldy%get_min_radius_liq()
+    endif
 
     ! #######################################################################################
     ! Call RRTMGP
     ! #######################################################################################
     ! Allocate space for source functions and gas optical properties
-    call check_error_msg(sources%alloc(                ncol, nlay, kdist_lw_clr))
-    call check_error_msg(optical_props_clr%alloc_1scl( ncol, nlay, kdist_lw_clr))
-    call check_error_msg(optical_props_cldy%alloc_1scl(ncol, nlay, kdist_lw_clr))
-    call check_error_msg(optical_props_aer%alloc_1scl( ncol, nlay, kdist_lw_clr))
+    call check_error_msg(sources%alloc(                 ncol, nlay, kdist_lw_clr))
+    call check_error_msg(optical_props_clr%alloc_1scl(  ncol, nlay, kdist_lw_clr))
+    call check_error_msg(optical_props_cldy%alloc_1scl( ncol, nlay, kdist_lw_cldy))
+    call check_error_msg(optical_props_mcica%alloc_1scl(ncol, nlay, kdist_lw_clr))
+    call check_error_msg(optical_props_aer%alloc_1scl(  ncol, nlay, kdist_lw_clr))
 
     ! Initialize RRTMGP files
     fluxAllSky%flux_up => flux_up_allSky
@@ -1043,14 +1039,14 @@ contains
     ! 1b) Compute the optical properties of the atmosphere and the Planck source functions
     !    from pressures, temperatures, and gas concentrations...
     print*,'Clear-Sky(LW): Optics'
-    call check_error_msg(kdist_lw_clr%gas_optics(      &
-         p_lay(1:ncol,1:nlay)*100.,      &
-         p_lev2(1:ncol,1:nlay+1)*100.,   &
-         t_lay(1:ncol,1:nlay),                     &
-         skt(1:ncol),                              &
-         gas_concs_lw,                             &
-         optical_props_clr,                        &
-         sources,                                  &
+    call check_error_msg(kdist_lw_clr%gas_optics( &
+         p_lay(1:ncol,1:nlay)*100.,               &
+         p_lev2(1:ncol,1:nlay+1)*100.,            &
+         t_lay(1:ncol,1:nlay),                    &
+         skt(1:ncol),                             &
+         gas_concs_lw,                            &
+         optical_props_clr,                       &
+         sources,                                 &
          tlev = t_lev(1:ncol,1:nlay+1)))
 
     ! 1c) Add contribution from aerosols. Also, apply diffusivity angle
@@ -1058,8 +1054,8 @@ contains
     do iCol=1,nCol
        do iGpt=1,nGptsLW
           iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-          optical_props_clr%tau(iCol,1:nlay,iGpt) = optical_props_clr%tau(iCol,1:nlay,iGpt) * secdiff(iBand,iCol)
-          optical_props_aer%tau(iCol,1:nlay,iGpt) = tau_aer(iCol,1:nlay,iBand) * (1. - ssa_aer(iCol,1:nlay,iBand)) * secdiff(iBand,iCol)
+          optical_props_clr%tau(iCol,1:nlay,iGpt) = optical_props_clr%tau(iCol,1:nlay,iGpt)! * secdiff(iBand,iCol)
+          optical_props_aer%tau(iCol,1:nlay,iGpt) = tau_aer(iCol,1:nlay,iBand) * (1. - ssa_aer(iCol,1:nlay,iBand))! * secdiff(iBand,iCol)
        enddo
     enddo
     call check_error_msg(optical_props_aer%increment(optical_props_clr))
@@ -1084,10 +1080,10 @@ contains
     ! #######################################################################################
     ! 2) All-sky fluxes
     ! #######################################################################################
-    ! 2a) Compute in-cloud optics
+    ! 2a) Compute in-cloud radiative properties 
     print*,'All-Sky(LW): Optics '
-    tau_cld(:,:,:) = 0.
     if (any(cldfrac .gt. 0)) then
+       ! 2a.i) RRTMG cloud optics
        ! If using RRTMG cloud-physics. Model can provide either cloud-optics (cld_od) or 
        ! cloud-properties by type (cloud LWP,snow effective radius, etc...)
        if (rrtmgp_lw_cld_phys .eq. 0) then
@@ -1097,84 +1093,73 @@ contains
              print*,'   Using all types too...'
              call rrtmgp_lw_cloud_optics(ncol, nlay, nBandsLW, cld_lwp, cld_ref_liq, cld_iwp,  &
                   cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow, cldfrac, tau_cld)
+             optical_props_cldy%tau = tau_cld
           else
           ! Cloud-optical depth provided.
              do iCol=1,ncol
                 do iLay=1,nlay
                    if (cldfrac(iCol,iLay) .gt. cldmin) then
-                      tau_cld(:,iCol,iLay) = cld_od(iCol,iLay)*secdiff(:,iCol)
+                      optical_props_cldy%tau(iCol,iLay,:) = cld_od(iCol,iLay)*secdiff(:,iCol)
                    else
-                      tau_cld(:,iCol,iLay) = 0.
+                      optical_props_cldy%tau(iCol,iLay,:) = 0._kind_phys
                    endif
                 end do
              end do
           endif
        endif
 
-       ! If using RRTMGP cloud-physics
+       ! 2a.ii) Use RRTMGP cloud-optics.
        if (rrtmgp_lw_cld_phys .gt. 0) then
-          print*,'Using RRTMGP cloud-physics'
+          print*,'Using RRTMGP cloud-physics',optical_props_cldy%get_ngpt(),optical_props_cldy%get_nband()
           call check_error_msg(kdist_lw_cldy%cloud_optics(ncol, nlay, nBandsLW, nrghice,     &
                liqmask, icemask, cld_lwp, cld_iwp, cld_ref_liq2, cld_ref_ice2, optical_props_cldy))
 
-          ! Add in contributions from snow and rain
-          do iCol=1,ncol
-             do iLay=1,nlay
-                if (cldfrac(iCol,iLay) .gt. cldmin) then
-                   ! Rain optical-depth
-                   tau_rain(iCol,iLay) = absrain*cld_rwp(iCol,iLay)
-                   ! Snow optical-depth
-                   if (cld_swp(iCol,iLay) .gt. 0. .and. cld_ref_snow(iCol,iLay) .gt. 10.) then
-                      tau_snow(iCol,iLay) = abssnow0*1.05756*cld_swp(iCol,iLay)/cld_ref_snow(iCol,iLay)
-                   else
-                      tau_snow(iCol,iLay) = 0.
-                   endif
-                endif
-             enddo
-          enddo
-          do iBand=1,nBandsLW 
-             tau_cld(iBand,:,:) = optical_props_cldy%tau(iBand,:,:)+tau_snow+tau_rain
-          enddo
+          ! Add in contributions from snow and rain (Need to revisit)
+          
        end if
     endif
 
-    ! 2b) Call McICA to generate subcolumns.
-    tau_gpt(:,:,:) = 0.
+    ! 2c) Call McICA to generate subcolumns.
     if (isubclw .gt. 0) then
        print*,'All-Sky(LW): McICA'
        cldfrac2 = merge(cldfrac,0.,cldfrac .gt. cldmin)
-       call mcica_subcol_lw(ncol, nlay, nGptsLW, cldfrac2, ipseed, dzlyr, de_lgth, cldfracMCICA)
+       !call mcica_subcol_lw(ncol, nlay, nGptsLW, cldfrac2, ipseed, dzlyr, de_lgth, cldfracMCICA)
        
+       ipseeds(:,:,:) = ipseed(1)
+       !select case ( iovrlw )
+       !case(2)
+       call check_error_msg(sampled_mask_max_ran(ipseeds,cldfrac2,cldfracMCICA))
+       !end select
+          
        ! Map band optical depth to each g-point using McICA
        do iCol=1,ncol
           do iLay=1,nLay
              do iGpt=1,nGptsLW
                 iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-                if (cldfracMCICA(iGpt,iCol,iLay) .gt. 0.) then
-                   tau_gpt(iCol,iLay,iGpt) = tau_cld(iband,iCol,iLay)*secdiff(iBand,iCol)
+                if (cldfracMCICA(iCol,iLay,iGpt)) then
+                   optical_props_mcica%tau(iCol,iLay,iGpt) = optical_props_cldy%tau(iCol,iLay,iBand)!*secdiff(iBand,iCol)
                 else
-                   tau_gpt(iCol,iLay,iGpt) = 0.
+                   optical_props_mcica%tau(iCol,iLay,iGpt) = 0._kind_phys
                 endif
              enddo
           enddo
        enddo
     endif
-    optical_props_cldy%tau = tau_gpt
 
-    ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
+    ! 2d) Add cloud contribution from the gaseous (clear-sky) atmosphere.
     print*,'All-Sky(LW): Increment'
-    call check_error_msg(optical_props_clr%increment(optical_props_cldy))
+    call check_error_msg(optical_props_clr%increment(optical_props_mcica))
 
-    ! 2d) Compute broadband fluxes
+    ! 2e) Compute broadband fluxes
     print*,'All-Sky(LW): Fluxes'
     call check_error_msg(rte_lw(                   &
-         optical_props_cldy,                       &
+         optical_props_mcica,                      &
          top_at_1,                                 &
          sources,                                  &
          semiss, &
          fluxAllSky))
 
-    ! 2e) Compute heating rates
+    ! 2f) Compute heating rates
     print*,'All-Sky(LW): Heating-rates'
     call check_error_msg(compute_heating_rate(  &
          fluxAllSky%flux_up,                    &
@@ -1191,7 +1176,7 @@ contains
             sum(fluxClrSky%flux_dn(1,iLay:iLay+1))/2.,sum(fluxAllSky%flux_up(1,iLay:iLay+1))/2.,&
             sum(fluxAllSky%flux_dn(1,iLay:iLay+1))/2.
        write(60,*) optical_props_clr%tau(1,iLay,:)
-       write(61,'(16f12.3)') tau_cld(:,1,iLay)!*secdiff(:,1)
+       write(61,'(16f12.3)') optical_props_cldy%tau(1,iLay,:)!*secdiff(:,1)
     enddo
     ! #######################################################################################
     ! Copy fluxes from RRTGMP types into model radiation types.
@@ -1203,7 +1188,7 @@ contains
     sfcflx%upfx0 = fluxClrSky%flux_up(:,1)
     sfcflx%dnfxc = fluxAllSky%flux_dn(:,1)
     sfcflx%dnfx0 = fluxClrSky%flux_dn(:,1)
-    cldtau       = tau_cld(7,:,:)
+    cldtau       = optical_props_cldy%tau(:,:,7)
     hlwc         = thetaTendAllSky
 
     ! Optional output

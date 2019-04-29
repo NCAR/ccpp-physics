@@ -707,6 +707,7 @@
 ! DJS2019: START        
         ! Compute layer cloud fraction.
         clwmin = 0.0
+        cldcov(:,:) = 0.0
         if (.not. Model%lmfshal) then
           do k = 1, LMK
              do i = 1, IM
@@ -749,9 +750,7 @@
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                 ! DJS2019: Tbd%phy_f3d(:,:,1) is mean layer temperature, not cloud amount
                  cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                 cldcov(i,k1) = tracer1(i,k,Model%ntclamt)
                  effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
                  effri(i,k1)  = Tbd%phy_f3d(i,k,3)
                  effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
@@ -784,6 +783,11 @@
         write(58,*) "Model%lgfdlmprad:  ",Model%lgfdlmprad
         write(58,*) "Model%lmfshal:     ",Model%lmfshal
         write(58,*) "Model%lmfdeep2:    ",Model%lmfdeep2
+        do k = 1, LMK
+           do i = 1, IM
+              write(58,'(a19,2i8,f10.2)') " Cloud-cover:      ",k,i,cldcov(i,k)
+           end do
+        enddo
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics

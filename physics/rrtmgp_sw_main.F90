@@ -873,6 +873,10 @@ contains
                   cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
                   cldfrac(idxday,1:nLay),                              &
                   tau_cld, ssa_cld, asy_cld)
+             write(70,*) 'rrtmgp_sw_cloud_optics'
+             do iLay=1,nLay
+                write(70,'(i10,5f12.7)') iLay,cld_lwp(idxday,iLay),cld_ref_liq(idxday,iLay),cld_iwp(idxday,iLay),cld_ref_ice(idxday,iLay),cldfrac(idxday,iLay)
+             enddo
           else
              ! Cloud-optical depth, single scattering albedo, and asymmetry parameter provided.
              do iDay=1,nDay
@@ -896,8 +900,11 @@ contains
        do iDay=1,nDay
           do iLay=1,nlay
              write(69,'(a5,i2,4f12.3)') '',iLay,p_lay(idxday(iDay),iLay),sum(optical_props_clr%tau(iDay,iLay,:))
+             write(70,'(a5,2i8)') 'TAU: ',iDay,iLay
              write(70,'(16f12.3)') tau_cld(:,1,iLay)
+             write(70,'(a5,2i8)') 'SSA: '
              write(70,'(16f12.3)') ssa_cld(:,1,iLay)
+             write(70,'(a5,2i8)') 'ASY: '
              write(70,'(16f12.3)') asy_cld(:,1,iLay)
           enddo
        enddo
