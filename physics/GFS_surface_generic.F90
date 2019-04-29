@@ -50,9 +50,6 @@
 !! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equiv of acc snow depth over land and sea ice                  | mm         |    1 | real      | kind_phys | in     | F        |
 !! | weasd_lnd      | water_equivalent_accumulated_snow_depth_over_land                            | water equiv of acc snow depth over land                              | mm         |    1 | real      | kind_phys | inout  | F        |
 !! | weasd_ice      | water_equivalent_accumulated_snow_depth_over_ice                             | water equiv of acc snow depth over ice                               | mm         |    1 | real      | kind_phys | inout  | F        |
-!! | evap_ocn       | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean                 | kg kg-1 m s-1 |    1 | real   | kind_phys | inout  | F        |
-!! | hflx_ocn       | kinematic_surface_upward_sensible_heat_flux_over_ocean                       | kinematic surface upward sensible heat flux over ocean               | K m s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | stress_ocn     | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                                       | m2 s-2     |    1 | real      | kind_phys | inout  | F        |
 !! | ep1d_ice       | surface_upward_potential_latent_heat_flux_over_ice                           | surface upward potential latent heat flux over ice                   | W m-2      |    1 | real      | kind_phys | inout  | F        |
 !! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                             | index      |    0 | integer   |           | in     | F        |
 !! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                              | index      |    0 | integer   |           | in     | F        |
@@ -110,7 +107,7 @@
                           oceanfrac, dry, icy, lake, ocean, wet, fice, cimin, zorl, zorlo, zorll, zorl_ocn,&
                           zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,    &
                           tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_lnd,          &
-                          weasd_ice, evap_ocn, hflx_ocn, stress_ocn, ep1d_ice, isot, ivegsrc, stype, vtype,&
+                          weasd_ice, ep1d_ice, isot, ivegsrc, stype, vtype,                                &
                           slope, prsik_1, prslk_1, semis, adjsfcdlw, tsfc, tsfco, tsfcl, tsfc_ocn,         &
                           tsfc_lnd, tsfc_ice, tisfc, phil, con_g, sigmaf, soiltyp, vegtype, slopetyp,      &
                           work3, gabsbdlw, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice, zlvl, do_sppt, dtdtr,   &
@@ -142,8 +139,7 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, tsfco, tsfcl, tisfc
         real(kind=kind_phys), dimension(im), intent(inout) :: snowd_ocn, snowd_lnd, snowd_ice, tprcp_ocn, &
           tprcp_lnd, tprcp_ice, zorl_ocn, zorl_lnd, zorl_ice, tsfc_ocn, tsfc_lnd, tsfc_ice, tsurf_ocn,    &
-          tsurf_lnd, tsurf_ice, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice, evap_ocn, hflx_ocn,         &
-          stress_ocn, ep1d_ice
+          tsurf_lnd, tsurf_ice, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice, ep1d_ice
 
         ! Stochastic physics / surface perturbations
         logical, intent(in) :: do_sppt
@@ -294,9 +290,6 @@
             zorl_ocn(i) = zorlo(i)
             tsfc_ocn(i) = tsfco(i)
             tsurf_ocn(i)= tsfco(i)
-            evap_ocn(i) = 0.
-            hflx_ocn(i) = 0.
-            stress_ocn(i) = 0.
           endif
   !
           if (dry(i)) then
@@ -350,10 +343,10 @@
 !! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
+!! | flag_cice      | flag_for_cice                                                                                                       | flag for cice                                                                       | flag        |    1 | logical    |           | in     | F        |
 !! | dry            | flag_nonzero_land_surface_fraction                                                                                  | flag indicating presence of some land surface area fraction                         | flag        |    1 | logical    |           | in     | F        |
 !! | wet            | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | logical    |           | in     | F        |
 !! | icy            | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | logical    |           | in     | F        |
-!! | lake           | flag_nonzero_lake_surface_fraction                                                                                  | flag indicating presence of some lake surface area fraction                         | flag        |    1 | logical    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
 !! | tgrs_1         | air_temperature_at_lowest_model_layer                                                                               | mean temperature at lowest model layer                                              | K           |    1 | real       | kind_phys | in     | F        |
 !! | qgrs_1         | water_vapor_specific_humidity_at_lowest_model_layer                                                                 | specific humidity at lowest model layer                                             | kg kg-1     |    1 | real       | kind_phys | in     | F        |
@@ -530,9 +523,9 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, dry, wet, icy, lake, dtf, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
-        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-        t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, flag_cice, dry, wet, icy, dtf, tgrs_1, qgrs_1, ugrs_1,    &
+        vgrs_1, adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu,       &
+        adjvisdfu, t2m, q2m, u10m, v10m, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                        &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
@@ -552,7 +545,7 @@
 
         integer,                              intent(in) :: im
         logical,                              intent(in) :: cplflx, cplwav, lssav
-        logical, dimension(im),               intent(in) :: dry, wet, icy, lake
+        logical, dimension(im),               intent(in) :: dry, wet, icy, flag_cice
 
         real(kind=kind_phys),                 intent(in) :: dtf
 
@@ -593,7 +586,7 @@
 
         do i=1, im
   !
-  ! Three-way composites (fields from sfc_diff_ocean, sfc_diff_land, sfc_diff_ice)
+  ! Three-way composites (fields from sfc_diff)
           zorl(i)           = cmposit3(ocnfrac(i), lndfrac(i),                &
                                 lakfrac(i),cice(i),                           &
                                 zorl_ocn(i),  zorl_lnd(i),  zorl_ice(i))
@@ -649,9 +642,7 @@
                                        lakfrac(i),cice(i),                    &
                                tprcp_ocn(i), tprcp_lnd(i), tprcp_ice(i))
 
-  ! Two-way composites (fields already composited in sfc_sice)
-  ! Three-way composites when coupled
-          if(cplflx .and. .not. lake(i)) then  ! Lakes in coupled mode use sice?
+          if(cplflx .and. flag_cice(i)) then ! 3-way when sfc_cice is used
             evap(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
                                          lakfrac(i),cice(i),                  &
                                   evap_ocn(i),  evap_lnd(i),  evap_ice(i))
@@ -664,7 +655,7 @@
             tsfc(i)           = cmposit3(ocnfrac(i),lndfrac(i),               &
                                          lakfrac(i),cice(i),                  &
                                   tsfc_ocn(i),  tsfc_lnd(i),  tsfc_ice(i))
-          else
+          else ! 2-way when sfc_sice used (fields already composited in sfc_sice)
             evap(i)           = cmposit2(ocnfrac(i),lndfrac(i),               &
                                          lakfrac(i),cice(i),                  &
                                   evap_ocn(i),  evap_lnd(i),  evap_ice(i))
@@ -677,7 +668,7 @@
             tsfc(i)           = cmposit2(ocnfrac(i),lndfrac(i), &
                                          lakfrac(i),cice(i),            &
                                   tsfc_ocn(i),  tsfc_lnd(i),  tsfc_ice(i))
-            if(icy(i) .and. .not. cplflx) then
+            if(icy(i)) then
               cmm(i)           = cmm_ice(i)
               chh(i)           = chh_ice(i)
               gflx(i)          = gflx_ice(i)
@@ -685,7 +676,7 @@
               weasd(i)         = weasd_ice(i)
               snowd(i)         = snowd_ice(i)
             end if
-          endif
+          endif ! cplflx .and. flag_cice
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)
