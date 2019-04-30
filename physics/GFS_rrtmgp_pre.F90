@@ -709,6 +709,7 @@
 ! DJS2019: START        
         ! Compute layer cloud fraction.
         clwmin = 0.0
+        cldcov(:,:) = 0.0
         if (.not. Model%lmfshal) then
           do k = 1, LMK
              do i = 1, IM
@@ -783,6 +784,11 @@
         write(58,*) "Model%lgfdlmprad:  ",Model%lgfdlmprad
         write(58,*) "Model%lmfshal:     ",Model%lmfshal
         write(58,*) "Model%lmfdeep2:    ",Model%lmfdeep2
+        do k = 1, LMK
+           do i = 1, IM
+              write(58,'(a19,2i8,f10.2)') " Cloud-cover:      ",k,i,cldcov(i,k)
+           end do
+        enddo
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics

@@ -4,13 +4,14 @@ module rrtmgp_lw
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,     only: ty_gas_concs
   use mo_fluxes,                 only: ty_fluxes_broadband
+  use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_optical_props,          only: ty_optical_props_1scl,ty_optical_props_2str
   use mo_source_functions,       only: ty_source_func_lw
   use mo_rte_lw,                 only: rte_lw
   use mo_rte_kind,               only: wl
   use mo_heating_rates,          only: compute_heating_rate
   use mo_cloud_optics,           only: ty_cloud_optics
-  use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran
+  use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
   use physparam,                 only: ilwcliq,isubclw,iovrlw,ilwrgas,icldflg,ilwrate
@@ -18,6 +19,8 @@ module rrtmgp_lw
   use mo_rrtmgp_constants,       only: grav, avogad
   use mo_rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics, diffusivityB1410,diffusivityHigh, &
        diffusivityLow, a0, a1, a2, cldmin, absrain, abssnow0, mcica_subcol_lw
+  use mersenne_twister, only: random_setseed, random_number, random_stat
+
   implicit none
 
   ! Parameters
@@ -53,7 +56,7 @@ module rrtmgp_lw
 
   ! Classes used by rte+rrtmgp
   type(ty_gas_optics_rrtmgp) :: &
-       kdist_lw_clr
+       kdist_lw
   type(ty_cloud_optics) :: &
        kdist_lw_cldy
   type(ty_gas_concs)  :: &
@@ -502,7 +505,7 @@ contains
     do iGas=1,nGases
        call check_error_msg(gas_concs_lw%set_vmr(active_gases(iGas), 0._kind_phys))
     enddo    
-    call check_error_msg(kdist_lw_clr%load(gas_concs_lw, gas_names, key_species, band2gpt, &
+    call check_error_msg(kdist_lw%load(gas_concs_lw, gas_names, key_species, band2gpt, &
          band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p, temp_ref_t,   &
          vmr_ref, kmajor, kminor_lower, kminor_upper, gas_minor,identifier_minor,   &
          minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower,              &
@@ -513,12 +516,12 @@ contains
          totplnk, planck_frac, rayl_lower, rayl_upper))
 
     ! Set band index by g-point array 
-    nBandsLW = kdist_lw_clr%get_nband()
-    nGptsLW  = kdist_lw_clr%get_ngpt()
-    ngb_LW   = kdist_lw_clr%get_gpoint_bands()
+    nBandsLW = kdist_lw%get_nband()
+    nGptsLW  = kdist_lw%get_ngpt()
+    ngb_LW   = kdist_lw%get_gpoint_bands()
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdlw0 = kdist_lw_clr%get_ngpt()
+    ipsdlw0 = kdist_lw%get_ngpt()
 
     ! #######################################################################################
     ! If RRTMGP cloud-optics are requested, read tables and broadcast.
@@ -862,29 +865,32 @@ contains
                          ! dnfx0 - clear sky dnward flux          (W/m2)
 
     ! Local variables
-    integer :: iGpt,iCol,iLay,iBand
+    integer :: iGpt,iCol,iLay,iBand,iTOA,iSFC
     integer,dimension(ncol) :: ipseed
     real(kind_phys), dimension(nBandsLW,ncol) :: &
-         semiss, secdiff         
-    real(kind_phys) :: &
-         tem1,tem2
-    real(kind_phys), dimension(ncol) :: &
-         precipitableH2o
+         semiss        
     real(kind_phys), dimension(ncol,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
+    real(kind_phys), dimension(ncol,nlay+1,nBandsLW),target :: &
+         fluxBB_up_allSky, fluxBB_dn_allSky
     real(kind_phys), dimension(ncol,nlay) :: &
-         vmr_o3, vmr_h2o, cldfrac2, thetaTendClrSky,thetaTendAllSky, cld_ref_liq2, &
-         cld_ref_ice2,tau_snow,tau_rain,coldry,tem0,colamt
+         vmr_o3, vmr_h2o, thetaTendClrSky,thetaTendAllSky, cld_ref_liq2, &
+         cld_ref_ice2,tau_snow,tau_rain
     real(kind_phys), dimension(ncol,nlay,nBandsLW) :: &
-         tau_cld
+         tau_cld,thetaTendByBandAllSky
     real(kind_phys), dimension(nGptsLW,nlay,ncol) :: &
-         ipseeds
+         rng3D
+    real(kind_phys), dimension(nGptsLW*nLay) :: &
+         rng1D
     logical,dimension(ncol,nlay) :: &
          liqmask,icemask
     logical, dimension(ncol,nlay,nGptsLW) :: &
          cldfracMCICA
     logical :: &
          top_at_1=.false.
+
+    ! Types used by Random Number Generator
+    type(random_stat) :: rng_stat
 
     ! RTE+RRTMGP classes
     type(ty_optical_props_1scl) :: &
@@ -898,6 +904,8 @@ contains
     type(ty_fluxes_broadband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
+    type(ty_fluxes_byband) :: &
+         fluxBBAllSky          ! All-sky flux (in each LW band)    (W/m2)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -937,6 +945,18 @@ contains
 
     ! What is vertical ordering?
     top_at_1 = (p_lay(1,1) .lt. p_lay(1,nlay))
+    if (top_at_1) then 
+       iSFC = nlay+1
+       iTOA = 1
+    else
+       iSFC = 1
+       iTOA = nlay+1
+    endif
+
+    ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
+    ! pressure needs to be slightly greater than that, ~1.00518Pa
+    p_lev2         = p_lev
+    p_lev2(:,iTOA) = kdist_lw%get_press_min()/100._kind_phys
 
     ! Change random number seed value for each radiation invocation (isubclw =1 or 2).
     if(isubclw == 1) then      ! advance prescribed permutation seed
@@ -959,40 +979,6 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
 
-    ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
-    ! pressure needs to be slightly greater than that, ~1.00518Pa
-    p_lev2=p_lev
-    p_lev2(:,nlay+1) = kdist_lw_clr%get_press_min()/100.
-
-    ! Conpute diffusivity angle adjustments.
-    ! First need to compute precipitable water in each column
-    tem0   = (1. - vmr_h2o)*amd + vmr_h2o*amw
-    coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1. + vmr_h2o))
-    colamt = max(0., coldry*vmr_h2o)
-    tem1   = 0.
-    tem2   = 0.
-    do iCol=1,nCol
-       do iLay=1,nLay
-          tem1 = tem1 + coldry(iCol,iLay)+colamt(iCol,iLay)
-          tem2 = tem2 + colamt(iCol,iLay)
-       enddo
-       precipitableH2o(iCol) = p_lev(iCol,1)*(10.*tem2 / (amdw*tem1*grav))
-    enddo
-
-    ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
-    ! and 1.80) as a function of total column water vapor.  the function
-    ! has been defined to minimize flux and cooling rate errors in these bands
-    ! over a wide range of precipitable water values.    
-    do iCol=1,nCol
-       do iBand = 1, nbandsLW
-          if (iBand==1 .or. iBand==4 .or. iBand==10) then
-             secdiff(iBand,iCol) = diffusivityB1410
-          else
-             secdiff(iBand,iCol) = min( diffusivityHigh, max(diffusivityLow, a0(iBand)+a1(iBand)*exp(a2(iBand)*precipitableH2o(iCol))))
-          endif
-       enddo
-    enddo
-
     ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
     liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
     icemask = (cldfrac .gt. 0 .and. cld_iwp .gt. 0)
@@ -1011,17 +997,28 @@ contains
     ! Call RRTMGP
     ! #######################################################################################
     ! Allocate space for source functions and gas optical properties
-    call check_error_msg(sources%alloc(                 ncol, nlay, kdist_lw_clr))
-    call check_error_msg(optical_props_clr%alloc_1scl(  ncol, nlay, kdist_lw_clr))
+    call check_error_msg(sources%alloc(                 ncol, nlay, kdist_lw))
+    call check_error_msg(optical_props_clr%alloc_1scl(  ncol, nlay, kdist_lw))
+    call check_error_msg(optical_props_mcica%alloc_1scl(ncol, nlay, kdist_lw))
+    ! DJS_asks_RP
+    ! Need to use kdist_lw_cldy here, otherewise if we use kdist_lw, optical_props_cldy gets
+    ! allocated with nBands != nGpts, which then fails when calling kdist_lw_cldy%cloud_optics
     call check_error_msg(optical_props_cldy%alloc_1scl( ncol, nlay, kdist_lw_cldy))
-    call check_error_msg(optical_props_mcica%alloc_1scl(ncol, nlay, kdist_lw_clr))
-    call check_error_msg(optical_props_aer%alloc_1scl(  ncol, nlay, kdist_lw_clr))
+    ! We have also have aerosol information by band, so need to allocate just like for 
+    ! clouds, where nbands = ngpts = 16. This is problematic when not using RRTMGP cloud_optics(),
+    ! as kdist_lw_cldy only gets loaded, so this breaks when using rrtmg cloud_optics with rrtmgp.
+    call check_error_msg(optical_props_aer%alloc_1scl(  ncol, nlay, kdist_lw_cldy))
 
     ! Initialize RRTMGP files
-    fluxAllSky%flux_up => flux_up_allSky
-    fluxAllsky%flux_dn => flux_dn_allSky
-    fluxClrSky%flux_up => flux_up_clrSky
-    fluxClrsky%flux_dn => flux_dn_clrSky
+    fluxAllSky%flux_up   => flux_up_allSky
+    fluxAllsky%flux_dn   => flux_dn_allSky
+    fluxClrSky%flux_up   => flux_up_clrSky
+    fluxClrsky%flux_dn   => flux_dn_clrSky
+    ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
+    if (l_AllSky_HR_byband) then
+       fluxBBAllSky%bnd_flux_up => fluxBB_up_allSky
+       fluxBBAllsky%bnd_flux_dn => fluxBB_dn_allSky
+    endif
 
     ! #######################################################################################
     ! 1) Clear-sky fluxes (gaseous-atmosphere + aerosols)
@@ -1039,7 +1036,7 @@ contains
     ! 1b) Compute the optical properties of the atmosphere and the Planck source functions
     !    from pressures, temperatures, and gas concentrations...
     print*,'Clear-Sky(LW): Optics'
-    call check_error_msg(kdist_lw_clr%gas_optics( &
+    call check_error_msg(kdist_lw%gas_optics( &
          p_lay(1:ncol,1:nlay)*100.,               &
          p_lev2(1:ncol,1:nlay+1)*100.,            &
          t_lay(1:ncol,1:nlay),                    &
@@ -1049,15 +1046,9 @@ contains
          sources,                                 &
          tlev = t_lev(1:ncol,1:nlay+1)))
 
-    ! 1c) Add contribution from aerosols. Also, apply diffusivity angle
+    ! 1c) Add contribution from aerosols.
     print*,'Clear-Sky(LW): Increment Aerosol'
-    do iCol=1,nCol
-       do iGpt=1,nGptsLW
-          iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-          optical_props_clr%tau(iCol,1:nlay,iGpt) = optical_props_clr%tau(iCol,1:nlay,iGpt)! * secdiff(iBand,iCol)
-          optical_props_aer%tau(iCol,1:nlay,iGpt) = tau_aer(iCol,1:nlay,iBand) * (1. - ssa_aer(iCol,1:nlay,iBand))! * secdiff(iBand,iCol)
-       enddo
-    enddo
+    optical_props_aer%tau = tau_aer * (1. - ssa_aer)
     call check_error_msg(optical_props_aer%increment(optical_props_clr))
 
     ! 1d) Compute the clear-sky broadband fluxes
@@ -1070,20 +1061,23 @@ contains
          fluxClrSky))
 
     ! 1e) Compute heating rates
-    print*,'Clear-Sky(LW): Heating-rates'
-    call check_error_msg(compute_heating_rate(   &
-         fluxClrSky%flux_up,                     &
-         fluxClrSky%flux_dn,                     &
-         p_lev2(1:ncol,1:nlay+1)*100., &
-         thetaTendClrSky))
+    if (l_ClrSky_HR) then
+       print*,'Clear-Sky(LW): Heating-rates'
+       call check_error_msg(compute_heating_rate(   &
+            fluxClrSky%flux_up,                     &
+            fluxClrSky%flux_dn,                     &
+            p_lev2(1:ncol,1:nlay+1)*100., &
+            thetaTendClrSky))
+    endif
 
     ! #######################################################################################
     ! 2) All-sky fluxes
     ! #######################################################################################
+
     ! 2a) Compute in-cloud radiative properties 
     print*,'All-Sky(LW): Optics '
     if (any(cldfrac .gt. 0)) then
-       ! 2a.i) RRTMG cloud optics
+       ! 2a.i) RRTMG cloud optics.
        ! If using RRTMG cloud-physics. Model can provide either cloud-optics (cld_od) or 
        ! cloud-properties by type (cloud LWP,snow effective radius, etc...)
        if (rrtmgp_lw_cld_phys .eq. 0) then
@@ -1099,7 +1093,7 @@ contains
              do iCol=1,ncol
                 do iLay=1,nlay
                    if (cldfrac(iCol,iLay) .gt. cldmin) then
-                      optical_props_cldy%tau(iCol,iLay,:) = cld_od(iCol,iLay)*secdiff(:,iCol)
+                      optical_props_cldy%tau(iCol,iLay,:) = cld_od(iCol,iLay)
                    else
                       optical_props_cldy%tau(iCol,iLay,:) = 0._kind_phys
                    endif
@@ -1110,40 +1104,34 @@ contains
 
        ! 2a.ii) Use RRTMGP cloud-optics.
        if (rrtmgp_lw_cld_phys .gt. 0) then
-          print*,'Using RRTMGP cloud-physics',optical_props_cldy%get_ngpt(),optical_props_cldy%get_nband()
+          print*,'Using RRTMGP cloud-physics'
           call check_error_msg(kdist_lw_cldy%cloud_optics(ncol, nlay, nBandsLW, nrghice,     &
-               liqmask, icemask, cld_lwp, cld_iwp, cld_ref_liq2, cld_ref_ice2, optical_props_cldy))
-
-          ! Add in contributions from snow and rain (Need to revisit)
-          
+               liqmask, icemask, cld_lwp, cld_iwp, cld_ref_liq2, cld_ref_ice2, optical_props_cldy))          
        end if
     endif
 
-    ! 2c) Call McICA to generate subcolumns.
+    ! 2b) Call McICA to generate subcolumns.
     if (isubclw .gt. 0) then
        print*,'All-Sky(LW): McICA'
-       cldfrac2 = merge(cldfrac,0.,cldfrac .gt. cldmin)
-       !call mcica_subcol_lw(ncol, nlay, nGptsLW, cldfrac2, ipseed, dzlyr, de_lgth, cldfracMCICA)
-       
-       ipseeds(:,:,:) = ipseed(1)
-       !select case ( iovrlw )
-       !case(2)
-       call check_error_msg(sampled_mask_max_ran(ipseeds,cldfrac2,cldfracMCICA))
-       !end select
+
+       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
+       ! and layers. ([nGpts,nLayer,nColumn]-> [nGpts*nLayer]*nColumn)
+       do iCol=1,nCol
+          call random_setseed(ipseed(icol),rng_stat)
+          call random_number(rng1D,rng_stat)
+          rng3D(:,:,iCol) = reshape(source = rng1D,shape=[nGptsLW,nLay])
+       enddo
+
+       ! Call McICA
+       select case ( iovrlw )
+       ! Maximumn-random 
+       case(1)
+          call check_error_msg(sampled_mask_max_ran(rng3D,cldfrac,cldfracMCICA))       
+       end select
           
        ! Map band optical depth to each g-point using McICA
-       do iCol=1,ncol
-          do iLay=1,nLay
-             do iGpt=1,nGptsLW
-                iBand = kdist_lw_clr%convert_gpt2band(iGpt)
-                if (cldfracMCICA(iCol,iLay,iGpt)) then
-                   optical_props_mcica%tau(iCol,iLay,iGpt) = optical_props_cldy%tau(iCol,iLay,iBand)!*secdiff(iBand,iCol)
-                else
-                   optical_props_mcica%tau(iCol,iLay,iGpt) = 0._kind_phys
-                endif
-             enddo
-          enddo
-       enddo
+       call check_error_msg(draw_samples(cldfracMCICA,optical_props_cldy,optical_props_mcica))
+
     endif
 
     ! 2d) Add cloud contribution from the gaseous (clear-sky) atmosphere.
@@ -1152,20 +1140,39 @@ contains
 
     ! 2e) Compute broadband fluxes
     print*,'All-Sky(LW): Fluxes'
-    call check_error_msg(rte_lw(                   &
-         optical_props_mcica,                      &
-         top_at_1,                                 &
-         sources,                                  &
-         semiss, &
-         fluxAllSky))
-
+    if (l_AllSky_HR_byband) then
+       call check_error_msg(rte_lw(                   &
+            optical_props_mcica,                      &
+            top_at_1,                                 &
+            sources,                                  &
+            semiss, &
+            fluxBBAllSky))
+    else
+       call check_error_msg(rte_lw(                   &
+            optical_props_mcica,                      &
+            top_at_1,                                 &
+            sources,                                  &
+            semiss, &
+            fluxAllSky))
+    endif
+    
     ! 2f) Compute heating rates
     print*,'All-Sky(LW): Heating-rates'
-    call check_error_msg(compute_heating_rate(  &
-         fluxAllSky%flux_up,                    &
-         fluxAllSky%flux_dn,                    &
-         p_lev(1:ncol,1:nlay+1)*100., &
-         thetaTendAllSky))
+    if (l_AllSky_HR_byband) then
+       do iBand=1,nBandsLW
+          call check_error_msg(compute_heating_rate(  &
+               fluxBBAllSky%bnd_flux_up(:,:,iBand),   &
+               fluxBBAllSky%bnd_flux_dn(:,:,iBand),   &
+               p_lev(1:ncol,1:nlay+1)*100.,           &
+               thetaTendByBandAllSky(:,:,iBand)))
+       enddo
+    else
+       call check_error_msg(compute_heating_rate(     &
+            fluxAllSky%flux_up,                       &
+            fluxAllSky%flux_dn,                       &
+            p_lev(1:ncol,1:nlay+1)*100.,              &
+            thetaTendAllSky))
+    endif
 
     write(59,*) "#"
     write(60,*) "#"
@@ -1176,18 +1183,19 @@ contains
             sum(fluxClrSky%flux_dn(1,iLay:iLay+1))/2.,sum(fluxAllSky%flux_up(1,iLay:iLay+1))/2.,&
             sum(fluxAllSky%flux_dn(1,iLay:iLay+1))/2.
        write(60,*) optical_props_clr%tau(1,iLay,:)
-       write(61,'(16f12.3)') optical_props_cldy%tau(1,iLay,:)!*secdiff(:,1)
+       write(61,'(16f12.3)') optical_props_cldy%tau(1,iLay,:)
     enddo
+
     ! #######################################################################################
     ! Copy fluxes from RRTGMP types into model radiation types.
     ! #######################################################################################
     ! Mandatory outputs
-    topflx%upfxc = fluxAllSky%flux_up(:,nlay+1)
-    topflx%upfx0 = fluxClrSky%flux_up(:,nlay+1)
-    sfcflx%upfxc = fluxAllSky%flux_up(:,1)
-    sfcflx%upfx0 = fluxClrSky%flux_up(:,1)
-    sfcflx%dnfxc = fluxAllSky%flux_dn(:,1)
-    sfcflx%dnfx0 = fluxClrSky%flux_dn(:,1)
+    topflx%upfxc = fluxAllSky%flux_up(:,iTOA)
+    topflx%upfx0 = fluxClrSky%flux_up(:,iTOA)
+    sfcflx%upfxc = fluxAllSky%flux_up(:,iSFC)
+    sfcflx%upfx0 = fluxClrSky%flux_up(:,iSFC)
+    sfcflx%dnfxc = fluxAllSky%flux_dn(:,iSFC)
+    sfcflx%dnfx0 = fluxClrSky%flux_dn(:,iSFC)
     cldtau       = optical_props_cldy%tau(:,:,7)
     hlwc         = thetaTendAllSky
 
@@ -1199,9 +1207,7 @@ contains
        flxprf%dnfx0 = fluxClrSky%flux_dn
     endif
     if (l_AllSky_HR_byband) then
-       do iBand=1,nBandsLW
-          hlwb(:,:,iBand) = thetaTendAllSky
-       end do
+       hlwb = thetaTendByBandAllSky
     endif
     if (l_ClrSky_HR) then
        hlw0 = thetaTendClrSky
