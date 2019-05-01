@@ -2063,7 +2063,7 @@ contains
          cld_ref_snow    ! Effective radius (snow-flake)          (micron)
     
     ! Outputs
-    real(kind_phys),dimension(nBandsSW,ncol,nlay),intent(out) :: &
+    real(kind_phys),dimension(ncol,nlay,nBandsSW),intent(out) :: &
          tau_cld,      & ! In-cloud optical depth                  (1)
          ssa_cld,      & ! In-cloud single-scattering albedo       (1)
          asy_cld         ! In-cloud asymmetry parameter            (1) 
@@ -2234,22 +2234,17 @@ contains
              if (cld_frac(iCol,iLay) .gt. 0._kind_phys) then
                 do iBand = 1,nBandsSW
                    ! Sum up radiative properties by type.
-                   tau_cld(iBand,iCol,iLay) = tau_liq(iBand) + tau_ice(iBand) + tau_rain        + tau_snow
-                   ssa_cld(iBand,iCol,iLay) = ssa_liq(iBand) + ssa_ice(iBand) + ssa_rain(iBand) + ssa_snow(iBand)
-                   asy_cld(iBand,iCol,iLay) = asy_liq(iBand) + asy_ice(iBand) + asy_rain(iBand) + asy_snow(iBand)
+                   tau_cld(iCol,iLay,iBand) = tau_liq(iBand) + tau_ice(iBand) + tau_rain        + tau_snow
+                   ssa_cld(iCol,iLay,iBand) = ssa_liq(iBand) + ssa_ice(iBand) + ssa_rain(iBand) + ssa_snow(iBand)
+                   asy_cld(iCol,iLay,iBand) = asy_liq(iBand) + asy_ice(iBand) + asy_rain(iBand) + asy_snow(iBand)
                    ! Delta-scale 
-                   asyw = asy_cld(iband,iCol,iLay)/max(0._kind_phys, ssa_cld(iBand,iCol,iLay))
-                   ssaw = min(1._kind_phys-0.000001, ssa_cld(iBand,iCol,iLay)/tau_cld(iBand,iCol,iLay))
+                   asyw = asy_cld(iCol,iLay,iBand)/max(0._kind_phys, ssa_cld(iCol,iLay,iBand))
+                   ssaw = min(1._kind_phys-0.000001, ssa_cld(iCol,iLay,iBand)/tau_cld(iCol,iLay,iBand))
                    za1  = asyw * asyw
                    za2  = ssaw * za1
-                   tau_cld(iBand,iCol,iLay) = (1._kind_phys - za2) * tau_cld(iband,iCol,iLay) 
-                   ssa_cld(iBand,iCol,iLay) = (ssaw - za2) / (1._kind_phys - za2)
-                   asy_cld(iBand,iCol,iLay) = (asyw - za2/ssaw)/(1-za2/ssaw)
-                   !asy_cld(iBand,iCol,iLay) = (tau_liq(iBand)*ssa_liq(iBand)*(asycoliq(iBand)-asycoliq(iBand)**2)/&
-                   !                                                          (1 - asycoliq(iBand)**2) + &
-                   !                            tau_ice(iBand)*ssa_ice(iBand)*(asycoice(iBand)-forwice(iBand))/&
-                   !                                                          (1 - forwice(iBand)))/&
-                   !                           (tau_liq(iBand)*ssa_liq(iBand) + tau_ice(iBand)*ssa_ice(iBand))
+                   tau_cld(iCol,iLay,iBand) = (1._kind_phys - za2) * tau_cld(iCol,iLay,iBand) 
+                   ssa_cld(iCol,iLay,iBand) = (ssaw - za2) / (1._kind_phys - za2)
+                   asy_cld(iCol,iLay,iBand) = (asyw - za2/ssaw)/(1-za2/ssaw)
                 enddo  ! Loop over SW bands
              endif     ! END sum cloudy properties
              !
@@ -2276,7 +2271,7 @@ contains
          cld_frac,     & ! Cloud-fraction  
          dzlyr           ! Layer thinkness (km)
     ! Outputs
-    real(kind_phys),dimension(ngpts,ncol,nlay),intent(out) :: &
+    logical,dimension(ncol,nlay,ngpts),intent(out) :: &
          cld_frac_mcica
     ! Local variables
     type(random_stat) :: stat
@@ -2406,9 +2401,9 @@ contains
           do n = 1, ngpts
              lcloudy(n,k) = cdfunc(n,k) >= tem1
              if (lcloudy(n,k)) then
-                cld_frac_mcica(n,icol,k) = 1._kind_phys
+                cld_frac_mcica(icol,k,n) = .true.
              else
-                cld_frac_mcica(n,icol,k) = 0._kind_phys
+                cld_frac_mcica(icol,k,n) = .false.
              endif
           enddo
        enddo

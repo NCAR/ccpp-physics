@@ -8,12 +8,16 @@ module rrtmgp_sw
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,     only: ty_gas_concs
   use mo_fluxes,                 only: ty_fluxes_broadband
+  use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_optical_props,          only: ty_optical_props_1scl,ty_optical_props_2str  
   use mo_rte_sw,                 only: rte_sw
   use mo_heating_rates,          only: compute_heating_rate
   use mo_rrtmgp_constants,       only: grav, avogad
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, profsw_type, cmpfsw_type
-  use mo_rrtmgp_sw_cloud_optics, only: rrtmgp_sw_cloud_optics, mcica_subcol_sw
+  use mo_rrtmgp_sw_cloud_optics, only: rrtmgp_sw_cloud_optics,mcica_subcol_sw
+  use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
+  use mersenne_twister,          only: random_setseed, random_number, random_stat
+  use mo_cloud_optics,           only: ty_cloud_optics
 
   implicit none
 
@@ -44,13 +48,17 @@ module rrtmgp_sw
 
   ! Module parameters (set during rrtmgp_sw_init())
   integer :: &
+       rrtmgp_sw_cld_phys, & ! RRTMGP cloud-physics (0-RRTMG, 1-RRTGMP(LUT), 2-RRTMGP(Pade))
        nGptsSW,            & ! Number of SW spectral g-points
        nBandsSW,           & ! Number of SW bands
+       nrghice,            & ! Number of ice roughness categories
        ipsdsw0               ! Initial seed for McICA
 
   ! Classes used by rte+rrtmgp
   type(ty_gas_optics_rrtmgp) :: &
-       kdist_sw_clr
+       kdist_sw
+  type(ty_cloud_optics) :: &
+       kdist_sw_cldy
   type(ty_gas_concs)  :: &
        gas_concs_sw
 
@@ -102,22 +110,48 @@ contains
     real(kind_phys) :: &
          press_ref_trop_sw,                  & ! used by RRTGMP gas optics 
          temp_ref_p_sw,                      & ! used by RRTGMP gas optics 
-         temp_ref_t_sw                         ! used by RRTGMP gas optics 
+         temp_ref_t_sw,                      & ! used by RRTGMP gas optics 
+         radliq_lwr_sw,                      & ! used by RRTGMP cloud optics 
+         radliq_upr_sw,                      & ! used by RRTGMP cloud optics 
+         radliq_fac_sw,                      & ! used by RRTGMP cloud optics 
+         radice_lwr_sw,                      & ! used by RRTGMP cloud optics 
+         radice_upr_sw,                      & ! used by RRTGMP cloud optics 
+         radice_fac_sw                         ! used by RRTGMP cloud optics 
+
     real(kind_phys), dimension(:), allocatable :: &
          press_ref_sw,                       & ! used by RRTGMP gas optics 
          temp_ref_sw,                        & ! used by RRTGMP gas optics 
-         solar_source_sw                       ! used by RRTGMP gas optics 
+         solar_source_sw,                    & ! used by RRTGMP gas optics 
+         pade_sizereg_extliq_sw,             & ! used by RRTGMP cloud optics 
+         pade_sizereg_ssaliq_sw,             & ! used by RRTGMP cloud optics 
+         pade_sizereg_asyliq_sw,             & ! used by RRTGMP cloud optics 
+         pade_sizereg_extice_sw,             & ! used by RRTGMP cloud optics 
+         pade_sizereg_ssaice_sw,             & ! used by RRTGMP cloud optics 
+         pade_sizereg_asyice_sw                ! used by RRTGMP cloud optics 
     real(kind_phys), dimension(:,:), allocatable :: &
-         band_lims_sw                          ! used by RRTGMP gas optics 
+         band_lims_sw,                       &  ! used by RRTGMP gas optics 
+         lut_extliq_sw,                      & ! used by RRTGMP cloud optics 
+         lut_ssaliq_sw,                      & ! used by RRTGMP cloud optics 
+         lut_asyliq_sw,                      & ! used by RRTGMP cloud optics 
+         band_lims_cldy_sw                     ! used by RRTGMP cloud optics                          
 
     real(kind_phys), dimension(:,:,:), allocatable :: &
          vmr_ref_sw,                         & ! used by RRTGMP gas optics 
          kminor_lower_sw,                    & ! used by RRTGMP gas optics 
          kminor_upper_sw,                    & ! used by RRTGMP gas optics 
          rayl_lower_sw,                      & ! used by RRTGMP gas optics 
-         rayl_upper_sw                         ! used by RRTGMP gas optics 
+         rayl_upper_sw,                      & ! used by RRTGMP gas optics 
+         lut_extice_sw,                      & ! used by RRTGMP cloud optics 
+         lut_ssaice_sw,                      & ! used by RRTGMP cloud optics 
+         lut_asyice_sw,                      & ! used by RRTGMP cloud optics 
+         pade_extliq_sw,                     & ! used by RRTGMP cloud optics 
+         pade_ssaliq_sw,                     & ! used by RRTGMP cloud optics 
+         pade_asyliq_sw                        ! used by RRTGMP cloud optics 
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         kmajor_sw                             ! used by RRTGMP gas optics 
+         kmajor_sw,                          & ! used by RRTGMP gas optics 
+         pade_extice_sw,                     & ! used by RRTGMP cloud optics 
+         pade_ssaice_sw,                     & ! used by RRTGMP cloud optics 
+         pade_asyice_sw                        ! used by RRTGMP cloud optics 
     character(len=32),  dimension(:), allocatable :: &
          gas_names_sw,                       & ! used by RRTGMP gas optics 
          gas_minor_sw,                       & ! used by RRTGMP gas optics 
@@ -146,11 +180,19 @@ contains
          nminor_absorber_intervals_lower_sw, & ! used by RRTGMP gas optics 
          nminor_absorber_intervals_upper_sw, & ! used by RRTGMP gas optics 
          ncontributors_lower_sw,             & ! used by RRTGMP gas optics 
-         ncontributors_upper_sw                ! used by RRTGMP gas optics 
+         ncontributors_upper_sw,             & ! used by RRTGMP gas optics 
+         nbandSWcldy_sw,                     & ! used by RRTGMP cloud optics 
+         nsize_liq_sw,                       & ! used by RRTGMP cloud optics 
+         nsize_ice_sw,                       & ! used by RRTGMP cloud optics 
+         nsizereg_sw,                        & ! used by RRTGMP cloud optics 
+         ncoeff_ext_sw,                      & ! used by RRTGMP cloud optics 
+         ncoeff_ssa_g_sw,                    & ! used by RRTGMP cloud optics 
+         nbound_sw,                          & ! used by RRTGMP cloud optics  
+         npairsSWcldy_sw                       ! used by RRTGMP cloud optics 
 
     ! Local variables
-    integer :: status,ncid_sw,dimid,varID,ij,iGas
-    character(len=264) :: kdist_file
+    integer :: status,ncid_sw,ncid_sw_clds,dimid,varID,ij,iGas
+    character(len=264) :: kdist_file, kdist_cldy_file
     integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4,temp_log_array1,&
          temp_log_array2, temp_log_array3, temp_log_array4
 
@@ -181,8 +223,15 @@ contains
        iovrsw = 1
     endif
 
+    ! How are we handling cloud-optics?
+    rrtmgp_sw_cld_phys = Model%rrtmgp_cld_phys
+
+    ! HACK. If using RRTMG cloud_optics w/ RRTMGP, we need to be able to define
+    !if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_sw_cld_phys=1
+
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_sw_file_gas)
+    kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_sw_file_clouds)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
     if (mpirank .eq. mpiroot) then
@@ -237,41 +286,41 @@ contains
     call MPI_BCAST(nminor_absorber_intervals_upper_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
 #endif
 
-    ! On master processor, allocate space, read in fields, broadcast to all processors
-    if (mpirank .eq. mpiroot) then
-       ! Allocate space for arrays
-       allocate(gas_names_sw(nabsorbers_sw))
-       allocate(scaling_gas_lower_sw(nminor_absorber_intervals_lower_sw))
-       allocate(scaling_gas_upper_sw(nminor_absorber_intervals_upper_sw))
-       allocate(gas_minor_sw(nminorabsorbers_sw))
-       allocate(identifier_minor_sw(nminorabsorbers_sw))
-       allocate(minor_gases_lower_sw(nminor_absorber_intervals_lower_sw))
-       allocate(minor_gases_upper_sw(nminor_absorber_intervals_upper_sw))
-       allocate(minor_limits_gpt_lower_sw(npairs_sw,nminor_absorber_intervals_lower_sw))
-       allocate(minor_limits_gpt_upper_sw(npairs_sw,nminor_absorber_intervals_upper_sw))
-       allocate(band2gpt_sw(2,nbnds_sw))
-       allocate(key_species_sw(2,nlayers_sw,nbnds_sw))
-       allocate(band_lims_sw(2,nbnds_sw))
-       allocate(press_ref_sw(npress_sw))
-       allocate(temp_ref_sw(ntemps_sw))
-       allocate(vmr_ref_sw(nlayers_sw, nextrabsorbers_sw, ntemps_sw))
-       allocate(kminor_lower_sw(ncontributors_lower_sw, nmixingfracs_sw, ntemps_sw))
-       allocate(kmajor_sw(ngpts_sw, nmixingfracs_sw,  npress_sw+1, ntemps_sw))
-       allocate(kminor_start_lower_sw(nminor_absorber_intervals_lower_sw))
-       allocate(kminor_upper_sw(ncontributors_upper_sw, nmixingfracs_sw, ntemps_sw))
-       allocate(kminor_start_upper_sw(nminor_absorber_intervals_upper_sw))
-       allocate(minor_scales_with_density_lower_sw(nminor_absorber_intervals_lower_sw))
-       allocate(minor_scales_with_density_upper_sw(nminor_absorber_intervals_upper_sw))
-       allocate(scale_by_complement_lower_sw(nminor_absorber_intervals_lower_sw))
-       allocate(scale_by_complement_upper_sw(nminor_absorber_intervals_upper_sw))
-       allocate(rayl_upper_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
-       allocate(rayl_lower_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
-       allocate(solar_source_sw(ngpts_sw))
-       allocate(temp1(nminor_absorber_intervals_lower_sw))
-       allocate(temp2(nminor_absorber_intervals_upper_sw))
-       allocate(temp3(nminor_absorber_intervals_lower_sw))
-       allocate(temp4(nminor_absorber_intervals_upper_sw))
+    ! Allocate space for arrays
+    allocate(gas_names_sw(nabsorbers_sw))
+    allocate(scaling_gas_lower_sw(nminor_absorber_intervals_lower_sw))
+    allocate(scaling_gas_upper_sw(nminor_absorber_intervals_upper_sw))
+    allocate(gas_minor_sw(nminorabsorbers_sw))
+    allocate(identifier_minor_sw(nminorabsorbers_sw))
+    allocate(minor_gases_lower_sw(nminor_absorber_intervals_lower_sw))
+    allocate(minor_gases_upper_sw(nminor_absorber_intervals_upper_sw))
+    allocate(minor_limits_gpt_lower_sw(npairs_sw,nminor_absorber_intervals_lower_sw))
+    allocate(minor_limits_gpt_upper_sw(npairs_sw,nminor_absorber_intervals_upper_sw))
+    allocate(band2gpt_sw(2,nbnds_sw))
+    allocate(key_species_sw(2,nlayers_sw,nbnds_sw))
+    allocate(band_lims_sw(2,nbnds_sw))
+    allocate(press_ref_sw(npress_sw))
+    allocate(temp_ref_sw(ntemps_sw))
+    allocate(vmr_ref_sw(nlayers_sw, nextrabsorbers_sw, ntemps_sw))
+    allocate(kminor_lower_sw(ncontributors_lower_sw, nmixingfracs_sw, ntemps_sw))
+    allocate(kmajor_sw(ngpts_sw, nmixingfracs_sw,  npress_sw+1, ntemps_sw))
+    allocate(kminor_start_lower_sw(nminor_absorber_intervals_lower_sw))
+    allocate(kminor_upper_sw(ncontributors_upper_sw, nmixingfracs_sw, ntemps_sw))
+    allocate(kminor_start_upper_sw(nminor_absorber_intervals_upper_sw))
+    allocate(minor_scales_with_density_lower_sw(nminor_absorber_intervals_lower_sw))
+    allocate(minor_scales_with_density_upper_sw(nminor_absorber_intervals_upper_sw))
+    allocate(scale_by_complement_lower_sw(nminor_absorber_intervals_lower_sw))
+    allocate(scale_by_complement_upper_sw(nminor_absorber_intervals_upper_sw))
+    allocate(rayl_upper_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
+    allocate(rayl_lower_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
+    allocate(solar_source_sw(ngpts_sw))
+    allocate(temp1(nminor_absorber_intervals_lower_sw))
+    allocate(temp2(nminor_absorber_intervals_upper_sw))
+    allocate(temp3(nminor_absorber_intervals_lower_sw))
+    allocate(temp4(nminor_absorber_intervals_upper_sw))
 
+    ! On master processor,  read in fields, broadcast to all processors
+    if (mpirank .eq. mpiroot) then
        ! Read in fields from file
        if(nf90_open(trim(kdist_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then
           status = nf90_inq_varid(ncid_sw,'gas_names',varID)
@@ -454,7 +503,7 @@ contains
     do iGas=1,nGases
        call check_error_msg(gas_concs_sw%set_vmr(active_gases(iGas), 0._kind_phys))
     enddo    
-    call check_error_msg(kdist_sw_clr%load(gas_concs_sw, gas_names_sw, key_species_sw, band2gpt_sw, &
+    call check_error_msg(kdist_sw%load(gas_concs_sw, gas_names_sw, key_species_sw, band2gpt_sw, &
          band_lims_sw, press_ref_sw, press_ref_trop_sw, temp_ref_sw,  temp_ref_p_sw, temp_ref_t_sw, &
          vmr_ref_sw, kmajor_sw, kminor_lower_sw, kminor_upper_sw, gas_minor_sw,identifier_minor_sw, &
          minor_gases_lower_sw, minor_gases_upper_sw, minor_limits_gpt_lower_sw,                     &
@@ -465,11 +514,214 @@ contains
          solar_source_sw, rayl_lower_sw, rayl_upper_sw))
 
     ! Set band index by g-point array 
-    nBandsSW = kdist_sw_clr%get_nband()
-    nGptsSW  = kdist_sw_clr%get_ngpt()
+    nBandsSW = kdist_sw%get_nband()
+    nGptsSW  = kdist_sw%get_ngpt()
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdsw0 = kdist_sw_clr%get_ngpt()
+    ipsdsw0 = kdist_sw%get_ngpt()
+
+    ! #######################################################################################
+    ! If RRTMGP cloud-optics are requested, read tables and broadcast.
+    ! #######################################################################################
+    ! Read dimensions for k-distribution fields (only on master processor(0))
+    if (mpirank .eq. mpiroot) then
+       if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
+          status = nf90_inq_dimid(ncid_sw_clds, 'nband', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nbandSWcldy_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'nrghice', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nrghice)
+          status = nf90_inq_dimid(ncid_sw_clds, 'nsize_liq', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsize_liq_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'nsize_ice', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsize_ice_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'nsizereg', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsizereg_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'ncoeff_ext', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=ncoeff_ext_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'ncoeff_ssa_g', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=ncoeff_ssa_g_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'nbound', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nbound_sw)
+          status = nf90_inq_dimid(ncid_sw_clds, 'pair', dimid)
+          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=npairsSWcldy_sw)
+          status = nf90_close(ncid_sw_clds)
+       endif
+    endif
+
+    ! Broadcast dimensions to all processors
+#ifdef MPI
+    if (rrtmgp_sw_cld_phys .eq. 1 .or. rrtmgp_sw_cld_phys .eq. 2) then
+       call MPI_BCAST(nbandSWcldy_sw,  1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(nrghice,         1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(nsize_liq_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(nsize_ice_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(nsizereg_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(ncoeff_ext_sw,   1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(ncoeff_ssa_g_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(nbound_sw,       1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+       call MPI_BCAST(npairsSWcldy_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    endif
+#endif
+
+    if (rrtmgp_sw_cld_phys .eq. 1) then
+       allocate(lut_extliq_sw(nsize_liq_sw, nBandSWcldy_sw))
+       allocate(lut_ssaliq_sw(nsize_liq_sw, nBandSWcldy_sw))
+       allocate(lut_asyliq_sw(nsize_liq_sw, nBandSWcldy_sw))
+       allocate(lut_extice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice))
+       allocate(lut_ssaice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice))
+       allocate(lut_asyice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice))
+       allocate(band_lims_cldy_sw(2, nBandSWcldy_sw))
+    endif
+    if (rrtmgp_sw_cld_phys .eq. 2) then
+       allocate(pade_extliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ext_sw ))
+       allocate(pade_ssaliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw))
+       allocate(pade_asyliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw))
+       allocate(pade_extice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ext_sw,   nrghice))
+       allocate(pade_ssaice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw, nrghice))
+       allocate(pade_asyice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw, nrghice))
+       allocate(pade_sizereg_extliq_sw(nbound_sw))
+       allocate(pade_sizereg_ssaliq_sw(nbound_sw))
+       allocate(pade_sizereg_asyliq_sw(nbound_sw))
+       allocate(pade_sizereg_extice_sw(nbound_sw))
+       allocate(pade_sizereg_ssaice_sw(nbound_sw))
+       allocate(pade_sizereg_asyice_sw(nbound_sw))
+       allocate(band_lims_cldy_sw(2,nbandSWcldy_sw))
+    endif
+
+    ! On master processor, allocate space, read in fields, broadcast to all processors
+    if (mpirank .eq. mpiroot) then
+       ! 
+       if (rrtmgp_sw_cld_phys .eq. 1) then
+          !
+          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_lwr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_upr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_upr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_fac',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_fac_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_lwr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_lwr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_upr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_upr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_fac',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_fac_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_extliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_extliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_ssaliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_ssaliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_asyliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_asyliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_extice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_extice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_ssaice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_ssaice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'lut_asyice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,lut_asyice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'bnd_limits_wavenumber',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,band_lims_cldy_sw)
+             status = nf90_close(ncid_sw_clds)
+          endif
+       endif
+       !
+       if (rrtmgp_sw_cld_phys .eq. 2) then
+          !
+          if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_lwr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_upr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_upr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radliq_fac',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radliq_fac_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_lwr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_lwr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_upr',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_upr_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'radice_fac',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,radice_fac_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_extliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_extliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_ssaliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_ssaliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_asyliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_asyliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_extice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_extice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_ssaice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_ssaice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_asyice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_asyice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_extliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_extliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_ssaliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_ssaliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_asyliq',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_asyliq_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_extice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_extice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_ssaice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_ssaice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_asyice',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_asyice_sw)
+             status = nf90_inq_varid(ncid_sw_clds,'bnd_limits_wavenumber',varID)
+             status = nf90_get_var(ncid_sw_clds,varID,band_lims_cldy_sw)
+             status = nf90_close(ncid_sw_clds)
+          endif
+       endif
+    endif
+
+    ! Broadcast arrays to all processors
+#ifdef MPI
+    if (rrtmgp_sw_cld_phys .eq. 1) then
+       call MPI_BCAST(radliq_lwr_sw,           size(radliq_lwr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radliq_upr_sw,           size(radliq_upr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radliq_fac_sw,           size(radliq_fac_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_lwr_sw,           size(radice_lwr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_upr_sw,           size(radice_upr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_fac_sw,           size(radice_fac_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_extliq_sw,           size(lut_extliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_ssaliq_sw,           size(lut_ssaliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_asyliq_sw,           size(lut_asyliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_extice_sw,           size(lut_extice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_ssaice_sw,           size(lut_ssaice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(lut_asyice_sw,           size(lut_asyice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(band_lims_cldy_sw),      size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
+    endif
+    if (rrtmgp_sw_cld_phys .eq. 2) then
+       call MPI_BCAST(pade_extliq_sw,          size(pade_extliq_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_ssaliq_sw,          size(pade_ssaliq_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_asyliq_sw,          size(pade_asyliq_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_extice_sw,          size(pade_extice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_ssaice_sw,          size(pade_ssaice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_asyice_sw,          size(pade_asyice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_extliq_sw), size(pade_sizereg_extliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_ssaliq_sw), size(pade_sizereg_ssaliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_asyliq_sw), size(pade_sizereg_asyliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_extice_sw), size(pade_sizereg_extice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_ssaice_sw), size(pade_sizereg_ssaice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_asyice_sw), size(pade_sizereg_asyice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(band_lims_cldy_sw),      size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
+    endif
+#endif
+
+    ! Load tables data for RRTGMP cloud-optics  
+    if (rrtmgp_sw_cld_phys .eq. 1) then
+       call check_error_msg(kdist_sw_cldy%set_ice_roughness(nrghice))
+       call check_error_msg(kdist_sw_cldy%load(band_lims_cldy_sw, radliq_lwr_sw,            &
+            radliq_upr_sw, radliq_fac_sw, radice_lwr_sw, radice_upr_sw, radice_fac_sw,      &
+            lut_extliq_sw, lut_ssaliq_sw, lut_asyliq_sw, lut_extice_sw, lut_ssaice_sw,      &
+            lut_asyice_sw))
+    endif
+    if (rrtmgp_sw_cld_phys .eq. 2) then
+       call check_error_msg(kdist_sw_cldy%set_ice_roughness(nrghice))
+       call check_error_msg(kdist_sw_cldy%load(band_lims_cldy_sw, pade_extliq_sw,           &
+            pade_ssaliq_sw, pade_asyliq_sw, pade_extice_sw, pade_ssaice_sw, pade_asyice_sw, &
+            pade_sizereg_extliq_sw, pade_sizereg_ssaliq_sw, pade_sizereg_asyliq_sw,         &
+            pade_sizereg_extice_sw, pade_sizereg_ssaice_sw, pade_sizereg_asyice_sw))
+    endif
+
+    ! HACK
+    rrtmgp_sw_cld_phys = Model%rrtmgp_cld_phys
 
   end subroutine rrtmgp_sw_init
   ! #########################################################################################
@@ -649,27 +901,40 @@ contains
     type(ty_optical_props_2str) :: &
          optical_props_clr,     & ! Optical properties for gaseous atmosphere
          optical_props_aer,     & ! Optical properties for aerosols
-         optical_props_cldy       ! Optical properties for clouds
-
-    type(ty_fluxes_broadband) :: &
+         optical_props_mcica,   & ! Optical properties for clouds (sampled)
+         optical_props_cldy       ! Optical properties for clouds (by-band)
+    type(ty_fluxes_byband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
 
+    ! Types used by Random Number Generator
+    type(random_stat) :: rng_stat
+
     ! Local variables
-    integer :: iCol, iBand, iGpt, iDay, iLay
+    integer :: iCol, iBand, iGpt, iDay, iLay, iTOA, iSFC
     integer,dimension(ncol) :: ipseed
     real(kind_phys) :: solAdjFac, cfrac, asyw, ssaw, za1, za2
     logical :: top_at_1=.false.
     real(kind_phys), dimension(ncol) :: clrfracSFC, cldfracSFC
-    real(kind_phys), dimension(ncol,nlay) :: vmr_o3, vmr_h2o, thetaTendClrSky, &
-         thetaTendAllSky,coldry,tem0
-    real(kind_phys), dimension(nday,nlay) :: cldfrac2, cld_lwp2
+    real(kind_phys), dimension(ncol,nlay) :: vmr_o3, vmr_h2o, coldry, tem0, &
+         cld_ref_liq2,cld_ref_ice2
+    real(kind_phys), dimension(ncol,nlay,nBandsSW) :: thetaTendByBandAllSky
+    real(kind_phys), dimension(nday,nlay) :: cldfrac2, cld_lwp2,thetaTendClrSky, &
+         thetaTendAllSky
     real(kind_phys), dimension(nday,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
+    real(kind_phys), dimension(nday,nlay+1,nBandsSW),target :: &
+         fluxBB_up_allSky, fluxBB_dn_allSky
     real(kind_phys), dimension(nday,nGptsSW) :: toa_flux
-    real(kind_phys), dimension(nBandsSW,nday,nlay) :: tau_cld, asy_cld, ssa_cld
-    real(kind_phys), dimension(nGptsSW,nday,nlay) :: cldfracMCICA
-    real(kind_phys), dimension(:,:,:),allocatable :: tau, asy, ssa
+    real(kind_phys), dimension(nday,nlay,nBandsSW) :: tau_cld, asy_cld, ssa_cld
+    real(kind_phys), dimension(nGptsSW,nlay,ncol) :: &
+         rng3D
+    real(kind_phys), dimension(nGptsSW*nLay) :: &
+         rng1D
+    logical,dimension(ncol,nlay) :: &
+         liqmask,icemask
+    logical, dimension(ncol,nlay,nGptsSW) :: &
+         cldfracMCICA
 
     ! Initialize
     errmsg = ''
@@ -711,6 +976,13 @@ contains
 
     ! What is vertical ordering?
     top_at_1 = (p_lay(1,1) .lt. p_lay(1,nlay))
+    if (top_at_1) then 
+       iSFC = nlay+1
+       iTOA = 1
+    else
+       iSFC = 1
+       iTOA = nlay+1
+    endif
 
     ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
     if(isubcsw == 1) then      ! advance prescribed permutation seed
@@ -727,6 +999,20 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
 
+    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
+    liqmask = (cldfrac .gt. 0 .and. cld_lwp .gt. 0)
+    icemask = (cldfrac .gt. 0 .and. cld_iwp .gt. 0)
+
+    ! RRTMGP cloud_optics expects particle size to be in a certain range. bound here
+    if (rrtmgp_sw_cld_phys .gt. 0) then
+       cld_ref_ice2 = cld_ref_ice
+       where(cld_ref_ice2 .gt. kdist_sw_cldy%get_max_radius_ice()) cld_ref_ice2=kdist_sw_cldy%get_max_radius_ice()
+       where(cld_ref_ice2 .lt. kdist_sw_cldy%get_min_radius_ice()) cld_ref_ice2=kdist_sw_cldy%get_min_radius_ice()
+       cld_ref_liq2 = cld_ref_liq
+       where(cld_ref_liq2 .gt. kdist_sw_cldy%get_max_radius_liq()) cld_ref_liq2=kdist_sw_cldy%get_max_radius_liq()
+       where(cld_ref_liq2 .lt. kdist_sw_cldy%get_min_radius_liq()) cld_ref_liq2=kdist_sw_cldy%get_min_radius_liq()
+    endif
+
     ! Compute dry air column amount
     tem0   = (1. - vmr_h2o)*amd + vmr_h2o*amw
     coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1. + vmr_h2o))
@@ -734,12 +1020,13 @@ contains
     ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
     ! pressure needs to be slightly greater than that, ~1.00518Pa
     p_lev2=p_lev
-    p_lev2(:,nlay+1) = kdist_sw_clr%get_press_min()/100.
+    p_lev2(:,iTOA) = kdist_sw%get_press_min()/100.
 
     ! Compute solar constant adjustment factor..
     solAdjFac = solcon / s0
 
-    ! Compute fractions of clear sky view at surface
+    ! Compute fractions of clear sky view at surface. *NOTE* This is only used if cloud radiative 
+    ! properties are provided directly.
     clrfracSFC   = 1._kind_phys
     cldfracSFC   = 1._kind_phys
     if (iovrsw == 0) then                    ! random overlapping
@@ -791,16 +1078,22 @@ contains
     if (nDay .gt. 0) then
 
        ! Allocate space for source functions and gas optical properties
-       call check_error_msg(optical_props_clr%alloc_2str(nday,  nlay, kdist_sw_clr))
-       call check_error_msg(optical_props_aer%alloc_2str(nday,  nlay, kdist_sw_clr))
-       call check_error_msg(optical_props_cldy%alloc_2str(nday, nlay, kdist_sw_clr))
+       call check_error_msg(optical_props_clr%alloc_2str(  nday, nlay, kdist_sw))
+       call check_error_msg(optical_props_aer%alloc_2str(  nday, nlay, kdist_sw_cldy))
+       call check_error_msg(optical_props_cldy%alloc_2str( nday, nlay, kdist_sw_cldy))
+       call check_error_msg(optical_props_mcica%alloc_2str(nday, nlay, kdist_sw))
 
        ! Initialize RRTMGP files
        fluxAllSky%flux_up => flux_up_allSky
        fluxAllsky%flux_dn => flux_dn_allSky
        fluxClrSky%flux_up => flux_up_clrSky
        fluxClrsky%flux_dn => flux_dn_clrSky
-       
+       ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
+       if (l_AllSky_HR_byband) then
+          fluxAllSky%bnd_flux_up => fluxBB_up_allSky
+          fluxAllsky%bnd_flux_dn => fluxBB_dn_allSky
+       endif
+
        ! #######################################################################################
        ! 1) Clear-sky fluxes (gaseous-atmosphere + aerosols)
        ! #######################################################################################
@@ -817,7 +1110,7 @@ contains
        ! 1b) Compute the optical properties of the atmosphere and the Planck source functions
        !    from pressures, temperatures, and gas concentrations...
        print*,'Clear-Sky(SW): Optics'
-       call check_error_msg(kdist_sw_clr%gas_optics(      &
+       call check_error_msg(kdist_sw%gas_optics(      &
             p_lay(idxday,1:nlay)*100.,      &
             p_lev2(idxday,1:nlay+1)*100.,   &
             t_lay(idxday,1:nlay),           &
@@ -827,15 +1120,10 @@ contains
 
        ! 1c) Add contribution from aerosols.
        print*,'Clear-Sky(SW): Increment Aerosol'
-       do iDay=1,nDay
-          do iGpt=1,nGptsSW
-             iBand = kdist_sw_clr%convert_gpt2band(iGpt)
-             optical_props_aer%tau(iDay,1:nlay,iGpt) = tau_aer(idxday(iDay),1:nlay,iBand)
-             optical_props_aer%ssa(iDay,1:nlay,iGpt) = ssa_aer(idxday(iDay),1:nlay,iBand)
-             optical_props_aer%g(iDay,1:nlay,iGpt)   = asy_aer(idxday(iDay),1:nlay,iBand)
-          enddo
-       enddo
-       !call check_error_msg(optical_props_aer%increment(optical_props_clr))
+       optical_props_aer%tau = tau_aer(idxday,:,:)
+       optical_props_aer%ssa = ssa_aer(idxday,:,:)
+       optical_props_aer%g   = asy_aer(idxday,:,:)
+       call check_error_msg(optical_props_aer%increment(optical_props_clr))
  
        ! 1d) Compute the clear-sky broadband fluxes
        print*,'Clear-Sky(SW): Fluxes'
@@ -845,54 +1133,117 @@ contains
             fluxClrSky))
 
        ! 1e) Compute heating rates
-       print*,'Clear-Sky(SW): Heating-rates'
-       call check_error_msg(compute_heating_rate(   &
-            fluxClrSky%flux_up,                     &
-            fluxClrSky%flux_dn,                     &
-            p_lev2(idxday,1:nlay+1)*100., &
-            thetaTendClrSky))
-   
+       if (l_ClrSky_HR) then
+          print*,'Clear-Sky(SW): Heating-rates'
+          call check_error_msg(compute_heating_rate(   &
+               fluxClrSky%flux_up,                     &
+               fluxClrSky%flux_dn,                     &
+               p_lev2(idxday,1:nlay+1)*100., &
+               thetaTendClrSky))
+       endif
+
        ! ####################################################################################
        ! 2) Compute broadband all-sky calculation.
        ! ####################################################################################
        ! 2a) Compute in-cloud optics
        print*,'All-Sky(SW): Optics '
-       tau_cld(:,:,:)  = 0._kind_phys
-       asy_cld(:,:,:)  = 0._kind_phys
-       ssa_cld(:,:,:)  = 0._kind_phys
 
        cldfrac2 = merge(cldfrac(idxday,:), 0., cldfrac(idxday,:) .gt. 0._kind_phys)
        if (any(cldfrac(idxday,:) .gt. 0)) then
+          ! 2ai) RRTMG cloud optics.
           ! Cloud-optical properties by type provided. Compute optical-depth, single-       
           ! scattering  albedo, and asymmetry parameter
-          if (.not. present(cld_od)) then
-             call rrtmgp_sw_cloud_optics(nday, nlay, nBandsSW,         &
-                  cld_lwp(idxday,1:nLay), cld_ref_liq(idxday,1:nLay),  &
-                  cld_iwp(idxday,1:nLay), cld_ref_ice(idxday,1:nLay),  &
-                  cld_rwp(idxday,1:nLay), cld_ref_rain(idxday,1:nLay), &
-                  cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
-                  cldfrac(idxday,1:nLay),                              &
-                  tau_cld, ssa_cld, asy_cld)
-             write(70,*) 'rrtmgp_sw_cloud_optics'
-             do iLay=1,nLay
-                write(70,'(i10,5f12.7)') iLay,cld_lwp(idxday,iLay),cld_ref_liq(idxday,iLay),cld_iwp(idxday,iLay),cld_ref_ice(idxday,iLay),cldfrac(idxday,iLay)
-             enddo
-          else
-             ! Cloud-optical depth, single scattering albedo, and asymmetry parameter provided.
-             do iDay=1,nDay
-                do iLay=1,nLay
-                   if (cldfrac(iCol,iLay) .gt. 1e-20_kind_phys) then
-                      tau_cld(:,iDay,iLay) = cld_od(idxday(iDay),iLay)
-                      ssa_cld(:,iDay,iLay) = cld_ssa(idxday(iDay),iLay)
-                      asy_cld(:,iDay,iLay) = cld_asy(idxday(iDay),iLay)
-                   else
-                      tau_cld(:,iDay,iLay) = 0.
-                      ssa_cld(:,iDay,iLay) = 1.
-                      asy_cld(:,iDay,iLay) = 0.
-                   endif
+          if (rrtmgp_sw_cld_phys .eq. 0) then
+             print*,'Using RRTMG cloud-physics'
+             if (.not. present(cld_od)) then
+                print*,'   Using all types too...'
+                call rrtmgp_sw_cloud_optics(nday, nlay, nBandsSW,         &
+                     cld_lwp(idxday,1:nLay), cld_ref_liq2(idxday,1:nLay),  &
+                     cld_iwp(idxday,1:nLay), cld_ref_ice2(idxday,1:nLay),  &
+                     cld_rwp(idxday,1:nLay), cld_ref_rain(idxday,1:nLay), &
+                     cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
+                     cldfrac(idxday,1:nLay),                              &
+                     tau_cld, ssa_cld, asy_cld)
+                optical_props_cldy%tau = tau_cld
+                optical_props_cldy%ssa = ssa_cld
+                optical_props_cldy%g   = asy_cld
+             else
+                ! Cloud-optical depth, single scattering albedo, and asymmetry parameter provided.
+                do iDay=1,nDay
+                   do iLay=1,nLay
+                      if (cldfrac(iCol,iLay) .gt. 1e-20_kind_phys) then
+                         optical_props_cldy%tau(iDay,iLay,:) = cld_od(idxday(iDay),iLay)
+                         optical_props_cldy%ssa(iDay,iLay,:) = cld_ssa(idxday(iDay),iLay)
+                         optical_props_cldy%g(iDay,iLay,:)   = cld_asy(idxday(iDay),iLay)
+                      else
+                         optical_props_cldy%tau(iDay,iLay,:) = 0.
+                         optical_props_cldy%ssa(iDay,iLay,:) = 1.
+                         optical_props_cldy%g(iDay,iLay,:)   = 0.
+                      endif
+                   end do
                 end do
-             end do
+             endif
           endif
+          
+          ! 2aii) Use RRTMGP cloud-optics.
+          if (rrtmgp_sw_cld_phys .gt. 0) then
+             print*,'Using RRTMGP cloud-physics'
+             call check_error_msg(kdist_sw_cldy%cloud_optics(nday, nlay, nBandsSW, nrghice,     &
+                  liqmask(idxday,1:nLay), icemask(idxday,1:nLay), cld_lwp(idxday,1:nLay),       &
+                  cld_iwp(idxday,1:nLay), cld_ref_liq2(idxday,1:nLay),                          &
+                  cld_ref_ice2(idxday,1:nLay), optical_props_cldy))        
+          end if
+       endif
+
+       ! 2b) Call McICA to sample clouds.
+       if (isubcsw .gt. 0) then
+          print*,'All-Sky(SW): McICA'
+          ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
+          ! and layers. ([nGpts,nLayer,nColumn]-> [nGpts*nLayer]*nColumn)
+          do iCol=1,nCol
+             call random_setseed(ipseed(icol),rng_stat)
+             call random_number(rng1D,rng_stat)
+             rng3D(:,:,iCol) = reshape(source = rng1D,shape=[nGptsSW,nLay])
+          enddo
+          
+          ! Call McICA
+          select case ( iovrsw )
+          ! Maximumn-random 
+          case(1)
+             call check_error_msg(sampled_mask_max_ran(rng3D,cldfrac,cldfracMCICA))       
+          end select
+
+          ! Map band optical depth to each g-point using McICA
+          call check_error_msg(draw_samples(cldfracMCICA,optical_props_cldy,optical_props_mcica))
+       endif
+
+       ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
+       print*,'All-Sky(SW): Increment'
+       call check_error_msg(optical_props_clr%increment(optical_props_mcica))
+
+       ! 2d) Compute broadband fluxes
+       print*,'All-Sky(SW): Fluxes'
+       call check_error_msg(rte_sw(optical_props_mcica, top_at_1, cossza(idxday), toa_flux,&
+            spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
+            spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
+            fluxAllSky))
+
+       ! 2e) Compute heating rates
+       print*,'All-Sky(SW): Heating-rates'
+       if (l_AllSky_HR_byband) then
+          do iBand=1,nBandsSW
+             call check_error_msg(compute_heating_rate(  &
+                  fluxAllSky%bnd_flux_up(:,:,iBand),     &
+                  fluxAllSky%bnd_flux_dn(:,:,iBand),     &
+                  p_lev(idxday,1:nlay+1)*100.,           &
+                  thetaTendByBandAllSky(:,:,iBand)))
+          enddo
+       else
+          call check_error_msg(compute_heating_rate(     &
+               fluxAllSky%flux_up,                       &
+               fluxAllSky%flux_dn,                       &
+               p_lev(idxday,1:nlay+1)*100.,              &
+               thetaTendAllSky))
        endif
 
        write(69,'(a20)') "RRTMGP TAUs" 
@@ -900,79 +1251,11 @@ contains
        do iDay=1,nDay
           do iLay=1,nlay
              write(69,'(a5,i2,4f12.3)') '',iLay,p_lay(idxday(iDay),iLay),sum(optical_props_clr%tau(iDay,iLay,:))
-             write(70,'(a5,2i8)') 'TAU: ',iDay,iLay
-             write(70,'(16f12.3)') tau_cld(:,1,iLay)
-             write(70,'(a5,2i8)') 'SSA: '
-             write(70,'(16f12.3)') ssa_cld(:,1,iLay)
-             write(70,'(a5,2i8)') 'ASY: '
-             write(70,'(16f12.3)') asy_cld(:,1,iLay)
+             write(70,'(16f12.3)') optical_props_cldy%tau(1,iLay,:)
+             write(70,'(16f12.3)') optical_props_cldy%ssa(1,iLay,:)
+             write(70,'(16f12.3)') optical_props_cldy%g(1,iLay,:)
           enddo
        enddo
-
-       ! 2b) Call McICA to sample clouds.
-       if (isubcsw .gt. 0) then
-          print*,'All-Sky(SW): McICA'
-          allocate(tau(nDay,nLay,nGptsSW),asy(nDay,nLay,nGptsSW),ssa(nDay,nLay,nGptsSW))
-          call mcica_subcol_sw(nday, nlay, nGptsSW, cldfrac2, ipseed(idxday), dzlyr(idxday,:), &
-               de_lgth(idxday), cldfracMCICA)
-          
-          ! Map band optical depth to each g-point using McICA
-          do iDay=1,nDay
-             do iLay=1,nLay
-                do iGpt=1,nGptsSW
-                   iBand = kdist_sw_clr%convert_gpt2band(iGpt)
-                   if (cldfracMCICA(iGpt,iDay,iLay) .gt. 0.) then
-                      optical_props_cldy%tau(iDay,iLay,iGpt) = tau_cld(iband,iDay,iLay) 
-                      optical_props_cldy%ssa(iDay,iLay,iGpt) = ssa_cld(iBand,iDay,iLay)
-                      optical_props_cldy%g(iDay,iLay,iGpt)   = asy_cld(iBand,iDay,iLay)
-                   else
-                      optical_props_cldy%tau(iDay,iLay,iGpt) = 0._kind_phys
-                      optical_props_cldy%ssa(iDay,iLay,iGpt) = 1._kind_phys
-                      optical_props_cldy%g(iDay,iLay,iGpt)   = 0._kind_phys
-                   endif
-                enddo
-             enddo
-          enddo
-       ! 2b) Or do calcualtion by band.
-       else
-          print*,'All-Sky(SW): Not using McICA. Computing quantities by band.'
-          allocate(tau(nDay,nLay,nBandsSW),asy(nDay,nLay,nBandsSW),ssa(nDay,nLay,nBandsSW))
-          do iDay=1,nDay
-             do iLay=1,nLay
-                cfrac = cldfrac(idxday(iDay),iLay)/cldfracSFC(idxday(iDay))
-                if (cfrac .gt. 0.) then
-                   do iBand=1,nBandsSW
-                      optical_props_cldy%tau(iDay,iLay,iBand) = tau_cld(iBand,iDay,iLay)
-                      optical_props_cldy%g(iDay,iLay,iBand)   = asy_cld(iBand,iDay,iLay)
-                      optical_props_cldy%ssa(iDay,iLay,iBand) = ssa_cld(iBand,iDay,iLay)
-                   enddo
-                else
-                   optical_props_cldy%tau(iDay,iLay,:) = 0._kind_phys
-                   optical_props_cldy%g(iDay,iLay,:)   = 1._kind_phys
-                   optical_props_cldy%ssa(iDay,iLay,:) = 0._kind_phys
-                endif
-             enddo
-          enddo
-       endif
-
-       ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
-       print*,'All-Sky(SW): Increment'
-       call check_error_msg(optical_props_clr%increment(optical_props_cldy))
-
-       ! 2d) Compute broadband fluxes
-       print*,'All-Sky(SW): Fluxes'
-       call check_error_msg(rte_sw(optical_props_cldy, top_at_1, cossza(idxday), toa_flux,&
-            spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
-            spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
-            fluxAllSky))
-
-       ! 2e) Compute heating rates
-       print*,'All-Sky(SW): Heating-rates'
-       call check_error_msg(compute_heating_rate(  &
-            fluxAllSky%flux_up,                    &
-            fluxAllSky%flux_dn,                    &
-            p_lev(idxday,1:nlay+1)*100., &
-            thetaTendAllSky))
 
     end if ! Daylit days
 
@@ -980,13 +1263,13 @@ contains
     ! Copy fluxes from RRTGMP types into model radiation types.
     ! #######################################################################################
     ! Mandatory outputs
-    topflx(idxday)%upfxc = fluxAllSky%flux_up(:,nlay+1)
-    topflx(idxday)%upfx0 = fluxClrSky%flux_up(:,nlay+1)
-    sfcflx(idxday)%upfxc = fluxAllSky%flux_up(:,1)
-    sfcflx(idxday)%upfx0 = fluxClrSky%flux_up(:,1)
-    sfcflx(idxday)%dnfxc = fluxAllSky%flux_dn(:,1)
-    sfcflx(idxday)%dnfx0 = fluxClrSky%flux_dn(:,1)
-    cldtau(idxday,:)     = tau(:,:,10)
+    topflx(idxday)%upfxc = fluxAllSky%flux_up(:,iTOA)
+    topflx(idxday)%upfx0 = fluxClrSky%flux_up(:,iTOA)
+    sfcflx(idxday)%upfxc = fluxAllSky%flux_up(:,iSFC)
+    sfcflx(idxday)%upfx0 = fluxClrSky%flux_up(:,iSFC)
+    sfcflx(idxday)%dnfxc = fluxAllSky%flux_dn(:,iSFC)
+    sfcflx(idxday)%dnfx0 = fluxClrSky%flux_dn(:,iSFC)
+    cldtau(idxday,:)     = optical_props_cldy%tau(:,:,10)
     hswc(idxday,:)       = thetaTendAllSky
 
     ! Optional output
@@ -997,14 +1280,11 @@ contains
        flxprf(idxday,:)%dnfx0 = fluxClrSky%flux_dn
     endif
     if (l_AllSky_HR_byband) then
-       do iBand=1,nBandsSW
-          hswb(idxday,:,iBand) = thetaTendAllSky
-       end do
+       hswb(idxday,:,:) = thetaTendByBandAllSky
     endif
     if (l_ClrSky_HR) then
        hsw0(idxday,:) = thetaTendClrSky
     endif
-
   end subroutine rrtmgp_sw_run
   ! #########################################################################################
   ! #########################################################################################

@@ -232,6 +232,9 @@ contains
     ! How are we handling cloud-optics?
     rrtmgp_lw_cld_phys = Model%rrtmgp_cld_phys
 
+    ! HACK. If using RRTMG cloud_optics w/ RRTMGP, we need to be able to define
+    if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_lw_cld_phys=1
+
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_gas)
     kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_clouds)
@@ -653,17 +656,17 @@ contains
              status = nf90_get_var(ncid_lw_clds,varID,pade_ssaice)
              status = nf90_inq_varid(ncid_lw_clds,'pade_asyice',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_asyice)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_extliq',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_extliq',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_extliq)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_ssaliq',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_ssaliq',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_ssaliq)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_asyliq',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_asyliq',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_asyliq)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_extice',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_extice',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_extice)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_ssaice',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_ssaice',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_ssaice)
-             status = nf90_inq_varid(ncid_lw_clds,'pade_sizereg_asyice',varID)
+             status = nf90_inq_varid(ncid_lw_clds,'pade_sizreg_asyice',varID)
              status = nf90_get_var(ncid_lw_clds,varID,pade_sizereg_asyice)
              status = nf90_inq_varid(ncid_lw_clds,'bnd_limits_wavenumber',varID)
              status = nf90_get_var(ncid_lw_clds,varID,band_lims_cldy)
@@ -708,20 +711,21 @@ contains
 
     ! Load tables data for RRTGMP cloud-optics  
     if (rrtmgp_lw_cld_phys .eq. 1) then
-       print*,'RRTMGP_INIT: ',shape(lut_extice)
        call check_error_msg(kdist_lw_cldy%set_ice_roughness(nrghice))
        call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, radliq_lwr, radliq_upr, &
             radliq_fac, radice_lwr, radice_upr, radice_fac, lut_extliq, lut_ssaliq,    &
             lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (rrtmgp_lw_cld_phys .eq. 2) then
-       print*,'RRTMGP_INIT: ',shape(pade_extice)
        call check_error_msg(kdist_lw_cldy%set_ice_roughness(nrghice))
        call check_error_msg(kdist_lw_cldy%load(band_lims_cldy, pade_extliq,            &
             pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,           &
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,             &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
+
+    ! HACK!
+    rrtmgp_lw_cld_phys = Model%rrtmgp_cld_phys
 
   end subroutine rrtmgp_lw_init
 
@@ -908,8 +912,6 @@ contains
     type(ty_fluxes_byband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
-!    type(ty_fluxes_byband) :: &
-!         fluxBBAllSky          ! All-sky flux (in each LW band)    (W/m2)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -1110,7 +1112,7 @@ contains
        if (rrtmgp_lw_cld_phys .gt. 0) then
           print*,'Using RRTMGP cloud-physics'
           call check_error_msg(kdist_lw_cldy%cloud_optics(ncol, nlay, nBandsLW, nrghice,     &
-               liqmask, icemask, cld_lwp, cld_iwp, cld_ref_liq2, cld_ref_ice2, optical_props_cldy))          
+               liqmask, icemask, cld_lwp, cld_iwp, cld_ref_liq2, cld_ref_ice2, optical_props_cldy))        
        end if
     endif
 

@@ -15,24 +15,6 @@ module mo_rrtmgp_lw_cloud_optics
        absrain  = 0.33e-3, & ! Rain drop absorption coefficient \f$(m^{2}/g)\f$ .
        abssnow0 = 1.5,     & ! Snow flake absorption coefficient (micron), fu coeff
        abssnow1 = 2.34e-3    ! Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
-  real(kind_phys), parameter :: &
-       cldmin  = 1e-20_kind_phys
-
-  ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
-  ! and 1.80) as a function of total column water vapor.  the function
-  ! has been defined to minimize flux and cooling rate errors in these bands
-  ! over a wide range of precipitable water values.
-  real (kind_phys), dimension(nbandsLW_RRTMG) :: &
-       a0 = (/ 1.66,  1.55,  1.58,  1.66,  1.54, 1.454,  1.89,  1.33,      &
-              1.668,  1.66,  1.66,  1.66,  1.66,  1.66,  1.66,  1.66 /), &
-       a1 = (/ 0.00,  0.25,  0.22,  0.00,  0.13, 0.446, -0.10,  0.40,     &
-             -0.006,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 /), &
-       a2 = (/ 0.00, -12.0, -11.7,  0.00, -0.72,-0.243,  0.19,-0.062,  &
-               0.414,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 /)
-  real(kind_phys),parameter :: &
-       diffusivityLow   = 1.50, & ! Minimum diffusivity angle for bands 2-3 and 5-9
-       diffusivityHigh  = 1.80, & ! Maximum diffusivity angle for bands 2-3 and 5-9
-       diffusivityB1410 = 1.66    ! Diffusivity for bands 1, 4, and 10
  
   ! RRTMG LW cloud property coefficients
   real(kind_phys) , dimension(58,nBandsLW_RRTMG),parameter :: &
