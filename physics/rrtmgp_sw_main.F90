@@ -227,7 +227,7 @@ contains
     rrtmgp_sw_cld_phys = Model%rrtmgp_cld_phys
 
     ! HACK. If using RRTMG cloud_optics w/ RRTMGP, we need to be able to define
-    !if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_sw_cld_phys=1
+    if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_sw_cld_phys=1
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_sw_file_gas)
@@ -913,13 +913,13 @@ contains
     ! Local variables
     integer :: iCol, iBand, iGpt, iDay, iLay, iTOA, iSFC
     integer,dimension(ncol) :: ipseed
-    real(kind_phys) :: solAdjFac, cfrac, asyw, ssaw, za1, za2
+    real(kind_phys) :: cfrac, asyw, ssaw, za1, za2
     logical :: top_at_1=.false.
     real(kind_phys), dimension(ncol) :: clrfracSFC, cldfracSFC
     real(kind_phys), dimension(ncol,nlay) :: vmr_o3, vmr_h2o, coldry, tem0, &
          cld_ref_liq2,cld_ref_ice2
     real(kind_phys), dimension(ncol,nlay,nBandsSW) :: thetaTendByBandAllSky
-    real(kind_phys), dimension(nday,nlay) :: cldfrac2, cld_lwp2,thetaTendClrSky, &
+    real(kind_phys), dimension(nday,nlay) ::  cld_lwp2,thetaTendClrSky, &
          thetaTendAllSky
     real(kind_phys), dimension(nday,nlay+1),target :: &
          flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
@@ -1022,13 +1022,9 @@ contains
     p_lev2=p_lev
     p_lev2(:,iTOA) = kdist_sw%get_press_min()/100.
 
-    ! Compute solar constant adjustment factor..
-    solAdjFac = solcon / s0
-
     ! Compute fractions of clear sky view at surface. *NOTE* This is only used if cloud radiative 
     ! properties are provided directly.
     clrfracSFC   = 1._kind_phys
-    cldfracSFC   = 1._kind_phys
     if (iovrsw == 0) then                    ! random overlapping
        do iCol=1,nCol
           do iLay = 1, nlay
@@ -1148,7 +1144,6 @@ contains
        ! 2a) Compute in-cloud optics
        print*,'All-Sky(SW): Optics '
 
-       cldfrac2 = merge(cldfrac(idxday,:), 0., cldfrac(idxday,:) .gt. 0._kind_phys)
        if (any(cldfrac(idxday,:) .gt. 0)) then
           ! 2ai) RRTMG cloud optics.
           ! Cloud-optical properties by type provided. Compute optical-depth, single-       
@@ -1158,8 +1153,8 @@ contains
              if (.not. present(cld_od)) then
                 print*,'   Using all types too...'
                 call rrtmgp_sw_cloud_optics(nday, nlay, nBandsSW,         &
-                     cld_lwp(idxday,1:nLay), cld_ref_liq2(idxday,1:nLay),  &
-                     cld_iwp(idxday,1:nLay), cld_ref_ice2(idxday,1:nLay),  &
+                     cld_lwp(idxday,1:nLay), cld_ref_liq(idxday,1:nLay),  &
+                     cld_iwp(idxday,1:nLay), cld_ref_ice(idxday,1:nLay),  &
                      cld_rwp(idxday,1:nLay), cld_ref_rain(idxday,1:nLay), &
                      cld_swp(idxday,1:nLay), cld_ref_snow(idxday,1:nLay), &
                      cldfrac(idxday,1:nLay),                              &
