@@ -17,8 +17,7 @@ module rrtmgp_lw
   use physparam,                 only: ilwcliq,isubclw,iovrlw,ilwrgas,icldflg,ilwrate
   use GFS_typedefs,              only: GFS_control_type
   use mo_rrtmgp_constants,       only: grav, avogad
-  use mo_rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics, diffusivityB1410,diffusivityHigh, &
-       diffusivityLow, a0, a1, a2, cldmin, absrain, abssnow0, mcica_subcol_lw
+  use mo_rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics
   use mersenne_twister, only: random_setseed, random_number, random_stat
 
   implicit none
@@ -231,7 +230,7 @@ contains
     endif
 
     ! How are we handling cloud-optics?
-    rrtmgp_lw_cld_phys = Model%rrtmgp_lw_cld_phys
+    rrtmgp_lw_cld_phys = Model%rrtmgp_cld_phys
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_gas)
@@ -293,40 +292,40 @@ contains
     call MPI_BCAST(ninternalSourcetemps,            1, MPI_INTEGER, mpiroot, mpicomm, ierr)
 #endif
     
-    ! On master processor, allocate space, read in fields, broadcast to all processors
-    if (mpirank .eq. mpiroot) then
-       ! Allocate space for arrays
-       allocate(gas_names(nabsorbers))
-       allocate(scaling_gas_lower(nminor_absorber_intervals_lower))
-       allocate(scaling_gas_upper(nminor_absorber_intervals_upper))
-       allocate(gas_minor(nminorabsorbers))
-       allocate(identifier_minor(nminorabsorbers))
-       allocate(minor_gases_lower(nminor_absorber_intervals_lower))
-       allocate(minor_gases_upper(nminor_absorber_intervals_upper))
-       allocate(minor_limits_gpt_lower(npairs,nminor_absorber_intervals_lower))
-       allocate(minor_limits_gpt_upper(npairs,nminor_absorber_intervals_upper))
-       allocate(band2gpt(2,nbnds))
-       allocate(key_species(2,nlayers,nbnds))
-       allocate(band_lims(2,nbnds))
-       allocate(press_ref(npress))
-       allocate(temp_ref(ntemps))
-       allocate(vmr_ref(nlayers, nextrabsorbers, ntemps))
-       allocate(kminor_lower(ncontributors_lower, nmixingfracs, ntemps))
-       allocate(kmajor(ngpts, nmixingfracs,  npress+1, ntemps))
-       allocate(kminor_start_lower(nminor_absorber_intervals_lower))
-       allocate(kminor_upper(ncontributors_upper, nmixingfracs, ntemps))
-       allocate(kminor_start_upper(nminor_absorber_intervals_upper))
-       allocate(minor_scales_with_density_lower(nminor_absorber_intervals_lower))
-       allocate(minor_scales_with_density_upper(nminor_absorber_intervals_upper))
-       allocate(scale_by_complement_lower(nminor_absorber_intervals_lower))
-       allocate(scale_by_complement_upper(nminor_absorber_intervals_upper))
-       allocate(temp1(nminor_absorber_intervals_lower))
-       allocate(temp2(nminor_absorber_intervals_upper))
-       allocate(temp3(nminor_absorber_intervals_lower))
-       allocate(temp4(nminor_absorber_intervals_upper))
-       allocate(totplnk(ninternalSourcetemps, nbnds))
-       allocate(planck_frac(ngpts, nmixingfracs, npress+1, ntemps))
+    !if (mpirank .eq. mpiroot) then
+    ! Allocate space for arrays
+    allocate(gas_names(nabsorbers))
+    allocate(scaling_gas_lower(nminor_absorber_intervals_lower))
+    allocate(scaling_gas_upper(nminor_absorber_intervals_upper))
+    allocate(gas_minor(nminorabsorbers))
+    allocate(identifier_minor(nminorabsorbers))
+    allocate(minor_gases_lower(nminor_absorber_intervals_lower))
+    allocate(minor_gases_upper(nminor_absorber_intervals_upper))
+    allocate(minor_limits_gpt_lower(npairs,nminor_absorber_intervals_lower))
+    allocate(minor_limits_gpt_upper(npairs,nminor_absorber_intervals_upper))
+    allocate(band2gpt(2,nbnds))
+    allocate(key_species(2,nlayers,nbnds))
+    allocate(band_lims(2,nbnds))
+    allocate(press_ref(npress))
+    allocate(temp_ref(ntemps))
+    allocate(vmr_ref(nlayers, nextrabsorbers, ntemps))
+    allocate(kminor_lower(ncontributors_lower, nmixingfracs, ntemps))
+    allocate(kmajor(ngpts, nmixingfracs,  npress+1, ntemps))
+    allocate(kminor_start_lower(nminor_absorber_intervals_lower))
+    allocate(kminor_upper(ncontributors_upper, nmixingfracs, ntemps))
+    allocate(kminor_start_upper(nminor_absorber_intervals_upper))
+    allocate(minor_scales_with_density_lower(nminor_absorber_intervals_lower))
+    allocate(minor_scales_with_density_upper(nminor_absorber_intervals_upper))
+    allocate(scale_by_complement_lower(nminor_absorber_intervals_lower))
+    allocate(scale_by_complement_upper(nminor_absorber_intervals_upper))
+    allocate(temp1(nminor_absorber_intervals_lower))
+    allocate(temp2(nminor_absorber_intervals_upper))
+    allocate(temp3(nminor_absorber_intervals_lower))
+    allocate(temp4(nminor_absorber_intervals_upper))
+    allocate(totplnk(ninternalSourcetemps, nbnds))
+    allocate(planck_frac(ngpts, nmixingfracs, npress+1, ntemps))
 
+    if (mpirank .eq. mpiroot) then
        ! Read in fields from file
        if(nf90_open(trim(kdist_file), NF90_WRITE, ncid_lw) .eq. NF90_NOERR) then
           status = nf90_inq_varid(ncid_lw,'gas_names',varID)
@@ -566,17 +565,35 @@ contains
     endif
 #endif
 
+    if (rrtmgp_lw_cld_phys .eq. 1) then
+       allocate(lut_extliq(nsize_liq, nBandLWcldy))
+       allocate(lut_ssaliq(nsize_liq, nBandLWcldy))
+       allocate(lut_asyliq(nsize_liq, nBandLWcldy))
+       allocate(lut_extice(nsize_ice, nBandLWcldy, nrghice))
+       allocate(lut_ssaice(nsize_ice, nBandLWcldy, nrghice))
+       allocate(lut_asyice(nsize_ice, nBandLWcldy, nrghice))
+       allocate(band_lims_cldy(2, nBandLWcldy))
+    endif
+    if (rrtmgp_lw_cld_phys .eq. 2) then
+       allocate(pade_extliq(nbandLWcldy, nsizereg,  ncoeff_ext ))
+       allocate(pade_ssaliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
+       allocate(pade_asyliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
+       allocate(pade_extice(nbandLWcldy, nsizereg,  ncoeff_ext,   nrghice))
+       allocate(pade_ssaice(nbandLWcldy, nsizereg,  ncoeff_ssa_g, nrghice))
+       allocate(pade_asyice(nbandLWcldy, nsizereg,  ncoeff_ssa_g, nrghice))
+       allocate(pade_sizereg_extliq(nbound))
+       allocate(pade_sizereg_ssaliq(nbound))
+       allocate(pade_sizereg_asyliq(nbound))
+       allocate(pade_sizereg_extice(nbound))
+       allocate(pade_sizereg_ssaice(nbound))
+       allocate(pade_sizereg_asyice(nbound))
+       allocate(band_lims_cldy(2,nbandLWcldy))
+    endif
+
     ! On master processor, allocate space, read in fields, broadcast to all processors
     if (mpirank .eq. mpiroot) then
        ! 
        if (rrtmgp_lw_cld_phys .eq. 1) then
-          allocate(lut_extliq(nsize_liq, nBandLWcldy))
-          allocate(lut_ssaliq(nsize_liq, nBandLWcldy))
-          allocate(lut_asyliq(nsize_liq, nBandLWcldy))
-          allocate(lut_extice(nsize_ice, nBandLWcldy, nrghice))
-          allocate(lut_ssaice(nsize_ice, nBandLWcldy, nrghice))
-          allocate(lut_asyice(nsize_ice, nBandLWcldy, nrghice))
-          allocate(band_lims_cldy(2, nBandLWcldy))
           !
           if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
@@ -610,19 +627,6 @@ contains
        endif
        !
        if (rrtmgp_lw_cld_phys .eq. 2) then
-          allocate(pade_extliq(nbandLWcldy, nsizereg,  ncoeff_ext ))
-          allocate(pade_ssaliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
-          allocate(pade_asyliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
-          allocate(pade_extice(nbandLWcldy, nsizereg,  ncoeff_ext,   nrghice))
-          allocate(pade_ssaice(nbandLWcldy, nsizereg,  ncoeff_ssa_g, nrghice))
-          allocate(pade_asyice(nbandLWcldy, nsizereg,  ncoeff_ssa_g, nrghice))
-          allocate(pade_sizereg_extliq(nbound))
-          allocate(pade_sizereg_ssaliq(nbound))
-          allocate(pade_sizereg_asyliq(nbound))
-          allocate(pade_sizereg_extice(nbound))
-          allocate(pade_sizereg_ssaice(nbound))
-          allocate(pade_sizereg_asyice(nbound))
-          allocate(band_lims_cldy(2,nbandLWcldy))
           !
           if(nf90_open(trim(kdist_cldy_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
@@ -901,11 +905,11 @@ contains
 
     type(ty_source_func_lw) :: &
          sources               ! source function
-    type(ty_fluxes_broadband) :: &
+    type(ty_fluxes_byband) :: &
          fluxAllSky,         & ! All-sky flux                      (W/m2)
          fluxClrSky            ! Clear-sky flux                    (W/m2)
-    type(ty_fluxes_byband) :: &
-         fluxBBAllSky          ! All-sky flux (in each LW band)    (W/m2)
+!    type(ty_fluxes_byband) :: &
+!         fluxBBAllSky          ! All-sky flux (in each LW band)    (W/m2)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -1016,8 +1020,8 @@ contains
     fluxClrsky%flux_dn   => flux_dn_clrSky
     ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
     if (l_AllSky_HR_byband) then
-       fluxBBAllSky%bnd_flux_up => fluxBB_up_allSky
-       fluxBBAllsky%bnd_flux_dn => fluxBB_dn_allSky
+       fluxAllSky%bnd_flux_up => fluxBB_up_allSky
+       fluxAllsky%bnd_flux_dn => fluxBB_dn_allSky
     endif
 
     ! #######################################################################################
@@ -1092,7 +1096,7 @@ contains
           ! Cloud-optical depth provided.
              do iCol=1,ncol
                 do iLay=1,nlay
-                   if (cldfrac(iCol,iLay) .gt. cldmin) then
+                   if (cldfrac(iCol,iLay) .gt. 1e-20_kind_phys) then
                       optical_props_cldy%tau(iCol,iLay,:) = cld_od(iCol,iLay)
                    else
                       optical_props_cldy%tau(iCol,iLay,:) = 0._kind_phys
@@ -1140,29 +1144,20 @@ contains
 
     ! 2e) Compute broadband fluxes
     print*,'All-Sky(LW): Fluxes'
-    if (l_AllSky_HR_byband) then
-       call check_error_msg(rte_lw(                   &
-            optical_props_mcica,                      &
-            top_at_1,                                 &
-            sources,                                  &
-            semiss, &
-            fluxBBAllSky))
-    else
-       call check_error_msg(rte_lw(                   &
-            optical_props_mcica,                      &
-            top_at_1,                                 &
-            sources,                                  &
-            semiss, &
-            fluxAllSky))
-    endif
+    call check_error_msg(rte_lw(                   &
+         optical_props_mcica,                      &
+         top_at_1,                                 &
+         sources,                                  &
+         semiss, &
+         fluxAllSky))
     
     ! 2f) Compute heating rates
     print*,'All-Sky(LW): Heating-rates'
     if (l_AllSky_HR_byband) then
        do iBand=1,nBandsLW
           call check_error_msg(compute_heating_rate(  &
-               fluxBBAllSky%bnd_flux_up(:,:,iBand),   &
-               fluxBBAllSky%bnd_flux_dn(:,:,iBand),   &
+               fluxAllSky%bnd_flux_up(:,:,iBand),   &
+               fluxAllSky%bnd_flux_dn(:,:,iBand),   &
                p_lev(1:ncol,1:nlay+1)*100.,           &
                thetaTendByBandAllSky(:,:,iBand)))
        enddo
