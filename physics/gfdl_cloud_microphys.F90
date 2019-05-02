@@ -231,7 +231,7 @@ contains
       real(kind=kind_phys) :: onebg
       real(kind=kind_phys) :: tem
 #ifdef TRANSITION
-      real(kind=kind_phys), volatile :: volatile_var
+      real(kind=kind_phys), volatile :: volatile_var1, volatile_var2
 #endif
 
 
@@ -322,10 +322,11 @@ contains
       ! values of rain0, ice0, snow0, graupel0 (for bit-for-bit)
       do i=1,im
 #ifdef TRANSITION
-        volatile_var = rain0(i)+snow0(i)+ice0(i)+graupel0(i)
-        prcp0(i) = volatile_var * tem
-        if ( volatile_var * tem > rainmin ) then
-          sr(i) = (snow0(i) + ice0(i)  + graupel0(i)) / volatile_var
+        volatile_var1 = rain0(i)+snow0(i)+ice0(i)+graupel0(i)
+        volatile_var2 = snow0(i)+ice0(i)+graupel0(i)
+        prcp0(i) = volatile_var1 * tem
+        if ( volatile_var1 * tem > rainmin ) then
+          sr(i) = volatile_var2 / volatile_var1
 #else
         prcp0(i) = (rain0(i)+snow0(i)+ice0(i)+graupel0(i)) * tem
         if ( prcp0(i) > rainmin ) then
