@@ -540,14 +540,18 @@
                    Model%lsswr, Model%lslwr,                      &
                    faersw, faerlw, aerodp)                          !  ---  outputs
 
-! CCPP
-      do j = 1,NBDSW
+
+      ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
+      ! band ordering was [nIR -> UV -> IR(band)]
+      faersw1(1:IM,1:LMK,1) = faersw(1:IM,1:LMK,NBDSW,1)
+      faersw2(1:IM,1:LMK,1) = faersw(1:IM,1:LMK,NBDSW,2)
+      faersw3(1:IM,1:LMK,1) = faersw(1:IM,1:LMK,NBDSW,3)
+      do j = 2,NBDSW
         do k = 1, LMK
           do i = 1, IM
-            ! NF_AESW = 3
-            faersw1(i,k,j) = faersw(i,k,j,1)
-            faersw2(i,k,j) = faersw(i,k,j,2)
-            faersw3(i,k,j) = faersw(i,k,j,3)
+             faersw1(i,k,j) = faersw(i,k,j-1,1)
+             faersw2(i,k,j) = faersw(i,k,j-1,2)
+             faersw3(i,k,j) = faersw(i,k,j-1,3)
           enddo
         enddo
        enddo

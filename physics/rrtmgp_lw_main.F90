@@ -232,9 +232,6 @@ contains
     ! How are we handling cloud-optics?
     rrtmgp_lw_cld_phys = Model%rrtmgp_cld_phys
 
-    ! HACK. If using RRTMG cloud_optics w/ RRTMGP, we need to be able to define
-    if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_lw_cld_phys=1
-
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_gas)
     kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_lw_file_clouds)
@@ -724,9 +721,6 @@ contains
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
 
-    ! HACK!
-    rrtmgp_lw_cld_phys = Model%rrtmgp_cld_phys
-
   end subroutine rrtmgp_lw_init
 
   ! #########################################################################################
@@ -1002,20 +996,18 @@ contains
     ! #######################################################################################
     ! Call RRTMGP
     ! #######################################################################################
-    ! Allocate space for source functions and gas optical properties
-    call check_error_msg(sources%alloc(                 ncol, nlay, kdist_lw))
-    call check_error_msg(optical_props_clr%alloc_1scl(  ncol, nlay, kdist_lw))
-    call check_error_msg(optical_props_mcica%alloc_1scl(ncol, nlay, kdist_lw))
-    ! DJS_asks_RP
-    ! Need to use kdist_lw_cldy here, otherewise if we use kdist_lw, optical_props_cldy gets
-    ! allocated with nBands != nGpts, which then fails when calling kdist_lw_cldy%cloud_optics
-    call check_error_msg(optical_props_cldy%alloc_1scl( ncol, nlay, kdist_lw_cldy))
-    ! We have also have aerosol information by band, so need to allocate just like for 
-    ! clouds, where nbands = ngpts = 16. This is problematic when not using RRTMGP cloud_optics(),
-    ! as kdist_lw_cldy only gets loaded, so this breaks when using rrtmg cloud_optics with rrtmgp.
-    call check_error_msg(optical_props_aer%alloc_1scl(  ncol, nlay, kdist_lw_cldy))
+    ! Allocate space for source functions and gas optical properties [ncol,nlay,ngpts]
+    call check_error_msg(sources%alloc(                 nCol, nLay, kdist_lw))
+    call check_error_msg(optical_props_clr%alloc_1scl(  nCol, nLay, kdist_lw))
+    call check_error_msg(optical_props_mcica%alloc_1scl(nCol, nLay, kdist_lw))
+    ! Cloud optics [nCol,nLay,nBands]
+    call check_error_msg(optical_props_cldy%init(optical_props_clr%get_band_lims_wavenumber()))
+    call check_error_msg(optical_props_cldy%alloc_1scl(ncol,nlay))
+    ! Aerosol optics [Ccol,nLay,nBands]
+    call check_error_msg(optical_props_aer%init(optical_props_clr%get_band_lims_wavenumber()))
+    call check_error_msg(optical_props_aer%alloc_1scl(ncol,nlay))
 
-    ! Initialize RRTMGP files
+    ! Initialize RRTMGP files 
     fluxAllSky%flux_up   => flux_up_allSky
     fluxAllsky%flux_dn   => flux_dn_allSky
     fluxClrSky%flux_up   => flux_up_clrSky

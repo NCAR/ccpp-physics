@@ -226,9 +226,6 @@ contains
     ! How are we handling cloud-optics?
     rrtmgp_sw_cld_phys = Model%rrtmgp_cld_phys
 
-    ! HACK. If using RRTMG cloud_optics w/ RRTMGP, we need to be able to define
-    if (Model%rrtmgp_cld_phys .eq. 0) rrtmgp_sw_cld_phys=1
-
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     kdist_file      = trim(Model%rrtmgp_root)//trim(Model%kdist_sw_file_gas)
     kdist_cldy_file = trim(Model%rrtmgp_root)//trim(Model%kdist_sw_file_clouds)
@@ -720,9 +717,6 @@ contains
             pade_sizereg_extice_sw, pade_sizereg_ssaice_sw, pade_sizereg_asyice_sw))
     endif
 
-    ! HACK
-    rrtmgp_sw_cld_phys = Model%rrtmgp_cld_phys
-
   end subroutine rrtmgp_sw_init
   ! #########################################################################################
   ! RRTMGP_SW_RUN
@@ -1073,11 +1067,16 @@ contains
     ! #######################################################################################
     if (nDay .gt. 0) then
 
-       ! Allocate space for source functions and gas optical properties
+       ! Allocate space for gas optical properties
+       ! Clear-sky 
        call check_error_msg(optical_props_clr%alloc_2str(  nday, nlay, kdist_sw))
-       call check_error_msg(optical_props_aer%alloc_2str(  nday, nlay, kdist_sw_cldy))
-       call check_error_msg(optical_props_cldy%alloc_2str( nday, nlay, kdist_sw_cldy))
        call check_error_msg(optical_props_mcica%alloc_2str(nday, nlay, kdist_sw))
+       ! Cloud optics [nCol,nLay,nBands]
+       call check_error_msg(optical_props_cldy%init(optical_props_clr%get_band_lims_wavenumber()))
+       call check_error_msg(optical_props_cldy%alloc_2str(ncol,nlay))
+       ! Aerosol optics [Ccol,nLay,nBands]
+       call check_error_msg(optical_props_aer%init(optical_props_clr%get_band_lims_wavenumber()))
+       call check_error_msg(optical_props_aer%alloc_2str(ncol,nlay))
 
        ! Initialize RRTMGP files
        fluxAllSky%flux_up => flux_up_allSky
