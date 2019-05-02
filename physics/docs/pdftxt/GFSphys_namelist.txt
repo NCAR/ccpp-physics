@@ -4,14 +4,70 @@
 \section gfs_physics_nml  GFS Physics Namelist Option
 
 \param fhzero   
-\param h2o_phys          logical |  .true.
-\param ldiag3d           logical |  .false.
-\param fhcyc                     |  24
-\param use_ufo           logical |  .true.
-\param pre_rad           logical |  .false.
-\param ncld              integer |  5
-\param imp_physics       integer |  11 
-\param pdfcld            logical | .false. 
+\param h2o_phys          logical, 
+\param ldiag3d           logical,
+\param fhcyc                     
+\param use_ufo           logical, 
+\param pre_rad           logical,
+\param ncld              integer,
+\param imp_physics       integer, 
+\param pdfcld            logical,
+\param fhswr
+\param fhlwr
+\param ialb              gfs_control_type::ialb
+\n                       SW surface albedo control flag
+\n                       0: using climatology surface albedo scheme for SW
+\n                       1: using MODIS based land surface albedo for SW
+\param iems              LW global surface emissivity control flag
+\n                       0: black-body emissivity 
+\n                       1: surface type based climatology in \f$1^o\f$ horizontal resolution
+\param iaer              aerosol effect control flag (physparam::iaerflg)
+\n                       3-digit flag "abc" (volcanic, LW, SW):
+\n                       a: stratospheric volcanic aerosols
+\n                       b: tropospheric aerosols for LW
+\n                       c: tropospheric aerosols for SW
+\n                       =0: aerosol effect is not included; =1: aerosol effect is included
+\param ico2              \f$CO_2\f$ data source control flag (physparam::ico2flg)     
+\n                       0: prescribed value (380 ppmv)
+\n                       1: yearly global averaged annual mean from observations
+\n                       2: monthly 15 degree horizontal resolution from observations
+\param isubc_sw          subgrid cloud approximation control flag in SW radiation
+\n                       0: no McICA approximation in SW radiation
+\n                       1: use McICA with prescribed permutation seeds (test mode)
+\n                       2: use McICA with randomly generated permutation seeds
+\param isubc_lw          subgrid cloud approximation control flag in LW radiation
+\n                       0: no McICA approximation in LW radiation
+\n                       1: use McICA with prescribed permutation seeds (test mode)
+\n                       2: use McICA with randomly generated permutation seeds
+\param isol              solar constant scheme control flag
+\n                       0: fixed value = 1366.0 \f$W m^{-2}\f$ (old standard)
+\n                       10: fixed value = 1360.8 \f$W m^{-2}\f$ (new standard) 
+\n                       1: NOAA ABS-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       2: NOAA TIM-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       3: CMIP5 TIM-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       4: CMIP5 TIM-scale TSI table (monthly) with 11-yr cycle approximation
+\param lwhtr             logical flag for output of longwave heating rate
+\param swhtr             logical flag for output of shortwave heating rate
+\param cnvgwd            logical flag for convective gravity wave drag
+\param shal_cnv          logical flag for shallow convection
+\param cal_pre           logical flag for precipitation type algorithm
+\param redrag            logical flag for reduced drag coefficient for high wind over sea
+\param dspheat           logical flag for TKE dissipation heating
+\param hybedmf           logical flag for hybrid EDMF PBL scheme
+\param random_clds
+\param trans_trac
+\param cnvcld
+\param imfshalcnv
+\param imfdeepcnv
+\param cdmbgwd
+\param prslrd0
+\param ivegsrc
+\param isot
+\param debug
+\param nstf_name
+\param nst_anl
+\param psautco
+\param prautco
 
 
 \section gfdl_cloud_microphysics_nml  GFDL Cloud Microphysics Namelist Option
@@ -33,29 +89,29 @@
 \param prog_ccn          logical, \e true to activate prognostic CCN (not supported in GFS Physics)  
 \param do_qa             logical, \e true to activate inline cloud fraction diagnosis in fast saturation adjustment 
 \param fast_sat_adj      logical, \e true to adjust cloud water evaporation/freezing, cloud ice deposition when fast saturation adjustment is activated (do_sat_adj=.true. in \b fv_core_nml block) 
-\param tau_l2v           real, time scale for evaporation of cloud water to water vapor. Increasing/decreasing \b tau_l2v can decrease/boost deposition of cloud water to water vapor 
-\param tau_v2l           real, time scale for condensation of water vapor to cloud water. Increasing/decreasing \b tau_v2l can decrease/boost condensation of water vapor to cloud water
-\param tau_g2v           real, time scale for sublimation of graupel to water vapor. Increasing/decreasing \b tau_g2v can decrease/boost sublimation of graupel to water vapor
-\param rthresh           real, critical cloud water radius for autoconversion (cloud water -> rain). Increasing/decreasing of \b rthresh makes the autoconversion harder/easier
+\param tau_l2v           real, time scale for evaporation of cloud water to water vapor. Increasing/decreasing \p tau_l2v can decrease/boost deposition of cloud water to water vapor 
+\param tau_v2l           real, time scale for condensation of water vapor to cloud water. Increasing/decreasing \p tau_v2l can decrease/boost condensation of water vapor to cloud water
+\param tau_g2v           real, time scale for sublimation of graupel to water vapor. Increasing/decreasing \p tau_g2v can decrease/boost sublimation of graupel to water vapor
+\param rthresh           real, critical cloud water radius for autoconversion (cloud water -> rain). Increasing/decreasing of \p rthresh makes the autoconversion harder/easier
 \param dw_land           real, base value for subgrid deviation/variability over land  
 \param dw_ocean          real, base value for subgrid deviation/variability over ocean
 \param ql_gen            real, maximum value for cloud water generated from condensation of water vapor (water vapor -> cloud water). Increasing/decreasing \b ql_gen can increase/decrease cloud water 
-\param ql_mlt            real, maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain). Exceedance of which will become rain. Increasing/decreasing \b ql_mlt can increase/decrease cloud water and decrease/increase rain
-\param qi0_crt           real, threshold of cloud ice to snow autoconversion (cloud ice -> snow). Increasing/decreasing \b qi0_crt can increase/decrease cloud ice and decrease/increase snow    
-\param qs0_crt           real, threshold of snow to graupel autoconversion (snow -> graupel). Increasing/decreasing \b qs0_crt can increase/decrease snow and decrease/increase graupel 
-\param tau_i2s           real, time scale for autoconversion of cloud ice to snow. Increasing/decreasing \b tau_i2s can decrease/boost autoconversion of cloud ice to snow (cloud ice -> snow) 
-\param c_psaci           real, accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing/decreasing of \b c_psaci can boost/decrease the accretion of cloud ice to snow      
-\param c_pgacs           real, accretion efficiency of snow to graupel (snow-> graupel). Increasing/decreasing of \b c_pgacs can boost/decrease the accretion of snow to graupel
+\param ql_mlt            real, maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain). Exceedance of which will become rain. Increasing/decreasing \p ql_mlt can increase/decrease cloud water and decrease/increase rain
+\param qi0_crt           real, threshold of cloud ice to snow autoconversion (cloud ice -> snow). Increasing/decreasing \p qi0_crt can increase/decrease cloud ice and decrease/increase snow    
+\param qs0_crt           real, threshold of snow to graupel autoconversion (snow -> graupel). Increasing/decreasing \p qs0_crt can increase/decrease snow and decrease/increase graupel 
+\param tau_i2s           real, time scale for autoconversion of cloud ice to snow. Increasing/decreasing \p tau_i2s can decrease/boost autoconversion of cloud ice to snow (cloud ice -> snow) 
+\param c_psaci           real, accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing/decreasing of \p c_psaci can boost/decrease the accretion of cloud ice to snow      
+\param c_pgacs           real, accretion efficiency of snow to graupel (snow-> graupel). Increasing/decreasing of \p c_pgacs can boost/decrease the accretion of snow to graupel
 \param rh_inc            real, relative humidity increment for complete evaporation of cloud water and cloud ice         
 \param rh_inr            real, relative humidity increment for sublimation of snow          
 \param rh_ins            real, relative humidity increment for minimum evaporation of rain        
 \param ccn_l             real, base CCN over land. Increasing/decreasing \b ccn_l can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier 
 \param ccn_o             real, base CCN over ocean. Increasing/decreasing \b ccn_o can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier 
-\param c_paut            real, uutoconversion efficiency of cloud water to rain (cloud water -> rain). Increasing/decreasing of \b c_paut can boost/decrease the autoconversion of cloud water to rain 
+\param c_paut            real, uutoconversion efficiency of cloud water to rain (cloud water -> rain). Increasing/decreasing of \p c_paut can boost/decrease the autoconversion of cloud water to rain 
 \param c_cracw           real, accretion efficiency of cloud water to rain (cloud water -> rain) 
 \param use_ppm           logical, \e true to use PPM fall scheme; .false. to use time-implicit monotonic fall scheme 
-\param use_ccn           logical, \e true to compute prescribed CCN. It should be .true. when \b prog_ccn = .false. 
-\param mono_prof         logical, \e true to turn on terminal fall with monotonic PPM scheme. This is used together with \b use_ppm =.true.
+\param use_ccn           logical, \e true to compute prescribed CCN. It should be .true. when \p prog_ccn = .false. 
+\param mono_prof         logical, \e true to turn on terminal fall with monotonic PPM scheme. This is used together with \p use_ppm =.true.
 \param z_slope_liq       logical, \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud water to rain
 \param z_slope_ice       logical, \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud ice to snow 
 \param de_ice            logical, \e true to convert excessive cloud ice to snow to prevent ice over-built from other sources like convection scheme (not supported in GFS physics) 

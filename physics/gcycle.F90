@@ -1,4 +1,11 @@
+!>\file gcycle.F90
+!! This file repopulates specific time-varying sfc properties for 
+!! AMIP/forecast runs
+
 # 1 "physics/gcycle.F90"
+!>\ingroup Noah_LSM
+!! This subroutine repopulates specific time-varying sfc properties for
+!! AMIP/forecast runs.
   SUBROUTINE GCYCLE (nblks, Model, Grid, Sfcprop, Cldprop)
 !
 !

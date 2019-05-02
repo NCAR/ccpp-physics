@@ -1,3 +1,13 @@
+!>\file sfcsub.F
+!! This file contains
+
+
+!>\defgroup mod_sfcsub GFS sfcsub Module
+!!\ingroup Noah_LSM
+!> @{
+!>\ingroup mod_sfcsub
+!! This module contains grib code for each paramter-used in subroutines sfccycle()
+!! and setrmsk().
       module sfccyc_module
       implicit none
       save
@@ -28,6 +38,8 @@
       integer            :: soil_type_landice
 !
       end module sfccyc_module
+
+!>\ingroup mod_sfcsub
       subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc
      &,                   iy,im,id,ih,fh
      &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl
@@ -130,41 +142,41 @@
 
       integer num_parthds
 !
-!  this is a limited point version of surface program.
-!
-!  this program runs in two different modes:
-!
-!  1.  analysis mode (fh=0.)
-!
-!      this program merges climatology, analysis and forecast guess to create
-!      new surface fields.  if analysis file is given, the program
-!      uses it if date of the analysis matches with iy,im,id,ih (see note
-!      below).
-!
-!  2.  forecast mode (fh.gt.0.)
-!
-!      this program interpolates climatology to the date corresponding to the
-!      forecast hour.  if surface analysis file is given, for the corresponding
-!      dates, the program will use it.
-!
-!   note:
-!
-!      if the date of the analysis does not match given iy,im,id,ih, (and fh),
-!      the program searches an old analysis by going back 6 hours, then 12 hours,
-!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
-!      now defined as 8).  this allows the user to provide non-daily analysis to
-!      be used.  if matching field is not found, the forecast guess will be used.
-!
-!      use of a combined earlier surface analyses and current analysis is
-!      not allowed (as was done in the old version for snow analysis in which
-!      old snow analysis is used in combination with initial guess), except
-!      for sea surface temperature.  for sst anolmaly interpolation, you need to
-!      set lanom=.true. and must provide sst analysis at initial time.
-!
-!      if you want to do complex merging of past and present surface field analysis,
-!      you need to create a separate file that contains daily surface field.
-!
-!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
+!>  this is a limited point version of surface program.
+!!
+!!  this program runs in two different modes:
+!!
+!!  1.  analysis mode (fh=0.)
+!!
+!!      this program merges climatology, analysis and forecast guess to create
+!!      new surface fields.  if analysis file is given, the program
+!!      uses it if date of the analysis matches with iy,im,id,ih (see note
+!!      below).
+!!
+!!  2.  forecast mode (fh.gt.0.)
+!!
+!!      this program interpolates climatology to the date corresponding to the
+!!      forecast hour.  if surface analysis file is given, for the corresponding
+!!      dates, the program will use it.
+!!
+!!   note:
+!!
+!!      if the date of the analysis does not match given iy,im,id,ih, (and fh),
+!!      the program searches an old analysis by going back 6 hours, then 12 hours,
+!!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
+!!      now defined as 8).  this allows the user to provide non-daily analysis to
+!!      be used.  if matching field is not found, the forecast guess will be used.
+!!
+!!      use of a combined earlier surface analyses and current analysis is
+!!      not allowed (as was done in the old version for snow analysis in which
+!!      old snow analysis is used in combination with initial guess), except
+!!      for sea surface temperature.  for sst anolmaly interpolation, you need to
+!!      set lanom=.true. and must provide sst analysis at initial time.
+!!
+!!      if you want to do complex merging of past and present surface field analysis,
+!!      you need to create a separate file that contains daily surface field.
+!!
+!!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
 !
 !  lugb           is the unit number used in this subprogram
 !  len ...        number of points on which sfccyc operates
@@ -2517,6 +2529,10 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end subroutine sfccycle 
+
+!>\ingroup mod_sfcsub
+!! This subroutine counts number of points for the four surface
+!! conditions.
       subroutine count(slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2569,6 +2585,8 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine monitr(lfld,fld,slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2633,6 +2651,9 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine figures out the day of the year given imo and idy.
       subroutine dayoyr(iyr,imo,idy,ldy)
       implicit none
       integer ldy,i,idy,iyr,imo
@@ -2648,6 +2669,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine hmskrd(lugb,imsk,jmsk,fnmskh,
      &                  kpds5,slmskh,gausm,blnmsk,bltmsk,me)
       use machine , only : kind_io8,kind_io4
@@ -2681,6 +2704,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine fixrdg(lugb,idim,jdim,fngrib,
      &                  kpds5,gdata,gaus,blno,blto,me)
       use machine      , only : kind_io8,kind_io4
@@ -2796,6 +2821,9 @@
       deallocate(lbms)
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine get area of the grib record.
       subroutine getarea(kgds,dlat,dlon,rslat,rnlat,wlon,elon,ijordr
      &,                  me)
       use machine , only : kind_io8,kind_io4
@@ -2946,6 +2974,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine subst(data,imax,jmax,dlon,dlat,ijordr)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -3006,6 +3036,10 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine conducts interpolation from lat/lon to Gaussian
+!! grid to other lat/lon grid.
       subroutine la2ga(regin,imxin,jmxin,rinlon,rinlat,rlon,rlat,inttyp,
      &                 gauout,len,lmask,rslmsk,slmask
      &,                outlat, outlon,me)
@@ -3543,6 +3577,8 @@
 !
       return
       end subroutine la2ga
+
+!>\ingroup mod_sfcsub
       subroutine maxmin(f,imax,kmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -3575,6 +3611,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine filanl(tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,
      &                  aisanl,
      &                  tg3anl,cvanl ,cvbanl,cvtanl,
@@ -3672,6 +3710,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,
      &                 slmask,fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
      &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
@@ -4336,6 +4376,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,
      &                  tg3fcs,cvfcs ,cvbfcs,cvtfcs,
      &                  cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,
@@ -4428,6 +4470,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
@@ -4456,6 +4500,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine rof01(aisfld,len,op,crit)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -4502,6 +4548,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine tsfcor(tsfc,orog,slmask,umask,len,rlapse)
 !
       use machine , only : kind_io8,kind_io4
@@ -4571,6 +4619,8 @@
       enddo
       return
       end subroutine snodpth
+
+!>\ingroup mod_sfcsub
       subroutine merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
      &                 sihfcs,sicfcs,
      &                 vmnfcs,vmxfcs,slpfcs,absfcs,
@@ -5022,6 +5072,8 @@
 !$omp end parallel do
       return
       end subroutine merge
+
+!>\ingroup mod_sfcsub
       subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,
 !cwu [+1l] add sihnew,sicnew,sihanl,sicanl
      &                   sihnew,sicnew,sihanl,sicanl,      
@@ -5118,6 +5170,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcsnow(snoanl,slmask,aisanl,glacir,len,snoval,
      &                  landice,me)
       use machine , only : kind_io8,kind_io4
@@ -5164,6 +5218,8 @@
       endif
       return
       end subroutine qcsnow
+
+!>\ingroup mod_sfcsub
       subroutine qcsice(ais,glacir,amxice,aicice,aicsea,sllnd,slmask,
      &                  rla,rlo,len,me)
       use machine , only : kind_io8,kind_io4
@@ -5263,6 +5319,8 @@
 !     enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setlsi(slmask,aisfld,len,aicice,slifld)
 !
       use machine , only : kind_io8,kind_io4
@@ -5281,6 +5339,7 @@
       enddo
       return
       end
+!>\ingroup mod_sfcsub
       subroutine scale(fld,len,scl)
 !
       use machine , only : kind_io8,kind_io4
@@ -5292,6 +5351,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcmxmn(ttl,fld,slimsk,sno,iceflg,
      &                  fldlmx,fldlmn,fldomx,fldomn,fldimx,fldimn,
      &                  fldjmx,fldjmn,fldsmx,fldsmn,epsfld,
@@ -5709,6 +5770,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setzro(fld,eps,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5720,6 +5783,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getscv(snofld,scvfld,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5733,6 +5798,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getstc(tsffld,tg3fld,slifld,len,lsoil,stcfld,tsfimx)
 !
       use machine , only : kind_io8,kind_io4
@@ -5766,6 +5833,9 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine calculates layer soil wetness.
       subroutine getsmc(wetfld,len,lsoil,smcfld,me)
 !
       use machine , only : kind_io8,kind_io4
@@ -5784,6 +5854,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine usesgt(sig1t,slianl,tg3anl,len,lsoil,tsfanl,stcanl,
      &                  tsfimx)
 !
@@ -5807,6 +5879,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine snosfc(snoanl,tsfanl,tsfsmx,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5831,6 +5905,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine albocn(albclm,slmask,albomx,len)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5847,6 +5923,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcmxice(glacir,amxice,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5867,6 +5945,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcsli(slianl,slifcs,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5930,6 +6010,8 @@
 !1111 format(80i1)
 !     return
 !     end
+
+!>\ingroup mod_sfcsub
       subroutine qcbyfc(tsffcs,snofcs,qctsfs,qcsnos,qctsfi,
      &                  len,lsoil,snoanl,aisanl,slianl,tsfanl,albanl,
      &                  zoranl,smcanl,
@@ -6026,6 +6108,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,
      &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
@@ -6500,6 +6584,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
       use machine , only : kind_io8,kind_io4
@@ -6746,6 +6832,8 @@ cjfe
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine landtyp(vegtype,soiltype,slptype,slmask,len)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -6763,6 +6851,8 @@ cjfe
         endif
       enddo
       return
+
+!>\ingroup mod_sfcsub
       end subroutine landtyp
       subroutine gaulat(gaul,k)
 !
@@ -6788,6 +6878,9 @@ cjfe
       stop
       end
 !-----------------------------------------------------------------------
+!>\ingroup mod_sfcsub
+!! The subroutine conducts time interpolation of anomalies,
+!! and add initial anomaly to date interpolated climatology.
       subroutine anomint(tsfan0,tsfclm,tsfcl0,tsfanl,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -6805,6 +6898,8 @@ cjfe
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,
      &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
@@ -7971,6 +8066,8 @@ cjfe
 !
       return
       end subroutine clima
+
+!>\ingroup mod_sfcsub
       subroutine fixrdc_tile(filename_raw, tile_num_ch,
      &                       i_index, j_index, kpds,
      &                       var, mon, npts, me)
@@ -8108,6 +8205,8 @@ cjfe
       return
 
       end subroutine fixrdc_tile
+
+!>\ingroup mod_sfcsub
       subroutine netcdf_err(error)
 
       use netcdf
@@ -8121,6 +8220,8 @@ cjfe
       call abort
 
       end subroutine netcdf_err
+
+!>\ingroup mod_sfcsub
       subroutine fixrdc(lugb,fngrib,kpds5,kpds7,mon,slmask,
      &                 gdata,len,iret
      &,                imsk, jmsk, slmskh, gaus,blno, blto
@@ -8297,6 +8398,8 @@ cjfe
       deallocate(lbms)
       return
       end subroutine fixrdc
+
+!>\ingroup mod_sfcsub
       subroutine fixrda(lugb,fngrib,kpds5,slmask,
      &                  iy,im,id,ih,fh,gdata,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
@@ -8616,6 +8719,8 @@ cjfe
       deallocate(data8)
       return
       end subroutine fixrda
+
+!>\ingroup mod_sfcsub
       subroutine snodpth2(glacir,snwmax,snoanl, len, me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -8637,3 +8742,4 @@ cjfe
       enddo
       return
       end
+!>@}

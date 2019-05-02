@@ -305,8 +305,8 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
 !     &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
      &       snwdph, tskin,                                             &
-             srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
-             sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
+     &       srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
+     &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
       real (kind=kind_phys), dimension(im), intent(in) ::               &
      &       rainnc, rainc, ice, snow, graupel
@@ -1122,9 +1122,6 @@ module lsm_ruc
 
 !>\ingroup lsm_ruc_group
 !! This subroutine contains RUC LSM initialization.
-!>\param restart
-!>\param im    
-!>\param lsoil_ruc
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tsurf, tg3,                    & ! in

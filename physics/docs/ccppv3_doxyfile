@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
-PROJECT_NUMBER         = "Version 3.0"
+PROJECT_NUMBER         = "Version pre3.0"
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -83,7 +83,7 @@ GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
-ENABLED_SECTIONS       =
+ENABLED_SECTIONS       = YES
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
@@ -120,6 +120,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFS_ZHAOC.txt    \
                           pdftxt/GFDL_cloud.txt   \
+                          pdftxt/GFS_SURFACE_PERT.txt    \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \
                           pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
@@ -128,8 +129,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GSD_CU_GF_deep.txt      \
                           pdftxt/GSD_RUCLSM.txt          \
                           pdftxt/GSD_THOMPSON.txt        \
-                          pdftxt/GFSphys_namelist.txt    \
+###                          pdftxt/GFSphys_namelist.txt    \
                           pdftxt/GFS_STOCHY_PHYS.txt     \
+                          pdftxt/suite_input.nml.txt    \
 ### Radiation
                         ../radlw_main.f                  \
                         ../radsw_main.f                  \
@@ -150,6 +152,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_nst_parameters.f90 \
                         ../module_nst_water_prop.f90  \
                         ../sfc_drv.f \
+                        ../sfcsub.F  \
+                        ../gcycle.F90  \
                         ../sflx.f    \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
@@ -185,6 +189,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_bfmicrophysics.f \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
+                        ../module_gfdl_cloud_microphys.F90 \
                         ../gfdl_fv_sat_adj.F90    \
 ###
                         ../GFS_MP_generic.F90 \
@@ -193,12 +198,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                      ../GFS_stochastics.F90   \
                      ../surface_perturbation.F90 \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
-### utils
-                        ../funcphys.f90     \
-                        ../physparam.f      \
-                        ../physcons.F90     \
-                        ../radcons.f90      \
-                        ../mersenne_twister.f  \
 ### CPT
                         ../m_micro.F90       \
                         ../micro_mg2_0.F90   \
@@ -225,12 +224,21 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_soil_pre.F90   \
                         ../mp_thompson_hrrr.F90    \
                         ../module_mp_thompson_hrrr.F90 \
-                        ../module_mp_radar.F90
+                        ../module_mp_radar.F90 \
+### utils
+                        ../funcphys.f90     \
+                        ../physparam.f      \
+                        ../physcons.F90     \
+                        ../radcons.f90      \
+                        ../mersenne_twister.f  \
+                        GFS_typedefs.F90 
+
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F90 \
                          *.f90 \
+                         *.nml \
                          *.txt
 RECURSIVE              = YES
 EXCLUDE                =
@@ -361,12 +369,12 @@ PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
 ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = NO
-EXPAND_ONLY_PREDEF     = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             =
+PREDEFINED             = CCPP 
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 TAGFILES               =

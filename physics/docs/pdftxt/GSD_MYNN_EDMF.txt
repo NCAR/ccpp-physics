@@ -2,36 +2,30 @@
 \page GSD_MYNNEDMF GSD MYNN-EDMF Boundary Layer and Shallow Cloud Scheme
 \section mynnedmf_descrip  Description
 
-The Mellor-Yamada-Nakanishi-Niino (MYNN) eddy diffusivity mass-flux
-(EDMF) boundary layer and shallow cloud scheme belong to the family of
-eddy diffusivity mass-flux schemes for vertical turbulent mixing in
-mesoscale models. While it is commonly called "PBL scheme,"it is worth
-noting that they are responsible for all vertical turbulent mixing, not
-only that occurring in the planetary boundary  layer. EDMF schemes
-provide  a natural, physically appealing way to handle the problem of
-nonlocal transport in the convective boundary layer, and a natural
-expression of the connection between dry thermals and cumulus clouds.
-Because shallow cumulus schemes are part of the boundary layer, the
-preferred solution is an integrated boundary layer and shallow cumulus
-scheme rather than separate schemes (Arakawa(2004) \cite Arakawa_2004).
-Using EMF, there is no need for a triggering condition for cumulus
-clouds to form, or for a closure formulation at cloud base. 
+The Mellor-Yamada-Nakanishi-Niino (Nakanishi and Niino 2009 \cite NAKANISHI_2009) eddy
+diffusivity-mass flux (EDMF) scheme was implemented into CCPP to introduce an alternative
+turbulent kinetic energy (TKE)-based planetary boundary layer (PBL) scheme which could 
+serve as a candidate PBL parameterization for the next-generation unified forecast system.
+The MYNN-EDMF is currently emplyed in NOAA's operational Rapid Refresh (RAP; Benjamin et al.2016 \cite Benjamin_2016)
+and High-Resolution Rapid Refresh (HRRR) forecast systems.
 
-Chatfield and Brost (1987) may have been the first to combine eddy
-diffusivity, commonly used for PBL mixing, with mass flux, commonly used
-to represent the vertical transport within cumulus clouds. Since about
-the year 2000, many EDMF schemes have been developed (Angevine 2005;
-Hourdin et al. 2002; Pergaud et al. 2009; Rio and Hourdin 2008; Siebesma
-and Teixeira 2000; Siebesma et al. 2007; Neggers et al. 2009;
-Su \&scaron elj et al. 2012,2013,2014) and several have been implemented in
-operational models including the ECMWF Integrated Forecast System
-(K \&ouml hler et al.2011), the U.S. Navy Global Environmental Model
-(Su \&scaron elj et al. 2014), and the NCEP GFS (Han et al. 2016).
+The original MYNN scheme was demonstrated to be an improvement over predecessor Mellor-Yamada-type 
+PBL schemes (e.g., Mellor and Yamada 1974,1982 \cite Mellor_1974 \cite Mellor_1982) when compared against large-eddy
+simulation (LES) of a convective PBL (Nakanishi and Niino 2004, 2009 \cite Nakanishi_2004 \cite NAKANISHI_2009), the
+prediction of advection fog (Nakanishi and Niino 2006 \cite Nakanishi_2006), and for the representation of coastal 
+barrier jets (Olson and Brown 2009 \cite olson_and_brown_2009). The MYNN scheme can be configured to function at either
+level 2.5 or 3.0 closure and includes a partial-condensation scheme (also known as a cloud PDF or a statistical-cloud
+scheme) to represent the effects of subgrid-scale(SGS) clouds on the buoyancy flux (Nakanishi and Niino 2004, 2006, and 2009
+\cite \cite Nakanishi_2004 \cite Nakanishi_2006 \cite NAKANISHI_2009). The closure constants for the original MYNN scheme 
+were tuned to a database of LES as opposed to observational data.
 
-MYNN-EDMF is an enhancement of the Mellor-Yamada-Nakanishii-Niino PBL 
-
-Goal: unif
-shallow :
+The MYNN-EDMF scheme has been extensively developed to improve upon the forecast skill of the original MYNN,
+largely driven by requirements to improve forecast skill in support of the NOAA's National Weather Service (NWS),
+the Federal Aviation Administration (FAA) and users within the renewable-energy industry.Specifically, fundamental
+changes were made to the formulation of the mixing lengths and representation of SGS clouds, but new components have also
+been added to improve to representation of non-local mixing, the turbulence interaction with clouds, and the coupling to other 
+model components (i.e., radiation). A description of the changes to the MYNN scheme are described in Olson et al.(2019) 
+\cite olson_et_al_2019.
 
 
 \section intra_mynnpbl Intraphysics Communication

@@ -2,10 +2,29 @@
 \page GSD_RUCLSM GSD RUC Land Surface Model
 \section ruclsm_descrip  Description
 
---PLACEHOLDER
+The land surface model (LSM) was originally developed as part of the NOAA Rapid Update Cycle (RUC) model development effort; with ongoing modifications, it is now used as an option for the WRF community model. The RUC model and its WRF-based NOAA successor, the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR), are hourly updated and have an emphasis on short-range, near-surface forecasts including aviation-impact variables and pre-convective environment. Therefore, coupling to this LSM (hereafter the RUC LSM) has been critical to provide more accurate lower boundary conditions. 
+
+The RUC LSM became operational at the NOAA/National Centers for Environmental Prediction (NCEP) first, as part of the RUC from 1998–2012, and then as part of the RAP from 2012 through the present and as part of HRRR from 2014 through the present. The simple treatments of basic land surface processes in the RUC LSM (Smirnova et al. 2016 ) have proven to be physically robust and capable of realistically representing the evolution of soil moisture, soil temperature, and snow in cycled models. Extension of the RAP domain to encompass all of North America and adjacent high-latitude ocean areas necessitated further development of the RUC LSM for application in the tundra permafrost regions and over Arctic sea ice (Smirnova et al. 2000). Other modifications include refinements in the snow model and a more accurate specification of albedo, roughness length, and other surface properties. These recent modifications in the RUC LSM are described and evaluated in Smirnova et al. 2016.
+
+The parameterizations in the RUC LSM describe complicated atmosphere–land surface interactions in an intentionally simplified fashion to avoid excessive sensitivity to multiple uncertain surface parameters. Nevertheless, the RUC LSM, when coupled with the hourly-assimilating atmospheric model, demonstrated over years of ongoing cycling (Benjamin et al. 2004a,b; Berbery et al. 1999) that it can produce a realistic evolution of hydrologic and time-varying soil fields (i.e., soil moisture and temperature) that cannot be directly observed over large areas, as well as the evolution of snow  cover on the ground surface. This result is possible only if the soil–vegetation–snow component of the coupled model, constrained only by atmospheric boundary conditions and the specification of surface characteristics, has sufficient skill to avoid long-term drift.
+
+International projects for intercomparison of land surface and snow parameterization schemes were essential in providing the testing environment and afforded an excellent opportunity to evaluate the RUC LSM with different land use and soil types and within a variety of climates. The RUC LSM was included in phase 2(d) of the Project for the Intercomparison of Land Surface Prediction Schemes [PILPS-2(d)], in which tested models performed 18-yr simulations of the land surface state for the Valdai site in Russia (Schlosser et al. 1997; Slater et al. 2001; Luo et al. 2003). The RUC LSM was also tested during the Snow Models Intercomparison Project (SnowMIP, SnowMIP2, ESM-SnowMIP), with emphasis on snow parameterizations for both grassland and forest locations in different parts of the world (Etchevers et al. 2002, 2004; Essery et al. 2009; Rutter et al. 2009, Krinner et al. 2018). The analysis of RUC LSM performance over 10 reference sites in ESM-SnowMIP rated it on the 5th place among the 26 participating models
+
+## RUC LSM characteristics that differ from NOAH LSM:
+- \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface
+- \b 9 \b soil \b levels with high vertical resolution near surface
+- \b Prognostic \b soil moisture variable (\f$\theta-\theta_r\f$)
+- \b Frozen \b soil \b physics algorithm
+- Treatment of \b mixed \b phase \b precipitation
+- Simple treatment of \b sea \c ice
+- sub-grid-scale \b heterogeneity
+- New: simple irrigation in the cropland area
+- New: water/snow intercepted by canopy as function of vegetation fraction and leaf area index (LAI)
+- New: density of falling solid precipitation
+- Snow forms additional two layers on top of soil in RUC LSM
 
 \section intra_ruclsm Intraphysics Communication
-\ref arg_table_ruclsm_run
+\ref arg_table_lsm_ruc_run
 
 \section gen_ruclsm General Algorithm
 \ref general_ruclsm

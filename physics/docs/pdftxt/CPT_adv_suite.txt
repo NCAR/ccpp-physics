@@ -124,7 +124,8 @@ The advanced CPT physics suite uses the parameterizations in the following order
 </suite>
 \endcode
 
-\section cpt_nml_option Namelist Option
-- \ref cpt_nml
+\section cpt_nml_option Namelist Option 
+- \ref gfs_physics_nml
+- \ref cpt_physics_nml
 
 */

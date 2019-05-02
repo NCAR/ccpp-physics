@@ -18,26 +18,6 @@ the algorithm.
 The latest CCPP public release is Version 3.0 (June 2019). While details on it may be found
 <a href="https://dtcenter.org/gmtb/users/ccpp/"> GMTB Common Community Physics Package (CCPP)</a> on the DTC website
 
-\section changelog Release Log
-## CCPP V3.0 Physics Scientific Upgrade
-some of V3.0's major physics improvements are as follows
-- Enhanced cloud-radiation interactions
-  - In the previous fv3gfs, all hydrometeor species (liquid cloud, ice, rain, snow, graupel) are combined and re-partitioned and
-grouped based solely temperature into ice and liquid before they are used in the radiation calculation. The liquid water radii is
-based on a crude formulation. A more physically based method is implemented to use hydrometeor information from the \ref GFDL_cloud
-in the radiation calculation. The individual hydrometeor species and their corresponding radii from the \ref GFDL_cloud
-are fed into the radiation. To use this function two options needed to be turned on in the \c gfs_physics_nml:
-\code
-lgfdlmprad = .true.
-effr_in    = .true.
-\endcode
-
-
-- Fractional snow/ice/graupel flag
-  - The \ref GFDL_cloud predicts rain, snow, graupel and ice falling on the ground. Convective parameterization also 
-predicts rain and snow. Redefine snow flag in the LSM (srflag) as a fractional number between frozen precipitation and 
-total precipitation.
-
 
 \b nomenclatures: GFS, NEMSfv3gfs, or FV3GFS referred in this documentation are the Finite-volume Cubed-Sphere (FV3) 
 non-hydrostatic dynamic core in place of the long-running spectral Gaussian hydrostatic core.

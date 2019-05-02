@@ -105,6 +105,7 @@ contains
 !! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
+!> @{
       subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,       &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                       &
@@ -867,5 +868,5 @@ contains
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !
    end subroutine cu_gf_driver_run
-!! @}
+!> @}
 end module cu_gf_driver

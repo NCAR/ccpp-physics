@@ -1,5 +1,5 @@
 /**
-\page CSAW_scheme CPT Scale-Aware Chikira-Sugiyama Cumulus Scheme with Arakawa-Wu Extension 
+\page CSAW_scheme CPT Scale-Aware Chikira-Sugiyama Scale-aware Convection Scheme with Arakawa-Wu Extension 
 \section cs_descrip  Description
 
 Chikira-Sugiyama cumulus scheme (Chikira and Sugiyama (2010) \cite Chikira_2010) with prognostic closure and
@@ -15,10 +15,10 @@ of deep convection, consistent with observations and previous of cloud-resolving
 
 
 
-\section intra_rough Intraphysics Communication
+\section intra_csaw Intraphysics Communication
 \ref arg_table_cs_conv_run
 
-\section gen_cs_conv CPT CSAW General Algorithm
-- \ref gen_cs_cumlus
+\section gen_cs_conv General Algorithm
+\ref gen_cs_cumlus
 
 */

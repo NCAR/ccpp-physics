@@ -118,6 +118,6 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
 
 \section gsd_nml_option Namelist Option
 - \ref gfs_physics_nml
-- \ref gsd_mynn_edmf_nml
+- \ref gsd_hrrr_nml
 
 */

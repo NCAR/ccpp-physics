@@ -1,5 +1,5 @@
 /**
-\page surf_pert FV3GFS Surface Paramter Perturbation
+\page surf_pert GFS Surface Parameter Perturbation
 \section des_sfcpert Description
 Parameterizations of physical process include a number of tunable 
 

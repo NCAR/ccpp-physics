@@ -1,0 +1,161 @@
+/**
+\page GFSsuite_nml Namelist Option Description
+
+\ref arg_table_GFS_control_type
+
+\section gfs_physics_nml GFS Physics NML
+The namelist variable description is provided in host-model side :GFS_typedefs.F90
+   \c NML_option = value            |                Definition in Host Model    |       Description                                |
+------------------------------------|--------------------------------------------|--------------------------------------------------|
+     fhzero       = 6               | gfs_typedefs::gfs_control_type::fhzero     | hour between clearing of diagnostic buckets      |  
+     h2o_phys     = .true.          | gfs_typedefs::gfs_control_type::h2o_phys   | flag for stratosphere h2o scheme                 |
+     ldiag3d      = .false.         | gfs_typedefs::gfs_control_type::ldiag3d    | flag for 3D diagnostic fields                    |
+     fhcyc        = 24              | gfs_typedefs::gfs_control_type::fhcyc      | frequency for surface data cycling in hours      |
+     use_ufo      = .true.          | gfs_typedefs::gfs_control_type::use_ufo    | flag for using unfiltered orography surface option            | 
+     pre_rad      = .false.         | gfs_typedefs::gfs_control_type::pre_rad    | flag for testing purpose                         |
+     ncld         = 5               | gfs_typedefs::gfs_control_type::ncld       | number of hydrometeors                           |
+     imp_physics  = 11              | gfs_typedefs::gfs_control_type::imp_physics | choice of microphysics scheme: \n 11: GFDL microphysics scheme \n 8: Thompson microphysics scheme \n 6: WSMG microphysics scheme \n 99: Zhao-Carr microphysics scheme \n 98: Zhao-Carr microphysics scheme with PDF clouds \n 10: Morrison-Gettelman microphysics scheme |
+     pdfcld       = .false.         | gfs_typedefs::gfs_control_type::pdfcld     | flag for PDF clouds                              |
+     fhswr        = 3600.           | gfs_typedefs::gfs_control_type::fhswr      | frequency for shortwave radiation (secs)         |
+     fhlwr        = 3600.           | gfs_typedefs::gfs_control_type::fhlwr      | frequency for longwave radiation (secs)          |
+     ialb         = 1               | gfs_typedefs::gfs_control_type::ialb       | SW surface albedo control flag: \n 0: using climatology surface albedo scheme for SW \n 1: using MODIS based land surface albedo for SW   |
+     iems         = 1               | gfs_typedefs::gfs_control_type::iems       | LW surface emissivity control flag: \n 0: black-body emissivity \n 1:surface type based climatology in 1 degree horizontal resolution     |
+     iaer         = 111             | gfs_typedefs::gfs_control_type::iaer       | aerosol flag "abc" (volcanic, LW, SW): \n a: stratospheric volcanic aerosols \n b: tropospheric aerosols for LW \n c: tropospheric aerosols for SW.\n 0: aerosol effect is not included; 1: aerosol effect is included |
+     ico2         = 2               | gfs_typedefs::gfs_control_type::ico2       | \f$CO_2\f$ data source control flag:\n 0: prescribed value (380 ppmv) \n 1: yearly global averaged annual mean from observations \n 2: monthly 15 degree horizontal resolution from observations|
+     isubc_sw     = 2               | gfs_typedefs::gfs_control_type::isubc_sw   | subgrid cloud approximation control flag in SW radiation: \n 0: no McICA approximation in SW radiation \n 1: use McICA with prescribed permutation seeds (test mode) \n 2: use McICA with randomly generated permutation seeds |
+     isubc_lw     = 2               | gfs_typedefs::gfs_control_type::isubc_lw   | subgrid cloud approximation control flag in LW radiation: \n 0: no McICA approximation in LW radiation \n 1: use McICA with prescribed permutation seeds (test mode) \n 2: use McICA with randomly generated permutation seeds |
+     isol         = 2               | gfs_typedefs::gfs_control_type::isol       | solar constant scheme control flag: \n 0: fixed value = 1366.0 \f$W m^{-2}\f$ (old standard) \n 10: fixed value =1360.8 \f$W m^{-2}\f$ (new standard) \n 1: NOAA ABS-scale TSI table (yearly) with 11-yr cycle approximation \n 2: NOAA TIM-scale TSI table(yearly) with 11-yr cycle approximation \n 3: CMIP5 TIM-scale TSI table (yearly) with 11-yr cycle approximation \n 4: CMIP5 TIM-scale TSI table (monthly) with 11-yr cycle approximation    |
+     lwhtr        = .true.          | gfs_typedefs::gfs_control_type::lwhtr      | logical flag for output of longwave heating rate |
+     swhtr        = .true.          | gfs_typedefs::gfs_control_type::swhtr      | logical flag for output of shortwave heating rate|
+     cnvgwd       = .true.          | gfs_typedefs::gfs_control_type::cnvgwd     | logical flag for convective gravity wave drag scheme |
+     shal_cnv     = .true.          | gfs_typedefs::gfs_control_type::shal_cnv   | logical flag for calling shallow convection      |
+     cal_pre      = .false.         | gfs_typedefs::gfs_control_type::cal_pre    | logical flag for calling precipitation type algorithm|
+     redrag       = .true.          | gfs_typedefs::gfs_control_type::redrag     | logical flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme |
+     dspheat      = .true.          | gfs_typedefs::gfs_control_type::dspheat    | logical flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes |
+     hybedmf      = .true.          | gfs_typedefs::gfs_control_type::hybedmf    | logical flag for calling hybrid EDMF PBL scheme     |
+     random_clds  = .false.         | gfs_typedefs::gfs_control_type::random_clds | logical flag for whether clouds are random          |
+     trans_trac   = .true.          | gfs_typedefs::gfs_control_type::trans_trac | logical flag for convective transport of tracers    |
+     cnvcld       = .true.          | gfs_typedefs::gfs_control_type::cnvcld     | logical flag for convective cloud                   |
+     imfshalcnv   = 2               | gfs_typedefs::gfs_control_type::imfshalcnv | flag for mass flux shallow convective scheme:\n 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) \n 2: scale- & aerosol- aware mass-flux shallow convective scheme (2017) \n 0: modified Tiedtke's eddy-diffusion shallow convective scheme \n -1: no shallow convection used       |
+     imfdeepcnv   = 2               | gfs_typedefs::gfs_control_type::imfdeepcnv | flag for mass-flux deep convective scheme:\n 1: July 2010 version of SAS convective scheme (operational version as of 2016) \n 2: scale- & aerosol-aware mass-flux deep convective scheme (2017) \n 0: old SAS convective scheme before July 2010 |
+     cdmbgwd      = 3.5,0.25        | gfs_typedefs::gfs_control_type::cdmbgwd    | multiplication factors for mountain blocking and orographic gravity wave drag |
+     prslrd0      = 0.              | gfs_typedefs::gfs_control_type::prslrd0    | pressure level above which to apply Rayleigh damping |
+     ivegsrc      = 1               | gfs_typedefs::gfs_control_type::ivegsrc    | flag for vegetation type dataset choice: \n 0: USGS; 1: IGBP(20 category); 2: UMD (13 category) |
+     isot         = 1               | gfs_typedefs::gfs_control_type::isot       | flag for soil type dataset choice:\n 0: Zobler soil type (9 category) \n 1: STATSGO soil type (19 category) |
+     debug        = .false.         | gfs_typedefs::gfs_control_type::debug      | flag for debug printout |
+     nstf_name    = 2,0,0,0,0       | gfs_typedefs::gfs_control_type::nstf_name  | NSST related paramters:\n flag 0 for no NST; 1 for uncoupled nst; and 2 for coupled NST \n nstf_name(1): 0=NSSTM off, 1= NSSTM on but uncoupled, 2= NSSTM on and coupled \n nstf_name(2): 1=NSSTM spin up on, 0=NSSTM spin up off \n nstf_name(3): 1=NSST analysis on, 0=NSSTM analysis off \n nstf_name(4): zsea1 in mm \n nstf_name(5): zesa2 in mm |
+     nst_anl      = .true.          | gfs_typedefs::gfs_control_type::nst_anl    | flag for NSSTM analysis in gcycle/sfcsub |
+     
+\section gfsp_physics_nml GFS+ Physics NML
+   \c NML_option = value            |                Definition in Host Model    |   Description                                     |
+------------------------------------|--------------------------------------------|---------------------------------------------------|
+     hybedmf      = .false.         | gfs_typedefs::gfs_control_type::hybedmf    |  logical flag for calling hybrid EDMF PBL scheme  |
+     satmedmf     = .true.          | gfs_typedefs::gfs_control_type::satmedmf   |  logical flag for calling TKE EDMF PBL scheme     |
+
+\section cpt_physics_nml CPT Physics NML
+   \c NML_option = value            |                Definition in Host Model    |   Description
+------------------------------------|--------------------------------------------|---------------------------------------------------|
+   crtrh          = 0.95,0.95,0.90  | gfs_typedefs::gfs_control_type::crtrh      | critical relative humidity at the surface, PBL top and at the top of the atmosphere |
+   ncld           = 2               | gfs_typedefs::gfs_control_type::ncld       | number of hydrometeors                            |
+   imp_physics    = 10              | gfs_typedefs::gfs_control_type::imp_physics| |
+   imfdeepcnv     = -1              | gfs_typedefs::gfs_control_type::imfdeepcnv | |
+   ras            = .false.         | gfs_typedefs::gfs_control_type::ras        | |
+   cscnv          = .true.          | gfs_typedefs::gfs_control_type::cscnv      | |
+   do_shoc        = .false.         | gfs_typedefs::gfs_control_type::do_shoc    | |
+   do_aw          = .true.          | gfs_typedefs::gfs_control_type::do_aw      | |
+   shoc_cld       = .false.         | gfs_typedefs::gfs_control_type::shoc_cld   | |
+   h2o_phys       = .true.          | gfs_typedefs::gfs_control_type::h2o_phys   | |
+   shcnvcw        = .false.         | gfs_typedefs::gfs_control_type::shcnvcw    | |
+   xkzm_h         = 0.5             | gfs_typedefs::gfs_control_type::xkzm_h     | |
+   xkzm_m         = 0.5             | gfs_typedefs::gfs_control_type::xkzm_m     | |
+   xkzm_s         = 1.0             | gfs_typedefs::gfs_control_type::xkzm_s     | |
+   nstf_name      = 2,1,0,0         | gfs_typedefs::gfs_control_type::nstf_name  | |
+   microp_uniform = .false.         | gfs_typedefs::gfs_control_type::microp_uniform | |
+   mg_do_ice_gmao = .true.          | gfs_typedefs::gfs_control_type::mg_do_ice_gmao | logical flag for turning on gmao ice autoconversion for MG microphysics |
+   mg_do_liq_liu  = .true.          | gfs_typedefs::gfs_control_type::mg_do_liq_liu  | |
+   mg_dcs         = 100.00          | gfs_typedefs::gfs_control_type::mg_dcs     | |
+   mg_alf         = 1.2             | gfs_typedefs::gfs_control_type::mg_alf     | |
+   mg_ts_auto_ice = 500.,2000.      | gfs_typedefs::gfs_control_type::mg_ts_auto_ice | |
+   mg_qcvar       = 0.5             | gfs_typedefs::gfs_control_type::mg_qcvar   | |
+   fprcp          = 2               | gfs_typedefs::gfs_control_type::fprcp      | |
+   cs_parm        = 2.6,1.0,0.05e3,2.0e3,50.0,1.0,-999.,1.,0.6,0. |gfs_typedefs::gfs_control_type::cs_parm | |
+   shoc_parm      = 7000.0,1.0,4.2857143,0.7,-999.0  | gfs_typedefs::gfs_control_type::shoc_parm  | |
+   iccn           = .false.         | gfs_typedefs::gfs_control_type::iccn       | |
+   aero_in        = .false.         | gfs_typedefs::gfs_control_type::aero_in    | |
+   ctei_rm        = 10.0,10.0       | gfs_typedefs::gfs_control_type::ctei_rm    | |
+   rhcmax         = 0.9999999       | gfs_typedefs::gfs_control_type::rhcmax     | |
+   effr_in        = .true.          | gfs_typedefs::gfs_control_type::effr_in    | |
+   ltaerosol      = .false.         | gfs_typedefs::gfs_control_type::ltaerosol  | |
+   lradar         = .false.         | gfs_typedefs::gfs_control_type::lradar     | |
+   cplflx         = .false.         | gfs_typedefs::gfs_control_type::cplflx     | |
+   iau_delthrs    = 6               | gfs_typedefs::gfs_control_type::iau_delthrs| |
+   iaufhrs        = 30              | gfs_typedefs::gfs_control_type::iaufhrs    | |
+   iau_inc_files  = ''              | gfs_typedefs::gfs_control_type::iau_inc_files | |
+   tau_i2s = 1500.                  | gfs_typedefs::gfs_control_type::tau_i2s    | |
+
+\section gsd_hrrr_nml GSD RAP/HRRR Physics NML
+   \c NML_option = value            |                Definition in Host Model    |
+------------------------------------|--------------------------------------------|
+   imp_physics = 8                  | gfs_typedefs::gfs_control_type::imp_physics|
+   ltaerosol   = .true.             | gfs_typedefs::gfs_control_type::ltaerosol  |
+   lradar      = .false.            | gfs_typedefs::gfs_control_type::lradar     |
+   do_mynnedmf    = .true.          | gfs_typedefs::gfs_control_type::do_mynnedmf|
+   do_mynnsfclay  = .false.         | gfs_typedefs::gfs_control_type::do_mynnsfclay |
+   imfshalcnv   = 3                 | gfs_typedefs::gfs_control_type::imfshalcnv |
+   imfdeepcnv   = 3                 | gfs_typedefs::gfs_control_type::imfdeepcnv |
+   lmfshal = .false.                | gfs_typedefs::gfs_control_type::lmfshal    |
+   oz_phys   = .false.              | gfs_typedefs::gfs_control_type::oz_phys    |
+   oz_phys_2015   = .true.          | gfs_typedefs::gfs_control_type::oz_phys_2015   |
+
+\section gfdl_cloud_microphysics_nml GFDL Cloud MP NML
+The namelist variable description is provided in module_gfdl_cloud_microphys.F90
+   \c NML_option = value            |                Definition in CCPP     |
+------------------------------------|--------------------------------------------|
+   sedi_transport = .true.          | gfdl_cloud_microphys_mod::sedi_transport   |
+     do_sedi_heat = .false.         | gfdl_cloud_microphys_mod::do_sedi_heat     |
+         rad_snow = .true.          | gfdl_cloud_microphys_mod::rad_snow         |
+      rad_graupel = .true.          | gfdl_cloud_microphys_mod::rad_graupel      |
+         rad_rain = .true.          | gfdl_cloud_microphys_mod::rad_rain         |
+         const_vi = .F.             | gfdl_cloud_microphys_mod::const_vi         |
+         const_vs = .F.             | gfdl_cloud_microphys_mod::const_vs         |
+         const_vg = .F.             | gfdl_cloud_microphys_mod::const_vg         |
+         const_vr = .F.             | gfdl_cloud_microphys_mod::const_vr         |
+           vi_max = 1.              | gfdl_cloud_microphys_mod::vi_max           |
+           vs_max = 2.              | gfdl_cloud_microphys_mod::vs_max           |
+           vg_max = 12.             | gfdl_cloud_microphys_mod::vg_max           |
+           vr_max = 12.             | gfdl_cloud_microphys_mod::vr_max           |
+           qi_lim = 1.              | gfdl_cloud_microphys_mod::qi_lim           |
+         prog_ccn = .false.         | gfdl_cloud_microphys_mod::prog_ccn         |
+            do_qa = .true.          | gfdl_cloud_microphys_mod::do_qa            |
+     fast_sat_adj = .true.          | gfdl_cloud_microphys_mod::fast_sat_adj     |
+          tau_l2v = 225.            | gfdl_cloud_microphys_mod::tau_l2v          |
+          tau_v2l = 150.            | gfdl_cloud_microphys_mod::tau_v2l          |
+          tau_g2v = 900.            | gfdl_cloud_microphys_mod::tau_g2v          |
+          rthresh = 10.e-6          | gfdl_cloud_microphys_mod::rthresh          |
+         dw_land  = 0.16            | gfdl_cloud_microphys_mod::dw_land          |
+         dw_ocean = 0.10            | gfdl_cloud_microphys_mod::dw_ocean         |
+           ql_gen = 1.0e-3          | gfdl_cloud_microphys_mod::ql_gen           |
+           ql_mlt = 1.0e-3          | gfdl_cloud_microphys_mod::ql_mlt           |
+          qi0_crt = 8.0E-5          | gfdl_cloud_microphys_mod::qi0_crt          |
+          qs0_crt = 1.0e-3          | gfdl_cloud_microphys_mod::qs0_crt          |
+          tau_i2s = 1000.           | gfdl_cloud_microphys_mod::tau_i2s          |
+          c_psaci = 0.05            | gfdl_cloud_microphys_mod::c_psaci          |
+          c_pgacs = 0.01            | gfdl_cloud_microphys_mod::c_pgacs          |
+           rh_inc = 0.30            | gfdl_cloud_microphys_mod::rh_inc           |
+           rh_inr = 0.30            | gfdl_cloud_microphys_mod::rh_inr           |
+           rh_ins = 0.30            | gfdl_cloud_microphys_mod::rh_ins           |
+            ccn_l = 300.            | gfdl_cloud_microphys_mod::ccn_l            |
+            ccn_o = 100.            | gfdl_cloud_microphys_mod::ccn_o            |
+           c_paut = 0.5             | gfdl_cloud_microphys_mod::c_paut           |
+          c_cracw = 0.8             | gfdl_cloud_microphys_mod::c_cracw          |
+          use_ppm = .false.         | gfdl_cloud_microphys_mod::use_ppm          |
+          use_ccn = .true.          | gfdl_cloud_microphys_mod::use_ccn          |
+        mono_prof = .true.          | gfdl_cloud_microphys_mod::mono_prof        |
+     z_slope_liq  = .true.          | gfdl_cloud_microphys_mod::z_slope_liq      |
+     z_slope_ice  = .true.          | gfdl_cloud_microphys_mod::z_slope_ice      |
+           de_ice = .false.         | gfdl_cloud_microphys_mod::de_ice           |
+     fix_negative = .true.          | gfdl_cloud_microphys_mod::fix_negative     |
+         icloud_f = 1               | gfdl_cloud_microphys_mod::icloud_f         |
+          mp_time = 150.            | gfdl_cloud_microphys_mod::mp_time          |
+  
+*/

@@ -149,26 +149,8 @@ The GFSv15 suite uses the parameterizations in the following order, as defined i
 </suite>
 \endcode
 
-\section gfs_nml_option Namelist Option
-
+\section suite1_nml_opt_des Namelist Option 
+- \ref gfs_physics_nml
 - \ref gfdl_cloud_microphysics_nml
-\p sedi_transport
-\p do_sedi_heat
-\p rad_snow
-\p rad_graupel
-\p rad_rain
-\p const_vi
-\p const_vs
-\p const_vg
-\p const_vr
-\p vi_max
-\p vs_max
-\p vg_max
-\p vr_max
-
-
-
-
-\p tau_l2v = 225.
 
 */
