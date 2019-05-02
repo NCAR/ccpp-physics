@@ -916,7 +916,7 @@ contains
     real(kind_phys), dimension(nday,nlay) ::  cld_lwp2,thetaTendClrSky, &
          thetaTendAllSky
     real(kind_phys), dimension(nday,nlay+1),target :: &
-         flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
+         flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky
     real(kind_phys), dimension(nday,nlay+1,nBandsSW),target :: &
          fluxBB_up_allSky, fluxBB_dn_allSky
     real(kind_phys), dimension(nday,nGptsSW) :: toa_flux
@@ -1011,11 +1011,6 @@ contains
     tem0   = (1. - vmr_h2o)*amd + vmr_h2o*amw
     coldry = ( 1.0e-20 * 1.0e3 *avogad)*delpin / (100.*grav*tem0*(1. + vmr_h2o))
 
-    ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
-    ! pressure needs to be slightly greater than that, ~1.00518Pa
-    p_lev2=p_lev
-    p_lev2(:,iTOA) = kdist_sw%get_press_min()/100.
-
     ! Compute fractions of clear sky view at surface. *NOTE* This is only used if cloud radiative 
     ! properties are provided directly.
     clrfracSFC   = 1._kind_phys
@@ -1106,8 +1101,8 @@ contains
        !    from pressures, temperatures, and gas concentrations...
        print*,'Clear-Sky(SW): Optics'
        call check_error_msg(kdist_sw%gas_optics(      &
-            p_lay(idxday,1:nlay)*100.,      &
-            p_lev2(idxday,1:nlay+1)*100.,   &
+            p_lay(idxday,1:nlay),      &
+            p_lev(idxday,1:nlay+1),   &
             t_lay(idxday,1:nlay),           &
             gas_concs_sw,                   &
             optical_props_clr,              &
@@ -1133,7 +1128,7 @@ contains
           call check_error_msg(compute_heating_rate(   &
                fluxClrSky%flux_up,                     &
                fluxClrSky%flux_dn,                     &
-               p_lev2(idxday,1:nlay+1)*100., &
+               p_lev(idxday,1:nlay+1), &
                thetaTendClrSky))
        endif
 
@@ -1229,14 +1224,14 @@ contains
              call check_error_msg(compute_heating_rate(  &
                   fluxAllSky%bnd_flux_up(:,:,iBand),     &
                   fluxAllSky%bnd_flux_dn(:,:,iBand),     &
-                  p_lev(idxday,1:nlay+1)*100.,           &
+                  p_lev(idxday,1:nlay+1),           &
                   thetaTendByBandAllSky(:,:,iBand)))
           enddo
        else
           call check_error_msg(compute_heating_rate(     &
                fluxAllSky%flux_up,                       &
                fluxAllSky%flux_dn,                       &
-               p_lev(idxday,1:nlay+1)*100.,              &
+               p_lev(idxday,1:nlay+1),              &
                thetaTendAllSky))
        endif
 

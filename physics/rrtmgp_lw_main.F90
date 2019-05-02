@@ -872,7 +872,7 @@ contains
     real(kind_phys), dimension(nBandsLW,ncol) :: &
          semiss        
     real(kind_phys), dimension(ncol,nlay+1),target :: &
-         flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky, p_lev2
+         flux_up_allSky, flux_up_clrSky, flux_dn_allSky, flux_dn_clrSky
     real(kind_phys), dimension(ncol,nlay+1,nBandsLW),target :: &
          fluxBB_up_allSky, fluxBB_dn_allSky
     real(kind_phys), dimension(ncol,nlay) :: &
@@ -953,11 +953,6 @@ contains
        iTOA = nlay+1
     endif
 
-    ! Input model-level pressure @ the top-of-model is set to 1Pa, whereas RRTMGP minimum 
-    ! pressure needs to be slightly greater than that, ~1.00518Pa
-    p_lev2         = p_lev
-    p_lev2(:,iTOA) = kdist_lw%get_press_min()/100._kind_phys
-
     ! Change random number seed value for each radiation invocation (isubclw =1 or 2).
     if(isubclw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
@@ -1035,8 +1030,8 @@ contains
     !    from pressures, temperatures, and gas concentrations...
     print*,'Clear-Sky(LW): Optics'
     call check_error_msg(kdist_lw%gas_optics( &
-         p_lay(1:ncol,1:nlay)*100.,               &
-         p_lev2(1:ncol,1:nlay+1)*100.,            &
+         p_lay(1:ncol,1:nlay),               &
+         p_lev(1:ncol,1:nlay+1),            &
          t_lay(1:ncol,1:nlay),                    &
          skt(1:ncol),                             &
          gas_concs_lw,                            &
@@ -1064,7 +1059,7 @@ contains
        call check_error_msg(compute_heating_rate(   &
             fluxClrSky%flux_up,                     &
             fluxClrSky%flux_dn,                     &
-            p_lev2(1:ncol,1:nlay+1)*100., &
+            p_lev(1:ncol,1:nlay+1), &
             thetaTendClrSky))
     endif
 
@@ -1152,14 +1147,14 @@ contains
           call check_error_msg(compute_heating_rate(  &
                fluxAllSky%bnd_flux_up(:,:,iBand),   &
                fluxAllSky%bnd_flux_dn(:,:,iBand),   &
-               p_lev(1:ncol,1:nlay+1)*100.,           &
+               p_lev(1:ncol,1:nlay+1),           &
                thetaTendByBandAllSky(:,:,iBand)))
        enddo
     else
        call check_error_msg(compute_heating_rate(     &
             fluxAllSky%flux_up,                       &
             fluxAllSky%flux_dn,                       &
-            p_lev(1:ncol,1:nlay+1)*100.,              &
+            p_lev(1:ncol,1:nlay+1),              &
             thetaTendAllSky))
     endif
 
@@ -1167,7 +1162,7 @@ contains
     write(60,*) "#"
     write(61,*) "#"
     do iLay=1,nLay
-       write(59,"(9F10.3)") p_lay(1,iLay)*100.,t_lay(1,iLay),cld_lwp(1,iLay),cld_iwp(1,iLay),&
+       write(59,"(9F10.3)") p_lay(1,iLay),t_lay(1,iLay),cld_lwp(1,iLay),cld_iwp(1,iLay),&
             cldfrac(1,iLay),sum(fluxClrSky%flux_up(1,iLay:iLay+1))/2.,&
             sum(fluxClrSky%flux_dn(1,iLay:iLay+1))/2.,sum(fluxAllSky%flux_up(1,iLay:iLay+1))/2.,&
             sum(fluxAllSky%flux_dn(1,iLay:iLay+1))/2.
