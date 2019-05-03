@@ -44,7 +44,7 @@
 !wrft:model_layer:physics
 !+---+-----------------------------------------------------------------+
 !
-MODULE module_mp_thompson_hrrr
+MODULE module_mp_thompson
 
       USE machine, only : kind_phys
 
@@ -3596,12 +3596,6 @@ MODULE module_mp_thompson_hrrr
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         ! DH* this was for FIM
-         !nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
-         !              (nwfa1d(k)+nwfaten(k)*DT)))
-         !nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
-         !              (nifa1d(k)+nifaten(k)*DT)))
-         ! *DH
          nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
                        (nwfa1d(k)+nwfaten(k)*DT)))
          nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
@@ -3734,6 +3728,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing qr_acr_qg"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
@@ -3911,6 +3908,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing qr_acr_qs"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
@@ -4162,6 +4162,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing freezeH2O"
 
         orho_w = 1./rho_w
@@ -5785,5 +5788,5 @@ MODULE module_mp_thompson_hrrr
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
-END MODULE module_mp_thompson_hrrr
+END MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+

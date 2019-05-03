@@ -1,25 +1,25 @@
 ! CCPP license goes here, as well as further documentation
-module mp_thompson_hrrr_pre
+module mp_thompson_pre
 
       use machine, only : kind_phys
 
-      use module_mp_thompson_hrrr, only : naIN0, naIN1, naCCN0, naCCN1, eps
+      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
 
       implicit none
 
-      public :: mp_thompson_hrrr_pre_init, mp_thompson_hrrr_pre_run, mp_thompson_hrrr_pre_finalize
+      public :: mp_thompson_pre_init, mp_thompson_pre_run, mp_thompson_pre_finalize
 
       private
 
    contains
 
-      subroutine mp_thompson_hrrr_pre_init()
-      end subroutine mp_thompson_hrrr_pre_init
+      subroutine mp_thompson_pre_init()
+      end subroutine mp_thompson_pre_init
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_pre_run Argument Table
+!! \section arg_table_mp_thompson_pre_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -54,7 +54,7 @@ module mp_thompson_hrrr_pre
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
+      subroutine mp_thompson_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,       &
                                   make_number_concentrations,                &
                                   is_aerosol_aware, nc, nwfa, nifa, nwfa2d,  &
@@ -113,7 +113,7 @@ module mp_thompson_hrrr_pre
          errmsg = ''
          errflg = 0
 
-         ! Save current air temperature for tendency limiters in mp_thompson_hrrr_post
+         ! Save current air temperature for tendency limiters in mp_thompson_post
          tgrs_save = tgrs
 
          ! Return if not first timestep
@@ -126,7 +126,7 @@ module mp_thompson_hrrr_pre
               .not.present(nifa2d) .or. &
               .not.present(nwfa)   .or. &
               .not.present(nifa)        )) then
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_pre_run:',                 &
+             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_pre_run:',                 &
                                         ' aerosol-aware microphysics require all of the following', &
                                         ' optional arguments: nc, nwfa2d, nifa2d, nwfa, nifa'
              errflg = 1
@@ -307,9 +307,9 @@ module mp_thompson_hrrr_pre
          ! If nc is in boundary conditions but qc is not, reset nc to zero
          if (maxval(nc)>0.0 .and. maxval(qc)==0.0) nc = 0.0
 
-      end subroutine mp_thompson_hrrr_pre_run
+      end subroutine mp_thompson_pre_run
 
-      subroutine mp_thompson_hrrr_pre_finalize()
-      end subroutine mp_thompson_hrrr_pre_finalize
+      subroutine mp_thompson_pre_finalize()
+      end subroutine mp_thompson_pre_finalize
 
-end module mp_thompson_hrrr_pre
+end module mp_thompson_pre

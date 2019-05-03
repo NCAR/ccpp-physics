@@ -1,13 +1,13 @@
 ! CCPP license goes here, as well as further documentation
-module mp_thompson_hrrr
+module mp_thompson
 
       use machine, only : kind_phys
 
-      use module_mp_thompson_hrrr, only : thompson_init, mp_gt_driver, thompson_finalize
+      use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize
 
       implicit none
 
-      public :: mp_thompson_hrrr_init, mp_thompson_hrrr_run, mp_thompson_hrrr_finalize
+      public :: mp_thompson_init, mp_thompson_run, mp_thompson_finalize
 
       private
 
@@ -16,7 +16,7 @@ module mp_thompson_hrrr
    contains
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_init Argument Table
+!! \section arg_table_mp_thompson_init Argument Table
 !! | local_name           | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol                 | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -36,7 +36,7 @@ module mp_thompson_hrrr
 !! | errflg               | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_init(ncol, nlev, is_aerosol_aware, &
+      subroutine mp_thompson_init(ncol, nlev, is_aerosol_aware, &
                                        nwfa2d, nifa2d, nwfa, nifa,   &
                                        mpicomm, mpirank, mpiroot,    &
                                        imp_physics,                  &
@@ -121,7 +121,7 @@ module mp_thompson_hrrr
                                threads=threads)
             if (errflg /= 0) return
          else if (is_aerosol_aware) then
-            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_init:',                    &
+            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_init:',                    &
                                        ' aerosol-aware microphysics require all of the following', &
                                        ' optional arguments: nifa2d, nwfa2d, nwfa, nifa'
             errflg = 1
@@ -137,10 +137,10 @@ module mp_thompson_hrrr
 
          is_initialized = .true.
 
-      end subroutine mp_thompson_hrrr_init
+      end subroutine mp_thompson_init
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_run Argument Table
+!! \section arg_table_mp_thompson_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                             | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                                | count      |    0 | integer   |           | in     | F        |
@@ -184,7 +184,7 @@ module mp_thompson_hrrr
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
+      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
                               nwfa2d, nifa2d,                            &
@@ -293,7 +293,7 @@ module mp_thompson_hrrr
 
          ! Check initialization state
          if (.not.is_initialized) then
-            write(errmsg, fmt='((a))') 'mp_thompson_hrrr_run called before mp_thompson_hrrr_init'
+            write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
             errflg = 1
             return
          end if
@@ -311,7 +311,7 @@ module mp_thompson_hrrr
                                            present(nifa)   .and. &
                                            present(nwfa2d) .and. &
                                            present(nifa2d)       )) then
-            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_run:',  &
+            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
                                        ' aerosol-aware microphysics require all of the', &
                                        ' following optional arguments:', &
                                        ' nc, nwfa, nifa, nwfa2d, nifa2d'
@@ -359,7 +359,7 @@ module mp_thompson_hrrr
              has_reqi = 0
              has_reqs = 0
          else
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_run:',  &
+             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
                                         ' all or none of the following optional', &
                                         ' arguments are required: re_cloud, re_ice, re_snow'
              errflg = 1
@@ -451,17 +451,17 @@ module mp_thompson_hrrr
             re_snow  = re_snow_mp*1.0E6_kind_phys
          end if
 
-      end subroutine mp_thompson_hrrr_run
+      end subroutine mp_thompson_run
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_finalize Argument Table
+!! \section arg_table_mp_thompson_finalize Argument Table
 !! | local_name      | standard_name                                                 | long_name                                              | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP               | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_finalize(errmsg, errflg)
+      subroutine mp_thompson_finalize(errmsg, errflg)
 
          implicit none
 
@@ -478,6 +478,6 @@ module mp_thompson_hrrr
 
          is_initialized = .false.
 
-      end subroutine mp_thompson_hrrr_finalize
+      end subroutine mp_thompson_finalize
 
-end module mp_thompson_hrrr
+end module mp_thompson
