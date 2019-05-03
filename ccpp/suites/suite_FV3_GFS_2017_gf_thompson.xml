@@ -60,7 +60,8 @@
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys</scheme>
+      <scheme>ozphys_2015</scheme>
+      <scheme>h2ophys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
@@ -75,9 +76,9 @@
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
-      <scheme>mp_thompson_hrrr_pre</scheme>
-      <scheme>mp_thompson_hrrr</scheme>
-      <scheme>mp_thompson_hrrr_post</scheme>
+      <scheme>mp_thompson_pre</scheme>
+      <scheme>mp_thompson</scheme>
+      <scheme>mp_thompson_post</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
       <scheme>cu_gf_driver_post</scheme>
