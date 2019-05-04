@@ -6,15 +6,9 @@
 
 export TEST_DESCR="Compare FV3 CCPP GSD restart results with previous trunk version"
 
-export CNTL_DIR=fv3_ccpp_gsd_restart
+export CNTL_DIR=fv3_ccpp_gsd
 
-export LIST_FILES="atmos_4xdaily.tile1.nc \
-                   atmos_4xdaily.tile2.nc \
-                   atmos_4xdaily.tile3.nc \
-                   atmos_4xdaily.tile4.nc \
-                   atmos_4xdaily.tile5.nc \
-                   atmos_4xdaily.tile6.nc \
-                   phyf027.tile1.nc \
+export LIST_FILES="phyf027.tile1.nc \
                    phyf027.tile2.nc \
                    phyf027.tile3.nc \
                    phyf027.tile4.nc \
@@ -71,7 +65,6 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
                    RESTART/phy_data.tile5.nc \
                    RESTART/phy_data.tile6.nc"
 
-
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
@@ -81,6 +74,8 @@ export EXTERNAL_IC=.F.
 export MAKE_NH=.F.
 export MOUNTAIN=.T.
 export NA_INIT=0
+export NSTF_NAME=2,0,1,0,5
+
 export FHMAX=48
 export FDIAG=3
 

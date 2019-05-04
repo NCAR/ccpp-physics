@@ -1,20 +1,22 @@
+cp -r /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/FV3_input_data_C96_with_aerosols INPUT
+chmod -R ug+w INPUT
+mkdir RESTART
 
-if [ $WARM_START = .F. ]; then
-  cp -r @[RTPWD]/FV3_input_data/INPUT .
-  mkdir RESTART
-else
-  mkdir INPUT RESTART
-  cp -r @[RTPWD]/FV3_input_data/RESTART/* ./INPUT
-fi
 cp    @[RTPWD]/FV3_input_data/INPUT/aerosol.dat .
 cp    @[RTPWD]/FV3_input_data/INPUT/co2historicaldata_201*.txt .
 cp    @[RTPWD]/FV3_input_data/INPUT/sfc_emissivity_idx.txt .
 cp    @[RTPWD]/FV3_input_data/INPUT/solarconstant_noaa_an.txt .
-cp    @[RTPWD]/FV3_input_data/INPUT/global_o3prdlos.f77 .
-cp    @[RTPWD]/FV3_input_data/qr_acr_q* .
+cp    @[RTPWD]/FV3_input_data/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 ./global_o3prdlos.f77
+cp    @[RTPWD]/FV3_input_data/global_h2o_pltc.f77 ./global_h2oprdlos.f77
+# SIONlib version of precomputed tables, if available
+#cp    @[RTPWD]/FV3_input_data/qr_acr_q* .
+if [ -f /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/thompson_tables_precomp.sl ]; then
+  cp  /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/thompson_tables_precomp.sl .
+fi
+#
 cp    @[RTPWD]/FV3_input_data/*grb .
 cp    @[RTPWD]/FV3_input_data/*_table .
-cp    @[RTPWD]/FV3_input_data/diag_table_thompson diag_table
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/diag_table_gf_thompson diag_table
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/field_table_gf_thompson field_table
 cp    @[RTPWD]/FV3_input_data/*configure .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/CCN_ACTIVATE.BIN .
