@@ -263,11 +263,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-FV3")
-  if (NOT STATIC)
-    link_directories(${NCEPLIBS_DIR}/lib)
-  endif (NOT STATIC)
-elseif (PROJECT STREQUAL "CCPP-SCM")
+if (PROJECT STREQUAL "CCPP-SCM")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
@@ -282,7 +278,7 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
 
@@ -299,8 +295,9 @@ else(STATIC)
 endif(STATIC)
 
 if (PROJECT STREQUAL "CCPP-FV3")
+  # Link required NCEPlibs for dynamic builds
   if (NOT STATIC)
-    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
+    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
   endif (NOT STATIC)
 elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
