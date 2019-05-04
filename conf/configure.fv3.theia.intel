@@ -56,7 +56,6 @@ HYBRID = Y
 STATIC = N
 SION = N
 DYN32 = N
-WORKAROUND_SRFLAG = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -126,6 +125,10 @@ else
 FFLAGS += -xHOST -qno-opt-dynamic-align
 CFLAGS += -xHOST -qno-opt-dynamic-align
 endif
+endif
+
+ifeq ($(MULTI_GASES),Y)
+CPPDEFS += -DMULTI_GASES
 endif
 
 FFLAGS_OPT = -O2 -debug minimal -fp-model source -qoverride-limits -qopt-prefetch=3
@@ -212,15 +215,6 @@ endif
 ifeq ($(TRANSITION),Y)
 CPPDEFS += -DTRANSITION
 endif
-
-# DH*
-# WORKAROUND TO BE ABLE TO COMPARE RESULTS AGAINST OFFICIAL
-# BASELINE THAT CONTAIN BUGS IN GFS_PHYSICS_DRIVER.F90 IN
-# THE CALCULATION OF SFCPROP%SRFLAG
-ifeq ($(WORKAROUND_SRFLAG),Y)
-CPPDEFS += -DWORKAROUND_SRFLAG
-endif
-# *DH
 
 LDFLAGS += $(LIBS)
 
