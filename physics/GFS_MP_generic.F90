@@ -225,7 +225,11 @@
       ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
+#ifdef TRANSITION
+      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+#else
       real(kind=kind_phys), parameter :: rainmin = 1.0e-13
+#endif
       real(kind=kind_phys), parameter :: p850    = 85000.0
       ! *DH
 

@@ -188,7 +188,11 @@ contains
       real(kind=kind_phys), parameter :: one = 1.0d0
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
+#ifdef TRANSITION
+      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+#else
       real(kind=kind_phys), parameter :: rainmin = 1.0e-13
+#endif
       ! *DH
 
       ! interface variables
