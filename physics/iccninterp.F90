@@ -223,8 +223,8 @@ contains
                ! i.e. i1 and i2 will have values determined by the
                ! previous code (line 178) - this leads to crashes in
                ! debug mode (out of bounds), for example for regression
-               ! test fv3_stretched_nest_debug_moninq. For the time
-               ! being, this is 'solved' by simply switching off ICCN
+               ! test fv3_stretched_nest_debug. For the time being,
+               ! this is 'solved' by simply switching off ICCN
                ! if MG2/3 are not used (these are the only microphysics
                ! schemes that use the ICCN data); however, this doesn't
                ! mean that the code is correct for MG2/3, it just doesn't
