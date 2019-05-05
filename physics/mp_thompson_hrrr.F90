@@ -144,7 +144,7 @@ module mp_thompson_hrrr
 
       end subroutine mp_thompson_hrrr_init
 
-!>\defgroup thompson GSD Aerosal-Aware Thompson MP Module
+!>\defgroup aathompson GSD Aerosal-Aware Thompson MP Module
 
 #if 0
 !> \section arg_table_mp_thompson_hrrr_run Argument Table
@@ -191,7 +191,9 @@ module mp_thompson_hrrr
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
+!>\ingroup aathompson
 !>\section gen_thompson_hrrr GSD Thompson MP General Algorithm
+!>@{
       subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
@@ -258,19 +260,19 @@ module mp_thompson_hrrr
 
          ! Local variables
 
-         !> Air density
+         ! Air density
          real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
-         !> Hydrometeors
+         ! Hydrometeors
          real(kind_phys) :: qv_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qc_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qr_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qi_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qs_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qg_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
-         !> Vertical velocity and level width
+         ! Vertical velocity and level width
          real(kind_phys) :: w(1:ncol,1:nlev)                !< m s-1
          real(kind_phys) :: dz(1:ncol,1:nlev)               !< m
-         !> Rain/snow/graupel fall amounts
+         ! Rain/snow/graupel fall amounts
          real(kind_phys) :: rain_mp(1:ncol)                 ! mm, dummy, not used
          real(kind_phys) :: graupel_mp(1:ncol)              ! mm, dummy, not used
          real(kind_phys) :: ice_mp(1:ncol)                  ! mm, dummy, not used
@@ -279,10 +281,10 @@ module mp_thompson_hrrr
          real(kind_phys) :: delta_graupel_mp(1:ncol)        ! mm
          real(kind_phys) :: delta_ice_mp(1:ncol)            ! mm
          real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
-         !> Radar reflectivity
+         ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
-         !> Effective cloud radii
+         ! Effective cloud radii
          logical         :: do_effective_radii
          real(kind_phys) :: re_cloud_mp(1:ncol,1:nlev)      ! m
          real(kind_phys) :: re_ice_mp(1:ncol,1:nlev)        ! m
@@ -306,7 +308,7 @@ module mp_thompson_hrrr
             return
          end if
 
-         ! Convert specific humidity/moist mixing ratios to dry mixing ratios
+         !> - Convert specific humidity/moist mixing ratios to dry mixing ratios
          qv_mp = spechum/(1.0_kind_phys-spechum)
          qc_mp = qc/(1.0_kind_phys-spechum)
          qr_mp = qr/(1.0_kind_phys-spechum)
@@ -327,13 +329,13 @@ module mp_thompson_hrrr
             return
          end if
 
-         ! Density of air in kg m-3
+         !> - Density of air in kg m-3
          rho = prsl/(con_rd*tgrs)
 
-         ! Convert omega in Pa s-1 to vertical velocity w in m s-1
+         !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
          w = -omega/(rho*con_g)
 
-         ! Layer width in m from geopotential in m2 s-2
+         !> - Layer width in m from geopotential in m2 s-2
          dz = (phii(:,2:nlev+1) - phii(:,1:nlev)) / con_g
 
          ! Accumulated values inside Thompson scheme, not used;
@@ -446,7 +448,7 @@ module mp_thompson_hrrr
          end if
 #endif
 
-         ! Call Thompson MP with or without aerosols
+         !> - Call mp_gt_driver() with or without aerosols
          if (is_aerosol_aware) then
             call mp_gt_driver(qv=qv_mp, qc=qc_mp, qr=qr_mp, qi=qi_mp, qs=qs_mp, qg=qg_mp,    &
                               ni=ni, nr=nr, nc=nc,                                           &
@@ -484,7 +486,7 @@ module mp_thompson_hrrr
          end if
          if (errflg/=0) return
 
-         ! convert dry mixing ratios to specific humidity/moist mixing ratios
+         !> - Convert dry mixing ratios to specific humidity/moist mixing ratios
          spechum = qv_mp/(1.0_kind_phys+qv_mp)
          qc      = qc_mp/(1.0_kind_phys+qv_mp)
          qr      = qr_mp/(1.0_kind_phys+qv_mp)
@@ -537,7 +539,7 @@ module mp_thompson_hrrr
          end if
 #endif
 
-         ! Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
+         !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
          prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
          graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
@@ -553,6 +555,7 @@ module mp_thompson_hrrr
          end if
 
       end subroutine mp_thompson_hrrr_run
+!>@}
 
 #if 0
 !! \section arg_table_mp_thompson_hrrr_finalize Argument Table

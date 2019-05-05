@@ -1266,7 +1266,7 @@ module GFS_typedefs
     integer              :: fprcp              !< no prognostic rain and snow (MG)
     integer              :: pdfflag            !< pdf flag for MG macrophysics
     real(kind=kind_phys) :: mg_dcs             !< autoconversion size threshold for cloud ice to snow for MG micrphysics
-    real(kind=kind_phys) :: mg_qcvar
+    real(kind=kind_phys) :: mg_qcvar           !< cloud water relative variance for MG microphysics
     real(kind=kind_phys) :: mg_ts_auto_ice(2)  !< autoconversion time scale for ice in MG microphysics
 #ifdef CCPP
     real(kind=kind_phys) :: mg_rhmini          !< relative humidity threshold parameter for nucleating ice

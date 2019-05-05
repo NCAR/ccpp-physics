@@ -28,7 +28,6 @@ parameterizations in suites.
  - \subpage GFS_ZHAOC
  - \subpage GFDL_cloud
  - \subpage fast_sat_adj
- - \subpage RAD_CLD
  - \subpage CPT_MG3
  - \subpage GSD_THOMPSON
 
@@ -44,6 +43,7 @@ parameterizations in suites.
  - \subpage GFS_GWDC
  - \subpage GFS_CALPRECIPTYPE
  - \subpage STOCHY_PHYS
+ - \subpage RAD_CLD
 
 In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
  - \subpage func_phys
@@ -95,21 +95,21 @@ approach is one way of "leveling the playing field" so that parameterizations de
 by sub-optimal interactions with other GFS parameterizations.
 
 
-Two suites of CP-MP-PBLP parameterizations have been identified as possible replacements for the current GFSv15 suite. \b GSD \b suite is
-derived from the operational Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR) modeling system \cite Benjamin_2016 and was developed largely at NOAA/OAR/ESRL/GSD for mesoscale applications, while the second candidate, i.e., the \b CPT \b suite, has components that were
+Two suites of CP-MP-PBLP parameterizations have been identified as possible replacements for the current GFSv15 suite. \b GSD suite is
+derived from the operational Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR) modeling system \cite Benjamin_2016 and was developed largely at NOAA/OAR/ESRL/GSD for mesoscale applications, while the second candidate, i.e., the \b CPT \b (Climate Process Team) suite, has components that were
 developed at multiple ressearch centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Its individual
 parameterizations have been applied primarily to medium-range and longer prediction scales. For the GFSv15 suite, a very similar suite, but
-with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019, manuscript accepted by WAF).
+with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019 \cite Han_2019, manuscript accepted by WAF).
 
-Table 1. Proposed physics-suite options for 2019 Advance Physics Testing. SA=Scale-aware; AA=aerosol aware
+Table 1.  physics-suite options included in this documentation. 
 \tableofcontents
-|   Phys suites    |   GFSv15              |   GFSv15+            |   CPT               |    GSD RAP/HRRR      |
-|------------------|-----------------------|----------------------|---------------------|----------------------|
-| Deep Cu          |  \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
-| Shallow Cu       |  \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF    |
-| Microphysics     |  \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
-| PBL/TURB         |  \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
-| Land             |  \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+|   Phys suites    | GFSv14            |  GFSv15              | GFSv15 with TKE-EDMF |   EMC CPT           |    GSD RAP/HRRR      |
+|------------------|-------------------|----------------------|----------------------|---------------------|----------------------|
+| Deep Cu          | \ref GFS_SAMFdeep | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
+| Shallow Cu       | \ref GFS_SAMFshal | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF    |
+| Microphysics     | \ref GFS_ZHAOC    | \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
+| PBL/TURB         | \ref GFS_HEDMF    | \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
+| Land             | \ref GFS_NOAH     | \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
 \tableofcontents
 
 

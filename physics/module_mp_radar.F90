@@ -1,7 +1,7 @@
 !>\file module_mp_radar.F90
 !! This set of routines facilitates computing radar reflectivity.
 
-!>\ingroup thompson
+!>\ingroup aathompson
 !>\defgroup thompson_radar Thompson-HRRR MP Radar Module
 !! This module is more library code whereas the individual microphysics
 !! schemes contains specific details needed for the final computation,

@@ -1,3 +1,7 @@
+!>\file aerclm_def.F
+!! This file contains aerosol climatology defition in MG microphysics
+
+!>\ingroup mg2mg3
       module aerclm_def
       use machine , only : kind_phys
       implicit none

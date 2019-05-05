@@ -3,8 +3,6 @@
 !! MG1 forecasts cloud ice and cloud liquid and their number
 !! MG2 forecasts cloud ice, cloud liquid, rain, snow,  and their number
 !! MG3 forecasts cloud ice, cloud liquid, rain, snow, Graupel/Hail  and their number
-!! \cite Gettelman_Morrison_2015.
-!! \cite Gettelman_et_al_2015.
 
 !> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG1, MG2 and MG3) scheme.
 module m_micro
@@ -16,6 +14,8 @@ module m_micro
 
 contains
 
+!>\ingroup mg_driver
+!! This subroutine is the MG initialization.
 !> \section arg_table_m_micro_init  Argument Table
 !! | local_name             | standard_name                                   | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
 !! |------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
@@ -136,13 +136,15 @@ end subroutine m_micro_init
 !!
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
+!> \defgroup mg2mg3 CPT Morrison-Gettelman MP scheme Module
+!> @{
+!!\ingroup mg2mg3
+!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
+!! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
+!! grid-scale condensation and evaporation of cloud condensate.
+
 #if 0
 
-!> \defgroup mg2mg3 FV3GFS Morrison-Gettelman MP scheme Module
-!> @{
-!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
-!! \brief This subroutine computes grid-scale condensation and evaporation of
-!! cloud condensate.
 !> \section arg_table_m_micro_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
 !! |----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
@@ -220,6 +222,8 @@ end subroutine m_micro_init
 !!
 #endif
 !>\ingroup mg_driver
+!>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
+!> @{
       subroutine m_micro_run(   im,       ix,     lm,     flipv, dt_i   &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
@@ -250,8 +254,8 @@ end subroutine m_micro_init
      &                         VIREPS => con_fvirt,                     &
      &                         latvap => con_hvap, latice => con_hfus
 
-!      use funcphys,      only: fpvs                ! saturation vapor pressure for water-ice mixed
-!      use funcphys,      only: fpvsl, fpvsi, fpvs  ! saturation vapor pressure for water,ice & mixed
+!      use funcphys,      only: fpvs                !< saturation vapor pressure for water-ice mixed
+!      use funcphys,      only: fpvsl, fpvsi, fpvs  !< saturation vapor pressure for water,ice & mixed
        use aer_cloud,     only: AerProps, getINsubset,init_aer,         &
      &                          aerosol_activate,AerConversion1
        use cldmacro,      only: macro_cloud,meltfrz_inst,update_cld,    &
@@ -758,11 +762,11 @@ end subroutine m_micro_init
 !need an estimate of convective area
 !=======================================================================================================================
 !=======================================================================================================================
-!===================================Nucleation of cloud droplets and ice crystals ======================================
-! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and nenes (2005) or Abdul Razzak and Ghan (2002)
-! liquid Activation Parameterization
-! Ice activation follows the Barahona & Nenes ice activation scheme, ACP, (2008, 2009).
-! Written by Donifan Barahona and described in Barahona et al. (2013)
+!> -# Nucleation of cloud droplets and ice crystals 
+!! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and nenes (2005) or Abdul Razzak and Ghan (2002)
+!! liquid Activation Parameterization
+!! Ice activation follows the Barahona & Nenes ice activation scheme, ACP, (2008, 2009).
+!! Written by Donifan Barahona and described in Barahona et al. (2013)
 !=======================================================================================================================
 !=======================================================================================================================
 !=======================================================================================================================
@@ -774,6 +778,7 @@ end subroutine m_micro_init
 !      end if
 
 !
+!>  - Call init_Aer()
        do k=1,lm
          do i=1,im
            call init_Aer(AeroProps(I, K))
@@ -788,6 +793,7 @@ end subroutine m_micro_init
          AERMASSMIX(:,:,1:5) = 1.e-6
          AERMASSMIX(:,:,6:15) = 2.e-14
        end if
+!>  - Call AerConversion1()
        call AerConversion1 (AERMASSMIX,  AeroProps)
        deallocate(AERMASSMIX)
 
@@ -859,7 +865,7 @@ end subroutine m_micro_init
 
 
 ! ====================================================================
-!*********** Calculate subgrid scale distribution in vertical velocity****
+!> -# Call gw_prof() to Calculate subgrid scale distribution in vertical velocity
 ! ====================================================================
 
 
@@ -878,7 +884,7 @@ end subroutine m_micro_init
            wparc_cgw(k) = 0.0
          end do
 
-!!!======== Subgrid variability from Convective Sources According to Barahona et al. 2014 in prep
+!>  - Subgrid variability from Convective Sources According to Barahona et al. 2014 in prep
 
          if (kcldtopcvn > 20) then
 
@@ -939,7 +945,7 @@ end subroutine m_micro_init
 
 
 
-!!!:=========Total variance
+!>  - Compute Total variance
 
          do K = 1, LM
            swparc(k) = sqrt(wparc_gw(k)   * wparc_gw(k)                 &
@@ -979,6 +985,7 @@ end subroutine m_micro_init
 !    &,' ccn_param=',ccn_param,' in_param=',in_param                    &
 !    &,' AeroAux%kap=',AeroAux%kap
 
+!> -# Call aerosol_activate() to activate the aerosols.
              call aerosol_activate(tauxr8, plevr8(K), swparc(K),        &
      &            wparc_ls(K), AeroAux, npre8(k), dpre8(k), ccn_diag,   &
      &            ndropr8(k),          npccninr8(K), smaxliq(K),        &
@@ -1073,8 +1080,7 @@ end subroutine m_micro_init
 !===========================End cloud particle nucleation=======================
 !                           -----------------------------
 !
-!===========================Begin Cloud Macrophysics ===========================
-!                           ------------------
+!> -# Begin Cloud Macrophysics
 
 !     do k=1,lm
 !       do i=1,im
@@ -1138,6 +1144,7 @@ end subroutine m_micro_init
 
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE, PK, FRLAND,       &
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE,     FRLAND,       &
+!>  - Call macro_cloud() for cloud macrophysics.
         call macro_cloud (IM, LM, DT_MOIST, alf_fac, PLO, PLE,          &
      &                             CNV_DQLDT,                           &
 !    &                    CNV_MFD, CNV_DQLDT,                           &
@@ -1207,6 +1214,7 @@ end subroutine m_micro_init
 !============ Put cloud fraction back in contact with the PDF (Barahona et al., GMD, 2014)============
 
 !make sure QI , NI stay within T limits
+!>  - Call meltfrz_inst() to calculate instantaneous freezing or condensate.
          call meltfrz_inst(IM, LM, TEMP, QLLS, QLCN, QILS, QICN, NCPL, NCPI)
 
 
@@ -1265,6 +1273,8 @@ end subroutine m_micro_init
 !===========================Two-moment stratiform microphysics ===============================
 !===========This is the implementation of the Morrison and Gettelman (2008) microphysics =====
 !=============================================================================================
+!> -# Two-moment stratiform microphysics: this is the implementation of the Morrison and 
+!! Gettelman (2008) microphysics \cite Morrison_2008
 
       do I=1,IM
         LS_SNR(i)  = 0.0
@@ -1603,7 +1613,8 @@ end subroutine m_micro_init
 !             write(0,*)' plevr8=',plevr8(:)
 !             write(0,*)' ter8=',ter8(:)
 !           endif
-
+!>  - Call micro_mg3_0::micro_mg_tend(), which is the main microphysics routine to
+!! calculate microphysical processes and other utilities.
             call micro_mg_tend3_0 (                                     &
      &         ncolmicro,          lm,                 dt_r8,           &
      &         ter8,                         qvr8,                      &
@@ -1741,6 +1752,7 @@ end subroutine m_micro_init
           end do
         end do
 
+!>  - Call update_cld()
         call update_cld(im, lm,  DT_MOIST,   ALPHT_X, qc_min            &
      &,                 pdfflag, PLO,  Q1,   QLLS,    QLCN              &
      &,                 QILS,    QICN, TEMP, CLLS,    CLCN              &
@@ -1865,6 +1877,7 @@ end subroutine m_micro_init
 !=======================================================================
 
        end subroutine m_micro_run
+!> @}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1874,6 +1887,8 @@ end subroutine m_micro_init
 !>\ingroup mg_driver
 !> This subroutine computes profiles of background state quantities for 
 !! the multiple gravity wave drag parameterization.
+!!\section gw_prof_gen MG gw_prof General Algorithm
+!> @{
        subroutine gw_prof (pcols, pver, ncol, t, pm, pi, rhoi, ni, ti,  &
                            nm, sph)
        use machine , only : kind_phys
@@ -1911,7 +1926,7 @@ end subroutine m_micro_init
        real :: dtdp, n2
 
 !-----------------------------------------------------------------------------
-! Determine the interface densities and Brunt-Vaisala frequencies.
+!> -# Determine the interface densities and Brunt-Vaisala frequencies.
 !-----------------------------------------------------------------------------
 
 ! The top interface values are calculated assuming an isothermal atmosphere
@@ -1944,7 +1959,7 @@ end subroutine m_micro_init
        end do
 
 !-----------------------------------------------------------------------------
-! Determine the midpoint Brunt-Vaisala frequencies.
+!> -# Determine the midpoint Brunt-Vaisala frequencies.
 !-----------------------------------------------------------------------------
        do kx=1,pver
          do ix=1,ncol
@@ -1954,9 +1969,10 @@ end subroutine m_micro_init
 
        return
        end subroutine gw_prof
+!> @}
 
 !>\ingroup mg_driver
-!> This subroutine is to find cloud top based on cloud fraction.
+!! This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none
 

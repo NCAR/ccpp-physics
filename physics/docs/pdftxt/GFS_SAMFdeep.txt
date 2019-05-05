@@ -1,5 +1,5 @@
 /**
-\page GFS_SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme
+\page GFS_SAMFdeep GFS Scale-Aware Simplified Arakawa-Schubert (sa-SAS) Deep Convection Scheme
 \section des_deep Description
  The scale-aware mass-flux (SAMF) deep convection scheme is an
  updated version of the previous Simplified Arakawa-Schubert (SAS) scheme

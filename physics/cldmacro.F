@@ -1,8 +1,9 @@
 !>\file cldmacro.F
-!! This file contains
+!! This file contains MG cloud macrophysics scheme.
 
 !>\ingroup mg2mg3
 !>\defgroup cldmacro_mod Morrison-Gettelman MP cldmacro Module
+!! This module contains MG cloud macrophysics scheme.
       module cldmacro
 !=======================================================================
 !      Anning Cheng 2/18/2016 replaced GEO condensation scheme
@@ -107,31 +108,17 @@
        contains
 
 !>\ingroup cldmacro_mod
-!>This subroutine calculates
-       subroutine macro_cloud(IRUN, LM, DT, alf_fac, PP_dev, PPE_dev
-!    &,                                               RMFDTR_dev
-!    &,                                   FRLAND_dev, RMFDTR_dev
-     &,                       QLWDTR_dev              
-!    &,                       QLWDTR_dev, QRN_CU_dev, CNV_UPDFRC_dev
-!    &,                       U_dev,      V_dev,      TH_dev, Q_dev
-     &,                                               TH_dev, Q_dev
-     &,                       QLW_LS_dev, QLW_AN_dev, QIW_LS_dev
-     &,                       QIW_AN_dev, ANVFRC_dev, CLDFRC_dev
-!    &,                       PRECU_dev,  CUARF_dev,  SNRCU_dev
-     &,                       PHYSPARAMS, SCLMFDFR
-!    &,                       PHYSPARAMS, SCLMFDFR,   QST3_dev
-!    &,                       DZET_dev,   QDDF3_dev,  RHX_dev
-!    &,                       REV_CN_dev, RSU_CN_dev, ACLL_CN_dev
-!    &,                       ACIL_CN_dev,PFL_CN_dev, PFI_CN_dev
-!    &,                       PDFL_dev,   PDFI_dev
-     &,                       ALPHT_dev
-!    &,                       ALPHT_dev,  CFPDF_dev,  DQRL_dev
-!    &,                       VFALLSN_CN_dev
-!    &,                       VFALLRN_CN_dev, CNV_FICE_dev
-     &,                                       CNV_FICE_dev
-     &,                       CNV_NDROP_dev,  CNV_NICE_dev, SCICE_dev
-     &,                       NCPL_dev,    NCPI_dev,   PFRZ_dev
-!    &,                                    QRAIN_CN,   QSNOW_CN
+!! This subroutine is the cloud macrophysics scheme in MG micriphysics.
+       subroutine macro_cloud(IRUN, LM, DT, alf_fac, PP_dev, PPE_dev    &
+     &,                       QLWDTR_dev                                &
+     &,                                               TH_dev, Q_dev     &
+     &,                       QLW_LS_dev, QLW_AN_dev, QIW_LS_dev        &
+     &,                       QIW_AN_dev, ANVFRC_dev, CLDFRC_dev        &
+     &,                       PHYSPARAMS, SCLMFDFR                      &
+     &,                       ALPHT_dev                                 &
+     &,                                       CNV_FICE_dev              &
+     &,                       CNV_NDROP_dev,  CNV_NICE_dev, SCICE_dev   &
+     &,                       NCPL_dev,    NCPI_dev,   PFRZ_dev         &
      &,                             lprnt, ipr, rhc, pdfflag, qc_min )
 !    &,                       KCBL, lprnt, ipr, rhc )
 
@@ -361,7 +348,7 @@
 !    &                 +  QLWDTR_dev(I,K)*DT
 
 
-!  update of number concentration due to convective detrainment
+!> -# update of number concentration due to convective detrainment
 
            if (TEMP < T_ICE_ALL) then
              fQi = 1.0
@@ -432,7 +419,7 @@
 
 !================================
 
-
+!> -# Call pfreezing()
              call Pfreezing (ALPHA , PP_dev(I,K) , TEMP , Q_dev(I,K),
      &                       QLW_LS_dev(I,K),  QLW_AN_dev(I,K),
      &                       QIW_LS_dev(I,K),  QIW_AN_dev(I,K),
@@ -568,6 +555,7 @@
 !     if (lprnt .and. i== ipr) write(0,*)'in macrocld1 clffrc=',
 !    & CLDFRC_dev(I,K) ,' k=',k
 
+!> -# Call fix_up_clouds_2m()
            CALL fix_up_clouds_2M( Q_dev(I,K) , TEMP , QLW_LS_dev(I,K),
      &              QIW_LS_dev(I,K), CLDFRC_dev(I,K), QLW_AN_dev(I,K),
      &              QIW_AN_dev(I,K), ANVFRC_dev(I,K), NCPL_dev(I, K),
@@ -636,7 +624,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !>\ingroup cldmacro_mod
-!> This subroutine calculates
        subroutine pdf_spread (K, LM, PP, ALPHA, ALPHT_DIAG, FRLAND, rhc)
 
        integer, intent(in)  :: k,lm
@@ -674,7 +661,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !>\ingroup cldmacro_mod
-!> This subroutine calculates
        subroutine fix_up_clouds_2M(QV, TE, QLC, QIC, CF, QLA, QIA, AF,
      &                             NL, NI, qc_min)
 
@@ -2070,10 +2056,10 @@
 
 !=============================================================================
 !>\ingroup cldmacro_mod
-!! Subroutine Pfreezing: calculates the probability of finding a supersaturated parcel in the grid cell
-!!SC_ICE is the effective freezing point for ice (Barahona and Nenes(2009) \cite Barahona_2009)
+!! This calculates the probability of finding a supersaturated parcel in the grid cell.
+!!\p SC_ICE is the effective freezing point for ice (Barahona and Nenes(2009) \cite Barahona_2009)
 !!\n Modified 02/19/15. in situ nucleation only occurs in the non_convective part of the grid cell
-      subroutine Pfreezing ( ALPHA , PL , TE , QV , QCl , QAl , QCi ,
+      subroutine Pfreezing ( ALPHA , PL , TE , QV , QCl , QAl , QCi ,   &
      &                       QAi , SC_ICE , CF , AF , PF, pdfflag)
 
       integer, intent(in) :: pdfflag
@@ -2150,7 +2136,7 @@
       subroutine meltfrz_inst(IM, LM, TE, QCL, QAL, QCI, QAI, NL, NI)
 
       integer, intent(in) :: IM, LM
-      real , intent(inout), dimension(:,:) :: TE,QCL,QCI, QAL, QAI,
+      real , intent(inout), dimension(:,:) :: TE,QCL,QCI, QAL, QAI,     &
      &                                        NI, NL
 
       real , dimension(im,lm) :: fQi,dQil, DQmax, QLTOT, QITOT, FQAL,
@@ -2231,7 +2217,6 @@
 
 !======================================
 !>\ingroup cldmacro_mod
-!! This subroutine calculates
       subroutine cloud_ptr_stubs (
      & SMAXL, SMAXI, WSUB, CCN01, CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4,
      & ORG, BCARBON, DUST, SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW,

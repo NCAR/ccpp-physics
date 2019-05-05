@@ -1,10 +1,7 @@
 !>\file module_mp_thompson_hrrr.F90
 !! This file contains the entity of GSD Thompson HRRR MP scheme
 
-!>\ingroup thompson
-!#define DEBUG_AEROSOLS
-
-!+---+-----------------------------------------------------------------+
+!>\ingroup aathompson
 !>\defgroup thompson_hrrr_mp Thompson-HRRR MP module
 !! This subroutine computes the moisture tendencies of water vapor,
 !! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
@@ -53,6 +50,7 @@
 !wrft:model_layer:physics
 !+---+-----------------------------------------------------------------+
 !
+!#define DEBUG_AEROSOLS
 MODULE module_mp_thompson_hrrr
 
       USE machine, only : kind_phys
@@ -188,12 +186,12 @@ MODULE module_mp_thompson_hrrr
       REAL, PARAMETER, PRIVATE:: Cp = 1004.0
       REAL, PARAMETER, PRIVATE:: R_uni = 8.314                           ! J (mol K)-1
 
-      DOUBLE PRECISION, PARAMETER, PRIVATE:: k_b = 1.38065E-23           ! Boltzmann constant [J/K]
-      DOUBLE PRECISION, PARAMETER, PRIVATE:: M_w = 18.01528E-3           ! molecular mass of water [kg/mol]
-      DOUBLE PRECISION, PARAMETER, PRIVATE:: M_a = 28.96E-3              ! molecular mass of air [kg/mol]
-      DOUBLE PRECISION, PARAMETER, PRIVATE:: N_avo = 6.022E23            ! Avogadro number [1/mol]
-      DOUBLE PRECISION, PARAMETER, PRIVATE:: ma_w = M_w / N_avo          ! mass of water molecule [kg]
-      REAL, PARAMETER, PRIVATE:: ar_volume = 4./3.*PI*(2.5e-6)**3        ! assume radius of 0.025 micrometer, 2.5e-6 cm
+      DOUBLE PRECISION, PARAMETER, PRIVATE:: k_b = 1.38065E-23           !< Boltzmann constant [J/K]
+      DOUBLE PRECISION, PARAMETER, PRIVATE:: M_w = 18.01528E-3           !< molecular mass of water [kg/mol]
+      DOUBLE PRECISION, PARAMETER, PRIVATE:: M_a = 28.96E-3              !< molecular mass of air [kg/mol]
+      DOUBLE PRECISION, PARAMETER, PRIVATE:: N_avo = 6.022E23            !< Avogadro number [1/mol]
+      DOUBLE PRECISION, PARAMETER, PRIVATE:: ma_w = M_w / N_avo          !< mass of water molecule [kg]
+      REAL, PARAMETER, PRIVATE:: ar_volume = 4./3.*PI*(2.5e-6)**3        !< assume radius of 0.025 micrometer, 2.5e-6 cm
 
 !..Enthalpy of sublimation, vaporization, and fusion at 0C.
       REAL, PARAMETER, PRIVATE:: lsub = 2.834E6
@@ -243,7 +241,7 @@ MODULE module_mp_thompson_hrrr
       DOUBLE PRECISION, DIMENSION(nbg):: Dg, dtg
       DOUBLE PRECISION, DIMENSION(nbc):: t_Nc
 
-!..Lookup tables for cloud water content (kg/m**3).
+!> Lookup tables for cloud water content (kg/m**3).
       REAL, DIMENSION(ntb_c), PARAMETER, PRIVATE:: &
       r_c = (/1.e-6,2.e-6,3.e-6,4.e-6,5.e-6,6.e-6,7.e-6,8.e-6,9.e-6, &
               1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
@@ -251,7 +249,7 @@ MODULE module_mp_thompson_hrrr
               1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
               1.e-2/)
 
-!..Lookup tables for cloud ice content (kg/m**3).
+!> Lookup tables for cloud ice content (kg/m**3).
       REAL, DIMENSION(ntb_i), PARAMETER, PRIVATE:: &
       r_i = (/1.e-10,2.e-10,3.e-10,4.e-10, &
               5.e-10,6.e-10,7.e-10,8.e-10,9.e-10, &
@@ -263,7 +261,7 @@ MODULE module_mp_thompson_hrrr
               1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
               1.e-3/)
 
-!..Lookup tables for rain content (kg/m**3).
+!> Lookup tables for rain content (kg/m**3).
       REAL, DIMENSION(ntb_r), PARAMETER, PRIVATE:: &
       r_r = (/1.e-6,2.e-6,3.e-6,4.e-6,5.e-6,6.e-6,7.e-6,8.e-6,9.e-6, &
               1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
@@ -271,21 +269,21 @@ MODULE module_mp_thompson_hrrr
               1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
               1.e-2/)
 
-!..Lookup tables for graupel content (kg/m**3).
+!> Lookup tables for graupel content (kg/m**3).
       REAL, DIMENSION(ntb_g), PARAMETER, PRIVATE:: &
       r_g = (/1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
               1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
               1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
               1.e-2/)
 
-!..Lookup tables for snow content (kg/m**3).
+!> Lookup tables for snow content (kg/m**3).
       REAL, DIMENSION(ntb_s), PARAMETER, PRIVATE:: &
       r_s = (/1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
               1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
               1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
               1.e-2/)
 
-!..Lookup tables for rain y-intercept parameter (/m**4).
+!> Lookup tables for rain y-intercept parameter (/m**4).
       REAL, DIMENSION(ntb_r1), PARAMETER, PRIVATE:: &
       N0r_exp = (/1.e6,2.e6,3.e6,4.e6,5.e6,6.e6,7.e6,8.e6,9.e6, &
                   1.e7,2.e7,3.e7,4.e7,5.e7,6.e7,7.e7,8.e7,9.e7, &
@@ -293,14 +291,14 @@ MODULE module_mp_thompson_hrrr
                   1.e9,2.e9,3.e9,4.e9,5.e9,6.e9,7.e9,8.e9,9.e9, &
                   1.e10/)
 
-!..Lookup tables for graupel y-intercept parameter (/m**4).
+!> Lookup tables for graupel y-intercept parameter (/m**4).
       REAL, DIMENSION(ntb_g1), PARAMETER, PRIVATE:: &
       N0g_exp = (/1.e4,2.e4,3.e4,4.e4,5.e4,6.e4,7.e4,8.e4,9.e4, &
                   1.e5,2.e5,3.e5,4.e5,5.e5,6.e5,7.e5,8.e5,9.e5, &
                   1.e6,2.e6,3.e6,4.e6,5.e6,6.e6,7.e6,8.e6,9.e6, &
                   1.e7/)
 
-!..Lookup tables for ice number concentration (/m**3).
+!> Lookup tables for ice number concentration (/m**3).
       REAL, DIMENSION(ntb_i1), PARAMETER, PRIVATE:: &
       Nt_i = (/1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0, &
                1.e1,2.e1,3.e1,4.e1,5.e1,6.e1,7.e1,8.e1,9.e1, &
@@ -399,7 +397,7 @@ MODULE module_mp_thompson_hrrr
 !ctrlL
 
       CONTAINS
-
+!>\ingroup thompson_hrrr_mp
       SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
                           ids, ide, jds, jde, kds, kde,     &
                           ims, ime, jms, jme, kms, kme,     &
@@ -972,6 +970,8 @@ MODULE module_mp_thompson_hrrr
 !+---+-----------------------------------------------------------------+
 !>\ingroup thompson_hrrr_mp
 !!This is a wrapper routine designed to transfer values from 3D to 1D.
+!!\section gen_mpgtdriver GSD Thompson mp_gt_driver General Algorithm
+!> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
@@ -1444,7 +1444,9 @@ MODULE module_mp_thompson_hrrr
 #endif
 
       END SUBROUTINE mp_gt_driver
+!> @}
 
+!>\ingroup thompson_hrrr_mp
       SUBROUTINE thompson_finalize()
 
       IMPLICIT NONE
@@ -4889,6 +4891,7 @@ MODULE module_mp_thompson_hrrr
       END SUBROUTINE GSER
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -4914,6 +4917,7 @@ MODULE module_mp_thompson_hrrr
       END FUNCTION GAMMLN
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       REAL FUNCTION GAMMP(A,X)
 !     --- COMPUTES THE INCOMPLETE GAMMA FUNCTION P(A,X)
 !     --- SEE ABRAMOWITZ AND STEGUN 6.5.1
@@ -4935,6 +4939,7 @@ MODULE module_mp_thompson_hrrr
       END FUNCTION GAMMP
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       REAL FUNCTION WGAMMA(y)
 
       IMPLICIT NONE
@@ -4944,9 +4949,9 @@ MODULE module_mp_thompson_hrrr
 
       END FUNCTION WGAMMA
 !+---+-----------------------------------------------------------------+
-! THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
-! A FUNCTION OF TEMPERATURE AND PRESSURE
-!
+!>\ingroup thompson_hrrr_mp
+!! THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
+!! A FUNCTION OF TEMPERATURE AND PRESSURE
       REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE
@@ -4979,9 +4984,9 @@ MODULE module_mp_thompson_hrrr
 
       END FUNCTION RSLF
 !+---+-----------------------------------------------------------------+
-! THIS FUNCTION CALCULATES THE ICE SATURATION VAPOR MIXING RATIO AS A
-! FUNCTION OF TEMPERATURE AND PRESSURE
-!
+!>\ingroup thompson_hrrr_mp
+!! THIS FUNCTION CALCULATES THE ICE SATURATION VAPOR MIXING RATIO AS A
+!! FUNCTION OF TEMPERATURE AND PRESSURE
       REAL FUNCTION RSIF(P,T)
 
       IMPLICIT NONE
@@ -5011,6 +5016,7 @@ MODULE module_mp_thompson_hrrr
       END FUNCTION RSIF
 
 !+---+-----------------------------------------------------------------+
+!>\ingroup thompson_hrrr_mp
       real function iceDeMott(tempc, qv, qvs, qvsi, rho, nifa)
       implicit none
 
@@ -5081,10 +5087,10 @@ MODULE module_mp_thompson_hrrr
       end FUNCTION iceDeMott
 
 !+---+-----------------------------------------------------------------+
-!..Newer research since Koop et al (2001) suggests that the freezing
-!.. rate should be lower than original paper, so J_rate is reduced
-!.. by two orders of magnitude.
-
+!>\ingroup thompson_hrrr_mp
+!! Newer research since Koop et al (2001) suggests that the freezing
+!! rate should be lower than original paper, so J_rate is reduced
+!! by two orders of magnitude.
       real function iceKoop(temp, qv, qvs, naero, dt)
       implicit none
 
@@ -5113,8 +5119,8 @@ MODULE module_mp_thompson_hrrr
       end FUNCTION iceKoop
 
 !+---+-----------------------------------------------------------------+
-!.. Helper routine for Phillips et al (2008) ice nucleation.  Trude
-
+!>\ingroup thompson_hrrr_mp
+!! Helper routine for Phillips et al (2008) ice nucleation.  Trude
       REAL FUNCTION delta_p (yy, y1, y2, aa, bb)
       IMPLICIT NONE
 

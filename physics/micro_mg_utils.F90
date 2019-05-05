@@ -4,27 +4,27 @@
 
 !>\ingroup mg2mg3
 !>\defgroup micro_mg_utils_mod Morrison-Gettelman MP utils Module
+!! This module contains process rates and utility functions used by the MG 
+!! microphysics.
+!!
+!! Original MG authors: Andrew Gettelman, Hugh Morrison
+!! Contributions from: Peter Caldwell, Xiaohong Liu and Steve Ghan
+!!
+!! Separated from MG 1.5 by B. Eaton.
+!!
+!! Separated module switched to MG 2.0 and further changes by S. Santos.
+!!
+!! Anning Cheng changed for FV3GFS 9/29/2017
+!!              added ac_time as an input
+!!
+!! S. Moorthi - Feb 2018 : code optimization
+!!
+!! This version: https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/mg3_tags/mg3_33_cam5_4_153/
+!!
+!! for questions contact Hugh Morrison, Andrew Gettelman
+!! e-mail: morrison@ucar.edu, andrew@ucar.edu
 module micro_mg_utils
 
-!--------------------------------------------------------------------------
-!
-! This module contains process rates and utility functions used by the MG
-! microphysics.
-!
-! Original MG authors: Andrew Gettelman, Hugh Morrison
-! Contributions from: Peter Caldwell, Xiaohong Liu and Steve Ghan
-!
-! Separated from MG 1.5 by B. Eaton.
-! Separated module switched to MG 2.0 and further changes by S. Santos.
-! Anning Cheng changed for FV3GFS 9/29/2017
-!              added ac_time as an input
-! S. Moorthi - Feb 2018 : code optimization
-!
-! This version: https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/mg3_tags/mg3_33_cam5_4_153/
-!
-! for questions contact Hugh Morrison, Andrew Gettelman
-! e-mail: morrison@ucar.edu, andrew@ucar.edu
-!
 !--------------------------------------------------------------------------
 !
 ! List of required external functions that must be supplied:
@@ -138,25 +138,25 @@ end interface
 ! Public module parameters (mostly for MG itself)
 !=================================================
 
-! Pi to 20 digits; more than enough to reach the limit of double precision.
+!> Pi to 20 digits; more than enough to reach the limit of double precision.
 real(r8), parameter, public :: pi = 3.14159265358979323846_r8
 
-! "One minus small number": number near unity for round-off issues.
+!> "One minus small number": number near unity for round-off issues.
 !real(r8), parameter, public :: omsm   = 1._r8 - 1.e-5_r8
 real(r8), parameter, public :: omsm   = 1._r8 - 1.e-6_r8
 
-! Smallest mixing ratio considered in microphysics.
+!> Smallest mixing ratio considered in microphysics.
 real(r8), parameter, public :: qsmall = 1.e-18_r8
 
-! minimum allowed cloud fraction
+!> minimum allowed cloud fraction
  real(r8), parameter, public :: mincld = 0.000001_r8
 !real(r8), parameter, public :: mincld = 0.0001_r8
 !real(r8), parameter, public :: mincld = 0.0_r8
 
-real(r8), parameter, public :: rhosn = 250._r8  ! bulk density snow
-real(r8), parameter, public :: rhoi  = 500._r8  ! bulk density ice
-real(r8), parameter, public :: rhow  = 1000._r8 ! bulk density liquid
-real(r8), parameter, public :: rhows = 917._r8  ! bulk density water solid
+real(r8), parameter, public :: rhosn = 250._r8  !< bulk density snow
+real(r8), parameter, public :: rhoi  = 500._r8  !< bulk density ice
+real(r8), parameter, public :: rhow  = 1000._r8 !< bulk density liquid
+real(r8), parameter, public :: rhows = 917._r8  !< bulk density water solid
 
 !++ag
 !Hail and Graupel (set in MG3)
@@ -189,9 +189,9 @@ real(r8), parameter, public :: ah = 114.5_r8
 real(r8), parameter, public :: bh = 0.5_r8
 !--ag
 
-! mass of new crystal due to aerosol freezing and growth (kg)
-! Make this consistent with the lower bound, to support UTLS and
-! stratospheric ice, and the smaller ice size limit.
+!> mass of new crystal due to aerosol freezing and growth (kg)
+!! Make this consistent with the lower bound, to support UTLS and
+!! stratospheric ice, and the smaller ice size limit.
 real(r8), parameter, public :: mi0 = 4._r8/3._r8*pi*rhoi*(1.e-6_r8)**3
 
 !++ag
@@ -295,10 +295,9 @@ interface rising_factorial
    module procedure rising_factorial_integer
 end interface rising_factorial
 
+!>\ingroup micro_mg_utils_mod
 interface var_coef
-!>\ingroup micro_mg_utils_mod
    module procedure var_coef_r8
-!>\ingroup micro_mg_utils_mod
    module procedure var_coef_integer
 end interface var_coef
 
@@ -1218,7 +1217,7 @@ end subroutine ice_autoconversion
 !===================================
 ! Anning Cheng 10/5/2017 added GMAO ice autoconversion
 !>\ingroup micro_mg_utils_mod
-!!
+!! GMAO ice autoconversion
 subroutine gmao_ice_autoconversion(t, qiic, niic, lami, n0i,        &
                                    dcs, ac_time, prci, nprci, mgncol)
 

@@ -1,12 +1,9 @@
 /**
-\page suite1_page GFS Physics Suite 
+\page suite1_page GFSv15 Physics Suite with GFDL microphysics scheme 
 
-\section gfs_suite_overview Overview
-In the CCPP-Physics v3.0 code, each parameterization is placed in its own modern Fortran module, which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
-parameterizations in suites. 
+\section gfs1_suite_overview Overview
 
-The GFS physics suite uses the parameterizations in the following order:
+The GFSv15 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -22,8 +19,6 @@ The GFS physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFshal
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
- - \ref fast_sat_adj
- - \ref RAD_CLD
  - \ref STOCHY_PHYS
 
 The parameterizations included in the CCPP-Physics v2 are all column-based, that is, computations are performed only in the vertical.

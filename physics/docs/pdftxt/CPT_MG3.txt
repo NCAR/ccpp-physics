@@ -46,5 +46,8 @@ Some unique attributes of MG3 cloud microphysics include:
  + micro_mg2_0: MG2
  + micro_mg3_0: MG3/2
 
+\section gen_mg3 General Algorithm
+\ref detail_m_micro_run
+
 
 */
