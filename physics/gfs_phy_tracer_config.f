@@ -1,3 +1,5 @@
+#undef MULTI_GASES
+
 !
 !! ! Module: gfs_phy_tracer_config
 !
@@ -143,8 +145,14 @@ c
         if(ntrnc > 0) gfs_phy_tracer%vname(ntrnc) = 'rnc'
         if(ntsnc > 0) gfs_phy_tracer%vname(ntsnc) = 'snc'
         if(ntke  > 0) gfs_phy_tracer%vname(ntke)  = 'tke'   
+#ifdef MULTI_GASES
+        print *,' ++++ nto nto2 ',nto,nto2
+        if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'spfo'
+        if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'spfo2'
+#else
         if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'o'   
         if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'o2'   
+#endif
 
 
         gfs_phy_tracer%fscav(1:gfs_phy_tracer%ntrac_met) = 0.
