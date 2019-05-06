@@ -50,6 +50,10 @@ MODULE module_mp_thompson
 
       USE module_mp_radar
 
+#ifndef SION
+      use mpi
+#endif
+
       IMPLICIT NONE
 
       LOGICAL, PARAMETER, PRIVATE:: iiwarm = .false.
@@ -381,6 +385,15 @@ MODULE module_mp_thompson
       REAL:: t1_qr_ev, t2_qr_ev
       REAL:: t1_qs_sd, t2_qs_sd, t1_qg_sd, t2_qg_sd
       REAL:: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
+
+!..MPI communicator
+      INTEGER:: mpi_communicator
+
+!..If SIONlib isn't used, write Thompson tables with master MPI task
+!.. after computing them in thompson_init
+#ifndef SION
+      LOGICAL:: thompson_table_writer
+#endif
 
 !+---+
 !+---+-----------------------------------------------------------------+
@@ -722,6 +735,8 @@ MODULE module_mp_thompson
 !..Create lookup tables for most costly calculations.
 !+---+-----------------------------------------------------------------+
 
+      ! Assign mpicomm to module variable
+      mpi_communicator = mpicomm
 #ifdef SION
       call cpu_time(stime)
       call readwrite_tables("read", mpicomm, mpirank, mpiroot, ierr)
@@ -732,6 +747,15 @@ MODULE module_mp_thompson
       else
          precomputed_tables = .false.
          if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
+      end if
+#else
+      ! Standard tables are only written by master MPI task;
+      ! (physics init cannot be called by multiple threads,
+      !  hence no need to test for a specific thread number)
+      if (mpirank==mpiroot) then
+         thompson_table_writer = .true.
+      else
+         thompson_table_writer = .false.
       end if
 #endif
 
@@ -3678,7 +3702,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: massg, massr, dvg, dvr, t1, t2, z1, z2, y1, y2
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
       force_read_thompson = .false.
       write_thompson_tables = .false.
@@ -3687,8 +3711,11 @@ MODULE module_mp_thompson
 
       good = 0
         INQUIRE(FILE="qr_acr_qg.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qg.dat stead of computing"
+          write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
           OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234) tcg_racg
@@ -3729,7 +3756,7 @@ MODULE module_mp_thompson
 
       IF (.NOT. good .EQ. 1 ) THEN
 #ifndef SION
-        write_thompson_tables = .true.
+        if (thompson_table_writer) write_thompson_tables = .true.
 #endif
         write(0,*) "ThompMP: computing qr_acr_qg"
         do n2 = 1, nbr
@@ -3852,7 +3879,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: y1, y2, y3, y4
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
 !+---+
 
@@ -3861,6 +3888,9 @@ MODULE module_mp_thompson
 
       good = 0
         INQUIRE(FILE="qr_acr_qs.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
           write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
           OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=1234)
@@ -3909,7 +3939,7 @@ MODULE module_mp_thompson
 
       IF (.NOT. good .EQ. 1 ) THEN
 #ifndef SION
-        write_thompson_tables = .true.
+        if (thompson_table_writer) write_thompson_tables = .true.
 #endif
         write(0,*) "ThompMP: computing qr_acr_qs"
         do n2 = 1, nbr
@@ -4112,15 +4142,17 @@ MODULE module_mp_thompson
       REAL:: T_adjust
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
 !+---+
       force_read_thompson = .false.
       write_thompson_tables = .false.
 
-
       good = 0
         INQUIRE(FILE="freezeH2O.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
           write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
           OPEN(63,file="freezeH2O.dat",form="unformatted",err=1234)
@@ -4163,7 +4195,7 @@ MODULE module_mp_thompson
 
       IF (.NOT. good .EQ. 1 ) THEN
 #ifndef SION
-        write_thompson_tables = .true.
+        if (thompson_table_writer) write_thompson_tables = .true.
 #endif
         write(0,*) "ThompMP: computing freezeH2O"
 
