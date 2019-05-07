@@ -193,7 +193,7 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
 end subroutine fv_sat_adj_init
 
 !\ingroup fast_sat_adj
-!>@brief The subroutine 'fv_sat_adj_finalize' deallocates lookup tables for the saturation mixing ratio.
+!>\brief The subroutine 'fv_sat_adj_finalize' deallocates lookup tables for the saturation mixing ratio.
 !! \section arg_table_fv_sat_adj_finalize Argument Table
 !! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
 !! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -227,14 +227,14 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
 
 end subroutine fv_sat_adj_finalize
 
-!>\defgroup fast_sat_adj GFDL In-core Microphysics
-!! @{
+!>\defgroup fast_sat_adj GFDL In-core Fast Saturation Adjustment
+!> @{
 !! The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
 !! Cloud MP. It is part of the GFDL Cloud MP.
-!>@author Shian-Jiann Lin, Linjiong Zhou
+!>\author Shian-Jiann Lin, Linjiong Zhou
 !!
-!>@brief The subroutine 'fv_sat_adj' performs the fast processes in the GFDL microphysics.
-!>@details This is designed for single-moment 6-class cloud microphysics schemes.
+!>\brief The subroutine 'fv_sat_adj' performs the fast processes in the GFDL microphysics.
+!>\details This is designed for single-moment 6-class cloud microphysics schemes.
 !! It handles the heat release due to in situ phase changes.
 !!
 !! \section arg_table_fv_sat_adj_run Argument Table
@@ -463,7 +463,7 @@ end subroutine fv_sat_adj_run
 !>\ingroup fast_sat_adj
 !> This subroutine includes the entity of the fast saturation adjustment processes.
 !>\section fast_gen GFDL Cloud Fast Physics General Algorithm
-!! @{
+!> @{
 subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te, te0, &
 #ifdef MULTI_GASES
         qvi, &
@@ -1201,11 +1201,11 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     enddo ! end j loop
     
 end subroutine fv_sat_adj_work
-!! @}
+!> @}
 
 ! =======================================================================
 !>\ingroup fast_sat_adj
-!>@brief the function 'wqs1' computes the 
+!>\brief the function 'wqs1' computes the 
 !! saturated specific humidity for table ii.
 ! =======================================================================
 real(kind=kind_dyn) function wqs1 (ta, den)
@@ -1232,7 +1232,7 @@ end function wqs1
 
 ! =======================================================================
 !>\ingroup fast_sat_adj
-!>@brief the function 'wqs1' computes the  saturated specific humidity 
+!>\brief the function 'wqs1' computes the  saturated specific humidity 
 !! for table iii
 ! =======================================================================
 real(kind=kind_dyn) function iqs1 (ta, den)
@@ -1259,7 +1259,7 @@ end function iqs1
 
 ! =======================================================================
 !>\ingroup fast_sat_adj
-!>@brief The function 'wqs2'computes the gradient of saturated specific 
+!>\brief The function 'wqs2'computes the gradient of saturated specific 
 !! humidity for table ii
 ! =======================================================================
 real(kind=kind_dyn) function wqs2 (ta, den, dqdt)
@@ -1291,7 +1291,7 @@ end function wqs2
 
 ! =======================================================================
 !>\ingroup fast_sat_adj
-!>@brief The function wqs2_vect computes the gradient of saturated 
+!>\brief The function wqs2_vect computes the gradient of saturated 
 !! specific humidity for table ii.
 !! It is the same as "wqs2", but written as vector function.
 ! =======================================================================
@@ -1329,7 +1329,7 @@ end subroutine wqs2_vect
 
 ! =======================================================================
 !>\ingroup fast_sat_adj
-!>@brief The function 'iqs2' computes the gradient of saturated specific 
+!>\brief The function 'iqs2' computes the gradient of saturated specific 
 !! humidity for table iii.
 ! =======================================================================
 real(kind=kind_dyn) function iqs2 (ta, den, dqdt)
@@ -1501,4 +1501,4 @@ subroutine qs_table2 (n)
 end subroutine qs_table2
 
 end module fv_sat_adj
-!! @}
+!> @}

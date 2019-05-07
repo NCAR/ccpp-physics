@@ -1,5 +1,5 @@
 /**
-\page allscheme_page Physics Parameterizations and Suites Overview
+\page allscheme_page  Parameterizations and Suites Overview
 
 \section allscheme_overview Physics Parameterizations 
 
@@ -15,7 +15,7 @@ parameterizations in suites.
 
 - For land surface model
  - \subpage GFS_NOAH
-   - \subpage surf_pert
+  - \subpage surf_pert
  - \subpage GSD_RUCLSM
 
 - For cumulus parameterizations:
@@ -41,6 +41,8 @@ parameterizations in suites.
  - \subpage GFS_GWDPS
  - \subpage GFS_RAYLEIGH
  - \subpage GFS_OZPHYS
+  - \ref GFS_ozphys
+  - \ref GFS_ozphys_2015
  - \subpage GFS_H2OPHYS
  - \subpage GFS_GWDC
  - \subpage GFS_CALPRECIPTYPE
@@ -48,10 +50,11 @@ parameterizations in suites.
  - \subpage RAD_CLD
 
 In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
- - \subpage func_phys
- - \subpage phy_sparam
- - \subpgae physcons
- - \subpage radcons
+ - \ref func_phys
+ - \ref phy_sparam
+ - \ref physcons
+ - \ref radcons
+ - \ref fv3gfs_typedefs
 
 The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional

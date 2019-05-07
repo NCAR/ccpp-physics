@@ -5,6 +5,8 @@
 !!  - Basic idea is m=rou*sigma*w, so  sigma=m/rou/w
 !!  
 
+!>\defgroup mod_cs_conv_aw_adj CPT cs_conv_aw_adj Module
+!!
 module cs_conv_aw_adj
 
    implicit none
@@ -48,6 +50,8 @@ module cs_conv_aw_adj
 !! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
+!!\section gen_cs_conv_aw_adj_run CPT cs_conv_aw_adj_run General Algorithm
+!> @{
    subroutine cs_conv_aw_adj_run(im, levs, do_cscnv, do_aw, do_shoc, &
                 ntrac, ncld, ntcw, ntclamt, nncl, con_g, sigmafrac,  &
                 gt0, gq0, save_t, save_q, prsi, cldfrac, subcldfrac, &
@@ -128,5 +132,7 @@ module cs_conv_aw_adj
       return
 
    end subroutine cs_conv_aw_adj_run
+
+!> @}
 
 end module cs_conv_aw_adj

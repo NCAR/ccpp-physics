@@ -136,9 +136,9 @@ end subroutine m_micro_init
 !!
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
+
 !> \defgroup mg2mg3 CPT Morrison-Gettelman MP scheme Module
 !> @{
-!!\ingroup mg2mg3
 !> \defgroup mg_driver Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
 !! grid-scale condensation and evaporation of cloud condensate.

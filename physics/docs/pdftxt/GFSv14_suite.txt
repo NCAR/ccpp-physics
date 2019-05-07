@@ -3,9 +3,8 @@
 
 \section gfsv14_suite_overview Overview
 
-This is the operational physics suite before June of 2019
-
-The GFSv15 physics suite uses the parameterizations in the following order:
+This is the operational physics suite in a spectral dynamical core until June of 2019.
+The GFSv14 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -22,40 +21,14 @@ The GFSv15 physics suite uses the parameterizations in the following order:
  - \ref GFS_CALPRECIPTYPE
  - \ref STOCHY_PHYS
 
-The parameterizations included in the CCPP-Physics v2 are all column-based, that is, computations are performed only in the vertical.
-The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
-specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
- dynamical tendencies for the same variables and various surface fields, both fixed and variable.
-
-The time integration of the GFS physics suite is based on the following:
-- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines;
-- The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer,
-orographic gravity wave drag, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting (Donahue and Caldwell(2018)
-\cite donahue_and_caldwell_2018), a method in which the various parameterizations use the same model state as input but feel the effect of the preceding
-parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
-- The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric \f$H_2O\f$, deep convection, convective gravity wave drag,
-shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
-to the parameterization.
-
-In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
- + @ref func_phys
- + @ref phy_sparam
- + @ref physcons
- + @ref radcons
-
 \section sdf_gfsv14 Suite Definition File 
 
-The GFS v14 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_2017_updated_gfdlmp :
+The GFS v14 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v14 :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v14" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_v14" lib="ccppphys" ver="3">
   <!-- <init></init> -->
-  <group name="fast_physics">
-    <subcycle loop="1">
-      <scheme>fv_sat_adj</scheme>
-    </subcycle>
-  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
@@ -114,7 +87,7 @@ The GFS v14 suite uses the parameterizations in the following order, as defined 
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys_2015</scheme>
+      <scheme>ozphys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
@@ -130,7 +103,8 @@ The GFS v14 suite uses the parameterizations in the following order, as defined 
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
-      <scheme>gfdl_cloud_microphys</scheme>
+      <scheme>zhaocarr_gscond</scheme>
+      <scheme>zhaocarr_precpd</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
@@ -145,8 +119,52 @@ The GFS v14 suite uses the parameterizations in the following order, as defined 
 </suite>
 \endcode
 
-\section suite1_nml_opt_des Namelist Option 
-- \ref gfs_physics_nml
-- \ref gfdl_cloud_microphysics_nml
+\section gfs14_nml_opt_des Namelist Option 
+\code
+  fhzero       = 6
+  h2o_phys     = .false.
+  oz_phys      = .true.
+  oz_phys_2015 = .false.
+  ldiag3d      = .false.
+  fhcyc        = 24
+  use_ufo      = .true.
+  pre_rad      = .false.
+  ncld         = 5
+  imp_physics  = 11
+  pdfcld       = .false.
+  fhswr        = 3600.
+  fhlwr        = 3600.
+  ialb         = 1
+  iems         = 1
+  iaer         = 111
+  ico2         = 2
+  isubc_sw     = 2
+  isubc_lw     = 2
+  isol         = 2
+  lwhtr        = .true.
+  swhtr        = .true.
+  cnvgwd       = .true.
+  shal_cnv     = .true.
+  cal_pre      = .false.
+  redrag       = .true.
+  dspheat      = .true.
+  hybedmf      = .true.
+  random_clds  = .false.
+  trans_trac   = .true.
+  cnvcld       = .true.
+  imfshalcnv   = 2
+  imfdeepcnv   = 2
+  cdmbgwd      = 3.5,0.25
+  prslrd0      = 0.
+  ivegsrc      = 1
+  isot         = 1
+  debug        = .false.
+  nstf_name    = 2,0,0,0,0
+  nst_anl      = .true.
+  psautco      = 0.0008,0.0005
+  prautco      = 0.00015,0.00015
+\endcode
+
+check \ref gfs_physics_nml for description
 
 */

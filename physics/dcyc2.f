@@ -3,6 +3,20 @@
 !! radiative fluxes and heating rates from a coarse radiation
 !! calculation time interval into model's more frequent time steps.
 
+!>\defgroup dcyc2t3_mod RRTMG dcyc2t3 Module
+!> @{
+!! This module contains the CCPP-compliant dcyc2t3 codes that fits
+!! radiative fluxes and heating rates from a coarse radiation
+!! calculation time interval into model's more frequent time steps.
+!!
+!! Solar heating rates and fluxes are scaled by the ratio of cosine
+!! of zenith angle at the current time to the mean value used in
+!! radiation calculation. Surface downward LW flux is scaled by the
+!! ratio of current surface air temperature to the corresponding
+!! temperature saved during LW radiation calculation. Upward LW flux
+!! at the surface is computed by current ground surface temperature.
+!! Surface emissivity effect will be taken in other part of the model.
+!!
       module dcyc2t3
 
       implicit none
@@ -143,20 +157,6 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 
-!>\defgroup dcyc2t3_mod RRTMG dcyc2t3 Module
-!> @{
-!! This module contains the CCPP-compliant dcyc2t3 codes that fits
-!! radiative fluxes and heating rates from a coarse radiation
-!! calculation time interval into model's more frequent time steps.
-!!
-!! Solar heating rates and fluxes are scaled by the ratio of cosine
-!! of zenith angle at the current time to the mean value used in
-!! radiation calculation. Surface downward LW flux is scaled by the
-!! ratio of current surface air temperature to the corresponding
-!! temperature saved during LW radiation calculation. Upward LW flux
-!! at the surface is computed by current ground surface temperature.
-!! Surface emissivity effect will be taken in other part of the model.
-!!
 !> \section arg_table_dcyc2t3_run Argument Table
 !! | local_name     | standard_name                                                                                  | long_name                                                                                            | units   | rank | type      | kind      | intent | optional |
 !! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -337,10 +337,10 @@
       return
 !...................................
       end subroutine dcyc2t3_run
-!! @}
-!> @}
 !-----------------------------------
       end module dcyc2t3
+!! @}
+!> @}
 
 
 

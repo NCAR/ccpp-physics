@@ -108,7 +108,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!> - Compute entrainment rate (eqn 30 of Han et al. (2019) \cite \Han_2019)
+!> - Compute entrainment rate (eqn 30 of Han et al. (2019) \cite Han_2019)
 !
       do k = 1, kmpbl
         do i=1,im

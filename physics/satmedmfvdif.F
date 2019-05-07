@@ -551,7 +551,7 @@
         endif
       enddo
 !
-!>  - Compute \frac{\Delta t}{\Delta z}\f$ , \f$u_*\f$
+!>  - Compute \f$\frac{\Delta t}{\Delta z}\f$ , \f$u_*\f$
       do i=1,im
          dtdz1(i)  = dt2 / (zi(i,2)-zi(i,1))
       enddo

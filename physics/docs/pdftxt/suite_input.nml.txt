@@ -1,9 +1,7 @@
 /**
 \page GFSsuite_nml Namelist Option Description
 
-\ref arg_table_GFS_control_type
-
-\section gfs_physics_nml GFS Physics NML
+\section gfs_physics_nml GFS Physics Parameters
 The namelist variable description is provided in host-model side :GFS_typedefs.F90
    \c NML_option   |                Definition in Host Model    |       Description                                |
 -------------------|--------------------------------------------|--------------------------------------------------|
@@ -49,7 +47,7 @@ The namelist variable description is provided in host-model side :GFS_typedefs.F
      nst_anl       | gfs_typedefs::gfs_control_type::nst_anl    | flag for NSSTM analysis in gcycle/sfcsub |
      satmedmf      | gfs_typedefs::gfs_control_type::satmedmf   |  logical flag for calling TKE EDMF PBL scheme     |
 
-\section cpt_physics_nml CPT Physics NML
+\section cpt_physics_nml EMC CPT Physics Parameters
    \c NML_option   |                Definition in Host Model        |   Description                                     |
 -------------------|------------------------------------------------|---------------------------------------------------|
    crtrh           | gfs_typedefs::gfs_control_type::crtrh          | critical relative humidity at the surface, PBL top and at the top of the atmosphere |
@@ -78,17 +76,41 @@ The namelist variable description is provided in host-model side :GFS_typedefs.F
    iau_delthrs     | gfs_typedefs::gfs_control_type::iau_delthrs    | incremental analysis update (IAU) time interval in hours   |
    iaufhrs         | gfs_typedefs::gfs_control_type::iaufhrs        | forecast hours associated with increment files   |
 
-\section gsd_hrrr_nml GSD RAP/HRRR Physics NML
+\section gsd_hrrr_nml GSD Physics Parameters
+   \c NML_option           |                Definition in Host Model                |    Description                                |
+---------------------------|--------------------------------------------------------|-----------------------------------------------|
+   ltaerosol               | gfs_typedefs::gfs_control_type::ltaerosol              | logical flag for using aerosol climotology    |
+   lradar                  | gfs_typedefs::gfs_control_type::lradar                 | logical flag for computing radar reflectivity |
+   do_mynnedmf             | gfs_typedefs::gfs_control_type::do_mynnedmf            | flag to activate MYNN-EDMF scheme          |
+   do_mynnsfclay           | gfs_typedefs::gfs_control_type::do_mynnsfclay          | flag to activate MYNN-SFCLAY scheme        |
+   lmfshal                 | gfs_typedefs::gfs_control_type::lmfshal                | flag for mass-flux shallow convection scheme in the cloud fraction calculation (lmf=shal_cnv .and. imfshalcnv > 0) |
+   bl_mynn_mixlength       | gfs_typedefs::gfs_control_type::bl_mynn_mixlength      | flag for different version of mixing length formulation \n 0: Original form from Nakanishi and Niino (2009) \cite NAKANISHI_2009 . NO scale-awareness is applied to the master mixing length, regardless of "scaleware" setting \n 1: HRRR operational form 201609-201807.Designed to work without the mass-flux scheme. Uses BouLac mixing length in free atmosphere.  \n 2: HRRR operational form 201807-present. Designed to be compatible with mass-flux scheme activated (default) |
+   bl_mynn_edmf            | gfs_typedefs::gfs_control_type::bl_mynn_edmf           | flag to activate the mass-flux scheme  \n 0: Deactivate mass-flux scheme \n 1: Activate dynamic multiplume mass-flux scheme (default)   |
+   bl_mynn_edmf_mom        | gfs_typedefs::gfs_control_type::bl_mynn_edmf_mom       | flag to activate the transport of momentum \n 0: Deactivate momentum transport in mass-flux scheme (default) \n 1: Activate momentum transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1 |
+   bl_mynn_edmf_tke        | gfs_typedefs::gfs_control_type::bl_mynn_edmf_tke       | flag to activate the transport of TKE \n 0: Deactivate TKE transport in mass-flux scheme (default) \n 1: Activate TKE transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1   |
+   bl_mynn_edmf_tkeadvect  | gfs_typedefs::gfs_control_type::bl_mynn_edmf_tkeadvect | activate computation of TKE advection (not yet in use for FV3) \n False: Deactivate TKE advection (default) \n True: Activate TKE advection |
+   bl_mynn_edmf_tkebudget  | gfs_typedefs::gfs_control_type::bl_mynn_edmf_tkebudget | flag to activate TKE budget                  |
+   bl_mynn_edmf_cloudpdf   | gfs_typedefs::gfs_control_type::bl_mynn_edmf_cloudpdf  | flag to determine which cloud PDF to use \n 0: use Sommeria-Deardorff subgrid cloud PDF \n 1: use Kuwano-Yoshida subgrid cloud PDF \n 2: use modified Chaboureau-Bechtold subgrid cloud PDF (default)   |
+   bl_mynn_edmf_cloudmix   | gfs_typedefs::gfs_control_type::bl_mynn_edmf_cloudmix  | flag to activate mixing of cloud species \n: Deactivate the mixing of any water species mixing ratios \n 1: activate the mixing of all water species mixing ratios (default)  |
+   bl_mynn_mixqt           | gfs_typedefs::gfs_control_type::bl_mynn_mixqt          | flag to mix total water or individual species \n 0: Mix individual water species separately (default) \n 1: DO NOT USE |
+   icloud_bl               | gfs_typedefs::gfs_control_type::icloud_bl              | flag to coupling sgs clouds to radiation \n 0: Deactivate coupling subgrid clouds to radiation \n 1: Activate subgrid cloud coupling to radiation (highly suggested) |
+   lsoil_lsm               | gfs_typedefs::gfs_control_type::lsoil_lsm              | number of soil layers internal to land surface model |
+   lsm                     | gfs_typedefs::gfs_control_type::lsm                    | flag for land surface model                     | 
+  
+\section stochy_nml  Stochastic Physics Parameters
    \c NML_option   |                Definition in Host Model             |    Description                                |
 -------------------|-----------------------------------------------------|-----------------------------------------------|
-   ltaerosol       | gfs_typedefs::gfs_control_type::ltaerosol           | logical flag for using aerosol climotology    |
-   lradar          | gfs_typedefs::gfs_control_type::lradar              | logical flag for computing radar reflectivity |
-   do_mynnedmf     | gfs_typedefs::gfs_control_type::do_mynnedmf         | flag for activating MYNN-EDMF scheme          |
-   do_mynnsfclay   | gfs_typedefs::gfs_control_type::do_mynnsfclay       | flag for activating MYNN-SFCLAY scheme        |
-   lmfshal         | gfs_typedefs::gfs_control_type::lmfshal             | flag for mass-flux shallow convection scheme in the cloud fraction calculation (lmf=shal_cnv .and. imfshalcnv > 0) |
-   bl_mynn_mixlength | gfs_typedefs::gfs_control_type::bl_mynn_mixlength   | flag for different version of mixing length formulation \n 0: Original form from Nakanishi and Niino (2009) \cite NAKANISHI_2009 . NO scale-awareness is applied to the master mixing length, regardless of "scaleware" setting \n 1: HRRR operational form 201609-201807.Designed to work without the mass-flux scheme. Uses BouLac mixing length in free atmosphere.  \n 2: HRRR operational form 201807-present. Designed to be compatible with mass-flux scheme activated (default) |
+ do_sppt           | gfs_typedefs::gfs_control_type::do_sppt             | flag for stochastic SPPT option               |
+ do_shum           | gfs_typedefs::gfs_control_type::do_shum             | flag for stochastic SHUM option               |
+ do_skeb           | gfs_typedefs::gfs_control_type::do_skeb             | flag for stochastic SKEB option               |
 
-\section gfdl_cloud_microphysics_nml GFDL Cloud MP NML
+\section zhao_carr_nml   Zhao-Carr MP Parameters
+   \c NML_option   |                Definition in Host Model             |    Description                                |
+-------------------|-----------------------------------------------------|-----------------------------------------------|
+  psautco          | gfs_typedefs::gfs_control_type::psautco             | auto conversion coeff from ice to snow        |
+  prautco          | gfs_typedefs::gfs_control_type::prautco             | auto conversion coeff from cloud to rain      |
+
+\section gfdl_cloud_microphysics_nml GFDL Cloud MP Parameters
 The namelist variable description is provided in module_gfdl_cloud_microphys.F90
    \c NML_option         |                     Definition in CCPP     |      Description                                                               |
 -------------------------|--------------------------------------------|--------------------------------------------------------------------------------|

@@ -71,8 +71,7 @@
 
 !> SW optical property for liquid clouds
 !!\n =0:input cld opt depth, ignoring iswcice setting
-!!\n =1:cloud optical property scheme based on Hu and Stamnes(1993) \cite
-!!      hu_and_stamnes_1993 method
+!!\n =1:cloud optical property scheme based on Hu and Stamnes(1993) \cite hu_and_stamnes_1993 method
 !!\n =2:cloud optical property scheme based on Hu and Stamnes(1993) -updated
       integer,save      :: iswcliq = 1
 

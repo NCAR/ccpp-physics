@@ -16,7 +16,7 @@ prediction of advection fog (Nakanishi and Niino 2006 \cite Nakanishi_2006), and
 barrier jets (Olson and Brown 2009 \cite olson_and_brown_2009). The MYNN scheme can be configured to function at either
 level 2.5 or 3.0 closure and includes a partial-condensation scheme (also known as a cloud PDF or a statistical-cloud
 scheme) to represent the effects of subgrid-scale(SGS) clouds on the buoyancy flux (Nakanishi and Niino 2004, 2006, and 2009
-\cite \cite Nakanishi_2004 \cite Nakanishi_2006 \cite NAKANISHI_2009). The closure constants for the original MYNN scheme 
+\cite Nakanishi_2004 \cite Nakanishi_2006 \cite NAKANISHI_2009). The closure constants for the original MYNN scheme 
 were tuned to a database of LES as opposed to observational data.
 
 The MYNN-EDMF scheme has been extensively developed to improve upon the forecast skill of the original MYNN,

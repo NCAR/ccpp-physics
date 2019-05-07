@@ -2,7 +2,7 @@
 \page GSD_CU_GF GSD Grell-Freitas Scale and Aerosol Aware Convection Scheme
 \section gfcu_descrip  Description
 
-\section intra_rough Intraphysics Communication
+\section intra_rough_gf Intraphysics Communication
 \ref arg_table_cu_gf_driver_run
 
 \section gen_gfgsd  General Algorithm

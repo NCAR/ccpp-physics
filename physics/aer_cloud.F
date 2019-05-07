@@ -1201,7 +1201,7 @@
 
 
 !!!!!!!!!!!!!!======================================
-!>\ingroup aer_cloud.F
+!>\ingroup aer_cloud_mod
 !! This subroutine finds the activated droplet number following Abdul-Razzak and Ghan (2000)
 !! \cite Abdul_Razzak_2000 .
 !!\author  Donifan Barahona
@@ -1285,8 +1285,7 @@
 
 
 !=====================================================================================================
-!>\ingroup aer_cloud.F
-!! This subroutine calculates
+!>\ingroup aer_cloud_mod
        subroutine ccn_at_super (super,ccn_at_s,nmodes,                  &
      &                          sig_par,sg_par,tp_par)
 
@@ -1393,18 +1392,18 @@
 !    -------------------------------
 !     DESCRIPTION
 !
-!>\ingroup aer_cloud.F
+!>\ingroup aer_cloud_mod
 !! This subroutine calculates the ccn activation fraction according
 !! to the nenes and seinfeld (2003) parameterization, with
-!     modification for non-contunuum effects as proposed by fountoukis
-!     and nenes (2005). this routine calculates for a pdf of
-!     updraft velocities.
-!
-! *** written by athanasios nenes
-!
-!      Code Developer
-!      Donifan Barahona
-!      donifanb@umbc.edu
+!!     modification for non-contunuum effects as proposed by fountoukis
+!!     and nenes (2005). this routine calculates for a pdf of
+!!     updraft velocities.
+!!
+!!\author Athanasios Nenes
+!!
+!!      Code Developer
+!!      Donifan Barahona
+!!      donifanb@umbc.edu
        subroutine pdfactiv (wparc,sigw, nact,smax,nmodes,
      &  alfa_par,bet2_par,akoh_par,sg_par,tp_par,
      &  temp_par, pres_par,aka_par, dv_par, psat_par,

@@ -59,7 +59,7 @@ contains
 !===================
 
 !> \defgroup cu_gf_group GSD Scale-Aware Grell-Freitas Convection Scheme Module
-!>\ingroup cu_gf_group
+!>@{
 !>\defgroup cu_gf_driver GSD Grell-Freitas Convection Scheme Driver
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
@@ -867,5 +867,6 @@ contains
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !
    end subroutine cu_gf_driver_run
+!> @}
 !> @}
 end module cu_gf_driver

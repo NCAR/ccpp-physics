@@ -5,6 +5,7 @@
 
 This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF replace of \ref GFS_HEDMF .
 
+ - \ref fast_sat_adj
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -22,26 +23,6 @@ This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF r
  - \ref GFS_CALPRECIPTYPE
  - \ref STOCHY_PHYS
 
-The parameterizations included in the CCPP-Physics v2 are all column-based, that is, computations are performed only in the vertical.
-The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
-specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
- dynamical tendencies for the same variables and various surface fields, both fixed and variable.
-
-The time integration of the GFS physics suite is based on the following:
-- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines;
-- The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer,
-orographic gravity wave drag, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting (Donahue and Caldwell(2018)
-\cite donahue_and_caldwell_2018), a method in which the various parameterizations use the same model state as input but feel the effect of the preceding
-parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
-- The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric \f$H_2O\f$, deep convection, convective gravity wave drag,
-shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
-to the parameterization.
-
-In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
- + @ref func_phys
- + @ref phy_sparam
- + @ref physcons
- + @ref radcons
 
 \section sdf_gfsv15p Suite Definition File 
 
@@ -49,7 +30,7 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15plus" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_v15plus" lib="ccppphys" ver="3">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -145,8 +126,102 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
 </suite>
 \endcode
 
-\section suite1_nml_opt_des Namelist Option 
-- \ref gfs_physics_nml
-- \ref gfdl_cloud_microphysics_nml
+\section gfs15p_nml_opt_des Namelist Option 
+\code
+  fhzero       = 6
+  h2o_phys     = .true.
+  oz_phys      = .false.
+  oz_phys_2015 = .true.
+  ldiag3d      = .false.
+  fhcyc        = 24
+  use_ufo      = .true.
+  pre_rad      = .false.
+  ncld         = 5
+  imp_physics  = 11
+  pdfcld       = .false.
+  fhswr        = 3600.
+  fhlwr        = 3600.
+  ialb         = 1
+  iems         = 1
+  iaer         = 111
+  ico2         = 2
+  isubc_sw     = 2
+  isubc_lw     = 2
+  isol         = 2
+  lwhtr        = .true.
+  swhtr        = .true.
+  cnvgwd       = .true.
+  shal_cnv     = .true.
+  cal_pre      = .false.
+  redrag       = .true.
+  dspheat      = .true.
+  hybedmf      = .false.
+  satmedmf      = .true.
+  random_clds  = .false.
+  trans_trac   = .true.
+  cnvcld       = .true.
+  imfshalcnv   = 2
+  imfdeepcnv   = 2
+  cdmbgwd      = 3.5,0.25
+  prslrd0      = 0.
+  ivegsrc      = 1
+  isot         = 1
+  debug        = .false.
+  nstf_name    = 2,0,0,0,0
+  nst_anl      = .true.
+  psautco      = 0.0008,0.0005
+  prautco      = 0.00015,0.00015
+\endcode
+check \ref gfs_physics_nml for description
+
+\code
+  sedi_transport    = .true.
+  do_sedi_heat      = .false.
+  rad_snow          = .true.
+  rad_graupel       = .true.
+  rad_rain          = .true.
+  const_vi          = .F.
+  const_vs          = .F.
+  const_vg          = .F.
+  const_vr          = .F.
+  vi_max            = 1.
+  vs_max            = 2.
+  vg_max            = 12.
+  vr_max            = 12.
+  qi_lim            = 1.
+  prog_ccn          = .false.
+  do_qa             = .true.
+  fast_sat_adj      = .true.
+  tau_l2v           = 225.
+  tau_v2l           = 150.
+  tau_g2v           = 900.
+  rthresh           = 10.e-6 
+  dw_land           = 0.16
+  dw_ocean          = 0.10
+  ql_gen            = 1.0e-3
+  ql_mlt            = 1.0e-3
+  qi0_crt           = 8.0E-5
+  qs0_crt           = 1.0e-3
+  tau_i2s           = 1000.
+  c_psaci           = 0.05
+  c_pgacs           = 0.01
+  rh_inc            = 0.30
+  rh_inr            = 0.30
+  rh_ins            = 0.30
+  ccn_l             = 300.
+  ccn_o             = 100.
+  c_paut            = 0.5
+  c_cracw           = 0.8
+  use_ppm           = .false.
+  use_ccn           = .true.
+  mono_prof         = .true.
+  z_slope_liq       = .true.
+  z_slope_ice       = .true.
+  de_ice            = .false.
+  fix_negative      = .true.
+  icloud_f          = 1
+  mp_time           = 150.
+\endcode
+check \ref gfdl_cloud_microphysics_nml for description
 
 */

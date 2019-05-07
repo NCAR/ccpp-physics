@@ -1,12 +1,12 @@
 !>\file sfcsub.F
-!! This file contains
+!! This file contains gribcode for each parameter.
 
 
-!>\defgroup mod_sfcsub GFS sfcsub Module
+!>\defgroup mod_sfcsub_mod GFS sfcsub Module
 !!\ingroup Noah_LSM
 !> @{
 !>\ingroup mod_sfcsub
-!! This module contains grib code for each paramter-used in subroutines sfccycle()
+!! This module contains grib code for each parameter-used in subroutines sfccycle()
 !! and setrmsk().
       module sfccyc_module
       implicit none

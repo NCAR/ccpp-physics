@@ -60,7 +60,6 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
-!! @{
 !! - Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
 !!  in Zeng et al. (1998) \cite zeng_et_al_1998). 
 !! - Calculate Zeng's momentum roughness length formulation over land and sea ice.
@@ -438,6 +437,5 @@
 
       return
       end subroutine sfc_ex_coef_run
-!! @}
 !> @}
       end module sfc_ex_coef

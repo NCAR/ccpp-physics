@@ -110,17 +110,14 @@
 !!\param[out] smcmax      real, porosity (sat val of soil mois)
 !>\section general_sflx GFS Noah LSM General Algorithm
 !! @{
-      subroutine gfssflx                                                &
-!  ---  inputs:
+      subroutine gfssflx                                                &!  ---  inputs:
      &     ( nsoil, couple, icein, ffrozp, dt, zlvl, sldpth,            &
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            &
      &       bexpp, xlaip,                                              & !  sfc-perts, mgehne
-     &       lheatstrg,                                                 &
-!  ---  input/outputs:
-     &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &
-!  ---  outputs:
+     &       lheatstrg,                                                 &!  ---  input/outputs:
+     &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &!  ---  outputs:
      &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              &
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
