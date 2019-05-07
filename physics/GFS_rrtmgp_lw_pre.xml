@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<scheme module="rrtmgp_lw_pre">
-  <subroutine name="rrtmgp_lw_pre_finalize" />
-  <subroutine name="rrtmgp_lw_pre_init" />
-  <subroutine name="rrtmgp_lw_pre_run">
+<scheme module="GFS_rrtmgp_lw_pre">
+  <subroutine name="GFS_rrtmgp_lw_pre_finalize" />
+  <subroutine name="GFS_rrtmgp_lw_pre_init" />
+  <subroutine name="GFS_rrtmgp_lw_pre_run">
     <variable name="GFS_control_type_instance">
       <standard_name>GFS_control_type_instance</standard_name>
       <long_name>Fortran DDT containing FV3-GFS model control parameters</long_name>
@@ -12,7 +12,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="GFS_grid_type_instance">
       <standard_name>GFS_grid_type_instance</standard_name>
@@ -23,7 +23,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="GFS_sfcprop_type_instance">
       <standard_name>GFS_sfcprop_type_instance</standard_name>
@@ -34,7 +34,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="GFS_radtend_type_instance">
       <standard_name>GFS_radtend_type_instance</standard_name>
@@ -45,7 +45,7 @@
       <rank />
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="horizontal_loop_extent">
       <standard_name>horizontal_loop_extent</standard_name>
@@ -56,7 +56,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="surface_ground_temperature_for_radiation">
       <standard_name>surface_ground_temperature_for_radiation</standard_name>
@@ -67,7 +67,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="surface_air_temperature_for_radiation">
       <standard_name>surface_air_temperature_for_radiation</standard_name>
@@ -78,7 +78,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="ccpp_error_message">
       <standard_name>ccpp_error_message</standard_name>
@@ -89,7 +89,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
     <variable name="ccpp_error_flag">
       <standard_name>ccpp_error_flag</standard_name>
@@ -100,7 +100,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_lw_pre SCHEME_rrtmgp_lw_pre SUBROUTINE_rrtmgp_lw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_lw_pre SCHEME_GFS_rrtmgp_lw_pre SUBROUTINE_GFS_rrtmgp_lw_pre_run</container>
     </variable>
   </subroutine>
 </scheme>

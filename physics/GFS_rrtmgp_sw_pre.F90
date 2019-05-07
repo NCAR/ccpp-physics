@@ -1,17 +1,17 @@
-!>\file rrtmgp_sw_pre.f90
+!>\file GFS_rrtmgp_sw_pre.f90
 !! This file contains a subroutine to module_radiation_surface::setalb() to
 !! setup surface albedo for SW radiation.
-      module rrtmgp_sw_pre
+      module GFS_rrtmgp_sw_pre
       contains
 
-!>\defgroup rrtmgp_sw_pre GFS RRTMGP scheme Pre
+!>\defgroup GFS_rrtmgp_sw_pre GFS RRTMGP scheme Pre
 !! @{
-!> \section arg_table_rrtmgp_sw_pre_init Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_pre_init Argument Table
 !!
-      subroutine rrtmgp_sw_pre_init ()
-      end subroutine rrtmgp_sw_pre_init
+      subroutine GFS_rrtmgp_sw_pre_init ()
+      end subroutine GFS_rrtmgp_sw_pre_init
 
-!> \section arg_table_rrtmgp_sw_pre_run Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_pre_run Argument Table
 !! | local_name     | standard_name                             | long_name                                                          | units    | rank |  type            |   kind    | intent | optional |
 !! |----------------|-------------------------------------------|--------------------------------------------------------------------|----------|------|------------------|-----------|--------|----------|
 !! | Model          | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters            | DDT      |    0 | GFS_control_type |           | in     | F        |
@@ -31,7 +31,7 @@
 !! | errmsg         | ccpp_error_message                        | error message for error handling in CCPP                           | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                           | error flag for error handling in CCPP                              | flag     |    0 | integer          |           | out    | F        |
 !!
-      subroutine rrtmgp_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
+      subroutine GFS_rrtmgp_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
         nday, idxday, tsfg, tsfa, sfcalb1, sfcalb2, sfcalb3, sfcalb4, &
         alb1d, errmsg, errflg)
 
@@ -107,12 +107,12 @@
         sfcalb4(i) = sfcalb(i,4)
       enddo
 
-      end subroutine rrtmgp_sw_pre_run
+      end subroutine GFS_rrtmgp_sw_pre_run
 
-!> \section arg_table_rrtmgp_sw_pre_finalize Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_pre_finalize Argument Table
 !!
-      subroutine rrtmgp_sw_pre_finalize ()
-      end subroutine rrtmgp_sw_pre_finalize
+      subroutine GFS_rrtmgp_sw_pre_finalize ()
+      end subroutine GFS_rrtmgp_sw_pre_finalize
 
 !! @}
-      end module rrtmgp_sw_pre
+      end module GFS_rrtmgp_sw_pre

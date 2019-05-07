@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<scheme module="rrtmgp_sw_pre">
-  <subroutine name="rrtmgp_sw_pre_init" />
-  <subroutine name="rrtmgp_sw_pre_finalize" />
-  <subroutine name="rrtmgp_sw_pre_run">
+<scheme module="GFS_rrtmgp_sw_pre">
+  <subroutine name="GFS_rrtmgp_sw_pre_init" />
+  <subroutine name="GFS_rrtmgp_sw_pre_finalize" />
+  <subroutine name="GFS_rrtmgp_sw_pre_run">
     <variable name="GFS_control_type_instance">
       <standard_name>GFS_control_type_instance</standard_name>
       <long_name>Fortran DDT containing FV3-GFS model control parameters</long_name>
@@ -12,7 +12,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="GFS_grid_type_instance">
       <standard_name>GFS_grid_type_instance</standard_name>
@@ -23,7 +23,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="GFS_sfcprop_type_instance">
       <standard_name>GFS_sfcprop_type_instance</standard_name>
@@ -34,7 +34,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="GFS_radtend_type_instance">
       <standard_name>GFS_radtend_type_instance</standard_name>
@@ -45,7 +45,7 @@
       <rank />
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="horizontal_loop_extent">
       <standard_name>horizontal_loop_extent</standard_name>
@@ -56,7 +56,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="daytime_points_dimension">
       <standard_name>daytime_points_dimension</standard_name>
@@ -67,7 +67,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="daytime_points">
       <standard_name>daytime_points</standard_name>
@@ -78,7 +78,7 @@
       <rank>(:)</rank>
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_ground_temperature_for_radiation">
       <standard_name>surface_ground_temperature_for_radiation</standard_name>
@@ -89,7 +89,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_air_temperature_for_radiation">
       <standard_name>surface_air_temperature_for_radiation</standard_name>
@@ -100,7 +100,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_albedo_due_to_near_IR_direct">
       <standard_name>surface_albedo_due_to_near_IR_direct</standard_name>
@@ -111,7 +111,7 @@
       <rank>(:)</rank>
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_albedo_due_to_near_IR_diffused">
       <standard_name>surface_albedo_due_to_near_IR_diffused</standard_name>
@@ -122,7 +122,7 @@
       <rank>(:)</rank>
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_albedo_due_to_UV_and_VIS_direct">
       <standard_name>surface_albedo_due_to_UV_and_VIS_direct</standard_name>
@@ -133,7 +133,7 @@
       <rank>(:)</rank>
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_albedo_due_to_UV_and_VIS_diffused">
       <standard_name>surface_albedo_due_to_UV_and_VIS_diffused</standard_name>
@@ -144,7 +144,7 @@
       <rank>(:)</rank>
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="surface_albedo_perturbation">
       <standard_name>surface_albedo_perturbation</standard_name>
@@ -155,7 +155,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="ccpp_error_message">
       <standard_name>ccpp_error_message</standard_name>
@@ -166,7 +166,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
     <variable name="ccpp_error_flag">
       <standard_name>ccpp_error_flag</standard_name>
@@ -177,7 +177,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw_pre SCHEME_rrtmgp_sw_pre SUBROUTINE_rrtmgp_sw_pre_run</container>
+      <container>MODULE_GFS_rrtmgp_sw_pre SCHEME_GFS_rrtmgp_sw_pre SUBROUTINE_GFS_rrtmgp_sw_pre_run</container>
     </variable>
   </subroutine>
 </scheme>

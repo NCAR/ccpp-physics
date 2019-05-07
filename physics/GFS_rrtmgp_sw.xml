@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<scheme module="rrtmgp_sw">
-  <subroutine name="rrtmgp_sw_init" />
-  <subroutine name="rrtmgp_sw_run">
+<scheme module="GFS_rrtmgp_sw">
+  <subroutine name="GFS_rrtmgp_sw_init" />
+  <subroutine name="GFS_rrtmgp_sw_run">
     <variable name="air_pressure_at_layer_for_radiation_in_hPa">
       <standard_name>air_pressure_at_layer_for_radiation_in_hPa</standard_name>
       <long_name>air pressure layer</long_name>
@@ -11,7 +11,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="air_pressure_at_interface_for_radiation_in_hPa">
       <standard_name>air_pressure_at_interface_for_radiation_in_hPa</standard_name>
@@ -22,7 +22,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="air_temperature_at_layer_for_radiation">
       <standard_name>air_temperature_at_layer_for_radiation</standard_name>
@@ -33,7 +33,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="air_temperature_at_interface_for_radiation">
       <standard_name>air_temperature_at_interface_for_radiation</standard_name>
@@ -44,7 +44,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="water_vapor_specific_humidity_at_layer_for_radiation">
       <standard_name>water_vapor_specific_humidity_at_layer_for_radiation</standard_name>
@@ -55,7 +55,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="ozone_concentration_at_layer_for_radiation">
       <standard_name>ozone_concentration_at_layer_for_radiation</standard_name>
@@ -66,7 +66,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_co2">
       <standard_name>volume_mixing_ratio_co2</standard_name>
@@ -77,7 +77,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_n2o">
       <standard_name>volume_mixing_ratio_n2o</standard_name>
@@ -88,7 +88,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_ch4">
       <standard_name>volume_mixing_ratio_ch4</standard_name>
@@ -99,7 +99,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_o2">
       <standard_name>volume_mixing_ratio_o2</standard_name>
@@ -110,7 +110,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_co">
       <standard_name>volume_mixing_ratio_co</standard_name>
@@ -121,7 +121,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_cfc11">
       <standard_name>volume_mixing_ratio_cfc11</standard_name>
@@ -132,7 +132,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_cfc12">
       <standard_name>volume_mixing_ratio_cfc12</standard_name>
@@ -143,7 +143,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_cfc22">
       <standard_name>volume_mixing_ratio_cfc22</standard_name>
@@ -154,7 +154,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="volume_mixing_ratio_ccl4">
       <standard_name>volume_mixing_ratio_ccl4</standard_name>
@@ -165,7 +165,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="seed_random_numbers_sw">
       <standard_name>seed_random_numbers_sw</standard_name>
@@ -176,7 +176,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="aerosol_optical_depth_for_shortwave_bands_01-16">
       <standard_name>aerosol_optical_depth_for_shortwave_bands_01-16</standard_name>
@@ -187,7 +187,7 @@
       <rank>(:,:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="aerosol_single_scattering_albedo_for_shortwave_bands_01-16">
       <standard_name>aerosol_single_scattering_albedo_for_shortwave_bands_01-16</standard_name>
@@ -198,7 +198,7 @@
       <rank>(:,:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="aerosol_asymmetry_parameter_for_shortwave_bands_01-16">
       <standard_name>aerosol_asymmetry_parameter_for_shortwave_bands_01-16</standard_name>
@@ -209,7 +209,7 @@
       <rank>(:,:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="surface_albedo_due_to_near_IR_direct">
       <standard_name>surface_albedo_due_to_near_IR_direct</standard_name>
@@ -220,7 +220,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="surface_albedo_due_to_near_IR_diffused">
       <standard_name>surface_albedo_due_to_near_IR_diffused</standard_name>
@@ -231,7 +231,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="surface_albedo_due_to_UV_and_VIS_direct">
       <standard_name>surface_albedo_due_to_UV_and_VIS_direct</standard_name>
@@ -242,7 +242,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="surface_albedo_due_to_UV_and_VIS_diffused">
       <standard_name>surface_albedo_due_to_UV_and_VIS_diffused</standard_name>
@@ -253,7 +253,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="layer_thickness_for_radiation">
       <standard_name>layer_thickness_for_radiation</standard_name>
@@ -264,7 +264,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="layer_pressure_thickness_for_radiation">
       <standard_name>layer_pressure_thickness_for_radiation</standard_name>
@@ -275,7 +275,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_decorrelation_length">
       <standard_name>cloud_decorrelation_length</standard_name>
@@ -286,7 +286,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cosine_of_zenith_angle">
       <standard_name>cosine_of_zenith_angle</standard_name>
@@ -297,7 +297,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="solar_constant">
       <standard_name>solar_constant</standard_name>
@@ -308,7 +308,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="daytime_points_dimension">
       <standard_name>daytime_points_dimension</standard_name>
@@ -319,7 +319,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="daytime_points">
       <standard_name>daytime_points</standard_name>
@@ -330,7 +330,7 @@
       <rank>(:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="horizontal_loop_extent">
       <standard_name>horizontal_loop_extent</standard_name>
@@ -341,7 +341,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="adjusted_vertical_layer_dimension_for_radiation">
       <standard_name>adjusted_vertical_layer_dimension_for_radiation</standard_name>
@@ -352,7 +352,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="flag_print">
       <standard_name>flag_print</standard_name>
@@ -363,7 +363,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="total_cloud_fraction">
       <standard_name>total_cloud_fraction</standard_name>
@@ -374,7 +374,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="flag_to_calc_sw">
       <standard_name>flag_to_calc_sw</standard_name>
@@ -385,7 +385,7 @@
       <rank />
       <intent>in</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step">
       <standard_name>tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step</standard_name>
@@ -396,7 +396,7 @@
       <rank>(:,:)</rank>
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="sw_fluxes_top_atmosphere">
       <standard_name>sw_fluxes_top_atmosphere</standard_name>
@@ -407,7 +407,7 @@
       <rank>(:)</rank>
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="sw_fluxes_sfc">
       <standard_name>sw_fluxes_sfc</standard_name>
@@ -418,7 +418,7 @@
       <rank>(:)</rank>
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_optical_depth_layers_at_0.55mu_band">
       <standard_name>cloud_optical_depth_layers_at_0.55mu_band</standard_name>
@@ -429,7 +429,7 @@
       <rank>(:,:)</rank>
       <intent>inout</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step">
       <standard_name>tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step</standard_name>
@@ -440,7 +440,7 @@
       <rank>(:,:)</rank>
       <intent>inout</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="sw_heating_rate_spectral">
       <standard_name>sw_heating_rate_spectral</standard_name>
@@ -451,7 +451,7 @@
       <rank>(:,:,:)</rank>
       <intent>inout</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="sw_fluxes">
       <standard_name>sw_fluxes</standard_name>
@@ -462,7 +462,7 @@
       <rank>(:,:)</rank>
       <intent>inout</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="components_of_surface_downward_shortwave_fluxes">
       <standard_name>components_of_surface_downward_shortwave_fluxes</standard_name>
@@ -473,7 +473,7 @@
       <rank>(:)</rank>
       <intent>inout</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_liquid_water_path">
       <standard_name>cloud_liquid_water_path</standard_name>
@@ -484,7 +484,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="mean_effective_radius_for_liquid_cloud">
       <standard_name>mean_effective_radius_for_liquid_cloud</standard_name>
@@ -495,7 +495,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_ice_water_path">
       <standard_name>cloud_ice_water_path</standard_name>
@@ -506,7 +506,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="mean_effective_radius_for_ice_cloud">
       <standard_name>mean_effective_radius_for_ice_cloud</standard_name>
@@ -517,7 +517,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_rain_water_path">
       <standard_name>cloud_rain_water_path</standard_name>
@@ -528,7 +528,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="mean_effective_radius_for_rain_drop">
       <standard_name>mean_effective_radius_for_rain_drop</standard_name>
@@ -539,7 +539,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_snow_water_path">
       <standard_name>cloud_snow_water_path</standard_name>
@@ -550,7 +550,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="mean_effective_radius_for_snow_flake">
       <standard_name>mean_effective_radius_for_snow_flake</standard_name>
@@ -561,7 +561,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_optical_depth">
       <standard_name>cloud_optical_depth</standard_name>
@@ -572,7 +572,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_single_scattering_albedo">
       <standard_name>cloud_single_scattering_albedo</standard_name>
@@ -583,7 +583,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="cloud_asymmetry_parameter">
       <standard_name>cloud_asymmetry_parameter</standard_name>
@@ -594,7 +594,7 @@
       <rank>(:,:)</rank>
       <intent>in</intent>
       <optional>T</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="ccpp_error_message">
       <standard_name>ccpp_error_message</standard_name>
@@ -605,7 +605,7 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
     <variable name="ccpp_error_flag">
       <standard_name>ccpp_error_flag</standard_name>
@@ -616,8 +616,8 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_rrtmgp_sw SCHEME_rrtmgp_sw SUBROUTINE_rrtmgp_sw_run</container>
+      <container>MODULE_GFS_rrtmgp_sw SCHEME_GFS_rrtmgp_sw SUBROUTINE_GFS_rrtmgp_sw_run</container>
     </variable>
   </subroutine>
-  <subroutine name="rrtmgp_sw_finalize" />
+  <subroutine name="GFS_rrtmgp_sw_finalize" />
 </scheme>

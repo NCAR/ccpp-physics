@@ -1,17 +1,17 @@
-!>\file rrtmgp_sw_post
+!>\file GFS_rrtmgp_sw_post
 !! This file contains
-      module rrtmgp_sw_post
+      module GFS_rrtmgp_sw_post
       contains
 
-!>\defgroup rrtmgp_sw_post GFS RRTMGP scheme post
+!>\defgroup GFS_rrtmgp_sw_post GFS RRTMGP scheme post
 !! @{
-!> \section arg_table_rrtmgp_sw_post_init Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_post_init Argument Table
 !!
-      subroutine rrtmgp_sw_post_init ()
-      end subroutine rrtmgp_sw_post_init
+      subroutine GFS_rrtmgp_sw_post_init ()
+      end subroutine GFS_rrtmgp_sw_post_init
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
-!> \section arg_table_rrtmgp_sw_post_run Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_post_run Argument Table
 !! | local_name     | standard_name                                                                                  | long_name                                                                    | units    | rank |  type                 |   kind    | intent | optional |
 !! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
 !! | Model          | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in     | F        |
@@ -35,7 +35,7 @@
 !! | errflg         | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out    | F        |
 !!
 #endif
-      subroutine rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
+      subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
                  im, ltp, nday, lm, kd, htswc, htsw0,                      &
                  sfcalb1, sfcalb2, sfcalb3, sfcalb4, scmpsw, errmsg, errflg)
 
@@ -144,11 +144,11 @@
 
       endif                                ! end_if_lsswr
 
-      end subroutine rrtmgp_sw_post_run
+      end subroutine GFS_rrtmgp_sw_post_run
  
-!> \section arg_table_rrtmgp_sw_post_finalize Argument Table
+!> \section arg_table_GFS_rrtmgp_sw_post_finalize Argument Table
 !!
-      subroutine rrtmgp_sw_post_finalize ()
-      end subroutine rrtmgp_sw_post_finalize
+      subroutine GFS_rrtmgp_sw_post_finalize ()
+      end subroutine GFS_rrtmgp_sw_post_finalize
 !! @}
-      end module rrtmgp_sw_post
+      end module GFS_rrtmgp_sw_post

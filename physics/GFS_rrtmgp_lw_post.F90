@@ -1,18 +1,18 @@
-!>\file rrtmgp_lw_post
+!>\file GFS_rrtmgp_lw_post
 !!This file contains
-      module rrtmgp_lw_post 
+      module GFS_rrtmgp_lw_post 
       contains
 
-!>\defgroup rrtmgp_lw_post GFS RRTMGP scheme post
+!>\defgroup GFS_rrtmgp_lw_post GFS RRTMGP scheme post
 !! @{
-!> \section arg_table_rrtmgp_lw_post_init Argument Table
+!> \section arg_table_GFS_rrtmgp_lw_post_init Argument Table
 !!
-      subroutine rrtmgp_lw_post_init()
-      end subroutine rrtmgp_lw_post_init
+      subroutine GFS_rrtmgp_lw_post_init()
+      end subroutine GFS_rrtmgp_lw_post_init
 
 ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
-!> \section arg_table_rrtmgp_lw_post_run Argument Table
+!> \section arg_table_GFS_rrtmgp_lw_post_run Argument Table
 !! | local_name      | standard_name                                                                                 | long_name                                                                    | units    | rank |  type                 |   kind    | intent    | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|-----------------------|-----------|-----------|----------|
 !! | Model           | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type      |           | in        | F        |
@@ -30,7 +30,7 @@
 !! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                        | flag     |    0 | integer               |           | out       | F        |
 !!
 #endif
-      subroutine rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling,   &
+      subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling,   &
                  im, ltp, lm, kd, tsfa, htlwc, htlw0, errmsg, errflg)
     
       use machine,                   only: kind_phys
@@ -91,12 +91,12 @@
 
       endif                                ! end_if_lslwr
 
-      end subroutine rrtmgp_lw_post_run
+      end subroutine GFS_rrtmgp_lw_post_run
 
-!> \section arg_table_rrtmgp_lw_post_finalize Argument Table
+!> \section arg_table_GFS_rrtmgp_lw_post_finalize Argument Table
 !!
-      subroutine rrtmgp_lw_post_finalize ()
-      end subroutine rrtmgp_lw_post_finalize
+      subroutine GFS_rrtmgp_lw_post_finalize ()
+      end subroutine GFS_rrtmgp_lw_post_finalize
 
 !! @}
-      end module rrtmgp_lw_post
+      end module GFS_rrtmgp_lw_post

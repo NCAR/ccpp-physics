@@ -137,20 +137,11 @@
              progclduni                  ! Unified cloud-scheme
         use surface_perturbation, only: & 
              cdfnor                      ! Routine to compute CDF (used to compute percentiles)
-        ! *NOTE* Ultimately these can be replaced with RRTMGP DDTs
-        use module_radsw_parameters, only: &
-             topfsw_type,              & ! DDT containing SW TOA fluxes
-             sfcfsw_type,              & ! DDT containing SW SFC fluxes
-             profsw_type                 ! DDT containing SW 2D flux profiles
-        use module_radlw_parameters, only: &
-             topflw_type,              & ! DDT containing LW TOA fluxes
-             sfcflw_type,              & ! DDT containing LW SFC fluxes
-             proflw_type                 ! DDT containing LW 2D flux profiles 
         ! RRTMGP stuff
-        use rrtmgp_lw, only:           &
+        use GFS_rrtmgp_lw, only:       &
              nBandsLW,                 & ! Number of LW bands in RRTMGP
              kdist_lw                    ! DDT contining LW spectral information
-        use rrtmgp_sw, only:           &
+        use GFS_rrtmgp_sw, only:       &
              nBandsSW,                 & ! Number of SW bands in RRTMGP
              kdist_sw                    ! DDT contining SW spectral information
         implicit none

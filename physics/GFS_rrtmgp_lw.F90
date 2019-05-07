@@ -1,6 +1,6 @@
 ! ###########################################################################################
 ! ###########################################################################################
-module rrtmgp_lw
+module GFS_rrtmgp_lw
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,     only: ty_gas_concs
   use mo_fluxes,                 only: ty_fluxes_broadband
@@ -61,12 +61,12 @@ module rrtmgp_lw
   type(ty_gas_concs)  :: &
        gas_concs_lw
 
-  public rrtmgp_lw_init, rrtmgp_lw_run, rrtmgp_lw_finalize
+  public GFS_rrtmgp_lw_init, GFS_rrtmgp_lw_run, GFS_rrtmgp_lw_finalize
 contains
   ! #########################################################################################
-  ! rrtmgp_lw_init
+  ! GFS_rrtmgp_lw_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_init Argument Table
+!! \section arg_table_GFS_rrtmgp_lw_init Argument Table
 !! | local_name      | standard_name             | long_name                                               | units | rank | type             |    kind   | intent | optional |
 !! |-----------------|---------------------------|---------------------------------------------------------|-------|------|------------------|-----------|--------|----------|
 !! | Model           | GFS_control_type_instance | Fortran DDT containing FV3-GFS model control parameters | DDT   |    0 | GFS_control_type |           | in     | F        |
@@ -77,7 +77,7 @@ contains
 !! | errflg          | ccpp_error_flag           | error flag for error handling in CCPP                   | flag  |    0 | integer          |           | out    | F        |
 !!
   ! #########################################################################################
-  subroutine rrtmgp_lw_init(Model,mpicomm, mpirank, mpiroot, errmsg, errflg)
+  subroutine GFS_rrtmgp_lw_init(Model,mpicomm, mpirank, mpiroot, errmsg, errflg)
     use netcdf
 
 #ifdef MPI
@@ -96,7 +96,6 @@ contains
          errmsg     ! Error message
     integer,          intent(out) :: &
          errflg     ! Error code
-
 
     ! Variables that will be passed to gas_optics%load()
     integer, dimension(:), allocatable :: &
@@ -721,12 +720,12 @@ contains
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
 
-  end subroutine rrtmgp_lw_init
+  end subroutine GFS_rrtmgp_lw_init
 
   ! #########################################################################################
   ! rrtmg_lw_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_run Argument Table
+!! \section arg_table_GFS_rrtmgp_lw_run Argument Table
 !! | local_name      | standard_name                                                                                 | long_name                                                 | units   | rank | type        |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
 !! | p_lay           | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                        | hPa     |    2 | real        | kind_phys | in     | F        |
@@ -777,7 +776,7 @@ contains
 !! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !!
   ! #########################################################################################
-  subroutine rrtmgp_lw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o,     & ! IN
+  subroutine GFS_rrtmgp_lw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o,     & ! IN
        vmr_ch4, vmr_o2, vmr_co, vmr_cfc11, vmr_cfc12, vmr_cfc22, vmr_ccl4, icseed, tau_aer, & ! IN
        ssa_aer, sfc_emiss, skt, dzlyr, delpin, de_lgth, ncol, nlay, lprint, cldfrac, lslwr, & ! IN
        hlwc, topflx, sfcflx, cldtau,                                                        & ! OUT
@@ -796,7 +795,7 @@ contains
                          ! random numbers. when isubclw /=2, it will not be used.
     logical,intent(in) :: &
          lprint,       & ! Control flag for diagnostics
-         lslwr           ! Flag to calculate RRTMGP LW? 
+         lslwr           ! Flag to calculate RRTMGP LW?                    (1)
     real(kind_phys), dimension(ncol), intent(in) :: &
          sfc_emiss,    & ! Surface emissivity                     (1)
          skt,          & ! Surface(skin) temperature              (K)
@@ -1197,13 +1196,13 @@ contains
        hlw0 = thetaTendClrSky
     endif
 
-  end subroutine rrtmgp_lw_run
+  end subroutine GFS_rrtmgp_lw_run
   !
-  subroutine rrtmgp_lw_finalize()
+  subroutine GFS_rrtmgp_lw_finalize()
     close(59)
     close(60)
     close(61)
-  end subroutine rrtmgp_lw_finalize
+  end subroutine GFS_rrtmgp_lw_finalize
 
   ! #########################################################################################
   ! Ancillary functions
@@ -1212,11 +1211,11 @@ contains
     character(len=*), intent(in) :: error_msg
     
     if(error_msg /= "") then
-       print*,"ERROR(rrtmgp_lw_main.F90): "
+       print*,"ERROR(GFS_rrtmgp_lw_main.F90): "
        print*,trim(error_msg)
        return
     end if
   end subroutine check_error_msg  
   
   
-end module rrtmgp_lw
+end module GFS_rrtmgp_lw
