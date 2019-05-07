@@ -10,7 +10,6 @@ module GFS_rrtmgp_sw
   use mo_fluxes,                 only: ty_fluxes_broadband
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_optical_props,          only: ty_optical_props_1scl,ty_optical_props_2str  
-  use mo_rte_sw,                 only: rte_sw
   use mo_heating_rates,          only: compute_heating_rate
   use mo_rrtmgp_constants,       only: grav, avogad
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, profsw_type, cmpfsw_type
@@ -18,6 +17,7 @@ module GFS_rrtmgp_sw
   use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use mersenne_twister,          only: random_setseed, random_number, random_stat
   use mo_cloud_optics,           only: ty_cloud_optics
+  use mo_rrtmgp_clr_all_sky,     only: rte_sw
 
   implicit none
 
@@ -195,9 +195,6 @@ contains
     character(len=264) :: kdist_file, kdist_cldy_file
     integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4,temp_log_array1,&
          temp_log_array2, temp_log_array3, temp_log_array4
-
-    open(69,file='rrtmgp_sw_aux_dump.txt',status='unknown')
-    open(70,file='rrtmgp_sw_aux_taucld.txt',status='unknown')
 
     ! Initialize
     errmsg = ''
@@ -1085,10 +1082,8 @@ contains
        endif
 
        ! #######################################################################################
-       ! 1) Clear-sky fluxes (gaseous-atmosphere + aerosols)
+       ! Set gas concentrations
        ! #######################################################################################
-       ! 1a) Set gas concentrations
-       print*,'Clear-Sky(SW): Set Gas Concentrations'
        call gas_concs_sw%reset()
        call check_error_msg(gas_concs_sw%set_vmr('o2',  vmr_o2(idxday,1:nlay)))
        call check_error_msg(gas_concs_sw%set_vmr('co2', vmr_co2(idxday,1:nlay)))
@@ -1096,56 +1091,25 @@ contains
        call check_error_msg(gas_concs_sw%set_vmr('n2o', vmr_n2o(idxday,1:nlay)))
        call check_error_msg(gas_concs_sw%set_vmr('h2o', vmr_h2o(idxday,1:nlay)))
        call check_error_msg(gas_concs_sw%set_vmr('o3',  vmr_o3(idxday,1:nlay)))
-       
-       ! 1b) Compute the optical properties of the atmosphere and the Planck source functions
-       !    from pressures, temperatures, and gas concentrations...
-       print*,'Clear-Sky(SW): Optics'
-       call check_error_msg(kdist_sw%gas_optics(      &
-            p_lay(idxday,1:nlay),      &
-            p_lev(idxday,1:nlay+1),   &
-            t_lay(idxday,1:nlay),           &
-            gas_concs_sw,                   &
-            optical_props_clr,              &
-            toa_flux))
 
-       ! 1c) Add contribution from aerosols.
-       print*,'Clear-Sky(SW): Increment Aerosol'
+       ! #######################################################################################
+       ! Copy aerosol to RRTMG DDT
+       ! #######################################################################################
        optical_props_aer%tau = tau_aer(idxday,:,:)
        optical_props_aer%ssa = ssa_aer(idxday,:,:)
        optical_props_aer%g   = asy_aer(idxday,:,:)
-       call check_error_msg(optical_props_aer%increment(optical_props_clr))
  
-       ! 1d) Compute the clear-sky broadband fluxes
-       print*,'Clear-Sky(SW): Fluxes'
-       call check_error_msg(rte_sw(optical_props_clr, top_at_1, cossza(idxday), toa_flux,&
-            spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
-            spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
-            fluxClrSky))
-
-       ! 1e) Compute heating rates
-       if (l_ClrSky_HR) then
-          print*,'Clear-Sky(SW): Heating-rates'
-          call check_error_msg(compute_heating_rate(   &
-               fluxClrSky%flux_up,                     &
-               fluxClrSky%flux_dn,                     &
-               p_lev(idxday,1:nlay+1), &
-               thetaTendClrSky))
-       endif
-
        ! ####################################################################################
-       ! 2) Compute broadband all-sky calculation.
+       ! Compute cloud-optics for RTE.
        ! ####################################################################################
-       ! 2a) Compute in-cloud optics
-       print*,'All-Sky(SW): Optics '
 
+       ! Compute in-cloud radiative properties.
        if (any(cldfrac(idxday,:) .gt. 0)) then
-          ! 2ai) RRTMG cloud optics.
+          ! i) RRTMG cloud optics.
           ! Cloud-optical properties by type provided. Compute optical-depth, single-       
           ! scattering  albedo, and asymmetry parameter
           if (rrtmgp_sw_cld_phys .eq. 0) then
-             print*,'Using RRTMG cloud-physics'
              if (.not. present(cld_od)) then
-                print*,'   Using all types too...'
                 call rrtmgp_sw_cloud_optics(nday, nlay, nBandsSW,         &
                      cld_lwp(idxday,1:nLay), cld_ref_liq(idxday,1:nLay),  &
                      cld_iwp(idxday,1:nLay), cld_ref_ice(idxday,1:nLay),  &
@@ -1174,9 +1138,8 @@ contains
              endif
           endif
           
-          ! 2aii) Use RRTMGP cloud-optics.
+          ! ii) Use RRTMGP cloud-optics.
           if (rrtmgp_sw_cld_phys .gt. 0) then
-             print*,'Using RRTMGP cloud-physics'
              call check_error_msg(kdist_sw_cldy%cloud_optics(nday, nlay, nBandsSW, nrghice,     &
                   liqmask(idxday,1:nLay), icemask(idxday,1:nLay), cld_lwp(idxday,1:nLay),       &
                   cld_iwp(idxday,1:nLay), cld_ref_liq2(idxday,1:nLay),                          &
@@ -1184,9 +1147,10 @@ contains
           end if
        endif
 
-       ! 2b) Call McICA to sample clouds.
+       ! #######################################################################################
+       ! Call McICA to sample clouds.
+       ! #######################################################################################       
        if (isubcsw .gt. 0) then
-          print*,'All-Sky(SW): McICA'
           ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
           ! and layers. ([nGpts,nLayer,nColumn]-> [nGpts*nLayer]*nColumn)
           do iCol=1,nCol
@@ -1206,45 +1170,48 @@ contains
           call check_error_msg(draw_samples(cldfracMCICA,optical_props_cldy,optical_props_mcica))
        endif
 
-       ! 2c) Add cloud contribution from the gaseous (clear-sky) atmosphere.
-       print*,'All-Sky(SW): Increment'
-       call check_error_msg(optical_props_clr%increment(optical_props_mcica))
-
-       ! 2d) Compute broadband fluxes
-       print*,'All-Sky(SW): Fluxes'
-       call check_error_msg(rte_sw(optical_props_mcica, top_at_1, cossza(idxday), toa_flux,&
+       ! #######################################################################################
+       ! Compute fluxes
+       ! #######################################################################################
+       call check_error_msg(rte_sw(  &
+            kdist_sw,                &
+            gas_concs_sw,            &
+            p_lay(idxday,1:nlay),    &
+            t_lay(idxday,1:nlay),    &
+            p_lev(idxday,1:nlay+1),  &
+            cossza(idxday),          &
             spread(sfcalb_nir_dir(idxday),1, ncopies = nBandsSW), & 
             spread(sfcalb_nir_dif(idxday),1, ncopies = nBandsSW), &
-            fluxAllSky))
+            optical_props_mcica,     &
+            fluxAllSky,              &
+            fluxClrSky,              &
+            aer_props = optical_props_aer))
 
-       ! 2e) Compute heating rates
-       print*,'All-Sky(SW): Heating-rates'
+       ! #######################################################################################
+       ! Compute heating rates
+       ! #######################################################################################
+       if (l_ClrSky_HR) then
+          call check_error_msg(compute_heating_rate(     &
+               fluxClrSky%flux_up,                       &
+               fluxClrSky%flux_dn,                       &
+               p_lev(idxday,1:nlay+1),                   &
+               thetaTendClrSky))
+       endif
        if (l_AllSky_HR_byband) then
           do iBand=1,nBandsSW
              call check_error_msg(compute_heating_rate(  &
                   fluxAllSky%bnd_flux_up(:,:,iBand),     &
                   fluxAllSky%bnd_flux_dn(:,:,iBand),     &
-                  p_lev(idxday,1:nlay+1),           &
+                  p_lev(idxday,1:nlay+1),                &
                   thetaTendByBandAllSky(:,:,iBand)))
           enddo
        else
           call check_error_msg(compute_heating_rate(     &
                fluxAllSky%flux_up,                       &
                fluxAllSky%flux_dn,                       &
-               p_lev(idxday,1:nlay+1),              &
+               p_lev(idxday,1:nlay+1),                   &
                thetaTendAllSky))
        endif
-
-       write(69,'(a20)') "RRTMGP TAUs" 
-       write(70,*) "#"
-       do iDay=1,nDay
-          do iLay=1,nlay
-             write(69,'(a5,i2,4f12.3)') '',iLay,p_lay(idxday(iDay),iLay),sum(optical_props_clr%tau(iDay,iLay,:))
-             write(70,'(16f12.3)') optical_props_cldy%tau(1,iLay,:)
-             write(70,'(16f12.3)') optical_props_cldy%ssa(1,iLay,:)
-             write(70,'(16f12.3)') optical_props_cldy%g(1,iLay,:)
-          enddo
-       enddo
 
     end if ! Daylit days
 
@@ -1278,8 +1245,6 @@ contains
   ! #########################################################################################
   ! #########################################################################################
   subroutine GFS_rrtmgp_sw_finalize()
-    close(69)
-    close(70)
   end subroutine GFS_rrtmgp_sw_finalize
 
   ! #########################################################################################
