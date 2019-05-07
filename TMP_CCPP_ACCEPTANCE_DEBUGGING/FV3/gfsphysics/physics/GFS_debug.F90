@@ -108,11 +108,17 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakemsk'  , Sfcprop%lakemsk)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%landfrac' , Sfcprop%landfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakefrac' , Sfcprop%lakefrac)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfc'     , Sfcprop%tsfc)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfco'    , Sfcprop%tsfco)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfcl'    , Sfcprop%tsfcl)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tisfc'    , Sfcprop%tisfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snowd'    , Sfcprop%snowd)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorl'     , Sfcprop%zorl)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorlo'    , Sfcprop%zorlo)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorll'    , Sfcprop%zorll)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%fice'     , Sfcprop%fice)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprime'   , Sfcprop%hprime)

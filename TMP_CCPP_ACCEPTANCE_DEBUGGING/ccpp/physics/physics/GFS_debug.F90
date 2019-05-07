@@ -134,7 +134,6 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakemsk'  , Sfcprop%lakemsk)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfc'     , Sfcprop%tsfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tisfc'    , Sfcprop%tisfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snowd'    , Sfcprop%snowd)
