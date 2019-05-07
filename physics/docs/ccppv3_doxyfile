@@ -236,8 +236,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../namelist_soilveg_ruc.F90 \
                         ../set_soilveg_ruc.F90   \
                         ../module_soil_pre.F90   \
-                        ../mp_thompson_hrrr.F90    \
-                        ../module_mp_thompson_hrrr.F90 \
+                        ../mp_thompson.F90    \
+                        ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
 ### utils
                         ../funcphys.f90     \
