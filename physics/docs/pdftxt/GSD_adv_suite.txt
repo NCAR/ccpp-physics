@@ -14,6 +14,8 @@ The advanced GSD RAP/HRRR physics suite uses the parameterizations in the follow
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref GSD_CU_GF
+   - \ref cu_gf_deep_group
+   - \ref cu_gf_sh_group
  - \ref GFS_GWDC
  - \ref GSD_THOMPSON
  - \ref GFS_CALPRECIPTYPE

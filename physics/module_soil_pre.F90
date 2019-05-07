@@ -14,7 +14,9 @@ module module_soil_pre
 contains
 
 !>\ingroup lsm_ruc_group
-!> This subroutine computes ZS and DZS in RUC LSM.
+!> This subroutine defines level depth in soil and thickness of soil 
+!! layers RUC LSM.
+!!
 !! In RUC LSM ZS-soil levels, and DZS-soil layer thicknesses, not used
 !! ZS is specified in the namelist: num_soil_levels =6 or 9.
 !! other options with number of levels are possible, but 
@@ -62,7 +64,9 @@ contains
    END SUBROUTINE init_soil_depth_3
 
 !>\ingroup lsm_ruc_group
-!>This subroutine initializes RUC LSM soil temp and moisture from the Noah 4 levels.
+!! This subroutine initializes soil moisture and temperature at RUC vertical levels
+!! from the Noah layers. RUC has 3 levels in the top Noah layer, therefore, initialization of 
+!! soil moisture at these top levels is questionable.
    SUBROUTINE init_soil_3_real ( tsk , tmn , smois , tslb , &
                                  st_input , sm_input , landmask, sst, &
                                  zs , dzs , &

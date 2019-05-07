@@ -1,7 +1,7 @@
 !>\file cu_gf_sh.F90
 !! This file contains
 
-!>\defgroup cu_gf_sh_group GSD GF Shallow Convection Main
+!>\defgroup cu_gf_sh_group GSD Grell-Freitas Shallow Convection Main
 !! @{
 !> \ingroup cu_gf_group
 !! module cup_gf_sh will call shallow convection as described in grell and

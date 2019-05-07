@@ -23,7 +23,8 @@
        end subroutine zhaocarr_gscond_finalize
 
 !> \defgroup condense GFS gscond Main
-!! \brief This subroutine computes grid-scale condensation and evaporation of
+!> @{
+!!  This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
 #if 0
@@ -521,6 +522,5 @@
       return
       end subroutine zhaocarr_gscond_run
 !> @}
-! @}
-! @}
+!> @}
       end module zhaocarr_gscond

@@ -43,13 +43,13 @@ In addition to the physical schemes themselves, this scientific documentation al
  + @ref physcons
  + @ref radcons
 
-\section sdf_gfsv15 Suite Definition File 
+\section sdf_gfsv14 Suite Definition File 
 
-The GFSv15 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_2017_updated_gfdlmp :
+The GFS v14 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_2017_updated_gfdlmp :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_gfdlmp" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_v14" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">

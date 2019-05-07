@@ -9,8 +9,10 @@ The CCPP-Physics is envisioned to contain parameterizations used by NOAA operati
 seasonal prediction timescales, as well as developmental schemes under consideration for upcoming 
 operational implementations. This version contains all parameterizations of the current operational GFS,
 plus additional developmental schemes. The CCPP can currently be used with the Single Column Model developed 
-by the Global Model Test Bed (GMTB) of the Developmental Testbed Center, as well as with the Weather Application 
-of the NOAA Unified Forecast System (UFS). 
+by the Global Model Test Bed (GMTB) of the Developmental Testbed Center, as well as with the version 15 of the Global Forecast System (GFS),
+to be implemented operationally in Q3 of FY19, which will be the first operational configuration of the model with the non-hydrostatic 
+Finite-volume Cubed-Sphere (FV3) dynamic core.  
+
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, and a description of

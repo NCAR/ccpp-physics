@@ -1,5 +1,5 @@
 !> \file ozphys.f
-!! This file is ozone sources and sinks.
+!! This file is ozone sources and sinks (previous version).
 
 
 !> This module contains the CCPP-compliant Ozone photochemistry scheme.

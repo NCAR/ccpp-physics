@@ -6033,7 +6033,7 @@ end subroutine condensation_edmf
 
 !===============================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine calculates the similarity functions, \f$P_{}\f$ \todo sigma
+!! This subroutine calculates the similarity functions, sigma
 !! NOTES ON SCALE-AWARE FORMULATION:
 !!JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
 !! JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)

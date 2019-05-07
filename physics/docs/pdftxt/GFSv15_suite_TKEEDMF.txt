@@ -1,7 +1,7 @@
 /**
-\page suite2_page GFSv15 Physics Suite with the scale-aware TKE-EDMF PBL scheme
+\page suite2_page GFSv15 Physics Suite with Scale-Aware TKE-EDMF PBL Scheme
 
-\section gfs2_suite_overview Overview
+\section gfs2p_suite_overview Overview
 
 This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF replace of \ref GFS_HEDMF .
 
@@ -43,13 +43,13 @@ In addition to the physical schemes themselves, this scientific documentation al
  + @ref physcons
  + @ref radcons
 
-\section sdf_gfsv15 Suite Definition File 
+\section sdf_gfsv15p Suite Definition File 
 
-The GFSv15 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_2017_updated_gfdlmp :
+The GFSv15plus suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15plus :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_gfdlmp" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_v15plus" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">

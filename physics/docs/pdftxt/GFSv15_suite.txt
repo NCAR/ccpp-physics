@@ -1,5 +1,5 @@
 /**
-\page suite1_page GFSv15 Physics Suite with GFDL microphysics scheme 
+\page suite1_page GFSv15 Physics Suite with GFDL Microphysics Scheme 
 
 \section gfs1_suite_overview Overview
 
@@ -48,7 +48,7 @@ The GFSv15 suite uses the parameterizations in the following order, as defined i
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_2017_updated_gfdlmp" lib="ccppphys" ver="2">
+<suite name="FV3_GFS_v15" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">

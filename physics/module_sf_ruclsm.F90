@@ -1249,7 +1249,14 @@ endif
 !-----------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine contains
+!! This subroutine solves energy and moisture budgets.
+!! - It computes density of frozen precipitation from empirical 
+!! dependence on temperature at the first atmospheric level.
+!! - Computes amount of liquid and frozen precipitation intercepted by 
+!! the vegetation canopy.
+!! - In there is snow on the ground, the snow fraction is below 0.75,
+!! the snow "mosaic" approach is turned on.
+!! - Updates emissivity and albedo for patch snow.
    SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         & !--- input variables
                 nzs,nddzs,nroot,meltfactor,                      &
                 ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
@@ -2259,7 +2266,8 @@ endif
 !---------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!! This function computes
+!! This function computes water vapor mixing ratio at saturation from
+!! the precomputed table and a given temperature.
        FUNCTION QSN(TN,T)
 !****************************************************************
    REAL,     DIMENSION(1:5001),  INTENT(IN   )   ::  T
@@ -2936,8 +2944,10 @@ endif
 !-------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine calculates energy budget and heat diffusion eqns. 
-!! for sea ice.
+!! This subroutine is called for sea ice without accumulated snow
+!! on its surface. it solves heat diffusion inside ice and energy
+!! budget at the surface of ice. It computes skin temperature and
+!! temerature inside sea ice.
         SUBROUTINE SICE ( debug_print,                          &
             i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   & !--- input variables
             PRCPMS,RAINF,PATM,QVATM,QCATM,GLW,GSW,              &
@@ -3202,9 +3212,10 @@ endif
 !-------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine calculates energy and moisture budget for snow,heat
-!! diffusion equations in snow and soil, Richards equations for soil
-!! covered with snow.
+!! This subroutine is called for snow covered areas of land. It
+!! solves energy and moisture budgets on the surface of snow, and 
+!! on the interface of snow and soil. It computes skin temperature,
+!! snow temperature, snow depth and snow melt.
         SUBROUTINE SNOWSOIL ( debug_print,                     &
              i,j,isoil,delt,ktau,conflx,nzs,nddzs,nroot,       & !--- input variables
              meltfactor,rhonewsn,SNHEI_CRIT,                   & ! new
@@ -3890,8 +3901,10 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !-------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine solves energy budget for snow on snow ice and heat 
-!! diffusion equations in snow and sea ice.
+!! This subroutine is called for sea ice with accumulated snow on
+!! its surface. It solves energy budget on the snow interface with 
+!! atmosphere and snow interface with ice. It calculates skin 
+!! temperature, snow and ice temperatures, snow depth and snow melt.
            SUBROUTINE SNOWSEAICE( debug_print,                  &
             i,j,isoil,delt,ktau,conflx,nzs,nddzs,               &
             meltfactor,rhonewsn,SNHEI_CRIT,                     &  ! new
@@ -5800,7 +5813,8 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !------------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine solves moisture balance equation and Richards equation.
+!! This subroutine solves moisture budget and computes soil moisture
+!! and surface and sub-surface runoffs.
         SUBROUTINE SOILMOIST ( debug_print,                     &
               DELT,NZS,NDDZS,DTDZS,DTDZS2,RIW,                  & !--- input parameters
               ZSMAIN,ZSHALF,DIFFU,HYDRO,                        &
@@ -6180,8 +6194,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !-------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine computes thermal diffusivity, and diffusional and 
-!! hydraulic condeuctivities.
+!! This subroutine computes thermal diffusivity, and diffusional and 
+!! hydraulic condeuctivities in soil.
             SUBROUTINE SOILPROP( debug_print,                     &
          nzs,fwsat,lwsat,tav,keepfr,                              & !--- input variables
          soilmois,soiliqw,soilice,                                &
@@ -6581,7 +6595,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 !>\ingroup lsm_ruc_group
 !> This subroutine finds the solution of energy budget at the surface
-!! using table T, QS computed from Clausius-Klapeiron.
+!! from the pre-computed table of saturated water vapor mixing ratio 
+!! and estimated surface temperature.
        SUBROUTINE VILKA(TN,D1,D2,PP,QS,TS,TT,NSTEP,ii,j,iland,isoil)
 !--------------------------------------------------------------
 !--- VILKA finds the solution of energy budget at the surface
@@ -6624,40 +6639,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !-----------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine sets up soil and vegetation parameters in the case when
-!! snow disappears during the forecast and snow parameters should be replaced
-!! by surface parameters according to soil  and vegetation types in this point.
-!>\param debug_print
-!>\param soilfrac
-!>\param nscat
-!>\param shdmin
-!>\param shdmax
-!>\param mosaic_lu
-!>\param mosaic_soil
-!>\param nlcat
-!>\param ivgtyp
-!>\param isltyp
-!>\param iswater
-!>\param myj
-!>\param iforest
-!>\param lufrac
-!>\param vegfrac
-!>\param emiss
-!>\param pc
-!>\param znt
-!>\param lai
-!>\param rdlai2d
-!>\param qwrtz
-!>\param rhocs
-!>\param bclh             Soil diffusivity/conductivity exponent
-!>\param dqm              MAX soil moisture content - MIN (\f$m^{3}m^{-3}\f$)
-!>\param ksat             SAT soil diffusivity/conductivity coefs (\f$m s^{-1}\f$)
-!>\param psis             SAT SOIL POTENTIAL coefs (\f$m\f$)
-!>\param qmin             air dry soil moist content limits (\f$m^{3}m^{-3}\f$)
-!>\param ref              reference soil moisture (\f$m^{3}m^{-3}\f$) 
-!>\param wilt             wilting PT soil moisture contents (\f$m^{3}m^{-3}\f$)
-!>\param i
-!>\param j
+!! This subroutine computes effective land and soil parameters in the
+!! grid cell from the weighted contribution of soil and land categories
+!! represented in the grid cell.
      SUBROUTINE SOILVEGIN  ( debug_print,                            &
                              soilfrac,nscat,shdmin, shdmax,          &
                              mosaic_lu, mosaic_soil,                 &
@@ -7133,7 +7117,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--------------------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group
-!> This subroutine is the RUC LSM initialization. 
+!> This subroutine computes liquid and forezen soil moisture from the
+!! total soil moisture, and also computes soil moisture availability in
+!! the top soil layer.
   SUBROUTINE RUCLSMINIT( debug_print,                              &
                      nzs, isltyp, ivgtyp, xice, mavail,            &
                      sh2o, smfr3d, tslb, smois,                    &

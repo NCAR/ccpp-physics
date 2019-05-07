@@ -824,7 +824,7 @@
 
 
        real, dimension(:,:,:,:), intent(in) :: aer_mass
-       real, intent (out), dimension(:,:,:) :: kappa, DUST, SULFATE,
+       real, intent (out), dimension(:,:,:) :: kappa, DUST, SULFATE,    &
      &                                         BCARBON, ORG, SEASALT
        real:: aux, densSO4, densORG, k_SO4, k_ORG, k_SS, tot_mass, dens,
      &        kappa_aux, tx1

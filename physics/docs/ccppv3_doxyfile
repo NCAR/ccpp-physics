@@ -43,7 +43,7 @@ GROUP_NESTED_COMPOUNDS = NO
 SUBGROUPING            = YES
 INLINE_GROUPED_CLASSES = NO
 INLINE_SIMPLE_STRUCTS  = NO
-TYPEDEF_HIDES_STRUCT   = NO
+TYPEDEF_HIDES_STRUCT   = YES
 LOOKUP_CACHE_SIZE      = 0
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
@@ -134,6 +134,18 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/GFSphys_namelist.txt    \
                           pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
+### in-core MP
+                        ../gfdl_fv_sat_adj.F90    \
+### time_vary
+                        ../GFS_phys_time_vary.fv3.F90 \
+                        ../ozne_def.f                 \
+                        ../ozinterp.f90               \
+                        ../h2o_def.f                 \
+                        ../h2ointerp.f90           \
+                        ../aerclm_def.F            \
+                        ../aerinterp.F90           \
+                        ../iccn_def.F              \
+                        ../iccninterp.F90          \
 ### Radiation
                         ../radlw_main.f                  \
                         ../radsw_main.f                  \
@@ -176,6 +188,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../rayleigh_damp.f  \
 ### Prognostic Ozone
                         ../ozphys_2015.f \
+                        ../ozphys.f  \
 ### stratospheric h2o
                         ../h2ophys.f \
 ### Deep Convection
@@ -192,7 +205,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
                         ../module_gfdl_cloud_microphys.F90 \
-                        ../gfdl_fv_sat_adj.F90    \
 ###
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
@@ -209,7 +221,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../aer_cloud.F       \
                         ../cldwat2m_micro.F  \
                         ../wv_saturation.F   \
-                        ../aerclm_def.F      \
                         ../cs_conv_aw_adj.F90 \
                         ../cs_conv.F90       \
 ### GSD

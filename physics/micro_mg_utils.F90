@@ -1167,7 +1167,7 @@ subroutine sb2001v2_accre_cld_water_rain(qc,nc,qr,rho,relvar,pra,npra,mgncol)
 !========================================================================
 ! Autoconversion of cloud ice to snow
 ! similar to Ferrier (1994)
-!>\ingourp micro_mg_utils_mod
+!>\ingroup micro_mg_utils_mod
 !! Autoconversion of cloud ice to snow
 !! similar to Ferrier (1994)
 subroutine ice_autoconversion(t, qiic, lami, n0i, dcs, ac_time, prci, nprci, mgncol)

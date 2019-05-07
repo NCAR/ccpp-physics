@@ -1,9 +1,12 @@
 !>\file mp_thompson_hrrr.F90
 !! This file contains NOAA/GSD's Thompson MP scheme.
-! CCPP license goes here, as well as further documentation
 
 !#define DEBUG_AEROSOLS
 
+!>\defgroup aathompson GSD Aerosal-Aware Thompson MP Module
+!!\author Dom Heinzeller, NOAA/ESRL/GSD, dom.heinzeller@noaa.gov
+!! -Last modified 4 Apr 2019: remove legacy debugging code
+!> @{
 module mp_thompson_hrrr
 
       use machine, only : kind_phys
@@ -20,6 +23,7 @@ module mp_thompson_hrrr
 
    contains
 
+!> This subroutine is a wrapper around the actual mp_gt_driver().
 #if 0
 !! \section arg_table_mp_thompson_hrrr_init Argument Table
 !! | local_name           | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
@@ -144,7 +148,6 @@ module mp_thompson_hrrr
 
       end subroutine mp_thompson_hrrr_init
 
-!>\defgroup aathompson GSD Aerosal-Aware Thompson MP Module
 
 #if 0
 !> \section arg_table_mp_thompson_hrrr_run Argument Table
@@ -585,3 +588,4 @@ module mp_thompson_hrrr
       end subroutine mp_thompson_hrrr_finalize
 
 end module mp_thompson_hrrr
+!> @}

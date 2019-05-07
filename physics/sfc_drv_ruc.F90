@@ -18,6 +18,8 @@ module lsm_ruc
 
       contains
 
+!> This subroutine calls set_soilveg_ruc() to specify vegetation and soil parameters for 
+!! a given soil and land-use classification.
 !! \section arg_table_lsm_ruc_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -248,7 +250,7 @@ module lsm_ruc
 !! | errflg          | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-!>\section gen_lsmruc GSD RUC LSM Scheme General Algorithm
+!>\section gen_lsmruc GSD RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            &   ! --- inputs
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
      &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
@@ -303,7 +305,6 @@ module lsm_ruc
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-!     &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
      &       snwdph, tskin,                                             &
      &       srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
      &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
@@ -412,7 +413,8 @@ module lsm_ruc
         print *,'flag_restart =',flag_restart
       endif
  
-!> - Call rucinit() for RUC initialization,then overwrite Noah soil fields
+!> - Call rucinit() at the first time step and the first interation
+!! for RUC initialization,then overwrite Noah soil fields
 !! with initialized RUC soil fields for output.
       if(flag_init .and. iter==1) then
         !print *,'RUC LSM initialization, kdt=', kdt
@@ -586,7 +588,6 @@ module lsm_ruc
 
 !> - Prepare variables to run RUC LSM: 
 !!  -   1. configuration information (c):
-!!\n  ----------------------------------------
 !!\n  \a ffrozp  - fraction of frozen precipitation
 !!\n  \a frpcpn  - .true. if mixed phase precipitation available
 !!\n  \a 1:im - horizontal_loop_extent
@@ -621,7 +622,6 @@ module lsm_ruc
         conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
 
 !>  -   2. forcing data (f):
-!!\n  ---------------------------------------
 !!\n  \a sfcprs  - pressure at height zf above ground (pascals)
 !!\n  \a sfctmp  - air temperature (\f$K\f$) at height zf above ground
 !!\n  \a q2      - pressure at height zf above ground (pascals)
@@ -634,7 +634,6 @@ module lsm_ruc
         qcatm(i,1,j)   = max(0., qc(i))
         rho2(i,1,j)    = rho(i)
 
-!!\n  ---------------------------------------
 !!\n  \a lwdn    - lw dw radiation flux at surface (\f$W m^{-2}\f$)
 !!\n  \a swdn    - sw dw radiation flux at surface (\f$W m^{-2}\f$)
 !!\n  \a solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
@@ -673,7 +672,6 @@ module lsm_ruc
         qcg(i,j)    = sfcqc(i) 
 
 !>  -   3. canopy/soil characteristics (s):
-!!\n      ------------------------------------
 !!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
 !!\n \a soiltyp - soil type (integer index)                         -> stype
 !!\n \a shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
@@ -726,7 +724,6 @@ module lsm_ruc
         tbot(i,j) = tg3(i)
 
 !>  -   4. history (state) variables (h):
-!!\n      ------------------------------
 !!\n \a cmc        - canopy moisture content (\f$mm\f$)
 !!\n \a soilt = tskin - ground/canopy/snowpack effective skin temperature (\f$K\f$)
 !!\n \a soilt1 = snowpack temperature at the bottom of the 1st layer (\f$K\f$)
@@ -982,7 +979,6 @@ module lsm_ruc
 
 !> - RUC LSM: prepare variables for return to parent model and unit conversion.
 !>  -   6. output (o):
-!!\n  ------------------------------
 !!\n \a lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
 !!\n \a hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
 !!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)

@@ -350,7 +350,8 @@ module GFS_typedefs
 
 !---------------------------------------------------------------------------------------
 ! GFS_sfcprop_type
-!   surface properties that may be read in and/or updated by climatology or observations
+!> This container defines surface properties that may be read in 
+!! and/or updated by climatology or observations
 !---------------------------------------------------------------------------------------
 #if 0
 !! \section arg_table_GFS_sfcprop_type
@@ -2229,7 +2230,7 @@ module GFS_typedefs
 #ifdef CCPP
 !---------------------------------------------------------------------
 ! GFS_interstitial_type
-!   fields required for interstitial code in CCPP schemes, previously
+!> This container defines fields required for interstitial code in CCPP schemes, previously
 !   in GFS_{physics,radiation}_driver.F90
 !---------------------------------------------------------------------
 #if 0

@@ -2,10 +2,30 @@
 \page GSD_THOMPSON GSD Thompson Aerosal-Aware Microphysics Scheme
 \section thompson_descrp  Description
 
+This scheme computes the moisture tendencies of water vapor, cloud droplets, rain, cloud ice(pristine),
+snow, and graupel. Developed mainly for application in the Weather Research and Forecasting (WRF) model,
+this code was based on Reisner et al (1998) until Dec 2006 (prior to WRFv2.2), but few of those pieces 
+remain. A complete description is now found in Thompson et al.(2008) \cite Thompson_2008 . Until Apr 2009
+(prior to WRFv3.1), this code was single-moment rain prediction, but in v3.1 and higher, the scheme is
+two-moment rain (i.e., predict rain number concentration).
+
+Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in 
+Thompson and Eidhammer (2014) \cite Thompson_2014 . The non aerosol-aware version of the code utilizes the older
+one-moment cloud water with constant droplet concentration set as \p nt_c, while the aerosol-aware version
+uses double-moment cloud droplet number concentration, which is not permitted to exceed \p nt_c_max.
+
+Most importantly, users may wish to modify the prescribed number of cloud droplets (\p nt_c). 
+Otherwise, users may alter the rain and graupel size distribution paramters to use exponential (Marshal-Palmer)
+or generalized gamma shape. The snow field assumes a combination of two gamma functions (from Field et al. 2005)
+and would require significant modifications throughout the entire code to alter its shape as well as accretion 
+rates. Users may also alter the constants used for density of rain, graupel, ice and snow, but the latter is not
+constant when using Paul Field's snow distribution and moments methods. Other values users can modify include
+the constants for mass and/or velocity power law relations and assumed capacitances used in deposition/sublimation/evaporation/melting.
+Remaining values should probably be left alone.
 
 
 \section intra_thompson Intraphysics Communication
-\ref arg_table_mp_thompson_hrrr_run
+\ref aathompson
 
 \section g_thompson  General Algorithm
 \ref gen_thompson_hrrr

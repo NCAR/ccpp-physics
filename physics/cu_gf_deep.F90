@@ -1,7 +1,7 @@
 !>\file cu_gf_deep.F90 
 !! This file is the Grell-Freitas deep convection scheme.
 
-!>\defgroup cu_gf_deep_group GSD GF Deep Convection Main
+!>\defgroup cu_gf_deep_group GSD Grell-Freitas Deep Convection Main
 !! @{
 !>\ingroup cu_gf_group
 module cu_gf_deep
