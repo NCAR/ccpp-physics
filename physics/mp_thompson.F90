@@ -1,16 +1,13 @@
 ! CCPP license goes here, as well as further documentation
-
-!#define DEBUG_AEROSOLS
-
-module mp_thompson_hrrr
+module mp_thompson
 
       use machine, only : kind_phys
 
-      use module_mp_thompson_hrrr, only : thompson_init, mp_gt_driver, thompson_finalize
+      use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize
 
       implicit none
 
-      public :: mp_thompson_hrrr_init, mp_thompson_hrrr_run, mp_thompson_hrrr_finalize
+      public :: mp_thompson_init, mp_thompson_run, mp_thompson_finalize
 
       private
 
@@ -19,7 +16,7 @@ module mp_thompson_hrrr
    contains
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_init Argument Table
+!! \section arg_table_mp_thompson_init Argument Table
 !! | local_name           | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |----------------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol                 | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -39,7 +36,7 @@ module mp_thompson_hrrr
 !! | errflg               | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_init(ncol, nlev, is_aerosol_aware, &
+      subroutine mp_thompson_init(ncol, nlev, is_aerosol_aware, &
                                        nwfa2d, nifa2d, nwfa, nifa,   &
                                        mpicomm, mpirank, mpiroot,    &
                                        imp_physics,                  &
@@ -124,7 +121,7 @@ module mp_thompson_hrrr
                                threads=threads)
             if (errflg /= 0) return
          else if (is_aerosol_aware) then
-            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_init:',                    &
+            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_init:',                    &
                                        ' aerosol-aware microphysics require all of the following', &
                                        ' optional arguments: nifa2d, nwfa2d, nwfa, nifa'
             errflg = 1
@@ -140,10 +137,10 @@ module mp_thompson_hrrr
 
          is_initialized = .true.
 
-      end subroutine mp_thompson_hrrr_init
+      end subroutine mp_thompson_init
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_run Argument Table
+!! \section arg_table_mp_thompson_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                             | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                                | count      |    0 | integer   |           | in     | F        |
@@ -187,7 +184,7 @@ module mp_thompson_hrrr
 !! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_run(ncol, nlev, con_g, con_rd,         &
+      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
                               nwfa2d, nifa2d,                            &
@@ -296,7 +293,7 @@ module mp_thompson_hrrr
 
          ! Check initialization state
          if (.not.is_initialized) then
-            write(errmsg, fmt='((a))') 'mp_thompson_hrrr_run called before mp_thompson_hrrr_init'
+            write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
             errflg = 1
             return
          end if
@@ -314,7 +311,7 @@ module mp_thompson_hrrr
                                            present(nifa)   .and. &
                                            present(nwfa2d) .and. &
                                            present(nifa2d)       )) then
-            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_run:',  &
+            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
                                        ' aerosol-aware microphysics require all of the', &
                                        ' following optional arguments:', &
                                        ' nc, nwfa, nifa, nwfa2d, nifa2d'
@@ -362,7 +359,7 @@ module mp_thompson_hrrr
              has_reqi = 0
              has_reqs = 0
          else
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_run:',  &
+             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
                                         ' all or none of the following optional', &
                                         ' arguments are required: re_cloud, re_ice, re_snow'
              errflg = 1
@@ -392,54 +389,6 @@ module mp_thompson_hrrr
          kde = nlev
          kme = nlev
          kte = nlev
-
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,*) "AEROSOL DEBUG: called mp_thompson_hrrr_run, is_aerosol_aware=",  is_aerosol_aware, &
-                      & ", do_effective_radii=", do_effective_radii, ", do_radar_ref=", do_radar_ref, &
-                      & ", diagflag=", diagflag, ", do_radar_ref_mp=", do_radar_ref_mp
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: prsl min/mean/max =", &
-                              & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: tgrs min/mean/max =", &
-                              & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: rho min/mean/max =", &
-                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
-             if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nc min/mean/max =", &
-                                    & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
-             end if
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: ni min/mean/max =", &
-                                 & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: nr min/mean/max =", &
-                                 & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: omega min/mean/max =", &
-                                 & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: w min/mean/max =", &
-                                 & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_cloud_mp min/mean/max =", &
-                                 & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_ice_mp min/mean/max =", &
-                                 & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: re_snow_mp min/mean/max =", &
-                                 & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_rain_mp min/mean/max =", &
-                                 & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_snow_mp min/mean/max =", &
-                                 & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_ice_mp min/mean/max =", &
-                                 & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run before: delta_graupel_mp min/mean/max =", &
-                                 & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
-         end if
-#endif
 
          ! Call Thompson MP with or without aerosols
          if (is_aerosol_aware) then
@@ -487,51 +436,6 @@ module mp_thompson_hrrr
          qs      = qs_mp/(1.0_kind_phys+qv_mp)
          qg      = qg_mp/(1.0_kind_phys+qv_mp)
 
-#ifdef DEBUG_AEROSOLS
-         if (mpirank==mpiroot) then
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: prsl min/mean/max =", &
-                              & minval(prsl), sum(prsl)/real(size(prsl)), maxval(prsl)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: tgrs min/mean/max =", &
-                              & minval(tgrs), sum(tgrs)/real(size(tgrs)), maxval(tgrs)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: rho min/mean/max =", &
-                              & minval(rho), sum(rho)/real(size(rho)), maxval(rho)
-             if (is_aerosol_aware) then
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa2d min/mean/max =", &
-                                    & minval(nwfa2d), sum(nwfa2d)/real(size(nwfa2d)), maxval(nwfa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nifa2d min/mean/max =", &
-                                    & minval(nifa2d), sum(nifa2d)/real(size(nifa2d)), maxval(nifa2d)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nwfa min/mean/max =", &
-                                    & minval(nwfa), sum(nwfa)/real(size(nwfa)), maxval(nwfa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nifa min/mean/max =", &
-                                    & minval(nifa), sum(nifa)/real(size(nifa)), maxval(nifa)
-                write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nc min/mean/max =", &
-                                    & minval(nc), sum(nc)/real(size(nc)), maxval(nc)
-             end if
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: ni min/mean/max =", &
-                                 & minval(ni), sum(ni)/real(size(ni)), maxval(ni)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: nr min/mean/max =", &
-                                 & minval(nr), sum(nr)/real(size(nr)), maxval(nr)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: omega min/mean/max =", &
-                                 & minval(omega), sum(omega)/real(size(omega)), maxval(omega)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: w min/mean/max =", &
-                                 & minval(w), sum(w)/real(size(w)), maxval(w)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_cloud_mp min/mean/max =", &
-                                 & minval(re_cloud_mp), sum(re_cloud_mp)/real(size(re_cloud_mp)), maxval(re_cloud_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_ice_mp min/mean/max =", &
-                                 & minval(re_ice_mp), sum(re_ice_mp)/real(size(re_ice_mp)), maxval(re_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: re_snow_mp min/mean/max =", &
-                                 & minval(re_snow_mp), sum(re_snow_mp)/real(size(re_snow_mp)), maxval(re_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_rain_mp min/mean/max =", &
-                                 & minval(delta_rain_mp), sum(delta_rain_mp)/real(size(delta_rain_mp)), maxval(delta_rain_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_snow_mp min/mean/max =", &
-                                 & minval(delta_snow_mp), sum(delta_snow_mp)/real(size(delta_snow_mp)), maxval(delta_snow_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_ice_mp min/mean/max =", &
-                                 & minval(delta_ice_mp), sum(delta_ice_mp)/real(size(delta_ice_mp)), maxval(delta_ice_mp)
-             write(0,'(a,3e16.7)') "AEROSOL DEBUG mp thompson run after: delta_graupel_mp min/mean/max =", &
-                                 & minval(delta_graupel_mp), sum(delta_graupel_mp)/real(size(delta_graupel_mp)), maxval(delta_graupel_mp)
-         end if
-#endif
-
          ! Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
          prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
@@ -547,17 +451,17 @@ module mp_thompson_hrrr
             re_snow  = re_snow_mp*1.0E6_kind_phys
          end if
 
-      end subroutine mp_thompson_hrrr_run
+      end subroutine mp_thompson_run
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_finalize Argument Table
+!! \section arg_table_mp_thompson_finalize Argument Table
 !! | local_name      | standard_name                                                 | long_name                                              | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP               | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine mp_thompson_hrrr_finalize(errmsg, errflg)
+      subroutine mp_thompson_finalize(errmsg, errflg)
 
          implicit none
 
@@ -574,6 +478,6 @@ module mp_thompson_hrrr
 
          is_initialized = .false.
 
-      end subroutine mp_thompson_hrrr_finalize
+      end subroutine mp_thompson_finalize
 
-end module mp_thompson_hrrr
+end module mp_thompson

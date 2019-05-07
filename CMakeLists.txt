@@ -111,6 +111,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       message (FATAL_ERROR "The current build system does not allow building fast physics with 32-bit precision when the GNU compilers are used")
@@ -141,6 +142,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNSFC_wrapper.F90
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
+                                ./physics/module_mp_thompson_make_number_concentrations.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
@@ -230,6 +232,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-r8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -r4 ")
@@ -260,11 +263,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-FV3")
-  if (NOT STATIC)
-    link_directories(${NCEPLIBS_DIR}/lib)
-  endif (NOT STATIC)
-elseif (PROJECT STREQUAL "CCPP-SCM")
+if (PROJECT STREQUAL "CCPP-SCM")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
@@ -279,7 +278,7 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
 
@@ -296,8 +295,9 @@ else(STATIC)
 endif(STATIC)
 
 if (PROJECT STREQUAL "CCPP-FV3")
+  # Link required NCEPlibs for dynamic builds
   if (NOT STATIC)
-    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
+    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
   endif (NOT STATIC)
 elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
