@@ -26,7 +26,6 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
     export PHDF5=/usr/local
     export PNETCDF=/usr/local
     export NETCDF=/usr/local
-    export SIONLIB=/usr/local/sionlib-1.7.2-debug
     ####################################################################################
 
 2. Install homebrew (enter sudo password when requested)

@@ -51,7 +51,8 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/module_nst_parameters.f90',
     'ccpp/physics/physics/module_nst_water_prop.f90',
     'ccpp/physics/physics/module_mp_radar.F90',
-    'ccpp/physics/physics/module_mp_thompson_hrrr.F90',
+    'ccpp/physics/physics/module_mp_thompson.F90',
+    'ccpp/physics/physics/module_mp_thompson_make_number_concentrations.F90',
     'ccpp/physics/physics/module_bl_mynn.F90',
     'ccpp/physics/physics/module_sf_mynn.F90',
     'ccpp/physics/physics/namelist_soilveg.f',
@@ -173,9 +174,9 @@ SCHEME_FILES = {
     'ccpp/physics/physics/module_MYNNSFC_wrapper.F90'        : [ 'slow_physics' ],
     'ccpp/physics/physics/module_MYNNrad_pre.F90'            : [ 'slow_physics' ],
     'ccpp/physics/physics/module_MYNNrad_post.F90'           : [ 'slow_physics' ],
-    'ccpp/physics/physics/mp_thompson_hrrr_pre.F90'          : [ 'slow_physics' ],
-    'ccpp/physics/physics/mp_thompson_hrrr.F90'              : [ 'slow_physics' ],
-    'ccpp/physics/physics/mp_thompson_hrrr_post.F90'         : [ 'slow_physics' ],
+    'ccpp/physics/physics/mp_thompson_pre.F90'               : [ 'slow_physics' ],
+    'ccpp/physics/physics/mp_thompson.F90'                   : [ 'slow_physics' ],
+    'ccpp/physics/physics/mp_thompson_post.F90'              : [ 'slow_physics' ],
     'ccpp/physics/physics/ozphys.f'                          : [ 'slow_physics' ],
     'ccpp/physics/physics/ozphys_2015.f'                     : [ 'slow_physics' ],
     'ccpp/physics/physics/precpd.f'                          : [ 'slow_physics' ],
@@ -254,14 +255,14 @@ OPTIONAL_ARGUMENTS = {
             'mean_effective_radius_for_snow_flake',
             ],
         },
-    'mp_thompson_hrrr' : {
-        'mp_thompson_hrrr_init' : [
+    'mp_thompson' : {
+        'mp_thompson_init' : [
             'water_friendly_aerosol_number_concentration',
             'ice_friendly_aerosol_number_concentration',
             'tendency_of_water_friendly_aerosols_at_surface',
             'tendency_of_ice_friendly_aerosols_at_surface',
             ],
-        'mp_thompson_hrrr_run' : [
+        'mp_thompson_run' : [
             'cloud_droplet_number_concentration_updated_by_physics',
             'water_friendly_aerosol_number_concentration_updated_by_physics',
             'ice_friendly_aerosol_number_concentration_updated_by_physics',
@@ -272,8 +273,8 @@ OPTIONAL_ARGUMENTS = {
             'mean_effective_radius_for_snow_flake',
             ],
         },
-    'mp_thompson_hrrr_pre' : {
-        'mp_thompson_hrrr_pre_run' : [
+    'mp_thompson_pre' : {
+        'mp_thompson_pre_run' : [
             'cloud_droplet_number_concentration_updated_by_physics',
             'water_friendly_aerosol_number_concentration_updated_by_physics',
             'ice_friendly_aerosol_number_concentration_updated_by_physics',

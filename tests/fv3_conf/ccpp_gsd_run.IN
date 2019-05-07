@@ -1,21 +1,25 @@
-
-if [ $WARM_START = .F. ]; then
-  cp -r @[RTPWD]/FV3_input_data_C96_with_aerosols/INPUT .
-  mkdir RESTART
-else
-  mkdir INPUT RESTART
-  cp -r /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/FV3_input_data_C96_with_aerosols/RESTART/* ./INPUT
+cp -r /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/FV3_input_data_C96_with_aerosols INPUT
+chmod -R ug+w INPUT
+mkdir RESTART
+if [ $WARM_START = .T. ]; then
+  cp ../fv3_ccpp_gsd_coldstart/RESTART/* INPUT/
 fi
+
 cp    @[RTPWD]/FV3_input_data/INPUT/aerosol.dat .
 cp    @[RTPWD]/FV3_input_data/INPUT/co2historicaldata_201*.txt .
 cp    @[RTPWD]/FV3_input_data/INPUT/sfc_emissivity_idx.txt .
 cp    @[RTPWD]/FV3_input_data/INPUT/solarconstant_noaa_an.txt .
-cp    @[RTPWD]/${inputdir}/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 ./global_o3prdlos.f77
+cp    @[RTPWD]/FV3_input_data/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 ./global_o3prdlos.f77
 cp    @[RTPWD]/FV3_input_data/global_h2o_pltc.f77 ./global_h2oprdlos.f77
-cp    @[RTPWD]/FV3_input_data/qr_acr_q* .
+# Thompson MP lookup tables - copy standard and SIONlib tables of precomputed tables
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/thompson_tables_precomp.sl .
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/qr_acr_qs.dat .
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/qr_acr_qg.dat .
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/freezeH2O.dat .
+#
 cp    @[RTPWD]/FV3_input_data/*grb .
 cp    @[RTPWD]/FV3_input_data/*_table .
-cp    @[RTPWD]/FV3_input_data/diag_table_thompson diag_table
+cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/diag_table_gsd diag_table
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/field_table_gsd field_table
 cp    @[RTPWD]/FV3_input_data/*configure .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/CCN_ACTIVATE.BIN .

@@ -4,7 +4,7 @@ set +x
 set -eu
 
 # List of valid/tested machines
-VALID_MACHINES=( wcoss_cray wcoss_dell_p3 gaea.intel jet.intel theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.intel-impi cheyenne.gnu cheyenne.pgi endeavor.intel macosx.gnu linux.gnu stampede.intel )
+VALID_MACHINES=( wcoss_cray wcoss_dell_p3 gaea.intel jet.intel theia.intel theia.gnu theia.pgi cheyenne.intel cheyenne.intel-impi cheyenne.gnu cheyenne.pgi endeavor.intel macosx.gnu linux.gnu stampede.intel supermuc_phase2.intel)
 
 ###################################################################################################
 
@@ -127,7 +127,7 @@ if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
   fi
 else
   # Dynamic builds require linking the NCEPlibs, provide path to them
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DNCEPLIBS_DIR=${NCEPLIBS_DIR}"
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DBACIO_LIB4=${BACIO_LIB4} -DSP_LIBd=${SP_LIBd} -DW3NCO_LIBd=${W3NCO_LIBd}"
 fi
 if [[ "${MAKE_OPT}" == *"MULTI_GASES=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMULTI_GASES=ON"

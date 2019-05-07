@@ -67,7 +67,7 @@
        k_split  = 2
        n_split  = 6
        nwat = 6
-       na_init = 1
+       na_init = @[NA_INIT]
        d_ext = 0.
        dnats = 0
        fv_sg_adj = 450
@@ -130,7 +130,7 @@
        fhzero         = 6.
        h2o_phys       = .true.
        ldiag3d        = .false.
-       fhcyc          = 24.
+       fhcyc          = 0.
        nst_anl        = .true.
        use_ufo        = .true.
        pre_rad        = .false.
@@ -139,6 +139,7 @@
        ttendlim       = 0.008
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
+       make_number_concentrations = .true.
        pdfcld         = .false.
        fhswr          = 3600.
        fhlwr          = 3600.
@@ -158,6 +159,7 @@
        dspheat        = .true.
        hybedmf        = .false.
        satmedmf       = .false.
+       lheatstrg      = @[LHEATSTRG]
        do_mynnedmf    = .true.
        do_mynnsfclay  = .false.
        random_clds    = .false.
