@@ -76,13 +76,14 @@
 !! | alb1d             | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real             | kind_phys | out    | F        |
 !! | errmsg            | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
+!! | kdist_lw          | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp |           | in    | F        |
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
       ! #########################################################################################
       subroutine GFS_rrtmgp_pre_run (Model, Grid, Sfcprop, Statein, Tbd, Cldprop, Coupling,     & ! IN
            Radtend,                                                                             & ! INOUT
-           lm, im, lmk, lmp,                                                                    & ! IN
+           lm, im, lmk, lmp, kdist_lw,                                                          & ! IN
            kd, kt, kb, raddt, delp, dz, plvl, plyr, tlvl, tlyr, tsfg, tsfa, qlyr, olyr,         & ! OUT
            gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,              & ! OUT
            gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113, faersw1, faersw2,  faersw3,  & ! OUT
@@ -138,9 +139,10 @@
         use surface_perturbation, only: & 
              cdfnor                      ! Routine to compute CDF (used to compute percentiles)
         ! RRTMGP stuff
+        use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
         use GFS_rrtmgp_lw, only:       &
-             nBandsLW,                 & ! Number of LW bands in RRTMGP
-             kdist_lw                    ! DDT contining LW spectral information
+             nBandsLW!,                 & ! Number of LW bands in RRTMGP
+             !kdist_lw                    ! DDT contining LW spectral information
         use GFS_rrtmgp_sw, only:       &
              nBandsSW,                 & ! Number of SW bands in RRTMGP
              kdist_sw                    ! DDT contining SW spectral information
@@ -156,7 +158,8 @@
         type(GFS_cldprop_type),   intent(in)    :: Cldprop
         type(GFS_coupling_type),  intent(in)    :: Coupling
         integer,                  intent(in)    :: im, lm, lmk, lmp
-        
+        type(ty_gas_optics_rrtmgp),intent(in)   :: kdist_lw
+
         ! Outputs
         integer,         intent(out) :: kd, kt, kb
         real(kind_phys), intent(out) :: raddt
