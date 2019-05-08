@@ -324,7 +324,7 @@ contains
       ! --- generate ocean/land/ice composites
 
       ! DH*
-      write(0,*) "DH DEBUG composites: i, cplflx, flag_cice, dry, wet, icy, ocnfrac, lndfrac, lakfrac, cice, tsfc_{lnd,ocn,ice}, tsfc, tsfcl, tsfco, tisfc"
+      !write(0,*) "DH DEBUG composites: i, cplflx, flag_cice, dry, wet, icy, ocnfrac, lndfrac, lakfrac, cice, tsfc_{lnd,ocn,ice}, tsfc, tsfcl, tsfco, tisfc"
       ! *DH
 
       do i=1, im
@@ -431,10 +431,10 @@ contains
         end if
 
         ! DH*
-        write(0,'(i5,5(1x,l),11e16.7)') i, cplflx, flag_cice(i), dry(i), wet(i), icy(i),  &
-                                        ocnfrac(i), lndfrac(i), lakfrac(i),               &
-                                        cice(i), tsfc_lnd(i), tsfc_ocn(i), tsfc_ice(i),   &
-                                        tsfc(i), tsfcl(i), tsfco(i), tisfc(i)
+        !write(0,'(i5,5(1x,l),11e16.7)') i, cplflx, flag_cice(i), dry(i), wet(i), icy(i),  &
+        !                                ocnfrac(i), lndfrac(i), lakfrac(i),               &
+        !                                cice(i), tsfc_lnd(i), tsfc_ocn(i), tsfc_ice(i),   &
+        !                                tsfc(i), tsfcl(i), tsfco(i), tisfc(i)
         ! *DH
 
       end do
