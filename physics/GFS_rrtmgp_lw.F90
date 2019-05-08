@@ -1,7 +1,7 @@
 ! ###########################################################################################
 ! ###########################################################################################
 module GFS_rrtmgp_lw
-  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
+  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp_type
   use mo_gas_concentrations,     only: ty_gas_concs
   use mo_fluxes,                 only: ty_fluxes_broadband
   use mo_fluxes_byband,          only: ty_fluxes_byband
@@ -67,15 +67,15 @@ contains
   ! GFS_rrtmgp_lw_init
   ! #########################################################################################
 !! \section arg_table_GFS_rrtmgp_lw_init Argument Table
-!! | local_name      | standard_name                            | long_name                                                          | units | rank | type                 |    kind   | intent | optional |
-!! |-----------------|------------------------------------------|--------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
-!! | Model           | GFS_control_type_instance                | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type     |           | in     | F        |
-!! | mpirank         | mpi_rank                                 | current MPI rank                                                   | index |    0 | integer              |           | in     | F        |
-!! | mpiroot         | mpi_root                                 | master MPI rank                                                    | index |    0 | integer              |           | in     | F        |
-!! | mpicomm         | mpi_comm                                 | MPI communicator                                                   | index |    0 | integer              |           | in     | F        |
-!! | errmsg          | ccpp_error_message                       | error message for error handling in CCPP                           | none  |    0 | character            | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                          | error flag for error handling in CCPP                              | flag  |    0 | integer              |           | out    | F        |
-!! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp |           | inout  | F        |
+!! | local_name      | standard_name                            | long_name                                                          | units | rank | type                      |    kind   | intent | optional |
+!! |-----------------|------------------------------------------|--------------------------------------------------------------------|-------|------|---------------------------|-----------|--------|----------|
+!! | Model           | GFS_control_type_instance                | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type          |           | in     | F        |
+!! | mpirank         | mpi_rank                                 | current MPI rank                                                   | index |    0 | integer                   |           | in     | F        |
+!! | mpiroot         | mpi_root                                 | master MPI rank                                                    | index |    0 | integer                   |           | in     | F        |
+!! | mpicomm         | mpi_comm                                 | MPI communicator                                                   | index |    0 | integer                   |           | in     | F        |
+!! | errmsg          | ccpp_error_message                       | error message for error handling in CCPP                           | none  |    0 | character                 | len=*     | out    | F        |
+!! | errflg          | ccpp_error_flag                          | error flag for error handling in CCPP                              | flag  |    0 | integer                   |           | out    | F        |
+!! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp_type |           | inout  | F        |
 !!
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_init(Model,mpicomm, mpirank, mpiroot, kdist_lw, errmsg, errflg)
@@ -92,7 +92,7 @@ contains
          mpicomm, & ! MPI communicator
          mpirank, & ! Current MPI rank
          mpiroot    ! Master MPI rank
-    type(ty_gas_optics_rrtmgp),intent(inout) :: &
+    type(ty_gas_optics_rrtmgp_type),intent(inout) :: &
          kdist_lw
     ! Outputs
     character(len=*), intent(out) :: &
@@ -773,7 +773,7 @@ contains
 !! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
 !! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
-!! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
+!! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp_type |           | in     | F        |
 !!
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o,     & ! IN
@@ -797,7 +797,7 @@ contains
     logical,intent(in) :: &
          lprint,       & ! Control flag for diagnostics
          lslwr           ! Flag to calculate RRTMGP LW?           (1)
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
+    type(ty_gas_optics_rrtmgp_type),intent(in) :: &
          kdist_lw        ! DDT containing LW spectral information
     real(kind_phys), dimension(ncol), intent(in) :: &
          sfc_emiss,    & ! Surface emissivity                     (1)
