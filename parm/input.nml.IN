@@ -162,6 +162,7 @@
        prslrd0        = 0.
        ivegsrc        = 1
        isot           = 1
+       h2o_phys       = @[H2O_PHYS]
        debug          = .false.
        nstf_name      = @[NSTF_NAME]
        cplflx         = @[CPLFLX]
