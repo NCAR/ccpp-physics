@@ -423,7 +423,7 @@ module cs_conv
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
-   real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd, cnv_prc3,&
+   real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd,          &
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
    integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
