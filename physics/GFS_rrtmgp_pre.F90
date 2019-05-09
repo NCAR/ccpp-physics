@@ -77,13 +77,14 @@
 !! | errmsg            | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
 !! | kdist_lw          | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp_type |           | in    | F        |
+!! | kdist_sw          | K_distribution_file_for_RRTMGP_SW_scheme                      | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp_type |           | in    | F        |
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
       ! #########################################################################################
       subroutine GFS_rrtmgp_pre_run (Model, Grid, Sfcprop, Statein, Tbd, Cldprop, Coupling,     & ! IN
            Radtend,                                                                             & ! INOUT
-           lm, im, lmk, lmp, kdist_lw,                                                          & ! IN
+           lm, im, lmk, lmp, kdist_lw, kdist_sw,                                                & ! IN
            kd, kt, kb, raddt, delp, dz, plvl, plyr, tlvl, tlyr, tsfg, tsfa, qlyr, olyr,         & ! OUT
            gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,              & ! OUT
            gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113, faersw1, faersw2,  faersw3,  & ! OUT
@@ -138,14 +139,9 @@
              progclduni                  ! Unified cloud-scheme
         use surface_perturbation, only: & 
              cdfnor                      ! Routine to compute CDF (used to compute percentiles)
-        ! RRTMGP stuff
+        ! RRTMGP types
         use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp_type
-        use GFS_rrtmgp_lw, only:       &
-             nBandsLW!,                 & ! Number of LW bands in RRTMGP
-             !kdist_lw                    ! DDT contining LW spectral information
-        use GFS_rrtmgp_sw, only:       &
-             nBandsSW,                 & ! Number of SW bands in RRTMGP
-             kdist_sw                    ! DDT contining SW spectral information
+
         implicit none
 
         ! Inputs
@@ -158,7 +154,9 @@
         type(GFS_cldprop_type),   intent(in)    :: Cldprop
         type(GFS_coupling_type),  intent(in)    :: Coupling
         integer,                  intent(in)    :: im, lm, lmk, lmp
-        type(ty_gas_optics_rrtmgp_type),intent(in)   :: kdist_lw
+        type(ty_gas_optics_rrtmgp_type),intent(in) :: &
+             kdist_lw, & ! RRTMGP DDT containing spectral information for LW calculation
+             kdist_sw    ! RRTMGP DDT containing spectral information for SW calculation
 
         ! Outputs
         integer,         intent(out) :: kd, kt, kb
@@ -172,9 +170,9 @@
              clouds6, clouds7, clouds8, clouds9
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP), intent(out) :: &
              plvl, tlvl
-        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,nBandsSW), intent(out) :: &
+        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_sw%get_nband()), intent(out) :: &
              faersw1, faersw2, faersw3
-        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,nBandsLW), intent(out) :: &
+        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_lw%get_nband()), intent(out) :: &
              faerlw1, faerlw2, faerlw3
         real(kind_phys), dimension(size(Grid%xlon,1),NSPC1), intent(out) :: &
              aerodp
@@ -200,8 +198,8 @@
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,2:Model%ntrac) :: tracer1
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
-        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,nBandsSW,NF_AESW)::faersw
-        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,nBandsLW,NF_AELW)::faerlw
+        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_sw%get_nband(),NF_AESW)::faersw
+        real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_lw%get_nband(),NF_AELW)::faerlw
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -468,16 +466,16 @@
         ! SW. 
         ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
         ! band ordering was [nIR -> UV -> IR(band)]
-        faersw1(1:IM,1:LMK,1)          = faersw(1:IM,1:LMK,nBandsSW,1)
-        faersw2(1:IM,1:LMK,1)          = faersw(1:IM,1:LMK,nBandsSW,2)
-        faersw3(1:IM,1:LMK,1)          = faersw(1:IM,1:LMK,nBandsSW,3)
-        faersw1(1:IM,1:LMK,2:nBandsSW) = faersw(1:IM,1:LMK,1:nBandsSW-1,1)
-        faersw2(1:IM,1:LMK,2:nBandsSW) = faersw(1:IM,1:LMK,1:nBandsSW-1,2)
-        faersw3(1:IM,1:LMK,2:nBandsSW) = faersw(1:IM,1:LMK,1:nBandsSW-1,3)
+        faersw1(1:IM,1:LMK,1)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),1)
+        faersw2(1:IM,1:LMK,1)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),2)
+        faersw3(1:IM,1:LMK,1)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),3)
+        faersw1(1:IM,1:LMK,2:kdist_sw%get_nband()) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,1)
+        faersw2(1:IM,1:LMK,2:kdist_sw%get_nband()) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,2)
+        faersw3(1:IM,1:LMK,2:kdist_sw%get_nband()) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,3)
         ! LW
-        faerlw1(1:IM,1:LMK,1:nBandsLW) = faerlw(1:IM,1:LMK,1:nBandsLW,1)
-        faerlw2(1:IM,1:LMK,1:nBandsLW) = faerlw(1:IM,1:LMK,1:nBandsLW,2)
-        faerlw3(1:IM,1:LMK,1:nBandsLW) = faerlw(1:IM,1:LMK,1:nBandsLW,3)
+        faerlw1(1:IM,1:LMK,1:kdist_lw%get_nband()) = faerlw(1:IM,1:LMK,1:kdist_lw%get_nband(),1)
+        faerlw2(1:IM,1:LMK,1:kdist_lw%get_nband()) = faerlw(1:IM,1:LMK,1:kdist_lw%get_nband(),2)
+        faerlw3(1:IM,1:LMK,1:kdist_lw%get_nband()) = faerlw(1:IM,1:LMK,1:kdist_lw%get_nband(),3)
    
         !  Obtain cloud information for radiation calculations
         !    (clouds,cldsa,mtopa,mbota)

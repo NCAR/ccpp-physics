@@ -1,7 +1,6 @@
 ! ###########################################################################################
 ! ###########################################################################################
 module GFS_rrtmgp_lw
-  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp_type
   use mo_gas_concentrations,     only: ty_gas_concs
   use mo_fluxes,                 only: ty_fluxes_broadband
   use mo_fluxes_byband,          only: ty_fluxes_byband
@@ -9,7 +8,8 @@ module GFS_rrtmgp_lw
   use mo_source_functions,       only: ty_source_func_lw
   use mo_rte_kind,               only: wl
   use mo_heating_rates,          only: compute_heating_rate
-  use mo_cloud_optics,           only: ty_cloud_optics
+  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp_type
+  use mo_cloud_optics,           only: ty_cloud_optics_type
   use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
@@ -56,10 +56,10 @@ module GFS_rrtmgp_lw
   ! Classes used by rte+rrtmgp
   !type(ty_gas_optics_rrtmgp) :: &
   !     kdist_lw
-  type(ty_cloud_optics) :: &
-       kdist_lw_cldy
+  !type(ty_cloud_optics) :: &
+  !     kdist_lw_cldy
   type(ty_gas_concs)  :: &
-       gas_concs_lw
+       gas_concentrations
 
   public GFS_rrtmgp_lw_init, GFS_rrtmgp_lw_run, GFS_rrtmgp_lw_finalize
 contains
@@ -67,18 +67,20 @@ contains
   ! GFS_rrtmgp_lw_init
   ! #########################################################################################
 !! \section arg_table_GFS_rrtmgp_lw_init Argument Table
-!! | local_name      | standard_name                            | long_name                                                          | units | rank | type                      |    kind   | intent | optional |
-!! |-----------------|------------------------------------------|--------------------------------------------------------------------|-------|------|---------------------------|-----------|--------|----------|
-!! | Model           | GFS_control_type_instance                | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type          |           | in     | F        |
-!! | mpirank         | mpi_rank                                 | current MPI rank                                                   | index |    0 | integer                   |           | in     | F        |
-!! | mpiroot         | mpi_root                                 | master MPI rank                                                    | index |    0 | integer                   |           | in     | F        |
-!! | mpicomm         | mpi_comm                                 | MPI communicator                                                   | index |    0 | integer                   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                       | error message for error handling in CCPP                           | none  |    0 | character                 | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                          | error flag for error handling in CCPP                              | flag  |    0 | integer                   |           | out    | F        |
-!! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp_type |           | inout  | F        |
+!! | local_name         | standard_name                                   | long_name                                                                 | units | rank | type                      |    kind   | intent | optional |
+!! |--------------------|-------------------------------------------------|---------------------------------------------------------------------------|-------|------|---------------------------|-----------|--------|----------|
+!! | Model              | GFS_control_type_instance                       | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type          |           | in     | F        |
+!! | mpirank            | mpi_rank                                        | current MPI rank                                                          | index |    0 | integer                   |           | in     | F        |
+!! | mpiroot            | mpi_root                                        | master MPI rank                                                           | index |    0 | integer                   |           | in     | F        |
+!! | mpicomm            | mpi_comm                                        | MPI communicator                                                          | index |    0 | integer                   |           | in     | F        |
+!! | errmsg             | ccpp_error_message                              | error message for error handling in CCPP                                  | none  |    0 | character                 | len=*     | out    | F        |
+!! | errflg             | ccpp_error_flag                                 | error flag for error handling in CCPP                                     | flag  |    0 | integer                   |           | out    | F        |
+!! | kdist_lw           | K_distribution_file_for_RRTMGP_LW_scheme        | DDT containing spectral information for RRTMGP LW radiation scheme        | DDT   |    0 | ty_gas_optics_rrtmgp_type |           | inout  | F        |
+!! | kdist_lw_cldy      | K_distribution_file_for_cloudy_RRTMGP_LW_scheme | DDT containing spectral information for cloudy RRTMGP LW radiation scheme | DDT   |    0 | ty_cloud_optics_type      |           | inout  | F        |
 !!
   ! #########################################################################################
-  subroutine GFS_rrtmgp_lw_init(Model,mpicomm, mpirank, mpiroot, kdist_lw, errmsg, errflg)
+  subroutine GFS_rrtmgp_lw_init(Model,mpicomm, mpirank, mpiroot, kdist_lw, kdist_lw_cldy,   &
+       errmsg, errflg)
     use netcdf
 
 #ifdef MPI
@@ -94,6 +96,11 @@ contains
          mpiroot    ! Master MPI rank
     type(ty_gas_optics_rrtmgp_type),intent(inout) :: &
          kdist_lw
+    type(ty_cloud_optics_type),intent(inout) :: &
+         kdist_lw_cldy
+!    type(ty_gas_concs_type),intent(inout)  :: &
+!         gas_concentrations
+
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -500,9 +507,9 @@ contains
 
     ! Initialize gas concentrations and gas optics class with data
     do iGas=1,nGases
-       call check_error_msg(gas_concs_lw%set_vmr(active_gases(iGas), 0._kind_phys))
+       call check_error_msg(gas_concentrations%set_vmr(active_gases(iGas), 0._kind_phys))
     enddo    
-    call check_error_msg(kdist_lw%load(gas_concs_lw, gas_names, key_species, band2gpt, &
+    call check_error_msg(kdist_lw%load(gas_concentrations, gas_names, key_species, band2gpt, &
          band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p, temp_ref_t,   &
          vmr_ref, kmajor, kminor_lower, kminor_upper, gas_minor,identifier_minor,   &
          minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower,              &
@@ -774,12 +781,13 @@ contains
 !! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
 !! | kdist_lw        | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp_type |           | in     | F        |
+!! | kdist_lw_cldy   | K_distribution_file_for_cloudy_RRTMGP_LW_scheme                                               | DDT containing spectral information for cloudy RRTMGP LW radiation scheme | DDT   |    0 | ty_cloud_optics_type |           | inout  | F        |
 !!
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o,     & ! IN
        vmr_ch4, vmr_o2, vmr_co, vmr_cfc11, vmr_cfc12, vmr_cfc22, vmr_ccl4, icseed, tau_aer, & ! IN
        ssa_aer, sfc_emiss, skt, dzlyr, delpin, de_lgth, ncol, nlay, lprint, cldfrac, lslwr, & ! IN
-       kdist_lw, &
+       kdist_lw, kdist_lw_cldy, &
        hlwc, topflx, sfcflx, cldtau,                                                        & ! OUT
        hlw0, hlwb, flxprf,                                                                  & ! OPT(out)
        cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp,          & ! OPT(in)
@@ -799,6 +807,10 @@ contains
          lslwr           ! Flag to calculate RRTMGP LW?           (1)
     type(ty_gas_optics_rrtmgp_type),intent(in) :: &
          kdist_lw        ! DDT containing LW spectral information
+    type(ty_cloud_optics_type),intent(in) :: &
+         kdist_lw_cldy
+!    type(ty_gas_concs_type),intent(inout) :: &
+!         gas_concentrations
     real(kind_phys), dimension(ncol), intent(in) :: &
          sfc_emiss,    & ! Surface emissivity                     (1)
          skt,          & ! Surface(skin) temperature              (K)
@@ -1018,13 +1030,13 @@ contains
     ! #######################################################################################
     ! Set gas concentrations
     ! #######################################################################################
-    call gas_concs_lw%reset()
-    call check_error_msg(gas_concs_lw%set_vmr('o2',  vmr_o2))
-    call check_error_msg(gas_concs_lw%set_vmr('co2', vmr_co2))
-    call check_error_msg(gas_concs_lw%set_vmr('ch4', vmr_ch4))
-    call check_error_msg(gas_concs_lw%set_vmr('n2o', vmr_n2o))
-    call check_error_msg(gas_concs_lw%set_vmr('h2o', vmr_h2o))
-    call check_error_msg(gas_concs_lw%set_vmr('o3',  vmr_o3))
+    call gas_concentrations%reset()
+    call check_error_msg(gas_concentrations%set_vmr('o2',  vmr_o2))
+    call check_error_msg(gas_concentrations%set_vmr('co2', vmr_co2))
+    call check_error_msg(gas_concentrations%set_vmr('ch4', vmr_ch4))
+    call check_error_msg(gas_concentrations%set_vmr('n2o', vmr_n2o))
+    call check_error_msg(gas_concentrations%set_vmr('h2o', vmr_h2o))
+    call check_error_msg(gas_concentrations%set_vmr('o3',  vmr_o3))
 
     ! #######################################################################################
     ! Copy aerosol to RRTMGP DDT
@@ -1096,7 +1108,7 @@ contains
     ! #######################################################################################
     call check_error_msg(rte_lw(  &
          kdist_lw,                &
-         gas_concs_lw,            &
+         gas_concentrations,      &
          p_lay(1:ncol,1:nlay),    &
          t_lay(1:ncol,1:nlay),    &
          p_lev(1:ncol,1:nlay+1),  &
