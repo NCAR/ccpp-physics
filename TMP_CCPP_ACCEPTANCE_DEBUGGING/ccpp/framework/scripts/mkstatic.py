@@ -156,7 +156,6 @@ class API(object):
 module {module}
 
 {module_use}
-
    implicit none
 
    private
@@ -166,22 +165,25 @@ module {module}
 '''
 
     sub = '''
-   subroutine {subroutine}({ccpp_var_name}, group_name, ierr)
+   subroutine {subroutine}({ccpp_var_name}, suite_name, group_name, ierr)
 
       use ccpp_types, only : ccpp_t
 
       implicit none
 
       type(ccpp_t),               intent(inout) :: {ccpp_var_name}
+      character(len=*),           intent(in)    :: suite_name
       character(len=*), optional, intent(in)    :: group_name
       integer,                    intent(out)   :: ierr
 
       ierr = 0
 
-      if (present(group_name)) then
-{group_calls}
+{suite_switch}
       else
-{suite_call}
+
+         write({ccpp_var_name}%errmsg,'(*(a))'), 'Invalid suite ' // trim(suite_name)
+         ierr = 1
+
       end if
 
       {ccpp_var_name}%errflg = ierr
@@ -197,7 +199,7 @@ end module {module}
         self._filename    = CCPP_STATIC_API_MODULE + '.F90'
         self._module      = CCPP_STATIC_API_MODULE
         self._subroutines = None
-        self._suite       = None
+        self._suites      = []
         for key, value in kwargs.items():
             setattr(self, "_"+key, value)
 
@@ -222,16 +224,18 @@ end module {module}
 
     def write(self):
         """Write API for static build"""
-        if not self._suite:
-            raise Exception("No suite specified for generating API")
-        suite = self._suite
+        if not self._suites:
+            raise Exception("No suites specified for generating API")
+        suites = self._suites
 
         # Module use statements for suite and group caps
-        module_use = '   use {module}, only: {subroutines}\n'.format(module=suite.module,
-                                                  subroutines=','.join(suite.subroutines))
-        for group in suite.groups:
-            module_use += '   use {module}, only: {subroutines}\n'.format(module=group.module,
-                                                      subroutines=','.join(group.subroutines))
+        module_use = ''
+        for suite in suites:
+            for subroutine in suite.subroutines:
+                module_use += '   use {module}, only: {subroutine}\n'.format(module=suite.module, subroutine=subroutine)
+            for group in suite.groups:
+                for subroutine in group.subroutines:
+                    module_use += '   use {module}, only: {subroutine}\n'.format(module=group.module, subroutine=subroutine)
 
         # Add all variables required to module use statements. This is for the API only,
         # because the static API imports all variables from modules instead of receiving them
@@ -240,17 +244,19 @@ end module {module}
         ccpp_var = None
         parent_standard_names = []
         for ccpp_stage in CCPP_STAGES:
-            for parent_standard_name in suite.parents[ccpp_stage].keys():
-                if not parent_standard_name in parent_standard_names:
-                    parent_var = suite.parents[ccpp_stage][parent_standard_name]
-                    # Identify which variable is of type CCPP_TYPE (need local name)
-                    if parent_var.type == CCPP_TYPE:
-                        if ccpp_var and not ccpp_var.local_name==parent_var.local_name:
-                            raise Exception('There can be only one variable of type {0}, found {1} and {2}'.format(
-                                            CCPP_TYPE, ccpp_var.local_name, parent_var.local_name))
-                        ccpp_var = parent_var
-                        continue
-                    module_use += '   {0}\n'.format(parent_var.print_module_use())
+            for suite in suites:
+                for parent_standard_name in suite.parents[ccpp_stage].keys():
+                    if not parent_standard_name in parent_standard_names:
+                        parent_var = suite.parents[ccpp_stage][parent_standard_name]
+                        # Identify which variable is of type CCPP_TYPE (need local name)
+                        if parent_var.type == CCPP_TYPE:
+                            if ccpp_var and not ccpp_var.local_name==parent_var.local_name:
+                                raise Exception('There can be only one variable of type {0}, found {1} and {2}'.format(
+                                                CCPP_TYPE, ccpp_var.local_name, parent_var.local_name))
+                            ccpp_var = parent_var
+                            continue
+                        module_use += '   {0}\n'.format(parent_var.print_module_use())
+                        parent_standard_names.append(parent_standard_name)
         if not ccpp_var:
             raise Exception('No variable of type {0} found - need a scalar instance.'.format(CCPP_TYPE))
         elif not ccpp_var.rank == '':
@@ -261,46 +267,63 @@ end module {module}
         self._subroutines=[]
         subs = ''
         for ccpp_stage in CCPP_STAGES:
+            suite_switch = ''
+            for suite in suites:
+                # Calls to groups of schemes for this stage
+                group_calls = ''
+                for group in suite.groups:
+                    # The <init></init> and <finalize></finalize> groups require special treatment,
+                    # since they can only be run in the respective stage (init/finalize)
+                    if (group.init and not ccpp_stage == 'init') or \
+                        (group.finalize and not ccpp_stage == 'finalize'):
+                        continue
+                    if not group_calls:
+                        clause = 'if'
+                    else:
+                        clause = 'else if'
+                    argument_list_group = create_argument_list_wrapped_explicit(group.arguments[ccpp_stage])
+                    group_calls += '''
+            {clause} (trim(group_name)=="{group_name}") then
+               ierr = {suite_name}_{group_name}_{stage}_cap({arguments})'''.format(clause=clause,
+                                                                                   suite_name=group.suite,
+                                                                                   group_name=group.name,
+                                                                                   stage=ccpp_stage,
+                                                                                   arguments=argument_list_group)
+                group_calls += '''
+            else
+               write({ccpp_var_name}%errmsg, '(*(a))') "Group " // trim(group_name) // " not found"
+               ierr = 1
+            end if
+'''.format(ccpp_var_name=ccpp_var.local_name, group_name=group.name)
 
-            # Calls to groups of schemes for this stage
-            group_calls = ''
-            for group in suite.groups:
-                # The <init></init> and <finalize></finalize> groups require special treatment,
-                # since they can only be run in the respective stage (init/finalize)
-                if (group.init and not ccpp_stage == 'init') or \
-                    (group.finalize and not ccpp_stage == 'finalize'):
-                    continue
-                if not group_calls:
+                # Call to entire suite for this stage
+
+                # Create argument list for calling the full suite
+                argument_list_suite = create_argument_list_wrapped_explicit(suite.arguments[ccpp_stage])
+                suite_call = '''
+           ierr = {suite_name}_{stage}_cap({arguments})
+'''.format(suite_name=suite.name, stage=ccpp_stage, arguments=argument_list_suite)
+
+                # Add call to all groups of this suite and to the entire suite
+                if not suite_switch:
                     clause = 'if'
                 else:
                     clause = 'else if'
-                argument_list_group = create_argument_list_wrapped_explicit(group.arguments[ccpp_stage])
-                group_calls += '''
-         {clause} (trim(group_name)=="{group_name}") then
-            ierr = {group_name}_{stage}_cap({arguments})'''.format(clause=clause,
-                                                                   group_name=group.name,
-                                                                   stage=ccpp_stage,
-                                                                   arguments=argument_list_group)
-            group_calls += '''
+                suite_switch += '''
+      {clause} (trim(suite_name)=="{suite_name}") then
+
+         if (present(group_name)) then
+{group_calls}
          else
-            write({ccpp_var_name}%errmsg, '(*(a))') "Group " // trim(group_name) // " not found"
-            ierr = 1
-        end if
-'''.format(ccpp_var_name=ccpp_var.local_name, group_name=group.name)
+{suite_call}
+         end if
+'''.format(clause=clause, suite_name=suite.name, group_calls=group_calls, suite_call=suite_call)
 
-            # Call to entire suite for this stage
-
-            # Create argument list for calling the full suite
-            argument_list_suite = create_argument_list_wrapped_explicit(suite.arguments[ccpp_stage])
-            suite_call = '''
-        ierr = suite_{stage}_cap({arguments})
-'''.format(stage=ccpp_stage, arguments=argument_list_suite)
             subroutine = CCPP_STATIC_SUBROUTINE_NAME.format(stage=ccpp_stage)
             self._subroutines.append(subroutine)
             subs += API.sub.format(subroutine=subroutine,
-                                   ccpp_var_name=ccpp_var.local_name, 
-                                   group_calls=group_calls,
-                                   suite_call=suite_call)
+                                   ccpp_var_name=ccpp_var.local_name,
+                                   suite_switch=suite_switch)
 
         # Write output to stdout or file
         if (self._filename is not sys.stdout):
@@ -426,9 +449,9 @@ end module {module}
                 schemes = [group_xml.text]
                 subcycles.append(Subcycle(loop=1, schemes=schemes))
                 if group_xml.tag.lower() == 'init':
-                    self._groups.append(Group(name=group_xml.tag.lower(), subcycles=subcycles, init=True))
+                    self._groups.append(Group(name=group_xml.tag.lower(), subcycles=subcycles, suite=self._name, init=True))
                 elif group_xml.tag.lower() == 'finalize':
-                    self._groups.append(Group(name=group_xml.tag.lower(), subcycles=subcycles, finalize=True))
+                    self._groups.append(Group(name=group_xml.tag.lower(), subcycles=subcycles, suite=self._name, finalize=True))
                 continue
 
             # Parse subcycles of all regular groups
@@ -442,7 +465,7 @@ end module {module}
                         self._all_subroutines_called.append(scheme_xml.text + '_' + ccpp_stage)
                 subcycles.append(Subcycle(loop=loop, schemes=schemes))
 
-            self._groups.append(Group(name=group_xml.get('name'), subcycles=subcycles))
+            self._groups.append(Group(name=group_xml.get('name'), subcycles=subcycles, suite=self._name))
 
         # Remove duplicates from list of all subroutines an schemes
         self._all_schemes_called = list(set(self._all_schemes_called))
@@ -511,7 +534,7 @@ end module {module}
         """Create caps for all groups in the suite and for the entire suite
         (calling the group caps one after another)"""
         # Set name of module and filename of cap
-        self._module = 'ccpp_suite_cap'
+        self._module = 'ccpp_{suite_name}_cap'.format(suite_name=self._name)
         self._filename = '{module_name}.F90'.format(module_name=self._module)
         # Init
         self._subroutines = []
@@ -521,7 +544,8 @@ end module {module}
         module_use = ''
         for group in self._groups:
             group.write(metadata_request, metadata_define, arguments)
-            module_use += '   use {m}, only: {s}\n'.format(m=group.module, s=','.join(group.subroutines))
+            for subroutine in group.subroutines:
+                module_use += '   use {m}, only: {s}\n'.format(m=group.module, s=subroutine)
             for ccpp_stage in CCPP_STAGES:
                 for parent_standard_name in group.parents[ccpp_stage].keys():
                     if parent_standard_name in self.parents[ccpp_stage]:
@@ -552,11 +576,11 @@ end module {module}
 
                 # Write to body that calls the groups for this stage
                 body += '''
-      ierr = {group_name}_{stage}_cap({arguments})
+      ierr = {suite_name}_{group_name}_{stage}_cap({arguments})
       if (ierr/=0) return
-'''.format(group_name=group.name, stage=ccpp_stage, arguments=argument_list_group)
+'''.format(suite_name=self._name, group_name=group.name, stage=ccpp_stage, arguments=argument_list_group)
             # Add name of subroutine in the suite cap to list of subroutine names
-            subroutine = 'suite_{stage}_cap'.format(stage=ccpp_stage)
+            subroutine = '{name}_{stage}_cap'.format(name=self._name, stage=ccpp_stage)
             self._subroutines.append(subroutine)
             # Add subroutine to output
             subs += Suite.sub.format(subroutine=subroutine,
@@ -572,7 +596,7 @@ end module {module}
             f = sys.stdout
         f.write(Suite.header.format(module=self._module,
                                     module_use=module_use,
-                                    subroutines=','.join(self._subroutines)))
+                                    subroutines=', &\n             '.join(self._subroutines)))
         f.write(subs)
         f.write(Suite.footer.format(module=self._module))
         if (f is not sys.stdout):
@@ -583,12 +607,6 @@ end module {module}
         for group in self._groups:
             self._caps.append(group.filename)
 
-
-    def create_sdf_name_include_file(self, incfilename):
-        # Create include file for framework that contains the name of the sdf used for static build
-        f = open(incfilename, "w")
-        f.write('character(len=*), parameter :: ccpp_suite_static_name = "{suite_name}"\n'.format(suite_name = self._name))
-        f.close()
 
 ###############################################################################
 class Group(object):
@@ -682,6 +700,7 @@ end module {module}
 
     def __init__(self, **kwargs):
         self._name = ''
+        self._suite = None
         self._filename = 'sys.stdout'
         self._init = False
         self._finalize = False
@@ -705,7 +724,7 @@ end module {module}
         ccpp_error_msg_target_name = metadata_request[CCPP_ERROR_MSG_VARIABLE][0].target
         #
         module_use = ''
-        self._module = 'ccpp_group_{name}_cap'.format(name=self._name)
+        self._module = 'ccpp_{suite}_{name}_cap'.format(name=self._name, suite=self._suite)
         self._filename = '{module_name}.F90'.format(module_name=self._module)
         self._subroutines = []
         local_subs = ''
@@ -837,7 +856,7 @@ end module {module}
 
                     args = args.rstrip(',')
 #                    subroutine_call = 'call {subroutine_name}({args})'.format(subroutine_name=subroutine_name, args=args)
-                    subroutine_call = '''if (mpirank==0) then
+                    subroutine_call = '''if (mpirank>=0) then
            write(0,"(a)") "Calling {subroutine_name}"
            write(6,"(a)") "Calling {subroutine_name}"
         endif
@@ -866,7 +885,7 @@ end module {module}
                                                                      self.parents[ccpp_stage], metadata_define)
             sub_argument_list = create_argument_list_wrapped(self.arguments[ccpp_stage])
 
-            subroutine = self._name + '_' + ccpp_stage + '_cap'
+            subroutine = self._suite + '_' + self._name + '_' + ccpp_stage + '_cap'
             self._subroutines.append(subroutine)
             # Test and set blocks for initialization status
             initialized_test_block = Group.initialized_test_blocks[ccpp_stage].format(
@@ -894,7 +913,7 @@ end module {module}
         f.write(Group.header.format(group=self._name,
                                     module=self._module,
                                     module_use=module_use,
-                                    subroutines=','.join(self._subroutines)))
+                                    subroutines=', &\n             '.join(self._subroutines)))
         f.write(local_subs)
         f.write(Group.footer.format(module=self._module))
         if (f is not sys.stdout):
@@ -941,6 +960,11 @@ end module {module}
         if not type(value) == types.BooleanType:
             raise Exception("Invalid type {0} of argument value, boolean expected".format(type(value)))
         self._finalize = value
+
+    @property
+    def suite(self):
+        '''Get the suite name.'''
+        return self._suite
 
     @property
     def module(self):

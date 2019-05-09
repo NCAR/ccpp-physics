@@ -6,7 +6,7 @@ module module_physics_driver
 
   use machine,               only: kind_phys
   use physcons,              only: con_cp, con_fvirt, con_g, con_rd,    &
-                                   con_rv, con_hvap, con_hfus,          &
+                                   con_rv, con_hvap, con_hfus, con_pi,  &
                                    con_rerth, con_pi, pa2mb, rlapse,    &
                                    con_eps, con_epsm1, con_cliq,        &
                                    con_cvap, con_t0c
@@ -23,7 +23,7 @@ module module_physics_driver
                                    GFS_sfcprop_type, GFS_coupling_type, &
                                    GFS_control_type, GFS_grid_type,     &
                                    GFS_tbd_type,     GFS_cldprop_type,  &
-                                   GFS_radtend_type, GFS_diag_type
+                                   GFS_radtend_type, GFS_diag_type, huge
 #ifdef CCPP
   use GFS_typedefs,          only: GFS_interstitial_type
 #endif
@@ -38,6 +38,16 @@ module module_physics_driver
 #ifndef CCPP
   use surface_perturbation,  only: cdfnor
 #endif
+
+#ifndef CCPP
+  use module_sfc_diff,  only: sfc_diff
+  use module_sfc_ocean, only: sfc_ocean
+  use module_sfc_drv,   only: sfc_drv
+  use module_sfc_sice,  only: sfc_sice, cimin
+  use module_sfc_nst,   only: sfc_nst
+  use module_sfc_diag,  only: sfc_diag
+#endif
+  use module_sfc_cice,  only: sfc_cice
 
 #ifdef CCPP
   use ccpp_api,              only: ccpp_physics_run
@@ -55,7 +65,11 @@ module module_physics_driver
   real(kind=kind_phys), parameter :: hocp    = con_hvap/con_cp
   real(kind=kind_phys), parameter :: qmin    = 1.0e-10
   real(kind=kind_phys), parameter :: qsmall  = 1.0e-20
+#ifdef TRANSITION
+  real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+#else
   real(kind=kind_phys), parameter :: rainmin = 1.0e-13
+#endif
 #ifndef CCPP
   real(kind=kind_phys), parameter :: p850    = 85000.0
 #endif
@@ -65,11 +79,12 @@ module module_physics_driver
 #ifndef CCPP
   real(kind=kind_phys), parameter :: one     = 1.0d0, onebg = one/con_g
   real(kind=kind_phys), parameter :: albdf   = 0.06
+  real(kind=kind_phys), parameter :: tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf)
 #endif
-  real(kind=kind_phys), parameter :: tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf) !GF - once MG is CCPP-compliant, wrap this in #ifndef CCPP since moved to GFS_typedefs
   real(kind=kind_phys), parameter :: con_p001= 0.001d0
   real(kind=kind_phys), parameter :: con_d00 = 0.0d0
   real(kind=kind_phys), parameter :: con_day = 86400.d0
+  real(kind=kind_phys), parameter :: rad2dg  = 180.d0/con_pi
 
 
 !> GFS Physics Implementation Layer
@@ -100,7 +115,7 @@ module module_physics_driver
 !  subprograms called:                                                  !
 !                                                                       !
 !     get_prs,  dcyc2t2_pre_rad (testing),    dcyc2t3,  sfc_diff,       !
-!     sfc_ocean,sfc_drv,  sfc_land, sfc_sice, sfc_diag, moninp1,        !
+!     sfc_ocean,sfc_drv,  sfc_sice, sfc_cice, sfc_diag, moninp1,        !
 !     moninp,   moninq1,  moninq,   satmedmfvdif,                       !
 !     gwdps,    ozphys,   get_phi,                                      !
 !     sascnv,   sascnvn,  samfdeepcnv, rascnv,   cs_convr, gwdc,        !
@@ -209,7 +224,7 @@ module module_physics_driver
 !                               vertical turbulent mixng scheme         !
 !      Nov  2018    J. Han      Add canopy heat storage parameterization!
 !      Feb  2019    Ruiyu S.    Add an alternate method to use          ! 
-!				hydrometeors from GFDL MP in radiation  !
+!                               hydrometeors from GFDL MP in radiation  !
 !
 !  ====================    end of description    =====================
 !  ====================  definition of variables  ====================  !
@@ -544,6 +559,8 @@ module module_physics_driver
 !--- GFDL Cloud microphysics
       real(kind=kind_phys) ::                                           &
            crain, csnow, total_precip
+
+      real(kind=kind_phys) :: rho
 #endif
 
       real(kind=kind_phys), dimension(Model%ntrac-Model%ncld+2) ::      &
@@ -579,7 +596,36 @@ module module_physics_driver
            dtsfc_cice, dqsfc_cice, dusfc_cice, dvsfc_cice, ulwsfc_cice, &
            tisfc_cice, tsea_cice, hice_cice, fice_cice,                 &
 !--- for CS-convection
-           wcbmax
+           wcbmax,                                                      &
+!--- required by module conversion:
+           prsl1,ddvel
+
+      real(kind=kind_phys), dimension(size(Grid%xlon,1))  ::            &
+             zorl_ocean,   zorl_land,   zorl_ice,                       &
+               cd_ocean,     cd_land,     cd_ice,                       &
+              cdq_ocean,    cdq_land,    cdq_ice,                       &
+               rb_ocean,     rb_land,     rb_ice,                       &
+           stress_ocean, stress_land, stress_ice,                       &
+             ffmm_ocean,   ffmm_land,   ffmm_ice,                       &
+             ffhh_ocean,   ffhh_land,   ffhh_ice,                       &
+           uustar_ocean, uustar_land, uustar_ice,                       &
+             fm10_ocean,   fm10_land,   fm10_ice,                       &
+              fh2_ocean,    fh2_land,    fh2_ice,                       &
+              qss_ocean,    qss_land,    qss_ice,                       &
+              cmm_ocean,    cmm_land,    cmm_ice,                       &
+              chh_ocean,    chh_land,    chh_ice,                       &
+             gflx_ocean,   gflx_land,   gflx_ice,                       &
+             evap_ocean,   evap_land,   evap_ice,                       &
+             hflx_ocean,   hflx_land,   hflx_ice,                       &
+             ep1d_ocean,   ep1d_land,   ep1d_ice,                       &
+                          weasd_land,  weasd_ice,                       &
+            snowd_ocean,  snowd_land,  snowd_ice,                       &
+            tprcp_ocean,  tprcp_land,  tprcp_ice,                       &
+             tsfc_ocean,   tsfc_land,   tsfc_ice,                       &
+            tsurf_ocean,  tsurf_land,  tsurf_ice
+
+      logical, dimension(size(Grid%xlon,1))                ::           &
+           wet, dry, ocean, lake, icy
 
 #ifndef CCPP
 !--- for precipitation type algorithm only
@@ -671,9 +717,7 @@ module module_physics_driver
       integer :: nsteps_per_reset
       integer :: kdtminus1
 ! For computing saturation vapor pressure and rh at 2m
-! DH* real(kind_phys) ???
       real :: pshltr,QCQ,rh02
-! *DH
 #endif
 #ifdef CCPP
       integer :: nb
@@ -681,7 +725,13 @@ module module_physics_driver
       integer :: ierr
       character(len=512) :: errmsg
       integer            :: errflg
+#endif
 
+#ifdef TRANSITION
+      real(kind=kind_phys), volatile :: volatile_var1, volatile_var2
+#endif
+
+#ifdef CCPP
       errmsg = ''
       errflg = 0
 
@@ -772,6 +822,34 @@ module module_physics_driver
 
 #include "debug_bitforbit_diagtoscreen.inc"
 
+! --- aux arrays required if subroutines are embedded in modules:
+      prsl1(:) = Statein%prsl(:,1)
+      ddvel(:) = Tbd%phy_f2d(:,Model%num_p2d)
+
+          cd_ocean(:) = huge ;      cd_land(:) = huge ;      cd_ice(:) = huge
+         cdq_ocean(:) = huge ;     cdq_land(:) = huge ;     cdq_ice(:) = huge
+          rb_ocean(:) = huge ;      rb_land(:) = huge ;      rb_ice(:) = huge
+      stress_ocean(:) = huge ;  stress_land(:) = huge ;  stress_ice(:) = huge
+        ffmm_ocean(:) = huge ;    ffmm_land(:) = huge ;    ffmm_ice(:) = huge
+        ffhh_ocean(:) = huge ;    ffhh_land(:) = huge ;    ffhh_ice(:) = huge
+        fm10_ocean(:) = huge ;    fm10_land(:) = huge ;    fm10_ice(:) = huge
+         fh2_ocean(:) = huge ;     fh2_land(:) = huge ;     fh2_ice(:) = huge
+         qss_ocean(:) = huge ;     qss_land(:) = huge ;     qss_ice(:) = huge
+         cmm_ocean(:) = huge ;     cmm_land(:) = huge ;     cmm_ice(:) = huge
+         chh_ocean(:) = huge ;     chh_land(:) = huge ;     chh_ice(:) = huge
+        gflx_ocean(:) = huge ;    gflx_land(:) = huge ;    gflx_ice(:) = huge
+        evap_ocean(:) = huge ;    evap_land(:) = huge ;    evap_ice(:) = huge
+        hflx_ocean(:) = huge ;    hflx_land(:) = huge ;    hflx_ice(:) = huge
+        ep1d_ocean(:) = huge ;    ep1d_land(:) = huge ;    ep1d_ice(:) = huge 
+      uustar_ocean(:) = huge ;  uustar_land(:) = huge ;  uustar_ice(:) = huge
+                                 weasd_land(:) = huge ;   weasd_ice(:) = huge
+       snowd_ocean(:) = huge ;   snowd_land(:) = huge ;   snowd_ice(:) = huge
+       tprcp_ocean(:) = huge ;   tprcp_land(:) = huge ;   tprcp_ice(:) = huge
+        tsfc_ocean(:) = huge ;    tsfc_land(:) = huge ;    tsfc_ice(:) = huge
+       tsurf_ocean(:) = huge ;   tsurf_land(:) = huge ;   tsurf_ice(:) = huge
+        zorl_ocean(:) = huge ;    zorl_land(:) = huge ;    zorl_ice(:) = huge
+        wind(:)     = huge
+
 !
 !===> ...  begin here
 
@@ -858,6 +936,10 @@ module module_physics_driver
         endif
       endif
 
+      if (imp_physics == 99) then
+        if (Model%cplchm) nvdiff = 3
+      end if
+
       ntkev = nvdiff
 #endif
 
@@ -870,22 +952,22 @@ module module_physics_driver
       lprnt   = .false.
 
 !     do i=1,im
-!       lprnt = kdt >= 1 .and. abs(grid%xlon(i)*57.29578-119.78) < 0.101      &
-!                        .and. abs(grid%xlat(i)*57.29578-19.49)  < 0.101
-!       lprnt = kdt >= 250 .and. abs(grid%xlon(i)*57.29578-227.34) < 0.101      &
-!                        .and. abs(grid%xlat(i)*57.29578-6.206)  < 0.101
-!       lprnt = kdt >= 0 .and. abs(grid%xlon(i)*57.29578-90.9375) < 0.501      &
-!                        .and. abs(grid%xlat(i)*57.29578-36.0)  < 0.501
-!       lprnt = kdt >= 0 .and. abs(grid%xlon(i)*57.29578-285.938) < 0.501      &
-!                        .and. abs(grid%xlat(i)*57.29578+46.286)  < 0.501
-!       lprnt = kdt >= 0 .and. abs(grid%xlon(i)*57.29578-108.41) < 0.501      &
-!                        .and. abs(grid%xlat(i)*57.29578-32.97)  < 0.501
+!       lprnt = kdt >=   1 .and. abs(grid%xlon(i)*rad2dg-119.78) < 0.101 &
+!                          .and. abs(grid%xlat(i)*rad2dg-19.49)  < 0.101
+!       lprnt = kdt >= 250 .and. abs(grid%xlon(i)*rad2dg-227.34) < 0.101 &
+!                          .and. abs(grid%xlat(i)*rad2dg-6.206)  < 0.101
+!       lprnt = kdt >=   0 .and. abs(grid%xlon(i)*rad2dg-90.9375)< 0.501 &
+!                          .and. abs(grid%xlat(i)*rad2dg-36.0)   < 0.501
+!       lprnt = kdt >=   0 .and. abs(grid%xlon(i)*rad2dg-285.938 < 0.501 &
+!                          .and. abs(grid%xlat(i)*rad2dg+46.286) < 0.501
+!       lprnt = kdt >=   0 .and. abs(grid%xlon(i)*rad2dg-108.41) < 0.501 &
+!                          .and. abs(grid%xlat(i)*rad2dg-32.97)  < 0.501
 !       if (kdt == 1) &
-!         write(2000+me,*)' i=',i,' xlon=',grid%xlon(i)*57.29578,             &
-!                       ' xlat=',grid%xlat(i)*57.29578,' me=',me
+!         write(2000+me,*)' i=',i,' xlon=',grid%xlon(i)*rad2dg,          &
+!                       ' xlat=',grid%xlat(i)*rad2dg,' me=',me
 !       if (lprnt) then
 !         ipr = i
-!         write(0,*)' ipr=',ipr,'xlon=',grid%xlon(i)*57.29578,' xlat=',grid%xlat(i)*57.29578,' me=',me
+!         write(0,*)' ipr=',ipr,'xlon=',grid%xlon(i)*rad2dg,' xlat=',grid%xlat(i)*rad2dg,' me=',me
 !         exit
 !       endif
 !     enddo
@@ -1083,7 +1165,7 @@ module module_physics_driver
       end if
 #else
       if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of get_prs_fv3'
-      call get_prs_fv3 (ix, levs, ntrac, Statein%phii, Statein%prsi, &
+      call get_prs_fv3 (ix, levs, ntrac, Statein%phii, Statein%prsi,    &
                         Statein%tgrs, Statein%qgrs, del, del_gz)
 #endif
 #endif
@@ -1107,16 +1189,18 @@ module module_physics_driver
       !Interstitial(nt)%rhcpbl = rhpbl    ! intent(out) - rhpbl  uninitialized at this point
       !Interstitial(nt)%rhctop = rhbtop   ! intent(out) - rhbtop uninitialized at this point
       !Interstitial(nt)%frain  = frain    ! intent(out) - frain  uninitialized at this point
-      !Interstitial(nt)%islmsk = islmsk    ! intent(out)
-      !Interstitial(nt)%frland = frland    ! intent(out)
-      !Interstitial(nt)%work1  = work1     ! intent(out)
-      !Interstitial(nt)%work2  = work2     ! intent(out)
+      !Interstitial(nt)%islmsk = islmsk   ! intent(out)
+      !Interstitial(nt)%frland = frland   ! intent(out)
+      !Interstitial(nt)%work1  = work1    ! intent(out)
+      !Interstitial(nt)%work2  = work2    ! intent(out)
       !Diag%psurf                         ! intent(out)
-      !Interstitial(nt)%dudt   = dudt      ! intent(out)
-      !Interstitial(nt)%dvdt   = dvdt      ! intent(out)
-      !Interstitial(nt)%dtdt   = dtdt      ! intent(out)
-      !Interstitial(nt)%dtdtc  = dtdtc     ! intent(out)
-      !Interstitial(nt)%dqdt   = dqdt      ! intent(out)
+      !Interstitial(nt)%dudt   = dudt     ! intent(out)
+      !Interstitial(nt)%dvdt   = dvdt     ! intent(out)
+      !Interstitial(nt)%dtdt   = dtdt     ! intent(out)
+      !Interstitial(nt)%dtdtc  = dtdtc    ! intent(out)
+      !Interstitial(nt)%dqdt   = dqdt     ! intent(out)
+      !Sfcprop%tisfc                      ! intent(in)
+      !Interstitial(nt)%tice              ! intent(out) - tice uninitialized at this point
       !cdata_block(nb,nt)%errmsg = errmsg ! intent(out)
       !cdata_block(nb,nt)%errflg = errflg ! intent(out)
       !
@@ -1135,6 +1219,7 @@ module module_physics_driver
       dtdt   = Interstitial(nt)%dtdt
       dtdtc  = Interstitial(nt)%dtdtc
       dqdt   = Interstitial(nt)%dqdt
+      tice   = Interstitial(nt)%tice
       errmsg = trim(cdata_block(nb,nt)%errmsg)
       errflg = cdata_block(nb,nt)%errflg
       if (errflg/=0) then
@@ -1153,6 +1238,22 @@ module module_physics_driver
 
 #ifndef CCPP
       frain = dtf / dtp
+
+      do i = 1, IM
+         ! Default assignments in CCPP are in Interstitial%create(im)
+         wet(i) = .false.
+         dry(i) = .false.
+       ocean(i) = .false.
+        lake(i) = .false.
+         icy(i) = .false.
+
+         ! In CCPP, this is in GFS_surface_composites_pre_run
+         if(Sfcprop%oceanfrac(i)>0.) ocean(i) = .true.
+         if(Sfcprop%landfrac(i) >0.)   dry(i) = .true.
+         if(Sfcprop%lakefrac(i) >0.)  lake(i) = .true.
+         if(ocean(i) .or. lake(i))     wet(i) = .true.
+         if(Sfcprop%fice(i) > cimin*max(Sfcprop%oceanfrac(i),Sfcprop%lakefrac(i))) icy(i) = .true.
+      enddo
 #endif
 
       do i=1,im
@@ -1211,7 +1312,8 @@ module module_physics_driver
 #endif
       enddo
 !
-! DH* note: this block is not yet in CCPP
+! DH* note: this block is not yet in CCPP, except the default
+! initialization of the interstitial variable flag_cice to .false.
       if (Model%cplflx) then
         do i=1,im
           islmsk_cice(i) = nint(Coupling%slimskin_cpl(i))
@@ -1223,11 +1325,14 @@ module module_physics_driver
           dtsfc_cice(i)  = Coupling%dtsfcin_cpl(i)
           dqsfc_cice(i)  = Coupling%dqsfcin_cpl(i)
           tisfc_cice(i)  = Sfcprop%tisfc(i)
-          tsea_cice(i)   = Sfcprop%tsfc(i)
+          tsea_cice(i)   = Sfcprop%tsfco(i)
           fice_cice(i)   = Sfcprop%fice(i)
           hice_cice(i)   = Sfcprop%hice(i)
-          if(flag_cice(i))Sfcprop%tsfc(i) = fice_cice(i)*tisfc_cice(i) + (1.0 - fice_cice(i))*tsea_cice(i)
+          if(flag_cice(i)) Sfcprop%tsfc(i) = fice_cice(i)*tisfc_cice(i) + (1. - fice_cice(i))*tsea_cice(i)
         enddo
+      else
+        ! Avoid uninitialized variables - set to default values
+        flag_cice = .false.
       endif
 ! *DH
 
@@ -1652,6 +1757,7 @@ module module_physics_driver
         flag_iter(i)    = .true.
         drain(i)        = 0.0
         ep1d(i)         = 0.0
+        gflx(i)         = 0.0
         runof(i)        = 0.0
         hflx(i)         = 0.0
         evap(i)         = 0.0
@@ -1668,6 +1774,51 @@ module module_physics_driver
         Diag%smcref2(i) = 0.0
       enddo
 
+#ifdef CCPP
+      write(0,*) "DH ERROR: call to GFS_surface_composites_pre_run not yet implemented in HYBRID mode"
+      call sleep(5)
+      stop
+#else
+      do i=1,im
+        if (.not. Model%cplflx) then
+          Sfcprop%zorll(i) = Sfcprop%zorl(i)
+          Sfcprop%zorlo(i) = Sfcprop%zorl(i)
+          Sfcprop%tsfcl(i) = Sfcprop%tsfc(i)
+          Sfcprop%tsfco(i) = Sfcprop%tsfc(i)
+          Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
+        end if
+        if(wet(i)) then
+          snowd_ocean(i) = Sfcprop%snowd(i)
+          tprcp_ocean(i) = Sfcprop%tprcp(i)
+           zorl_ocean(i) = Sfcprop%zorlo(i)
+           tsfc_ocean(i) = Sfcprop%tsfco(i)
+          tsurf_ocean(i) = Sfcprop%tsfco(i)
+        endif
+!
+        if (dry(i)) then
+          uustar_land(i) = Sfcprop%uustar(i)
+           weasd_land(i) = Sfcprop%weasd(i)
+           tprcp_land(i) = Sfcprop%tprcp(i)
+            zorl_land(i) = Sfcprop%zorll(i)
+            tsfc_land(i) = Sfcprop%tsfcl(i)
+           tsurf_land(i) = Sfcprop%tsfcl(i)
+           snowd_land(i) = Sfcprop%snowd(i)
+        end if
+!
+        if (icy(i)) then
+          uustar_ice(i) = Sfcprop%uustar(i)
+           weasd_ice(i) = Sfcprop%weasd(i)
+           tprcp_ice(i) = Sfcprop%tprcp(i)
+            zorl_ice(i) = Sfcprop%zorll(i)
+            tsfc_ice(i) = Sfcprop%tisfc(i)
+           tsurf_ice(i) = Sfcprop%tisfc(i)
+           snowd_ice(i) = Sfcprop%snowd(i)
+            ep1d_ice(i) = 0.
+            gflx_ice(i) = 0.
+        end if
+      enddo
+#endif
+
 !  --- ...  lu: iter-loop over (sfc_diff,sfc_drv,sfc_ocean,sfc_sice)
 
       do iter=1,2
@@ -1678,70 +1829,141 @@ module module_physics_driver
 !
 !     if (lprnt) write(0,*)' tsfc=',Sfcprop%tsfc(ipr),' tsurf=',tsurf(ipr),iter
 #ifdef CCPP
-         if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_ex_coef through option B'
+         if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_diff through option B'
          ! Copy local variables from driver to appropriate interstitial variables
-         !Interstitial(nt)%im = im              ! intent(in) - set in Interstitial(nt)%create()
-         !Statein%pgr                           ! intent(in)
-         !Statein%ugrs                          ! intent(in)
-         !Statein%vgrs                          ! intent(in)
-         !Statein%tgrs                          ! intent(in)
-         !Statein%qgrs                          ! intent(in)
-         !Diag%zlvl                             ! intent(in)
-         !Sfcprop%snowd                         ! intent(in)
-         !Sfcprop%tsfc                          ! intent(in)
-         !Sfcprop%zorl                          ! intent(inout)
-         Interstitial(nt)%cd = cd               ! intent(inout)
-         Interstitial(nt)%cdq = cdq             ! intent(inout)
-         Interstitial(nt)%rb = rb               ! intent(inout)
-         !Statein%prsl(1,1)                     ! intent(in)
-         Interstitial(nt)%work3 = work3         ! intent(in)
-         Interstitial(nt)%islmsk = islmsk       ! intent(in)
-         Interstitial(nt)%stress = stress       ! intent(inout)
-         !Sfcprop%ffmm                          ! intent(inout)
-         !Sfcprop%ffhh                          ! intent(inout)
-         !Sfcprop%uustar                        ! intent(inout)
-         Interstitial(nt)%wind = wind           ! intent(inout)
-         !Tbd%phy_f2d(1,Model%num_p2d)          ! intent(in)
-         Interstitial(nt)%fm10 = fm10           ! intent(inout)
-         Interstitial(nt)%fh2 = fh2             ! intent(inout)
-         Interstitial(nt)%sigmaf = sigmaf       ! intent(in)
-         Interstitial(nt)%vegtype = vegtype     ! intent(in)
-         !Sfcprop%shdmax                        ! intent(in)
-         !Model%ivegsrc                         ! intent(in)
-         Interstitial(nt)%z01d = z01d           ! intent(in)
-         Interstitial(nt)%zt1d = zt1d           ! intent(in)
-         Interstitial(nt)%tsurf = tsurf         ! intent(in)
-         Interstitial(nt)%flag_iter = flag_iter ! intent(in)
-         !Model%redrag                          ! intent(in)
-         !cdata_block(nb,nt)%errmsg = errmsg    ! intent(out)
-         !cdata_block(nb,nt)%errflg = errflg    ! intent(out)
-         call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_ex_coef", ierr=ierr)
+         !Interstitial(nt)%im = im                    ! intent(in) - set in Interstitial(nt)%create()
+         !Statein%pgr                                 ! intent(in)
+         !Statein%ugrs                                ! intent(in)
+         !Statein%vgrs                                ! intent(in)
+         !Statein%tgrs                                ! intent(in)
+         !Statein%qgrs                                ! intent(in)
+         !Diag%zlvl                                   ! intent(in)
+         !Statein%prsl(:,1)                           ! intent(in)
+         Interstitial(nt)%work3 = work3               ! intent(in)
+         !Tbd%phy_f2d(1,Model%num_p2d)                ! intent(in)
+         Interstitial(nt)%sigmaf = sigmaf             ! intent(in)
+         Interstitial(nt)%vegtype = vegtype           ! intent(in)
+         !Sfcprop%shdmax                              ! intent(in)
+         !Model%ivegsrc                               ! intent(in)
+         Interstitial(nt)%z01d = z01d                 ! intent(in)
+         Interstitial(nt)%zt1d = zt1d                 ! intent(in)
+         Interstitial(nt)%flag_iter = flag_iter       ! intent(in)
+         !Model%redrag                                ! intent(in)
+         Interstitial(nt)%wet = wet                   ! intent(in)
+         Interstitial(nt)%dry = dry                   ! intent(in)
+         Interstitial(nt)%icy = icy                   ! intent(in)
+         !Sfcprop%fice                                ! intent(in)
+         Interstitial(nt)%tsfc_ocean = tsfc_ocean     ! intent(in)
+         Interstitial(nt)%tsfc_land = tsfc_land       ! intent(in)
+         Interstitial(nt)%tsfc_ice = tsfc_ice         ! intent(in)
+         Interstitial(nt)%tsurf_ocean = tsurf_ocean   ! intent(in)
+         Interstitial(nt)%tsurf_land = tsurf_land     ! intent(in)
+         Interstitial(nt)%tsurf_ice = tsurf_ice       ! intent(in)
+         Interstitial(nt)%snowd_ocean = snowd_ocean   ! intent(in)
+         Interstitial(nt)%snowd_land = snowd_land     ! intent(in)
+         Interstitial(nt)%snowd_ice = snowd_ice       ! intent(in)
+         Interstitial(nt)%zorl_ocean = zorl_ocean     ! intent(inout)
+         Interstitial(nt)%zorl_land = zorl_land       ! intent(inout)
+         Interstitial(nt)%zorl_ice = zorl_ice         ! intent(inout)
+         Interstitial(nt)%uustar_ocean = uustar_ocean ! intent(inout)
+         Interstitial(nt)%uustar_land = uustar_land   ! intent(inout)
+         Interstitial(nt)%uustar_ice = uustar_ice     ! intent(inout)
+         Interstitial(nt)%cd_ocean = cd_ocean         ! intent(inout)
+         Interstitial(nt)%cd_land = cd_land           ! intent(inout)
+         Interstitial(nt)%cd_ice = cd_ice             ! intent(inout)
+         Interstitial(nt)%cdq_ocean = cdq_ocean       ! intent(inout)
+         Interstitial(nt)%cdq_land = cdq_land         ! intent(inout)
+         Interstitial(nt)%cdq_ice = cdq_ice           ! intent(inout)
+         Interstitial(nt)%rb_ocean = rb_ocean         ! intent(inout)
+         Interstitial(nt)%rb_land = rb_land           ! intent(inout)
+         Interstitial(nt)%rb_ice = rb_ice             ! intent(inout)
+         Interstitial(nt)%stress_ocean = stress_ocean ! intent(inout)
+         Interstitial(nt)%stress_land = stress_land   ! intent(inout)
+         Interstitial(nt)%stress_ice = stress_ice     ! intent(inout)
+         Interstitial(nt)%ffmm_ocean = ffmm_ocean     ! intent(inout)
+         Interstitial(nt)%ffmm_land = ffmm_land       ! intent(inout)
+         Interstitial(nt)%ffmm_ice = ffmm_ice         ! intent(inout)
+         Interstitial(nt)%ffhh_ocean = ffhh_ocean     ! intent(inout)
+         Interstitial(nt)%ffhh_land = ffhh_land       ! intent(inout)
+         Interstitial(nt)%ffhh_ice = ffhh_ice         ! intent(inout)
+         Interstitial(nt)%fm10_ocean = fm10_ocean     ! intent(inout)
+         Interstitial(nt)%fm10_land = fm10_land       ! intent(inout)
+         Interstitial(nt)%fm10_ice = fm10_ice         ! intent(inout)
+         Interstitial(nt)%fh2_ocean = fh2_ocean       ! intent(inout)
+         Interstitial(nt)%fh2_land = fh2_land         ! intent(inout)
+         Interstitial(nt)%fh2_ice = fh2_ice           ! intent(inout)
+         Interstitial(nt)%wind = wind                 ! intent(inout)
+         !cdata_block(nb,nt)%errmsg = errmsg          ! intent(out)
+         !cdata_block(nb,nt)%errflg = errflg          ! intent(out)
+         call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_diff", ierr=ierr)
          ! Copy back intent(inout) interstitial variables to local variables in driver
-         cd     = Interstitial(nt)%cd
-         cdq    = Interstitial(nt)%cdq
-         rb     = Interstitial(nt)%rb
-         stress = Interstitial(nt)%stress
+         zorl_ocean = Interstitial(nt)%zorl_ocean
+         zorl_land = Interstitial(nt)%zorl_land
+         zorl_ice = Interstitial(nt)%zorl_ice
+         uustar_ocean = Interstitial(nt)%uustar_ocean
+         uustar_land = Interstitial(nt)%uustar_land
+         uustar_ice = Interstitial(nt)%uustar_ice
+         cd_ocean = Interstitial(nt)%cd_ocean
+         cd_land = Interstitial(nt)%cd_land
+         cd_ice = Interstitial(nt)%cd_ice
+         cdq_ocean = Interstitial(nt)%cdq_ocean
+         cdq_land = Interstitial(nt)%cdq_land
+         cdq_ice = Interstitial(nt)%cdq_ice
+         rb_ocean = Interstitial(nt)%rb_ocean
+         rb_land = Interstitial(nt)%rb_land
+         rb_ice = Interstitial(nt)%rb_ice
+         stress_ocean = Interstitial(nt)%stress_ocean
+         stress_land = Interstitial(nt)%stress_land
+         stress_ice = Interstitial(nt)%stress_ice
+         ffmm_ocean = Interstitial(nt)%ffmm_ocean
+         ffmm_land = Interstitial(nt)%ffmm_land
+         ffmm_ice = Interstitial(nt)%ffmm_ice
+         ffhh_ocean = Interstitial(nt)%ffhh_ocean
+         ffhh_land = Interstitial(nt)%ffhh_land
+         ffhh_ice = Interstitial(nt)%ffhh_ice
+         fm10_ocean = Interstitial(nt)%fm10_ocean
+         fm10_land = Interstitial(nt)%fm10_land
+         fm10_ice = Interstitial(nt)%fm10_ice
+         fh2_ocean = Interstitial(nt)%fh2_ocean
+         fh2_land = Interstitial(nt)%fh2_land
+         fh2_ice = Interstitial(nt)%fh2_ice
          wind   = Interstitial(nt)%wind
-         fm10   = Interstitial(nt)%fm10
-         fh2    = Interstitial(nt)%fh2
          errmsg = trim(cdata_block(nb,nt)%errmsg)
          errflg = cdata_block(nb,nt)%errflg
          if (errflg/=0) then
-             write(0,*) 'Error in call to sfc_ex_coef: ' // trim(errmsg)
+             write(0,*) 'Error in call to sfc_diff: ' // trim(errmsg)
              stop
          end if
 #else
          if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of sfc_diff'
-         call sfc_diff (im, Statein%pgr, Statein%ugrs, Statein%vgrs,      &
-                       Statein%tgrs, Statein%qgrs, Diag%zlvl,             &
-                       Sfcprop%snowd, Sfcprop%tsfc,  Sfcprop%zorl, cd,    &
-                       cdq, rb, Statein%prsl(1,1), work3, islmsk, stress, &
-                       Sfcprop%ffmm,  Sfcprop%ffhh, Sfcprop%uustar,       &
-                       wind,  Tbd%phy_f2d(1,Model%num_p2d), fm10, fh2,    &
-                       sigmaf, vegtype, Sfcprop%shdmax, Model%ivegsrc,    &
-                       z01d, zt1d,                                        &  ! mg, sfc-perts
-                       tsurf, flag_iter, Model%redrag)
+         call sfc_diff                                                   &
+!  ---  inputs:
+          (im, Statein%pgr, Statein%ugrs, Statein%vgrs,                 &
+           Statein%tgrs, Statein%qgrs, Diag%zlvl,                       &
+           prsl1, work3, ddvel, sigmaf, vegtype,                        &
+           Sfcprop%shdmax, Model%ivegsrc,                               &
+           z01d, zt1d,                                                  & ! mg, sfc-perts
+           flag_iter, Model%redrag,                                     &
+           wet, dry, icy, cice,                                         &
+             tsfc_ocean,   tsfc_land,   tsfc_ice,                       &
+            tsurf_ocean,  tsurf_land,  tsurf_ice,                       &
+            snowd_ocean,  snowd_land,  snowd_ice,                       &
+!  ---  input/output:
+             zorl_ocean,   zorl_land,   zorl_ice,                       &
+           uustar_ocean, uustar_land, uustar_ice,                       &
+!  ---  outputs:
+           cd_ocean,cd_land,cd_ice,cdq_ocean,cdq_land,cdq_ice,          &
+               rb_ocean,     rb_land,     rb_ice,                       &
+           stress_ocean, stress_land, stress_ice,                       &
+             ffmm_ocean,   ffmm_land,   ffmm_ice,                       &
+             ffhh_ocean,   ffhh_land,   ffhh_ice,                       &
+             fm10_ocean,   fm10_land,   fm10_ice,                       &
+              fh2_ocean,    fh2_land,    fh2_ice,                       &
+              wind)
+ !
 #endif
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
 !  --- ...  lu: update flag_guess
 
@@ -1776,20 +1998,57 @@ module module_physics_driver
          enddo
 #endif
 
+#include "debug_bitforbit_diagtoscreen.inc"
+
          if (Model%nstf_name(1) > 0) then
 
 #ifdef CCPP
             if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_nst_pre through option B'
             ! Copy local variables from driver to appropriate interstitial variables
-            !Interstitial(nt)%im = im                ! intent(in) - set in Interstitial(nt)%create()
-            Interstitial(nt)%islmsk = islmsk         ! intent(in)
-            Interstitial(nt)%tsurf = tsurf           ! intent(inout)
-            Interstitial(nt)%tseal = tseal           ! intent(inout)
-            !cdata_block(nb,nt)%errmsg = errmsg      ! intent(out)
-            !cdata_block(nb,nt)%errflg = errflg      ! intent(out)
+            !Interstitial(nt)%im = im                     ! intent(in) - set in Interstitial(nt)%create()
+            !rlapse                                       ! intent(in)
+            Interstitial(nt)%icy = icy                    ! intent(in)
+            Interstitial(nt)%wet = wet                    ! intent(in)
+            Interstitial(nt)%zorl_ocean = zorl_ocean      ! intent(inout)
+            Interstitial(nt)%zorl_ice = zorl_ice          ! intent(in)
+            Interstitial(nt)%cd_ocean = cd_ocean          ! intent(inout)
+            Interstitial(nt)%cd_ice = cd_ice              ! intent(in)
+            Interstitial(nt)%cdq_ocean = cdq_ocean        ! intent(inout)
+            Interstitial(nt)%cdq_ice = cdq_ice            ! intent(in)
+            Interstitial(nt)%rb_ocean = rb_ocean          ! intent(inout)
+            Interstitial(nt)%rb_ice = rb_ice              ! intent(in)
+            Interstitial(nt)%stress_ocean = stress_ocean  ! intent(inout)
+            Interstitial(nt)%stress_ice = stress_ice      ! intent(in)
+            Interstitial(nt)%ffmm_ocean = ffmm_ocean      ! intent(inout)
+            Interstitial(nt)%ffmm_ice = ffmm_ice          ! intent(in)
+            Interstitial(nt)%ffhh_ocean = ffhh_ocean      ! intent(inout)
+            Interstitial(nt)%ffhh_ice = ffhh_ice          ! intent(in)
+            Interstitial(nt)%uustar_ocean = uustar_ocean  ! intent(inout)
+            Interstitial(nt)%uustar_ice = uustar_ice      ! intent(in)
+            Interstitial(nt)%fm10_ocean = fm10_ocean      ! intent(inout)
+            Interstitial(nt)%fm10_ice = fm10_ice          ! intent(in)
+            Interstitial(nt)%fh2_ocean = fh2_ocean        ! intent(inout)
+            Interstitial(nt)%fh2_ice = fh2_ice            ! intent(in)
+            !Sfcprop%oro                                  ! intent(in)
+            !Sfcprop%oro_uf                               ! intent(in)
+            Interstitial(nt)%tsfc_ocean = tsfc_ocean      ! intent(in)
+            Interstitial(nt)%tsurf_ocean = tsurf_ocean    ! intent(inout)
+            Interstitial(nt)%tseal = tseal                ! intent(inout)
+            !cdata_block(nb,nt)%errmsg = errmsg           ! intent(out)
+            !cdata_block(nb,nt)%errflg = errflg           ! intent(out)
             call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_nst_pre", ierr=ierr)
             ! Copy intent(inout) and intent(out) interstitial variables to local variables in driver
-            tsurf = Interstitial(nt)%tsurf
+            zorl_ocean = Interstitial(nt)%zorl_ocean
+            cd_ocean = Interstitial(nt)%cd_ocean
+            cdq_ocean = Interstitial(nt)%cdq_ocean
+            rb_ocean = Interstitial(nt)%rb_ocean
+            stress_ocean = Interstitial(nt)%stress_ocean
+            ffmm_ocean = Interstitial(nt)%ffmm_ocean
+            ffhh_ocean = Interstitial(nt)%ffhh_ocean
+            uustar_ocean = Interstitial(nt)%uustar_ocean
+            fm10_ocean = Interstitial(nt)%fm10_ocean
+            fh2_ocean = Interstitial(nt)%fh2_ocean
+            tsurf_ocean = Interstitial(nt)%tsurf_ocean
             tseal = Interstitial(nt)%tseal
             errmsg = trim(cdata_block(nb,nt)%errmsg)
             errflg = cdata_block(nb,nt)%errflg
@@ -1800,36 +2059,88 @@ module module_physics_driver
             !
             if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_nst through option B'
             ! Copy local variables from driver to appropriate interstitial variables
-            !Interstitial(nt)%im = im                ! intent(in) - set in Interstitial(nt)%create()
-            Interstitial(nt)%islmsk = islmsk         ! intent(in)
-            Interstitial(nt)%tsurf = tsurf           ! intent(inout)
-            Interstitial(nt)%tseal = tseal           ! intent(inout)
-            Interstitial(nt)%cd = cd                 ! intent(in)
-            Interstitial(nt)%cdq = cdq               ! intent(in)
-            Interstitial(nt)%work3 = work3           ! intent(in)
-            Interstitial(nt)%stress = stress         ! intent(in)
-            Interstitial(nt)%gabsbdlw = gabsbdlw     ! intent(in)
-            !Diag%nswsfci                            ! intent(in)
-            Interstitial(nt)%xcosz = xcosz           ! intent(in)
-            Interstitial(nt)%flag_iter = flag_iter   ! intent(in)
-            Interstitial(nt)%flag_guess = flag_guess ! intent(in)
-            Interstitial(nt)%ipr = ipr               ! intent(in)
-            Interstitial(nt)%qss = qss               ! intent(inout)
-            Interstitial(nt)%gflx = gflx             ! intent(inout)
-            Interstitial(nt)%evap = evap             ! intent(inout)
-            Interstitial(nt)%hflx = hflx             ! intent(inout)
-            Interstitial(nt)%ep1d = ep1d             ! intent(inout)
-            !cdata_block(nb,nt)%errmsg = errmsg      ! intent(out)
-            !cdata_block(nb,nt)%errflg = errflg      ! intent(out)
+            !Interstitial(nt)%im = im                 ! intent(in) - set in Interstitial(nt)%create()
+            !con_hvap
+            !con_cp
+            !con_hfus
+            !con_jcal
+            !con_eps
+            !con_epsm1
+            !con_fvirt
+            !con_rd
+            !con_rhw0
+            !con_pi
+            !con_sbc
+            !Statein%pgr                              ! intent(in)
+            !Statein%ugrs                             ! intent(in)
+            !Statein%vgrs                             ! intent(in)
+            !Statein%tgrs                             ! intent(in)
+            !Statein%qgrs                             ! intent(in)
+            !Sfcprop%tref                             ! intent(in)
+            Interstitial(nt)%cd_ocean = cd_ocean      ! intent(in)
+            Interstitial(nt)%cdq_ocean = cdq_ocean    ! intent(in)
+            !Statein%prsl(:,1)                        ! intent(in)
+            Interstitial(nt)%work3 = work3            ! intent(in)
+            Interstitial(nt)%wet = wet                ! intent(in)
+            Interstitial(nt)%icy = icy                ! intent(in)
+            !Grid%xlon                                ! intent(in)
+            !Grid%sinlat                              ! intent(in)
+            Interstitial(nt)%stress_ocean = stress_ocean  ! intent(in)
+            !Radtend%semis                            ! intent(in)
+            Interstitial(nt)%gabsbdlw = gabsbdlw      ! intent(in)
+            !Diag%nswsfci                             ! intent(in)
+            Interstitial(nt)%tprcp_ocean = tprcp_ocean! intent(in)
+            !Model%dtf                                ! intent(in)
+            !Model%kdt                                ! intent(in)
+            !Model%solhr                              ! intent(in)
+            Interstitial(nt)%xcosz = xcosz            ! intent(in)
+            !Tbd%phy_f2d(:,Model%num_p2d)             ! intent(in)
+            Interstitial(nt)%flag_iter = flag_iter    ! intent(in)
+            Interstitial(nt)%flag_guess = flag_guess  ! intent(in)
+            !Model%nstf_name(1)                       ! intent(in)
+            !Model%nstf_name(4)                       ! intent(in)
+            !Model%nstf_name(5)                       ! intent(in)
+            !Model%lprnt                              ! intent(in)
+            Interstitial(nt)%ipr = ipr                ! intent(in)
+            Interstitial(nt)%tseal = tseal            ! intent(inout)
+            Interstitial(nt)%tsurf_ocean = tsurf_ocean! intent(inout)
+            !Sfcprop%xt                               ! intent(inout)
+            !Sfcprop%xs                               ! intent(inout)
+            !Sfcprop%xu                               ! intent(inout)
+            !Sfcprop%xv                               ! intent(inout)
+            !Sfcprop%xz                               ! intent(inout)
+            !Sfcprop%zm                               ! intent(inout)
+            !Sfcprop%xtts                             ! intent(inout)
+            !Sfcprop%xzts                             ! intent(inout)
+            !Sfcprop%dt_cool                          ! intent(inout)
+            !Sfcprop%z_c                              ! intent(inout)
+            !Sfcprop%c_0                              ! intent(inout)
+            !Sfcprop%c_d                              ! intent(inout)
+            !Sfcprop%w_0                              ! intent(inout)
+            !Sfcprop%w_d                              ! intent(inout)
+            !Sfcprop%d_conv                           ! intent(inout)
+            !Sfcprop%ifd                              ! intent(inout)
+            !Sfcprop%qrain                            ! intent(inout)
+            Interstitial(nt)%qss_ocean = qss_ocean    ! intent(inout)
+            Interstitial(nt)%gflx_ocean = gflx_ocean  ! intent(inout)
+            Interstitial(nt)%cmm_ocean = cmm_ocean    ! intent(inout)
+            Interstitial(nt)%chh_ocean = chh_ocean    ! intent(inout)
+            Interstitial(nt)%evap_ocean = evap_ocean  ! intent(inout)
+            Interstitial(nt)%hflx_ocean = hflx_ocean  ! intent(inout)
+            Interstitial(nt)%ep1d_ocean = ep1d_ocean  ! intent(inout)
+            !cdata_block(nb,nt)%errmsg = errmsg       ! intent(out)
+            !cdata_block(nb,nt)%errflg = errflg       ! intent(out)
             call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_nst", ierr=ierr)
             ! Copy intent(inout) and intent(out) interstitial variables to local variables in driver
-            tsurf = Interstitial(nt)%tsurf
             tseal = Interstitial(nt)%tseal
-            qss = Interstitial(nt)%qss
-            gflx = Interstitial(nt)%gflx
-            evap = Interstitial(nt)%evap
-            hflx = Interstitial(nt)%hflx
-            ep1d = Interstitial(nt)%ep1d
+            tsurf_ocean = Interstitial(nt)%tsurf_ocean
+            qss_ocean = Interstitial(nt)%qss_ocean
+            gflx_ocean = Interstitial(nt)%gflx_ocean
+            cmm_ocean = Interstitial(nt)%cmm_ocean
+            chh_ocean = Interstitial(nt)%chh_ocean
+            evap_ocean = Interstitial(nt)%evap_ocean
+            hflx_ocean = Interstitial(nt)%hflx_ocean
+            ep1d_ocean = Interstitial(nt)%ep1d_ocean
             errmsg = trim(cdata_block(nb,nt)%errmsg)
             errflg = cdata_block(nb,nt)%errflg
             if (errflg/=0) then
@@ -1839,15 +2150,30 @@ module module_physics_driver
             !
             if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_nst_post through option B'
             ! Copy local variables from driver to appropriate interstitial variables
-            !Interstitial(nt)%im = im                ! intent(in) - set in Interstitial(nt)%create()
-            Interstitial(nt)%islmsk = islmsk         ! intent(in)
-            Interstitial(nt)%tsurf = tsurf           ! intent(inout)
-            Interstitial(nt)%dtzm = dtzm             ! intent(inout)
-            !cdata_block(nb,nt)%errmsg = errmsg      ! intent(out)
-            !cdata_block(nb,nt)%errflg = errflg      ! intent(out)
+            !Interstitial(nt)%im = im                 ! intent(in) - set in Interstitial(nt)%create()
+            !rlapse
+            Interstitial(nt)%wet = wet                ! intent(in)
+            Interstitial(nt)%icy = icy                ! intent(in)
+            !Sfcprop%oro                              ! intent(in)
+            !Sfcprop%oro_uf                           ! intent(in)
+            !Model%nstf_name(1)                       ! intent(in)
+            !Model%nstf_name(4)                       ! intent(in)
+            !Model%nstf_name(5)                       ! intent(in)
+            !Sfcprop%xt                               ! intent(in)
+            !Sfcprop%xz                               ! intent(in)
+            !Sfcprop%dt_cool                          ! intent(in)
+            !Sfcprop%z_c                              ! intent(in)
+            !Sfcprop%tref                             ! intent(in)
+            !Grid%xlon                                ! intent(in)
+            Interstitial(nt)%tsurf_ocean = tsurf_ocean! intent(inout)
+            Interstitial(nt)%tsfc_ocean = tsfc_ocean  ! intent(inout)
+            !Interstitial(nt)%dtzm = dtzm             ! intent(out)
+            !cdata_block(nb,nt)%errmsg = errmsg       ! intent(out)
+            !cdata_block(nb,nt)%errflg = errflg       ! intent(out)
             call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_nst_post", ierr=ierr)
             ! Copy intent(inout) and intent(out) interstitial variables to local variables in driver
-            tsurf = Interstitial(nt)%tsurf
+            tsurf_ocean = Interstitial(nt)%tsurf_ocean
+            tsfc_ocean = Interstitial(nt)%tsfc_ocean
             dtzm = Interstitial(nt)%dtzm
             errmsg = trim(cdata_block(nb,nt)%errmsg)
             errflg = cdata_block(nb,nt)%errflg
@@ -1858,37 +2184,58 @@ module module_physics_driver
 #else
             if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of sfc_nst'
             do i=1,im
-              if (islmsk(i) == 0) then
-                tem      = (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
-                tseal(i) = Sfcprop%tsfc(i) + tem
-                tsurf(i) = tsurf(i)        + tem
+              if(icy(i)) then
+                  zorl_ocean(i) = zorl_ice(i)
+                    cd_ocean(i) = cd_ice(i)
+                   cdq_ocean(i) = cdq_ice(i)
+                    rb_ocean(i) = rb_ice(i)
+                stress_ocean(i) = stress_ice(i)
+                  ffmm_ocean(i) = ffmm_ice(i)
+                  ffhh_ocean(i) = ffhh_ice(i)
+                uustar_ocean(i) = uustar_ice(i)
+                  fm10_ocean(i) = fm10_ice(i)
+                   fh2_ocean(i) = fh2_ice(i)
               endif
             enddo
 
-            call sfc_nst (im, Statein%pgr, Statein%ugrs,                     &
-                          Statein%vgrs, Statein%tgrs, Statein%qgrs,          &
-                          Sfcprop%tref, cd, cdq, Statein%prsl(1,1), work3,   &
-                          islmsk, Grid%xlon, Grid%sinlat, stress,            &
-                          Radtend%semis, gabsbdlw, adjsfcnsw, Sfcprop%tprcp, &
-                          dtf, kdt, Model%solhr, xcosz,                      &
-                          Tbd%phy_f2d(1,Model%num_p2d), flag_iter,           &
-                          flag_guess, Model%nstf_name, lprnt, ipr,           &
-!  --- Input/output
-                          tseal, tsurf, Sfcprop%xt, Sfcprop%xs, Sfcprop%xu,  &
-                          Sfcprop%xv, Sfcprop%xz, Sfcprop%zm, Sfcprop%xtts,  &
-                          Sfcprop%xzts, Sfcprop%dt_cool, Sfcprop%z_c,        &
-                          Sfcprop%c_0, Sfcprop%c_d, Sfcprop%w_0, Sfcprop%w_d,&
-                          Sfcprop%d_conv, Sfcprop%ifd, Sfcprop%qrain,        &
+            do i=1,im
+              if ( wet(i) .and. .not.icy(i) ) then
+                tem      = (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
+                tseal(i) = tsfc_ocean(i)  + tem
+                tsurf_ocean(i) = tsurf_ocean(i) + tem
+              endif
+            enddo
+
+            call sfc_nst                                                  & 
+!  ---  inputs:
+            (im, Statein%pgr, Statein%ugrs,                             &
+             Statein%vgrs, Statein%tgrs, Statein%qgrs,                  &
+             Sfcprop%tref, cd_ocean, cdq_ocean, prsl1, work3,           &
+             wet, icy,                                                  &
+             Grid%xlon, Grid%sinlat,stress_ocean,                       &
+             Radtend%semis, gabsbdlw, adjsfcnsw, tprcp_ocean,           &
+             dtf, kdt, Model%solhr, xcosz,                              &
+             ddvel, flag_iter,                                          &
+             flag_guess, Model%nstf_name, lprnt, ipr,                   &
+!  ---  input/output
+             tseal, tsurf_ocean, Sfcprop%xt, Sfcprop%xs,                &
+             Sfcprop%xu,Sfcprop%xv, Sfcprop%xz, Sfcprop%zm,             &
+             Sfcprop%xtts,Sfcprop%xzts, Sfcprop%dt_cool,                &
+             Sfcprop%z_c,Sfcprop%c_0, Sfcprop%c_d,                      &
+             Sfcprop%w_0, Sfcprop%w_d,Sfcprop%d_conv,                   &
+             Sfcprop%ifd, Sfcprop%qrain,                                &
 !  ---  outputs:
-                          qss, gflx, Diag%cmm, Diag%chh, evap, hflx, ep1d)
+             qss_ocean, gflx_ocean, cmm_ocean, chh_ocean, evap_ocean,   &
+             hflx_ocean, ep1d_ocean)
 
 !         if (lprnt) write(0,*)' tseaz2=',tseal(ipr),' tref=', Sfcprop%tref(ipr),   &
 !    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),       &
 !    &     ' kdt=',kdt
 
             do i=1,im
-              if ( islmsk(i) == 0 ) then
-                tsurf(i) = tsurf(i) - (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
+              if (wet(i) .and. .not.icy(i)) then
+              tsurf_ocean(i) = tsurf_ocean(i)                           &
+                 - (Sfcprop%oro(i)-Sfcprop%oro_uf(i)) * rlapse
               endif
             enddo
 
@@ -1897,12 +2244,12 @@ module module_physics_driver
             if (Model%nstf_name(1) > 1) then
               zsea1 = 0.001*real(Model%nstf_name(4))
               zsea2 = 0.001*real(Model%nstf_name(5))
-              call get_dtzm_2d (Sfcprop%xt,  Sfcprop%xz, Sfcprop%dt_cool,  &
-                                Sfcprop%z_c, Sfcprop%slmsk, zsea1, zsea2,  &
+              call get_dtzm_2d (Sfcprop%xt,  Sfcprop%xz, Sfcprop%dt_cool, &
+                              Sfcprop%z_c, wet, icy, zsea1, zsea2,      &
                                 im, 1, dtzm)
               do i=1,im
-                if ( islmsk(i) == 0 ) then
-                Sfcprop%tsfc(i) = max(271.2,Sfcprop%tref(i) + dtzm(i)) -   &
+                if (wet(i) .and. .not.icy(i)) then
+                tsfc_ocean(i) = max(271.2,Sfcprop%tref(i) + dtzm(i)) -  &
                                   (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
                 endif
               enddo
@@ -1925,30 +2272,33 @@ module module_physics_driver
             !Statein%vgrs                            ! intent(in   )
             !Statein%tgrs                            ! intent(in   )
             !Statein%qgrs                            ! intent(in   )
-            !Sfcprop%tsfc                            ! intent(in   )
-            Interstitial(nt)%cd = cd                 ! intent(in   )
-            Interstitial(nt)%cdq = cdq               ! intent(in   )
+            Interstitial(nt)%tsfc_ocean = tsfc_ocean ! intent(in   )
+            Interstitial(nt)%cd_ocean = cd_ocean     ! intent(in   )
+            Interstitial(nt)%cdq_ocean = cdq_ocean   ! intent(in   )
             !Statein%prsl(:,1)                       ! intent(in   )
             Interstitial(nt)%work3 = work3           ! intent(in   )
-            Interstitial(nt)%islmsk = islmsk         ! intent(in   )
+            Interstitial(nt)%wet = wet               ! intent(in   )
+            !Sfcprop%fice                            ! intent(in   )
             !Tbd%phy_f2d(:,Model%num_p2d)            ! intent(in   )
             Interstitial(nt)%flag_iter = flag_iter   ! intent(in   )
-            Interstitial(nt)%qss = qss               ! intent(inout)
-            !Diag%cmm                                ! intent(inout)
-            !Diag%chh                                ! intent(inout)
-            Interstitial(nt)%gflx = gflx             ! intent(inout)
-            Interstitial(nt)%evap = evap             ! intent(inout)
-            Interstitial(nt)%hflx = hflx             ! intent(inout)
-            Interstitial(nt)%ep1d = ep1d             ! intent(inout)
+            Interstitial(nt)%qss_ocean = qss_ocean   ! intent(inout)
+            Interstitial(nt)%cmm_ocean = cmm_ocean   ! intent(inout)
+            Interstitial(nt)%chh_ocean = chh_ocean   ! intent(inout)
+            Interstitial(nt)%gflx_ocean = gflx_ocean ! intent(inout)
+            Interstitial(nt)%evap_ocean = evap_ocean ! intent(inout)
+            Interstitial(nt)%hflx_ocean = hflx_ocean ! intent(inout)
+            Interstitial(nt)%ep1d_ocean = ep1d_ocean ! intent(inout)
             !cdata_block(nb,nt)%errmsg = errmsg      ! intent(  out)
             !cdata_block(nb,nt)%errflg = errflg      ! intent(  out)
             call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_ocean", ierr=ierr)
             ! Copy intent(inout) and intent(out) interstitial variables to local variables in driver
-            qss  = Interstitial(nt)%qss
-            gflx = Interstitial(nt)%gflx
-            evap = Interstitial(nt)%evap
-            hflx = Interstitial(nt)%hflx
-            ep1d = Interstitial(nt)%ep1d
+            qss_ocean  = Interstitial(nt)%qss_ocean
+            cmm_ocean  = Interstitial(nt)%cmm_ocean
+            chh_ocean  = Interstitial(nt)%chh_ocean
+            gflx_ocean = Interstitial(nt)%gflx_ocean
+            evap_ocean = Interstitial(nt)%evap_ocean
+            hflx_ocean = Interstitial(nt)%hflx_ocean
+            ep1d_ocean = Interstitial(nt)%ep1d_ocean
             errmsg = trim(cdata_block(nb,nt)%errmsg)
             errflg = cdata_block(nb,nt)%errflg
             if (errflg/=0) then
@@ -1957,20 +2307,23 @@ module module_physics_driver
             end if
 #else
             if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of sfc_ocean'
-            call sfc_ocean                                                &
+            call sfc_ocean                                                         &
 !  ---  inputs:
-             (im, Statein%pgr, Statein%ugrs, Statein%vgrs, Statein%tgrs,  &
-              Statein%qgrs, Sfcprop%tsfc, cd, cdq, Statein%prsl(1,1),     &
-              work3, islmsk, Tbd%phy_f2d(1,Model%num_p2d), flag_iter,     &
+           (im, Statein%pgr, Statein%ugrs, Statein%vgrs, Statein%tgrs,           &
+            Statein%qgrs, tsfc_ocean, cd_ocean, cdq_ocean, prsl1,                &
+            work3, wet, cice, ddvel, flag_iter,                                  &
 !  ---  outputs:
-               qss, Diag%cmm, Diag%chh, gflx, evap, hflx, ep1d)
+            qss_ocean, cmm_ocean, chh_ocean, gflx_ocean, evap_ocean, hflx_ocean, &
+            ep1d_ocean)
 #endif
 
          endif       ! if ( nstf_name(1) > 0 ) then
 
-!       if (lprnt) write(0,*)' sfalb=',Radtend%sfalb(ipr),' ipr=',ipr          &
-!     ,   ' weasd=',Sfcprop%weasd(ipr)             &
-!     ,   ' tprcp=',Sfcprop%tprcp(ipr),' kdt=',kdt,' iter=',iter               &
+#include "debug_bitforbit_diagtoscreen.inc"
+
+!       if (lprnt) write(0,*)' sfalb=',Radtend%sfalb(ipr),' ipr=',ipr   &
+!     ,   ' weasd=',Sfcprop%weasd(ipr)                                  &
+!     ,   ' tprcp=',Sfcprop%tprcp(ipr),' kdt=',kdt,' iter=',iter        &
 !     ,' tseabefland=',Sfcprop%tsfc(ipr)
 
 !  --- ...  surface energy balance over land
@@ -1984,6 +2337,13 @@ module module_physics_driver
          ! Copy local variables from driver to appropriate interstitial variables
          !Interstitial(nt)%im = im              ! intent(in) - set in Interstitial(nt)%create()
          !Model%lsoil                           ! intent(in)
+         !con_g
+         !con_cp
+         !con_hvap
+         !con_rd
+         !con_eps
+         !con_epsm1
+         !con_fvirt
          !Statein%pgr                           ! intent(in)
          !Statein%ugrs                          ! intent(in)
          !Statein%vgrs                          ! intent(in)
@@ -1998,12 +2358,12 @@ module module_physics_driver
          !Diag%nswsfci                          ! intent(in)
          !Model%dtf                             ! intent(in)
          !Sfcprop%tg3                           ! intent(in)
-         Interstitial(nt)%cd = cd               ! intent(in)
-         Interstitial(nt)%cdq = cdq             ! intent(in)
+         Interstitial(nt)%cd_land = cd_land     ! intent(in)
+         Interstitial(nt)%cdq_land = cdq_land   ! intent(in)
          !Statein%prsl(1,1)                     ! intent(in)
          Interstitial(nt)%work3 = work3         ! intent(in)
          !Diag%zlvl                             ! intent(in)
-         Interstitial(nt)%islmsk = islmsk       ! intent(in)
+         Interstitial(nt)%dry = dry             ! intent(in)
          !Tbd%phy_f2d(1,Model%num_p2d)          ! intent(in)
          Interstitial(nt)%slopetype= slopetyp   ! intent(in)
          !Sfcprop%shdmin                        ! intent(in)
@@ -2019,51 +2379,58 @@ module module_physics_driver
          Interstitial(nt)%xlai1d = xlai1d       ! intent(in)
          Interstitial(nt)%vegf1d = vegf1d       ! intent(in)
          !Model%pertvegf                        ! intent(in)
-         !Sfcprop%weasd                         ! intent(inout)
-         !Sfcprop%snowd                         ! intent(inout)
-         !Sfcprop%tsfc                          ! intent(inout)
-         !Sfcprop%tprcp                         ! intent(inout)
+         Interstitial(nt)%weasd_land = weasd_land ! intent(inout)
+         Interstitial(nt)%snowd_land = snowd_land ! intent(inout)
+         Interstitial(nt)%tsfc_land = tsfc_land   ! intent(inout)
+         Interstitial(nt)%tprcp_land = tprcp_land ! intent(inout)
          !Sfcprop%srflag                        ! intent(inout)
          !Sfcprop%smc                           ! intent(inout)
          !Sfcprop%stc                           ! intent(inout)
          !Sfcprop%slc                           ! intent(inout)
          !Sfcprop%canopy                        ! intent(inout)
          Interstitial(nt)%trans  = trans        ! intent(inout)
-         Interstitial(nt)%tsurf  = tsurf        ! intent(inout)
-         !Sfcprop%zorl                          ! intent(inout)
-         !Sfcprop%sncovr                        ! intent(out)
-         Interstitial(nt)%qss    = qss          ! intent(out)
-         Interstitial(nt)%gflx   = gflx         ! intent(out)
-         Interstitial(nt)%drain  = drain        ! intent(out)
-         Interstitial(nt)%evap   = evap         ! intent(out)
-         Interstitial(nt)%hflx   = hflx         ! intent(out)
-         Interstitial(nt)%ep1d   = ep1d         ! intent(out)
-         Interstitial(nt)%runoff = runof        ! intent(out)
-         !Diag%cmm                              ! intent(out)
-         !Diag%chh                              ! intent(out)
-         Interstitial(nt)%evbs   = evbs         ! intent(out)
-         Interstitial(nt)%evcw   = evcw         ! intent(out)
-         Interstitial(nt)%sbsno  = sbsno        ! intent(out)
-         Interstitial(nt)%snowc  = snowc        ! intent(out)
-         !Diag%soilm                            ! intent(out)
-         Interstitial(nt)%snohf  = snohf        ! intent(out)
-         !Diag%smcwlt2                          ! intent(out)
-         !Diag%smcref2                          ! intent(out)
-         !Sfcprop%wet1                          ! intent(out)
+         Interstitial(nt)%tsurf_land = tsurf_land ! intent(inout)
+         Interstitial(nt)%zorl_land = zorl_land ! intent(inout)
+         !Sfcprop%sncovr                        ! intent(inout)
+         Interstitial(nt)%qss_land = qss_land   ! intent(inout)
+         Interstitial(nt)%gflx_land = gflx_land ! intent(inout)
+         Interstitial(nt)%drain  = drain        ! intent(inout)
+         Interstitial(nt)%evap_land = evap_land ! intent(inout)
+         Interstitial(nt)%hflx_land = hflx_land ! intent(inout)
+         Interstitial(nt)%ep1d_land = ep1d_land ! intent(inout)
+         Interstitial(nt)%runoff = runof        ! intent(inout)
+         Interstitial(nt)%cmm_land = cmm_land   ! intent(inout)
+         Interstitial(nt)%chh_land = chh_land   ! intent(inout)
+         Interstitial(nt)%evbs   = evbs         ! intent(inout)
+         Interstitial(nt)%evcw   = evcw         ! intent(inout)
+         Interstitial(nt)%sbsno  = sbsno        ! intent(inout)
+         Interstitial(nt)%snowc  = snowc        ! intent(inout)
+         !Diag%soilm                            ! intent(inout)
+         Interstitial(nt)%snohf  = snohf        ! intent(inout)
+         !Diag%smcwlt2                          ! intent(inout)
+         !Diag%smcref2                          ! intent(inout)
+         !Sfcprop%wet1                          ! intent(inout)
          !cdata_block(nb,nt)%errmsg = errmsg    ! intent(out)
          !cdata_block(nb,nt)%errflg = errflg    ! intent(out)
          ! Call NOAH LSM through CCPP
          call ccpp_physics_run(cdata_block(nb,nt), scheme_name="lsm_noah", ierr=ierr)
          ! Copy back intent(inout) interstitial variables to local variables in driver
+         weasd_land = Interstitial(nt)%weasd_land
+         snowd_land = Interstitial(nt)%snowd_land
+         tsfc_land = Interstitial(nt)%tsfc_land
+         tprcp_land = Interstitial(nt)%tprcp_land
          trans  = Interstitial(nt)%trans
-         tsurf  = Interstitial(nt)%tsurf
-         qss    = Interstitial(nt)%qss
-         gflx   = Interstitial(nt)%gflx
+         tsurf_land  = Interstitial(nt)%tsurf_land
+         zorl_land = Interstitial(nt)%zorl_land
+         qss_land = Interstitial(nt)%qss_land
+         gflx_land = Interstitial(nt)%gflx_land
          drain  = Interstitial(nt)%drain
-         evap   = Interstitial(nt)%evap
-         hflx   = Interstitial(nt)%hflx
-         ep1d   = Interstitial(nt)%ep1d
+         evap_land = Interstitial(nt)%evap_land
+         hflx_land = Interstitial(nt)%hflx_land
+         ep1d_land = Interstitial(nt)%ep1d_land
          runof  = Interstitial(nt)%runoff
+         cmm_land = Interstitial(nt)%cmm_land
+         chh_land = Interstitial(nt)%chh_land
          evbs   = Interstitial(nt)%evbs
          evcw   = Interstitial(nt)%evcw
          sbsno  = Interstitial(nt)%sbsno
@@ -2077,26 +2444,26 @@ module module_physics_driver
          end if
 #else
          if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of sfc_drv'
-         call sfc_drv                                                   &
+         call sfc_drv                                                  &
 !  ---  inputs:
-           (im, lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,        &
+          (im, lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,         &
             Statein%tgrs, Statein%qgrs, soiltyp, vegtype, sigmaf,      &
             Radtend%semis, gabsbdlw, adjsfcdsw, adjsfcnsw, dtf,        &
-            Sfcprop%tg3, cd, cdq, Statein%prsl(1,1), work3, Diag%zlvl, &
-            islmsk, Tbd%phy_f2d(1,Model%num_p2d), slopetyp,            &
+            Sfcprop%tg3, cd_land, cdq_land, prsl1, work3, Diag%zlvl,   &
+            dry, ddvel, slopetyp,                                      &
             Sfcprop%shdmin, Sfcprop%shdmax, Sfcprop%snoalb,            &
             Radtend%sfalb, flag_iter, flag_guess, Model%lheatstrg,     &
-            Model%isot,Model%ivegsrc,                                  &
+            Model%isot, Model%ivegsrc,                                 &
             bexp1d, xlai1d, vegf1d, Model%pertvegf,                    &
-!  ---  in/outs:
-            Sfcprop%weasd, Sfcprop%snowd, Sfcprop%tsfc, Sfcprop%tprcp, &
+!  ---  input/output:
+            weasd_land, snowd_land, tsfc_land, tprcp_land,             &
             Sfcprop%srflag, Sfcprop%smc, Sfcprop%stc, Sfcprop%slc,     &
-            Sfcprop%canopy, trans, tsurf, Sfcprop%zorl,                &
+            Sfcprop%canopy, trans, tsurf_land, zorl_land,              &
 !  ---  outputs:
-            Sfcprop%sncovr, qss, gflx, drain, evap, hflx, ep1d, runof, &
-            Diag%cmm, Diag%chh, evbs, evcw, sbsno, snowc, Diag%soilm,  &
+            Sfcprop%sncovr, qss_land, gflx_land, drain, evap_land,     &
+            hflx_land, ep1d_land, runof,                               &
+            cmm_land, chh_land, evbs, evcw, sbsno, snowc, Diag%soilm,  &
             snohf, Diag%smcwlt2, Diag%smcref2, Sfcprop%wet1)
-
 #endif
 !     if (lprnt) write(0,*)' tseae=',tsea(ipr),' tsurf=',tsurf(ipr),iter &
 !    &,' phy_f2d=',phy_f2d(ipr,num_p2d)
@@ -2194,8 +2561,8 @@ module module_physics_driver
               !Diag%srunoff                          ! intent(inout)
               !Diag%soilm                            ! intent(out)
               !Sfcprop%wet1                          ! intent(out)
-              !Diag%acsnow                           ! intent(out)
-              !Diag%snowfallac                       ! intent(out)
+              !Sfcprop%acsnow                        ! intent(out)
+              !Sfcprop%snowfallac                    ! intent(out)
               !cdata_block(nb,nt)%errmsg = errmsg    ! intent(out)
               !cdata_block(nb,nt)%errflg = errflg    ! intent(out)
 
@@ -2241,11 +2608,23 @@ module module_physics_driver
            enddo
          endif
 
+#include "debug_bitforbit_diagtoscreen.inc"
+
 #ifdef CCPP
          if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_sice through option B'
          ! Copy local variables from driver to appropriate interstitial variables
          !Interstitial(nt)%im = im              ! intent(in   ) - set in Interstitial(nt)%create()
          !Model%lsoil                           ! intent(in   )
+         !con_sbc
+         !con_hvap
+         !con_tice
+         !con_cp
+         !con_eps
+         !con_epsm1
+         !con_fvirt
+         !con_g
+         !con_t0c
+         !con_rd
          !Statein%pgr                           ! intent(in   )
          !Statein%ugrs                          ! intent(in   )
          !Statein%vgrs                          ! intent(in   )
@@ -2257,8 +2636,8 @@ module module_physics_driver
          !Diag%nswsfci                          ! intent(in   ) - associated with adjsfcnsw
          !Diag%dswsfci                          ! intent(in   ) - associated with adjsfcdsw
          !Sfcprop%srflag                        ! intent(in   )
-         Interstitial(nt)%cd = cd               ! intent(in   )
-         Interstitial(nt)%cdq = cdq             ! intent(in   )
+         Interstitial(nt)%cd_ice = cd_ice       ! intent(in   )
+         Interstitial(nt)%cdq_ice = cdq_ice     ! intent(in   )
          !Statein%prsl(:,1)                     ! intent(in   )
          Interstitial(nt)%work3 = work3         ! intent(in   )
          Interstitial(nt)%islmsk = islmsk       ! intent(in   )
@@ -2270,53 +2649,61 @@ module module_physics_driver
          !Interstitial(nt)%ipr                  ! intent(in   ) - set in Interstitial(nt)%create()
          !Sfcprop%hice                          ! intent(inout)
          !Sfcprop%fice                          ! intent(inout)
-         !Sfcprop%tisfc                         ! intent(inout)
-         !Sfcprop%weasd                         ! intent(inout)
-         !Sfcprop%tsfc                          ! intent(inout)
-         !Sfcprop%tprcp                         ! intent(inout)
+         Interstitial(nt)%tice = tice           ! intent(inout)
+         Interstitial(nt)%weasd_ice = weasd_ice ! intent(inout)
+         Interstitial(nt)%tsfc_ice = tsfc_ice   ! intent(inout)
+         Interstitial(nt)%tprcp_ice = tprcp_ice ! intent(inout)
          !Sfcprop%stc                           ! intent(inout)
-         Interstitial(nt)%ep1d = ep1d           ! intent(inout)
-         !Sfcprop%snowd                         ! intent(inout)
-         Interstitial(nt)%qss = qss             ! intent(inout)
+         Interstitial(nt)%ep1d_ice = ep1d_ice   ! intent(inout)
+         Interstitial(nt)%snowd_ice = snowd_ice ! intent(inout)
+         Interstitial(nt)%qss_ice = qss_ice     ! intent(inout)
          Interstitial(nt)%snowmt = snowmt       ! intent(inout)
-         Interstitial(nt)%gflx = gflx           ! intent(inout)
-         !Diag%cmm                              ! intent(inout)
-         !Diag%chh                              ! intent(inout)
-         Interstitial(nt)%evap = evap           ! intent(inout)
-         Interstitial(nt)%hflx = hflx           ! intent(inout)
+         Interstitial(nt)%gflx_ice = gflx_ice   ! intent(inout)
+         Interstitial(nt)%cmm_ice = cmm_ice     ! intent(inout)
+         Interstitial(nt)%chh_ice = chh_ice     ! intent(inout)
+         Interstitial(nt)%evap_ice = evap_ice   ! intent(inout)
+         Interstitial(nt)%hflx_ice = hflx_ice   ! intent(inout)
          !cdata_block(nb,nt)%errmsg = errmsg    ! intent(out)
          !cdata_block(nb,nt)%errflg = errflg    ! intent(out)
          call ccpp_physics_run(cdata_block(nb,nt), scheme_name="sfc_sice", ierr=ierr)
          ! Copy back intent(inout) interstitial variables to local variables in driver
-         ep1d   = Interstitial(nt)%ep1d
-         qss    = Interstitial(nt)%qss
-         snowmt = Interstitial(nt)%snowmt
-         gflx   = Interstitial(nt)%gflx
-         evap   = Interstitial(nt)%evap
-         hflx   = Interstitial(nt)%hflx
-         errmsg = trim(cdata_block(nb,nt)%errmsg)
-         errflg = cdata_block(nb,nt)%errflg
+         tice      = Interstitial(nt)%tice
+         weasd_ice = Interstitial(nt)%weasd_ice
+         tsfc_ice  = Interstitial(nt)%tsfc_ice
+         tprcp_ice = Interstitial(nt)%tprcp_ice
+         ep1d_ice  = Interstitial(nt)%ep1d_ice
+         snowd_ice = Interstitial(nt)%snowd_ice
+         qss_ice   = Interstitial(nt)%qss_ice
+         snowmt    = Interstitial(nt)%snowmt
+         gflx_ice  = Interstitial(nt)%gflx_ice
+         cmm_ice   = Interstitial(nt)%cmm_ice
+         chh_ice   = Interstitial(nt)%chh_ice
+         evap_ice  = Interstitial(nt)%evap_ice
+         hflx_ice  = Interstitial(nt)%hflx_ice
+         errmsg    = trim(cdata_block(nb,nt)%errmsg)
+         errflg    = cdata_block(nb,nt)%errflg
          if (errflg/=0) then
              write(0,*) 'Error in call to sfc_sice: ' // trim(errmsg)
              stop
          end if
 #else
          if (Model%me==0) write(0,*) 'CCPP DEBUG: calling non-CCPP compliant version of sfc_sice'
-         call sfc_sice                                                     &
+         call sfc_sice                                                   &
 !  ---  inputs:
-              (im, lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,         &
-               Statein%tgrs, Statein%qgrs, dtf, Radtend%semis, gabsbdlw,   &
-               adjsfcnsw, adjsfcdsw, Sfcprop%srflag, cd, cdq,              &
-               Statein%prsl(1,1), work3, islmsk,                           &
-               Tbd%phy_f2d(1,Model%num_p2d), flag_iter, Model%mom4ice,     &
-               Model%lsm, lprnt, ipr,                                      &
-!  ---  input/outputs:
-               zice, cice, tice, Sfcprop%weasd, Sfcprop%tsfc,              &
-               Sfcprop%tprcp, Sfcprop%stc, ep1d,                           &
+           (im, lsoil, Statein%pgr, Statein%ugrs, Statein%vgrs,         &
+            Statein%tgrs, Statein%qgrs, dtf, Radtend%semis, gabsbdlw,   &
+            adjsfcnsw, adjsfcdsw, Sfcprop%srflag, cd_ice, cdq_ice,      &
+            prsl1, work3, islmsk, ddvel, flag_iter, Model%mom4ice,      &
+            Model%lsm, lprnt, ipr,                                      &
+!  ---  input/output:
+            zice, cice, tice, weasd_ice, tsfc_ice, tprcp_ice,           &
+            Sfcprop%stc, ep1d_ice,                                      &
 !  ---  outputs:
-               Sfcprop%snowd, qss, snowmt, gflx, Diag%cmm, Diag%chh, evap, &
-               hflx)
+            snowd_ice, qss_ice, snowmt, gflx_ice, cmm_ice, chh_ice,     &
+            evap_ice, hflx_ice)
 #endif
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
         if (Model%cplflx .or. Model%cplchm) then
           do i=1,im
@@ -2325,15 +2712,14 @@ module module_physics_driver
             endif
           enddo
 
-           call sfc_cice                                                   &
+          call sfc_cice                                                 &
 !  ---  inputs:
-              (im, Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs, &
-               cd, cdq, Statein%prsl(1,1), work3, islmsk_cice,             &
-               Tbd%phy_f2d(1,Model%num_p2d),flag_iter, dqsfc_cice,         &
-               dtsfc_cice,                                                 &
+           (im, Statein%ugrs, Statein%vgrs, Statein%tgrs, Statein%qgrs, &
+            cd_ice, cdq_ice, prsl1, work3, islmsk_cice,                 &
+            ddvel, flag_iter, dqsfc_cice, dtsfc_cice,                   &
 !  ---  outputs:
-             qss, Diag%cmm, Diag%chh, evap, hflx)
-         endif
+            qss_ice, cmm_ice, chh_ice, evap_ice, hflx_ice)
+        endif
        endif ! lsm == lsm_noah for sea ice
 
 !  --- ...  lu: update flag_iter and flag_guess
@@ -2345,7 +2731,9 @@ module module_physics_driver
          Interstitial(nt)%wind       = wind           ! intent(in)
          Interstitial(nt)%flag_guess = flag_guess     ! intent(inout)
          Interstitial(nt)%flag_iter  = flag_iter      ! intent(inout)
-         !Sfcprop%slmsk                               ! intent(in)
+         Interstitial(nt)%dry        = dry            ! intent(in)
+         Interstitial(nt)%wet        = wet            ! intent(in)
+         Interstitial(nt)%icy        = icy            ! intent(in)
          !Model%nstf_name(1)                          ! intent(in)
          !cdata_block(nb,nt)%errmsg = errmsg          ! intent(out)
          !cdata_block(nb,nt)%errflg = errflg          ! intent(out)
@@ -2366,8 +2754,8 @@ module module_physics_driver
            flag_guess(i) = .false.
 
            if (iter == 1 .and. wind(i) < 2.0) then
-             if (islmsk(i) == 1 .or. (islmsk(i) == 0 .and.           &
-                                      Model%nstf_name(1) > 0)) then
+             if (dry(i) .or. (wet(i) .and. .not.icy(i)                   &
+                 .and. Model%nstf_name(1) > 0)) then
                flag_iter(i) = .true.
              endif
            endif
@@ -2382,6 +2770,133 @@ module module_physics_driver
 #endif
 
       enddo   ! end iter_loop
+
+#include "debug_bitforbit_diagtoscreen.inc"
+
+#ifdef CCPP
+      write(0,*) "DH ERROR: call to GFS_surface_composites_post_run not yet implemented in HYBRID mode"
+      call sleep(5)
+      stop
+#else
+! --- generate ocean/land/ice composites
+
+      ! DH*
+      write(0,*) "DH DEBUG composites: i, cplflx, flag_cice, dry, wet, icy, ocnfrac, lndfrac, lakfrac, cice, tsfc_{lnd,ocn,ice}, tsfc, tsfcl, tsfco, tisfc"
+      ! *DH
+
+      do i=1, im
+!            
+! Three-way composites (fields from sfc_diff)
+        Sfcprop%zorl(i)   = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              zorl_ocean(i), zorl_land(i), zorl_ice(i))
+        cd(i)             = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                                cd_ocean(i),   cd_land(i), cd_ice(i))
+        cdq(i)            = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                               cdq_ocean(i),  cdq_land(i), cdq_ice(i))
+        rb(i)             = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                                rb_ocean(i),   rb_land(i), rb_ice(i))
+        stress(i)         = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                           stress_ocean(i),stress_land(i), stress_ice(i))
+        Sfcprop%ffmm(i)   = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              ffmm_ocean(i), ffmm_land(i), ffmm_ice(i))
+        Sfcprop%ffhh(i)   = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              ffhh_ocean(i), ffhh_land(i), ffhh_ice(i))
+        Sfcprop%uustar(i) = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                           uustar_ocean(i),uustar_land(i), uustar_ice(i))
+        fm10(i)           = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              fm10_ocean(i), fm10_land(i), fm10_ice(i))
+        fh2(i)            = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                                fh2_ocean(i), fh2_land(i), fh2_ice(i))
+        tsurf(i)          = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                             tsurf_ocean(i),tsurf_land(i), tsurf_ice(i))
+        Diag%cmm(i)       = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                               cmm_ocean(i),  cmm_land(i), cmm_ice(i))
+        Diag%chh(i)       = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                               chh_ocean(i),  chh_land(i), chh_ice(i))
+        gflx(i)           = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              gflx_ocean(i), gflx_land(i), gflx_ice(i))
+        ep1d(i)           = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              ep1d_ocean(i), ep1d_land(i), ep1d_ice(i))
+        Sfcprop%weasd(i)  = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                           Sfcprop%weasd(i),weasd_land(i), weasd_ice(i))
+        Sfcprop%snowd(i)  = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                            snowd_ocean(i), snowd_land(i), snowd_ice(i))
+        Sfcprop%tprcp(i)  = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                            tprcp_ocean(i), tprcp_land(i), tprcp_ice(i))
+
+        if(Model%cplflx .and. flag_cice(i)) then ! 3-way when sfc_cice is used
+        evap(i)           = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              evap_ocean(i), evap_land(i), evap_ice(i))
+        hflx(i)           = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              hflx_ocean(i), hflx_land(i), hflx_ice(i))
+        qss(i)            = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                               qss_ocean(i),  qss_land(i), qss_ice(i))
+        Sfcprop%tsfc(i)   = cmposit3(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              tsfc_ocean(i), tsfc_land(i), tsfc_ice(i))
+        else ! 2-way when sfc_sice used (fields already composited in sfc_sice)
+        evap(i)           = cmposit2(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              evap_ocean(i), evap_land(i), evap_ice(i))
+        hflx(i)           = cmposit2(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              hflx_ocean(i), hflx_land(i), hflx_ice(i))
+        qss(i)            = cmposit2(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                                qss_ocean(i), qss_land(i), qss_ice(i))
+        Sfcprop%tsfc(i)   = cmposit2(Sfcprop%oceanfrac(i),Sfcprop%landfrac(i), &
+                                      Sfcprop%lakefrac(i), cice(i),            &
+                              tsfc_ocean(i), tsfc_land(i), tsfc_ice(i))
+        if (icy(i)) then
+          Diag%cmm(i)      =   cmm_ice(i)
+          Diag%chh(i)      =   chh_ice(i)
+          gflx(i)          =  gflx_ice(i)
+          ep1d(i)          =  ep1d_ice(i)
+          Sfcprop%weasd(i) = weasd_ice(i)
+          Sfcprop%snowd(i) = snowd_ice(i)
+        end if
+        endif ! cplflx .and. flag_cice
+
+        Sfcprop%zorll(i) = zorl_land(i)
+        Sfcprop%zorlo(i) = zorl_ocean(i)
+
+        if (dry(i)) Sfcprop%tsfcl(i) = tsfc_land(i)
+        if (wet(i)) then
+          Sfcprop%tsfco(i) = tsfc_ocean(i)
+          Sfcprop%tisfc(i) = tsfc_ice(i)
+        end if
+
+        ! DH*
+        write(0,'(i5,5(1x,l),11e16.7)') i, Model%cplflx, flag_cice(i), dry(i), wet(i), icy(i),                &
+                                        Sfcprop%oceanfrac(i), Sfcprop%landfrac(i), Sfcprop%lakefrac(i),       &
+                                        cice(i), tsfc_land(i), tsfc_ocean(i), tsfc_ice(i),                    &
+                                        Sfcprop%tsfc(i), Sfcprop%tsfcl(i), Sfcprop%tsfco(i), Sfcprop%tisfc(i)
+        ! *DH
+        end do
+
+! --- compositing done
+#endif
 
 #include "debug_bitforbit_diagtoscreen.inc"
 
@@ -2502,7 +3017,7 @@ module module_physics_driver
       !Model%cplflx                           ! intent(in)
       !Model%lssav                            ! intent(in)
       !Model%cplwav                           ! intent(in)
-      Interstitial(nt)%islmsk = islmsk        ! intent(in)
+      !Sfcprop%landfrac                       ! intent(in)
       !Model%dtf                              ! intent(in)
       Interstitial(nt)%ep1d = ep1d            ! intent(in)
       Interstitial(nt)%gflx = gflx            ! intent(in)
@@ -2626,7 +3141,7 @@ module module_physics_driver
 !       them to net SW heat fluxes
 
         do i=1,im
-          if (islmsk(i) /= 1) then  ! not a land point
+          if(Sfcprop%landfrac(i) < 1.) then ! Not 100% land
 !  ---  compute open water albedo
             xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
             ocalnirdf_cpl(i) = 0.06
@@ -2721,6 +3236,8 @@ module module_physics_driver
 !  if (lprnt) write(0,*)'befmonshochflx=',hflx(ipr),' tsea=',Sfcprop%tsfc(ipr),&
 !      ' evap=',evap(ipr)
 !  if (lprnt) write(0,*)'befmonshoctke=',Statein%qgrs(ipr,:,ntke)
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
       if (nvdiff == ntrac .or. Model%do_ysu .or. Model%shinhong) then
 !
@@ -3339,6 +3856,17 @@ module module_physics_driver
             enddo
           enddo
           ntiwx = 3
+        elseif (imp_physics == 99) then
+! Zhao/Carr/Sundqvist
+          if (Model%cplchm) then
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1) = Statein%qgrs(i,k,1)
+                vdftra(i,k,2) = Statein%qgrs(i,k,ntcw)
+                vdftra(i,k,3) = Statein%qgrs(i,k,ntoz)
+              enddo
+            enddo
+          endif
         endif
 
         if (Model%satmedmf) then
@@ -3714,6 +4242,17 @@ module module_physics_driver
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
+
+        elseif (imp_physics == 99) then
+          if (Model%cplchm) then
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,1)    = dvdftra(i,k,1)
+                dqdt(i,k,ntcw) = dvdftra(i,k,2)
+                dqdt(i,k,ntoz) = dvdftra(i,k,3)
+              enddo
+            enddo
+          endif
         endif
 
         if (Model%satmedmf) then
@@ -3729,22 +4268,6 @@ module module_physics_driver
       endif
 
 ! DH* note: this block is not yet in CCPP
-      if (Model%cplflx) then
-        do i=1,im
-          if (flag_cice(i)) then
-#ifdef CCPP
-            Sfcprop%fice(i) = fice_cice(i)
-#else
-                    cice(i) = fice_cice(i)
-#endif
-                  dusfc1(i) = dusfc_cice(i)
-                  dvsfc1(i) = dvsfc_cice(i)
-                  dqsfc1(i) = dqsfc_cice(i)
-                  dtsfc1(i) = dtsfc_cice(i)
-          endif
-        enddo
-      endif
-
       if (Model%cplchm) then
         do i = 1, im
           tem1 = max(Diag%q1(i), 1.e-8)
@@ -3851,14 +4374,38 @@ module module_physics_driver
 #else
       if (Model%cplflx) then
         do i=1,im
-          Coupling%dusfc_cpl (i) = Coupling%dusfc_cpl(i) + dusfc1(i)*dtf
-          Coupling%dvsfc_cpl (i) = Coupling%dvsfc_cpl(i) + dvsfc1(i)*dtf
-          Coupling%dtsfc_cpl (i) = Coupling%dtsfc_cpl(i) + dtsfc1(i)*dtf
-          Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + dqsfc1(i)*dtf
-          Coupling%dusfci_cpl(i) = dusfc1(i)
-          Coupling%dvsfci_cpl(i) = dvsfc1(i)
-          Coupling%dtsfci_cpl(i) = dtsfc1(i)
-          Coupling%dqsfci_cpl(i) = dqsfc1(i)
+          if (ocean(i)) then ! Ocean only, NO LAKES
+            if (flag_cice(i)) cice(i) = fice_cice(i)
+            if (cice(i) == 1.) then ! use results from CICE
+              Coupling%dusfci_cpl(i) = dusfc_cice(i)
+              Coupling%dvsfci_cpl(i) = dvsfc_cice(i)
+              Coupling%dtsfci_cpl(i) = dtsfc_cice(i)
+              Coupling%dqsfci_cpl(i) = dqsfc_cice(i)
+            elseif (dry(i) .or. icy(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
+              tem1 = max(Diag%q1(i), 1.e-8)
+              rho = Statein%prsl(i,1) / (con_rd*Diag%t1(i)*(1.0+con_fvirt*tem1))
+              if (wind(i) > 0.) then
+                Coupling%dusfci_cpl(i) = -rho * stress_ocean(i) * Statein%ugrs(i,1) / wind(i) ! U-momentum flux
+                Coupling%dvsfci_cpl(i) = -rho * stress_ocean(i) * Statein%vgrs(i,1) / wind(i) ! V-momentum flux
+              else
+                Coupling%dusfci_cpl(i) = 0.
+                Coupling%dvsfci_cpl(i) = 0.
+              end if
+              Coupling%dtsfci_cpl(i) = con_cp   * rho * hflx_ocean(i) !sensible heat flux over open ocean
+              Coupling%dqsfci_cpl(i) = con_hvap * rho * evap_ocean(i) !  latent heat flux over open ocean
+            else  ! use results from PBL scheme for 100% open ocean
+              Coupling%dusfci_cpl(i) = dusfc1(i)
+              Coupling%dvsfci_cpl(i) = dvsfc1(i)
+              Coupling%dtsfci_cpl(i) = dtsfc1(i)
+              Coupling%dqsfci_cpl(i) = dqsfc1(i)
+            endif
+
+            Coupling%dusfc_cpl (i) = Coupling%dusfc_cpl(i) + Coupling%dusfci_cpl(i) * dtf
+            Coupling%dvsfc_cpl (i) = Coupling%dvsfc_cpl(i) + Coupling%dvsfci_cpl(i) * dtf
+            Coupling%dtsfc_cpl (i) = Coupling%dtsfc_cpl(i) + Coupling%dtsfci_cpl(i) * dtf
+            Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + Coupling%dqsfci_cpl(i) * dtf
+!
+          endif ! Ocean only, NO LAKES
         enddo
       endif
 !-------------------------------------------------------lssav if loop ----------
@@ -4018,12 +4565,7 @@ module module_physics_driver
         if (Model%ldiag3d) then
           do k=1,levs
             do i=1,im
-
-#ifdef WORKAROUND_DT3DT7
-              Diag%dt3dt(i,k,7) = Diag%dt3dt(i,k,7) - dtdt(i,k)
-#else
               Diag%dt3dt(i,k,7) = Diag%dt3dt(i,k,7) - dtdt(i,k)*dtf
-#endif
             enddo
          enddo
         endif
@@ -4393,6 +4935,8 @@ module module_physics_driver
 !     if (lprnt) write(7000,*)' bef convection gu0=',gu0(ipr,:)
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !     if (lprnt) write(7000,*)' bef convection gv0=',gv0(ipr,:)
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
 #ifdef CCPP
       ! From this point on, dtdt, dudt, dvdt and dqdt have a different meaning:
@@ -5916,8 +6460,8 @@ module module_physics_driver
 !       if (lprnt) then
 !         if (kbot(ipr) <= ktop(ipr)) then
 !           write(*,*) 'kbot <= ktop     for (lat,lon) = ',             &
-!    &            xlon(ipr)*57.29578,xlat(ipr)*57.29578
-!           write(*,*) 'kcnv kbot ktop dlength  ',kcnv(ipr),       &
+!    &            xlon(ipr)*rad2dg,xlat(ipr)*rad2dg
+!           write(*,*) 'kcnv kbot ktop dlength  ',kcnv(ipr),            &
 !    &            kbot(ipr),ktop(ipr),dlength(ipr)
 !           write(*,9000) kdt
 !9000       format(/,3x,'k',5x,'cuhr(k)',4x,'cumchr(k)',5x,             &
@@ -6117,6 +6661,8 @@ module module_physics_driver
 !     if (lprnt) write(7000,*)' aft cnvgwd gv0=',gv0(ipr,:)
 !    &,' lat=',lat,' kdt=',kdt,' me=',me
 !----------------Convective gravity wave drag parameterization over --------
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
 #ifdef CCPP
       if (Model%me==0) write(0,*) 'CCPP DEBUG: calling GFS_SCNV_generic_pre through option B'
@@ -6815,20 +7361,21 @@ module module_physics_driver
 !              enddo
 !            enddo
 !          endif
-          if (Model%ldiag3d) then
-            do k=1,levs
-              do i=1,im
-! DH* dt3dt has last dim 1:7 only (GFS_typedefs.F90)
-!                 Diag%dt3dt(i,k,8) = Diag%dt3dt(i,k,8) + (Stateout%gt0(i,k)  -dtdt(i,k)  ) * frain
-! *DH
-!                Diag%dq3dt(i,k,2) = Diag%dq3dt(i,k,2) + (Stateout%gq0(i,k,1)-dqdt(i,k,1)) * frain
-              enddo
-            enddo
-          endif
+!          if (Model%ldiag3d) then
+!            do k=1,levs
+!              do i=1,im
+!                Diag%dt3dt(i,k,8) = Diag%dt3dt(i,k,8) + (Stateout%gt0(i,k)  -dtdt(i,k)  ) * frain
+!!                Diag%dq3dt(i,k,2) = Diag%dq3dt(i,k,2) + (Stateout%gq0(i,k,1)-dqdt(i,k,1)) * frain
+!              enddo
+!            enddo
+!          endif
         endif
       endif               !       moist convective adjustment over
 ! *DH
 !
+
+#include "debug_bitforbit_diagtoscreen.inc"
+
 #ifdef CCPP
 ! OPTION B - works with all compilers
       if (Model%me==0) write(0,*) 'CCPP DEBUG: calling GFS_MP_generic_pre through option B'
@@ -7077,7 +7624,7 @@ module module_physics_driver
           errflg = cdata_block(nb,nt)%errflg
           !
           if (errflg/=0) then
-              write(0,*) 'Error in call to mp_thompson_mp_mp_thompson_run: ' // trim(errmsg)
+              write(0,*) 'Error in call to mp_thompson_pre: ' // trim(errmsg)
               stop
           end if
           if (Model%me==0) write(0,*) 'CCPP DEBUG: calling mp_thompson_run through option B'
@@ -7150,7 +7697,7 @@ module module_physics_driver
           errflg = cdata_block(nb,nt)%errflg
           !
           if (errflg/=0) then
-              write(0,*) 'Error in call to mp_thompson_mp_mp_thompson_post_run: ' // trim(errmsg)
+              write(0,*) 'Error in call to mp_thompson_post: ' // trim(errmsg)
               stop
           end if
 #endif
@@ -7686,25 +8233,35 @@ module module_physics_driver
               graupel0(i,1) = 0.0
             endif
 
+#ifdef TRANSITION
+            volatile_var1   = rain0(i,1)+snow0(i,1)+ice0(i,1)+graupel0(i,1)
+            volatile_var2   = snow0(i,1)+ice0(i,1)+graupel0(i,1)
+            rain1(i)        = volatile_var1 * tem
+#else
             rain1(i)        = (rain0(i,1)+snow0(i,1)+ice0(i,1)+graupel0(i,1)) * tem
+#endif
             Diag%ice(i)     = ice0    (i,1) * tem
             Diag%snow(i)    = snow0   (i,1) * tem
             Diag%graupel(i) = graupel0(i,1) * tem
+#ifdef TRANSITION
+            if ( volatile_var1 * tem > rainmin ) then
+              Sfcprop%sr(i) = volatile_var2 / volatile_var1
+#else
             if ( rain1(i) > rainmin ) then
               Sfcprop%sr(i) = (snow0(i,1) + ice0(i,1)  + graupel0(i,1)) &
                             / (rain0(i,1) + snow0(i,1) + ice0(i,1) + graupel0(i,1))
+#endif
             else
               Sfcprop%sr(i) = 0.0
             endif
           enddo
-#ifndef WORKAROUND_SRFLAG
-          ! DH* Convert rain0, ice0, graupel0 and snow0 from mm/day to m/physics-timestep
+#if defined(TRANSITION) || defined(REPRO)
+          ! Convert rain0, ice0, graupel0 and snow0 from mm/day to m/physics-timestep
           ! for later use (approx. lines 7970, calculation of srflag)
           rain0 = tem*rain0
           ice0  = tem*ice0
           snow0 = tem*snow0
           graupel0 = tem*graupel0
-          ! *DH
 #endif
           do k = 1, levs
             kk = levs-k+1
@@ -7761,13 +8318,13 @@ module module_physics_driver
 !              do i=1,im
 !
 !                if(Model%me==0) then
-!		  if(Tbd%phy_f3d(i,k,1) > 5.) then 
+!                  if(Tbd%phy_f3d(i,k,1) > 5.) then 
 !                    write(6,*) 'phy driver:cloud radii:',Model%kdt, i,k,        &
-!				Tbd%phy_f3d(i,k,1)
+!                               Tbd%phy_f3d(i,k,1)
 !                  endif 
-!		  if(Tbd%phy_f3d(i,k,3)> 0.0) then 
+!                 if(Tbd%phy_f3d(i,k,3)> 0.0) then 
 !                    write(6,*) 'phy driver:rain radii:',Model%kdt, i,k,         & 
-!				Tbd%phy_f3d(i,k,3)
+!                               Tbd%phy_f3d(i,k,3)
 !                  endif 
 !
 !                endif 
@@ -7956,8 +8513,8 @@ module module_physics_driver
 !        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '
 !     &,DOMR(ipr),DOMZR(ipr),DOMIP(ipr),DOMS(ipr)
 !        do i=1,im
-!         if (abs(xlon(i)*57.29578-114.0) .lt. 0.2  .and.
-!     &    abs(xlat(i)*57.29578-40.0) .lt. 0.2)
+!         if (abs(xlon(i)*rad2dg-114.0) .lt. 0.2  .and.
+!     &       abs(xlat(i)*rad2dg- 40.0) .lt. 0.2)
 !     &    print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS ',
 !     &    DOMR(i),DOMZR(i),DOMIP(i),DOMS(i)
 !       end do
@@ -8041,10 +8598,19 @@ module module_physics_driver
 !            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
 !          endif
 ! compute fractional srflag
+#if defined(TRANSITION) || defined(REPRO)
+          ! For bit-for-bit identical results with CCPP code, snow0/ice0/graupel0/rain0
+          ! are converted from mm per day to m per physics timestep previously in the code
           total_precip = snow0(i,1)+ice0(i,1)+graupel0(i,1)+rain0(i,1)+Diag%rainc(i)
-          if (total_precip*tem > rainmin) then
+          if (total_precip > rainmin) then
             Sfcprop%srflag(i) = (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow)/total_precip
           endif
+#else
+          total_precip = (snow0(i,1)+ice0(i,1)+graupel0(i,1)+rain0(i,1))*tem+Diag%rainc(i)
+          if (total_precip > rainmin) then
+            Sfcprop%srflag(i) = ((snow0(i,1)+ice0(i,1)+graupel0(i,1))*tem+csnow)/total_precip
+          endif
+#endif
         enddo
       elseif( .not. Model%cal_pre) then
         do i = 1, im
@@ -8058,7 +8624,7 @@ module module_physics_driver
 
 !  --- ...  coupling insertion
 
-      if (Model%cplflx) then
+      if (Model%cplflx .or. Model%cplchm) then
         do i = 1, im
           if (t850(i) > 273.16) then
             Coupling%rain_cpl(i) = Coupling%rain_cpl(i) + Diag%rain(i)
@@ -8068,9 +8634,8 @@ module module_physics_driver
         enddo
       endif
 
-      if (Model%cplchm.and. .not. Model%cplflx) then
+      if (Model%cplchm) then
         do i = 1, im
-          Coupling%rain_cpl(i)  = Coupling%rain_cpl(i)  + Diag%rain(i)
           Coupling%rainc_cpl(i) = Coupling%rainc_cpl(i) + Diag%rainc(i)
         enddo
       endif
@@ -8097,8 +8662,9 @@ module module_physics_driver
       do i=1,im
         Diag%pwat(i) = Diag%pwat(i) * onebg
       enddo
-#endif
+
 !  --- ...  end coupling insertion
+#endif
 
 !!! update surface diagnosis fields at the end of phys package
 !!! this change allows gocart to use filtered wind fields
@@ -8217,7 +8783,9 @@ module module_physics_driver
         if (Model%me==0) write(0,*) 'CCPP DEBUG: calling sfc_sice_post through option B'
         ! Copy local variables from driver to appropriate interstitial variables
         !Interstitial(nt)%im = im             ! intent(in) - set in Interstitial(nt)%create
+        !Model%cplflx                         ! intent(in)
         Interstitial(nt)%islmsk = islmsk      ! intent(in)
+        Interstitial(nt)%tice = tice          ! intent(in)
         !Sfcprop%tsfc                         ! intent(in)
         !Sfcprop%fice                         ! intent(inout)
         !Sfcprop%hice                         ! intent(inout)
@@ -8233,17 +8801,19 @@ module module_physics_driver
           stop
         end if
 #else
-        do i = 1, im
-          if (islmsk(i) == 2) then
-            Sfcprop%hice(i)  = zice(i)
-            Sfcprop%fice(i)  = cice(i)
-            Sfcprop%tisfc(i) = tice(i)
-          else
-            Sfcprop%hice(i)  = 0.0
-            Sfcprop%fice(i)  = 0.0
-            Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
-          endif
-        enddo
+        if(.not. Model%cplflx) then
+          do i = 1, im
+            if (islmsk(i) == 2) then
+              Sfcprop%hice(i)  = zice(i)
+              Sfcprop%fice(i)  = cice(i)
+              Sfcprop%tisfc(i) = tice(i)
+            else
+              Sfcprop%hice(i)  = 0.0
+              Sfcprop%fice(i)  = 0.0
+              Sfcprop%tisfc(i) = Sfcprop%tsfc(i)
+            endif
+          enddo
+        endif
 #endif
        endif ! lsm == lsm_noah for sea ice
 
@@ -8352,7 +8922,7 @@ module module_physics_driver
 !     if (kdt > 2 ) call mpi_quit(70)
 !    if (lprnt) write(0,*)'qt0out=',Stateout%gt0(ipr,:)    &
 !    if (lprnt) write(0,*)'gq0outtke=',Stateout%gq0(ipr,1:25,ntke)    &
-!      ,'xlon=',grid%xlon(ipr)*57.29578,' xlat=',grid%xlat(ipr)*57.29578
+!      ,'xlon=',grid%xlon(ipr)*rad2dg,' xlat=',grid%xlat(ipr)*rad2dg
 !     if (lprnt) write(0,*)' clouddriverend=',Tbd%phy_f3d(ipr,:,1)*100,' kdt=',kdt
 
       deallocate (qlcn, qicn, w_upi, cf_upi, CNV_MFD,           &
@@ -8430,17 +9000,17 @@ module module_physics_driver
             tem = sqrt(Diag%u10m(i)*Diag%u10m(i) + Diag%v10m(i)*Diag%v10m(i))
             if(mod(kdtminus1,nsteps_per_reset)==0)then
                Diag%spd10max(i) = -999.
-               Diag%u10max(i)    = -999.
-               Diag%v10max(i)    = -999.
-               Diag%t02max(i)    = -999.
-               Diag%t02min(i)    = 999.
-               Diag%rh02max(i)    = -999.
-               Diag%rh02min(i)    = 999.
+               Diag%u10max(i)   = -999.
+               Diag%v10max(i)   = -999.
+               Diag%t02max(i)   = -999.
+               Diag%t02min(i)   =  999.
+               Diag%rh02max(i)  = -999.
+               Diag%rh02min(i)  =  999.
             endif
             if (tem > Diag%spd10max(i)) then
                Diag%spd10max(i) = tem
-               Diag%u10max(i)    = Diag%u10m(i)
-               Diag%v10max(i)    = Diag%v10m(i)
+               Diag%u10max(i)   = Diag%u10m(i)
+               Diag%v10max(i)   = Diag%v10m(i)
             endif
             pshltr=Statein%pgr(i)*exp(-0.068283/Stateout%gt0(i,1))
             QCQ=PQ0/pshltr*EXP(A2A*(Sfcprop%t2m(i)-A3)/(Sfcprop%t2m(i)-A4))
@@ -8462,6 +9032,8 @@ module module_physics_driver
       ! End associate construct to replace local variables with CCPP variables
       end associate associate_ccpp_vars
 #endif
+
+#include "debug_bitforbit_diagtoscreen.inc"
 
       return
 !...................................
@@ -8660,6 +9232,37 @@ module module_physics_driver
       return
 
       end subroutine moist_bud2
+
+#ifndef CCPP
+      real function cmposit2(frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval)
+      ! --- 2-way compositing (use with ice/non-ice composited variables)
+      implicit none
+      real(kind=kind_phys),intent(IN) :: frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval
+      real(kind=kind_phys)            :: frac_wet
+
+      frac_wet=max(frac_lake,frac_ocean)
+      if (frac_ice == 0.) then
+        cmposit2 = frac_dry*landval + frac_wet*oceanval
+      else
+        cmposit2 = frac_dry*landval + frac_wet*iceval
+      end if
+      return
+      end function cmposit2
+
+
+      real function cmposit3(frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval)
+      ! --- 3-way compositing
+      implicit none
+      real(kind=kind_phys),intent(IN) :: frac_ocean,frac_dry,frac_lake,frac_ice,oceanval,landval,iceval
+
+      if (frac_dry == 0.0 .and. iceval == oceanval) then
+        cmposit3 = oceanval
+      else
+        cmposit3 = frac_dry*landval + frac_ice*iceval + (1.-frac_dry-frac_ice)*oceanval
+      endif
+      return
+      end function cmposit3
+#endif
 
 !> @}
 

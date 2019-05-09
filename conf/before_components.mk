@@ -16,23 +16,12 @@
 
 CHOSEN_MODULE=$(BUILD_TARGET)/fv3
 
-# DH* TODO: INTEL18=Y is not a useful way to trigger using the CCPP version of the
-# fv3 modulefile for wcoss, because Intel 18 is already the default compiler *DH
 ifneq (,$(findstring INTEL18=Y,$(FV3_MAKEOPT)))
   ifeq ($(CHOSEN_MODULE),theia.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.1.163
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),jet.intel/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.5.274
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   else ifeq ($(CHOSEN_MODULE),gaea.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.3.222
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),wcoss_cray/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),wcoss_dell_p3/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   endif
 #else ifneq (,$(findstring CCPP=Y,$(FV3_MAKEOPT)))
@@ -40,17 +29,8 @@ else ifneq (,$(or $(findstring CCPP=Y,$(COMPONENTS)),$(findstring CCPP=Y,$(FV3_M
   ifeq ($(CHOSEN_MODULE),theia.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-15.1.133
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),jet.intel/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-18.0.5.274
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   else ifeq ($(CHOSEN_MODULE),gaea.intel/fv3)
     override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.intel-16.0.3.210
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),wcoss_cray/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
-    $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
-  else ifeq ($(CHOSEN_MODULE),wcoss_dell_p3/fv3)
-    override CHOSEN_MODULE=$(BUILD_TARGET)/fv3.ccpp
     $(warning Overriding CHOSEN_MODULE with $(CHOSEN_MODULE) as requested per MAKEOPT)
   endif
 endif

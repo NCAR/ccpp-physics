@@ -140,6 +140,7 @@ SCHEME_FILES = {
     'ccpp/physics/physics/GFS_stochastics.F90'               : [ 'slow_physics' ],
     'ccpp/physics/physics/GFS_suite_interstitial.F90'        : [ 'slow_physics' ],
     'ccpp/physics/physics/GFS_surface_generic.F90'           : [ 'slow_physics' ],
+    'ccpp/physics/physics/GFS_surface_composites.F90'        : [ 'slow_physics' ],
     'ccpp/physics/physics/GFS_surface_loop_control.F90'      : [ 'slow_physics' ],
     'ccpp/physics/physics/GFS_time_vary_pre.fv3.F90'         : [ 'slow_physics' ],
     'ccpp/physics/physics/cnvc90.f'                          : [ 'slow_physics' ],
