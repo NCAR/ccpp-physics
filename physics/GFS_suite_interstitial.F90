@@ -108,7 +108,7 @@
 !! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                           | critical relative humidity at the top of atmosphere                     | frac          |    0 | real       | kind_phys | out    | F        |
 !! | frain          | dynamics_to_physics_timestep_ratio                                        | ratio of dynamics timestep to physics timestep                          | none          |    0 | real       | kind_phys | out    | F        |
 !! | islmsk         | sea_land_ice_mask                                                         | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer    |           | out    | F        |
-!! | frland         | land_area_fraction                                                        | land area fraction                                                      | frac          |    1 | real       | kind_phys | out    | F        |
+!! | frland         | land_area_fraction_for_microphysics                                       | land area fraction used in microphysics schemes                         | frac          |    1 | real       | kind_phys | out    | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes             | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real       | kind_phys | out    | F        |
 !! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement  | complement to work1                                                     | none          |    1 | real       | kind_phys | out    | F        |
 !! | psurf          | surface_air_pressure_diag                                                 | surface air pressure diagnostic                                         | Pa            |    1 | real       | kind_phys | out    | F        |
@@ -117,11 +117,14 @@
 !! | dtdt           | tendency_of_air_temperature_due_to_model_physics                          | updated tendency of the temperature                                     | K s-1         |    2 | real       | kind_phys | out    | F        |
 !! | dtdtc          | tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky   | clear sky radiative (shortwave + longwave) heating rate at current time | K s-1         |    2 | real       | kind_phys | out    | F        |
 !! | dqdt           | tendency_of_tracers_due_to_model_physics                                  | updated tendency of the tracers                                         | kg kg-1 s-1   |    3 | real       | kind_phys | out    | F        |
+!! | tisfc          | sea_ice_temperature                                                       | sea ice surface skin temperature                                        | K             |    1 | real       | kind_phys | in     | F        |
+!! | tice           | sea_ice_temperature_interstitial                                          | sea ice surface skin temperature use as interstitial                    | K             |    1 | real       | kind_phys | out    | F        |
 !! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                                | none          |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                                   | flag          |    0 | integer    |           | out    | F        |
 !!
     subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, crtrh, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
-      rhbbot, rhpbl, rhbtop, frain, islmsk, frland, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+      rhbbot, rhpbl, rhbtop, frain, islmsk, frland, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, &
+      tisfc, tice, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -138,6 +141,8 @@
       real(kind=kind_phys), intent(out), dimension(im) :: frland, work1, work2, psurf
       real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
+      real(kind=kind_phys), intent(in),  dimension(im) :: tisfc
+      real(kind=kind_phys), intent(out), dimension(im) :: tice
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
@@ -165,6 +170,9 @@
         work1(i) = max(0.0, min(1.0,work1(i)))
         work2(i) = 1.0 - work1(i)
         psurf(i) = pgr(i)
+        ! DH* 20190507 - assign sea ice temperature to interstitial variable
+        tice(i) = tisfc(i)
+        ! *DH
       end do
 
       do k=1,levs
