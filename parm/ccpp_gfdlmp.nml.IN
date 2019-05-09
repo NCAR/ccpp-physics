@@ -155,6 +155,7 @@
        dspheat        = .true.
        hybedmf        = @[HYBEDMF]
        satmedmf       = @[SATMEDMF]
+       shinhong       = @[SHINHONG]
        lheatstrg      = @[LHEATSTRG]
        lgfdlmprad     = @[LGFDLMPRAD]
        effr_in        = @[EFFR_IN]

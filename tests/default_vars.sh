@@ -113,6 +113,7 @@ export EFFR_IN=.F.
 
 # PBL
 export SATMEDMF=.F.
+export SHINHONG=.F.
 export HYBEDMF=.T.
 
 # Shallow/deep convection
