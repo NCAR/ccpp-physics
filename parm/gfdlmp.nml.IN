@@ -154,15 +154,14 @@
        dspheat        = .true.
        hybedmf        = @[HYBEDMF]
        satmedmf       = @[SATMEDMF]
-       shinhong       = @[SHINHONG]
        lheatstrg      = @[LHEATSTRG]
        lgfdlmprad     = @[LGFDLMPRAD]
        effr_in        = @[EFFR_IN]
        random_clds    = .false.
        trans_trac     = .false.
        cnvcld         = .true.
-       imfshalcnv     = @[IMFSHALCNV]
-       imfdeepcnv     = @[IMFDEEPCNV]
+       imfshalcnv     = 2
+       imfdeepcnv     = 2
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
        ivegsrc        = 1

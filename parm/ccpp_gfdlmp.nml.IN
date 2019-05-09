@@ -156,6 +156,7 @@
        hybedmf        = @[HYBEDMF]
        satmedmf       = @[SATMEDMF]
        shinhong       = @[SHINHONG]
+       do_ysu         = @[DO_YSU]
        lheatstrg      = @[LHEATSTRG]
        lgfdlmprad     = @[LGFDLMPRAD]
        effr_in        = @[EFFR_IN]

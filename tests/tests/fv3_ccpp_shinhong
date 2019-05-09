@@ -85,5 +85,4 @@ export INPUT_NML=ccpp_gfdlmp.IN
 RUN_SCRIPT=rt_fv3.sh
 
 export HYBEDMF=.F.
-export SATMEDMF=.F.
 export SHINHONG=.T.
