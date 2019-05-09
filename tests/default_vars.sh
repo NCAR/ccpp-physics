@@ -116,10 +116,20 @@ export SATMEDMF=.F.
 export HYBEDMF=.T.
 export SHINHONG=.F.
 export DO_YSU=.F.
+export DO_MYNNEDMF=.F.
 
 # Shallow/deep convection
 export IMFSHALCNV=2
 export IMFDEEPCNV=2
+
+# LSM
+export LSM=1
+export LSOIL_LSM=4
+
+# Ozone / stratospheric H2O
+export OZ_PHYS_OLD=.T.
+export OZ_PHYS_NEW=.F.
+export H2O_PHYS=.F.
 
 export CPL=.F.
 export CPLFLX=.F.
@@ -147,11 +157,7 @@ export SDAY=03
 export SHOUR=00
 export FHMAX=${FHMAX:-`expr $DAYS \* 24`}
 export DT_ATMOS=1800
-
-# Ozone / stratospheric H2O
-export OZ_PHYS_OLD=.T.
-export OZ_PHYS_NEW=.F.
-export H2O_PHYS=.F.
+export FHCYC=24
 
 # Stochastic physics
 export DO_SPPT=.F.
