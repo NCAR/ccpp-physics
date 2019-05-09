@@ -47,7 +47,6 @@ parameterizations in suites.
  - \subpage GFS_GWDC
  - \subpage GFS_CALPRECIPTYPE
  - \subpage STOCHY_PHYS
- - \subpage RAD_CLD
 
 In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
  - \ref func_phys
@@ -102,7 +101,7 @@ Two suites of CP-MP-PBLP parameterizations have been identified as possible repl
 derived from the operational Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR) modeling system \cite Benjamin_2016 and was developed largely at NOAA/OAR/ESRL/GSD for mesoscale applications, while the second candidate, i.e., the \b CPT \b (Climate Process Team) suite, has components that were
 developed at multiple ressearch centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Its individual
 parameterizations have been applied primarily to medium-range and longer prediction scales. For the GFSv15 suite, a very similar suite, but
-with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019 \cite Han_2019, manuscript accepted by WAF).
+with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019 \cite Han_2019).
 
 Table 1.  physics-suite options included in this documentation. 
 \tableofcontents

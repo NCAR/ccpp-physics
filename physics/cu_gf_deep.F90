@@ -97,8 +97,7 @@ contains
               ,ktop          &  !<
               ,cupclw        &  !< used for direct coupling to radiation, but with tuning factors
               ,ierr          &  !< ierr flags are error flags, used for debugging
-              ,ierrc         &  !<
-!    the following should be set to zero if not available
+              ,ierrc         &  !<!    the following should be set to zero if not available
               ,rand_mom      &  !< for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     &  !< for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     &  !< for stochastics closures, if temporal and spatial patterns exist

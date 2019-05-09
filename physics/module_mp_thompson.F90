@@ -1,8 +1,8 @@
 !>\file module_mp_thompson.F90
-!! This file contains the entity of GSD Thompson HRRR MP scheme
+!! This file contains the entity of GSD Thompson MP scheme.
 
 !>\ingroup aathompson
-!>\defgroup thompson_hrrr_mp Thompson-HRRR MP module
+!>\defgroup thompson_hrrr_mp GSD Thompson MP Module
 !! This subroutine computes the moisture tendencies of water vapor,
 !! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
 !! Prior to WRFv2.2 this code was based on Reisner et al (1998), but

@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
-PROJECT_NUMBER         = "Version pre3.0"
+PROJECT_NUMBER         = "Version 3.0"
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -124,7 +124,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFDL_cloud.txt   \
                           pdftxt/GFS_SURFACE_PERT.txt    \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \
-                          pdftxt/rad_cld.txt             \
+###                          pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
                           pdftxt/CPT_MG3.txt             \
                           pdftxt/GSD_MYNN_EDMF.txt       \

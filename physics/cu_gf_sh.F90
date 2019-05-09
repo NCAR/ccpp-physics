@@ -3,8 +3,8 @@
 
 !>\defgroup cu_gf_sh_group GSD Grell-Freitas Shallow Convection Main
 !> \ingroup cu_gf_group
-!! module cup_gf_sh will call shallow convection as described in grell and
-!! freitas (2014) \cite grell_and_freitas_2014. input variables are:
+!! module cup_gf_sh will call shallow convection as described in Grell and
+!! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
 !!\param    zo               height at model levels
 !!\param    t,tn             temperature without and with forcing at model levels
 !!\param    q,qo             mixing ratio without and with forcing at model levels
@@ -21,29 +21,23 @@
 !!\n                         3: dhdt
 !!\n                         0: average
 !!\param    tcrit            parameter for water/ice conversion (258)
-!!\param
-! variables that are diagnostic
-!
-!>\param    zuo               normalized mass flux profile
+!!\param    zuo               normalized mass flux profile
 !!\param    xmb_out           base mass flux
 !!\param    kbcon             convective cloud base
 !!\param    ktop              cloud top
 !!\param    k22               level of updraft originating air
 !!\param    ierr              error flag
 !!\param    ierrc             error description
-!
-!!!!!!!!!!!! variables that are on output
-!>\param    outt               temperature tendency (k/s)
-!    outq               mixing ratio tendency (kg/kg/s)
-!    outqc              cloud water/ice tendency (kg/kg/s)
-!    pre                precip rate (mm/s)
-!    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)
-!                       this needs heavy tuning factors, since cloud fraction is
-!                       not included (kg/kg)
-!    cnvwt              required for gfs physics
-!
-!    itf,ktf,its,ite, kts,kte are dimensions
-!    ztexec,zqexec    excess temperature and moisture for updraft
+!!\param    outt               temperature tendency (k/s)
+!!\param    outq               mixing ratio tendency (kg/kg/s)
+!!\param    outqc              cloud water/ice tendency (kg/kg/s)
+!!\param    pre                precip rate (mm/s)
+!!\param    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)
+!!                            this needs heavy tuning factors, since cloud fraction is
+!!                       not included (kg/kg)
+!!\param    cnvwt              required for gfs physics
+!!\param    itf,ktf,its,ite, kts,kte are dimensions
+!!\param    ztexec,zqexec    excess temperature and moisture for updraft
 module cu_gf_sh
     use machine , only : kind_phys
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
