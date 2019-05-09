@@ -54,7 +54,6 @@ In addition to the physical schemes themselves, this scientific documentation al
  - \ref phy_sparam
  - \ref physcons
  - \ref radcons
- - \ref fv3gfs_typedefs
 
 The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, vater contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional

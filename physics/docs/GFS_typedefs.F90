@@ -1,10 +1,9 @@
 !>\file GFS_typedefs.F90
-!! This file contains typedefs on host model side
+!! This file contains typedefs on host model side.
 
 #undef MULTI_GASES
 
 !>\defgroup fv3gfs_typedefs GFS typedefs
-!> @{
 module GFS_typedefs
 
        use machine,                  only: kind_phys
@@ -6540,4 +6539,3 @@ module GFS_typedefs
 #endif
 
 end module GFS_typedefs
-!> @}

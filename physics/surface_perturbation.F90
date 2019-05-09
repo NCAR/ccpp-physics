@@ -2,11 +2,9 @@
 !! This file includes routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
 
-
+!>\defgroup gfs_sfcpert GFS Surface Perturbation Module
 !> This module contains routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
-!>\defgroup gfs_sfcpert GFS Surface Perturbation Module
-!! @{
 module surface_perturbation
 
       implicit none
@@ -22,6 +20,7 @@ module surface_perturbation
 ! the routines below are used in the percentile matching algorithm for the
 ! albedo and vegetation fraction perturbations 
 
+!>\ingroup gfs_sfcpert
 !> This subrtouine calculates the CDF of the standard normal distribution
 !! evaluated at z.
       subroutine cdfnor(z,cdfz)
@@ -61,6 +60,7 @@ module surface_perturbation
       return
       end
 
+!>\ingroup gfs_sfcpert
       subroutine cdfgam(x,alpha,eps,iflag,cdfx)
       use machine
 
@@ -133,6 +133,7 @@ module surface_perturbation
         return
       end subroutine cdfgam
 
+!>\ingroup gfs_sfcpert
       subroutine dgamln(x,dgamlnout)
 
       use machine
@@ -177,6 +178,7 @@ module surface_perturbation
       return
       end subroutine dgamln
 
+!>\ingroup gfs_sfcpert
 !> This subroutine computes the beta distribution value that
 !! matches the percentile from the random pattern.
       subroutine ppfbet(pr,p,q,iflag,x)
@@ -293,6 +295,7 @@ module surface_perturbation
         return
       end subroutine ppfbet
 
+!>\ingroup gfs_sfcpert
 !> This subroutine computes the value of the cumulative beta distribution
 !! at a single point x, given the distribution parameters p,q.
       subroutine cdfbet(x,p,q,eps,iflag,cdfx)
@@ -379,6 +382,7 @@ module surface_perturbation
 
       end subroutine cdfbet
 
+!>\ingroup gfs_sfcpert
 !> This subroutine computes the natural logarithm of the gamma distribution.
 !! Users can set the absolute accuracy and corresponding xmin.
       subroutine gmln(x,y)
@@ -431,4 +435,3 @@ module surface_perturbation
 
 ! *** mg, sfc perts
 end module surface_perturbation
-!! @}

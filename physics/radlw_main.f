@@ -1532,6 +1532,8 @@
 !!\param nlay            number of layer number
 !!\param nlp1            number of veritcal levels
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
+!!\param dz              layer thickness (km) 
+!!\param de_lgth         layer cloud decorrelation length (km)  
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm

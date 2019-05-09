@@ -59,8 +59,8 @@ contains
 !===================
 
 !> \defgroup cu_gf_group GSD Scale-Aware Grell-Freitas Convection Scheme Module
-!>@{
 !>\defgroup cu_gf_driver GSD Grell-Freitas Convection Scheme Driver
+!> \ingroup cu_gf_group
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
@@ -263,7 +263,7 @@ contains
 ! 
      tropics(:)=0
 !
-!> tuning constants for radiation coupling
+!> - tuning constants for radiation coupling
 !
    tun_rad_shall(:)=.02
    tun_rad_mid(:)=.15
@@ -533,7 +533,7 @@ contains
            ierrm(i)=0
           enddo
 !
-!> if ishallow_g3=1, call shallow: cup_gf_sh()
+!> - Call shallow: cu_gf_sh_run()
 !
     ! print*,'hli bf shallow t2d',t2d
           call cu_gf_sh_run (us,vs,                                              &
@@ -558,7 +558,7 @@ contains
 
        ipr=0
        jpr_deep=0 !340765
-!> if imid_gf=1, call cup_gf()
+!> - Call cu_gf_deep_run() for middle GF convection
    if(imid_gf == 1)then
       call cu_gf_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
@@ -636,7 +636,7 @@ contains
       call neg_check('mid',ipn,dt,qcheck,outqm,outtm,outum,outvm,   &
                      outqcm,pretm,its,ite,kts,kte,itf,ktf,ktopm)
     endif
-!> if ideep=1, call cup_gf()
+!> - Call cu_gf_deep_run() for deep GF convection
    if(ideep.eq.1)then
       call cu_gf_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
@@ -802,7 +802,7 @@ contains
                 print*,'hli gdc(i,k,1),gdc2(i,k,1)',gdc(i,k,1),gdc2(i,k,1)
                endif
 !
-!> calculate subsidence effect on clw
+!> - Calculate subsidence effect on clw
 !
                dsubclw=0.
                dsubclwm=0.
@@ -867,6 +867,5 @@ contains
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !
    end subroutine cu_gf_driver_run
-!> @}
 !> @}
 end module cu_gf_driver

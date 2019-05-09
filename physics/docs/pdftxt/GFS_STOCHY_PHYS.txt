@@ -6,7 +6,7 @@ using ensemble forecasting techniques (Lewis(2005) \cite Lewis_2005). Building a
 specification of the sources of uncertainties. It seems conventionally to distinguish between uncertainties in the initial 
 conditions (i.e. initial uncertainties) and uncertainties in the forecast model (i.e. model uncertainties). An ensemble 
 that represents only initial uncertainties consistent with the true distribution of initial condition errors is known to be 
-underdispersive and therefore will lack reliability (Wilks (2005) \cite wilks_2005). This motivates the development of methodologies
+underdispersive and therefore will lack reliability (Wilks (2005) \cite Wilks_2005). This motivates the development of methodologies
 to represent model uncertainties.
 
 Traditionally, physical parameterization schemes were assumed to be deterministic, producing representations of small-scale

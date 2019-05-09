@@ -24,7 +24,6 @@
 ! =======================================================================
 !>\defgroup mod_gfdl_cloud_mp GFDL Cloud MP modules
 !!\ingroup gfdlmp
-!> @{
 !! This module contains the column GFDL Cloud microphysics scheme.
 module gfdl_cloud_microphys_mod
 
@@ -631,7 +630,7 @@ end subroutine gfdl_cloud_microphys_mod_driver
 !! Rutledge and Hobbs (1984) \cite rutledge_and_hobbs_1984.
 !!
 !>\section detmpdrv GFDL Cloud mpdrv General Algorithm
-!! @{
+!> @{
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
         rain, snow, graupel, ice, m2_rain, m2_sol, cond, area1, land,         &
@@ -1042,7 +1041,7 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     enddo
 
 end subroutine mpdrv
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup mod_gfdl_cloud_mp
@@ -1102,7 +1101,7 @@ end subroutine sedi_heat
 !>\ingroup mod_gfdl_cloud_mp
 !> This subroutine includes warm rain cloud microphysics.
 !>\section warm_gen GFDL Cloud warm_rain General Algorithm
-!! @{
+!> @{
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         den, denfac, ccn, c_praut, rh_rain, vtr, r1, m1_rain, w1, h_var)
 
@@ -1318,13 +1317,13 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
 
 end subroutine warm_rain
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup mod_gfdl_cloud_mp
 !> This subroutine calculates evaporation of rain and accretion of rain.
 !!\section gen_ravap GFDL Cloud revap_racc General Algorithm
-!! @{
+!> @{
 subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
 
     implicit none
@@ -1420,7 +1419,7 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
     enddo
 
 end subroutine revap_racc
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
 !>\ingroup mod_gfdl_cloud_mp
@@ -1429,7 +1428,7 @@ end subroutine revap_racc
 ! qi -- > ql & ql -- > qr
 ! edges: qe == qbar + / - dm
 !>\section gen_linear GFDL cloud linear_prof General Algorithm
-!! @{
+!> @{
 subroutine linear_prof (km, q, dm, z_var, h_var)
 
     implicit none
@@ -1484,7 +1483,7 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
     endif
 
 end subroutine linear_prof
-!! @}
+!> @}
 
 ! =======================================================================
 !>\ingroup mod_gfdl_cloud_mp
@@ -1496,7 +1495,7 @@ end subroutine linear_prof
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
 !>\section det_icloud GFDL icloud Detailed Algorithm
-!! @{
+!> @{
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         den, denfac, vts, vtg, vtr, qak, rh_adj, rh_rain, dts, h_var)
 
@@ -1977,7 +1976,7 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         qlk, qrk, qik, qsk, qgk, qak, h_var, rh_rain)
 
 end subroutine icloud
-!! @}
+!> @}
 
 ! =======================================================================
 !>\ingroup mod_gfdl_cloud_mp
@@ -4976,5 +4975,3 @@ end subroutine cloud_diagnosis
 !! @}
 
 end module gfdl_cloud_microphys_mod
-!!@}
-!> @}

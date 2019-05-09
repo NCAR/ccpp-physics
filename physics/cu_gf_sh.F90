@@ -2,39 +2,38 @@
 !! This file contains
 
 !>\defgroup cu_gf_sh_group GSD Grell-Freitas Shallow Convection Main
-!! @{
 !> \ingroup cu_gf_group
 !! module cup_gf_sh will call shallow convection as described in grell and
 !! freitas (2014) \cite grell_and_freitas_2014. input variables are:
-!    zo               height at model levels
-!    t,tn             temperature without and with forcing at model levels
-!    q,qo             mixing ratio without and with forcing at model levels
-!    po               pressure at model levels (mb)
-!    psur             surface pressure (mb)
-!    z1               surface height
-!    dhdt             forcing for boundary layer equilibrium   
-!    hfx,qfx          in w/m2 (positive, if upward from sfc)
-!    kpbl             level of boundaty layer height
-!    xland            land mask (1. for land)
-!    ichoice          which closure to choose 
-!                     1: old g
-!                     2: zws
-!                     3: dhdt
-!                     0: average
-!    tcrit            parameter for water/ice conversion (258)
+!!\param    zo               height at model levels
+!!\param    t,tn             temperature without and with forcing at model levels
+!!\param    q,qo             mixing ratio without and with forcing at model levels
+!!\param    po               pressure at model levels (mb)
+!!\param    psur             surface pressure (mb)
+!!\param    z1               surface height
+!!\param    dhdt             forcing for boundary layer equilibrium   
+!!\param    hfx,qfx          in w/m2 (positive, if upward from sfc)
+!!\param    kpbl             level of boundaty layer height
+!!\param    xland            land mask (1. for land)
+!!\param    ichoice          which closure to choose 
+!!\n                         1: old g
+!!\n                         2: zws
+!!\n                         3: dhdt
+!!\n                         0: average
+!!\param    tcrit            parameter for water/ice conversion (258)
+!!\param
+! variables that are diagnostic
 !
-!!!!!!!!!!!! variables that are diagnostic
-!
-!    zuo               normalized mass flux profile
-!    xmb_out           base mass flux
-!    kbcon             convective cloud base
-!    ktop              cloud top
-!    k22               level of updraft originating air
-!    ierr              error flag
-!    ierrc             error description
+!>\param    zuo               normalized mass flux profile
+!!\param    xmb_out           base mass flux
+!!\param    kbcon             convective cloud base
+!!\param    ktop              cloud top
+!!\param    k22               level of updraft originating air
+!!\param    ierr              error flag
+!!\param    ierrc             error description
 !
 !!!!!!!!!!!! variables that are on output
-!    outt               temperature tendency (k/s)
+!>\param    outt               temperature tendency (k/s)
 !    outq               mixing ratio tendency (kg/kg/s)
 !    outqc              cloud water/ice tendency (kg/kg/s)
 !    pre                precip rate (mm/s)
@@ -58,17 +57,13 @@ module cu_gf_sh
 
 contains
 
+!>\section gen_cu_gf_sh_run GSD cu_gf_sh_run General Algorithm
   subroutine cu_gf_sh_run (                                            &
-! input variables, must be supplied
-                         us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
+                         us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
-! input variables. ierr should be initialized to zero or larger than zero for
-! turning off shallow convection for grid points
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
-! output tendencies
-                         outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,          &
-! dimesnional variables
-                         itf,ktf,its,ite, kts,kte,ipr,tropics)
+                         outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,     & ! output tendencies
+                         itf,ktf,its,ite, kts,kte,ipr,tropics)  ! dimesnional variables
 !
 ! this module needs some subroutines from gf_deep
 !
@@ -941,4 +936,3 @@ contains
 
    end subroutine cu_gf_sh_run
 end module cu_gf_sh
-!! @}

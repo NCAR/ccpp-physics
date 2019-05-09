@@ -229,8 +229,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../cu_gf_sh.F90     \
                         ../module_MYNNPBL_wrapper.F90 \
                         ../module_bl_mynn.F90   \
-                        ../module_MYNNSFC_wrapper.F90 \
-                        ../module_sf_mynn.F90  \
+###                        ../module_MYNNSFC_wrapper.F90 \
+###                        ../module_sf_mynn.F90  \
                         ../sfc_drv_ruc.F90   \
                         ../module_sf_ruclsm.F90    \
                         ../namelist_soilveg_ruc.F90 \
@@ -244,8 +244,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f  \
-                        GFS_typedefs.F90 
+                        ../mersenne_twister.f  
+###                        GFS_typedefs.F90 
 
 
 INPUT_ENCODING         = UTF-8
@@ -382,13 +382,14 @@ GENERATE_PERLMOD       = NO
 PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
-ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = YES
+ENABLE_PREPROCESSING   = NO
+MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = CCPP 
+PREDEFINED             = CCPP \
+                         GEOS5 
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 TAGFILES               =

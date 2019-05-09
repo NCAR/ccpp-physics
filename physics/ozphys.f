@@ -23,7 +23,6 @@
 
 
 !>\defgroup GFS_ozphys GFS ozphys Main
-!> @{
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
@@ -54,7 +53,7 @@
 !! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 !> \section genal_ozphys GFS ozphys_run General Algorithm
-!! @{
+!> @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
      &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
@@ -198,7 +197,6 @@
 !
       return
       end subroutine ozphys_run
-!! @}
 !> @}
 
       end module ozphys

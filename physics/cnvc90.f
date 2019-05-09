@@ -37,7 +37,7 @@
 !! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
-!>\section gen_cnvc90 FV3GFS cnvc90_run General Algorithm
+!>\section gen_cnvc90_run GFS cnvc90_run General Algorithm
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 

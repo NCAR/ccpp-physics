@@ -2,7 +2,6 @@
 !! This file is the Grell-Freitas deep convection scheme.
 
 !>\defgroup cu_gf_deep_group GSD Grell-Freitas Deep Convection Main
-!! @{
 !>\ingroup cu_gf_group
 module cu_gf_deep
      use machine , only : kind_phys
@@ -49,7 +48,7 @@ contains
 
 !>\ingroup cu_gf_deep_group
 !> \section general_gf_deep GF Deep Convection General Algorithm
-!! @{
+!> @{
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
               ,dicycle       &  !< diurnal cycle flag
@@ -2030,7 +2029,7 @@ contains
 !
 
    end subroutine cu_gf_deep_run
-!! @}
+!> @}
 
 !>\ingroup cu_gf_deep_group
 !> This subroutine calculates
@@ -4963,4 +4962,3 @@ endif
 !------------------------------------------------------------------------------------
 
 end module cu_gf_deep
-!!@}

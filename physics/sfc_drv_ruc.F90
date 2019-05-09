@@ -139,9 +139,8 @@ module lsm_ruc
 !  ====================    end of description    =====================  !
 
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
-!! @{
 #if 0
-!! \section arg_table_lsm_ruc_run Argument Table
+!> \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
@@ -1501,6 +1500,5 @@ module lsm_ruc
 
       end subroutine rucinit
 
-!! @}
 
 end module lsm_ruc

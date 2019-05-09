@@ -1,12 +1,9 @@
 !>  \file cs_conv_aw_adj.F90
-!!  Driver for CS (Chikira Sugiyama) deep convection upgraded with Arakawa-Wu (AW) scale-aware parameterization.
-!!  - A spectrum of  cloud types defined by cloud base vertical velocity by CS
-!!  - Vertical velocity calculated at each level and each cloud type for AW scale-awareness 
-!!  - Basic idea is m=rou*sigma*w, so  sigma=m/rou/w
-!!  
+!! This file contains a subroutine to adjusts surface rainrate for conservation for CSAW.  
 
 !>\defgroup mod_cs_conv_aw_adj CPT cs_conv_aw_adj Module
-!!
+!! This module adjusts surface rainrate for conservation.
+!> @{
 module cs_conv_aw_adj
 
    implicit none
@@ -24,7 +21,8 @@ module cs_conv_aw_adj
    end subroutine cs_conv_aw_adj_finalize
 
 !>\ingroup cs_scheme
-!! \section arg_table_cs_conv_aw_adj_run Argument Table
+!> This subroutine adjusts surface rainrate for conservation.
+!> \section arg_table_cs_conv_aw_adj_run Argument Table
 !! | local_name      | standard_name                                                 | long_name                                                                        | units   | rank | type      |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | im              | horizontal_dimension                                          | horizontal dimension                                                             | count   |    0 | integer   |           | in     | F        |
@@ -50,8 +48,7 @@ module cs_conv_aw_adj
 !! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
-!!\section gen_cs_conv_aw_adj_run CPT cs_conv_aw_adj_run General Algorithm
-!> @{
+!>\section gen_cs_conv_aw_adj_run CPT cs_conv_aw_adj_run General Algorithm
    subroutine cs_conv_aw_adj_run(im, levs, do_cscnv, do_aw, do_shoc, &
                 ntrac, ncld, ntcw, ntclamt, nncl, con_g, sigmafrac,  &
                 gt0, gq0, save_t, save_q, prsi, cldfrac, subcldfrac, &
@@ -133,6 +130,6 @@ module cs_conv_aw_adj
 
    end subroutine cs_conv_aw_adj_run
 
-!> @}
 
 end module cs_conv_aw_adj
+!> @}

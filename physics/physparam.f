@@ -20,7 +20,6 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup phy_sparam GFS Physics Parameter Module
-!! @{
 !! Those variables are grouped  together in accordance with functionaity
 !! and are given brief descriptions and value specifications. There are
 !! two types of attributes (parameters vs. save) designated for the
@@ -300,4 +299,3 @@
 !...................................!
       end module physparam          !
 !===================================!
-!! @}
