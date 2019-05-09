@@ -11,7 +11,7 @@ module module_nst_water_prop
   private
   public :: rhocoef,density,sw_rad,sw_rad_aw,sw_rad_sum,sw_rad_upper,sw_rad_upper_aw,sw_rad_skin,grv,solar_time_from_julian,compjd, &
             sw_ps_9b,sw_ps_9b_aw,get_dtzm_point,get_dtzm_2d
-      
+
   !
   interface sw_ps_9b
      module procedure sw_ps_9b
@@ -41,35 +41,40 @@ module module_nst_water_prop
 contains
   ! ------------------------------------------------------
 !>\ingroup waterprop
+<<<<<<< HEAD
 !! This subroutine computes thermal expansion coefficient (alpha)
 !! and saline contraction coefficient (beta). 
+=======
+!> This subroutine computes thermal expansion coefficient (alpha)
+!! and saline contraction coefficient (beta).
+>>>>>>> 1c75de1fd2c606e9930ca6c63cda5431bddf1519
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
 
-    !  compute thermal expansion coefficient (alpha) 
-    !  and saline contraction coefficient (beta) using 
-    !  the international equation of state of sea water 
-    !  (1980). ref: pond and pickard, introduction to 
-    !  dynamical oceanography, pp310.  
+    !  compute thermal expansion coefficient (alpha)
+    !  and saline contraction coefficient (beta) using
+    !  the international equation of state of sea water
+    !  (1980). ref: pond and pickard, introduction to
+    !  dynamical oceanography, pp310.
     !  note: compression effects are not included
 
     implicit none
-    real(kind=kind_phys), intent(in)  :: t, s, rhoref 
-    real(kind=kind_phys), intent(out) :: alpha, beta  
+    real(kind=kind_phys), intent(in)  :: t, s, rhoref
+    real(kind=kind_phys), intent(out) :: alpha, beta
     real(kind=kind_phys) :: tc
 
     tc = t - t0k
 
-    alpha =                                                        & 
-         6.793952e-2                                              & 
-         - 2.0 * 9.095290e-3 * tc     +  3.0 * 1.001685e-4 * tc**2  & 
-         - 4.0 * 1.120083e-6 * tc**3  +  5.0 * 6.536332e-9 * tc**4  & 
-         - 4.0899e-3 * s                                            & 
-         + 2.0 * 7.6438e-5 * tc * s  -  3.0 * 8.2467e-7 * tc**2 * s & 
-         + 4.0 * 5.3875e-9 * tc**3 * s                              & 
+    alpha =                                                        &
+         6.793952e-2                                              &
+         - 2.0 * 9.095290e-3 * tc     +  3.0 * 1.001685e-4 * tc**2  &
+         - 4.0 * 1.120083e-6 * tc**3  +  5.0 * 6.536332e-9 * tc**4  &
+         - 4.0899e-3 * s                                            &
+         + 2.0 * 7.6438e-5 * tc * s  -  3.0 * 8.2467e-7 * tc**2 * s &
+         + 4.0 * 5.3875e-9 * tc**3 * s                              &
          + 1.0227e-4 * s**1.5 -  2.0 * 1.6546e-6 * tc * s**1.5
 
-    ! note: rhoref - specify 
+    ! note: rhoref - specify
     !
     alpha =  -alpha/rhoref
 
@@ -95,13 +100,13 @@ contains
     real(kind=kind_phys), intent(in)  :: t     !unit, k
     real(kind=kind_phys), intent(in)  :: s     !unit, 1/1000
     ! output
-    real(kind=kind_phys), intent(out) :: rho   !unit, kg/m^3 
+    real(kind=kind_phys), intent(out) :: rho   !unit, kg/m^3
     ! local
     real(kind=kind_phys) :: tc
 
-    ! compute density using the international equation 
-    ! of state of sea water 1980, (pond and pickard, 
-    ! introduction to dynamical oceanography, pp310). 
+    ! compute density using the international equation
+    ! of state of sea water 1980, (pond and pickard,
+    ! introduction to dynamical oceanography, pp310).
     ! compression effects are not included
 
     rho = 0.0
@@ -124,11 +129,15 @@ contains
   !======================
   !
 !>\ingroup waterprop
+<<<<<<< HEAD
 !! This subroutine computes the fraction of the solar radiation absorbed 
+=======
+!> This subroutine computes the fraction of the solar radiation absorbed
+>>>>>>> 1c75de1fd2c606e9930ca6c63cda5431bddf1519
 !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
-    ! fraction of the solar radiation absorbed by the ocean at the depth z 
+    ! fraction of the solar radiation absorbed by the ocean at the depth z
     ! following paulson and simpson, 1981
     !
     ! input:
@@ -162,7 +171,7 @@ contains
 !! This subroutine
   elemental subroutine sw_ps_9b_aw(z,aw)
     !
-    ! d(fw)/d(z) for 9-band 
+    ! d(fw)/d(z) for 9-band
     !
     ! input:
     ! z:       depth (m)
@@ -263,7 +272,7 @@ contains
   end subroutine sw_fairall_6exp_v1_aw
   !
 !>\ingroup waterprop
-!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the 
+!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the
 !! depth z (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1298) following Paulson and
 !! Simpson (1981) \cite paulson_and_simpson_1981 .
 !>\param[in] z     depth (m)
@@ -299,7 +308,7 @@ contains
   !
   !======================
 !>\ingroup waterprop
-!! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996) 
+!! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996)
 !! \cite fairall_et_al_1996, p.1298)
 !!\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
 !!\param[in] z           depth (m)
@@ -307,8 +316,8 @@ contains
   elemental subroutine sw_fairall_simple_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
-    ! 
-    ! input: 
+    !
+    ! input:
     ! f_sol_0: solar radiation at the ocean surface (w/m^2)
     ! z:       depth (m)
     !
@@ -330,7 +339,7 @@ contains
   !======================
   !
 !>\ingroup waterprop
-!! solar radiation absorbed by the ocean at the depth z (Zeng and Beljaars (2005) 
+!! solar radiation absorbed by the ocean at the depth z (Zeng and Beljaars (2005)
 !! \cite zeng_and_beljaars_2005 , p.5).
 !>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
 !>\param[in] z           depth (m)
@@ -338,8 +347,8 @@ contains
   elemental subroutine sw_wick_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (zeng and beljaars, 2005, p.5)
-    ! 
-    ! input: 
+    !
+    ! input:
     ! f_sol_0: solar radiation at the ocean surface (w/m^2)
     ! z:       depth (m)
     !
@@ -362,7 +371,7 @@ contains
   !
 !>\ingroup waterprop
 !! This subroutine computes solar radiation absorbed by the ocean at the depth z
-!! (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1301) following 
+!! (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1301) following
 !! Soloviev and Vershinsky (1982) \cite soloviev_and_vershinsky_1982.
 !>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
 !>\param[in] z           depth (m)
@@ -371,8 +380,8 @@ contains
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
     ! following soloviev, 1982
-    ! 
-    ! input: 
+    !
+    ! input:
     ! f_sol_0: solar radiation at the ocean surface (w/m^2)
     ! z:       depth (m)
     !
@@ -402,8 +411,8 @@ contains
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
     ! following soloviev, 1982
-    ! 
-    ! input: 
+    !
+    ! input:
     ! f_sol_0: solar radiation at the ocean surface (w/m^2)
     ! z:       depth (m)
     !
@@ -417,7 +426,7 @@ contains
     if(z>0) then
        df_sol_z=f_sol_0*(1.0 &
             -(0.28*0.014*(1.-exp(-z/0.014)) &
-            +0.27*0.357*(1.-exp(-z/0.357)) &        
+            +0.27*0.357*(1.-exp(-z/0.357)) &
             +.45*12.82*(1.-exp(-z/12.82)))/z &
             )
     else
@@ -492,7 +501,7 @@ function grv(lat)
   c3=0.0000001262
   c4=0.0000000007
   pi=3.141593
-                                                                                                                                                             
+
   phi=lat*pi/180
   x=sin(phi)
   grv=gamma*(1+(c1*x**2)+(c2*x**4)+(c3*x**6)+(c4*x**8))
@@ -547,7 +556,7 @@ end subroutine solar_time_from_julian
 !     jmnth    - month
 !     jday     - day
 !     jhr      - hour
-!     jmn      - minutes 
+!     jmn      - minutes
 !   output argument list:
 !     jd       - julian day.
 !     fjd      - fraction of the julian day.
@@ -575,7 +584,7 @@ end subroutine solar_time_from_julian
       end subroutine compjd
 
 !>\ingroup waterprop
-!>This subroutine computes dtm (the mean of \f$dT(z)\f$). 
+!>This subroutine computes dtm (the mean of \f$dT(z)\f$).
  subroutine get_dtzm_point(xt,xz,dt_cool,zc,z1,z2,dtm)
 ! ===================================================================== !
 !                                                                       !
@@ -657,7 +666,7 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_point
 
 !>\ingroup waterprop
- subroutine get_dtzm_2d(xt,xz,dt_cool,zc,slmsk,z1,z2,nx,ny,dtm)
+ subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
 ! ===================================================================== !
 !                                                                       !
 !  description:  get dtm = mean of dT(z) (z1 - z2) with NSST dT(z)      !
@@ -665,7 +674,7 @@ end subroutine solar_time_from_julian
 !                                                                       !
 !  usage:                                                               !
 !                                                                       !
-!    call get_dtzm_2d                                                     !
+!    call get_dtzm_2d                                                   !
 !                                                                       !
 !       inputs:                                                         !
 !          (xt,xz,dt_cool,zc,z1,z2,                                     !
@@ -680,6 +689,8 @@ end subroutine solar_time_from_julian
 !     xz      - real, dtl thickness                                  1  !
 !     dt_cool - real, sub-layer cooling amount                       1  !
 !     zc      - sub-layer cooling thickness                          1  !
+!     wet     - logical, flag for wet point (ocean or lake)          1  !
+!     icy     - logical, flag for ice point (ocean or lake)          1  !
 !     nx      - integer, dimension in x-direction (zonal)            1  !
 !     ny      - integer, dimension in y-direction (meridional)       1  !
 !     z1      - lower bound of depth of sea temperature              1  !
@@ -692,9 +703,10 @@ end subroutine solar_time_from_julian
   implicit none
 
   integer, intent(in) :: nx,ny
-  real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc,slmsk
+  real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
+  logical, dimension(nx,ny), intent(in)  :: wet,icy
   real (kind=kind_phys), intent(in)  :: z1,z2
-  real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm                    
+  real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm
 ! Local variables
   integer :: i,j
   real (kind=kind_phys), dimension(nx,ny) :: dtw,dtc
@@ -707,9 +719,9 @@ end subroutine solar_time_from_julian
 !
 !     initialize dtw & dtc as zeros
 !
-      dtw(i,j) = 0.0      
-      dtc(i,j) = 0.0      
-      if ( slmsk(i,j) == 0.0 ) then
+      dtw(i,j) = 0.0
+      dtc(i,j) = 0.0
+      if ( wet(i,j) .and. .not.icy(i,j) ) then
 !
 !       get the mean warming in the range of z=z1 to z=z2
 !
@@ -743,16 +755,16 @@ end subroutine solar_time_from_julian
             endif
           endif
         endif
-      endif        ! if ( slmsk(i,j) == 0 ) then
+      endif        ! if ( wet(i,j) .and. .not.icy(i,j) ) then
     enddo
-  enddo 
+  enddo
 !
 ! get the mean T departure from Tf in the range of z=z1 to z=z2
 
 !$omp parallel do private(j,i)
   do j = 1, ny
     do i= 1, nx
-      if ( slmsk(i,j) == 0.0 ) then
+      if ( wet(i,j) .and. .not.icy(i,j)) then
         dtm(i,j) = dtw(i,j) - dtc(i,j)
       endif
     enddo

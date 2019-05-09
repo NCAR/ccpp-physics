@@ -1,7 +1,7 @@
 !>  \file sfc_sice.f
 !!  This file contains the GFS three level thermodynamic sea ice model.
 
-!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns 
+!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns
 !! updated ice thickness and concentration to global arrays
 !! where there is no ice, and set temperature to surface skin temperature.
       module sfc_sice_post
@@ -19,28 +19,31 @@
       end subroutine sfc_sice_post_finalize
 
 !! \section arg_table_sfc_sice_post_run Argument Table
-!! | local_name     | standard_name                                         | long_name                                   | units | rank | type      |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------|---------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                | horizontal loop extent                      | count |    0 | integer   |           | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                  | flag  |    1 | integer   |           | in     | F        |
-!! | tsfc           | surface_skin_temperature                              | surface skin temperature                    | K     |    1 | real      | kind_phys | in     | F        |
-!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                 | frac  |    1 | real      | kind_phys | inout  | F        |
-!! | hice           | sea_ice_thickness                                     | sea-ice thickness                           | m     |    1 | real      | kind_phys | inout  | F        |
-!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                 | K     |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP    | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP       | flag  |    0 | integer   |           | out    | F        |
+!! | local_name     | standard_name                                         | long_name                                         | units | rank | type      |    kind   | intent | optional |
+!! |----------------|-------------------------------------------------------|---------------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                            | count |    0 | integer   |           | in     | F        |
+!! | cplflx         | flag_for_flux_coupling                                | flag controlling cplflx collection (default off)  | flag  |    0 | logical   |           | in     | F        |
+!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                        | flag  |    1 | integer   |           | in     | F        |
+!! | tice           | sea_ice_temperature_interstitial                      | sea-ice surface temperature use as interstitial   | K     |    1 | real      | kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                              | surface skin temperature                          | K     |    1 | real      | kind_phys | in     | F        |
+!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                       | frac  |    1 | real      | kind_phys | inout  | F        |
+!! | hice           | sea_ice_thickness                                     | sea-ice thickness                                 | m     |    1 | real      | kind_phys | inout  | F        |
+!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                       | K     |    1 | real      | kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP          | none  |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP             | flag  |    0 | integer   |           | out    | F        |
 !!
-      subroutine sfc_sice_post_run(im, islmsk, tsfc, fice, hice, tisfc, &
-     &                             errmsg, errflg)
+      subroutine sfc_sice_post_run(im, cplflx, islmsk, tice, tsfc,      &
+     &    fice, hice, tisfc, errmsg, errflg)
 
       use machine, only : kind_phys
 
       implicit none
 
 ! --- input
-      integer :: im
-      integer, dimension(im) :: islmsk
-      real(kind=kind_phys), dimension(im), intent(in) :: tsfc
+      integer, intent(in) :: im
+      logical, intent(in) :: cplflx
+      integer, dimension(im), intent(in) :: islmsk
+      real(kind=kind_phys), dimension(im), intent(in) :: tice, tsfc
 
 ! --- input/output
       real(kind=kind_phys), dimension(im), intent(inout) :: fice, hice, &
@@ -58,13 +61,17 @@
 
 !--- return updated ice thickness & concentration to global arrays
 !    where there is no ice, set temperature to surface skin temperature.
-      do i = 1, im
-        if (islmsk(i) /= 2) then
-           hice(i) = 0.0
-           fice(i) = 0.0
-           tisfc(i) = tsfc(i)
-        endif
-      enddo
+      if(.not. cplflx) then
+        do i = 1, im
+          if (islmsk(i) == 2) then
+            tisfc(i) = tice(i)
+          else
+            hice(i)  = 0.0
+            fice(i)  = 0.0
+            tisfc(i) = tsfc(i)
+          endif
+        enddo
+      endif
 
       end subroutine sfc_sice_post_run
 
@@ -78,7 +85,6 @@
       subroutine sfc_sice_init
       end subroutine sfc_sice_init
 !
-
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
@@ -89,6 +95,17 @@
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
 !! | km             | soil_vertical_dimension                                                      | vertical loop extent for soil levels, start at 1                | count         |    0 | integer   |           | in     | F        |
+!! | sbc            | steffan_boltzmann_constant                                                   | Steffan-Boltzmann constant                                      | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
+!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                          | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | tgice          | freezing_point_temperature_of_seawater                                       | freezing point temperature of seawater                          | K             |    0 | real      | kind_phys | in     | F        |
+!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                           | none          |    0 | real      | kind_phys | in     | F        |
+!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                     | none          |    0 | real      | kind_phys | in     | F        |
+!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)           | none          |    0 | real      | kind_phys | in     | F        |
+!! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
+!! | t0c            | temperature_at_zero_celsius                                                  | temperature at 0 degrees Celsius                                | K             |    0 | real      | kind_phys | in     | F        |
+!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                   | frac          |    0 | real      | kind_phys | in     | F        |
 !! | ps             | surface_air_pressure                                                         | surface pressure                                                | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | u1             | x_wind_at_lowest_model_layer                                                 | u component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v1             | y_wind_at_lowest_model_layer                                                 | v component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
@@ -100,8 +117,8 @@
 !! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc netsw flx into ground                             | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | sfcdsw         | surface_downwelling_shortwave_flux                                           | total sky sfc downward sw flux                                  | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | srflag         | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                             | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                          | none          |    1 | real      | kind_phys | in     | F        |
+!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ice                        | surface exchange coeff for momentum over ice                    | none          |    1 | real      | kind_phys | in     | F        |
+!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | in     | F        |
@@ -113,20 +130,20 @@
 !! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                              | index         |    0 | integer   |           | in     | F        |
 !! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                               | m             |    1 | real      | kind_phys | inout  | F        |
 !! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                     | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | tice           | sea_ice_temperature                                                          | sea-ice surface temperature                                     | K             |    1 | real      | kind_phys | inout  | F        |
-!! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equivalent accumulated snow depth                         | mm            |    1 | real      | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature                                                     | surface skin temperature                                        | K             |    1 | real      | kind_phys | inout  | F        |
-!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount in one dynamics time step      | m             |    1 | real      | kind_phys | inout  | F        |
+!! | tice           | sea_ice_temperature_interstitial                                             | sea-ice surface temperature use as interstitial                 | K             |    1 | real      | kind_phys | inout  | F        |
+!! | weasd          | water_equivalent_accumulated_snow_depth_over_ice                             | water equiv of acc snow depth over ice                          | mm            |    1 | real      | kind_phys | inout  | F        |
+!! | tskin          | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial)  | K        |    1 | real      | kind_phys | inout  | F        |
+!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice | total precipitation amount in each time step over ice        | m             |    1 | real      | kind_phys | inout  | F        |
 !! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                           | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | snwdph         | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth                                     | mm            |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity                                                    | sfc air saturation specific humidity                            | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
+!! | ep             | surface_upward_potential_latent_heat_flux_over_ice                           | surface upward potential latent heat flux over ice              | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | snwdph         | surface_snow_thickness_water_equivalent_over_ice                             | water equivalent snow depth over ice                            | mm            |    1 | real      | kind_phys | inout  | F        |
+!! | qsurf          | surface_specific_humidity_over_ice                                           | surface air saturation specific humidity over ice               | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                                  | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | evaporative latent heat flux                                    | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                    | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | gflux          | upward_heat_flux_in_soil_over_ice                                            | soil heat flux over ice                                         | W m-2         |    1 | real      | kind_phys | inout  | F        |
+!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ice                         | momentum exchange coefficient over ice                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
+!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                 | thermal exchange coefficient over ice                           | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ice                           | kinematic surface upward latent heat flux over ice              | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
+!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ice                         | kinematic surface upward sensible heat flux over ice            | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -153,7 +170,8 @@
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !>  @{
       subroutine sfc_sice_run                                           &
-     &     ( im, km, ps, u1, v1, t1, q1, delt,                          & !  ---  inputs:
+     &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
+     &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
      &       flag_iter, mom4ice, lsm, lprnt, ipr,                       &
@@ -244,21 +262,13 @@
 !                                                                       !
 ! ===================================================================== !
 !
-      use machine , only : kind_phys
+      use machine, only: kind_phys
       use funcphys, only : fpvs
-      use physcons, only : sbc => con_sbc, hvap => con_hvap,            &
-     &                     tgice => con_tice, cp => con_cp,             &
-     &                     eps => con_eps, epsm1 => con_epsm1,          &
-     &                     grav => con_g, rvrdm1 => con_fvirt,          &
-     &                     t0c => con_t0c, rd => con_rd
 !
       implicit none
 !
 ! - Define constant parameters
       integer,              parameter :: kmi   = 2        !< 2-layer of ice
-      real(kind=kind_phys), parameter :: cpinv = 1.0/cp
-      real(kind=kind_phys), parameter :: hvapi = 1.0/hvap
-      real(kind=kind_phys), parameter :: elocp = hvap/cp
       real(kind=kind_phys), parameter :: himax = 8.0      !< maximum ice thickness allowed
       real(kind=kind_phys), parameter :: himin = 0.1      !< minimum ice thickness required
       real(kind=kind_phys), parameter :: hsmax = 2.0      !< maximum snow depth allowed
@@ -270,6 +280,9 @@
       integer, intent(in) :: im, km, lsm, ipr
       logical, intent(in) :: lprnt
 
+      real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
+     &       epsm1, grav, rvrdm1, t0c, rd, cimin
+
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
@@ -277,7 +290,8 @@
       integer, dimension(im), intent(in) :: islimsk
       real (kind=kind_phys), intent(in)  :: delt
 
-      logical, intent(in) :: flag_iter(im), mom4ice
+      logical, dimension(im), intent(in) :: flag_iter
+      logical,                intent(in) :: mom4ice
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
@@ -301,7 +315,7 @@
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kmi)
      &,                        hflxi, hflxw, q0, qs1, wind, qssi, qssw
-      real (kind=kind_phys), parameter :: cimin=0.15 !< minimum ice concentration
+      real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
 
@@ -309,6 +323,10 @@
 !
 !===> ...  begin here
 !
+      cpinv = 1.0/cp
+      hvapi = 1.0/hvap
+      elocp = hvap/cp
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -335,7 +353,7 @@
 !
       if (mom4ice) then
         do i = 1, im
-          if (flag(i)) then
+          if (flag(i)) then ! sea ice
             hi_save(i) = hice(i)
             hs_save(i) = weasd(i) * 0.001
           endif
@@ -465,9 +483,9 @@
 !     if (lprnt) write(0,*)' tice2=',tice(ipr)
       call ice3lay
 !  ---  inputs:                                                         !
-!    &     ( im, kmi, fice, flag, hfi, hfd, sneti, focn, delt,          !
+     &     ( im, kmi, fice, flag, hfi, hfd, sneti, focn, delt,          !
 !  ---  outputs:                                                        !
-!    &       snowd, hice, stsice, tice, snof, snowmt, gflux )           !
+     &       snowd, hice, stsice, tice, snof, snowmt, gflux )           !
 
 !     if (lprnt) write(0,*)' tice3=',tice(ipr)
       if (mom4ice) then
@@ -546,7 +564,7 @@
 
 
 !-----------------------------------
-!> This subroutine is the entity of three-layer sea ice vertical thermodynamics 
+!> This subroutine is the entity of three-layer sea ice vertical thermodynamics
 !! based on Winton(2000) \cite winton_2000 .
 !!\ingroup gfs_sice_main
 !\param[in] im    integer, horizontal dimension
@@ -570,12 +588,12 @@
       subroutine ice3lay
 !...................................
 !  ---  inputs:
-!    &     ( im, kmi, fice, flag, hfi, hfd, sneti, focn, delt,          &
+     &     ( im, kmi, fice, flag, hfi, hfd, sneti, focn, delt,          &
 !  ---  input/outputs:
-!    &       snowd, hice, stsice, tice, snof,                           &
+     &       snowd, hice, stsice, tice, snof,                           &
 !  ---  outputs:
-!    &       snowmt, gflux                                              &
-!    &     )
+     &       snowmt, gflux                                              &
+     &     )
 
 !**************************************************************************
 !                                                                         *
@@ -654,24 +672,24 @@
       real (kind=kind_phys), parameter :: ki4  = ki*4.0
 
 !  ---  inputs:
-!     integer, intent(in) :: im, kmi
+      integer, intent(in) :: im, kmi
 
-!     real (kind=kind_phys), dimension(im), intent(in) :: fice, hfi,    &
-!    &       hfd, sneti, focn
+      real (kind=kind_phys), dimension(im), intent(in) :: fice, hfi,    &
+     &       hfd, sneti, focn
 
-!     real (kind=kind_phys), intent(in) :: delt
+      real (kind=kind_phys), intent(in) :: delt
 
-!     logical, dimension(im), intent(in) :: flag
+      logical, dimension(im), intent(in) :: flag
 
 !  ---  input/outputs:
-!     real (kind=kind_phys), dimension(im), intent(inout) :: snowd,     &
-!    &       hice, tice, snof
+      real (kind=kind_phys), dimension(im), intent(inout) :: snowd,     &
+     &       hice, tice, snof
 
-!     real (kind=kind_phys), dimension(im,kmi), intent(inout) :: stsice
+      real (kind=kind_phys), dimension(im,kmi), intent(inout) :: stsice
 
 !  ---  outputs:
-!     real (kind=kind_phys), dimension(im), intent(out) :: snowmt,      &
-!    &       gflux
+      real (kind=kind_phys), dimension(im), intent(out) :: snowmt,      &
+     &       gflux
 
 !  ---  locals:
 
@@ -723,7 +741,7 @@
 !! beneath the snow-ice interface (see \a eq.(5) in Winton (2000) \cite winton_2000).
           k12  = ki4*ks / (ks*hice(i) + ki4*snowd(i))
 
-!>  - Calculate the conductive coupling between the two ice temperature 
+!>  - Calculate the conductive coupling between the two ice temperature
 !! points (see \a eq.(10) in Winton (2000) \cite winton_2000).
           k32  = (ki+ki) / hice(i)
 

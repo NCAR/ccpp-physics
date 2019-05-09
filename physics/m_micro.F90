@@ -166,7 +166,7 @@ end subroutine m_micro_init
 !! | swheat_i       | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep  | total sky sw heating rate                                                                   | K s-1       |    2 | real       | kind_phys | in     | F        |
 !! | w_upi          | vertical_velocity_for_updraft                                               | vertical velocity for updraft                                                               | m s-1       |    2 | real       | kind_phys | in     | F        |
 !! | cf_upi         | convective_cloud_fraction_for_microphysics                                  | convective cloud fraction for microphysics                                                  | frac        |    2 | real       | kind_phys | in     | F        |
-!! | frland         | land_area_fraction                                                          | land area fraction                                                                          | frac        |    1 | real       | kind_phys | in     | F        |
+!! | frland         | land_area_fraction_for_microphysics                                         | land area fraction used in microphysics schemes                                             | frac        |    1 | real       | kind_phys | in     | F        |
 !! | zpbl           | atmosphere_boundary_layer_thickness                                         | pbl height                                                                                  | m           |    1 | real       | kind_phys | in     | F        |
 !! | cnv_mfd_i      | detrained_mass_flux                                                         | detrained mass flux                                                                         | kg m-2 s-1  |    2 | real       | kind_phys | in     | F        |
 !! | cnv_dqldt_i    | tendency_of_cloud_water_due_to_convective_microphysics                      | tendency of cloud water due to convective microphysics                                      | kg m-2 s-1  |    2 | real       | kind_phys | in     | F        |
@@ -1114,7 +1114,7 @@ end subroutine m_micro_init
 !    &           REV_CN_X(im,lm),  RSU_CN_X(im,lm), DLPDF_X(im,lm),     &
 !    &           DIPDF_X(im,lm),   ALPHT_X(im,lm),  PFRZ(im,lm),        &
      &                             ALPHT_X(im,lm),  PFRZ(im,lm))
-!    &           ACLL_CN_X(im,lm), ACIL_CN_X(im,lm), DQRL_X(im,lm) 
+!    &           ACLL_CN_X(im,lm), ACIL_CN_X(im,lm), DQRL_X(im,lm)
 !    &           ACLL_CN_X(im,lm), ACIL_CN_X(im,lm), DQRL_X(im,lm),     &
 !    &           DZET(im,lm))
 !    &           DZET(im,lm),      qst3(im,lm))

@@ -56,7 +56,7 @@ contains
        logical,          intent( in) :: do_shoc
        character(len=*), intent(out) :: errmsg
        integer,          intent(out) :: errflg
- 
+
        ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
@@ -132,7 +132,7 @@ contains
 !! | con_g            | gravitational_acceleration                                       | gravitational acceleration                                            | m s-2      |    0 | real      | kind_phys | in    | F        |
 !! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                | rv/rd - 1 (rv = ideal gas constant for water vapor)                   | none       |    0 | real      | kind_phys | in    | F        |
 !! | con_rd           | gas_constant_dry_air                                             | ideal gas constant for dry air                                        | J kg-1 K-1 |    0 | real      | kind_phys | in    | F        |
-!! | frland           | land_area_fraction                                               | land area fraction                                                    | frac       |    1 | real      | kind_phys | in    | F        |
+!! | frland           | land_area_fraction_for_microphysics                              | land area fraction used in microphysics schemes                       | frac       |    1 | real      | kind_phys | in    | F        |
 !! | garea            | cell_area                                                        | area of grid cell                                                     | m2         |    1 | real      | kind_phys | in    | F        |
 !! | gq0              | water_vapor_specific_humidity_updated_by_physics                 | water vapor specific humidity updated by physics                      | kg kg-1    |    2 | real      | kind_phys | inout | F        |
 !! | gq0_ntcw         | cloud_condensed_water_mixing_ratio_updated_by_physics            | cloud condensed water mixing ratio updated by physics                 | kg kg-1    |    2 | real      | kind_phys | inout | F        |
@@ -167,7 +167,7 @@ contains
 !! | rer              | effective_radius_of_stratiform_cloud_rain_particle_in_um         | effective radius of cloud rain particle in micrometers                | um         |    2 | real      | kind_phys | inout | F        |
 !! | res              | effective_radius_of_stratiform_cloud_snow_particle_in_um         | effective radius of cloud snow particle in micrometers                | um         |    2 | real      | kind_phys | inout | F        |
 !! | reg              | effective_radius_of_stratiform_cloud_graupel_particle_in_um      | eff. radius of cloud graupel particle in micrometer                   | um         |    2 | real      | kind_phys | inout | F        |
-!! | errmsg           | ccpp_error_message                                               | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out   | F        | 
+!! | errmsg           | ccpp_error_message                                               | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out   | F        |
 !! | errflg           | ccpp_error_flag                                                  | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
