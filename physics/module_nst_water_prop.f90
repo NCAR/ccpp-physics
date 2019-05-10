@@ -41,13 +41,8 @@ module module_nst_water_prop
 contains
   ! ------------------------------------------------------
 !>\ingroup waterprop
-<<<<<<< HEAD
 !! This subroutine computes thermal expansion coefficient (alpha)
 !! and saline contraction coefficient (beta). 
-=======
-!> This subroutine computes thermal expansion coefficient (alpha)
-!! and saline contraction coefficient (beta).
->>>>>>> 1c75de1fd2c606e9930ca6c63cda5431bddf1519
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
 
@@ -129,11 +124,7 @@ contains
   !======================
   !
 !>\ingroup waterprop
-<<<<<<< HEAD
 !! This subroutine computes the fraction of the solar radiation absorbed 
-=======
-!> This subroutine computes the fraction of the solar radiation absorbed
->>>>>>> 1c75de1fd2c606e9930ca6c63cda5431bddf1519
 !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
