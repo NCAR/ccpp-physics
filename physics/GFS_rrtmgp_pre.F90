@@ -76,8 +76,8 @@
 !! | alb1d             | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real             | kind_phys | out    | F        |
 !! | errmsg            | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
-!! | kdist_lw          | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp_type |           | in    | F        |
-!! | kdist_sw          | K_distribution_file_for_RRTMGP_SW_scheme                      | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp_type |           | in    | F        |
+!! | kdist_lw          | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp |           | in    | F        |
+!! | kdist_sw          | K_distribution_file_for_RRTMGP_SW_scheme                      | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp |           | in    | F        |
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
@@ -140,7 +140,7 @@
         use surface_perturbation, only: & 
              cdfnor                      ! Routine to compute CDF (used to compute percentiles)
         ! RRTMGP types
-        use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp_type
+        use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
 
         implicit none
 
@@ -154,7 +154,7 @@
         type(GFS_cldprop_type),   intent(in)    :: Cldprop
         type(GFS_coupling_type),  intent(in)    :: Coupling
         integer,                  intent(in)    :: im, lm, lmk, lmp
-        type(ty_gas_optics_rrtmgp_type),intent(in) :: &
+        type(ty_gas_optics_rrtmgp),intent(in) :: &
              kdist_lw, & ! RRTMGP DDT containing spectral information for LW calculation
              kdist_sw    ! RRTMGP DDT containing spectral information for SW calculation
 
