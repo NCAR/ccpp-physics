@@ -76,6 +76,8 @@ export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
 export FV3_RUN=ozphys_2015_run.IN
-export INPUT_NML=ozphys_2015.nml.IN
+
+export OZ_PHYS_OLD=.F.
+export OZ_PHYS_NEW=.T.
 
 RUN_SCRIPT=rt_fv3.sh

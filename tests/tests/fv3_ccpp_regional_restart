@@ -22,4 +22,19 @@ export FV3_RUN=ccpp_regional_run.IN
 
 export CCPP_SUITE=FV3_GFS_2017_gfdlmp_regional
 export CCPP_LIB_DIR=ccpp/lib
-export INPUT_NML=ccpp_regional_restart.nml.IN
+export INPUT_NML=ccpp_regional.nml.IN
+
+export FDIAG=3
+export INPES=4
+export JNPES=6
+
+export WARM_START=.T.
+export NGGPS_IC=.F.
+export EXTERNAL_IC=.F.
+# DH* The correct setting would be .F.? However the official 
+#     regression test baseline uses MAKE_NH=.T.
+#export MAKE_NH=.F.
+export MAKE_NH=.T.
+# *DH
+export MOUNTAIN=.T.
+export NA_INIT=0

@@ -78,6 +78,9 @@ export NODES=$(expr $TASKS / $TPN + 1)
 export FV3_RUN=ccpp_ozphys_2015_run.IN
 export CCPP_SUITE=FV3_GFS_2017_ozphys_2015
 export CCPP_LIB_DIR=ccpp/lib
-export INPUT_NML=ccpp_ozphys_2015.nml.IN
+export INPUT_NML=ccpp_control.nml.IN
+
+export OZ_PHYS_OLD=.F.
+export OZ_PHYS_NEW=.T.
 
 RUN_SCRIPT=rt_fv3.sh

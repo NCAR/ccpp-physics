@@ -76,6 +76,8 @@ export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
 export FV3_RUN=h2ophys_run.IN
-export INPUT_NML=h2ophys.nml.IN
+export INPUT_NML=input.nml.IN
+
+export H2O_PHYS=.T.
 
 RUN_SCRIPT=rt_fv3.sh

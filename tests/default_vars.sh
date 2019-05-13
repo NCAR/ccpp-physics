@@ -97,18 +97,40 @@ export WRITE_FSYNCFLAG=.false.
 export IMO=384
 export JMO=190
 
+# Coldstart/warmstart
 export WARM_START=.F.
 export READ_INCREMENT=.F.
 export NGGPS_IC=.T.
 export EXTERNAL_IC=.T.
 export MAKE_NH=.T.
 export MOUNTAIN=.F.
-export SATMEDMF=.F.
-export HYBEDMF=.T.
+export NA_INIT=1
+
+# Microphysics
 export LHEATSTRG=.F.
 export LGFDLMPRAD=.F.
 export EFFR_IN=.F.
-export NA_INIT=1
+
+# PBL
+export SATMEDMF=.F.
+export HYBEDMF=.T.
+export SHINHONG=.F.
+export DO_YSU=.F.
+export DO_MYNNEDMF=.F.
+
+# Shallow/deep convection
+export IMFSHALCNV=2
+export IMFDEEPCNV=2
+
+# LSM
+export LSM=1
+export LSOIL_LSM=4
+
+# Ozone / stratospheric H2O
+export OZ_PHYS_OLD=.T.
+export OZ_PHYS_NEW=.F.
+export H2O_PHYS=.F.
+
 export CPL=.F.
 export CPLFLX=.F.
 export CPLWAV=.F.
@@ -128,7 +150,6 @@ export FNSOTC="'global_soiltype.statsgo.t126.384.190.rg.grb',"
 export FNSMCC="'global_soilmgldas.t126.384.190.grb',"
 export FNABSC="'global_mxsnoalb.uariz.t126.384.190.rg.grb',"
 
-
 export ENS_NUM=1
 export SYEAR=2016
 export SMONTH=10
@@ -136,10 +157,9 @@ export SDAY=03
 export SHOUR=00
 export FHMAX=${FHMAX:-`expr $DAYS \* 24`}
 export DT_ATMOS=1800
+export FHCYC=24
 
-export OZ_PHYS_OLD=.T.
-export OZ_PHYS_NEW=.F.
-export H2O_PHYS=.F.
+# Stochastic physics
 export DO_SPPT=.F.
 export DO_SHUM=.F.
 export DO_SKEB=.F.
@@ -147,5 +167,6 @@ export DO_SFCPERTS=.F.
 export SKEB=-999.
 export SPPT=-999.
 export SHUM=-999.
+
 export IAU_INC_FILES="''"
 }
