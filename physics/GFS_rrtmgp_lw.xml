@@ -345,39 +345,6 @@
       <optional>F</optional>
       <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
     </variable>
-    <variable name="tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step">
-      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step</standard_name>
-      <long_name>longwave total sky heating rate</long_name>
-      <units>K s-1</units>
-      <local_name>hlwc</local_name>
-      <type>real</type>
-      <rank>(:,:)</rank>
-      <intent>out</intent>
-      <optional>F</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-    <variable name="lw_fluxes_top_atmosphere">
-      <standard_name>lw_fluxes_top_atmosphere</standard_name>
-      <long_name>longwave total sky fluxes at the top of the atm</long_name>
-      <units>W m-2</units>
-      <local_name>topflx</local_name>
-      <type>topflw_type</type>
-      <rank>(:)</rank>
-      <intent>inout</intent>
-      <optional>F</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-    <variable name="lw_fluxes_sfc">
-      <standard_name>lw_fluxes_sfc</standard_name>
-      <long_name>longwave total sky fluxes at the Earth surface</long_name>
-      <units>W m-2</units>
-      <local_name>sfcflx</local_name>
-      <type>sfcflw_type</type>
-      <rank>(:)</rank>
-      <intent>inout</intent>
-      <optional>F</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
     <variable name="ccpp_error_message">
       <standard_name>ccpp_error_message</standard_name>
       <long_name>error message for error handling in CCPP</long_name>
@@ -398,50 +365,6 @@
       <rank />
       <intent>out</intent>
       <optional>F</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-    <variable name="tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step">
-      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step</standard_name>
-      <long_name>longwave clear sky heating rate</long_name>
-      <units>K s-1</units>
-      <local_name>hlw0</local_name>
-      <type>real</type>
-      <rank>(:,:)</rank>
-      <intent>inout</intent>
-      <optional>T</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-   <variable name="lw_fluxes">
-      <standard_name>lw_fluxes</standard_name>
-      <long_name>lw fluxes total sky / csk and up / down at levels </long_name>
-      <units>W m-2</units>
-      <local_name>flxprf</local_name>
-      <type>proflw_type</type>
-      <rank>(:,:)</rank>
-      <intent>in</intent>
-      <optional>F</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-    <variable name="lw_heating_rate_spectral">
-      <standard_name>lw_heating_rate_spectral</standard_name>
-      <long_name>longwave total sky heating rate (spectral)</long_name>
-      <units>K s-1</units>
-      <local_name>hlwb</local_name>
-      <type>real</type>
-      <rank>(:,:,:)</rank>
-      <intent>inout</intent>
-      <optional>T</optional>
-      <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
-    </variable>
-    <variable name="lw_fluxes">
-      <standard_name>lw_fluxes</standard_name>
-      <long_name>lw fluxes total sky / csk and up / down at levels</long_name>
-      <units>W m-2</units>
-      <local_name>flxprf</local_name>
-      <type>proflw_type</type>
-      <rank>(:,:)</rank>
-      <intent>inout</intent>
-      <optional>T</optional>
       <container>MODULE_GFS_rrtmgp_lw SCHEME_GFS_rrtmgp_lw SUBROUTINE_GFS_rrtmgp_lw_run</container>
     </variable>
     <variable name="cloud_liquid_water_path">

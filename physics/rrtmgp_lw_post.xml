@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme module="rrtmgp_lw_post">
+  <subroutine name="rrtmgp_lw_post_init" />
+  <subroutine name="rrtmgp_lw_post_run">
+   <variable name="horizontal_loop_extent">
+      <standard_name>horizontal_loop_extent</standard_name>
+      <long_name>horizontal dimension</long_name>
+      <units>count</units>
+      <local_name>ncol</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="adjusted_vertical_layer_dimension_for_radiation">
+      <standard_name>adjusted_vertical_layer_dimension_for_radiation</standard_name>
+      <long_name>number of vertical layers for radiation</long_name>
+      <units>count</units>
+      <local_name>nlay</local_name>
+      <type>integer</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="air_pressure_at_interface_for_radiation_in_hPa">
+      <standard_name>air_pressure_at_interface_for_radiation_in_hPa</standard_name>
+      <long_name>air pressure level</long_name>
+      <units>hPa</units>
+      <local_name>p_lev</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+       <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+   </variable>
+    <variable name="fluxLW_allsky">
+      <standard_name>lw_flux_profiles_byband_allsky</standard_name>
+      <long_name>Fortran DDT containing RRTMGP 3D fluxes</long_name>
+      <units>DDT</units>
+      <local_name>fluxLW_allsky</local_name>
+      <type>ty_fluxes_byband</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="fluxLW_clrsky">
+      <standard_name>lw_flux_profiles_byband_clrsky</standard_name>
+      <long_name>Fortran DDT containing RRTMGP 3D fluxes</long_name>
+      <units>DDT</units>
+      <local_name>fluxLW_clrsky</local_name>
+      <type>ty_fluxes_byband</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+   <variable name="kdist_lw">
+      <standard_name>K_distribution_file_for_RRTMGP_LW_POST_scheme</standard_name>
+      <long_name>DDT containing spectral information for RRTMGP LW radiation scheme</long_name>
+      <units>DDT</units>
+      <local_name>kdist_lw</local_name>
+      <type>ty_gas_optics_rrtmgp_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+   <variable name="kdist_lw">
+      <standard_name>K_distribution_file_for_RRTMGP_LW_POST_scheme</standard_name>
+      <long_name>DDT containing spectral information for RRTMGP LW radiation scheme</long_name>
+      <units>DDT</units>
+      <local_name>kdist_lw</local_name>
+      <type>ty_gas_optics_rrtmgp_type</type>
+      <rank />
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+
+  <variable name="tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step">
+      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step</standard_name>
+      <long_name>longwave total sky heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>hlwc</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="lw_fluxes_top_atmosphere">
+      <standard_name>lw_fluxes_top_atmosphere</standard_name>
+      <long_name>longwave total sky fluxes at the top of the atm</long_name>
+      <units>W m-2</units>
+      <local_name>topflx</local_name>
+      <type>topflw_type</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="lw_fluxes_sfc">
+      <standard_name>lw_fluxes_sfc</standard_name>
+      <long_name>longwave total sky fluxes at the Earth surface</long_name>
+      <units>W m-2</units>
+      <local_name>sfcflx</local_name>
+      <type>sfcflw_type</type>
+      <rank>(:)</rank>
+      <intent>inout</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="ccpp_error_message">
+      <standard_name>ccpp_error_message</standard_name>
+      <long_name>error message for error handling in CCPP</long_name>
+      <units>none</units>
+      <local_name>errmsg</local_name>
+      <type>character</type>
+      <rank />
+      <intent>out</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+  </subroutine>
+    <variable name="tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step">
+      <standard_name>tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step</standard_name>
+      <long_name>longwave clear sky heating rate</long_name>
+      <units>K s-1</units>
+      <local_name>hlw0</local_name>
+      <type>real</type>
+      <rank>(:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+   <variable name="lw_fluxes">
+      <standard_name>lw_fluxes</standard_name>
+      <long_name>lw fluxes total sky / csk and up / down at levels </long_name>
+      <units>W m-2</units>
+      <local_name>flxprf</local_name>
+      <type>proflw_type</type>
+      <rank>(:,:)</rank>
+      <intent>in</intent>
+      <optional>F</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+    <variable name="lw_heating_rate_spectral">
+      <standard_name>lw_heating_rate_spectral</standard_name>
+      <long_name>longwave total sky heating rate (spectral)</long_name>
+      <units>K s-1</units>
+      <local_name>hlwb</local_name>
+      <type>real</type>
+      <rank>(:,:,:)</rank>
+      <intent>inout</intent>
+      <optional>T</optional>
+      <container>MODULE_rrtmgp_lw_post SCHEME_rrtmgp_lw_post SUBROUTINE_rrtmgp_lw_post_run</container>
+    </variable>
+  <subroutine name="rrtmgp_lw_post_finalize" />
+</scheme>

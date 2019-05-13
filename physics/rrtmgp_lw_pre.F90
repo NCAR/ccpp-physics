@@ -24,7 +24,7 @@
 !! | errmsg           | ccpp_error_message                        | error message for error handling in CCPP                           | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                           | error flag for error handling in CCPP                              | flag     |    0 | integer               |           | out    | F        |
 !! | kdist_lw         | K_distribution_file_for_RRTMGP_LW_scheme  | DDT containing spectral information for RRTMGP LW radiation scheme | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | sfc_emiss_byband | surface_longwave_emissivity_in_each_band  | surface lw emissivity in fraction in each LW band                  | frac     |    2 | real                  | kind_phys | out    | F        |
+!! | sfc_emiss_byband | surface_longwave_emissivity_in_each_band  | surface lw emissivity in fraction in each LW band                  | frac     |    2 | real                  | kind_phys | inout  | F        |
 !!
 
       subroutine rrtmgp_lw_pre_run (Model, Grid, Sfcprop, Radtend, im, tsfg, tsfa, kdist_lw, sfc_emiss_byband, errmsg, errflg)
@@ -47,7 +47,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
       type(ty_gas_optics_rrtmgp),intent(in) :: &
            kdist_lw        ! DDT containing LW spectral information
-      real(kind_phyd),dimension(kdist_lw%get_nband(),im),intent(out) :: sfc_emiss_byband
+      real(kind_phys),dimension(kdist_lw%get_nband(),im),intent(inout) :: sfc_emiss_byband
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       integer :: ij
@@ -56,6 +56,8 @@
       errmsg = ''
       errflg = 0
 
+      print*,'In RRTMGP_lW_PRE_RUN(): top',shape(sfc_emiss_byband),im
+      print*,'In RRTMGP_lW_PRE_RUN(): top',shape(Radtend%semis)
       if (Model%lslwr) then
 !>  - Call module_radiation_surface::setemis(),to setup surface
 !! emissivity for LW radiation.
@@ -64,9 +66,11 @@
                      tsfg, tsfa, Sfcprop%hprim, IM,               &
                       Radtend%semis)                              !  ---  outputs
         do ij=1,kdist_lw%get_nband()
-           sfc_emiss_byband(ij,:) = Radtend%semis
+           print*,ij
+           sfc_emiss_byband(ij,1:im) = Radtend%semis(1:im)
         enddo
       endif
+      print*,'In RRTMGP_lW_PRE_RUN(): bottom'
 
       end subroutine rrtmgp_lw_pre_run
 
