@@ -129,6 +129,7 @@
 !! | graupel          | lwe_thickness_of_graupel_amount_on_dynamics_timestep                    | graupel fall at this time step                                          | m           |    1 | real       | kind_phys | inout  | F        |
 !! | save_t           | air_temperature_save                                                    | air temperature before entering a physics scheme                        | K           |    2 | real       | kind_phys | in     | F        |
 !! | save_qv          | water_vapor_specific_humidity_save                                      | water vapor specific humidity before entering a physics scheme          | kg kg-1     |    2 | real       | kind_phys | in     | F        |
+!! | rain0            | lwe_thickness_of_explicit_rain_amount                                   | explicit rain on physics timestep                                       | m           |    1 | real       | kind_phys | in     | F        |
 !! | ice0             | lwe_thickness_of_ice_amount                                             | ice fall on physics timestep                                            | m           |    1 | real       | kind_phys | in     | F        |
 !! | snow0            | lwe_thickness_of_snow_amount                                            | snow fall on physics timestep                                           | m           |    1 | real       | kind_phys | in     | F        |
 !! | graupel0         | lwe_thickness_of_graupel_amount                                         | graupel fall on physics timestep                                        | m           |    1 | real       | kind_phys | in     | F        |
@@ -166,6 +167,7 @@
 !! | iceprv           | lwe_thickness_of_ice_amount_from_previous_timestep                      | ice amount from previous timestep                                       | m           |    1 | real       | kind_phys | inout  | F        |
 !! | snowprv          | lwe_thickness_of_snow_amount_from_previous_timestep                     | snow amount from previous timestep                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | graupelprv       | lwe_thickness_of_graupel_amount_from_previous_timestep                  | graupel amount from previous timestep                                   | m           |    1 | real       | kind_phys | inout  | F        |
+!! | dtp              | time_step_for_physics                                                   | physics timestep                                                        | s           |    0 | real       | kind_phys | in     | F        |
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
@@ -173,11 +175,11 @@
 !! @{
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
         imp_physics_thompson, cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, &
-        gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, ice0, snow0, graupel0, del,                &
+        gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0, graupel0, del,         &
         rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, totprcp, totice, totsnw,                       &
         totgrp, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat,                   &
         do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv,      &
-        errmsg, errflg)
+        dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
 
@@ -189,7 +191,7 @@
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
-      real(kind=kind_phys), dimension(im),            intent(in)    :: ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
@@ -214,14 +216,25 @@
       real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
       real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
 
+      real(kind=kind_phys),                     intent(in)    :: dtp
+
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
+      ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
+      real(kind=kind_phys), parameter :: con_p001= 0.001d0
+      real(kind=kind_phys), parameter :: con_day = 86400.d0
+#ifdef TRANSITION
+      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+#else
+      real(kind=kind_phys), parameter :: rainmin = 1.0e-13
+#endif
       real(kind=kind_phys), parameter :: p850    = 85000.0
+      ! *DH
 
       integer :: i, k, ic
-      real(kind=kind_phys) :: crain, csnow, onebg
+      real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
 
       ! Initialize CCPP error handling variables
@@ -325,7 +338,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+!              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
         endif
@@ -350,6 +363,7 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
+        tem = dtp * con_p001 / con_day
         do i = 1, im
           !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
           srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
@@ -360,9 +374,14 @@
             crain = 0.0
             csnow = rainc(i)
           endif
-!         if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
-          if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
-            srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
+!          if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
+!          if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
+!            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
+!          endif
+! compute fractional srflag
+          total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
+          if (total_precip > rainmin) then
+            srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
           endif
         enddo
       elseif( .not. cal_pre) then
@@ -375,7 +394,7 @@
         enddo
       endif
 
-      if (cplflx) then
+      if (cplflx .or. cplchm) then
         do i = 1, im
           if (t850(i) > 273.16) then
              rain_cpl(i) = rain_cpl(i) + rain(i)
@@ -385,9 +404,8 @@
         enddo
       endif
 
-      if (cplchm .and. .not.cplflx) then
+      if (cplchm) then
         do i = 1, im
-             rain_cpl(i) = rain_cpl(i) + rain(i)
              rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
       endif

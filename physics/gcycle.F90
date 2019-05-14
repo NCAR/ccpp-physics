@@ -17,6 +17,10 @@
 !
 !     Local variables
 !     ---------------
+    integer              ::                     &
+           I_INDEX(Model%nx*Model%ny),          &
+           J_INDEX(Model%nx*Model%ny)
+
     real(kind=kind_phys) ::                     &
            RLA (Model%nx*Model%ny),             &
            RLO (Model%nx*Model%ny),             &
@@ -30,7 +34,7 @@
         TG3FCS (Model%nx*Model%ny),             &
         CNPFCS (Model%nx*Model%ny),             &
         AISFCS (Model%nx*Model%ny),             &
-        F10MFCS(Model%nx*Model%ny),             &
+!        F10MFCS(Model%nx*Model%ny),             &
         VEGFCS (Model%nx*Model%ny),             &
         VETFCS (Model%nx*Model%ny),             &
         SOTFCS (Model%nx*Model%ny),             &
@@ -51,15 +55,32 @@
         STCFC1 (Model%nx*Model%ny*Model%lsoil), &
         SLCFC1 (Model%nx*Model%ny*Model%lsoil)
 
+    character(len=6) :: tile_num_ch
     real(kind=kind_phys), parameter :: pifac=180.0/pi
     real(kind=kind_phys)            :: sig1t
-    integer :: npts, len, nb, ix, ls, ios
+    integer :: npts, len, nb, ix, jx, ls, ios
     logical :: exists
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !
 !     if (Model%me .eq. 0) print *,' nlats=',nlats,' lonsinpe='
 !    *,lonsinpe(0,1)
+
+      tile_num_ch = "      "
+      if (Model%tile_num < 10) then
+        write(tile_num_ch, "(a4,i1)") "tile", Model%tile_num
+      else
+        write(tile_num_ch, "(a4,i2)") "tile", Model%tile_num
+      endif
+
+      len = 0
+      do jx = Model%jsc, (Model%jsc+Model%ny-1)
+      do ix = Model%isc, (Model%isc+Model%nx-1)
+        len = len + 1
+        i_index(len) = ix
+        j_index(len) = jx
+      enddo
+      enddo
 
       sig1t = 0.0
       npts  = Model%nx*Model%ny
@@ -82,7 +103,7 @@
           ZORFCS  (len)          = Sfcprop(nb)%zorl   (ix)
           TG3FCS  (len)          = Sfcprop(nb)%tg3    (ix)
           CNPFCS  (len)          = Sfcprop(nb)%canopy (ix)
-          F10MFCS (len)          = Sfcprop(nb)%f10m   (ix)
+!          F10MFCS (len)          = Sfcprop(nb)%f10m   (ix)
           VEGFCS  (len)          = Sfcprop(nb)%vfrac  (ix)
           VETFCS  (len)          = Sfcprop(nb)%vtype  (ix)
           SOTFCS  (len)          = Sfcprop(nb)%stype  (ix)
@@ -152,12 +173,13 @@
                      SIHFCS, SICFCS, SITFCS, SWDFCS, SLCFC1,      &
                      VMNFCS, VMXFCS, SLPFCS, ABSFCS, TSFFCS,      &
                      SNOFCS, ZORFCS, ALBFC1, TG3FCS, CNPFCS,      &
-                     SMCFC1, STCFC1, SLIFCS, AISFCS, F10MFCS,     &
+                     SMCFC1, STCFC1, SLIFCS, AISFCS,              &
                      VEGFCS, VETFCS, SOTFCS, ALFFC1, CVFCS,       &
                      CVBFCS, CVTFCS, Model%me, Model%nlunit,      &
                      size(Model%input_nml_file),                  &
                      Model%input_nml_file,                        &
-                     Model%ialb, Model%isot, Model%ivegsrc)
+                     Model%ialb, Model%isot, Model%ivegsrc,       &
+                     trim(tile_num_ch), i_index, j_index)
 #ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
 #endif
@@ -176,7 +198,7 @@
           Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)
           Sfcprop(nb)%tg3    (ix) = TG3FCS  (len)
           Sfcprop(nb)%canopy (ix) = CNPFCS  (len)
-          Sfcprop(nb)%f10m   (ix) = F10MFCS (len)
+!          Sfcprop(nb)%f10m   (ix) = F10MFCS (len)
           Sfcprop(nb)%vfrac  (ix) = VEGFCS  (len)
           Sfcprop(nb)%vtype  (ix) = VETFCS  (len)
           Sfcprop(nb)%stype  (ix) = SOTFCS  (len)

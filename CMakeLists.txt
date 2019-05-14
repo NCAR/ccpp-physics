@@ -111,6 +111,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       message (FATAL_ERROR "The current build system does not allow building fast physics with 32-bit precision when the GNU compilers are used")
@@ -141,6 +142,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNSFC_wrapper.F90
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
+                                ./physics/module_mp_thompson_make_number_concentrations.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
@@ -151,7 +153,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2" "-axSSE4.2,AVX,CORE-AVX-I"
+    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
            CMAKE_Fortran_FLAGS_LOPT1
            "${CMAKE_Fortran_FLAGS_LOPT1}")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
@@ -164,21 +166,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # intrinsic gamma function are different for the non-CCPP and CCPP
     # version (on Theia with Intel 18). Note this is only required with
     # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
-    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
-                                  ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
-      # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
-                              ./physics/micro_mg3_0.F90)
-    elseif (${CMAKE_BUILD_TYPE} MATCHES "Bitforbit")
-      SET_SOURCE_FILES_PROPERTIES(./physics/micro_mg2_0.F90
-                                  ./physics/micro_mg3_0.F90
-                                  PROPERTIES COMPILE_FLAGS "-fimf-arch-consistency=true")
-      # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
-                              ./physics/micro_mg3_0.F90)
-    elseif (TRANSITION)
+    if (TRANSITION)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
       # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
       # with non-CCPP builds. These may go in the future once the CCPP solution is fully accepted.
@@ -217,7 +205,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                               ./physics/cs_conv.F90
                               ./physics/gcm_shoc.F90
                               ./physics/gfdl_fv_sat_adj.F90)
-    endif (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    endif (TRANSITION)
 
     # Remove files with special compiler flags from list of files with standard compiler flags
     list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX})
@@ -244,6 +232,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-r8")
   if (PROJECT STREQUAL "CCPP-FV3")
     if (DYN32)
       SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -r4 ")
@@ -274,9 +263,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-FV3")
-  link_directories(${NCEPLIBS_DIR}/lib)
-elseif (PROJECT STREQUAL "CCPP-SCM")
+if (PROJECT STREQUAL "CCPP-SCM")
   SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
   SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
   SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
@@ -291,7 +278,7 @@ elseif (PROJECT STREQUAL "CCPP-SCM")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
 
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
 
@@ -304,11 +291,14 @@ if(STATIC)
       list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
   endforeach()
 else(STATIC)
-  add_library(ccppphys ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
+  add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
 endif(STATIC)
 
 if (PROJECT STREQUAL "CCPP-FV3")
-  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} sp_v2.0.2_d bacio_4 w3nco_d)
+  # Link required NCEPlibs for dynamic builds
+  if (NOT STATIC)
+    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
+  endif (NOT STATIC)
 elseif (PROJECT STREQUAL "CCPP-SCM")
   target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
 endif (PROJECT STREQUAL "CCPP-FV3")

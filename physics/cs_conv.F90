@@ -81,6 +81,9 @@ module cs_conv_pre
   fscav(:) = 0.0
   do k=1,levs
     do i=1,im
+      ! DH* note - save_q1 assignment may be redundant,
+      ! because already done in GFS_DCNV_generic_pre?
+      ! Keep for using cs_conv w/o GFS_DCNV_generic_pre?
       save_q1(i,k) = q(i,k)
       save_q2(i,k) = max(0.0,clw2(i,k))
       save_q3(i,k) = max(0.0,clw1(i,k))

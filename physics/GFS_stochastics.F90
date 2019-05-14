@@ -87,6 +87,7 @@
          logical,                               intent(in)    :: use_zmtnblck
          logical,                               intent(in)    :: do_shum
          logical,                               intent(in)    :: do_skeb
+         !logical,                               intent(in)    :: isppt_deep
          real(kind_phys), dimension(1:im),      intent(in)    :: zmtnblck
          ! sppt_wts only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts
@@ -125,6 +126,11 @@
          ! drain_cpl, dsnow_cpl only allocated if do_sppt == .true.
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
+         ! tconvtend ... vconvtend only allocated if isppt_deep == .true.
+         !real(kind_phys), dimension(:,:),       intent(in)    :: tconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: qconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: uconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: vconvtend
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 
@@ -161,10 +167,21 @@
                endif
                sppt_wts_inv(i,km-k+1)=sppt_wts(i,k)
 
+               !if(isppt_deep)then
+
+                ! upert = (gu0(i,k) - ugrs(i,k) - uconvtend(i,k)) + uconvtend(i,k) * sppt_wts(i,k)
+                ! vpert = (gv0(i,k) - vgrs(i,k) - vconvtend(i,k)) + vconvtend(i,k) * sppt_wts(i,k)
+                ! tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k) - tconvtend(i,k)) + tconvtend(i,k) * sppt_wts(i,k)
+                ! qpert = (gq0(i,k) - qgrs(i,k) - qconvtend(i,k)) + qconvtend(i,k) * sppt_wts(i,k)
+
+               !else
+
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
                tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k)) * sppt_wts(i,k)
                qpert = (gq0(i,k) - qgrs(i,k)) * sppt_wts(i,k)
+
+               !endif
 
                gu0(i,k)  = ugrs(i,k)+upert
                gv0(i,k)  = vgrs(i,k)+vpert
@@ -177,6 +194,22 @@
                endif
              enddo
            enddo
+
+           !if(isppt_deep)then
+           !  tprcp(:) = tprcp(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+           !  totprcp(:)  = totprcp(:)  + (sppt_wts(:,15) - 1 )*rainc(:) 
+           !  cnvprcp(:)  = cnvprcp(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+           !!  ! bucket precipitation adjustment due to sppt
+           !  totprcpb(:) = totprcpb(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+           !  cnvprcpb(:) = cnvprcpb(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+
+           !  if (cplflx) then !Need to make proper adjustments for deep convection only perturbations
+           !    rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
+           !    snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
+           !  endif
+
+           !else
+
            ! instantaneous precip rate going into land model at the next time step
            tprcp(:) = sppt_wts(:,15)*tprcp(:)
            totprcp(:) = totprcp(:) + (sppt_wts(:,15) - 1 )*rain(:)
@@ -190,7 +223,9 @@
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
             endif
-         
+
+           !endif
+
          endif
 
          if (do_shum) then

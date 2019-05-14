@@ -232,7 +232,7 @@ contains
 !
       len_thread_m  = (len+ompthreads-1) / ompthreads
 !
-      !$omp parallel do default(none)                                       &
+      !$omp parallel do num_threads(ompthreads) default(none)               &
       !$omp private(i1_t,i2_t,len_thread,it,i,ii,i1,i2)                     &
       !$omp private(j,j1,j2,jq,ix,jy,nx,kxs,kxt,kmami)                      &
       !$omp private(alamd,denom,rnume,aphi,x,y,wsum,wsumiv,sum1,sum2)       &

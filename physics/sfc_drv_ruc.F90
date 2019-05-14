@@ -130,7 +130,6 @@ module lsm_ruc
 !     evbs     - real, direct soil evaporation (m/s)               im   !
 !     evcw     - real, canopy water evaporation (m/s)              im   !
 !     sbsno    - real, sublimation/deposit from snopack (m/s)      im   !
-!     snowc    - real, fractional snow cover                       im   !
 !     stm      - real, total soil column moisture content (m)      im   !
 !     zorl     - real, surface roughness                           im   !
 !     wet1     - real, normalized soil wetness                     im   !
@@ -167,8 +166,7 @@ module lsm_ruc
 !! | snow            | lwe_thickness_of_snow_amount_from_previous_timestep                          | snow amount from previous timestep                              | m             |    1 | real      | kind_phys | in     | F        |
 !! | graupel         | lwe_thickness_of_graupel_amount_from_previous_timestep                       | graupel amount from previous timestep                           | m             |    1 | real      | kind_phys | in     | F        |
 !! | srflag          | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | real      | kind_phys | in     | F        |
-!! | sncovr1         | surface_snow_area_fraction_for_diagnostics                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | snowc           | surface_snow_area_fraction                                                   | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | sncovr1         | surface_snow_area_fraction_over_land                                         | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | weasd           | water_equivalent_accumulated_snow_depth                                      | water equiv of acc snow depth over land and sea ice             | mm            |    1 | real      | kind_phys | inout  | F        |
 !! | snwdph          | surface_snow_thickness_water_equivalent                                      | water equivalent snow depth over land                           | mm            |    1 | real      | kind_phys | inout  | F        |
 !! | sr              | ratio_of_snowfall_to_rainfall                                                | snow ratio: ratio of snow to total precipitation                | frac          |    1 | real      | kind_phys | in     | F        |
@@ -272,7 +270,7 @@ module lsm_ruc
 ! --- outputs
      &       sncovr1, qsurf, gflux, drain, evap, hflx,                  &
      &       rhosnf, runof, runoff, srunoff,                            &
-     &       chh, cmm, evbs, evcw, sbsno, snowc, stm, wet1,             &
+     &       chh, cmm, evbs, evcw, sbsno, stm, wet1,                    &
      &       acsnow, snowfallac,                                        &
      &       flag_init, flag_restart, errmsg, errflg                    &
      &     )
@@ -325,7 +323,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
      &       qsurf , gflux , evap , runof , drain ,                     &
      &       runoff, srunoff, hflx, cmm, chh,                           &
-     &       rhosnf, evbs, evcw, sbsno, snowc, stm, wet1,               &
+     &       rhosnf, evbs, evcw, sbsno, stm, wet1,                      &
      &       acsnow, snowfallac
 
       logical,          intent(in)  :: flag_init, flag_restart
@@ -335,14 +333,16 @@ module lsm_ruc
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, wind, weasd_old, snwdph_old,                      &
-     &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old
+     &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old,      &
+     &       tsnow_old, snowfallac_old, acsnow_old, sfalb_old,          &
+     &       sfcqv_old, sfcqc_old, wet1_old, zorl_old, sncovr1_old
 
       real (kind=kind_phys), dimension(lsoil_ruc) :: et
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,              &
+      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,       &
            slsoil, stsoil, smfrsoil, keepfrsoil
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,               &
+      real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,      &
      &       tslb_old, sh2o_old, keepfr_old, smfrkeep_old
 
       real (kind=kind_phys),dimension (im,1,1)      ::                  &
@@ -507,16 +507,24 @@ module lsm_ruc
 
       do i  = 1, im ! i - horizontal loop
         if (flag(i) .and. flag_guess(i)) then
-          !if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
-          weasd_old(i)  = weasd(i)
-          snwdph_old(i) = snwdph(i)
-          tskin_old(i)  = tskin(i)
-          canopy_old(i) = canopy(i)
-          !tprcp_old(i)  = tprcp(i)
-          srflag_old(i) = srflag(i)
-          sr_old(i)     = sr(i)
-
           !> - Save land-related prognostic fields for guess run.
+          !if(me==0 .and. i==ipr) print *,'before call to RUC guess run', i
+          weasd_old(i)       = weasd(i)
+          snwdph_old(i)      = snwdph(i)
+          tskin_old(i)       = tskin(i)
+          canopy_old(i)      = canopy(i)
+          !tprcp_old(i)       = tprcp(i)
+          srflag_old(i)      = srflag(i)
+          sr_old(i)          = sr(i)
+          tsnow_old(i)       = tsnow(i)
+          snowfallac_old(i)  = snowfallac(i)
+          acsnow_old(i)      = acsnow(i)
+          sfalb_old(i)       = sfalb(i)
+          sfcqv_old(i)       = sfcqv(i)
+          sfcqc_old(i)       = sfcqc(i)
+          wet1_old(i)        = wet1(i)
+          zorl_old(i)        = zorl(i)
+          sncovr1_old(i)     = sncovr1(i)
           do k = 1, lsoil_ruc
             smois_old(i,k)  = smois(i,k)
             tslb_old(i,k)   = tslb(i,k)
@@ -544,7 +552,6 @@ module lsm_ruc
           evcw (i)  = 0.0
           trans(i)  = 0.0
           sbsno(i)  = 0.0
-          snowc(i)  = 0.0
 
           !local i,j arrays
           dew(i,j)      = 0.0
@@ -799,7 +806,6 @@ module lsm_ruc
           endif
         endif
 
-        !sncovr(i,j) = snowc(i)
         sncovr(i,j) = sncovr1(i)
 
         chs(i,j)    = ch(i) * wind(i) ! compute conductance 
@@ -1017,12 +1023,12 @@ module lsm_ruc
         !sbsno(i) = esnow(i,j)
         !snohf(i) = snoh(i,j)
 
-        sfcdew(i) = dew(i,j)
-        qsurf(i)  = qsfc(i,j)
-        snowc(i)  = sncovr(i,j)
-        stm(i)    = soilm(i,j)
-        tsurf(i)  = soilt(i,j)
-        tice(i)   = tsurf(i)
+        sfcdew(i)  = dew(i,j)
+        qsurf(i)   = qsfc(i,j)
+        sncovr1(i) = sncovr(i,j)
+        stm(i)     = soilm(i,j)
+        tsurf(i)   = soilt(i,j)
+        tice(i)    = tsurf(i)
         !  --- ...  units [m/s] = [g m-2 s-1] 
         runof (i)  = runoff1(i,j)
         drain (i)  = runoff2(i,j)
@@ -1038,6 +1044,10 @@ module lsm_ruc
         ! --- ... accumulated total runoff and surface runoff
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
         srunoff(i) = srunoff(i) + runof(i) * delt * 0.001            ! kg m-2
+
+        ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
+        snowfallac(i) = snfallac(i,j) ! kg m-2
+        acsnow(i)     = acsn(i,j)     ! kg m-2
 
         !  --- ...  unit conversion (from m to mm)
         snwdph(i)  = snowh(i,j) * 1000.0
@@ -1094,13 +1104,21 @@ module lsm_ruc
           if(debug_print) print *,'end ',i,flag_guess(i),flag_iter(i)
           if (flag_guess(i)) then
             if(debug_print) print *,'guess run'
-            weasd(i)  = weasd_old(i)
-            snwdph(i) = snwdph_old(i)
-            tskin(i)  = tskin_old(i)
-            canopy(i) = canopy_old(i)
-            !tprcp(i)  = tprcp_old(i)
-            srflag(i) = srflag_old(i)
-
+            weasd(i)       = weasd_old(i)
+            snwdph(i)      = snwdph_old(i)
+            tskin(i)       = tskin_old(i)
+            canopy(i)      = canopy_old(i)
+            !tprcp(i)       = tprcp_old(i)
+            srflag(i)      = srflag_old(i)
+            tsnow(i)       = tsnow_old(i)
+            snowfallac(i)  = snowfallac_old(i)
+            acsnow(i)      = acsnow_old(i)
+            sfalb(i)       = sfalb_old(i)
+            sfcqv(i)       = sfcqv_old(i)
+            sfcqc(i)       = sfcqc_old(i)
+            wet1(i)        = wet1_old(i)
+            zorl(i)        = zorl_old(i)
+            sncovr1(i)     = sncovr1_old(i)
             do k = 1, lsoil_ruc
               smois(i,k) = smois_old(i,k)
               tslb(i,k) = tslb_old(i,k)

@@ -56,6 +56,7 @@
          ! Local variables
          integer :: nb, nblks, nt
          integer :: i, j, ix
+         logical :: non_uniform_blocks
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -64,10 +65,29 @@
          if (is_initialized) return
 
          nblks = size(Model%blksz)
+
+         ! Non-uniform blocks require special handling: instead
+         ! of nthrds elements of the Interstitial array, there are
+         ! nthrds+1 elements. The extra Interstitial(nthrds+1) is
+         ! allocated for the smaller block length of the last block,
+         ! while all other elements are allocated to the maximum
+         ! block length (which is the same for all blocks except
+         ! the last block).
+         if (minval(Model%blksz)==maxval(Model%blksz)) then
+             non_uniform_blocks = .false.
+         else
+             non_uniform_blocks = .true.
+         end if
+
          ! Consistency check - number of threads passed in via the argument list
          ! has to match the size of the Interstitial data type.
-         if (.not. nthrds == size(Interstitial)) then
+         if (.not. non_uniform_blocks .and. nthrds/=size(Interstitial)) then
              write(errmsg,'(*(a))') 'Logic error: nthrds does not match size of Interstitial variable'
+             errflg = 1
+             return
+         else if (non_uniform_blocks .and. nthrds+1/=size(Interstitial)) then
+             write(errmsg,'(*(a))') 'Logic error: nthrds+1 does not match size of Interstitial variable ' // &
+                                    '(including extra last element for shorter blocksizes)'
              errflg = 1
              return
          end if
@@ -77,7 +97,7 @@
 !$OMP          shared (Model,Data,Interstitial,errmsg,errflg) &
 !$OMP          shared (levozp,oz_coeff,oz_pres)               &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres)             &
-!$OMP          shared (ntrcaer,nblks)
+!$OMP          shared (ntrcaer,nblks,nthrds,non_uniform_blocks)
 
 #ifdef OPENMP
          nt = omp_get_thread_num()+1
@@ -161,12 +181,25 @@
          ! Update values of oz_pres in Interstitial data type for all threads
          if (Model%ntoz > 0) then
             Interstitial(nt)%oz_pres = oz_pres
+!$OMP single
+            if (non_uniform_blocks) then
+               ! For non-uniform block sizes, set Interstitial(nthrds+1)%oz_pres
+               Interstitial(nthrds+1)%oz_pres = oz_pres
+            end if
+!$OMP end single nowait
          end if
 
          ! Update values of h2o_pres in Interstitial data type for all threads
          if (Model%h2o_phys) then
             Interstitial(nt)%h2o_pres = h2o_pres
+!$OMP single
+            if (non_uniform_blocks) then
+               ! For non-uniform block sizes, set Interstitial(nthrds+1)%oz_pres
+               Interstitial(nthrds+1)%h2o_pres = h2o_pres
+            end if
+!$OMP end single nowait
          end if
+
 
          !--- read in and initialize ozone
          if (Model%ntoz > 0) then

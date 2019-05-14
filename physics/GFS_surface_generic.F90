@@ -3,6 +3,10 @@
 
       module GFS_surface_generic_pre
 
+      private
+
+      public GFS_surface_generic_pre_init, GFS_surface_generic_pre_finalize, GFS_surface_generic_pre_run
+
       contains
 
       subroutine GFS_surface_generic_pre_init ()
@@ -217,7 +221,12 @@
 
       end module GFS_surface_generic_pre
 
+
       module GFS_surface_generic_post
+
+      private
+
+      public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
 
       contains
 
@@ -232,8 +241,9 @@
 !! |----------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                                                              | horizontal loop extent                                                              | count       |    0 | integer    |           | in     | F        |
 !! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
+!! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                                                                                   | landmask: sea/land/ice=0/1/2                                                        | flag        |    1 | integer    |           | in     | F        |
+!! | lndfrac        | land_area_fraction                                                                                                  | fraction of horizontal grid area occupied by land                                   | frac        |    1 | real       | kind_phys | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
 !! | ep1d           | surface_upward_potential_latent_heat_flux                                                                           | surface upward potential latent heat flux                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | gflx           | upward_heat_flux_in_soil                                                                                            | upward soil heat flux                                                               | W m-2       |    1 | real       | kind_phys | in     | F        |
@@ -317,7 +327,7 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, lssav, islmsk, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,          &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, lndfrac, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
         t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -331,8 +341,8 @@
         implicit none
 
         integer,                              intent(in) :: im
-        logical,                              intent(in) :: cplflx, lssav
-        integer, dimension(im),               intent(in) :: islmsk
+        logical,                              intent(in) :: cplflx, cplwav, lssav
+        real(kind=kind_phys), dimension(im),  intent(in) :: lndfrac
 
         real(kind=kind_phys),                 intent(in) :: dtf
 
@@ -370,6 +380,13 @@
           v1(i)      = vgrs_1(i)
         enddo
 
+        if (cplflx .or. cplwav) then
+          do i=1,im
+            u10mi_cpl   (i) = u10m(i)
+            v10mi_cpl   (i) = v10m(i)
+          enddo
+        endif
+
         if (cplflx) then
           do i=1,im
             dlwsfci_cpl (i) = adjsfcdlw(i)
@@ -388,8 +405,6 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            u10mi_cpl   (i) = u10m(i)
-            v10mi_cpl   (i) = v10m(i)
             tsfci_cpl   (i) = tsfc(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
@@ -398,7 +413,7 @@
   !       them to net SW heat fluxes
 
           do i=1,im
-            if (islmsk(i) /= 1) then  ! not a land point
+            if(lndfrac(i) < 1.) then ! Not 100% land
   !  ---  compute open water albedo
               xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
               ocalnirdf_cpl = 0.06

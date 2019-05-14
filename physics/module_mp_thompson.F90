@@ -1,5 +1,3 @@
-!#define DEBUG_AEROSOLS
-
 !+---+-----------------------------------------------------------------+
 !.. This subroutine computes the moisture tendencies of water vapor,
 !.. cloud droplets, rain, cloud ice (pristine), snow, and graupel.
@@ -46,11 +44,15 @@
 !wrft:model_layer:physics
 !+---+-----------------------------------------------------------------+
 !
-MODULE module_mp_thompson_hrrr
+MODULE module_mp_thompson
 
-      USE machine, ONLY : kind_phys
+      USE machine, only : kind_phys
 
-      USE module_mp_thompson_hrrr_radar
+      USE module_mp_radar
+
+#ifndef SION
+      use mpi
+#endif
 
       IMPLICIT NONE
 
@@ -383,6 +385,15 @@ MODULE module_mp_thompson_hrrr
       REAL:: t1_qr_ev, t2_qr_ev
       REAL:: t1_qs_sd, t2_qs_sd, t1_qg_sd, t2_qg_sd
       REAL:: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
+
+!..MPI communicator
+      INTEGER:: mpi_communicator
+
+!..If SIONlib isn't used, write Thompson tables with master MPI task
+!.. after computing them in thompson_init
+#ifndef SION
+      LOGICAL:: thompson_table_writer
+#endif
 
 !+---+
 !+---+-----------------------------------------------------------------+
@@ -724,6 +735,8 @@ MODULE module_mp_thompson_hrrr
 !..Create lookup tables for most costly calculations.
 !+---+-----------------------------------------------------------------+
 
+      ! Assign mpicomm to module variable
+      mpi_communicator = mpicomm
 #ifdef SION
       call cpu_time(stime)
       call readwrite_tables("read", mpicomm, mpirank, mpiroot, ierr)
@@ -734,6 +747,15 @@ MODULE module_mp_thompson_hrrr
       else
          precomputed_tables = .false.
          if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
+      end if
+#else
+      ! Standard tables are only written by master MPI task;
+      ! (physics init cannot be called by multiple threads,
+      !  hence no need to test for a specific thread number)
+      if (mpirank==mpiroot) then
+         thompson_table_writer = .true.
+      else
+         thompson_table_writer = .false.
       end if
 #endif
 
@@ -984,9 +1006,6 @@ MODULE module_mp_thompson_hrrr
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
                               errmsg, errflg)
-#ifdef DEBUG_AEROSOLS
-      use mpi
-#endif
 
       implicit none
 
@@ -1049,24 +1068,6 @@ MODULE module_mp_thompson_hrrr
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
       integer,          optional, intent(  out) :: errflg
-
-#ifdef DEBUG_AEROSOLS
-      integer :: mpirank, mpisize, impi, ierr
-      real    :: nc1d_in_debug, nwfa1d_in_debug, nifa1d_in_debug, nwfa1_in_debug
-      real    :: nc1d_out_debug, nwfa1d_out_debug, nifa1d_out_debug, nwfa1_out_debug
-
-      call MPI_COMM_RANK(MPI_COMM_WORLD,mpirank,ierr)
-      call MPI_COMM_SIZE(MPI_COMM_WORLD,mpisize,ierr)
-
-      nc1d_in_debug   = 0.0
-      nwfa1d_in_debug = 0.0
-      nifa1d_in_debug = 0.0
-      nwfa1_in_debug  = 0.0
-      nc1d_out_debug   = 0.0
-      nwfa1d_out_debug = 0.0
-      nifa1d_out_debug = 0.0
-      nwfa1_out_debug  = 0.0
-#endif
 
       ! CCPP
       if (present(errmsg)) errmsg = ''
@@ -1211,12 +1212,7 @@ MODULE module_mp_thompson_hrrr
             enddo
             nwfa1 = 11.1E6
          endif
-#ifdef DEBUG_AEROSOLS
-         nc1d_in_debug   = nc1d_in_debug   + sum(nc1d(:))
-         nwfa1d_in_debug = nwfa1d_in_debug + sum(nwfa1d(:))
-         nifa1d_in_debug = nifa1d_in_debug + sum(nifa1d(:))
-         nwfa1_in_debug  = nwfa1_in_debug  + nwfa1
-#endif
+
          call mp_thompson(qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                       nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dz1d,  &
                       pptrain, pptsnow, pptgraul, pptice, &
@@ -1268,11 +1264,6 @@ MODULE module_mp_thompson_hrrr
                nifa(i,k,j) = nifa1d(k)
             enddo
          endif
-#ifdef DEBUG_AEROSOLS
-         nc1d_out_debug   = nc1d_out_debug   + sum(nc1d(:))
-         nwfa1d_out_debug = nwfa1d_out_debug + sum(nwfa1d(:))
-         nifa1d_out_debug = nifa1d_out_debug + sum(nifa1d(:))
-#endif
 
          do k = kts, kte
             qv(i,k,j) = qv1d(k)
@@ -1411,30 +1402,6 @@ MODULE module_mp_thompson_hrrr
 !         'ni: ', ni_max, '(', imax_ni, ',', jmax_ni, ',', kmax_ni, ')', &
 !         'nr: ', nr_max, '(', imax_nr, ',', jmax_nr, ',', kmax_nr, ')'
 ! END DEBUG - GT
-#ifdef DEBUG_AEROSOLS
-      nc1d_in_debug   = nc1d_in_debug   / real((j_end-j_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      nwfa1d_in_debug = nwfa1d_in_debug / real((j_end-i_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      nifa1d_in_debug = nifa1d_in_debug / real((j_end-j_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      nwfa1_in_debug  = nwfa1_in_debug  / real((j_end-j_start+1)*(i_end-i_start+1))
-      nc1d_out_debug   = nc1d_out_debug   / real((j_end-j_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      nwfa1d_out_debug = nwfa1d_out_debug / real((j_end-i_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      nifa1d_out_debug = nifa1d_out_debug / real((j_end-j_start+1)*(i_end-i_start+1)*(kte-kts+1))
-      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      do impi=0,mpisize-1
-         !if (impi==mpirank) then
-         if (impi==mpirank .and. impi==0) then
-            write(0,'(a,i3,a,l,e16.7)') "MPI rank ", mpirank, &
-                     & ": is_aero, mean(nwfa1) IN:", is_aerosol_aware, nwfa1_in_debug
-            write(0,'(a,i3,a,3e16.7)') "MPI rank ", mpirank, &
-                     & ": mean(nc1d_in), mean(nwfa1d_in), mean(nifa1d_in):", &
-                     & nc1d_in_debug, nwfa1d_in_debug, nifa1d_in_debug
-            write(0,'(a,i3,a,3e16.7)') "MPI rank ", mpirank, &
-                     & ": mean(nc1d_out), mean(nwfa1d_out), mean(nifa1d_out):", &
-                     & nc1d_out_debug, nwfa1d_out_debug, nifa1d_out_debug
-         end if
-         call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-      end do
-#endif
 
       END SUBROUTINE mp_gt_driver
 
@@ -1607,12 +1574,6 @@ MODULE module_mp_thompson_hrrr
       LOGICAL, DIMENSION(kts:kte):: L_qc, L_qi, L_qr, L_qs, L_qg
       LOGICAL:: debug_flag
       INTEGER:: nu_c
-#ifdef DEBUG_AEROSOLS
-      INTEGER :: mpirank, ierr
-      LOGICAL :: abort = .false.
-
-      call MPI_COMM_RANK(MPI_COMM_WORLD,mpirank,ierr)
-#endif
 
 !+---+
 
@@ -3515,15 +3476,6 @@ MODULE module_mp_thompson_hrrr
 
          if (rr(kts).gt.R1*1000.) &
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
-#ifdef DEBUG_AEROSOLS
-         if (pptrain.ge.1E5) then
-            write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)", &
-                     & pptrain, nstep, n, kts, DT, sed_r(kts), onstep(1), rr(kts)
-         end if
-         if (sed_r(kts)*DT*onstep(1).ge.1E3) then
-            abort = .true.
-         end if
-#endif
       enddo
       endif
 
@@ -3575,15 +3527,6 @@ MODULE module_mp_thompson_hrrr
 
          if (ri(kts).gt.R1*1000.) &
          pptice = pptice + sed_i(kts)*DT*onstep(2)
-#ifdef DEBUG_AEROSOLS
-         if (pptice.ge.1E5) then
-            write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)", &
-                     & pptice, nstep, n, kts, DT, sed_i(kts), onstep(2), ri(kts)
-         end if
-         if (sed_i(kts)*DT*onstep(2).ge.1E3) then
-            abort = .true.
-         end if
-#endif
       enddo
       endif
 
@@ -3611,15 +3554,6 @@ MODULE module_mp_thompson_hrrr
 
          if (rs(kts).gt.R1*1000.) &
          pptsnow = pptsnow + sed_s(kts)*DT*onstep(3)
-#ifdef DEBUG_AEROSOLS
-         if (pptsnow.ge.1E5) then
-            write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)", &
-                     & pptsnow, nstep, n, kts, DT, sed_s(kts), onstep(3), rs(kts)
-         end if
-         if (sed_s(kts)*DT*onstep(3).ge.1E3) then
-            abort = .true.
-         end if
-#endif
       enddo
       endif
 
@@ -3647,15 +3581,6 @@ MODULE module_mp_thompson_hrrr
 
          if (rg(kts).gt.R1*1000.) &
          pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
-#ifdef DEBUG_AEROSOLS
-         if (pptgraul.ge.1E5) then
-            write(0,*) mpirank, " ::: DH DEBUG THOMPSON: pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)", &
-                     & pptgraul, nstep, n, kts, DT, sed_g(kts), onstep(4), rg(kts)
-         end if
-         if (sed_g(kts)*DT*onstep(4).ge.1E5) then
-            abort = .true.
-         end if
-#endif
       enddo
       endif
 
@@ -3695,12 +3620,6 @@ MODULE module_mp_thompson_hrrr
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         ! DH* this was for FIM
-         !nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
-         !              (nwfa1d(k)+nwfaten(k)*DT)))
-         !nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
-         !              (nifa1d(k)+nifaten(k)*DT)))
-         ! *DH
          nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
                        (nwfa1d(k)+nwfaten(k)*DT)))
          nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
@@ -3761,15 +3680,6 @@ MODULE module_mp_thompson_hrrr
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
       enddo
 
-#ifdef DEBUG_AEROSOLS
-      if (abort) then
-         write(0,*) "DH DEBUG: abort for debugging (inside mp_thompson)"
-         call sleep(1)
-         call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-         stop
-      end if
-#endif
-
       end subroutine mp_thompson
 !+---+-----------------------------------------------------------------+
 !ctrlL
@@ -3792,7 +3702,7 @@ MODULE module_mp_thompson_hrrr
       DOUBLE PRECISION:: massg, massr, dvg, dvr, t1, t2, z1, z2, y1, y2
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
       force_read_thompson = .false.
       write_thompson_tables = .false.
@@ -3801,8 +3711,11 @@ MODULE module_mp_thompson_hrrr
 
       good = 0
         INQUIRE(FILE="qr_acr_qg.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qg.dat stead of computing"
+          write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
           OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234) tcg_racg
@@ -3842,6 +3755,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        if (thompson_table_writer) write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing qr_acr_qg"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
@@ -3963,7 +3879,7 @@ MODULE module_mp_thompson_hrrr
       DOUBLE PRECISION:: y1, y2, y3, y4
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
 !+---+
 
@@ -3972,6 +3888,9 @@ MODULE module_mp_thompson_hrrr
 
       good = 0
         INQUIRE(FILE="qr_acr_qs.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
           write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
           OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=1234)
@@ -4019,6 +3938,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        if (thompson_table_writer) write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing qr_acr_qs"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
@@ -4220,15 +4142,17 @@ MODULE module_mp_thompson_hrrr
       REAL:: T_adjust
       LOGICAL force_read_thompson, write_thompson_tables
       LOGICAL lexist,lopen
-      INTEGER good
+      INTEGER good,ierr
 
 !+---+
       force_read_thompson = .false.
       write_thompson_tables = .false.
 
-
       good = 0
         INQUIRE(FILE="freezeH2O.dat",EXIST=lexist)
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
         IF ( lexist ) THEN
           write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
           OPEN(63,file="freezeH2O.dat",form="unformatted",err=1234)
@@ -4270,6 +4194,9 @@ MODULE module_mp_thompson_hrrr
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
+#ifndef SION
+        if (thompson_table_writer) write_thompson_tables = .true.
+#endif
         write(0,*) "ThompMP: computing freezeH2O"
 
         orho_w = 1./rho_w
@@ -5893,5 +5820,5 @@ MODULE module_mp_thompson_hrrr
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
-END MODULE module_mp_thompson_hrrr
+END MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
