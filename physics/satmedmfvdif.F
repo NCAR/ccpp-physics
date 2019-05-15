@@ -626,7 +626,7 @@
 !
 !> -# Compute Monin-Obukhov similarity parameters
 !!  - Calculate the Monin-Obukhov nondimensional stability paramter, commonly
-!! referred to as \f$\zeta\f$ using the following equation from Businger et al.(1971) \cite businge_et_al_1971
+!! referred to as \f$\zeta\f$ using the following equation from Businger et al.(1971) \cite businger_et_al_1971
 !! (eqn 28):
 !!  \f[
 !!  \zeta = Ri_{sfc}\frac{F_m^2}{F_h} = \frac{z}{L}

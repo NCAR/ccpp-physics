@@ -105,7 +105,7 @@ with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019 \c
 
 Table 1.  physics-suite options included in this documentation. 
 \tableofcontents
-|   Phys suites    | GFSv14            |  GFSv15              | GFSv15 with TKE-EDMF |   EMC CPT           |    GSD RAP/HRRR      |
+|   Phys suites    | GFSv14            |  FV3_GFS_v15         |  FV3_GFS_v15plus     |   FV3_CPT_v0        |    FV3_GSD_v0        |
 |------------------|-------------------|----------------------|----------------------|---------------------|----------------------|
 | Deep Cu          | \ref GFS_SAMFdeep | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
 | Shallow Cu       | \ref GFS_SAMFshal | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |

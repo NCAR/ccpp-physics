@@ -236,9 +236,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../namelist_soilveg_ruc.F90 \
                         ../set_soilveg_ruc.F90   \
                         ../module_soil_pre.F90   \
+                        ../mp_thompson_pre.F90  \
+                        ../module_mp_thompson_make_number_concentrations.F90 \
                         ../mp_thompson.F90    \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
+                        ../mp_thompson_post.F90  \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \

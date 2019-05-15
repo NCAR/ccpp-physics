@@ -1,5 +1,5 @@
 /**
-\page suite1_page GFSv15 Physics Suite with GFDL Microphysics Scheme 
+\page suite1_page FV3_GFS_v15 
 
 \section gfs1_suite_overview Overview
 

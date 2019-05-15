@@ -1,5 +1,5 @@
 /**
-\page suite2_page GFSv15 Physics Suite with Scale-Aware TKE-EDMF PBL Scheme
+\page suite2_page FV3_GFS_v15plus
 
 \section gfs2p_suite_overview Overview
 

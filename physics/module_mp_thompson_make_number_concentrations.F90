@@ -1,3 +1,7 @@
+!>\file module_mp_thompson_make_number_concentrations.F90
+!! This file contains
+
+!>\ingroup aathompson
 module module_mp_thompson_make_number_concentrations
 
       use physcons, only: PI => con_pi
