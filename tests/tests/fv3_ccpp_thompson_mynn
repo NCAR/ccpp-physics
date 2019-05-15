@@ -78,7 +78,7 @@ export DT_ATMOS="1200"
 export LRADAR=.T.
 export LTAEROSOL=.T.
 
-export FV3_RUN=ccpp_thompson_mynn_run.IN
+export FV3_RUN=ccpp_gsd_run.IN
 export CCPP_SUITE=FV3_GFS_2017_thompson_mynn
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gsd.nml.IN

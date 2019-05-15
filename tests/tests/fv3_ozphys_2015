@@ -75,7 +75,7 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
 export_fv3
 export NODES=$(expr $TASKS / $TPN + 1)
 
-export FV3_RUN=ozphys_2015_run.IN
+export FV3_RUN=fv3_run.IN
 
 export OZ_PHYS_OLD=.F.
 export OZ_PHYS_NEW=.T.
