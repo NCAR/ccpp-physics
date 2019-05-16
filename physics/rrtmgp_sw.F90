@@ -1,6 +1,6 @@
 ! ###########################################################################################
 ! ###########################################################################################
-module GFS_rrtmgp_sw
+module rrtmgp_sw
   use GFS_typedefs,              only: GFS_control_type
   use physparam,                 only: iovrsw, icldflg, iswcliq, isubcsw
   use machine,                   only: kind_phys
@@ -39,14 +39,14 @@ module GFS_rrtmgp_sw
   real (kind_phys), parameter :: &
        s0 = 1368.22                  ! Solar constant (W/m2)
 
-  ! Logical flags for optional output fields in GFS_rrtmgp_sw_run(), default=.false.
+  ! Logical flags for optional output fields in rrtmgp_sw_run(), default=.false.
   logical :: &
        l_AllSky_HR_byband  = .false., & ! 2D [ncol,nlay] all-sky heating rates, in each band [ncol,nlay,nBandsSW]?
        l_ClrSky_HR         = .false., & ! 2D [ncol,nlay] clear-sky heating rate?
        l_fluxes2D          = .false., & ! 2D [ncol,nlay] radiative fluxes *Note* fluxes is a DDT w/ 4 fields.
        l_sfcFluxes1D       = .false.    ! 1D [ncol] surface fluxes  *Note* fluxes is a DDT w/ 6 fields.
 
-  ! Module parameters (set during GFS_rrtmgp_sw_init())
+  ! Module parameters (set during rrtmgp_sw_init())
   integer :: &
        rrtmgp_sw_cld_phys, & ! RRTMGP cloud-physics (0-RRTMG, 1-RRTGMP(LUT), 2-RRTMGP(Pade))
        nGptsSW,            & ! Number of SW spectral g-points
@@ -62,12 +62,12 @@ module GFS_rrtmgp_sw
   type(ty_gas_concs)  :: &
        gas_concentrations
 
-  public GFS_rrtmgp_sw_init, GFS_rrtmgp_sw_run, GFS_rrtmgp_sw_finalize
+  public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
 contains
   ! #########################################################################################
-  ! GFS_rrtmgp_sw_init
+  ! rrtmgp_sw_init
   ! #########################################################################################
-!! \section arg_table_GFS_rrtmgp_sw_init Argument Table
+!! \section arg_table_rrtmgp_sw_init Argument Table
 !! | local_name      | standard_name                                   | long_name                                                                 | units | rank | type                 |    kind   | intent | optional |
 !! |-----------------|-------------------------------------------------|---------------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
 !! | Model           | GFS_control_type_instance                       | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type     |           | in     | F        |
@@ -80,7 +80,7 @@ contains
 !! | kdist_sw_cldy   | K_distribution_file_for_cloudy_RRTMGP_SW_scheme | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT   |    0 | ty_cloud_optics      |           | inout  | F        |
 !!
   ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_init(Model,mpicomm, mpirank, mpiroot, kdist_sw, kdist_sw_cldy,   &
+  subroutine rrtmgp_sw_init(Model,mpicomm, mpirank, mpiroot, kdist_sw, kdist_sw_cldy,   &
         errmsg, errflg)
     use netcdf
 #ifdef MPI
@@ -723,11 +723,11 @@ contains
             pade_sizereg_extice_sw, pade_sizereg_ssaice_sw, pade_sizereg_asyice_sw))
     endif
 
-  end subroutine GFS_rrtmgp_sw_init
+  end subroutine rrtmgp_sw_init
   ! #########################################################################################
   ! GFS_RRTMGP_SW_RUN
   ! #########################################################################################
-!! \section arg_table_GFS_rrtmgp_sw_run Argument Table
+!! \section arg_table_rrtmgp_sw_run Argument Table
 !! | local_name      | standard_name                                                                                  | long_name                                                                 | units   | rank | type                      |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------|------|---------------------------|-----------|--------|----------|
 !! | p_lay           | air_pressure_at_layer_for_radiation_in_hPa                                                     | air pressure layer                                                        | hPa     |    2 | real                      | kind_phys | in     | F        |
@@ -789,7 +789,7 @@ contains
 !! | kdist_sw        | K_distribution_file_for_RRTMGP_SW_scheme                                                       | DDT containing spectral information for RRTMGP SW radiation scheme        | DDT     |    0 | ty_gas_optics_rrtmgp      |           | in     | F        |
 !! | kdist_sw_cldy   | K_distribution_file_for_cloudy_RRTMGP_SW_scheme                                                | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT     |    0 | ty_cloud_optics           |           | inout  | F        |
 !!
-  subroutine GFS_rrtmgp_sw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o, & ! IN
+  subroutine rrtmgp_sw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o, & ! IN
        vmr_ch4, vmr_o2, vmr_co, vmr_cfc11, vmr_cfc12, vmr_cfc22, vmr_ccl4, icseed, tau_aer, & ! IN
        ssa_aer, asy_aer, sfcalb_nir_dir, sfcalb_nir_dif,  sfcalb_uvis_dir, sfcalb_uvis_dif, & ! IN
        dzlyr, delpin, de_lgth, cossza, solcon, nday, idxday, ncol, nlay, lprint, cldfrac,   & ! IN
@@ -1258,11 +1258,11 @@ contains
     if (l_ClrSky_HR) then
        hsw0(idxday,:) = thetaTendClrSky
     endif
-  end subroutine GFS_rrtmgp_sw_run
+  end subroutine rrtmgp_sw_run
   ! #########################################################################################
   ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_finalize()
-  end subroutine GFS_rrtmgp_sw_finalize
+  subroutine rrtmgp_sw_finalize()
+  end subroutine rrtmgp_sw_finalize
 
   ! #########################################################################################
   ! Ancillary functions
@@ -1271,11 +1271,11 @@ contains
     character(len=*), intent(in) :: error_msg
     
     if(error_msg /= "") then
-       print*,"ERROR(GFS_rrtmgp_sw_main.F90): "
+       print*,"ERROR(rrtmgp_sw_main.F90): "
        print*,trim(error_msg)
        return
     end if
   end subroutine check_error_msg  
   ! #########################################################################################
   ! #########################################################################################
-end module GFS_rrtmgp_sw
+end module rrtmgp_sw

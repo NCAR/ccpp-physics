@@ -5,7 +5,7 @@ module rrtmgp_lw_post
   use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use mo_heating_rates,        only: compute_heating_rate
-  use GFS_rrtmgp_lw,           only: check_error_msg
+  use rrtmgp_lw,               only: check_error_msg
   use module_radlw_parameters, only: topflw_type, sfcflw_type, proflw_type
 
   implicit none
