@@ -14,7 +14,7 @@ HOST_MODEL_IDENTIFIER = "FV3"
 VARIABLE_DEFINITION_FILES = [
     'ccpp/physics/physics/machine.F',
     'FV3/gfsphysics/CCPP_layer/CCPP_typedefs.F90',
-    'FV3/gfsphysics/GFS_layer/GFS_typedefs.ccpp.F90',
+    'FV3/gfsphysics/GFS_layer/GFS_typedefs.F90',
     'FV3/gfsphysics/CCPP_layer/CCPP_data.F90',
     ]
 
@@ -118,7 +118,7 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/stochastic_physics/initialize_spectral_mod.F90',
     'ccpp/physics/stochastic_physics/stochy_ccpp.F90',
     # derived data type definitions
-    'FV3/gfsphysics/GFS_layer/GFS_typedefs.ccpp.F90',
+    'FV3/gfsphysics/GFS_layer/GFS_typedefs.F90',
     'FV3/gfsphysics/CCPP_layer/CCPP_typedefs.F90',
     ]
 
