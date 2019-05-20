@@ -1,5 +1,5 @@
 !>\file GFS_typedefs.F90
-!! This file contains typedefs on host model side.
+!! This file contains DDTs on the host model side.
 
 #undef MULTI_GASES
 

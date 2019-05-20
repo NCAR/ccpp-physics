@@ -1,5 +1,5 @@
 /**
-\page suite0_page GFSv14 Physics Suite with Zhao-Carr Microphysics
+\page suite0_page  FV3_GFS_v14
 
 \section gfsv14_suite_overview Overview
 

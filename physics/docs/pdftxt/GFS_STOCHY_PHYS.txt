@@ -76,41 +76,6 @@ uncertainty, particularly in the tropics, which may lead to improvements in trop
 In 2019 FV3GFS implementation, only the SHUM and SPPT are included as stochastic physics in the EnKF. The SKEB was not available to 
 be used at the time the code was frozen, and the amplitude parameters for SHUM and SPPT were modified to compensate.  
 
-\section nml_stochy  GFS Stochastic Physics Namelist Options
-- General Stochastic Physics
- - \c \b NTRUNC: spectral resolution (e.g. T126) of random patterns
- - \c \b LON_S, \c \b LAT_S: number of longitude and latitude point for the Gaussian grid
- - \c \b FHSTOCH: forecast hour to write out random pattern in order to restart the pattern for a different forecast (used in DA),file
-is \c stoch_out.F<HHH>
- - \c \b STOCHINI: set to true if wanting to read in a previous random pattern (input file need to be named stoch_ini)
-
-- Controls for SPPT
- - \c \b SPPT: amplitudes of random patterns (0.8, 0.4, 0.2, 0.08, 0.04)
- - \c \b SPPT_TAU: decorrelation timescales in seconds (21600, 1.728E5, 6.912E5, 7.776E6, 3.1536E7)
- - \c \b SPPT_LSCALE: decorrelation spatial scales in meters (250.E3, 1000.E3, 2000.E3, 2000.E3, 2000.E3)
- - \c \b SPPT_LOGIT: should be true to limit the SPPT perturbations between 0 and 2. Otherwise model will crash.
- - \c \b ISEED_SPPT: seeds for setting the random number sequence (ignored if \c \b stochini is true)
- - \c \b SPPT_SIGTOP1, \c \b SPPT_SIGTOP2: sigma levels to taper perturbations to zeros (default is 0.1, 0.025)
- - \c \b SPPT_SFCLIMIT: .T.= tapers the SPPT perturbations to zero at model's lowest level (helps reduce model crashes) 
- - \c \b USE_ZMTNBLCK: .T.= do not apply perturbations below the dividing streamline that is dianosed by the gravity wave drag,mountian blocking scheme
-
-- Controls for SHUM
- - \c \b SHUM: amplitudes of random patterns (0.004)
- - \c \b SHUM_TAU: decorrelation timescales in seconds (21600)
- - \c \b SHUM_LSCALE: decorrelation spatial scales in meters (250000)
- - \c \b SHUM_SIGEFOLD: e-folding lengthscale (in units of sigma) of specific humidity perturbations, default is 0.2
-
-- Controls for SKEB
- - \c \b SKEB: amplitude of random patterns (1.0)
- - \c \b SKEB_TAU: decorrelation timescales in seconds (21600)
- - \c \b SKEB_LSCALE: decorrelation spatial scales in meters (250)
- - \c \b ISEED_SKEB: Seeds for setting the random number sequence (ignored if \c \b stochini is true)
- - \c \b SKEBNORM: 0 - random pattern is stream function, 1 - pattern is K.E. norm, 2 - pattern is vorticity (default is 0)
- - \c \b SKEB_VARSPECT_OPT: 0 - gaussian (default, 1 - power law (not tested))
- - \c \b SKEB_NPASS: number of passes of the \f$del^2\f$ smoothing for the dissipation estimate (default is 11,minimum is 3)
- - \c \b SKEB_VDOF: the number of degrees of freedom in the vertical for the SKEB random pattern (default is 5)
- - \c \b SKEB_SIGTOP1, \c \b SKEB_SIGTOP2: sigma levels to taper perturbations to zeros (default is 0.1,0.025)
-
 \section intra_stochy Intraphysics Communication
 \ref arg_table_GFS_stochastics_run
 

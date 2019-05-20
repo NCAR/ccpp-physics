@@ -214,7 +214,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
 ### CPT
                         ../m_micro.F90       \
-                        ../micro_mg2_0.F90   \
+###                        ../micro_mg2_0.F90   \
                         ../micro_mg3_0.F90   \
                         ../micro_mg_utils.F90 \
                         ../cldmacro.F        \
@@ -247,8 +247,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f  
-###                        GFS_typedefs.F90 
+                        ../mersenne_twister.f \  
+                        compns_stochy.F90   
 
 
 INPUT_ENCODING         = UTF-8

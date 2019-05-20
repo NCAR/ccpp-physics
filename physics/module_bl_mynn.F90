@@ -458,7 +458,7 @@ CONTAINS
 !!\param spp_pbl
 !!\param rstoch_col
 !!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
-!! @{
+!> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,                                  &
        &            dz, zw,                                   &
@@ -602,7 +602,7 @@ CONTAINS
 !    RETURN
 
   END SUBROUTINE mym_initialize
-!! @}
+!> @}
   
 !
 ! ==================================================================
