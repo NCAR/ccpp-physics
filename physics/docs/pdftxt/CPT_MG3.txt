@@ -5,7 +5,26 @@ MG3 microphysics (MP) scheme is a six-category double momentum bulk scheme. It f
 hydrometeors (cloud water, cloud ice, rain, snow and graupel) and their number concentrations in addition to mass of water vapor.
 Physics processes of MG3 cloud MP are described in Figure 1. 
 
-\image  html  MG3_MP_diagram.png "Figure: MG3 MP at a glance" width=10cm
+# Morrison Gettelman Advancements
+- MG1: Morrison and Gettelman (2008) \cite Morrison_2008 (CESM1, CAM5) 
+  - Morrison et al 2005 scheme
+  - Added sub-grid scale variance
+  - Coupling to activation (aerosols)
+- MG2: Gettelman and Morrison (2015) \cite Gettelman_2015_1 \cite Gettelman_2015_2 (CESM2, CAM6)
+  - Prognostic precipitation (rain and snow)
+  - Sub-stepping and sub-column capable
+- MG3: Gettelman et al. 2019 (accepted by JAMES)
+  - Rimed hydrometeors (graupel or hail) are added to stratiform cloud scheme for global models.
+  - Global climate impacts are limited to small increased in ice mass.
+  - High (14 km) resolution similations show local production of rimed ice (graupel) can affect regional precipitation amounts and intensity.
+
+A schematic of the MG3 scheme is shown in Figure 1. MG3 starts with MG2 \cite Gettelman_2015_1 \cite Gettelman_2015_2 and adds a 
+series of processes (in red). One rimed hydrometeor category is added. Both mass and number are prognosed. Rimed ice has the 
+"character" of hail or graupel by pre-selecting density and fall speed paramters.
+
+\image  html  MG3_MP_diagram.png "Figure 1: A schematic of the MG3 scheme (Courtesy of A. Gettleman )" width=10cm
+
+
 
 Some unique attributes of MG3 cloud microphysics include:
 
@@ -20,29 +39,10 @@ Some unique attributes of MG3 cloud microphysics include:
 -# Number concentration of all species forcasted and has local storage
 -# Sub-step semi-implicit sedimentation
 
-
-
-\section MG3 Algorithm description 
- + IN and CNN activation 
- + GMAO cloud fraction and condensation calculation based on three different pdfs: 1) delta, 2) triangle, and 3) normal
- + Autoconversion calculations
- + Immersion freezing
- + Contact freezing
- + Aggregation
- + Accretion
- + Heterogeneous rain freezing
- + Bergeron process
- + Deposition/evaporation/sublimation
- + Mass conservation control
- + precipitatin/sedimentation
  
-\section non entry-point of the scheme
- + aer_cloud: aerosol activation module
- + cldmacro: GMAO macrophysics
- + micro_mg_utils: utility for MG3
- + cldwat2m_micro: MG1/2
- + micro_mg2_0: MG2
- + micro_mg3_0: MG3/2
+
+\section intra_mg3 Intraphysics Communication
+\ref arg_table_m_micro_run
 
 \section gen_mg3 General Algorithm
 \ref detail_m_micro_run

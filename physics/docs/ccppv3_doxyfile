@@ -101,7 +101,6 @@ WARN_FORMAT            =
 WARN_LOGFILE           =
 INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
-                          pdftxt/GFSv14_suite.txt \
                           pdftxt/GFSv15_suite.txt \
                           pdftxt/GFSv15_suite_TKEEDMF.txt \
                           pdftxt/CPT_adv_suite.txt   \
@@ -120,7 +119,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
-                          pdftxt/GFS_ZHAOC.txt    \
                           pdftxt/GFDL_cloud.txt   \
                           pdftxt/GFS_SURFACE_PERT.txt    \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \

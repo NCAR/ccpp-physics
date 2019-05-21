@@ -3,8 +3,8 @@
 
 
 !>\defgroup aathompson GSD Aerosal-Aware Thompson MP Module
-!!\author Dom Heinzeller, NOAA/ESRL/GSD, dom.heinzeller@noaa.gov
-!! -Last modified 4 Apr 2019: remove legacy debugging code
+!!
+!! Last modified 4 Apr 2019: remove legacy debugging code    D. Heinzeller
 !> @{
 module mp_thompson
 

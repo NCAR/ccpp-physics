@@ -18,7 +18,7 @@ and towering cumulus on the forecast variables.
 The GF scheme still uses an ensemble of convective schemes, but is now limited to options that modulate closure and capping
 inversion thresholds for convection. After calculations for each member of the cloud ensemble in the convective scheme, the ensemble 
 mean time tendency for temperature, moisture, and cloud and precipitation hydrometeors is passed to the rest of the model 
-(Grell and Devenyi, 2002 \cite Grell_2002 ). Additionally, the upward mass flux from parameterized convective updrafts is balanced by
+(Grell and \f$D\acute{e}v\acute{e}nyi\f$, 2002 \cite Grell_2002 ). Additionally, the upward mass flux from parameterized convective updrafts is balanced by
 subsidence in adjacent grid columns, if horizontal resolution of the model using the parameterization is less than 10 km.
 
 # Operational Impacts in RAP/HRRR

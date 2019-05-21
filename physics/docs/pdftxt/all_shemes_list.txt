@@ -27,7 +27,6 @@ parameterizations in suites.
   - \ref cu_gf_sh_group
 
 - For cloud microphysics parameterizations:
- - \subpage GFS_ZHAOC
  - \subpage GFDL_cloud
  - \subpage fast_sat_adj
  - \subpage CPT_MG3
@@ -105,13 +104,13 @@ with TKE-EDMF in repace of K-EDMF have been developed at EMC (Han et al. 2019 \c
 
 Table 1.  physics-suite options included in this documentation. 
 \tableofcontents
-|   Phys suites    | FV3_GFS_v14       |  FV3_GFS_v15         |  FV3_GFS_v15plus     |   FV3_CPT_v0        |    FV3_GSD_v0        |
-|------------------|-------------------|----------------------|----------------------|---------------------|----------------------|
-| Deep Cu          | \ref GFS_SAMFdeep | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
-| Shallow Cu       | \ref GFS_SAMFshal | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |
-| Microphysics     | \ref GFS_ZHAOC    | \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
-| PBL/TURB         | \ref GFS_HEDMF    | \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
-| Land             | \ref GFS_NOAH     | \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+|   Phys suites    |  FV3_GFS_v15         |  FV3_GFS_v15plus     |   FV3_CPT_v0        |    FV3_GSD_v0        |
+|------------------|----------------------|----------------------|---------------------|----------------------|
+| Deep Cu          | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
+| Shallow Cu       | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |
+| Microphysics     | \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
+| PBL/TURB         | \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
+| Land             | \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
 \tableofcontents
 
 

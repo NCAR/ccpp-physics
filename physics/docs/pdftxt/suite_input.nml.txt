@@ -150,7 +150,7 @@ The namelist variable description is provided in host-model side :GFS_typedefs.F
   skeb_lscale                 | compns_stochy_mod          | decorrelation spatial scales in meter                                              | -999.         |
   iseed_skeb                  | compns_stochy_mod          | seeds for setting the random number sequnce (ignored if \c stochini is true)       |  0            |
   skebnorm                    | compns_stochy_mod          | 0: random pattern is stream function,1: pattern is kenorm, 2: pattern is vorticity |  0            |
-  skeb_varspect_opt           | compns_stochy              | Gaussian or power law variance spectrum for SKEB (0: Gaussian, 1: power law        |  0            |
+  skeb_varspect_opt           | compns_stochy_mod          | Gaussian or power law variance spectrum for SKEB (0: Gaussian, 1: power law        |  0            |
   skeb_npass                  | compns_stochy_mod          | number of passes of smoother for dissipation estimate                              |  11           |
   skeb_vdof                   | compns_stochy_mod          | the number of degrees of freedom in the vertical for the SKEB random pattern       |   5           |
   skeb_sigtop1, skeb_sigtop2  | compns_stochy_mod          | sigma levels to taper perturbations to zeros                                       | 0.1, 0.025    |
