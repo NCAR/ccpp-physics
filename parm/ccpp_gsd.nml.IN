@@ -100,6 +100,7 @@
        warm_start = @[WARM_START]
        no_dycore = .false.
        z_tracer = .T.
+       agrid_vel_rst = .true.
        read_increment = @[READ_INCREMENT]
        res_latlon_dynamics = "fv3_increment.nc"
 /
@@ -136,9 +137,10 @@
        pre_rad        = .false.
        ncld           = 5
        imp_physics    = 8
-       ttendlim       = 0.008
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
+       ttendlim       = -999.
+       ! DH* TODO CHECK IF make_number_concentrations gives b4b identical results through restarts
        make_number_concentrations = .true.
        pdfcld         = .false.
        fhswr          = 3600.
@@ -185,6 +187,10 @@
        do_sfcperts    = @[DO_SFCPERTS]
        lsm            = @[LSM]
        lsoil_lsm      = @[LSOIL_LSM]
+       icloud_bl         = 1
+       bl_mynn_tkeadvect = .true.
+       bl_mynn_edmf      = 1
+       bl_mynn_edmf_mom  = 1
 /
 
 &interpolator_nml
