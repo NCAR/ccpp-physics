@@ -54,38 +54,30 @@ module rrtmgp_sw
        nrghice,            & ! Number of ice roughness categories
        ipsdsw0               ! Initial seed for McICA
 
-  ! Classes used by rte+rrtmgp
-!  type(ty_gas_optics_rrtmgp) :: &
-!       kdist_sw
-!  type(ty_cloud_optics) :: &
-!       kdist_sw_cldy
-  type(ty_gas_concs)  :: &
-       gas_concentrations
-
   public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
 contains
-  ! #########################################################################################
-  ! rrtmgp_sw_init
-  ! #########################################################################################
+
 !! \section arg_table_rrtmgp_sw_init Argument Table
-!! | local_name      | standard_name                                   | long_name                                                                 | units | rank | type                 |    kind   | intent | optional |
-!! |-----------------|-------------------------------------------------|---------------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
-!! | Model           | GFS_control_type_instance                       | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type     |           | in     | F        |
-!! | mpirank         | mpi_rank                                        | current MPI rank                                                          | index |    0 | integer              |           | in     | F        |
-!! | mpiroot         | mpi_root                                        | master MPI rank                                                           | index |    0 | integer              |           | in     | F        |
-!! | mpicomm         | mpi_comm                                        | MPI communicator                                                          | index |    0 | integer              |           | in     | F        |
-!! | errmsg          | ccpp_error_message                              | error message for error handling in CCPP                                  | none  |    0 | character            | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                 | error flag for error handling in CCPP                                     | flag  |    0 | integer              |           | out    | F        |
-!! | kdist_sw        | K_distribution_file_for_RRTMGP_SW_scheme        | DDT containing spectral information for RRTMGP SW radiation scheme        | DDT   |    0 | ty_gas_optics_rrtmgp |           | inout  | F        |
-!! | kdist_sw_cldy   | K_distribution_file_for_cloudy_RRTMGP_SW_scheme | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT   |    0 | ty_cloud_optics      |           | inout  | F        |
+!! | local_name         | standard_name                                   | long_name                                                                 | units | rank | type                 |    kind   | intent | optional |
+!! |--------------------|-------------------------------------------------|---------------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
+!! | Model              | GFS_control_type_instance                       | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type     |           | in     | F        |
+!! | mpirank            | mpi_rank                                        | current MPI rank                                                          | index |    0 | integer              |           | in     | F        |
+!! | mpiroot            | mpi_root                                        | master MPI rank                                                           | index |    0 | integer              |           | in     | F        |
+!! | mpicomm            | mpi_comm                                        | MPI communicator                                                          | index |    0 | integer              |           | in     | F        |
+!! | errmsg             | ccpp_error_message                              | error message for error handling in CCPP                                  | none  |    0 | character            | len=*     | out    | F        |
+!! | errflg             | ccpp_error_flag                                 | error flag for error handling in CCPP                                     | flag  |    0 | integer              |           | out    | F        |
+!! | kdist_sw           | K_distribution_file_for_RRTMGP_SW_scheme        | DDT containing spectral information for RRTMGP SW radiation scheme        | DDT   |    0 | ty_gas_optics_rrtmgp |           | inout  | F        |
+!! | kdist_cldy_sw      | K_distribution_file_for_cloudy_RRTMGP_SW_scheme | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT   |    0 | ty_cloud_optics      |           | inout  | F        |
 !!
   ! #########################################################################################
-  subroutine rrtmgp_sw_init(Model,mpicomm, mpirank, mpiroot, kdist_sw, kdist_sw_cldy,   &
+  subroutine rrtmgp_sw_init(Model,mpicomm, mpirank, mpiroot, kdist_sw, kdist_cldy_sw,   &
         errmsg, errflg)
     use netcdf
+
 #ifdef MPI
     use mpi
 #endif
+
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model      ! DDT containing model control parameters
@@ -93,12 +85,11 @@ contains
          mpicomm, & ! MPI communicator
          mpirank, & ! Current MPI rank
          mpiroot    ! Master MPI rank
-    type(ty_gas_optics_rrtmgp) :: &
-         kdist_sw   ! RRTMGP DDT containing SW spectral information
-    type(ty_cloud_optics) :: &
-         kdist_sw_cldy
-!    type(ty_gas_concs_type),intent(inout) :: &
-!         gas_concentrations
+    type(ty_gas_optics_rrtmgp),intent(inout) :: &
+         kdist_sw
+    type(ty_cloud_optics),intent(inout) :: &
+         kdist_cldy_sw
+
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -107,6 +98,8 @@ contains
 
     ! Fields from the K-distribution files
     ! Variables that will be passed to gas_optics%load()
+    type(ty_gas_concs)  :: &
+         gas_concentrations
     integer, dimension(:), allocatable :: &
          kminor_start_lower_sw,              & ! used by RRTGMP gas optics 
          kminor_start_upper_sw                 ! used by RRTGMP gas optics 
@@ -505,7 +498,7 @@ contains
     ! Initialize gas concentrations and gas optics class with data
     do iGas=1,nGases
        call check_error_msg(gas_concentrations%set_vmr(active_gases(iGas), 0._kind_phys))
-    enddo    
+    enddo
     call check_error_msg(kdist_sw%load(gas_concentrations, gas_names_sw, key_species_sw, band2gpt_sw, &
          band_lims_sw, press_ref_sw, press_ref_trop_sw, temp_ref_sw,  temp_ref_p_sw, temp_ref_t_sw, &
          vmr_ref_sw, kmajor_sw, kminor_lower_sw, kminor_upper_sw, gas_minor_sw,identifier_minor_sw, &
@@ -709,15 +702,15 @@ contains
 
     ! Load tables data for RRTGMP cloud-optics  
     if (rrtmgp_sw_cld_phys .eq. 1) then
-       call check_error_msg(kdist_sw_cldy%set_ice_roughness(nrghice))
-       call check_error_msg(kdist_sw_cldy%load(band_lims_cldy_sw, radliq_lwr_sw,            &
+       call check_error_msg(kdist_cldy_sw%set_ice_roughness(nrghice))
+       call check_error_msg(kdist_cldy_sw%load(band_lims_cldy_sw, radliq_lwr_sw,            &
             radliq_upr_sw, radliq_fac_sw, radice_lwr_sw, radice_upr_sw, radice_fac_sw,      &
             lut_extliq_sw, lut_ssaliq_sw, lut_asyliq_sw, lut_extice_sw, lut_ssaice_sw,      &
             lut_asyice_sw))
     endif
     if (rrtmgp_sw_cld_phys .eq. 2) then
-       call check_error_msg(kdist_sw_cldy%set_ice_roughness(nrghice))
-       call check_error_msg(kdist_sw_cldy%load(band_lims_cldy_sw, pade_extliq_sw,           &
+       call check_error_msg(kdist_cldy_sw%set_ice_roughness(nrghice))
+       call check_error_msg(kdist_cldy_sw%load(band_lims_cldy_sw, pade_extliq_sw,           &
             pade_ssaliq_sw, pade_asyliq_sw, pade_extice_sw, pade_ssaice_sw, pade_asyice_sw, &
             pade_sizereg_extliq_sw, pade_sizereg_ssaliq_sw, pade_sizereg_asyliq_sw,         &
             pade_sizereg_extice_sw, pade_sizereg_ssaice_sw, pade_sizereg_asyice_sw))
@@ -787,13 +780,13 @@ contains
 !! | errmsg          | ccpp_error_message                                                                             | error message for error handling in CCPP                                  | none    |    0 | character                 | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                     | flag    |    0 | integer                   |           | out    | F        |
 !! | kdist_sw        | K_distribution_file_for_RRTMGP_SW_scheme                                                       | DDT containing spectral information for RRTMGP SW radiation scheme        | DDT     |    0 | ty_gas_optics_rrtmgp      |           | in     | F        |
-!! | kdist_sw_cldy   | K_distribution_file_for_cloudy_RRTMGP_SW_scheme                                                | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT     |    0 | ty_cloud_optics           |           | inout  | F        |
+!! | kdist_cldy_sw   | K_distribution_file_for_cloudy_RRTMGP_SW_scheme                                                | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT     |    0 | ty_cloud_optics           |           | in     | F        |
 !!
   subroutine rrtmgp_sw_run(p_lay, p_lev, t_lay, t_lev, q_lay, o3_lay, vmr_co2, vmr_n2o, & ! IN
        vmr_ch4, vmr_o2, vmr_co, vmr_cfc11, vmr_cfc12, vmr_cfc22, vmr_ccl4, icseed, tau_aer, & ! IN
        ssa_aer, asy_aer, sfcalb_nir_dir, sfcalb_nir_dif,  sfcalb_uvis_dir, sfcalb_uvis_dif, & ! IN
        dzlyr, delpin, de_lgth, cossza, solcon, nday, idxday, ncol, nlay, lprint, cldfrac,   & ! IN
-       lsswr, kdist_sw, kdist_sw_cldy,                                  & ! IN
+       lsswr, kdist_sw, kdist_cldy_sw,                                  & ! IN
        hswc, topflx, sfcflx, cldtau,                                                        & ! OUT
        hsw0, hswB, flxprf, fdncmp, cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice, cld_rwp,     & ! OUT(optional)
        cld_ref_rain, cld_swp, cld_ref_snow, cld_od, cld_ssa, cld_asy,                       & ! OUT(optional)
@@ -817,9 +810,9 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          kdist_sw        ! DDT containing LW spectral information
     type(ty_cloud_optics),intent(in) :: &
-         kdist_sw_cldy
-!    type(ty_gas_concs_type),intent(inout) :: &
-!         gas_concentrations
+         kdist_cldy_sw
+    !type(ty_gas_concs),intent(inout) :: &
+    !     gas_concentrations
     real(kind_phys), intent(in) :: &
          solcon             ! Solar constant                          (W/m2)
     real(kind_phys), dimension(ncol), intent(in) :: &
@@ -906,6 +899,8 @@ contains
                             ! visdf - downward uv+vis diffused flux   (W/m2)
 
     ! RTE+RRTMGP classes
+    type(ty_gas_concs) :: &
+         gas_concentrations
     type(ty_optical_props_2str) :: &
          optical_props_clr,     & ! Optical properties for gaseous atmosphere
          optical_props_aer,     & ! Optical properties for aerosols
@@ -1014,11 +1009,11 @@ contains
     ! RRTMGP cloud_optics expects particle size to be in a certain range. bound here
     if (rrtmgp_sw_cld_phys .gt. 0) then
        cld_ref_ice2 = cld_ref_ice
-       where(cld_ref_ice2 .gt. kdist_sw_cldy%get_max_radius_ice()) cld_ref_ice2=kdist_sw_cldy%get_max_radius_ice()
-       where(cld_ref_ice2 .lt. kdist_sw_cldy%get_min_radius_ice()) cld_ref_ice2=kdist_sw_cldy%get_min_radius_ice()
+       where(cld_ref_ice2 .gt. kdist_cldy_sw%get_max_radius_ice()) cld_ref_ice2=kdist_cldy_sw%get_max_radius_ice()
+       where(cld_ref_ice2 .lt. kdist_cldy_sw%get_min_radius_ice()) cld_ref_ice2=kdist_cldy_sw%get_min_radius_ice()
        cld_ref_liq2 = cld_ref_liq
-       where(cld_ref_liq2 .gt. kdist_sw_cldy%get_max_radius_liq()) cld_ref_liq2=kdist_sw_cldy%get_max_radius_liq()
-       where(cld_ref_liq2 .lt. kdist_sw_cldy%get_min_radius_liq()) cld_ref_liq2=kdist_sw_cldy%get_min_radius_liq()
+       where(cld_ref_liq2 .gt. kdist_cldy_sw%get_max_radius_liq()) cld_ref_liq2=kdist_cldy_sw%get_max_radius_liq()
+       where(cld_ref_liq2 .lt. kdist_cldy_sw%get_min_radius_liq()) cld_ref_liq2=kdist_cldy_sw%get_min_radius_liq()
     endif
 
     ! Compute dry air column amount
@@ -1077,17 +1072,17 @@ contains
     if (nDay .gt. 0) then
 
        ! Allocate space for gas optical properties
-       ! Clear-sky 
-       call check_error_msg(optical_props_clr%alloc_2str(  nday, nlay, kdist_sw))
-       call check_error_msg(optical_props_mcica%alloc_2str(nday, nlay, kdist_sw))
        ! Cloud optics [nCol,nLay,nBands]
-       call check_error_msg(optical_props_cldy%init(optical_props_clr%get_band_lims_wavenumber()))
+       call check_error_msg(optical_props_cldy%init(kdist_sw%get_band_lims_wavenumber()))
        call check_error_msg(optical_props_cldy%alloc_2str(ncol,nlay))
        ! Aerosol optics [Ccol,nLay,nBands]
-       call check_error_msg(optical_props_aer%init(optical_props_clr%get_band_lims_wavenumber()))
+       call check_error_msg(optical_props_aer%init(kdist_sw%get_band_lims_wavenumber()))
        call check_error_msg(optical_props_aer%alloc_2str(ncol,nlay))
+       ! Cloud optics sampled [nCol,nLay,nGpts]
+       call check_error_msg(optical_props_mcica%alloc_2str(ncol, nlay, kdist_sw))
 
-       ! Initialize RRTMGP files
+
+       ! Initialize RRTMGP DDT containing 2D(3D) fluxes
        fluxAllSky%flux_up => flux_up_allSky
        fluxAllsky%flux_dn => flux_dn_allSky
        fluxClrSky%flux_up => flux_up_clrSky
@@ -1157,7 +1152,7 @@ contains
           
           ! ii) Use RRTMGP cloud-optics.
           if (rrtmgp_sw_cld_phys .gt. 0) then
-             call check_error_msg(kdist_sw_cldy%cloud_optics(nday, nlay, nBandsSW, nrghice,     &
+             call check_error_msg(kdist_cldy_sw%cloud_optics(nday, nlay, nBandsSW, nrghice,     &
                   liqmask(idxday,1:nLay), icemask(idxday,1:nLay), cld_lwp(idxday,1:nLay),       &
                   cld_iwp(idxday,1:nLay), cld_ref_liq2(idxday,1:nLay),                          &
                   cld_ref_ice2(idxday,1:nLay), optical_props_cldy))        
@@ -1190,6 +1185,9 @@ contains
        ! #######################################################################################
        ! Compute fluxes
        ! #######################################################################################
+       print*,'In rrmtgp_sw(): '
+       print*,'   shape(optical_props_aerosol%tau): ',shape(optical_props_aer%tau)
+       print*,'   shape(optical_props_clds%tau):    ',shape(optical_props_mcica%tau)
        call check_error_msg(rte_sw(  &
             kdist_sw,                &
             gas_concentrations,      &
@@ -1271,7 +1269,7 @@ contains
     character(len=*), intent(in) :: error_msg
     
     if(error_msg /= "") then
-       print*,"ERROR(rrtmgp_sw_main.F90): "
+       print*,"ERROR(rrtmgp_sw.F90): "
        print*,trim(error_msg)
        return
     end if

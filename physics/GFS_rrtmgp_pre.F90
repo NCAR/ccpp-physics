@@ -91,7 +91,8 @@
 !! | kdist_cldy_sw         | K_distribution_file_for_cloudy_RRTMGP_SW_scheme               | DDT containing spectral information for cloudy RRTMGP SW radiation scheme     | DDT      |    0 | ty_cloud_optics       |           | in     | F        |
 !! | optical_props_clouds  | optical_properties_for_cloudy_atmosphere                      | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | optical_props_aerosol | optical_properties_for_aerosols                               | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_1scl |           | out    | F        |
-!! | gas_concentrations    | Gas_concentrations_for_RRTMGP_suite                           | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | inout  | F        |
+!! | gas_concentrations    | Gas_concentrations_for_RRTMGP_suite                           | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
+!! | sfc_emiss_byband      | surface_longwave_emissivity_in_each_band                      | surface lw emissivity in fraction in each LW band                             | frac     |    2 | real                  | kind_phys | out    | F        |
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
@@ -104,7 +105,7 @@
            gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113, faersw1, faersw2,  faersw3,  & ! OUT
            faerlw1, faerlw2, faerlw3, aerodp, clouds1, clouds2, clouds3, clouds4, clouds5,      & ! OUT
            clouds6, clouds7, clouds8, clouds9, cldsa, mtopa, mbota, de_lgth, alb1d,             & ! OUT
-           optical_props_clouds, optical_props_aerosol, gas_concentrations, errmsg, errflg)
+           optical_props_clouds, optical_props_aerosol, gas_concentrations, sfc_emiss_byband, errmsg, errflg)
 
         use physparam
         use machine, only: &
@@ -153,9 +154,9 @@
              progclduni                  ! Unified cloud-scheme
         use surface_perturbation, only: & 
              cdfnor                      ! Routine to compute CDF (used to compute percentiles)
-        use rrtmgp_lw_pre, only: &
-             nrghice, ipsdlw0
-        use rrtmgp_lw, only: check_error_msg
+        use module_radiation_surface,  only: &
+             setemis                     ! Routine to compute surface-emissivity
+        use rrtmgp_lw, only: check_error_msg, nrghice, ipsdlw0
         use mersenne_twister, only: &
              random_setseed, &
              random_number, &
@@ -185,7 +186,7 @@
         type(ty_cloud_optics),intent(in) :: &
              kdist_cldy_lw, &
              kdist_cldy_sw
-        type(ty_gas_concs),intent(inout) :: &
+        type(ty_gas_concs),intent(out) :: &
              gas_concentrations
         integer,intent(in),dimension(IM) :: &
              icseed          ! auxiliary special cloud related array when module 
@@ -220,14 +221,15 @@
         type(ty_optical_props_1scl),intent(out) :: &
              optical_props_clouds, &
              optical_props_aerosol
+        real(kind_phys),dimension(kdist_lw%get_nband(),Model%levr+LTP),intent(out) :: sfc_emiss_byband
 
         ! Local variables
         integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl,i, j, k, k1, k2, lsk, &
-             lv, n, itop, ibtc, LP1, lla, llb, lya, lyb, iCol
+             lv, n, itop, ibtc, LP1, lla, llb, lya, lyb, iCol, iBand
         integer,dimension(IM) :: ipseed
-        logical,dimension(IM,LMK) :: &
+        logical,dimension(IM,Model%levr+LTP) :: &
              liqmask,icemask
-        real(kind_phys),dimension(IM,LMK) :: &
+        real(kind_phys),dimension(IM,Model%levr+LTP) :: &
              cld_ref_ice2,cld_ref_liq2, vmr_o3, vmr_h2o
         real(kind_phys) :: es, qs, delt, tem0d
         real(kind_phys), dimension(size(Grid%xlon,1)) :: cvt1, cvb1, tem1d, tskn
@@ -244,11 +246,11 @@
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_sw%get_nband(),NF_AESW)::faersw
         real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_lw%get_nband(),NF_AELW)::faerlw
         type(ty_optical_props_1scl) :: optical_props_clear, optical_props_cloudsByBand
-        real(kind_phys), dimension(kdist_lw%get_nband(),LMK,IM) :: &
+        real(kind_phys), dimension(kdist_lw%get_ngpt(),Model%levr+LTP,IM) :: &
              rng3D
-        real(kind_phys), dimension(kdist_lw%get_nband()*LMK) :: &
+        real(kind_phys), dimension(kdist_lw%get_ngpt()*(Model%levr+LTP)) :: &
              rng1D
-        logical, dimension(IM,LMK,kdist_lw%get_nband()) :: &
+        logical, dimension(IM,Model%levr+LTP,kdist_lw%get_ngpt()) :: &
              cldfracMCICA
         type(random_stat) :: rng_stat
 
@@ -307,17 +309,9 @@
         if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
            tskn(1:IM) = Sfcprop%tsfc(1:IM)
            tsfg(1:IM) = Sfcprop%tsfc(1:IM)
-!           do i = 1, IM
-!              tskn(i) = Sfcprop%tsfc(i)
-!              tsfg(i) = Sfcprop%tsfc(i)
-!           enddo
         else                              ! use diff sfc skin-air/ground temp
            tskn(1:IM) = Sfcprop%tsfc(1:IM)
            tsfg(1:IM) = Sfcprop%tsfc(1:IM)
-!           do i = 1, IM
-!              tskn(i) = Sfcprop%tsfc(i)
-!              tsfg(i) = Sfcprop%tsfc(i)
-!           enddo
         endif
 
         ! Prepare atmospheric profiles for radiation input.
@@ -755,6 +749,17 @@
         ! mg, sfc-perts
 
         ! #######################################################################################
+        ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
+        ! #######################################################################################
+        if (Model%lslwr) then
+           call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,     &
+                Sfcprop%zorl, tsfg, tsfa, Sfcprop%hprim, IM,  Radtend%semis)
+           do iBand=1,kdist_lw%get_nband()
+              sfc_emiss_byband(iBand,1:IM) = Radtend%semis(1:IM)
+           enddo
+        endif
+
+        ! #######################################################################################
         ! Compute radiative properties needed for RRTMGP
         ! #######################################################################################
 
@@ -786,16 +791,16 @@
         where(cld_ref_liq2 .lt. kdist_cldy_lw%get_min_radius_liq()) cld_ref_liq2=kdist_cldy_lw%get_min_radius_liq()
 
         ! Allocate space for gas optical properties [ncol,nlay,ngpts]
-        call check_error_msg(optical_props_clear%alloc_1scl(  IM, LMK, kdist_lw))
         ! Cloud optics [nCol,nLay,nBands]
-        call check_error_msg(optical_props_cloudsByBand%init(optical_props_clear%get_band_lims_wavenumber()))
+        print*,'In GFS_rrtmgp_pre: '
+        call check_error_msg(optical_props_cloudsByBand%init(kdist_lw%get_band_lims_wavenumber()))
         call check_error_msg(optical_props_cloudsByBand%alloc_1scl(IM, LMK))
         ! Aerosol optics [Ccol,nLay,nBands]
-        call check_error_msg(optical_props_aerosol%init(optical_props_clear%get_band_lims_wavenumber()))
+        call check_error_msg(optical_props_aerosol%init(kdist_lw%get_band_lims_wavenumber()))
         call check_error_msg(optical_props_aerosol%alloc_1scl(IM, LMK))
         ! Cloud optics [nCol,nLay,nGpts]
         call check_error_msg(optical_props_clouds%alloc_1scl(IM, LMK, kdist_lw))
-     
+ 
         ! Set gas concentrations
         call gas_concentrations%reset()
         call check_error_msg(gas_concentrations%set_vmr('o2',  gasvmr_o2))
@@ -834,8 +839,6 @@
            call check_error_msg(draw_samples(cldfracMCICA,optical_props_cloudsByBand,optical_props_clouds))
         endif
        
-
-
       end subroutine GFS_rrtmgp_pre_run
 
 !> \section arg_table_GFS_rrtmgp_pre_finalize Argument Table
