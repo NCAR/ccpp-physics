@@ -30,98 +30,113 @@
 !! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
 !! | Grid           | GFS_grid_type_instance                                 | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT      |    0 | GFS_grid_type         |           | inout  | F        |
 !! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | in     | F        |
+!! | Interstitial   | GFS_interstitial_type_instance                         | Fortran DDT containing FV3-GFS interstitial data                        | DDT      |    0 | GFS_interstitial_type |           | inout  | F        |
 !! | Tbd            | GFS_tbd_type_instance                                  | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
-      subroutine GFS_phys_time_vary_init (Grid, Model, Tbd, errmsg, errflg)
+      subroutine GFS_phys_time_vary_init (Grid, Model, Interstitial, Tbd, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
-                                          GFS_Tbd_type
+                                          GFS_Tbd_type, GFS_interstitial_type
 
          implicit none
 
          ! Interface variables
          type(GFS_grid_type),              intent(inout) :: Grid
          type(GFS_control_type),           intent(in)    :: Model
+         type(GFS_interstitial_type),      intent(inout) :: Interstitial
          type(GFS_tbd_type),               intent(in)    :: Tbd
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, ix, nb
+         integer :: i, j, ix, nb, nt
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-         nb = 1
-         
-         if (.not. is_initialized) then
-           call read_o3data  (Model%ntoz, Model%me, Model%master)
+         if (is_initialized) return
 
-           ! Consistency check that the hardcoded values for levozp and
-           ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
-           ! in GFS_typedefs.F90: allocate (Tbd%ozpl  (IM,levozp,oz_coeff))
-           if (size(Tbd%ozpl, dim=2).ne.levozp) then
-              write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
-                    "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
-                    levozp, " /= ", size(Tbd%ozpl, dim=2)
-              errflg = 1
-           end if
-           if (size(Tbd%ozpl, dim=3).ne.oz_coeff) then
-              write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
-                    "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
-                    oz_coeff, " /= ", size(Tbd%ozpl, dim=3)
-              errflg = 1
-           end if
+         nb = 1
+         nt = 1
+         
+         call read_o3data  (Model%ntoz, Model%me, Model%master)
+
+         ! Consistency check that the hardcoded values for levozp and
+         ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! in GFS_typedefs.F90: allocate (Tbd%ozpl  (IM,levozp,oz_coeff))
+         if (size(Tbd%ozpl, dim=2).ne.levozp) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
+                  "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
+                  levozp, " /= ", size(Tbd%ozpl, dim=2)
+            errflg = 1
+         end if
+         if (size(Tbd%ozpl, dim=3).ne.oz_coeff) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
+                  "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
+                  oz_coeff, " /= ", size(Tbd%ozpl, dim=3)
+            errflg = 1
+         end if
            
-           call read_h2odata (Model%h2o_phys, Model%me, Model%master)
-           
-           ! Consistency check that the hardcoded values for levh2o and
-           ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
-           ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
-           if (size(Tbd%h2opl, dim=2).ne.levh2o) then
-              write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
-                    "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                    levh2o, " /= ", size(Tbd%h2opl, dim=2)
-              errflg = 1
-           end if
-           if (size(Tbd%h2opl, dim=3).ne.h2o_coeff) then
-              write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
-                    "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                    h2o_coeff, " /= ", size(Tbd%h2opl, dim=3)
-              errflg = 1
-           end if 
+         call read_h2odata (Model%h2o_phys, Model%me, Model%master)
+         
+         ! Consistency check that the hardcoded values for levh2o and
+         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
+         if (size(Tbd%h2opl, dim=2).ne.levh2o) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+                  "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
+                  levh2o, " /= ", size(Tbd%h2opl, dim=2)
+            errflg = 1
+         end if
+         if (size(Tbd%h2opl, dim=3).ne.h2o_coeff) then
+            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
+                  "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
+                  h2o_coeff, " /= ", size(Tbd%h2opl, dim=3)
+            errflg = 1
+         end if 
                        
-           if (Model%aero_in) then
-             ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
-             ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
-             if (size(Tbd%aer_nm, dim=3).ne.ntrcaerm) then
-                write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
-                      "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
-                      ntrcaerm, " /= ", size(Tbd%aer_nm, dim=3)
-                errflg = 1
-             else
-                ! Update the value of ntrcaer in aerclm_def with the value defined
-                ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-                ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
-                ntrcaer = size(Tbd%aer_nm, dim=3)
-                ! Read aerosol climatology
-                call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
-             endif
+         if (Model%aero_in) then
+           ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
+           ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
+           if (size(Tbd%aer_nm, dim=3).ne.ntrcaerm) then
+              write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+                    "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
+                    ntrcaerm, " /= ", size(Tbd%aer_nm, dim=3)
+              errflg = 1
            else
               ! Update the value of ntrcaer in aerclm_def with the value defined
               ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-              ! If Model%aero_in is .false., then ntrcaer == 1
+              ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
               ntrcaer = size(Tbd%aer_nm, dim=3)
+              ! Read aerosol climatology
+              call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
            endif
-           if (Model%iccn) then
-              call read_cidata  ( Model%me, Model%master)
-              ! No consistency check needed for in/ccn data, all values are
-              ! hardcoded in module iccn_def.F and GFS_typedefs.F90
-           endif
+         else
+            ! Update the value of ntrcaer in aerclm_def with the value defined
+            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
+            ! If Model%aero_in is .false., then ntrcaer == 1
+            ntrcaer = size(Tbd%aer_nm, dim=3)
          endif
+         
+         if (Model%iccn) then
+            call read_cidata  ( Model%me, Model%master)
+            ! No consistency check needed for in/ccn data, all values are
+            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
+         endif
+         
+         ! Update values of oz_pres in Interstitial data type for all threads
+         if (Model%ntoz > 0) then
+            Interstitial%oz_pres = oz_pres
+         end if
+
+         ! Update values of h2o_pres in Interstitial data type for all threads
+         if (Model%h2o_phys) then
+            Interstitial%h2o_pres = h2o_pres
+         end if
+         
          
          !--- read in and initialize ozone
          if (Model%ntoz > 0) then
