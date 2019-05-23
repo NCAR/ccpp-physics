@@ -3211,19 +3211,20 @@ endif
         do i=its,itf
          aa0(i)=0.
         enddo
-        do 100 k=kts+1,ktf
-        do 100 i=its,itf
-         if(ierr(i).ne.0)go to 100
-         if(k.lt.kbcon(i))go to 100
-         if(k.gt.ktop(i))go to 100
-         dz=z(i,k)-z(i,k-1)
-         da=zu(i,k)*dz*(9.81/(1004.*( &
-                (t_cup(i,k)))))*dby(i,k-1)/ &
-             (1.+gamma_cup(i,k))
-!         if(k.eq.ktop(i).and.da.le.0.)go to 100
-         aa0(i)=aa0(i)+max(0.,da)
-         if(aa0(i).lt.0.)aa0(i)=0.
-100     continue
+        do k=kts+1,ktf
+          do i=its,itf
+           if(ierr(i).ne.0) exit
+           if(k.lt.kbcon(i)) exit
+           if(k.gt.ktop(i)) exit
+           dz=z(i,k)-z(i,k-1)
+           da=zu(i,k)*dz*(9.81/(1004.*( &
+                  (t_cup(i,k)))))*dby(i,k-1)/ &
+               (1.+gamma_cup(i,k))
+  !         if(k.eq.ktop(i).and.da.le.0.)go to 100
+           aa0(i)=aa0(i)+max(0.,da)
+           if(aa0(i).lt.0.)aa0(i)=0.
+          enddo
+        enddo
 
    end subroutine cup_up_aa0
 
@@ -4356,16 +4357,18 @@ endif
         do i=its,itf
          aa0(i)=0.
         enddo
-        do 100 i=its,itf
-        do 100 k=kts,kbcon(i)
-        if(ierr(i).ne.0 )go to 100
-!        if(k.gt.kbcon(i))go to 100
+        do i=its,itf
+          do k=kts,kbcon(i)
+            if(ierr(i).ne.0 ) exit
+!           if(k.gt.kbcon(i)) exit
 
-          dz = (z_cup (i,k+1)-z_cup (i,k))*g
-          da = dz*(tn(i,k)*(1.+0.608*qo(i,k))-t(i,k)*(1.+0.608*q(i,k)))/dtime
+            dz = (z_cup (i,k+1)-z_cup (i,k))*g
+            da = dz*(tn(i,k)*(1.+0.608*qo(i,k))-t(i,k)*(1.+0.608*q(i,k)))/dtime
 
-         aa0(i)=aa0(i)+da
-100     continue
+            aa0(i)=aa0(i)+da
+          enddo
+        enddo
+             
 
  end subroutine cup_up_aa1bl
 !---------------------------------------------------------------------- 
