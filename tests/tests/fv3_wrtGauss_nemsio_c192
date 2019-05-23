@@ -2,7 +2,7 @@
 #
 #  FV3 c192 Gaussian grid nemsio output test
 #
-###############################################################################
+################################################################################
 
 export TEST_DESCR="Compare FV3 c192 Gaussian grid nemsio output results with previous trunk version"
 

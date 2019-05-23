@@ -150,6 +150,7 @@ export FNSOTC="'global_soiltype.statsgo.t126.384.190.rg.grb',"
 export FNSMCC="'global_soilmgldas.t126.384.190.grb',"
 export FNABSC="'global_mxsnoalb.uariz.t126.384.190.rg.grb',"
 
+
 export ENS_NUM=1
 export SYEAR=2016
 export SMONTH=10
@@ -167,6 +168,5 @@ export DO_SFCPERTS=.F.
 export SKEB=-999.
 export SPPT=-999.
 export SHUM=-999.
-
 export IAU_INC_FILES="''"
 }

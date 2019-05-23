@@ -88,19 +88,19 @@
        hord_vt  =  6
        hord_tm  =  6
        hord_dp  = -6
-       hord_tr  = 13
+       hord_tr  =  8
        adjust_dry_mass = .F.
        consv_te   = 1.
+       do_sat_adj = .T.
        consv_am   = .F.
-       do_sat_adj = .false.
        fill       = .T.
        dwind_2d   = .F.
        print_freq = 6
        warm_start = @[WARM_START]
-       no_dycore  = .false.
-       z_tracer   = .T.
        read_increment = @[READ_INCREMENT]
        res_latlon_dynamics = "fv3_increment.nc"
+       no_dycore  = .false.
+       z_tracer   = .T.
 /
 
 #&coupler_nml
@@ -129,7 +129,6 @@
        fhzero         = 6.
        ldiag3d        = .false.
        fhcyc          = 24.
-       nst_anl        = .true.
        use_ufo        = .true.
        pre_rad        = .false.
        crtrh          = 0.93,0.90,0.95
@@ -151,12 +150,13 @@
        shal_cnv       = .true.
        cal_pre        = .false.
        redrag         = .true.
-       dspheat        = .false.
+       dspheat        = .true.
        hybedmf        = @[HYBEDMF]
        satmedmf       = @[SATMEDMF]
+       lheatstrg      = @[LHEATSTRG]
        random_clds    = .true.
        trans_trac     = .true.
-       cnvcld         = .false.
+       cnvcld         = .true.
        imfshalcnv     = 2
        imfdeepcnv     = -1
        cdmbgwd        = 3.5,0.25
@@ -167,7 +167,6 @@
        ras            = .false.
        cscnv          = .true.
        do_shoc        = .false.
-       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
        do_aw          = .true.
        shoc_cld       = .false.
        h2o_phys       = .true.
@@ -175,6 +174,8 @@
        xkzm_h         = 0.5
        xkzm_m         = 0.5
        xkzm_s         = 1.0
+       nstf_name      = @[NSTF_NAME]
+       nst_anl        = .true.
        ccwf           = 1.0,1.0
        dlqf           = 0.25,0.05
        mg_dcs         = 200.0
@@ -190,16 +191,67 @@
        mg_do_ice_gmao = .false.
        mg_do_liq_liu  = .true.
        cs_parm        = 8.0,4.0,1.0e3,3.5e3,20.0,1.0,0.0,1.0,0.6,0.0
+       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
        ctei_rm        = 0.60,0.23
        max_lon        = 8000
        max_lat        = 4000
        rhcmax         = 0.9999999
        effr_in        = .true.
-
-       nstf_name      = @[NSTF_NAME]
+       ltaerosol      = .false.
+       lradar         = .false.
+       cplflx         = .false.
        iau_delthrs    = 6
        iaufhrs        = 30
        iau_inc_files  = @[IAU_INC_FILES]
+/
+
+&gfdl_cloud_microphysics_nml
+  sedi_transport = .true.
+  do_sedi_heat = .false.
+  rad_snow = .true.
+  rad_graupel = .true.
+  rad_rain = .true.
+  const_vi = .F.
+  const_vs = .F.
+  const_vg = .F.
+  const_vr = .F.
+  vi_max = 1.
+  vs_max = 2.
+  vg_max = 12.
+  vr_max = 12.
+  qi_lim = 1.
+  prog_ccn = .false.
+  do_qa = .true.
+  fast_sat_adj = .true.
+  tau_l2v = 225.
+  tau_v2l = 150.
+  tau_g2v = 900.
+  rthresh = 10.e-6  ! This is a key parameter for cloud water
+  dw_land  = 0.16
+  dw_ocean = 0.10
+  ql_gen = 1.0e-3
+  ql_mlt = 1.0e-3
+  qi0_crt = 8.0E-5
+  qs0_crt = 1.0e-3
+  tau_i2s = 1500.
+  c_psaci = 0.05
+  c_pgacs = 0.01
+  rh_inc = 0.30
+  rh_inr = 0.30
+  rh_ins = 0.30
+  ccn_l = 300.
+  ccn_o = 100.
+  c_paut = 0.5
+  c_cracw = 0.8
+  use_ppm = .false.
+  use_ccn = .true.
+  mono_prof = .true.
+  z_slope_liq  = .true.
+  z_slope_ice  = .true.
+  de_ice = .false.
+  fix_negative = .true.
+  icloud_f = 1
+  mp_time = 150.  
 /
 
 &interpolator_nml

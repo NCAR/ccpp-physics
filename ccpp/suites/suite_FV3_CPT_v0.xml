@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_suite2" lib="ccppphys" ver="2">
+<suite name="FV3_CPT_v0" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -60,7 +60,7 @@
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
       <scheme>GFS_PBL_generic_pre</scheme>
-      <scheme>satmedmfvdif</scheme>
+      <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>gwdps_pre</scheme>
       <scheme>gwdps</scheme>
@@ -72,7 +72,9 @@
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
-      <scheme>samfdeepcnv</scheme>
+      <scheme>cs_conv_pre</scheme>
+      <scheme>cs_conv</scheme>
+      <scheme>cs_conv_post</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
       <scheme>gwdc_pre</scheme>
       <scheme>gwdc</scheme>
@@ -84,7 +86,10 @@
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
-      <scheme>gfdl_cloud_microphys</scheme>
+      <scheme>m_micro_pre</scheme>
+      <scheme>m_micro</scheme>
+      <scheme>m_micro_post</scheme>
+      <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
