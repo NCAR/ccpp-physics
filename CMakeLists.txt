@@ -164,8 +164,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # Force consistent results of math calculations for MG microphysics;
     # in Debug/Bitforbit mode; without this flag, the results of the
     # intrinsic gamma function are different for the non-CCPP and CCPP
-    # version (on Theia with Intel 18). Note this is only required with
-    # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
+    # version (on Theia with Intel 18). Note this is only required for
+    # the dynamic CCPP build, not for the static CCPP build.
     if (TRANSITION)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
       # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
