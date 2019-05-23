@@ -6,12 +6,12 @@ module cs_conv_pre
 
 !! \section arg_table_cs_conv_pre_init  Argument Table
 !!
-  subroutine cs_conv_pre_init
+  subroutine cs_conv_pre_init()
   end subroutine cs_conv_pre_init
 
 !! \section arg_table_cs_conv_pre_finalize  Argument Table
 !!
-  subroutine cs_conv_pre_finalize
+  subroutine cs_conv_pre_finalize()
   end subroutine cs_conv_pre_finalize
 
 #if 0
@@ -100,12 +100,12 @@ module cs_conv_post
 
 !! \section arg_table_cs_conv_post_init  Argument Table
 !!
-  subroutine cs_conv_post_init
+  subroutine cs_conv_post_init()
   end subroutine cs_conv_post_init
 
 !! \section arg_table_cs_conv_post_finalize  Argument Table
 !!
-  subroutine cs_conv_post_finalize
+  subroutine cs_conv_post_finalize()
   end subroutine cs_conv_post_finalize
 
 !!
@@ -498,6 +498,10 @@ module cs_conv
    real(r8), parameter :: tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf), tcl=2.0
    logical, save       :: first=.true.
    logical lprnt
+
+   ! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
 !  lprnt = kdt == 1 .and. mype == 38
 !  ipr = 43
