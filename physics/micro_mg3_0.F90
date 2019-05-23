@@ -2979,7 +2979,7 @@ subroutine micro_mg_tend (                                       &
 !               (nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k))*lcldm(i,k)+(nsubi(i,k)-nprci(i,k)- &
 !               nprai(i,k))*icldm(i,k)+nnuccri(i,k)*precip_frac(i,k)
 
-          nitend(i,k) = nitend(i,k) + nnuccd(i,k) +                                   &
+          nitend(i,k) = nitend(i,k) + nnuccd(i,k)                                     &
                +  (nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k)+nmultg(i,k))*lcldm(i,k) &
                + (nsubi(i,k)-nprci(i,k)-nprai(i,k))*icldm(i,k)                        &
                + (nnuccri(i,k)+nmultrg(i,k))*precip_frac(i,k)

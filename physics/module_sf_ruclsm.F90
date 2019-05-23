@@ -5859,7 +5859,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         COSMC(1)=0.
         RHSMC(1)=SOILMOIS(NZS)
 !
-        DO 330 K=1,NZS2
+        DO K=1,NZS2
           KN=NZS-K
           K1=2*KN-3
           X4=2.*DTDZS(K1)*DIFFU(KN-1)
@@ -5872,10 +5872,11 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           print *,'q2,soilmois(kn),DIFFU(KN),x2,HYDRO(KN+1),DTDZS2(KN-1),kn,k' &
                   ,q2,soilmois(kn),DIFFU(KN),x2,HYDRO(KN+1),DTDZS2(KN-1),kn,k
     ENDIF
- 330      RHSMC(K+1)=(SOILMOIS(KN)+Q2*RHSMC(K)                            &
+          RHSMC(K+1)=(SOILMOIS(KN)+Q2*RHSMC(K)                            &
                    +TRANSP(KN)                                            &
                    /(ZSHALF(KN+1)-ZSHALF(KN))                             &
                    *DELT)/DENOM
+        ENDDO
 
 ! --- MOISTURE BALANCE BEGINS HERE
 
