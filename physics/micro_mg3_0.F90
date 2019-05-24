@@ -4,12 +4,11 @@
 
 !>\ingroup mg2mg3
 !>\defgroup mg3_mp Morrison-Gettelman MP version 3.0
-!! Purpose:
-!!   MG microphysics version 3.0 - Update of MG microphysics with
-!!                                prognostic hail OR graupel.
+!> @{
+!! This module contains  MG microphysics version 3.0 - Update of MG microphysics with
+!!  prognostic hail OR graupel.
 !!
 !! \authors Andrew Gettelman, Hugh Morrison
-!!
 !!
 !! \version 3 history: Sep 2016: development begun for hail, graupel
 !!  This version:https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/mg3_tags/mg3_33_cam5_4_153/
@@ -429,7 +428,7 @@ end subroutine micro_mg_init
 
 !>\ingroup mg3_mp
 !! This subroutine calculates calculate
-!! microphysical processes and other utilities
+!! MG3 microphysical processes and other utilities.
 !>\authors Hugh Morrison, Andrew Gettelman, NCAR, Peter Caldwell, LLNL
 !! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !!\section mg3_micro_mg_tend MG3 micro_mg_tend General Algorithm
@@ -4488,3 +4487,4 @@ end subroutine calc_rercld
 !========================================================================
 
 end module micro_mg3_0
+!>@}

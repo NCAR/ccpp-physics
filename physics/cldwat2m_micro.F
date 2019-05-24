@@ -1,21 +1,25 @@
 !>\file cldwat2m_micro.F
-!! This file contains CAM interface for microphysics
+!! This file contains CAM interface for microphysics.
 
 !>\ingroup mg2mg3
 !>\defgroup cldwat2m_micro_mod Morrison-Gettelman MP cldwat2m_micro Module
+!! This module contains CAM interface for MG microphysics.
+!> @{
+!!\author Andrew Gettelman, Hugh Morrison.
+!!
+!! e-mail: morrison@ucar.edu, andrew@ucar.edu
+!!
+!! Contributions from: Xiaohong Liu and Steve Ghan
+!!
+!! December 2005-May 2010
+!!
+!! Description in: Morrison and Gettelman, 2008 \cite Morrison_2008
+!!                 Gettelman et al., 2010 \cite Gettelman_2010
       module cldwat2m_micro
 
 !---------------------------------------------------------------------------------
 ! Purpose:
 !   CAM Interface for microphysics
-!
-! Author: Andrew Gettelman, Hugh Morrison.
-! Contributions from: Xiaohong Liu and Steve Ghan
-! December 2005-May 2010
-! Description in: Morrison and Gettelman, 2008. J. Climate (MG2008)
-!                 Gettelman et al., 2010 J. Geophys. Res. - Atmospheres (G2010)
-! for questions contact Hugh Morrison, Andrew Gettelman
-! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !---------------------------------------------------------------------------------
 
 #ifdef NEMS_GSM
@@ -165,7 +169,7 @@
       real(r8), private:: lammini, lammaxi, lamminr, lammaxr
      &,                   lammins, lammaxs
 
-! parameters for snow/rain fraction for convective clouds
+!> parameters for snow/rain fraction for convective clouds
       real(r8), private, parameter :: tmax_fsnow = tmelt
      &,                               tmin_fsnow = tmelt-5._r8
 
@@ -181,8 +185,7 @@
 
 !===============================================================================
 !>\ingroup cldwat2m_micro_mod
-!! This subroutine initializes constants for the morrison microphysics
-!! called from stratiform.F90.
+!! This subroutine initializes constants for MG microphysics.
 !!\author Andrew Gettelman
       subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_)
 
@@ -5524,3 +5527,4 @@ checked up to here moorthi
 
 
       end module cldwat2m_micro
+!> @}

@@ -2,7 +2,7 @@
 !! This file contains NOAA/GSD's Thompson MP scheme.
 
 
-!>\defgroup aathompson GSD Aerosal-Aware Thompson MP Module
+!>\defgroup aathompson GSD Aerosol-Aware Thompson MP Module
 !!
 !! Last modified 4 Apr 2019: remove legacy debugging code    D. Heinzeller
 !> @{

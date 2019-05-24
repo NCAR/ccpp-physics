@@ -139,6 +139,7 @@ module lsm_ruc
 !  ====================    end of description    =====================  !
 
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
+!! This module contains GSD RUC Land Surface Model
 #if 0
 !> \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |

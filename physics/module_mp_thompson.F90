@@ -2,8 +2,8 @@
 !! This file contains the entity of GSD Thompson MP scheme.
 
 !>\ingroup aathompson
-!>\defgroup thompson_hrrr_mp GSD Thompson MP Module
-!! This subroutine computes the moisture tendencies of water vapor,
+
+!! This module computes the moisture tendencies of water vapor,
 !! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
 !! Prior to WRFv2.2 this code was based on Reisner et al (1998), but
 !! few of those pieces remain.  A complete description is now found in
@@ -44,12 +44,8 @@
 !!
 !! - Last modified: 24 Jan 2018   Aerosol additions to v3.5.1 code 9/2013
 !!                 Cloud fraction additions 11/2014 part of pre-v3.7
-!! - Imported in CCPP by: Dom Heinzeller, NOAA/ESRL/GS, dom.heinzeller@noaa.gov
+!! - Imported in CCPP by: Dom Heinzeller, NOAA/ESRL/GSD, dom.heinzeller@noaa.gov
 !! - Last modified:  6 Aug 2018   Update of initial import to WRFV4.0
-!+---+-----------------------------------------------------------------+
-!wrft:model_layer:physics
-!+---+-----------------------------------------------------------------+
-!
 MODULE module_mp_thompson
 
       USE machine, only : kind_phys
@@ -180,14 +176,14 @@ MODULE module_mp_thompson
       REAL, PRIVATE:: Sc3
 
 !..Homogeneous freezing temperature
-      REAL, PARAMETER, PRIVATE:: HGFR = 235.16
+      REAL, PARAMETER, PRIVATE:: HGFR = 235.16     !< Homogeneous freezing temperature
 
 !..Water vapor and air gas constants at constant pressure
       REAL, PARAMETER, PRIVATE:: Rv = 461.5
       REAL, PARAMETER, PRIVATE:: oRv = 1./Rv
       REAL, PARAMETER, PRIVATE:: R = 287.04
       REAL, PARAMETER, PRIVATE:: Cp = 1004.0
-      REAL, PARAMETER, PRIVATE:: R_uni = 8.314                           ! J (mol K)-1
+      REAL, PARAMETER, PRIVATE:: R_uni = 8.314                           !< J (mol K)-1
 
       DOUBLE PRECISION, PARAMETER, PRIVATE:: k_b = 1.38065E-23           !< Boltzmann constant [J/K]
       DOUBLE PRECISION, PARAMETER, PRIVATE:: M_w = 18.01528E-3           !< molecular mass of water [kg/mol]
@@ -324,7 +320,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ntb_ark), PARAMETER, PRIVATE:: &
       ta_Ka = (/0.2, 0.4, 0.6, 0.8/)
 
-!..Lookup tables for IN concentration (/m**3) from 0.001 to 1000/Liter.
+!> Lookup tables for IN concentration (/m**3) from 0.001 to 1000/Liter.
       REAL, DIMENSION(ntb_IN), PARAMETER, PRIVATE:: &
       Nt_IN = (/1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0, &
                1.e1,2.e1,3.e1,4.e1,5.e1,6.e1,7.e1,8.e1,9.e1, &
@@ -334,7 +330,7 @@ MODULE module_mp_thompson
                1.e5,2.e5,3.e5,4.e5,5.e5,6.e5,7.e5,8.e5,9.e5, &
                1.e6/)
 
-!..For snow moments conversions (from Field et al. 2005)
+!> For snow moments conversions (from Field et al. 2005)
       REAL, DIMENSION(10), PARAMETER, PRIVATE:: &
       sa = (/ 5.065339, -0.062659, -3.032362, 0.029469, -0.000285, &
               0.31255,   0.000204,  0.003199, 0.0,      -0.015952/)
@@ -342,7 +338,7 @@ MODULE module_mp_thompson
       sb = (/ 0.476221, -0.015896,  0.165977, 0.007468, -0.000141, &
               0.060366,  0.000079,  0.000594, 0.0,      -0.003577/)
 
-!..Temperatures (5 C interval 0 to -40) used in lookup tables.
+!> Temperatures (5 C interval 0 to -40) used in lookup tables.
       REAL, DIMENSION(ntb_t), PARAMETER, PRIVATE:: &
       Tc = (/-0.01, -5., -10., -15., -20., -25., -30., -35., -40./)
 
@@ -409,7 +405,11 @@ MODULE module_mp_thompson
 !ctrlL
 
       CONTAINS
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
+!! This subroutine calculates simplified cloud species equations and create
+!! lookup tables in Thomspson scheme.
+!>\section gen_thompson_init GSD thompson_init General Algorithm
+!> @{
       SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
                           ids, ide, jds, jde, kds, kde,     &
                           ims, ime, jms, jme, kms, kme,     &
@@ -449,7 +449,7 @@ MODULE module_mp_thompson
           present(nwfa)   .and. &
           present(nifa)         ) is_aerosol_aware = .true.
 
-!..Allocate space for lookup tables (J. Michalakes 2009Jun08).
+!> - Allocate space for lookup tables (J. Michalakes 2009Jun08).
 
       if (.NOT. ALLOCATED(tcg_racg) ) then
          ALLOCATE(tcg_racg(ntb_g1,ntb_g,ntb_r1,ntb_r))
@@ -499,24 +499,24 @@ MODULE module_mp_thompson
 
       if_micro_init: if (micro_init) then
 
-!..From Martin et al. (1994), assign gamma shape parameter mu for cloud
-!.. drops according to general dispersion characteristics (disp=~0.25
-!.. for Maritime and 0.45 for Continental).
+!> - From Martin et al. (1994), assign gamma shape parameter mu for cloud
+!! drops according to general dispersion characteristics (disp=~0.25
+!! for Maritime and 0.45 for Continental).
 !.. disp=SQRT((mu+2)/(mu+1) - 1) so mu varies from 15 for Maritime
 !.. to 2 for really dirty air.  This not used in 2-moment cloud water
 !.. scheme and nu_c used instead and varies from 2 to 15 (integer-only).
       mu_c = MIN(15., (1000.E6/Nt_c + 2.))
 
-!..Schmidt number to one-third used numerous times.
+!> - Compute Schmidt number to one-third used numerous times.
       Sc3 = Sc**(1./3.)
 
-!..Compute min ice diam from mass, min snow/graupel mass from diam.
+!> - Compute min ice diam from mass, min snow/graupel mass from diam.
       D0i = (xm0i/am_i)**(1./bm_i)
       xm0s = am_s * D0s**bm_s
       xm0g = am_g * D0g**bm_g
 
-!..These constants various exponents and gamma() assoc with cloud,
-!.. rain, snow, and graupel.
+!> - Compute constants various exponents and gamma() assoc with cloud,
+!! rain, snow, and graupel.
       do n = 1, 15
          cce(1,n) = n + 1.
          cce(2,n) = bm_r + n + 1.
@@ -621,44 +621,44 @@ MODULE module_mp_thompson
       ogg3 = 1./cgg(3)
 
 !+---+-----------------------------------------------------------------+
-!..Simplify various rate eqns the best we can now.
+!> - Simplify various rate eqns the best we can now.
 !+---+-----------------------------------------------------------------+
 
-!..Rain collecting cloud water and cloud ice
+!>  - Compute rain collecting cloud water and cloud ice
       t1_qr_qc = PI*.25*av_r * crg(9)
       t1_qr_qi = PI*.25*av_r * crg(9)
       t2_qr_qi = PI*.25*am_r*av_r * crg(8)
 
-!..Graupel collecting cloud water
+!>  - Compute Graupel collecting cloud water
       t1_qg_qc = PI*.25*av_g * cgg(9)
 
-!..Snow collecting cloud water
+!>  - Compute Snow collecting cloud water
       t1_qs_qc = PI*.25*av_s
 
-!..Snow collecting cloud ice
+!>  - Compute Snow collecting cloud ice
       t1_qs_qi = PI*.25*av_s
 
-!..Evaporation of rain; ignore depositional growth of rain.
+!>  - Compute Evaporation of rain; ignore depositional growth of rain.
       t1_qr_ev = 0.78 * crg(10)
       t2_qr_ev = 0.308*Sc3*SQRT(av_r) * crg(11)
 
-!..Sublimation/depositional growth of snow
+!>  - Compute Sublimation/depositional growth of snow
       t1_qs_sd = 0.86
       t2_qs_sd = 0.28*Sc3*SQRT(av_s)
 
-!..Melting of snow
+!>  - Compute Melting of snow
       t1_qs_me = PI*4.*C_sqrd*olfus * 0.86
       t2_qs_me = PI*4.*C_sqrd*olfus * 0.28*Sc3*SQRT(av_s)
 
-!..Sublimation/depositional growth of graupel
+!>  - Compute Sublimation/depositional growth of graupel
       t1_qg_sd = 0.86 * cgg(10)
       t2_qg_sd = 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!..Melting of graupel
+!>  - Compute Melting of graupel
       t1_qg_me = PI*4.*C_cube*olfus * 0.86 * cgg(10)
       t2_qg_me = PI*4.*C_cube*olfus * 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!..Constants for helping find lookup table indexes.
+!>  - Compute Constants for helping find lookup table indexes.
       nic2 = NINT(ALOG10(r_c(1)))
       nii2 = NINT(ALOG10(r_i(1)))
       nii3 = NINT(ALOG10(Nt_i(1)))
@@ -669,7 +669,7 @@ MODULE module_mp_thompson
       nig3 = NINT(ALOG10(N0g_exp(1)))
       niIN2 = NINT(ALOG10(Nt_IN(1)))
 
-!..Create bins of cloud water (from min diameter up to 100 microns).
+!>  - Create bins of cloud water (from min diameter up to 100 microns).
       Dc(1) = D0c*1.0d0
       dtc(1) = D0c*1.0d0
       do n = 2, nbc
@@ -677,7 +677,7 @@ MODULE module_mp_thompson
          dtc(n) = (Dc(n) - Dc(n-1))
       enddo
 
-!..Create bins of cloud ice (from min diameter up to 5x min snow size).
+!>  - Create bins of cloud ice (from min diameter up to 5x min snow size).
       xDx(1) = D0i*1.0d0
       xDx(nbi+1) = 5.0d0*D0s
       do n = 2, nbi
@@ -689,7 +689,7 @@ MODULE module_mp_thompson
          dti(n) = xDx(n+1) - xDx(n)
       enddo
 
-!..Create bins of rain (from min diameter up to 5 mm).
+!>  - Create bins of rain (from min diameter up to 5 mm).
       xDx(1) = D0r*1.0d0
       xDx(nbr+1) = 0.005d0
       do n = 2, nbr
@@ -701,7 +701,7 @@ MODULE module_mp_thompson
          dtr(n) = xDx(n+1) - xDx(n)
       enddo
 
-!..Create bins of snow (from min diameter up to 2 cm).
+!>  - Create bins of snow (from min diameter up to 2 cm).
       xDx(1) = D0s*1.0d0
       xDx(nbs+1) = 0.02d0
       do n = 2, nbs
@@ -713,7 +713,7 @@ MODULE module_mp_thompson
          dts(n) = xDx(n+1) - xDx(n)
       enddo
 
-!..Create bins of graupel (from min diameter up to 5 cm).
+!>  - Create bins of graupel (from min diameter up to 5 cm).
       xDx(1) = D0g*1.0d0
       xDx(nbg+1) = 0.05d0
       do n = 2, nbg
@@ -725,7 +725,7 @@ MODULE module_mp_thompson
          dtg(n) = xDx(n+1) - xDx(n)
       enddo
 
-!..Create bins of cloud droplet number concentration (1 to 3000 per cc).
+!>  - Create bins of cloud droplet number concentration (1 to 3000 per cc).
       xDx(1) = 1.0d0
       xDx(nbc+1) = 3000.0d0
       do n = 2, nbc
@@ -738,7 +738,7 @@ MODULE module_mp_thompson
       nic1 = DLOG(t_Nc(nbc)/t_Nc(1))
 
 !+---+-----------------------------------------------------------------+
-!..Create lookup tables for most costly calculations.
+!> - Create lookup tables for most costly calculations.
 !+---+-----------------------------------------------------------------+
 
       ! Assign mpicomm to module variable
@@ -874,21 +874,22 @@ MODULE module_mp_thompson
       if (mpirank==mpiroot) WRITE (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
           ' using: mu_c=',mu_c,' mu_i=',mu_i,' mu_r=',mu_r,' mu_g=',mu_g
 
-!..Read a static file containing CCN activation of aerosols. The
-!.. data were created from a parcel model by Feingold & Heymsfield with
-!.. further changes by Eidhammer and Kriedenweis.
+!>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
+!! data were created from a parcel model by Feingold & Heymsfield with
+!! further changes by Eidhammer and Kriedenweis.
       ! This computation is cheap compared to the others below, and
       ! doing it always ensures that the correct data is in the SIONlib
       ! file containing the precomputed tables *DH
       WRITE (*,*) '  calling table_ccnAct routine'
       call table_ccnAct
 
-!..Collision efficiency between rain/snow and cloud water.
+!>  - Call table_efrw() and table_Efsw() to creat collision efficiency table 
+!! between rain/snow and cloud water.
       WRITE (*,*)'  creating qc collision eff tables'
       call table_Efrw
       call table_Efsw
 
-!..Drop evaporation.
+!>  - Call table_dropevap() to creat rain drop evaporation table.
       WRITE(*,*) '  creating rain evap table'
       call table_dropEvap
 
@@ -897,7 +898,7 @@ MODULE module_mp_thompson
 
       end if precomputed_tables_1
 
-!..Initialize various constants for computing radar reflectivity.
+!>  - Call radar_init() to initialize various constants for computing radar reflectivity.
       call cpu_time(stime)
       xam_r = am_r
       xbm_r = bm_r
@@ -924,7 +925,7 @@ MODULE module_mp_thompson
 !$OMP sections
 
 !$OMP section
-!..Rain collecting graupel & graupel collecting rain.
+!>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table.
       WRITE (*,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
       call qr_acr_qg
@@ -932,7 +933,7 @@ MODULE module_mp_thompson
       if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
 !$OMP section
-!..Rain collecting snow & snow collecting rain.
+!>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table.
       WRITE (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
@@ -943,14 +944,14 @@ MODULE module_mp_thompson
 
 !$OMP end parallel
 
-!..Cloud water and rain freezing (Bigg, 1953).
+!>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table.
       WRITE (*,*)  '  creating freezing of water drops table'
       call cpu_time(stime)
       call freezeH2O(threads)
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
-!..Conversion of some ice mass into snow category.
+!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category.
       WRITE (*,*) '  creating ice converting to snow table'
       call cpu_time(stime)
       call qi_aut_qs
@@ -988,10 +989,10 @@ MODULE module_mp_thompson
       endif if_micro_init
 
       END SUBROUTINE thompson_init
-!+---+-----------------------------------------------------------------+
-!ctrlL
-!+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!> @}
+
+!>\ingroup aathompson
 !!This is a wrapper routine designed to transfer values from 3D to 1D.
 !!\section gen_mpgtdriver GSD Thompson mp_gt_driver General Algorithm
 !> @{
@@ -1221,6 +1222,7 @@ MODULE module_mp_thompson
             nwfa1 = 11.1E6
          endif
 
+!> - Call mp_thompson()
          call mp_thompson(qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                       nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dz1d,  &
                       pptrain, pptsnow, pptgraul, pptice, &
@@ -1366,6 +1368,7 @@ MODULE module_mp_thompson
             endif
          enddo
 
+!> - Call calc_refl10cm()
          IF ( PRESENT (diagflag) ) THEN
          if (diagflag .and. do_radar_ref == 1) then
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
@@ -1388,6 +1391,7 @@ MODULE module_mp_thompson
              re_qi1d(k) = 4.99E-6
              re_qs1d(k) = 9.99E-6
           enddo
+!> - Call calc_effectrad()
           call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
                       re_qc1d, re_qi1d, re_qs1d, kts, kte)
           do k = kts, kte
@@ -1414,7 +1418,7 @@ MODULE module_mp_thompson
       END SUBROUTINE mp_gt_driver
 !> @}
 
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
       SUBROUTINE thompson_finalize()
 
       IMPLICIT NONE
@@ -1466,12 +1470,15 @@ MODULE module_mp_thompson
 !ctrlL
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!>\ingroup aathompson
 !! This subroutine computes the moisture tendencies of water vapor,
 !! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
 !! Previously this code was based on Reisner et al (1998), but few of
 !! those pieces remain.  A complete description is now found in
 !! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
+!>\section gen_mp_thompson  GSD mp_thompson General Algorithm
+!> @{
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &
                           pptrain, pptsnow, pptgraul, pptice, &
@@ -1599,18 +1606,18 @@ MODULE module_mp_thompson
       iexfrq = 1
 
 !+---+-----------------------------------------------------------------+
-!.. Source/sink terms.  First 2 chars: "pr" represents source/sink of
-!.. mass while "pn" represents source/sink of number.  Next char is one
-!.. of "v" for water vapor, "r" for rain, "i" for cloud ice, "w" for
-!.. cloud water, "s" for snow, and "g" for graupel.  Next chars
-!.. represent processes: "de" for sublimation/deposition, "ev" for
-!.. evaporation, "fz" for freezing, "ml" for melting, "au" for
-!.. autoconversion, "nu" for ice nucleation, "hm" for Hallet/Mossop
-!.. secondary ice production, and "c" for collection followed by the
-!.. character for the species being collected.  ALL of these terms are
-!.. positive (except for deposition/sublimation terms which can switch
-!.. signs based on super/subsaturation) and are treated as negatives
-!.. where necessary in the tendency equations.
+!> - Initialize Source/sink terms.  First 2 chars: "pr" represents source/sink of
+!! mass while "pn" represents source/sink of number.  Next char is one
+!! of "v" for water vapor, "r" for rain, "i" for cloud ice, "w" for
+!! cloud water, "s" for snow, and "g" for graupel.  Next chars
+!! represent processes: "de" for sublimation/deposition, "ev" for
+!! evaporation, "fz" for freezing, "ml" for melting, "au" for
+!! autoconversion, "nu" for ice nucleation, "hm" for Hallet/Mossop
+!! secondary ice production, and "c" for collection followed by the
+!! character for the species being collected.  ALL of these terms are
+!! positive (except for deposition/sublimation terms which can switch
+!! signs based on super/subsaturation) and are treated as negatives
+!! where necessary in the tendency equations.
 !+---+-----------------------------------------------------------------+
 
       do k = kts, kte
@@ -1715,7 +1722,7 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Put column of data into local arrays.
+!> - Put column of data into local arrays.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          temp(k) = t1d(k)
@@ -1834,10 +1841,10 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
 !+---+-----------------------------------------------------------------+
-!..Derive various thermodynamic variables frequently used.
-!.. Saturation vapor pressure (mixing ratio) over liquid/ice comes from
-!.. Flatau et al. 1992; enthalpy (latent heat) of vaporization from
-!.. Bohren & Albrecht 1998; others from Pruppacher & Klett 1978.
+!> - Derive various thermodynamic variables frequently used.
+!! Saturation vapor pressure (mixing ratio) over liquid/ice comes from
+!! Flatau et al. 1992; enthalpy (latent heat) of vaporization from
+!! Bohren & Albrecht 1998; others from Pruppacher & Klett 1978.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          tempc = temp(k) - 273.15
@@ -1870,14 +1877,14 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..If no existing hydrometeor species and no chance to initiate ice or
-!.. condense cloud water, just exit quickly!
+!> - If no existing hydrometeor species and no chance to initiate ice or
+!! condense cloud water, just exit quickly!
 !+---+-----------------------------------------------------------------+
 
       if (no_micro) return
 
 !+---+-----------------------------------------------------------------+
-!..Calculate y-intercept, slope, and useful moments for snow.
+!> - Calculate y-intercept, slope, and useful moments for snow.
 !+---+-----------------------------------------------------------------+
       if (.not. iiwarm) then
       do k = kts, kte
@@ -1885,8 +1892,8 @@ MODULE module_mp_thompson
          tc0 = MIN(-0.1, temp(k)-273.15)
          smob(k) = rs(k)*oams
 
-!..All other moments based on reference, 2nd moment.  If bm_s.ne.2,
-!.. then we must compute actual 2nd moment and use as reference.
+!>  - All other moments based on reference, 2nd moment.  If bm_s.ne.2,
+!! then we must compute actual 2nd moment and use as reference.
          if (bm_s.gt.(2.0-1.e-3) .and. bm_s.lt.(2.0+1.e-3)) then
             smo2(k) = smob(k)
          else
@@ -1904,13 +1911,13 @@ MODULE module_mp_thompson
             smo2(k) = (smob(k)/a_)**(1./b_)
          endif
 
-!..Calculate 0th moment.  Represents snow number concentration.
+!>  - Calculate 0th moment.  Represents snow number concentration.
          loga_ = sa(1) + sa(2)*tc0 + sa(5)*tc0*tc0 + sa(9)*tc0*tc0*tc0
          a_ = 10.0**loga_
          b_ = sb(1) + sb(2)*tc0 + sb(5)*tc0*tc0 + sb(9)*tc0*tc0*tc0
          smo0(k) = a_ * smo2(k)**b_
 
-!..Calculate 1st moment.  Useful for depositional growth and melting.
+!>  - Calculate 1st moment.  Useful for depositional growth and melting.
          loga_ = sa(1) + sa(2)*tc0 + sa(3) &
                + sa(4)*tc0 + sa(5)*tc0*tc0 &
                + sa(6) + sa(7)*tc0*tc0 &
@@ -1923,7 +1930,7 @@ MODULE module_mp_thompson
               + sb(9)*tc0*tc0*tc0 + sb(10)
          smo1(k) = a_ * smo2(k)**b_
 
-!..Calculate bm_s+1 (th) moment.  Useful for diameter calcs.
+!>  - Calculate bm_s+1 (th) moment.  Useful for diameter calcs.
          loga_ = sa(1) + sa(2)*tc0 + sa(3)*cse(1) &
                + sa(4)*tc0*cse(1) + sa(5)*tc0*tc0 &
                + sa(6)*cse(1)*cse(1) + sa(7)*tc0*tc0*cse(1) &
@@ -1936,7 +1943,7 @@ MODULE module_mp_thompson
               + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc(k) = a_ * smo2(k)**b_
 
-!..Calculate bv_s+2 (th) moment.  Useful for riming.
+!>  - Calculate bv_s+2 (th) moment.  Useful for riming.
          loga_ = sa(1) + sa(2)*tc0 + sa(3)*cse(13) &
                + sa(4)*tc0*cse(13) + sa(5)*tc0*tc0 &
                + sa(6)*cse(13)*cse(13) + sa(7)*tc0*tc0*cse(13) &
@@ -1949,7 +1956,7 @@ MODULE module_mp_thompson
               + sb(9)*tc0*tc0*tc0 + sb(10)*cse(13)*cse(13)*cse(13)
          smoe(k) = a_ * smo2(k)**b_
 
-!..Calculate 1+(bv_s+1)/2 (th) moment.  Useful for depositional growth.
+!>  - Calculate 1+(bv_s+1)/2 (th) moment.  Useful for depositional growth.
          loga_ = sa(1) + sa(2)*tc0 + sa(3)*cse(16) &
                + sa(4)*tc0*cse(16) + sa(5)*tc0*tc0 &
                + sa(6)*cse(16)*cse(16) + sa(7)*tc0*tc0*cse(16) &
@@ -1965,7 +1972,7 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Calculate y-intercept, slope values for graupel.
+!> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
       N0_min = gonv_max
       k_0 = kts
@@ -1993,7 +2000,7 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!..Calculate y-intercept, slope values for rain.
+!> - Calculate y-intercept, slope values for rain.
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
@@ -2003,13 +2010,13 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Compute warm-rain process terms (except evap done later).
+!> - Compute warm-rain process terms (except evap done later).
 !+---+-----------------------------------------------------------------+
 
       do k = kts, kte
 
-!..Rain self-collection follows Seifert, 1994 and drop break-up
-!.. follows Verlinde and Cotton, 1993.                                        RAIN2M
+!>  - Rain self-collection follows Seifert, 1994 and drop break-up
+!! follows Verlinde and Cotton, 1993.                                        RAIN2M
          if (L_qr(k) .and. mvd_r(k).gt. D0r) then
 !-GT      Ef_rr = 1.0
 !-GT      if (mvd_r(k) .gt. 1500.0E-6) then
@@ -2026,8 +2033,8 @@ MODULE module_mp_thompson
           mvd_c(k) = (3.0+nu_c+0.672) / lamc
          endif
 
-!..Autoconversion follows Berry & Reinhardt (1974) with characteristic
-!.. diameters correctly computed from gamma distrib of cloud droplets.
+!>  - Autoconversion follows Berry & Reinhardt (1974) with characteristic
+!! diameters correctly computed from gamma distrib of cloud droplets.
          if (rc(k).gt. 0.01e-3) then
           Dc_g = ((ccg(3,nu_c)*ocg2(nu_c))**obmr / lamc) * 1.E6
           Dc_b = (xDc*xDc*xDc*Dc_g*Dc_g*Dc_g - xDc*xDc*xDc*xDc*xDc*xDc) &
@@ -2044,7 +2051,7 @@ MODULE module_mp_thompson
                      / (am_r*mvd_c(k)*mvd_c(k)*mvd_c(k)))                   ! Qc2M
          endif
 
-!..Rain collecting cloud water.  In CE, assume Dc<<Dr and vtc=~0.
+!>  - Rain collecting cloud water.  In CE, assume Dc<<Dr and vtc=~0.
          if (L_qr(k) .and. mvd_r(k).gt. D0r .and. mvd_c(k).gt. D0c) then
           lamr = 1./ilamr(k)
           idx = 1 + INT(nbr*DLOG(mvd_r(k)/Dr(1))/DLOG(Dr(nbr)/Dr(1)))
@@ -2058,7 +2065,7 @@ MODULE module_mp_thompson
           pnc_rcw(k) = MIN(DBLE(nc(k)*odts), pnc_rcw(k))
          endif
 
-!..Rain collecting aerosols, wet scavenging.
+!>  - Rain collecting aerosols, wet scavenging.
          if (L_qr(k) .and. mvd_r(k).gt. D0r) then
           Ef_ra = Eff_aero(mvd_r(k),0.04E-6,visco(k),rho(k),temp(k),'r')
           lamr = 1./ilamr(k)
@@ -2075,13 +2082,13 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Compute all frozen hydrometeor species' process terms.
+!> - Compute all frozen hydrometeor species' process terms.
 !+---+-----------------------------------------------------------------+
       if (.not. iiwarm) then
       do k = kts, kte
          vts_boost(k) = 1.5
 
-!..Temperature lookup table indexes.
+!>  - Temperature lookup table indexes.
          tempc = temp(k) - 273.15
          idx_tc = MAX(1, MIN(NINT(-tempc), 45) )
          idx_t = INT( (tempc-2.5)/5. ) - 1
@@ -2089,7 +2096,7 @@ MODULE module_mp_thompson
          idx_t = MIN(idx_t, ntb_t)
          IT = MAX(1, MIN(NINT(-tempc), 31) )
 
-!..Cloud water lookup table index.
+!>  - Cloud water lookup table index.
          if (rc(k).gt. r_c(1)) then
           nic = NINT(ALOG10(rc(k)))
           do nn = nic-1, nic+1
@@ -2104,11 +2111,11 @@ MODULE module_mp_thompson
           idx_c = 1
          endif
 
-!..Cloud droplet number lookup table index.
+!>  - Cloud droplet number lookup table index.
          idx_n = NINT(1.0 + FLOAT(nbc) * DLOG(nc(k)/t_Nc(1)) / nic1)
          idx_n = MAX(1, MIN(idx_n, nbc))
 
-!..Cloud ice lookup table indexes.
+!>  - Cloud ice lookup table indexes.
          if (ri(k).gt. r_i(1)) then
           nii = NINT(ALOG10(ri(k)))
           do nn = nii-1, nii+1
@@ -2137,7 +2144,7 @@ MODULE module_mp_thompson
           idx_i1 = 1
          endif
 
-!..Rain lookup table indexes.
+!>  - Rain lookup table indexes.
          if (rr(k).gt. r_r(1)) then
           nir = NINT(ALOG10(rr(k)))
           do nn = nir-1, nir+1
@@ -2166,7 +2173,7 @@ MODULE module_mp_thompson
           idx_r1 = ntb_r1
          endif
 
-!..Snow lookup table index.
+!>  - Snow lookup table index.
          if (rs(k).gt. r_s(1)) then
           nis = NINT(ALOG10(rs(k)))
           do nn = nis-1, nis+1
@@ -2181,7 +2188,7 @@ MODULE module_mp_thompson
           idx_s = 1
          endif
 
-!..Graupel lookup table index.
+!>  - Graupel lookup table index.
          if (rg(k).gt. r_g(1)) then
           nig = NINT(ALOG10(rg(k)))
           do nn = nig-1, nig+1
@@ -2210,7 +2217,7 @@ MODULE module_mp_thompson
           idx_g1 = ntb_g1
          endif
 
-!..Deposition/sublimation prefactor (from Srivastava & Coen 1992).
+!>  - Deposition/sublimation prefactor (from Srivastava & Coen 1992).
          otemp = 1./temp(k)
          rvs = rho(k)*qvsi(k)
          rvs_p = rvs*otemp*(lsub*otemp*oRv - 1.)
@@ -2229,7 +2236,7 @@ MODULE module_mp_thompson
                 - 5.*alphsc*alphsc*alphsc*xsat*xsat*xsat ) &
                 / (1.+gamsc)
 
-!..Snow collecting cloud water.  In CE, assume Dc<<Ds and vtc=~0.
+!>  - Snow collecting cloud water.  In CE, assume Dc<<Ds and vtc=~0.
          if (L_qc(k) .and. mvd_c(k).gt. D0c) then
           xDs = 0.0
           if (L_qs(k)) xDs = smoc(k) / smob(k)
@@ -2242,7 +2249,7 @@ MODULE module_mp_thompson
            pnc_scw(k) = MIN(DBLE(nc(k)*odts), pnc_scw(k))
           endif
 
-!..Graupel collecting cloud water.  In CE, assume Dc<<Dg and vtc=~0.
+!>  - Graupel collecting cloud water.  In CE, assume Dc<<Dg and vtc=~0.
           if (rg(k).ge. r_g(1) .and. mvd_c(k).gt. D0c) then
            xDg = (bm_g + mu_g + 1.) * ilamg(k)
            vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
@@ -2264,7 +2271,7 @@ MODULE module_mp_thompson
           endif
          endif
 
-!..Snow and graupel collecting aerosols, wet scavenging.
+!>  - Snow and graupel collecting aerosols, wet scavenging.
          if (rs(k) .gt. r_s(1)) then
           xDs = smoc(k) / smob(k)
           Ef_sa = Eff_aero(xDs,0.04E-6,visco(k),rho(k),temp(k),'s')
@@ -2288,9 +2295,9 @@ MODULE module_mp_thompson
           pnd_gcd(k) = MIN(DBLE(nifa(k)*odts), pnd_gcd(k))
          endif
 
-!..Rain collecting snow.  Cannot assume Wisner (1972) approximation
-!.. or Mizuno (1990) approach so we solve the CE explicitly and store
-!.. results in lookup table.
+!>  - Rain collecting snow.  Cannot assume Wisner (1972) approximation
+!! or Mizuno (1990) approach so we solve the CE explicitly and store
+!! results in lookup table.
          if (rr(k).ge. r_r(1)) then
           if (rs(k).ge. r_s(1)) then
            if (temp(k).lt.T_0) then
@@ -2326,9 +2333,9 @@ MODULE module_mp_thompson
            pnr_rcs(k) = MIN(DBLE(nr(k)*odts), pnr_rcs(k))
           endif
 
-!..Rain collecting graupel.  Cannot assume Wisner (1972) approximation
-!.. or Mizuno (1990) approach so we solve the CE explicitly and store
-!.. results in lookup table.
+!>  - Rain collecting graupel.  Cannot assume Wisner (1972) approximation
+!! or Mizuno (1990) approach so we solve the CE explicitly and store
+!! results in lookup table.
           if (rg(k).ge. r_g(1)) then
            if (temp(k).lt.T_0) then
             prg_rcg(k) = tmr_racg(idx_g1,idx_g,idx_r1,idx_r) &
@@ -2342,14 +2349,14 @@ MODULE module_mp_thompson
             prr_rcg(k) = tcg_racg(idx_g1,idx_g,idx_r1,idx_r)
             prr_rcg(k) = MIN(DBLE(rg(k)*odts), prr_rcg(k))
             prg_rcg(k) = -prr_rcg(k)
-!..Put in explicit drop break-up due to collisions.
+!>  - Put in explicit drop break-up due to collisions.
             pnr_rcg(k) = -5.*tnr_gacr(idx_g1,idx_g,idx_r1,idx_r)         ! RAIN2M
            endif
           endif
          endif
 
 !+---+-----------------------------------------------------------------+
-!..Next IF block handles only those processes below 0C.
+!> - Next IF block handles only those processes below 0C.
 !+---+-----------------------------------------------------------------+
 
          if (temp(k).lt.T_0) then
@@ -2358,17 +2365,17 @@ MODULE module_mp_thompson
           rate_max = (qv(k)-qvsi(k))*rho(k)*odts*0.999
 
 !+---+---------------- BEGIN NEW ICE NUCLEATION -----------------------+
-!..Freezing of supercooled water (rain or cloud) is influenced by dust
-!.. but still using Bigg 1953 with a temperature adjustment of a few
-!.. degrees depending on dust concentration.  A default value by way
-!.. of idx_IN is 1.0 per Liter of air is used when dustyIce flag is
-!.. false.  Next, a combination of deposition/condensation freezing
-!.. using DeMott et al (2010) dust nucleation when water saturated or
-!.. Phillips et al (2008) when below water saturation; else, without
-!.. dustyIce flag, use the previous Cooper (1986) temperature-dependent
-!.. value.  Lastly, allow homogeneous freezing of deliquesced aerosols
-!.. following Koop et al. (2001, Nature).
-!.. Implemented by T. Eidhammer and G. Thompson 2012Dec18
+!> - Begin NEW ICE NUCLEATION: Freezing of supercooled water (rain or cloud) is influenced by dust
+!! but still using Bigg 1953 with a temperature adjustment of a few
+!! degrees depending on dust concentration.  A default value by way
+!! of idx_IN is 1.0 per Liter of air is used when dustyIce flag is
+!! false.  Next, a combination of deposition/condensation freezing
+!! using DeMott et al (2010) dust nucleation when water saturated or
+!! Phillips et al (2008) when below water saturation; else, without
+!! dustyIce flag, use the previous Cooper (1986) temperature-dependent
+!! value.  Lastly, allow homogeneous freezing of deliquesced aerosols
+!! following Koop et al. (2001, Nature).
+!! Implemented by T. Eidhammer and G. Thompson 2012Dec18
 !+---+-----------------------------------------------------------------+
 
           if (dustyIce .AND. is_aerosol_aware) then
@@ -2377,7 +2384,7 @@ MODULE module_mp_thompson
            xni = 1.0 *1000.                                               ! Default is 1.0 per Liter
           endif
 
-!..Ice nuclei lookup table index.
+!>  - Ice nuclei lookup table index.
           if (xni.gt. Nt_IN(1)) then
            niin = NINT(ALOG10(xni))
            do nn = niin-1, niin+1
@@ -2392,7 +2399,7 @@ MODULE module_mp_thompson
            idx_IN = 1
           endif
 
-!..Freezing of water drops into graupel/cloud ice (Bigg 1953).
+!>  - Freezing of water drops into graupel/cloud ice (Bigg 1953).
           if (rr(k).gt. r_r(1)) then
            prg_rfz(k) = tpg_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
            pri_rfz(k) = tpi_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
@@ -2416,8 +2423,8 @@ MODULE module_mp_thompson
            pni_wfz(k) = nc(k)*odts
           endif
 
-!..Deposition nucleation of dust/mineral from DeMott et al (2010)
-!.. we may need to relax the temperature and ssati constraints.
+!>  - Deposition nucleation of dust/mineral from DeMott et al (2010)
+!! we may need to relax the temperature and ssati constraints.
           if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
@@ -2431,7 +2438,7 @@ MODULE module_mp_thompson
            pni_inu(k) = pri_inu(k)/xm0i
           endif
 
-!..Freezing of aqueous aerosols based on Koop et al (2001, Nature)
+!>  - Freezing of aqueous aerosols based on Koop et al (2001, Nature)
           xni = smo0(k)+ni(k) + (pni_rfz(k)+pni_wfz(k)+pni_inu(k))*dtsave
           if (is_aerosol_aware .AND. homogIce .AND. (xni.le.500.E3)     &
      &                .AND.(temp(k).lt.238).AND.(ssati(k).ge.0.4) ) then
@@ -2443,7 +2450,7 @@ MODULE module_mp_thompson
 !+---+------------------ END NEW ICE NUCLEATION -----------------------+
 
 
-!..Deposition/sublimation of cloud ice (Srivastava & Coen 1992).
+!>  - Deposition/sublimation of cloud ice (Srivastava & Coen 1992).
           if (L_qi(k)) then
            lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
            ilami = 1./lami
@@ -2463,8 +2470,8 @@ MODULE module_mp_thompson
             pri_ide(k) = tpi_ide(idx_i,idx_i1)*pri_ide(k)
            endif
 
-!..Some cloud ice needs to move into the snow category.  Use lookup
-!.. table that resulted from explicit bin representation of distrib.
+!>  - Some cloud ice needs to move into the snow category.  Use lookup
+!! table that resulted from explicit bin representation of distrib.
            if ( (idx_i.eq. ntb_i) .or. (xDi.gt. 5.0*D0s) ) then
             prs_iau(k) = ri(k)*.99*odts
             pni_iau(k) = ni(k)*.95*odts
@@ -2479,8 +2486,8 @@ MODULE module_mp_thompson
            endif
           endif
 
-!..Deposition/sublimation of snow/graupel follows Srivastava & Coen
-!.. (1992).
+!>  - Deposition/sublimation of snow/graupel follows Srivastava & Coen
+!! (1992).
           if (L_qs(k)) then
            C_snow = C_sqrd + (tempc+1.5)*(C_cube-C_sqrd)/(-30.+1.5)
            C_snow = MAX(C_sqrd, MIN(C_snow, C_cube))
@@ -2505,7 +2512,7 @@ MODULE module_mp_thompson
            endif
           endif
 
-!..Snow collecting cloud ice.  In CE, assume Di<<Ds and vti=~0.
+!>  - Snow collecting cloud ice.  In CE, assume Di<<Ds and vti=~0.
           if (L_qi(k)) then
            lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
            ilami = 1./lami
@@ -2517,7 +2524,7 @@ MODULE module_mp_thompson
             pni_sci(k) = prs_sci(k) * oxmi
            endif
 
-!..Rain collecting cloud ice.  In CE, assume Di<<Dr and vti=~0.
+!>  - Rain collecting cloud ice.  In CE, assume Di<<Dr and vti=~0.
            if (rr(k).ge. r_r(1) .and. mvd_r(k).gt. 4.*xDi) then
             lamr = 1./ilamr(k)
             pri_rci(k) = rhof(k)*t1_qr_qi*Ef_ri*ri(k)*N0_r(k) &
@@ -2532,7 +2539,7 @@ MODULE module_mp_thompson
            endif
           endif
 
-!..Ice multiplication from rime-splinters (Hallet & Mossop 1974).
+!>  - Ice multiplication from rime-splinters (Hallet & Mossop 1974).
           if (prg_gcw(k).gt. eps .and. tempc.gt.-8.0) then
            tf = 0.
            if (tempc.ge.-5.0 .and. tempc.lt.-3.0) then
@@ -2548,10 +2555,10 @@ MODULE module_mp_thompson
                           * pri_ihm(k)
           endif
 
-!..A portion of rimed snow converts to graupel but some remains snow.
-!.. Interp from 15 to 95% as riming factor increases from 2.0 to 30.0
-!.. 0.028 came from (.95-.15)/(30.-2.).  This remains ad-hoc and should
-!.. be revisited.
+!>  - A portion of rimed snow converts to graupel but some remains snow.
+!! Interp from 15 to 95% as riming factor increases from 2.0 to 30.0
+!! 0.028 came from (.95-.15)/(30.-2.).  This remains ad-hoc and should
+!! be revisited.
           if (prs_scw(k).gt.2.0*prs_sde(k) .and. &
                          prs_sde(k).gt.eps) then
            r_frac = MIN(30.0D0, prs_scw(k)/prs_sde(k))
@@ -2563,8 +2570,8 @@ MODULE module_mp_thompson
 
          else
 
-!..Melt snow and graupel and enhance from collisions with liquid.
-!.. We also need to sublimate snow and graupel if subsaturated.
+!>  - Melt snow and graupel and enhance from collisions with liquid.
+!! We also need to sublimate snow and graupel if subsaturated.
           if (L_qs(k)) then
            prr_sml(k) = (tempc*tcond(k)-lvap0*diffu(k)*delQvs(k))       &
                       * (t1_qs_me*smo1(k) + t2_qs_me*rhof2(k)*vsc2(k)*smof(k))
@@ -2602,10 +2609,10 @@ MODULE module_mp_thompson
            endif
           endif
 
-!.. This change will be required if users run adaptive time step that
-!.. results in delta-t that is generally too long to allow cloud water
-!.. collection by snow/graupel above melting temperature.
-!.. Credit to Bjorn-Egil Nygaard for discovering.
+!>  - This change will be required if users run adaptive time step that
+!! results in delta-t that is generally too long to allow cloud water
+!! collection by snow/graupel above melting temperature.
+!! Credit to Bjorn-Egil Nygaard for discovering.
           if (dt .gt. 120.) then
              prr_rcw(k)=prr_rcw(k)+prs_scw(k)+prg_gcw(k)
              prs_scw(k)=0.
@@ -2618,14 +2625,14 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!..Ensure we do not deplete more hydrometeor species than exists.
+!> - Ensure we do not deplete more hydrometeor species than exists.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
 
-!..If ice supersaturated, ensure sum of depos growth terms does not
-!.. deplete more vapor than possibly exists.  If subsaturated, limit
-!.. sum of sublimation terms such that vapor does not reproduce ice
-!.. supersat again.
+!>  - If ice supersaturated, ensure sum of depos growth terms does not
+!! deplete more vapor than possibly exists.  If subsaturated, limit
+!! sum of sublimation terms such that vapor does not reproduce ice
+!! supersat again.
          sump = pri_inu(k) + pri_ide(k) + prs_ide(k) &
               + prs_sde(k) + prg_gde(k) + pri_iha(k)
          rate_max = (qv(k)-qvsi(k))*rho(k)*odts*0.999
@@ -2641,7 +2648,7 @@ MODULE module_mp_thompson
           pri_iha(k) = pri_iha(k) * ratio
          endif
 
-!..Cloud water conservation.
+!>  - Cloud water conservation.
          sump = -prr_wau(k) - pri_wfz(k) - prr_rcw(k) &
                 - prs_scw(k) - prg_scw(k) - prg_gcw(k)
          rate_max = -rc(k)*odts
@@ -2655,7 +2662,7 @@ MODULE module_mp_thompson
           prg_gcw(k) = prg_gcw(k) * ratio
          endif
 
-!..Cloud ice conservation.
+!>  - Cloud ice conservation.
          sump = pri_ide(k) - prs_iau(k) - prs_sci(k) &
                 - pri_rci(k)
          rate_max = -ri(k)*odts
@@ -2667,7 +2674,7 @@ MODULE module_mp_thompson
           pri_rci(k) = pri_rci(k) * ratio
          endif
 
-!..Rain conservation.
+!>  - Rain conservation.
          sump = -prg_rfz(k) - pri_rfz(k) - prr_rci(k) &
                 + prr_rcs(k) + prr_rcg(k)
          rate_max = -rr(k)*odts
@@ -2680,7 +2687,7 @@ MODULE module_mp_thompson
           prr_rcg(k) = prr_rcg(k) * ratio
          endif
 
-!..Snow conservation.
+!>  - Snow conservation.
          sump = prs_sde(k) - prs_ihm(k) - prr_sml(k) &
                 + prs_rcs(k)
          rate_max = -rs(k)*odts
@@ -2692,7 +2699,7 @@ MODULE module_mp_thompson
           prs_rcs(k) = prs_rcs(k) * ratio
          endif
 
-!..Graupel conservation.
+!>  - Graupel conservation.
          sump = prg_gde(k) - prg_ihm(k) - prr_gml(k) &
               + prg_rcg(k)
          rate_max = -rg(k)*odts
@@ -2704,8 +2711,8 @@ MODULE module_mp_thompson
           prg_rcg(k) = prg_rcg(k) * ratio
          endif
 
-!..Re-enforce proper mass conservation for subsequent elements in case
-!.. any of the above terms were altered.  Thanks P. Blossey. 2009Sep28
+!>  - Re-enforce proper mass conservation for subsequent elements in case
+!! any of the above terms were altered.  Thanks P. Blossey. 2009Sep28
          pri_ihm(k) = prs_ihm(k) + prg_ihm(k)
          ratio = MIN( ABS(prr_rcg(k)), ABS(prg_rcg(k)) )
          prr_rcg(k) = ratio * SIGN(1.0, SNGL(prr_rcg(k)))
@@ -2719,14 +2726,14 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Calculate tendencies of all species but constrain the number of ice
-!.. to reasonable values.
+!> - Calculate tendencies of all species but constrain the number of ice
+!! to reasonable values.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          orho = 1./rho(k)
          lfus2 = lsub - lvap(k)
 
-!..Aerosol number tendency
+!>  - Aerosol number tendency
          if (is_aerosol_aware) then
             nwfaten(k) = nwfaten(k) - (pna_rca(k) + pna_sca(k)          &
                        + pna_gca(k) + pni_iha(k)) * orho
@@ -2739,24 +2746,24 @@ MODULE module_mp_thompson
             endif
          endif
 
-!..Water vapor tendency
+!>  - Water vapor tendency
          qvten(k) = qvten(k) + (-pri_inu(k) - pri_iha(k) - pri_ide(k)   &
                       - prs_ide(k) - prs_sde(k) - prg_gde(k)) &
                       * orho
 
-!..Cloud water tendency
+!>  - Cloud water tendency
          qcten(k) = qcten(k) + (-prr_wau(k) - pri_wfz(k) &
                       - prr_rcw(k) - prs_scw(k) - prg_scw(k) &
                       - prg_gcw(k)) &
                       * orho
 
-!..Cloud water number tendency
+!>  - Cloud water number tendency
          ncten(k) = ncten(k) + (-pnc_wau(k) - pnc_rcw(k) &
                       - pni_wfz(k) - pnc_scw(k) - pnc_gcw(k)) &
                       * orho
 
-!..Cloud water mass/number balance; keep mass-wt mean size between
-!.. 1 and 50 microns.  Also no more than Nt_c_max drops total.
+!>  - Cloud water mass/number balance; keep mass-wt mean size between
+!! 1 and 50 microns.  Also no more than Nt_c_max drops total.
          xrc=MAX(R1, (qc1d(k) + qcten(k)*dtsave)*rho(k))
          xnc=MAX(2., (nc1d(k) + ncten(k)*dtsave)*rho(k))
          if (xrc .gt. R1) then
@@ -2779,20 +2786,20 @@ MODULE module_mp_thompson
          if (xnc.gt.Nt_c_max) &
                 ncten(k) = (Nt_c_max-nc1d(k)*rho(k))*odts*orho
 
-!..Cloud ice mixing ratio tendency
+!>  - Cloud ice mixing ratio tendency
          qiten(k) = qiten(k) + (pri_inu(k) + pri_iha(k) + pri_ihm(k)    &
                       + pri_wfz(k) + pri_rfz(k) + pri_ide(k) &
                       - prs_iau(k) - prs_sci(k) - pri_rci(k)) &
                       * orho
 
-!..Cloud ice number tendency.
+!>  - Cloud ice number tendency.
          niten(k) = niten(k) + (pni_inu(k) + pni_iha(k) + pni_ihm(k)    &
                       + pni_wfz(k) + pni_rfz(k) + pni_ide(k) &
                       - pni_iau(k) - pni_sci(k) - pni_rci(k)) &
                       * orho
 
-!..Cloud ice mass/number balance; keep mass-wt mean size between
-!.. 5 and 300 microns.  Also no more than 500 xtals per liter.
+!>  - Cloud ice mass/number balance; keep mass-wt mean size between
+!! 5 and 300 microns.  Also no more than 500 xtals per liter.
          xri=MAX(R1,(qi1d(k) + qiten(k)*dtsave)*rho(k))
          xni=MAX(R2,(ni1d(k) + niten(k)*dtsave)*rho(k))
          if (xri.gt. R1) then
@@ -2815,21 +2822,21 @@ MODULE module_mp_thompson
          if (xni.gt.499.E3) &
                 niten(k) = (499.E3-ni1d(k)*rho(k))*odts*orho
 
-!..Rain tendency
+!>  - Rain tendency
          qrten(k) = qrten(k) + (prr_wau(k) + prr_rcw(k) &
                       + prr_sml(k) + prr_gml(k) + prr_rcs(k) &
                       + prr_rcg(k) - prg_rfz(k) &
                       - pri_rfz(k) - prr_rci(k)) &
                       * orho
 
-!..Rain number tendency
+!>  - Rain number tendency
          nrten(k) = nrten(k) + (pnr_wau(k) + pnr_sml(k) + pnr_gml(k)    &
                       - (pnr_rfz(k) + pnr_rcr(k) + pnr_rcg(k)           &
                       + pnr_rcs(k) + pnr_rci(k)) )                      &
                       * orho
 
-!..Rain mass/number balance; keep median volume diameter between
-!.. 37 microns (D0r*0.75) and 2.5 mm.
+!>  - Rain mass/number balance; keep median volume diameter between
+!! 37 microns (D0r*0.75) and 2.5 mm.
          xrr=MAX(R1,(qr1d(k) + qrten(k)*dtsave)*rho(k))
          xnr=MAX(R2,(nr1d(k) + nrten(k)*dtsave)*rho(k))
          if (xrr.gt. R1) then
@@ -2851,20 +2858,20 @@ MODULE module_mp_thompson
            nrten(k) = -nr1d(k)*odts
          endif
 
-!..Snow tendency
+!>  - Snow tendency
          qsten(k) = qsten(k) + (prs_iau(k) + prs_sde(k) &
                       + prs_sci(k) + prs_scw(k) + prs_rcs(k) &
                       + prs_ide(k) - prs_ihm(k) - prr_sml(k)) &
                       * orho
 
-!..Graupel tendency
+!>  - Graupel tendency
          qgten(k) = qgten(k) + (prg_scw(k) + prg_rfz(k) &
                       + prg_gde(k) + prg_rcg(k) + prg_gcw(k) &
                       + prg_rci(k) + prg_rcs(k) - prg_ihm(k) &
                       - prr_gml(k)) &
                       * orho
 
-!..Temperature tendency
+!>  - Temperature tendency
          if (temp(k).lt.T_0) then
           tten(k) = tten(k) &
                     + ( lsub*ocp(k)*(pri_inu(k) + pri_ide(k) &
@@ -2887,7 +2894,7 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Update variables for TAU+1 before condensation & sedimention.
+!> - Update variables for TAU+1 before condensation & sedimention.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          temp(k) = t1d(k) + DT*tten(k)
@@ -2974,8 +2981,8 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..With tendency-updated mixing ratios, recalculate snow moments and
-!.. intercepts/slopes of graupel and rain.
+!> - With tendency-updated mixing ratios, recalculate snow moments and
+!! intercepts/slopes of graupel and rain.
 !+---+-----------------------------------------------------------------+
       if (.not. iiwarm) then
       do k = kts, kte
@@ -2989,8 +2996,8 @@ MODULE module_mp_thompson
          tc0 = MIN(-0.1, temp(k)-273.15)
          smob(k) = rs(k)*oams
 
-!..All other moments based on reference, 2nd moment.  If bm_s.ne.2,
-!.. then we must compute actual 2nd moment and use as reference.
+!>  - All other moments based on reference, 2nd moment.  If bm_s.ne.2,
+!! then we must compute actual 2nd moment and use as reference.
          if (bm_s.gt.(2.0-1.e-3) .and. bm_s.lt.(2.0+1.e-3)) then
             smo2(k) = smob(k)
          else
@@ -3008,7 +3015,7 @@ MODULE module_mp_thompson
             smo2(k) = (smob(k)/a_)**(1./b_)
          endif
 
-!..Calculate bm_s+1 (th) moment.  Useful for diameter calcs.
+!>  - Calculate bm_s+1 (th) moment.  Useful for diameter calcs.
          loga_ = sa(1) + sa(2)*tc0 + sa(3)*cse(1) &
                + sa(4)*tc0*cse(1) + sa(5)*tc0*tc0 &
                + sa(6)*cse(1)*cse(1) + sa(7)*tc0*tc0*cse(1) &
@@ -3021,7 +3028,7 @@ MODULE module_mp_thompson
               + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc(k) = a_ * smo2(k)**b_
 
-!..Calculate bm_s+bv_s (th) moment.  Useful for sedimentation.
+!>  - Calculate bm_s+bv_s (th) moment.  Useful for sedimentation.
          loga_ = sa(1) + sa(2)*tc0 + sa(3)*cse(14) &
                + sa(4)*tc0*cse(14) + sa(5)*tc0*tc0 &
                + sa(6)*cse(14)*cse(14) + sa(7)*tc0*tc0*cse(14) &
@@ -3036,7 +3043,7 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Calculate y-intercept, slope values for graupel.
+!> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
       N0_min = gonv_max
       k_0 = kts
@@ -3064,7 +3071,7 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!..Calculate y-intercept, slope values for rain.
+!> - Calculate y-intercept, slope values for rain.
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
@@ -3074,12 +3081,12 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!..Cloud water condensation and evaporation.  Nucleate cloud droplets
-!.. using explicit CCN aerosols with hygroscopicity like sulfates using
-!.. parcel model lookup table results provided by T. Eidhammer.  Evap
-!.. drops using calculation of max drop size capable of evaporating in
-!.. single timestep and explicit number of drops smaller than Dc_star
-!.. from lookup table.
+!>  - Cloud water condensation and evaporation.  Nucleate cloud droplets
+!! using explicit CCN aerosols with hygroscopicity like sulfates using
+!! parcel model lookup table results provided by T. Eidhammer.  Evap
+!! drops using calculation of max drop size capable of evaporating in
+!! single timestep and explicit number of drops smaller than Dc_star
+!! from lookup table.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          orho = 1./rho(k)
@@ -3132,7 +3139,7 @@ MODULE module_mp_thompson
             idx_n = NINT(1.0 + FLOAT(nbc) * DLOG(nc(k)/t_Nc(1)) / nic1)
             idx_n = MAX(1, MIN(idx_n, nbc))
 
-!..Cloud water lookup table index.
+!>  - Cloud water lookup table index.
             if (rc(k).gt. r_c(1)) then
              nic = NINT(ALOG10(rc(k)))
              do nn = nic-1, nic+1
@@ -3179,8 +3186,8 @@ MODULE module_mp_thompson
       enddo
 
 !+---+-----------------------------------------------------------------+
-!.. If still subsaturated, allow rain to evaporate, following
-!.. Srivastava & Coen (1992).
+!> - If still subsaturated, allow rain to evaporate, following
+!! Srivastava & Coen (1992).
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          if ( (ssatw(k).lt. -eps) .and. L_qr(k) &
@@ -3218,7 +3225,7 @@ MODULE module_mp_thompson
                  / (1.+gamsc)
 
           lamr = 1./ilamr(k)
-!..Rapidly eliminate near zero values when low humidity (<95%)
+!>  - Rapidly eliminate near zero values when low humidity (<95%)
           if (qv(k)/qvs(k) .lt. 0.95 .AND. rr(k)*orho.le.1.E-8) then
           prv_rev(k) = rr(k)*orho*odts
           else
@@ -3229,9 +3236,9 @@ MODULE module_mp_thompson
           prv_rev(k) = MIN(DBLE(rate_max), prv_rev(k)*orho)
 
 !..TEST: G. Thompson  10 May 2013
-!..Reduce the rain evaporation in same places as melting graupel occurs.
-!..Rationale: falling and simultaneous melting graupel in subsaturated
-!..regions will not melt as fast because particle temperature stays
+!>  - Reduce the rain evaporation in same places as melting graupel occurs.
+!Rationale: falling and simultaneous melting graupel in subsaturated
+!regions will not melt as fast because particle temperature stays
 !..at 0C.  Also not much shedding of the water from the graupel so
 !..likely that the water-coated graupel evaporating much slower than
 !..if the water was immediately shed off.
@@ -3269,12 +3276,12 @@ MODULE module_mp_thompson
 #endif
 
 !+---+-----------------------------------------------------------------+
-!..Find max terminal fallspeed (distribution mass-weighted mean
-!.. velocity) and use it to determine if we need to split the timestep
-!.. (var nstep>1).  Either way, only bother to do sedimentation below
-!.. 1st level that contains any sedimenting particles (k=ksed1 on down).
-!.. New in v3.0+ is computing separate for rain, ice, snow, and
-!.. graupel species thus making code faster with credit to J. Schmidt.
+!> - Find max terminal fallspeed (distribution mass-weighted mean
+!! velocity) and use it to determine if we need to split the timestep
+!! (var nstep>1).  Either way, only bother to do sedimentation below
+!! 1st level that contains any sedimenting particles (k=ksed1 on down).
+!! New in v3.0+ is computing separate for rain, ice, snow, and
+!! graupel species thus making code faster with credit to J. Schmidt.
 !+---+-----------------------------------------------------------------+
       nstep = 0
       onstep(:) = 1.0
@@ -3451,9 +3458,9 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!..Sedimentation of mixing ratio is the integral of v(D)*m(D)*N(D)*dD,
-!.. whereas neglect m(D) term for number concentration.  Therefore,
-!.. cloud ice has proper differential sedimentation.
+!>  - Sedimentation of mixing ratio is the integral of v(D)*m(D)*N(D)*dD,
+!! whereas neglect m(D) term for number concentration.  Therefore,
+!! cloud ice has proper differential sedimentation.
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -3594,8 +3601,8 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!.. Instantly melt any cloud ice into cloud water if above 0C and
-!.. instantly freeze any cloud water found below HGFR.
+!> - Instantly melt any cloud ice into cloud water if above 0C and
+!! instantly freeze any cloud water found below HGFR.
 !+---+-----------------------------------------------------------------+
       if (.not. iiwarm) then
       do k = kts, kte
@@ -3622,7 +3629,7 @@ MODULE module_mp_thompson
       endif
 
 !+---+-----------------------------------------------------------------+
-!.. All tendencies computed, apply and pass back final values to parent.
+!> - All tendencies computed, apply and pass back final values to parent.
 !+---+-----------------------------------------------------------------+
       do k = kts, kte
          t1d(k)  = t1d(k) + tten(k)*DT
@@ -3690,12 +3697,13 @@ MODULE module_mp_thompson
       enddo
 
       end subroutine mp_thompson
+! >@}
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
 !..Creation of the lookup tables and support functions found below here.
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Rain collecting graupel (and inverse).  Explicit CE integration.
       subroutine qr_acr_qg
 
@@ -3868,7 +3876,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !!Rain collecting snow (and inverse).  Explicit CE integration.
       subroutine qr_acr_qs
 
@@ -4125,7 +4133,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! This is a literal adaptation of Bigg (1954) probability of drops of
 !! a particular volume freezing.  Given this probability, simply freeze
 !! the proportion of drops summing their masses.
@@ -4299,7 +4307,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Cloud ice converting to snow since portion greater than min snow
 !! size.  Given cloud ice content (kg/m**3), number concentration
 !! (#/m**3) and gamma shape parameter, mu_i, break the distrib into
@@ -4354,7 +4362,7 @@ MODULE module_mp_thompson
       end subroutine qi_aut_qs
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Variable collision efficiency for rain collecting cloud water using
 !! method of Beard and Grover, 1974 if a/A less than 0.25; otherwise
 !! uses polynomials to get close match of Pruppacher & Klett Fig 14-9.
@@ -4417,7 +4425,7 @@ MODULE module_mp_thompson
       end subroutine table_Efrw
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Variable collision efficiency for snow collecting cloud water using
 !! method of Wang and Ji, 2000 except equate melted snow diameter to
 !! their "effective collision cross-section."
@@ -4460,7 +4468,7 @@ MODULE module_mp_thompson
       end subroutine table_Efsw
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Function to compute collision efficiency of collector species (rain,
 !! snow, graupel) of aerosols.  Follows Wang et al, 2010, ACP, which
 !! follows Slinn (1983).
@@ -4504,7 +4512,7 @@ MODULE module_mp_thompson
 
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Integrate rain size distribution from zero to D-star to compute the
 !! number of drops smaller than D-star that evaporate in a single
 !! timestep.  Drops larger than D-star dont evaporate entirely so do
@@ -4601,7 +4609,7 @@ MODULE module_mp_thompson
 !
 !ctrlL
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Fill the table of CCN activation data created from parcel model run
 !! by Trude Eidhammer with inputs of aerosol number concentration,
 !! vertical velocity, temperature, lognormal mean aerosol radius, and
@@ -4659,9 +4667,8 @@ MODULE module_mp_thompson
       RETURN
 
       end subroutine table_ccnAct
-!^L
-!+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!>\ingroup aathompson
 !! Retrieve fraction of CCN that gets activated given the model temp,
 !! vertical velocity, and available CCN concentration.  The lookup
 !! table (read from external file) has CCN concentration varying the
@@ -4749,7 +4756,7 @@ MODULE module_mp_thompson
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
       SUBROUTINE GCF(GAMMCF,A,X,GLN)
 !> RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
 !! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
@@ -4785,8 +4792,8 @@ MODULE module_mp_thompson
  1    GAMMCF=EXP(-X+A*LOG(X)-GLN)*H
       END SUBROUTINE GCF
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
-!+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!>\ingroup aathompson
       SUBROUTINE GSER(GAMSER,A,X,GLN)
 !     --- RETURNS THE INCOMPLETE GAMMA FUNCTION P(A,X) EVALUATED BY ITS
 !     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A))
@@ -4818,8 +4825,8 @@ MODULE module_mp_thompson
  1    GAMSER=SUM*EXP(-X+A*LOG(X)-GLN)
       END SUBROUTINE GSER
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
-!+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!>\ingroup aathompson
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -4844,8 +4851,8 @@ MODULE module_mp_thompson
       GAMMLN=TMP+LOG(STP*SER/X)
       END FUNCTION GAMMLN
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
-!+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+
+!>\ingroup aathompson
       REAL FUNCTION GAMMP(A,X)
 !     --- COMPUTES THE INCOMPLETE GAMMA FUNCTION P(A,X)
 !     --- SEE ABRAMOWITZ AND STEGUN 6.5.1
@@ -4867,7 +4874,7 @@ MODULE module_mp_thompson
       END FUNCTION GAMMP
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
       REAL FUNCTION WGAMMA(y)
 
       IMPLICIT NONE
@@ -4877,7 +4884,7 @@ MODULE module_mp_thompson
 
       END FUNCTION WGAMMA
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
 !! A FUNCTION OF TEMPERATURE AND PRESSURE
       REAL FUNCTION RSLF(P,T)
@@ -4912,7 +4919,7 @@ MODULE module_mp_thompson
 
       END FUNCTION RSLF
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! THIS FUNCTION CALCULATES THE ICE SATURATION VAPOR MIXING RATIO AS A
 !! FUNCTION OF TEMPERATURE AND PRESSURE
       REAL FUNCTION RSIF(P,T)
@@ -4944,7 +4951,7 @@ MODULE module_mp_thompson
       END FUNCTION RSIF
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
       real function iceDeMott(tempc, qv, qvs, qvsi, rho, nifa)
       implicit none
 
@@ -5015,7 +5022,7 @@ MODULE module_mp_thompson
       end FUNCTION iceDeMott
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Newer research since Koop et al (2001) suggests that the freezing
 !! rate should be lower than original paper, so J_rate is reduced
 !! by two orders of magnitude.
@@ -5047,7 +5054,7 @@ MODULE module_mp_thompson
       end FUNCTION iceKoop
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Helper routine for Phillips et al (2008) ice nucleation.  Trude
       REAL FUNCTION delta_p (yy, y1, y2, aa, bb)
       IMPLICIT NONE
@@ -5084,7 +5091,7 @@ MODULE module_mp_thompson
 !ctrlL
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Compute _radiation_ effective radii of cloud water, ice, and snow.
 !! These are entirely consistent with microphysics assumptions, not
 !! constant or otherwise ad hoc as is internal to most radiation
@@ -5198,7 +5205,7 @@ MODULE module_mp_thompson
       end subroutine calc_effectRad
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
 !! Compute radar reflectivity assuming 10 cm wavelength radar and using
 !! Rayleigh approximation.  Only complication is melted snow/graupel
 !! which we treat as water-coated ice spheres and use Uli Blahak's
@@ -5531,7 +5538,7 @@ MODULE module_mp_thompson
 !
 
 #ifdef SION
-!>\ingroup thompson_hrrr_mp
+!>\ingroup aathompson
       subroutine readwrite_tables(mode, mpicomm, mpirank, mpiroot, ierr)
 
 #ifdef MPI

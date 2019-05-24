@@ -7,18 +7,20 @@ In the CCPP-Physics v3.0 package, each parameterization is placed in its own mod
 code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
 parameterizations in suites. 
 
+- Radiation:
+ - \subpage GFS_RRTMG
 
-- For PBL and turbulence parameterizations
+- PBL and turbulence:
  - \subpage GFS_HEDMF
  - \subpage GFS_SATMEDMF
  - \subpage GSD_MYNNEDMF
 
-- For land surface model
+- Land surface model:
  - \subpage GFS_NOAH
-  - \subpage surf_pert
+ - \subpage surf_pert
  - \subpage GSD_RUCLSM
 
-- For cumulus parameterizations:
+- Cumulus parameterizations:
  - \subpage GFS_SAMFdeep
  - \subpage GFS_SAMFshal
  - \subpage CSAW_scheme
@@ -26,26 +28,37 @@ parameterizations in suites.
   - \ref cu_gf_deep_group
   - \ref cu_gf_sh_group
 
-- For cloud microphysics parameterizations:
+- Cloud Microphysics:
  - \subpage GFDL_cloud
  - \subpage fast_sat_adj
  - \subpage CPT_MG3
  - \subpage GSD_THOMPSON
 
-- shared parameterizations:
- - \subpage GFS_RRTMG
- - \subpage GFS_SFCLYR
- - \subpage GFS_NSST
- - \subpage GFS_SFCSICE
- - \subpage GFS_GWDPS
- - \subpage GFS_RAYLEIGH
+- Stochastic:
+ - \subpage STOCHY_PHYS
+ - \subpage surf_pert
+
+- Ozone:
  - \subpage GFS_OZPHYS
   - \ref GFS_ozphys
   - \ref GFS_ozphys_2015
+
+- \f$H_2O\f$:
  - \subpage GFS_H2OPHYS
+
+- Gravity Wave Drag:
+ - \subpage GFS_GWDPS 
  - \subpage GFS_GWDC
+
+
+- Surface layer/Sea Ice/NSST:
+ - \subpage GFS_SFCLYR
+ - \subpage GFS_NSST
+ - \subpage GFS_SFCSICE
+
+- Others:
+ - \subpage GFS_RAYLEIGH
  - \subpage GFS_CALPRECIPTYPE
- - \subpage STOCHY_PHYS
 
 In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
  - \ref func_phys

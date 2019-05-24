@@ -6,6 +6,7 @@
 !
 !>\ingroup mg2mg3
 !>\defgroup wv_saturation_mod Morrison-Gettelman MP wv_saturation Module
+!! This module contain some utility functions for saturation vapor pressure.
       module wv_saturation
 #ifdef GEOS5
        use MAPL_ConstantsMod, r8 => MAPL_R8
@@ -96,24 +97,15 @@
 !>\ingroup wv_saturation_mod
 !! This subroutine builds saturation vapor pressure table for later
 !! procedure.
+!!
+!! Method:
+!! uses Goff and Gratch (1946) relationships to generate the table
+!! according to a set of free paramters defined below. Auxiliary 
+!! routines are also included for making rapid estimates (well with 1%)
+!! of both es and d(es)/dt for the particular table configuration.
+!>\author J. Hack
       subroutine gestbl(tmn ,tmx ,trice ,ip ,epsil , latvap ,latice ,   &
      &                  rh2o ,cpair ,tmeltx )
-!-----------------------------------------------------------------------
-!
-! Purpose:
-! Builds saturation vapor pressure table for later lookup procedure.
-!
-! Method:
-! Uses Goff & Gratch (1946) relationships to generate the table
-! according to a set of free parameters defined below.  Auxiliary
-! routines are also included for making rapid estimates (well with 1%)
-! of both es and d(es)/dt for the particular table configuration.
-!
-! Author: J. Hack
-!
-!-----------------------------------------------------------------------
-
-
 !------------------------------Arguments--------------------------------
 !
 ! Input arguments
@@ -232,22 +224,8 @@
 !! saturation vapor pressure from precomputed table, calculate and
 !! return saturation specific humidity (\f$g g^{-1}\f$), for input 
 !! arrays of temperature and pressure (dimensioned ii,kk).
+!> \author J. Hack
       subroutine aqsat(t ,p ,es ,qs ,ii , ilen ,kk ,kstart ,kend )
-!-----------------------------------------------------------------------
-!
-! Purpose:
-! Utility procedure to look up and return saturation vapor pressure from
-! precomputed table, calculate and return saturation specific humidity
-! (g/g),for input arrays of temperature and pressure (dimensioned ii,kk)
-! This routine is useful for evaluating only a selected region in the
-! vertical.
-!
-! Method:
-! <Describe the algorithm(s) used in the routine.>
-! <Also include any applicable external references.>
-!
-! Author: J. Hack
-!
 !------------------------------Arguments--------------------------------
 !
 ! Input arguments
@@ -297,23 +275,13 @@
 
 !++xl
 !>\ingroup wv_saturation_mod
-!!
+!! This subroutine includes the utility procedure to look up and return
+!! saturation vapor pressure from precomputed table, calculate and return
+!! saturation specific humidity (g/g), for input arrays of temperature and 
+!! pressure (dimensiond ii, kk). This routine is useful for evaluating only
+!! a selected region in the vertical. 
+!>\author J. Hack
       subroutine aqsat_water(t, p, es, qs, ii, ilen, kk, kstart,kend)
-!-----------------------------------------------------------------------
-!
-! Purpose:
-! Utility procedure to look up and return saturation vapor pressure from
-! precomputed table, calculate and return saturation specific humidity
-! (g/g),for input arrays of temperature and pressure (dimensioned ii,kk)
-! This routine is useful for evaluating only a selected region in the
-! vertical.
-!
-! Method:
-! <Describe the algorithm(s) used in the routine.>
-! <Also include any applicable external references.>
-!
-! Author: J. Hack
-!
 !------------------------------Arguments--------------------------------
 !
 ! Input arguments
@@ -368,22 +336,17 @@
 !--xl
 
 !>\ingroup wv_saturation_mod
+!! This subroutine include the utility procedure to look up and returen saturation
+!! vapor pressure from precomputed table, calculate and return saturation 
+!! specific humidity (g/g)
 !!
+!! Method:
+!! Differs from aqsat by also calculating and returning
+!! gamma (l/cp)*(d(qsat)/dT)
+!! Input arrays temperature and pressure (dimensioned ii,kk).
+!!
+!! \author J. Hack
       subroutine aqsatd(t, p, es, qs, gam, ii, ilen, kk, kstart, kend)
-!-----------------------------------------------------------------------
-!
-! Purpose:
-! Utility procedure to look up and return saturation vapor pressure from
-! precomputed table, calculate and return saturation specific humidity
-! (g/g).
-!
-! Method:
-! Differs from aqsat by also calculating and returning
-! gamma (l/cp)*(d(qsat)/dT)
-! Input arrays temperature and pressure (dimensioned ii,kk).
-!
-! Author: J. Hack
-!
 !------------------------------Arguments--------------------------------
 !
 ! Input arguments
@@ -513,20 +476,13 @@
       end subroutine aqsatd
 
 !>\ingroup wv_saturation_mod
-!!
+!! This subroutine is the utility procedure to look up and return 
+!! saturation vapor pressure from precomputed table, calculated the 
+!! return saturation specific humidity (g/g). and calculate and 
+!! return gamma (1/cp)*(d(qsat)/dT). The same function as qsatd,
+!! but operates on vectors of temperature and pressure
+!>\author J. Hack
       subroutine vqsatd(t ,p ,es ,qs ,gam , len )
-!-----------------------------------------------------------------------
-!
-! Purpose:
-! Utility procedure to look up and return saturation vapor pressure from
-! precomputed table, calculate and return saturation specific humidity
-! (g/g), and calculate and return gamma (l/cp)*(d(qsat)/dT).  The same
-! function as qsatd, but operates on vectors of temperature and pressure
-!
-! Method:
-!
-! Author: J. Hack
-!
 !------------------------------Arguments--------------------------------
 !
 ! Input arguments

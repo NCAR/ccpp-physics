@@ -4,46 +4,23 @@
 
 !>\ingroup mg2mg3
 !>\defgroup mg2_0_mp Morrison-Gettelman MP version 2.0
+!! This module includes the MG microphysics version 2.0 - update of MG 
+!! microphysics with prognostic precipitation.
+!!
+!!\author Andrew Gettelman, Hugh Morrison, Sean Santos
+!! e-mail: morrison@ucar.edu, andrew@ucar.edu
+!!\n Contributions from: Peter Caldwell, Xiaohong Liu and Steve Ghan
+!!  
+!! - Anning Cheng adopted for FV3GFS 9/29/2017
+!! - Anning Cheng added GMAO ice conversion and Liu et al. Liquid water conversion 
+!! in 10/12/2017
+!! - S. Moorthi - Oct/Nov 2017 - optimized the code
+!! - S. Moorthi - Nov 2017 - made the sedimentation quasi-implicit
+!! - Version 2 history:
+!!  - Sep 2011: Development begun
+!!  - Feb 2013: Added of prognostic precipitation
+!!  - Aug 2015: Published and released version (\cite Gettelman_2015_1 \cite Gettelman_2015_2 )
 module micro_mg2_0
-!---------------------------------------------------------------------------------
-! Purpose:
-!   MG microphysics version 2.0 - Update of MG microphysics with
-!                                 prognostic precipitation.
-!
-! Author: Andrew Gettelman, Hugh Morrison, Sean Santos
-! Contributions from: Peter Caldwell, Xiaohong Liu and Steve Ghan
-! Anning Cheng adopted for FV3GFS 9/29/2017
-!              add GMAO ice conversion and Liu et. al liquid water
-!              conversion in 10/12/2017
-! Anning showed promising results for FV3GFS on 10/15/2017
-! S. Moorthi - Oct/Nov 2017 - optimized the code
-! S. Moorthi - Nov 2017     - made the sedimentation quasi-implicit
-! Version 2 history: Sep 2011: Development begun.
-!                    Feb 2013: Added of prognostic precipitation.
-!                    Aug 2015: Published and released version
-!
-! invoked in CAM by specifying -microphys=mg2.0
-!
-! References: 
-!
-!           Gettelman, A. and H. Morrison, Advanced Two-Moment Microphysics for Global Models. 
-!
-!           Part I: Off line tests and comparisons with other schemes. 
-!
-!           J. Climate, 28, 1268-1287. doi: 10.1175/JCLI-D-14-00102.1, 2015. 
-!
-!
-!
-!           Gettelman, A., H. Morrison, S. Santos, P. Bogenschutz and P. H. Caldwell 
-!
-!           Advanced Two-Moment Microphysics for Global Models. 
-!
-!           Part II: Global model solutions and Aerosol-Cloud Interactions. 
-!
-!           J. Climate, 28, 1288-1307. doi:10.1175/JCLI-D-14-00103.1 , 2015. 
-!
-! for questions contact Hugh Morrison, Andrew Gettelman
-! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !---------------------------------------------------------------------------------
 !
 ! NOTE: Modified to allow other microphysics packages (e.g. CARMA) to do ice
@@ -359,8 +336,11 @@ end subroutine micro_mg_init
 !===============================================================================
 !microphysics routine for each timestep goes here...
 
-!>\ingroup mg2_0_mp
-!> This subroutine calculates
+!\ingroup mg2_0_mp
+!> This subroutine is the main microphysics routine to be called each time step
+!!
+!! this also calls several smaller subroutines to calculate
+!! microphysical processes and other utilities
 subroutine micro_mg_tend (                                       &
      mgncol,             nlev,               deltatin,           &
      t,                            q,                            &

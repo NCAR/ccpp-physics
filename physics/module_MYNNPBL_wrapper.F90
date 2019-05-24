@@ -240,8 +240,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
        &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
 
-  REAL, PARAMETER :: tref=300.0     ! reference temperature (K)
-  REAL, PARAMETER :: TKmin=253.0    ! for total water conversion, Tripoli and Cotton (1981)
+  REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
+  REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
   REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
   character(len=*), intent(out) :: errmsg

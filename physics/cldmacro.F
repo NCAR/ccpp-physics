@@ -574,54 +574,11 @@
        END SUBROUTINE MACRO_CLOUD
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!              P R O C E S S   S U B R O U T I N E S                 !!
-!!                         * * * * *                                  !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!              P R O C E S S   S U B R O U T I N E S                 !!
-!!                         * * * * *                                  !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
-!!                                                                    !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!              P R O C E S S   S U B R O U T I N E S                 !!
 !!                         * * * * *                                  !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !>\ingroup cldmacro_mod
        subroutine pdf_spread (K, LM, PP, ALPHA, ALPHT_DIAG, FRLAND, rhc)
@@ -661,7 +618,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !>\ingroup cldmacro_mod
-       subroutine fix_up_clouds_2M(QV, TE, QLC, QIC, CF, QLA, QIA, AF,
+       subroutine fix_up_clouds_2M(QV, TE, QLC, QIC, CF, QLA, QIA, AF,  &
      &                             NL, NI, qc_min)
 
        real, intent(in)    :: qc_min(2)
@@ -745,10 +702,11 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>\ingroup cldmacro_mod
-!> This subroutine calculates
-       subroutine update_cld( irun, lm, DT, ALPHA, qc_min,
-     &                        PDFSHAPE, PL, QV, QCl, QAl,
-     &                        QCi, QAi, TE, CF, AF,
+!> This subroutine calculates the cloud fraction that would correspond to
+!! the current condensate.
+       subroutine update_cld( irun, lm, DT, ALPHA, qc_min,              &
+     &                        PDFSHAPE, PL, QV, QCl, QAl,               &
+     &                        QCi, QAi, TE, CF, AF,                     &
      &                        SCICE, NI, NL)
 !    &                        SCICE, NI, NL, NCnuc)
 
@@ -756,11 +714,11 @@
        real,    intent(in) :: DT, qc_min(2)
        real,    intent(in),    dimension(irun,lm) :: ALPHA, PL
 !      real,    intent(in),    dimension(irun,lm) :: ALPHA, PL, NCnuc
-       real,    intent(inout), dimension(irun,lm) :: te, qv, qcl, qci
+       real,    intent(inout), dimension(irun,lm) :: te, qv, qcl, qci   &
      &,                        CF, QAl, QAi, AF, NI, NL, SCICE
 
 !      real :: CFO, pl100, QT, DQ, QSx, DQsx, QCx, QC, QA
-       real :: CFO, pl100, QT, DQ, QSx,       QCx, QC, QA
+       real :: CFO, pl100, QT, DQ, QSx,       QCx, QC, QA               &
      &,        QX, QSLIQ, QSICE, CFALL, DQx, FQA, tem
 
        real :: esl, esi, esn !temp use only Anning
@@ -848,13 +806,13 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>\ingroup cldmacro_mod
 !! This subroutine calculates
-       subroutine hystpdf( DT, ALPHA, PDFSHAPE, qc_min, PL, QV, QCl, QAl
+       subroutine hystpdf( DT, ALPHA, PDFSHAPE, qc_min, PL, QV, QCl, QAl&
      &,                    QCi, QAi, TE, CF, AF, SCICE, NI, NL)
 !    &,                    QCi, QAi, TE, CF, AF, SCICE, NI, NL, i, k)
 
        real,    intent(in)    :: DT, ALPHA, PL, qc_min(2)
        integer, intent(in)    :: pdfshape
-       real,    intent(inout) :: TE, QV, QCl, QCi, CF, QAl, QAi, AF,
+       real,    intent(inout) :: TE, QV, QCl, QCi, CF, QAl, QAi, AF,    &
      &                           NI, NL, SCICE
 
        integer, parameter :: nmax=10
@@ -1194,7 +1152,7 @@
 
 !>\ingroup cldmacro_mod
 !! This subroutine calculates
-       subroutine pdfcondensate (flag,qtmean4,sigmaqt14,sigmaqt24,
+       subroutine pdfcondensate (flag,qtmean4,sigmaqt14,sigmaqt24,      &
      &                           qstar4,condensate4, clfrac4)
        implicit none
 
@@ -1274,13 +1232,13 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>\ingroup cldmacro_mod
 !! This subroutine calculates
-       subroutine cnvsrc( DT, ICEPARAM, SCLMFDFR, MASS, iMASS, PL,
-     &                    TE, QV, DCF, DMF, QLA, QIA, CF, AF, QS,
+       subroutine cnvsrc( DT, ICEPARAM, SCLMFDFR, MASS, iMASS, PL,      &
+     &                    TE, QV, DCF, DMF, QLA, QIA, CF, AF, QS,       &
      &                    NL, NI, CNVFICE, CNVNDROP, CNVNICE)
 
-       real, intent(in)    :: DT, ICEPARAM, SCLMFDFR, MASS, iMASS, QS
+       real, intent(in)    :: DT, ICEPARAM, SCLMFDFR, MASS, iMASS, QS   & 
      &,                       DMF,PL, DCF, CF
-       real, intent(inout) :: TE, AF,QV, QLA, QIA, NI, NL
+       real, intent(inout) :: TE, AF,QV, QLA, QIA, NI, NL               &
      &,                       CNVFICE, CNVNDROP, CNVNICE
 
        real    :: TEND,QVx,QCA,fQi
@@ -1354,11 +1312,11 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>\ingroup cldmacro_mod
 !! This subroutine calculates
-       subroutine PRECIP3( K,LM , DT , FRLAND , RHCR3 , QPl , QPi ,
-     & QCl , QCi , TE , QV , mass , imass , PL , dZE , QDDF3 , AA , BB ,
-     & AREA , RAIN , SNOW , PFl_above , PFi_above , EVAP_DD_above,
-     & SUBL_DD_above, REVAP_DIAG , RSUBL_DIAG , ACRLL_DIAG ,
-     & ACRIL_DIAG , PFL_DIAG , PFI_DIAG , VFALLRN , VFALLSN , FRZ_DIAG ,
+       subroutine PRECIP3( K,LM , DT , FRLAND , RHCR3 , QPl , QPi ,     &
+     & QCl , QCi , TE , QV , mass , imass , PL , dZE , QDDF3 , AA , BB ,&
+     & AREA , RAIN , SNOW , PFl_above , PFi_above , EVAP_DD_above,      &
+     & SUBL_DD_above, REVAP_DIAG , RSUBL_DIAG , ACRLL_DIAG ,            &
+     & ACRIL_DIAG , PFL_DIAG , PFI_DIAG , VFALLRN , VFALLSN , FRZ_DIAG ,&
      & ENVFC,DDRFC, AF, CF, PCBL,i )
 
 
@@ -1833,6 +1791,7 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!>\ingroup cldmacro_mod
        function LDRADIUS3(PL,TE,QCL,NN) RESULT(RADIUS)
 
        real, intent(in) :: TE,PL,NN,QCL
@@ -1851,7 +1810,7 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
+!>\ingroup cldmacro_mod
        function ICE_FRACTION (TEMP) RESULT(ICEFRCT)
        real, intent(in) :: TEMP
        real :: ICEFRCT
@@ -1871,7 +1830,7 @@
        end function ICE_FRACTION
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+!>\ingroup cldmacro_mod
        function GET_ALHX3(T) RESULT(ALHX3)
 
        real, intent(in) :: T
@@ -1899,7 +1858,7 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
+!>\ingroup cldmacro_mod
        real function ICEFRAC(T,T_TRANS,T_FREEZ)
 
        real, intent(in) :: T
@@ -2063,11 +2022,11 @@
      &                       QAi , SC_ICE , CF , AF , PF, pdfflag)
 
       integer, intent(in) :: pdfflag
-      real ,   intent(in) :: PL,  ALPHA, QV,  SC_ICE, AF, TE,
+      real ,   intent(in) :: PL,  ALPHA, QV,  SC_ICE, AF, TE,           &
      &                       QCl, QCi,   QAl, QAi, CF
       real , intent(out)  :: PF
 
-      real :: qt, QCx, QSn, tmpARR, CFALL, QVx, CFio, QA, QAx, QC, QI,
+      real :: qt, QCx, QSn, tmpARR, CFALL, QVx, CFio, QA, QAx, QC, QI,  &
      &        QL, DQSx, sigmaqt1, sigmaqt2, qsnx, esl, esi,pl100
 
       pl100 = pl*100
@@ -2217,35 +2176,35 @@
 
 !======================================
 !>\ingroup cldmacro_mod
-      subroutine cloud_ptr_stubs (
-     & SMAXL, SMAXI, WSUB, CCN01, CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4,
-     & ORG, BCARBON, DUST, SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW,
-     & CDNC_NUC, INC_NUC, SAT_RAT, QSTOT, QRTOT, CLDREFFS, CLDREFFR,
-     & DQVDT_micro,DQIDT_micro, DQLDT_micro, DTDT_micro, RL_MASK,
-     & RI_MASK, KAPPA, SC_ICE, CFICE, CFLIQ, RHICE, RHLIQ, RAD_CF,
-     & RAD_QL, RAD_QI, RAD_QS, RAD_QR, RAD_QV, CLDREFFI, CLDREFFL,
-     & NHET_IMM, NHET_DEP, NHET_DHF, DUST_IMM, DUST_DEP, DUST_DHF, SCF,
-     & SCF_ALL, SIGW_GW, SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro,
-     & DNHET_IMM, NONDUST_IMM, NONDUST_DEP, BERG, BERGSO, MELT,
-     & DNHET_CT, DTDT_macro, QCRES, DT_RASP, FRZPP_LS, SNOWMELT_LS,
-     & QIRES, AUTICE, PFRZ, DNCNUC, DNCHMSPLIT, DNCSUBL, DNCAUTICE,
+      subroutine cloud_ptr_stubs (                                      &
+     & SMAXL, SMAXI, WSUB, CCN01, CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4, &
+     & ORG, BCARBON, DUST, SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW,   &
+     & CDNC_NUC, INC_NUC, SAT_RAT, QSTOT, QRTOT, CLDREFFS, CLDREFFR,    &
+     & DQVDT_micro,DQIDT_micro, DQLDT_micro, DTDT_micro, RL_MASK,       &
+     & RI_MASK, KAPPA, SC_ICE, CFICE, CFLIQ, RHICE, RHLIQ, RAD_CF,      &
+     & RAD_QL, RAD_QI, RAD_QS, RAD_QR, RAD_QV, CLDREFFI, CLDREFFL,      &
+     & NHET_IMM, NHET_DEP, NHET_DHF, DUST_IMM, DUST_DEP, DUST_DHF, SCF, &
+     & SCF_ALL, SIGW_GW, SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro,        &
+     & DNHET_IMM, NONDUST_IMM, NONDUST_DEP, BERG, BERGSO, MELT,         &
+     & DNHET_CT, DTDT_macro, QCRES, DT_RASP, FRZPP_LS, SNOWMELT_LS,     &
+     & QIRES, AUTICE, PFRZ, DNCNUC, DNCHMSPLIT, DNCSUBL, DNCAUTICE,     &
      & DNCACRIS, DNDCCN, DNDACRLS, DNDEVAPC, DNDACRLR, DNDAUTLIQ)
 !    & DNDCNV, DNCCNV)
 
 
 
-      real , pointer , dimension(:,:,:) :: SMAXL,SMAXI, WSUB, CCN01,
-     & CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4, ORG, BCARBON, DUST,
-     & SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW, CDNC_NUC, INC_NUC,
-     & SAT_RAT, QSTOT, QRTOT, CLDREFFS, CLDREFFR, DQVDT_micro,
-     &DQIDT_micro, DQLDT_micro, DTDT_micro, RL_MASK, RI_MASK, KAPPA,
-     & SC_ICE, CFICE, CFLIQ, RHICE, RHLIQ, ALPH, RAD_CF, RAD_QL, RAD_QI,
-     & RAD_QS, RAD_QR, RAD_QV, CLDREFFI, CLDREFFL, NHET_IMM, NHET_DEP,
-     & NHET_DHF, DUST_IMM, DUST_DEP, DUST_DHF, SCF, SCF_ALL, SIGW_GW,
-     & SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro, DNHET_IMM, NONDUST_IMM,
-     & NONDUST_DEP, BERG, BERGSO, MELT, DNHET_CT, DTDT_macro, QCRES,
-     & DT_RASP, FRZPP_LS, SNOWMELT_LS, QIRES, AUTICE, PFRZ, DNCNUC,
-     & DNCHMSPLIT, DNCSUBL, DNCAUTICE, DNCACRIS, DNDCCN, DNDACRLS,
+      real , pointer , dimension(:,:,:) :: SMAXL,SMAXI, WSUB, CCN01,    &
+     & CCN04, CCN1, NHET_NUC, NLIM_NUC, SO4, ORG, BCARBON, DUST,        &
+     & SEASALT, NCPL_VOL, NCPI_VOL, NRAIN, NSNOW, CDNC_NUC, INC_NUC,    &
+     & SAT_RAT, QSTOT, QRTOT, CLDREFFS, CLDREFFR, DQVDT_micro,          &
+     &DQIDT_micro, DQLDT_micro, DTDT_micro, RL_MASK, RI_MASK, KAPPA,    &
+     & SC_ICE, CFICE, CFLIQ, RHICE, RHLIQ, ALPH, RAD_CF, RAD_QL, RAD_QI,&
+     & RAD_QS, RAD_QR, RAD_QV, CLDREFFI, CLDREFFL, NHET_IMM, NHET_DEP,  &
+     & NHET_DHF, DUST_IMM, DUST_DEP, DUST_DHF, SCF, SCF_ALL, SIGW_GW,   &
+     & SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro, DNHET_IMM, NONDUST_IMM,  & 
+     & NONDUST_DEP, BERG, BERGSO, MELT, DNHET_CT, DTDT_macro, QCRES,    &
+     & DT_RASP, FRZPP_LS, SNOWMELT_LS, QIRES, AUTICE, PFRZ, DNCNUC,     &
+     & DNCHMSPLIT, DNCSUBL, DNCAUTICE, DNCACRIS, DNDCCN, DNDACRLS,      &
      & DNDEVAPC, DNDACRLR, DNDAUTLIQ
 !    & DNDEVAPC, DNDACRLR, DNDAUTLIQ, DNDCNV, DNCCNV
 

@@ -814,7 +814,7 @@
 !=======================================================================
 !
 !>\ingroup aer_cloud_mod
-!! This subrotine sets the properties of the aerosol distributions
+!! This subroutine sets the properties of the aerosol distributions
 !! Mass-number conversion based on Barahona at al. GMD, 2014. \cite Barahona_2014
        SUBROUTINE AerConversion (aer_mass, AerPr, kappa, SULFATE, ORG,  &
      &                           BCARBON, DUST, SEASALT)
@@ -922,11 +922,8 @@
 !
        END SUBROUTINE AerConversion
 
-!=======================================================================
-!=======================================================================
-!
 !>\ingroup aer_cloud_mod
-!! This subroutine calculates
+!! This subroutine sets the properties of the aerosol distributions
        SUBROUTINE AerConversion1 (aer_mass, AerPr)
 
 
@@ -1178,7 +1175,7 @@
        end subroutine copy_mode
 
 !>\ingroup aer_cloud_mod
-!! This subroutine
+!! This subroutine initialize aerosol properties in MG sheme.
        subroutine init_Aer(aerout)
 
        type (AerProps), intent(inout) :: aerout
@@ -1200,7 +1197,6 @@
 
 
 
-!!!!!!!!!!!!!!======================================
 !>\ingroup aer_cloud_mod
 !! This subroutine finds the activated droplet number following Abdul-Razzak and Ghan (2000)
 !! \cite Abdul_Razzak_2000 .

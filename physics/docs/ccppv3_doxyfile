@@ -212,7 +212,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
 ### CPT
                         ../m_micro.F90       \
-###                        ../micro_mg2_0.F90   \
+                        ../micro_mg2_0.F90   \
                         ../micro_mg3_0.F90   \
                         ../micro_mg_utils.F90 \
                         ../cldmacro.F        \
@@ -225,6 +225,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../cu_gf_driver.F90 \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
+                        ../module_MYNNrad_pre.F90 \
+                        ../module_MYNNrad_post.F90 \
                         ../module_MYNNPBL_wrapper.F90 \
                         ../module_bl_mynn.F90   \
 ###                        ../module_MYNNSFC_wrapper.F90 \

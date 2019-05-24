@@ -430,33 +430,6 @@ CONTAINS
 !>\ingroup gsd_mynn_edmf
 !! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
-!!\param kts
-!!\param kte
-!!\param dz      vertical grid spacings (\f$m\f$)
-!!\param zw      heights of the walls of the grid boxes (\f$m\f$)
-!!\param u
-!!\param v
-!!\param thl
-!!\param qw      total water content \f$Q_w\f$ (\f$kg kg^{-1}\f$)
-!!\param zi
-!!\param theta
-!!\param sh
-!!\param ust      friction velocity (\f$m s^{-1}\f$)
-!!\param rmo      inverse of the Obukhov length (\f$m^{-1}\f$)
-!!\param el       master length scale L (\f$m\f$) defined on the walls of the grid boxes
-!!\param qke
-!!\param tsq      variance of \f$theta_l\f$ (\f$K^2\f$)
-!!\param qsq      variance of \f$Q_w\f$
-!!\param cov      covariance of \f$theta_l\f$ and \f$Q_w\f$ (\f$K\f$) 
-!!\param psig_bl
-!!\param cldfra_bl1d
-!!\param bl_mynn_mixlength
-!!\param edmf_w1
-!!\param edmf_a1
-!!\param edmf_qc1
-!!\param bl_mynn_edmf
-!!\param spp_pbl
-!!\param rstoch_col
 !!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
 !> @{
   SUBROUTINE  mym_initialize (                                & 
@@ -773,28 +746,6 @@ CONTAINS
 !
 !>\ingroup gsd_mynn_edmf
 !! This subroutine calculates the mixing lengths.
-!!\param kts
-!!\param kte
-!!\param dz
-!!\param zw
-!!\param rmo
-!!\param flt
-!!\param flq
-!!\param vt
-!!\param vq
-!!\param qke
-!!\param dtv
-!!\param el
-!!\param zi
-!!\param theta
-!!\param qkw
-!!\param psig_bl
-!!\param cldfra_bl1d
-!!\param bl_mynn_mixlength
-!!\param edmf_w1
-!!\param edmf_a1
-!!\param edmf_qc1
-!!\param bl_mynn_edmf
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,                      &
     &            dz, zw,                       &
@@ -1479,36 +1430,53 @@ CONTAINS
 ! ==================================================================
 !     SUBROUTINE  mym_turbulence:
 !
-!>     Input variables:    see subroutine mym_initialize
-!!       levflag         : <>3;  Level 2.5
-!!                         = 3;  Level 3
-!!
-!!     # ql, vt, vq, qke, tsq, qsq and cov are changed to input variables.
-!!
-!!     Output variables:   see subroutine mym_initialize
-!!       dfm(nx,nz,ny) : Diffusivity coefficient for momentum,
-!!                         divided by dz (not dz*h(i,j))            (m/s)
-!!       dfh(nx,nz,ny) : Diffusivity coefficient for heat,
-!!                         divided by dz (not dz*h(i,j))            (m/s)
-!!       dfq(nx,nz,ny) : Diffusivity coefficient for q^2,
-!!                         divided by dz (not dz*h(i,j))            (m/s)
-!!       tcd(nx,nz,ny)   : Countergradient diffusion term for Theta_l
-!!                                                                  (K/s)
-!!       qcd(nx,nz,ny)   : Countergradient diffusion term for Q_w
-!!                                                              (kg/kg s)
-!!       pd?(nx,nz,ny) : Half of the production terms
-!!
-!!       Only tcd and qcd are defined at the center of the grid boxes
-!!
-!!     # DO NOT forget that tcd and qcd are added on the right-hand side
-!!       of the equations for Theta_l and Q_w, respectively.
-!!
-!!     Work arrays:        see subroutine mym_initialize and level2
-!!
-!!     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
-!!       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
-!!
+!     Input variables:    see subroutine mym_initialize
+!       levflag         : <>3;  Level 2.5
+!                         = 3;  Level 3
+!
+!     # ql, vt, vq, qke, tsq, qsq and cov are changed to input variables.
+!
+!     Output variables:   see subroutine mym_initialize
+!       dfm(nx,nz,ny) : Diffusivity coefficient for momentum,
+!                         divided by dz (not dz*h(i,j))            (m/s)
+!       dfh(nx,nz,ny) : Diffusivity coefficient for heat,
+!                         divided by dz (not dz*h(i,j))            (m/s)
+!       dfq(nx,nz,ny) : Diffusivity coefficient for q^2,
+!                         divided by dz (not dz*h(i,j))            (m/s)
+!       tcd(nx,nz,ny)   : Countergradient diffusion term for Theta_l
+!                                                                  (K/s)
+!       qcd(nx,nz,ny)   : Countergradient diffusion term for Q_w
+!                                                              (kg/kg s)
+!       pd?(nx,nz,ny) : Half of the production terms
+!
+!       Only tcd and qcd are defined at the center of the grid boxes
+!
+!     # DO NOT forget that tcd and qcd are added on the right-hand side
+!       of the equations for Theta_l and Q_w, respectively.
+!
+!     Work arrays:        see subroutine mym_initialize and level2
+!
+!     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
+!       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
+!
 !>\ingroup gsd_mynn_edmf
+!! This subroutine calculates the vertical diffusivity coefficients and the 
+!! production terms for the turbulent quantities.      
+!>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+!! Two subroutines mym_level2() and mym_length() are called within this
+!!subrouine to collect variable to carry out successive calculations:
+!! - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
+!! and vertical temperature gradient \f$G_H\f$ as well as the level 2 stability
+!! functions \f$S_h\f$ and \f$S_m\f$.
+!! - mym_length() calculates the mixing lengths.
+!! - The stability criteria from Helfand and Labraga (1989) are applied.
+!! - The stability functions for level 2.5 or level 3.0 are calculated.
+!! - If level 3.0 is used, counter-gradient terms are calculated.
+!! - Production terms of TKE,\f$\theta^{'2}\f$,\f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$
+!! are calculated.
+!! - Eddy diffusivity \f$K_h\f$ and eddy viscosity \f$K_m\f$ are calculated.
+!! - TKE budget terms are calculated (if the namelist parameter \p bl_mynn_tkebudget 
+!! is set to True)
   SUBROUTINE  mym_turbulence (                                &
     &            kts,kte,                                     &
     &            levflag,                                     &
@@ -2044,16 +2012,16 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !>\ingroup gsd_mynn_edmf
-!!
-  SUBROUTINE  mym_predict (kts,kte,&
-       &            levflag,  &
-       &            delt,&
-       &            dz, &
-       &            ust, flt, flq, pmz, phh, &
-       &            el, dfq, &
-       &            pdk, pdt, pdq, pdc,&
-       &            qke, tsq, qsq, cov, &
-       &            s_aw,s_awqke,bl_mynn_edmf_tke &
+!! This subroutine predicts the turbulent quantities at the next step.
+  SUBROUTINE  mym_predict (kts,kte,                                     &
+       &            levflag,                                            &
+       &            delt,                                               &
+       &            dz,                                                 &
+       &            ust, flt, flq, pmz, phh,                            &
+       &            el, dfq,                                            &
+       &            pdk, pdt, pdq, pdc,                                 &
+       &            qke, tsq, qsq, cov,                                 &
+       &            s_aw,s_awqke,bl_mynn_edmf_tke                       &
        &)
 
 !-------------------------------------------------------------------
@@ -2361,6 +2329,10 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !>\ingroup gsd_mynn_edmf 
+!! This subroutine calculates the nonconvective component of the 
+!! subgrid cloud fraction and mixing ratio as well as the functions used to 
+!! calculate the buoyancy flux. Different cloud PDFs can be selected by
+!! use of the namelist parameter \p bl_mynn_cloudpdf .
   SUBROUTINE  mym_condensation (kts,kte,  &
     &            dx, dz,                  &
     &            thl, qw,                 &
@@ -2812,6 +2784,8 @@ CONTAINS
 
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
+!! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
+!! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,      &
        &levflag,grav_settling,             &
        &delt,dz,rho,                       &
@@ -3839,12 +3813,12 @@ ENDIF
         end subroutine tridiag3
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine.
+!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!! encompassed the majority of the subroutines that comprise the 
+!! procedures that ultimately solve for tendencies of 
+!! \f$U, V, \theta, q_v, q_c, and q_i\f$.
 !!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
-!!
-!!
-!!\section detail_mynn_bl_driver GSD mynn_bl_driver Detailed Algorithm
-!! @{
+!> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,grav_settling, &
        &delt,dz,dx,znt,                 &
@@ -4089,7 +4063,8 @@ ENDIF
     ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
 !> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
 !! If true, a three-dimensional initialization loop is entered. Within this loop,
-!! several arrays are initializaed and 
+!! several arrays are initialized and k-oriented (vertical) subroutines are called 
+!! at every i and j point, corresponding to the x- and y- directions, respectively.  
     IF (initflag > 0) THEN
  
        if (.not.restart) THEN
@@ -4199,12 +4174,12 @@ ENDIF
 
              zw(kte+1)=zw(kte)+dz(i,kte,j)
 
-!>  - Call get_pblh() to calculate hybrid (\f$\theta_v-TKE\f$) PBL height.
+!>  - Call get_pblh() to calculate hybrid (\f$\theta_{vli}-TKE\f$) PBL height.
 !             CALL GET_PBLH(KTS,KTE,PBLH(i,j),thetav,&
              CALL GET_PBLH(KTS,KTE,PBLH(i,j),thvl,&
                &  Qke1,zw,dz1,xland(i,j),KPBL(i,j))
              
-!> - Call scale_aware() to calculate similarity functions for scale-adaptive control
+!>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
              IF (scaleaware > 0.) THEN
                 CALL SCALE_AWARE(dx(i,j),PBLH(i,j),Psig_bl(i,j),Psig_shcu(i,j))
@@ -4214,8 +4189,10 @@ ENDIF
              ENDIF
 
              ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
-!> - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
-!! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
+!>  - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
+!! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$. These variables are calculated after 
+!! obtaining prerequisite variables by calling the following subroutines from 
+!! within mym_initialize(): mym_level2() and mym_length().
              CALL mym_initialize (             & 
                   &kts,kte,                    &
                   &dz1, zw, u1, v1, thl, sqv,  &
@@ -4259,6 +4236,8 @@ ENDIF
 
     ENDIF ! end initflag
 
+!> - After initializing all required variables, the regular procedures 
+!! performed at every time step are ready for execution.
     !ACF- copy qke_adv array into qke if using advection
     IF (bl_mynn_tkeadvect) THEN
        qke=qke_adv
@@ -4418,10 +4397,16 @@ ENDIF
           ENDDO
 #endif
 
+!>  - Call get_pblh() to calculate the hybrid \f$\theta_{vli}-TKE\f$
+!! PBL height diagnostic.
 !          CALL GET_PBLH(KTS,KTE,PBLH(i,j),thetav,&
           CALL GET_PBLH(KTS,KTE,PBLH(i,j),thvl,&
           & Qke1,zw,dz1,xland(i,j),KPBL(i,j))
 
+!>  - Call scale_aware() to calculate the similarity functions,
+!! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
+!! the scale-adaptive behaviour for the local and nonlocal 
+!! components, respectively.
           IF (scaleaware > 0.) THEN
              CALL SCALE_AWARE(dx(i,j),PBLH(i,j),Psig_bl(i,j),Psig_shcu(i,j))
           ELSE
@@ -4475,6 +4460,11 @@ ENDIF
           delta(i,j) = min(d1*pblh(i,j) + d2*wm2/delb, 100.)
           !-- End GRIMS-----------------------------------------
 
+!>  - Call mym_condensation() to calculate the nonconvective component
+!! of the subgrid cloud fraction and mixing ratio as well as the functions
+!! used to calculate the buoyancy flux. Different cloud PDFs can be 
+!! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
+
           CALL  mym_condensation ( kts,kte,      &
                &dx(i,j),dz1,thl,sqw,p1,ex1,           &
                &tsq1, qsq1, cov1,                &
@@ -4485,6 +4475,8 @@ ENDIF
                &spp_pbl, rstoch_col              )
 
           !ADD TKE source driven by cloud top cooling
+!>  - Calculate the buoyancy production of TKE from cloud-top cooling when
+!! \p bl_mynn_topdown =1.
           IF (bl_mynn_topdown.eq.1)then
              cloudflg=.false.
              minrad=100.
@@ -4574,6 +4566,9 @@ ENDIF
              TKEprodTD(kts:kte)=0.0
           ENDIF !end top-down check
 
+!>  - Call dmp_mf() to calculate the nonlocal turbulent transport from  
+!! the dynamic multiplume mass-flux scheme as well as the shallow-cumulus
+!! component of the subgrid clouds.
           IF (bl_mynn_edmf == 1) THEN
             !PRINT*,"Calling DMP Mass-Flux: i= ",i," j=",j
             CALL DMP_mf(                         &
@@ -4614,6 +4609,8 @@ ENDIF
 
           ENDIF
 
+!>  - Call mym_turbulence() to collect the necessary variable
+!! to carry out successive claculations.
           CALL mym_turbulence (                  & 
                &kts,kte,levflag,                 &
                &dz1, zw, u1, v1, thl, sqc, sqw,  &
@@ -4633,6 +4630,9 @@ ENDIF
                &TKEprodTD,                       &
                &spp_pbl,rstoch_col)
 
+!>  - Call mym_predict() to solve TKE and 
+!! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
+!! for the following time step.
           CALL mym_predict (kts,kte,levflag,     &
                &delt, dz1,                       &
                &ust(i,j), flt, flq, pmz, phh,    &
@@ -4646,6 +4646,8 @@ ENDIF
           ENDDO
           diss_heat(kte) = 0.
 
+!>  - Call mynn_tendencies() to solve for tendencies of 
+!! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
           CALL mynn_tendencies(kts,kte,          &
                &levflag,grav_settling,           &
                &delt, dz1, rho1,                 &
@@ -4700,7 +4702,8 @@ ENDIF
     ENDIF
 #endif
 
- 
+!>  - Call retrieve_exchange_coeffs() to retrieve K_m1
+!! and K_h1. 
           CALL retrieve_exchange_coeffs(kts,kte,&
                &dfm, dfh, dz1, K_m1, K_h1)
 
@@ -4737,6 +4740,8 @@ ENDIF
                cldfra_bl(i,k,j)=cldfra_bl1D(k) !*Psig_shcu(i,j)
 
                !DIAGNOSTIC-DECAY FOR SUBGRID-SCALE CLOUDS
+!>  - Compute the temporal decay of diagnostic subgrid cloud. This allows the diagnostic
+!! sugrid clouds to persist for an eddy turnover time scale.
                IF (CLDFRA_BL(i,k,j) < cldfra_bl1D_old(k)) THEN
                   !DECAY TIMESCALE FOR CALM CONDITION IS THE EDDY TURNOVER
                   !TIMESCALE, BUT FOR
@@ -4851,7 +4856,7 @@ ENDIF
 #endif
 
   END SUBROUTINE mynn_bl_driver
-!! @}
+!> @}
 
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
@@ -4915,19 +4920,24 @@ ENDIF
 
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
+!! This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
+!!
 !! NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
 !!PBL heights as the level at.
 !!which the potential temperature first exceeds the minimum potential.
 !!temperature within the boundary layer by 1.5 K. When applied to.
 !!observed temperatures, this method has been shown to produce PBL-
 !!height estimates that are unbiased relative to profiler-based.
-!!estimates (Nielsen-Gammon et al. 2008). However, their study did not
-!!include LLJs. Banta and Pichugina (2008) show that a TKE-based.
+!!estimates (Nielsen-Gammon et al. 2008 \cite Nielsen_Gammon_2008). 
+!! However, their study did not
+!!include LLJs. Banta and Pichugina (2008) \cite Pichugina_2008  show that a TKE-based.
 !!threshold is a good estimate of the PBL height in LLJs. Therefore,
 !!a hybrid definition is implemented that uses both methods, weighting
 !!the TKE-method more during stable conditions (PBLH < 400 m).
 !!A variable tke threshold (TKEeps) is used since no hard-wired
 !!value could be found to work best in all conditions.
+!>\section gen_get_pblh  GSD get_pblh General Algorithm
+!> @{
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
 
     INTEGER,INTENT(IN) :: KTS,KTE
@@ -4943,9 +4953,9 @@ ENDIF
     REAL, DIMENSION(KTS:KTE+1), INTENT(IN) :: zw1D
     !LOCAL VARS
     REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv
-    REAL :: delt_thv   !delta theta-v; dependent on land/sea point
-    REAL, PARAMETER :: sbl_lim  = 200. !upper limit of stable BL height (m).
-    REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
+    REAL :: delt_thv   !< delta theta-v; dependent on land/sea point
+    REAL, PARAMETER :: sbl_lim  = 200. !< upper limit of stable BL height (m).
+    REAL, PARAMETER :: sbl_damp = 400. !< transition length for blending (m).
     INTEGER :: I,J,K,kthv,ktke,kzi,kzi2
 
     !ADD KPBL (kzi)
@@ -4953,7 +4963,7 @@ ENDIF
     kzi = 2
     kzi2= 2
 
-    !FIND MIN THETAV IN THE LOWEST 200 M AGL
+    !> - FIND MIN THETAV IN THE LOWEST 200 M AGL
     k = kts+1
     kthv = 1
     minthv = 9.E9
@@ -4967,7 +4977,7 @@ ENDIF
        !IF (zw1D(k) .GT. sbl_lim) exit
     ENDDO
 
-    !FIND THETAV-BASED PBLH (BEST FOR DAYTIME).
+    !> - FIND THETAV-BASED PBLH (BEST FOR DAYTIME).
     zi=0.
     k = kthv+1
     IF((landsea-1.5).GE.0)THEN
@@ -4995,10 +5005,10 @@ ENDIF
     ENDDO
     !print*,"IN GET_PBLH:",thsfc,zi
 
-    !FOR STABLE BOUNDARY LAYERS, USE TKE METHOD TO COMPLEMENT THE
-    !THETAV-BASED DEFINITION (WHEN THE THETA-V BASED PBLH IS BELOW ~0.5 KM).
-    !THE TANH WEIGHTING FUNCTION WILL MAKE THE TKE-BASED DEFINITION NEGLIGIBLE 
-    !WHEN THE THETA-V-BASED DEFINITION IS ABOVE ~1 KM.
+    !> - FOR STABLE BOUNDARY LAYERS, USE TKE METHOD TO COMPLEMENT THE
+    !! THETAV-BASED DEFINITION (WHEN THE THETA-V BASED PBLH IS BELOW ~0.5 KM).
+    !!THE TANH WEIGHTING FUNCTION WILL MAKE THE TKE-BASED DEFINITION NEGLIGIBLE 
+    !!WHEN THE THETA-V-BASED DEFINITION IS ABOVE ~1 KM.
     ktke = 1
     maxqke = MAX(Qke1D(kts),0.)
     !Use 5% of tke max (Kosovic and Curry, 2000; JAS)
@@ -5027,12 +5037,12 @@ ENDIF
        IF (PBLH_TKE .NE. 0.) exit
     ENDDO
 
-    !With TKE advection turned on, the TKE-based PBLH can be very large 
-    !in grid points with convective precipitation (> 8 km!),
-    !so an artificial limit is imposed to not let PBLH_TKE exceed the
-    !theta_v-based PBL height +/- 350 m.
-    !This has no impact on 98-99% of the domain, but is the simplest patch
-    !that adequately addresses these extremely large PBLHs.
+    !> - With TKE advection turned on, the TKE-based PBLH can be very large 
+    !! in grid points with convective precipitation (> 8 km!),
+    !! so an artificial limit is imposed to not let PBLH_TKE exceed the
+    !!theta_v-based PBL height +/- 350 m.
+    !!This has no impact on 98-99% of the domain, but is the simplest patch
+    !!that adequately addresses these extremely large PBLHs.
     PBLH_TKE = MIN(PBLH_TKE,zi+350.)
     PBLH_TKE = MAX(PBLH_TKE,MAX(zi-350.,10.))
 
@@ -5053,10 +5063,16 @@ ENDIF
 #endif
 
   END SUBROUTINE GET_PBLH
+!> @}
   
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
 !! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
+!! 
+!! dmp_mf() calculates the nonlocal turbulent transport from the dynamic
+!! multiplume mass-flux scheme as well as the shallow-cumulus component of 
+!! the subgrid clouds. Note that this mass-flux scheme is called when the
+!! namelist paramter \p bl_mynn_edmf is set to 1 (recommended).
 !!
 !! Much thanks to Kay Suslj of NASA-JPL for contributing the original version
 !! of this mass-flux scheme. Considerable changes have been made from it's
@@ -6033,7 +6049,11 @@ end subroutine condensation_edmf
 
 !===============================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine calculates the similarity functions, sigma
+!! This subroutine calculates the similarity functions, 
+!!\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control the 
+!! scale-adaptive behavior for the local and nonlocal components,
+!! respectively.
+!!
 !! NOTES ON SCALE-AWARE FORMULATION:
 !!JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
 !! JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)

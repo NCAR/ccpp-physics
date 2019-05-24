@@ -138,6 +138,7 @@ end subroutine m_micro_init
        end subroutine m_micro_finalize
 
 !> \defgroup mg2mg3 CPT Morrison-Gettelman MP scheme Module
+!! This module contains the the entity of MG2 and MG3 schemes. 
 !> @{
 !> \defgroup mg_driver Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
@@ -778,7 +779,7 @@ end subroutine m_micro_init
 !      end if
 
 !
-!>  - Call init_Aer()
+!>  - Call init_aer()
        do k=1,lm
          do i=1,im
            call init_Aer(AeroProps(I, K))
@@ -793,7 +794,7 @@ end subroutine m_micro_init
          AERMASSMIX(:,:,1:5) = 1.e-6
          AERMASSMIX(:,:,6:15) = 2.e-14
        end if
-!>  - Call AerConversion1()
+!>  - Call aerConversion1()
        call AerConversion1 (AERMASSMIX,  AeroProps)
        deallocate(AERMASSMIX)
 

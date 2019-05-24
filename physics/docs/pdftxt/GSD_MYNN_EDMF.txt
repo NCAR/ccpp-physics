@@ -29,28 +29,48 @@ model components (i.e., radiation). A description of the changes to the MYNN sch
 
 
 \section intra_mynnpbl Intraphysics Communication
+- Cloud-Radiation Interaction
+
+\sa gsd_mynnrad_pre
+\sa gsd_mynnrad_post
+
+The subgrid-scale(SGS) clouds produced by the MYNN-EDMF are coupled to the longwave and shortwave radiation schemes
+if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud fraction, \p CLDFRA_BL, and the SGS
+cloud-mixing ratio, \b QC_BL, are added to the microphysics arrays within the radiation driver (mynnrad_pre_run()). 
+The following two steps are performed: 
+
+(1) the cloud fraction of the resolved-scale clouds are computed, using Xu and Randal (1996) \cite xu_and_randall_1996
+by default;
+
+(2) if the resolved-scale cloud liquid and ice, \f$q_c\f$ and \f$q_i\f$, is less than \f$10^{-6}kg kg^{-1}\f$ and
+\f$10^{-8}kg kg^{-1}\f$, respectively, and there exists a nonzero SGS cloud fraction, then the SGS components are
+added to their respective resolved-scale components by a temperature weighting, according to linear approximation
+of Hobbs et al.(1974) \cite HOBBS_1974 :
+\f[
+ W_{ice}=1-min(1,max(0,(T-254)/15))
+ W_{h2o}=1-W_{ice}
+\f]
+
+Then we sort the SGS cloud water and liquid as :
+
+\f$q_c\f$=QC_BL*\f$W_{h2o}\f$*CLDFRA_BL
+
+\f$q_i\f$=QC_BL*\f$W_{ice}\f$*CLDFRA_BL
+
+This allows us to only use one 3-D array for both SGS cloud water and ice. The updated \f$q_{c}\f$,\f$q_{i}\f$, and
+\p CLDFRA are then used as input into the radiation schemes. After exiting the radiation schemes, the original 
+values of \f$q_c, q_i\f$  and \p CLDFRA are restored, so the SGS clouds do not impact the resolved-scale moisture budget.
+
+
+The GSD MYNN-EDMF CCPP-compliant interface:
 \ref arg_table_mynnedmf_wrapper_run
 
 \section gen_mynnedmf_conv GSD MYNN-EDMF Scheme  General Algorithm
-Within the MYNN-EDMF, there is a dependecy check for the first time step. If true.
-a three-dimensional initialization loop is entered. within this loop, several arrays
-are initialized in three subroutines below:
-- get_pblh(): calculates the hybrid \f$\theta_{vli}-TKE\f$ PBL height
-- scale_aware(): calculates the similarity functions, \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$,
-  to control the scale-adaptive behavior for the local and nonlocal components, respectively
-- mym_initialize(): initializes the mixing length, TKE, \f$\theta^{'2}\f$,\f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
-These variables are calculated after obtaining prerequisite variables by calling the following subroutines from 
-within mym_initialize():
-  - mym_level2(): caluclates the level 2, non-dimensional wind shear \f$G_{M}\f$ and vertical temperature
-gradient \f$G_{H}\f$ as well as the level 2 stability functions \f$S_{h}\f$ and \f$S_{m}\f$
-  - mym_length(): calculates the mixing lengths
 
-After initializing all required variables, the regular procedures performed at every time step are ready
-for execution. The main subroutine mynn_bl_driver() encompasses the majority of the subroutines that comprise
-the procedures that ultimately solve for tendencies of \f$U\f$, \f$V\f$, \f$\theta\f$, \f$q_v\f$, \f$q_c\f$,
-and \f$q_i\f$. Figure 1 shows the full order of procedure/subroutines called within mynn_bl_driver().
+\image html  MYNN-EDMF_call_order.png "Figure 1.The order of subroutines within the MYNN-EDMF (Courtesy of J.B. Olson). The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=10cm
 
-\image html  MYNN-EDMF_call_order.png "Figure.The order of subroutines within the MYNN-EDMF. The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=10cm
+
 \ref gen_mynn_bl_driver
+
 
 */
