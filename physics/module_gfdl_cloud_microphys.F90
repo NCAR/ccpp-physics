@@ -684,7 +684,16 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     ! -----------------------------------------------------------------------
     ! use local variables
     ! -----------------------------------------------------------------------
-
+    
+    !GJF: assign values to intent(out) variables that are commented out
+    w_var = 0.0
+    vt_r = 0.0
+    vt_s = 0.0
+    vt_g = 0.0
+    vt_i = 0.0
+    qn2 = 0.0
+    !GJF
+    
     do i = is, ie
 
         do k = ktop, kbot

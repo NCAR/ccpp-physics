@@ -139,7 +139,7 @@
      &                     dtsfc(im),     dqsfc(im),
      &                     hpbl(im) 
 !
-      logical, intent(out)  :: dspheat
+      logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
