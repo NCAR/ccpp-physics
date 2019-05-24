@@ -21,9 +21,10 @@ function usage   {
   echo "                                   REPRO=Y/N       (default N)"
   echo "                                   TRANSITION=Y/N  (default N)"
   echo "                                   OPENMP=Y/N      (default Y)"
-  echo "                                   HYBRID=Y/N      (default Y)"
   echo "                                   32BIT=Y/N       (default N, affects dynamics/fast physics only)"
-  echo "                                   STATIC=Y/N      (default N, STATIC=Y requires HYBRID=N)"
+  echo "                                   STATIC=Y/N      (default N, STATIC=Y requires SUITES=...)"
+  echo "                                   SUITES=ABC,XYZ  (comma-separated list of CCPP suites; "
+  echo "                                                    corresponding filenames: suite_ABC.xml. ...)"
   echo "                                   MULTI_GASES=Y/N (default N)"
   echo "           clean_before [optional] can be 'YES' (default) or 'NO'"
   echo "           clean_after  [optional] can be 'YES' (default) or 'NO'"
@@ -97,37 +98,24 @@ else
 fi
 if [[ "${MAKE_OPT}" == *"TRANSITION=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTRANSITION=ON"
+else
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTRANSITION=OFF"
 fi
 if [[ "${MAKE_OPT}" == *"OPENMP=N"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=OFF"
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DOPENMP=ON"
 fi
-if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTEMPLOG=ON"
-else
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DTEMPLOG=OFF"
-fi
 if [[ "${MAKE_OPT}" == *"32BIT=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=ON"
 else
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DDYN32=OFF"
 fi
-if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=OFF"
-else
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DHYBRID=ON"
-fi
 if [[ "${MAKE_OPT}" == *"STATIC=Y"* ]]; then
-  if [[ "${MAKE_OPT}" == *"HYBRID=N"* ]]; then
-    CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSTATIC=ON"
-  else
-    echo "Error, option STATIC=Y requires HYBRID=N"
-    exit 1
-  fi
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSTATIC=ON"
 else
   # Dynamic builds require linking the NCEPlibs, provide path to them
-  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DBACIO_LIB4=${BACIO_LIB4} -DSP_LIBd=${SP_LIBd} -DW3NCO_LIBd=${W3NCO_LIBd}"
+  CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DSTATIC=OFF -DBACIO_LIB4=${BACIO_LIB4} -DSP_LIBd=${SP_LIBd} -DW3NCO_LIBd=${W3NCO_LIBd}"
 fi
 if [[ "${MAKE_OPT}" == *"MULTI_GASES=Y"* ]]; then
   CCPP_CMAKE_FLAGS="${CCPP_CMAKE_FLAGS} -DMULTI_GASES=ON"

@@ -55,7 +55,6 @@ OPENMP = Y
 AVX2 = Y
 HYDRO = N
 CCPP = N
-HYBRID = Y
 STATIC = N
 SION = N
 DYN32 = N
@@ -189,9 +188,6 @@ endif
 
 ifeq ($(CCPP),Y)
 CPPDEFS += -DCCPP
-ifeq ($(HYBRID),Y)
-CPPDEFS += -DHYBRID
-endif
 CFLAGS += -I$(PATH_CCPP)/include
 FFLAGS += -I$(PATH_CCPP)/include
 ifeq ($(STATIC),Y)
