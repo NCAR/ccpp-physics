@@ -82,9 +82,6 @@ SCHEME_FILES_DEPENDENCIES = [
     'ccpp/physics/physics/cu_gf_sh.F90',
     'ccpp/physics/physics/tridi.f',
     'ccpp/physics/physics/tridi2t3.f',
-    # This file needs to be compiled for the hybrid mode (see GFS_typedefs.F90)
-    # and can be removed once the hybrid mode is gone: wam_f107_kp_mod.f90
-    'ccpp/physics/physics/wam_f107_kp_mod.f90',
     'ccpp/physics/physics/wv_saturation.F',
     'ccpp/physics/physics/module_sf_ruclsm.F90',
     'ccpp/physics/physics/namelist_soilveg_ruc.F90',

@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+# Use rpaths on MacOSX
+set(CMAKE_MACOSX_RPATH 1)
+
+if(POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif(POLICY CMP0048)
+
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif(POLICY CMP0042)
@@ -10,9 +17,6 @@ set(PROJECT "CCPP-FV3")
 ENABLE_LANGUAGE(Fortran)
 
 include(CMakeForceCompiler)
-
-# Use rpaths on MacOSX
-set(CMAKE_MACOSX_RPATH 1)
 
 #------------------------------------------------------------------------------
 # Set a default build type if none was specified
@@ -160,18 +164,6 @@ if (MPI)
 endif (MPI)
 
 #------------------------------------------------------------------------------
-# Set TEMPLOG flags for C/C++/Fortran preprocessor (temporary, need better logging)
-if (TEMPLOG)
-  ADD_DEFINITIONS(-DTEMPLOG)
-endif (TEMPLOG)
-
-#------------------------------------------------------------------------------
-# Set flags for hybrid/non-hybrid build of CCPP
-if (HYBRID)
-  ADD_DEFINITIONS(-DHYBRID)
-endif (HYBRID)
-
-#------------------------------------------------------------------------------
 # Set flags for static building/linking of CCPP
 if (STATIC)
   ADD_DEFINITIONS(-DSTATIC)
@@ -272,7 +264,6 @@ endif(NETCDF_DIR)
 #------------------------------------------------------------------------------
 # Set ESMF flags for preprocessor, compiler and linker (if defined)
 if(ESMF_LIB_DIR)
-  message (STATUS "ESMF_LIB_DIR: ${ESMF_LIB_DIR}")
   set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -L${ESMF_LIB_DIR} -lesmf")
   message (STATUS "Enable ESMF support")
 else(ESMF_LIB_DIR)

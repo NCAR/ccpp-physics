@@ -156,8 +156,7 @@ steps 12-15, these differences can be ignored. It is also assumed that the bash 
     # Build model
     cd tests
     ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=N'          2>&1 | tee log.compile # without CCPP
-    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=Y'          2>&1 | tee log.compile # with CCPP, hybrid mode
-    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=Y HYBRID=N' 2>&1 | tee log.compile # with CCPP, standalone mode
+    ./compile.sh $PWD/../FV3 macosx.gnu 'CCPP=Y'          2>&1 | tee log.compile # with CCPP, dynamic mode
 
 16. Set up the run directory using the template on Theia or Cheyenne at some location on your machine:
 

@@ -106,7 +106,7 @@ build fv3_ccpp_control.exe {
     # build: script to build the NEMS.x.  For now, this is an embedded
     # bash script.
     build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
-                    MAKE_OPTS="\'CCPP=Y HYBRID=N STATIC=Y SUITES=FV3_GFS_2017\'")
+                     MAKE_OPTS="\'CCPP=Y STATIC=Y SUITES=FV3_GFS_2017\'")
 }
 
 build fv3_32bit.exe {
