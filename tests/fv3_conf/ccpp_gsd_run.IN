@@ -11,15 +11,23 @@ cp    @[RTPWD]/FV3_input_data/INPUT/sfc_emissivity_idx.txt .
 cp    @[RTPWD]/FV3_input_data/INPUT/solarconstant_noaa_an.txt .
 cp    @[RTPWD]/FV3_input_data/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 ./global_o3prdlos.f77
 cp    @[RTPWD]/FV3_input_data/global_h2o_pltc.f77 ./global_h2oprdlos.f77
+
 # Thompson MP lookup tables - copy standard and SIONlib tables of precomputed tables
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/thompson_tables_precomp.sl .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/qr_acr_qs.dat .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/qr_acr_qg.dat .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/freezeH2O.dat .
-#
+
 cp    @[RTPWD]/FV3_input_data/*grb .
 cp    @[RTPWD]/FV3_input_data/*_table .
-cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/diag_table_gsd diag_table
+
+# Copy diag table file depending on LSM
+if [ $LSM = 1]; then
+  cp  /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/diag_table_gsd_noah diag_table
+elif [ $LSM = 2]; then
+  cp  /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/diag_table_gsd_ruc  diag_table
+fi
+
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/field_table_gsd field_table
 cp    @[RTPWD]/FV3_input_data/*configure .
 cp    /scratch4/NCEPDEV/stmp4/Dom.Heinzeller/FV3_RT/REGRESSION_TEST_INPUT_DATA_GMTB/CCN_ACTIVATE.BIN .
