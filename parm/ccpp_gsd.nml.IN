@@ -140,7 +140,6 @@
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
        ttendlim       = -999.
-       ! DH* TODO CHECK IF make_number_concentrations gives b4b identical results through restarts
        make_number_concentrations = .true.
        pdfcld         = .false.
        fhswr          = 3600.
