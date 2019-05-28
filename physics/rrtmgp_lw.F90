@@ -10,6 +10,8 @@ module rrtmgp_lw
   use mo_rrtmgp_clr_all_sky, only: rte_lw
   use mo_gas_concentrations, only: ty_gas_concs
   use mo_fluxes_byband,      only: ty_fluxes_byband
+  use rrtmgp_sw,             only: check_error_msg
+
 
   ! Parameters
   integer,parameter :: nGases = 6
@@ -441,9 +443,9 @@ contains
 
     ! Initialize gas concentrations and gas optics class with data
     do iGas=1,nGases
-       call check_error_msg(gas_concentrations%set_vmr(active_gases(iGas), 0._kind_phys))
+       call check_error_msg('rrtmgp_lw_init',gas_concentrations%set_vmr(active_gases(iGas), 0._kind_phys))
     enddo    
-    call check_error_msg(kdist_lw%load(gas_concentrations, gas_names, key_species, band2gpt, &
+    call check_error_msg('rrtmgp_lw_init',kdist_lw%load(gas_concentrations, gas_names, key_species, band2gpt, &
          band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p, temp_ref_t,   &
          vmr_ref, kmajor, kminor_lower, kminor_upper, gas_minor,identifier_minor,   &
          minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower,              &
@@ -642,14 +644,14 @@ contains
 
     ! Load tables data for RRTGMP cloud-optics  
     if (rrtmgp_lw_cld_phys .eq. 1) then
-       call check_error_msg(kdist_cldy_lw%set_ice_roughness(nrghice))
-       call check_error_msg(kdist_cldy_lw%load(band_lims_cldy, radliq_lwr, radliq_upr, &
+       call check_error_msg('rrtmgp_lw_init',kdist_cldy_lw%set_ice_roughness(nrghice))
+       call check_error_msg('rrtmgp_lw_init',kdist_cldy_lw%load(band_lims_cldy, radliq_lwr, radliq_upr, &
             radliq_fac, radice_lwr, radice_upr, radice_fac, lut_extliq, lut_ssaliq,    &
             lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (rrtmgp_lw_cld_phys .eq. 2) then
-       call check_error_msg(kdist_cldy_lw%set_ice_roughness(nrghice))
-       call check_error_msg(kdist_cldy_lw%load(band_lims_cldy, pade_extliq,            &
+       call check_error_msg('rrtmgp_lw_init',kdist_cldy_lw%set_ice_roughness(nrghice))
+       call check_error_msg('rrtmgp_lw_init',kdist_cldy_lw%load(band_lims_cldy, pade_extliq,            &
             pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,           &
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,             &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
@@ -660,58 +662,57 @@ contains
   ! #########################################################################################
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_run Argument Table
-!! | local_name            | standard_name                                                                                 | long_name                                                          | units | rank | type                  |    kind   | intent | optional |
-!! |-----------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
-!! | ncol                  | horizontal_loop_extent                                                                        | horizontal dimension                                               | count |    0 | integer               |           | in     | F        |
-!! | nlay                  | adjusted_vertical_layer_dimension_for_radiation                                               | number of vertical layers for radiation                            | count |    0 | integer               |           | in     | F        |
-!! | p_lay                 | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                 | air_pressure_at_interface_for_radiation_in_hPa                                                | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                 | air_temperature_at_layer_for_radiation                                                        | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
-!! | skt                   | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                           | K     |    1 | real                  | kind_phys | in     | F        |
-!! | sfc_emiss             | surface_longwave_emissivity_in_each_band                                                      | surface lw emissivity in fraction in each LW band                  | frac  |    2 | real                  | kind_phys | in     | F        |
-!! | kdist_lw              | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | optical_props_clds    | optical_properties_for_cloudy_atmosphere                                                      | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
-!! | optical_props_aerosol | optical_properties_for_aerosols                                                               | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
-!! | gas_concentrations    | Gas_concentrations_for_RRTMGP_suite                                                           | DDT containing gas concentrations for RRTMGP radiation scheme      | DDT   |    0 | ty_gas_concs          |           | in     | F        |
-!! | lslwr                 | flag_to_calc_lw                                                                               | flag to calculate LW irradiances                                   | flag  |    0 | logical               |           | in     | F        |
-!! | fluxLW_allsky         | lw_flux_profiles_byband_allsky                                                                | Fortran DDT containing RRTMGP 3D fluxes                            | DDT   |    0 | ty_fluxes_byband      |           | out    | F        |
-!! | fluxLW_clrsky         | lw_flux_profiles_byband_clrsky                                                                | Fortran DDT containing RRTMGP 3D fluxes                            | DDT   |    0 | ty_fluxes_byband      |           | out    | F        |
-!! | hlw0                  | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                                    | K s-1 |    2 | real                  | kind_phys | inout  | T        |
-!! | hlwb                  | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                         | K s-1 |    3 | real                  | kind_phys | inout  | T        |
-!! | errmsg                | ccpp_error_message                                                                            | error message for error handling in CCPP                           | none  |    0 | character             | len=*     | out    | F        |
-!! | errflg                | ccpp_error_flag                                                                               | error flag for error handling in CCPP                              | flag  |    0 | integer               |           | out    | F        |
+!! | local_name              | standard_name                                                                                 | long_name                                                          | units | rank | type                  |    kind   | intent | optional |
+!! |-------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
+!! | ncol                    | horizontal_loop_extent                                                                        | horizontal dimension                                               | count |    0 | integer               |           | in     | F        |
+!! | nlay                    | adjusted_vertical_layer_dimension_for_radiation                                               | number of vertical layers for radiation                            | count |    0 | integer               |           | in     | F        |
+!! | p_lay                   | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | p_lev                   | air_pressure_at_interface_for_radiation_in_hPa                                                | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | t_lay                   | air_temperature_at_layer_for_radiation                                                        | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
+!! | skt                     | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                           | K     |    1 | real                  | kind_phys | in     | F        |
+!! | sfc_emiss               | surface_longwave_emissivity_in_each_band                                                      | surface lw emissivity in fraction in each LW band                  | frac  |    2 | real                  | kind_phys | in     | F        |
+!! | kdist_lw                | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
+!! | optical_propsLW_clds    | longwave_optical_properties_for_cloudy_atmosphere                                             | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
+!! | optical_propsLW_aerosol | longwave_optical_properties_for_aerosols                                                      | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
+!! | gas_concentrations      | Gas_concentrations_for_RRTMGP_suite_lw                                                        | DDT containing gas concentrations for RRTMGP radiation scheme      | DDT   |    0 | ty_gas_concs          |           | in     | F        |
+!! | lslwr                   | flag_to_calc_lw                                                                               | flag to calculate LW irradiances                                   | flag  |    0 | logical               |           | in     | F        |
+!! | fluxLW_allsky           | lw_flux_profiles_byband_allsky                                                                | Fortran DDT containing RRTMGP 3D fluxes                            | DDT   |    0 | ty_fluxes_byband      |           | out    | F        |
+!! | fluxLW_clrsky           | lw_flux_profiles_byband_clrsky                                                                | Fortran DDT containing RRTMGP 3D fluxes                            | DDT   |    0 | ty_fluxes_byband      |           | out    | F        |
+!! | hlw0                    | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                                    | K s-1 |    2 | real                  | kind_phys | in     | T        |
+!! | hlwb                    | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                         | K s-1 |    3 | real                  | kind_phys | in     | T        |
+!! | errmsg                  | ccpp_error_message                                                                            | error message for error handling in CCPP                           | none  |    0 | character             | len=*     | out    | F        |
+!! | errflg                  | ccpp_error_flag                                                                               | error flag for error handling in CCPP                              | flag  |    0 | integer               |           | out    | F        |
 !!
   subroutine rrtmgp_lw_run(ncol, nlay, kdist_lw, p_lay, t_lay, p_lev, skt, &
-       sfc_emiss, gas_concentrations, optical_props_clds, optical_props_aerosol,&
+       sfc_emiss, gas_concentrations, optical_propsLW_clds, optical_propsLW_aerosol,&
        lslwr, fluxLW_allsky, fluxLW_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: &
-         ncol,         & ! Number of horizontal gridpoints
-         nlay            ! Number of vertical layers
+         ncol,                 & ! Number of horizontal gridpoints
+         nlay                    ! Number of vertical layers
     real(kind_phys), dimension(ncol,nlay), intent(in) :: &
-         p_lay,        & ! Pressure @ model layer-centers         (hPa)
-         t_lay           ! Temperature                            (K)
+         p_lay,                & ! Pressure @ model layer-centers         (hPa)
+         t_lay                   ! Temperature                            (K)
     real(kind_phys), dimension(ncol,nlay+1), intent(in) :: &
-         p_lev           ! Pressure @ model layer-interfaces      (hPa)
+         p_lev                   ! Pressure @ model layer-interfaces      (hPa)
     real(kind_phys), dimension(ncol), intent(in) :: &
-         skt             ! Surface(skin) temperature              (K)
+         skt                     ! Surface(skin) temperature              (K)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         kdist_lw        ! DDT containing LW spectral information
+         kdist_lw                ! DDT containing LW spectral information
     real(kind_phys), dimension(kdist_lw%get_nband(),ncol) :: &
-         sfc_emiss       ! Surface emissivity                     (1)
+         sfc_emiss               ! Surface emissivity                     (1)
     type(ty_optical_props_1scl),intent(in) :: &
-         optical_props_clds, & ! RRTMGP DDT: cloud radiative properties 
-         optical_props_aerosol ! RRTMGP DDT: aerosol radiative properties
+         optical_propsLW_clds, & ! RRTMGP DDT: longwave cloud radiative properties 
+         optical_propsLW_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
     type(ty_gas_concs),intent(in) :: &
-         gas_concentrations    ! RRTMGP DDT: trace gas concentrations (vmr)
+         gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
     logical, intent(in) :: &
-         lslwr           ! Flag to calculate LW irradiances
+         lslwr                   ! Flag to calculate LW irradiances
 
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
-
     type(ty_fluxes_byband),intent(out) :: &
          fluxLW_allsky, & ! All-sky flux                      (W/m2)
          fluxLW_clrsky    ! Clear-sky flux                    (W/m2)
@@ -724,9 +725,9 @@ contains
 
     ! Local variables
     real(kind_phys), dimension(ncol,nlay+1),target :: &
-         flux_up_allsky, flux_up_clrsky, flux_dn_allsky, flux_dn_clrsky
+         fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     real(kind_phys), dimension(ncol,nlay+1,kdist_lw%get_nband()),target :: &
-         fluxBB_up_allsky, fluxBB_dn_allsky
+         fluxLWBB_up_allsky, fluxLWBB_dn_allsky
     logical :: l_ClrSky_HR, l_AllSky_HR_byband
 
     ! Initialize CCPP error handling variables
@@ -739,43 +740,33 @@ contains
     l_AllSky_HR_byband = present(hlwb)
 
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
-    fluxLW_allsky%flux_up => flux_up_allsky
-    fluxLW_allsky%flux_dn => flux_dn_allsky
-    fluxLW_clrsky%flux_up => flux_up_clrsky
-    fluxLW_clrsky%flux_dn => flux_dn_clrsky
+    fluxLW_allsky%flux_up => fluxLW_up_allsky
+    fluxLW_allsky%flux_dn => fluxLW_dn_allsky
+    fluxLW_clrsky%flux_up => fluxLW_up_clrsky
+    fluxLW_clrsky%flux_dn => fluxLW_dn_clrsky
     ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
     if (l_AllSky_HR_byband) then
-       fluxLW_allsky%bnd_flux_up => fluxBB_up_allsky
-       fluxLW_allsky%bnd_flux_dn => fluxBB_dn_allsky
+       fluxLW_allsky%bnd_flux_up => fluxLWBB_up_allsky
+       fluxLW_allsky%bnd_flux_dn => fluxLWBB_dn_allsky
     endif
     
     ! Call RRTMGP LW scheme
-    call check_error_msg(rte_lw(           &
-         kdist_lw,                         & ! IN  - spectral information 
-         gas_concentrations,               & ! IN  - gas concentrations (vmr)
-         p_lay,                            & ! IN  - pressure at layer interfaces (Pa)
-         t_lay,                            & ! IN  - temperature at layer interfaes (K)
-         p_lev,                            & ! IN  - pressure at layer centers (Pa)
-         skt,                              & ! IN  - skin temperature (K)
-         sfc_emiss,                        & ! IN  - surface emissivity in each LW band
-         optical_props_clds,               & ! IN  - DDT containing cloud optical information 
-         fluxLW_allsky,                    & ! OUT - Fluxes, all-sky, 3D (nCol,nLay,nBand) 
-         fluxLW_clrsky,                    & ! OUT - Fluxes, clear-sky, 3D (nCol,nLay,nBand) 
-         aer_props = optical_props_aerosol)) ! IN(optional) - DDT containing aerosol optical information
+    call check_error_msg('rrtmgp_lw_run',rte_lw(           &
+         kdist_lw,                           & ! IN  - spectral information 
+         gas_concentrations,                 & ! IN  - gas concentrations (vmr)
+         p_lay,                              & ! IN  - pressure at layer interfaces (Pa)
+         t_lay,                              & ! IN  - temperature at layer interfaes (K)
+         p_lev,                              & ! IN  - pressure at layer centers (Pa)
+         skt,                                & ! IN  - skin temperature (K)
+         sfc_emiss,                          & ! IN  - surface emissivity in each LW band
+         optical_propsLW_clds,               & ! IN  - DDT containing cloud optical information 
+         fluxLW_allsky,                      & ! OUT - Fluxes, all-sky, 3D (nCol,nLay,nBand) 
+         fluxLW_clrsky,                      & ! OUT - Fluxes, clear-sky, 3D (nCol,nLay,nBand) 
+         aer_props = optical_propsLW_aerosol)) ! IN(optional) - DDT containing aerosol optical information
 
   end subroutine rrtmgp_lw_run
   
   subroutine rrtmgp_lw_finalize()
   end subroutine rrtmgp_lw_finalize
-  subroutine check_error_msg(error_msg)
-    character(len=*), intent(in) :: error_msg
-    
-    if(error_msg /= "") then
-       print*,"ERROR(rrtmgp_lw.F90): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg    
-
 
 end module rrtmgp_lw
