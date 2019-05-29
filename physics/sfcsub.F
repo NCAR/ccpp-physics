@@ -2722,7 +2722,7 @@
       real (kind=kind_io8), allocatable :: data8(:)
       real (kind=kind_io4), allocatable :: data4(:)
 !
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer kpds(200),kgds(200)
       integer jpds(200),jgds(200), kpds0(200)
@@ -8251,7 +8251,7 @@ cjfe
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer, intent(in) :: kpds7
       integer kpds(1000),kgds(1000)

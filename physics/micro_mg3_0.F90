@@ -2417,11 +2417,13 @@ subroutine micro_mg_tend (                                       &
         if (do_cldice) then
 
            ! freezing of rain to produce ice if mean rain size is smaller than Dcs
-           if (lamr(i,k) > qsmall .and. one/lamr(i,k) < Dcs) then
-              mnuccri(i,k) = mnuccr(i,k)
-              nnuccri(i,k) = nnuccr(i,k)
-              mnuccr(i,k)  = zero 
-              nnuccr(i,k)  = zero
+           if (lamr(i,k) > qsmall) then
+             if(one/lamr(i,k) < Dcs) then
+                mnuccri(i,k) = mnuccr(i,k)
+                nnuccri(i,k) = nnuccr(i,k)
+                mnuccr(i,k)  = zero 
+                nnuccr(i,k)  = zero
+             end if
            end if
         end if
 
@@ -2968,7 +2970,7 @@ subroutine micro_mg_tend (                                       &
 !               (nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k))*lcldm(i,k)+(nsubi(i,k)-nprci(i,k)- &
 !               nprai(i,k))*icldm(i,k)+nnuccri(i,k)*precip_frac(i,k)
 
-          nitend(i,k) = nitend(i,k) + nnuccd(i,k) +                                   &
+          nitend(i,k) = nitend(i,k) + nnuccd(i,k)                                     &
                +  (nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k)+nmultg(i,k))*lcldm(i,k) &
                + (nsubi(i,k)-nprci(i,k)-nprai(i,k))*icldm(i,k)                        &
                + (nnuccri(i,k)+nmultrg(i,k))*precip_frac(i,k)

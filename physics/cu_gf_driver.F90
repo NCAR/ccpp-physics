@@ -35,7 +35,11 @@ contains
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
-
+         
+         ! initialize ccpp error handling variables
+         errmsg = ''
+         errflg = 0
+         
          ! DH* temporary
          if (mpirank==mpiroot) then
             write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'

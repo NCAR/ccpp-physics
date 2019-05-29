@@ -52,7 +52,7 @@ MODULE module_mp_thompson
 
       USE module_mp_radar
 
-#ifndef SION
+#if !defined(SION) && defined(MPI)
       use mpi
 #endif
 
