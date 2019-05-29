@@ -1,4 +1,4 @@
-!> \file physcons.f90
+!> \file physcons.F90
 !! This file contains module physcons
 
 !  ==========================================================  !!!!!
@@ -28,7 +28,6 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup physcons GFS Physics Constants Module
-!! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for GCM models.
 
@@ -134,4 +133,3 @@
 !........................................!
       end module physcons                !
 !========================================!
-!! @}

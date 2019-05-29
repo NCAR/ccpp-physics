@@ -2,7 +2,6 @@
 !! This file includes API for basic thermodynamic physics.
 
 !>\defgroup func_phys GFS Physics Function Module
-!! @{
 !! This module provides API for computing basic thermodynamic physics
 !! functions. 
 
@@ -3341,4 +3340,3 @@ contains
   end subroutine
 !-------------------------------------------------------------------------------
 end module
-!! @}

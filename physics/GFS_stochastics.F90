@@ -1,9 +1,6 @@
 !> \file GFS_stochastics.f90
 !! This file contains code previously in GFS_stochastics_driver.
 
-!>\defgroup gfs_stoch GFS Stochastics Main Module
-!! This module
-!! @ {
     module GFS_stochastics
 
       contains
@@ -14,6 +11,10 @@
       subroutine GFS_stochastics_finalize()
       end subroutine GFS_stochastics_finalize
 
+
+!>\defgroup gfs_stoch GFS Stochastics Physics Module
+!! This module
+!> @{
 !> \section arg_table_GFS_stochastics_run Argument Table
 !! | local_name     | standard_name                                                             | long_name                                                    | units   | rank | type      |    kind   | intent | optional |
 !! |----------------|---------------------------------------------------------------------------|--------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -57,16 +58,14 @@
 !! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                     | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                        | flag    |    0 | integer   |           | out    | F        |
 !!
-!-------------------------------------------------------------------------
-! GFS stochastic_driver
-!-------------------------------------------------------------------------
-!    routine called prior to radiation and physics steps to handle:
-!      1) sets up various time/date variables
-!      2) sets up various triggers
-!      3) defines random seed indices for radiation (in a reproducible way)
-!      5) interpolates coefficients for prognostic ozone calculation
-!      6) performs surface data cycling via the GFS gcycle routine
-!-------------------------------------------------------------------------
+!>\section gfs_stochy_general GFS_stochastics_run General Algorithm
+!! This is the GFS stochastic physics driver.
+!! Routines are called prior to radiation and physics steps to handle:
+!! -# sets up various time/date variables
+!! -# sets up various triggers
+!! -# defines random seed indices for radiation (in a reproducible way)
+!! -# interpolates coefficients for prognostic ozone calculation
+!! -# performs surface data cycling via the GFS gcycle routine
       subroutine GFS_stochastics_run (im, km, do_sppt, use_zmtnblck, do_shum, do_skeb,   &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
@@ -247,4 +246,4 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
-!! @}
+!> @}

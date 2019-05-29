@@ -1,6 +1,9 @@
-!> \file GFS_phys_time_vary.F90
+!> \file GFS_phys_time_vary.fv3.F90
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
+!>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
+!! This module contains GFS physics time vary subroutines including ozone, h2o, i
+!! aerosol and IN&CCN updates. 
    module GFS_phys_time_vary
 
 #ifdef OPENMP

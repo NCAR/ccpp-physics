@@ -1,3 +1,10 @@
+!>\file iccninterp.F90
+!! This file contains subrouines of reading and interplating
+!! IN and CCN data.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module contains subroutines of reading and interplating
+!! IN and CCN data.
 module iccninterp
 
     implicit none

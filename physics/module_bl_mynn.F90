@@ -1,105 +1,110 @@
+!>\file module_bl_mynn.F90
+!! This file contains the entity of MYNN-EDMF PBL scheme.
+
 !WRF:MODEL_LAYER:PHYSICS
 !
-! translated from NN f77 to F90 and put into WRF by Mariusz Pagowski
-! NOAA/GSD & CIRA/CSU, Feb 2008
-! changes to original code:
-! 1. code is 1D (in z)
-! 2. no advection of TKE, covariances and variances 
-! 3. Cranck-Nicholson replaced with the implicit scheme
-! 4. removed terrain dependent grid since input in WRF in actual
-!    distances in z[m]
-! 5. cosmetic changes to adhere to WRF standard (remove common blocks, 
-!            intent etc)
-!-------------------------------------------------------------------
-!Modifications implemented by Joseph Olson and Jaymes Kenyon NOAA/GSD/MDB - CU/CIRES
-!
-! Departures from original MYNN (Nakanish & Niino 2009)
-! 1. Addition of BouLac mixing length in the free atmosphere.
-! 2. Changed the turbulent mixing length to be integrated from the
-!    surface to the top of the BL + a transition layer depth.
-! v3.4.1:    Option to use Kitamura/Canuto modification which removes 
-!            the critical Richardson number and negative TKE (default).
-!            Hybrid PBL height diagnostic, which blends a theta-v-based
-!            definition in neutral/convective BL and a TKE-based definition
-!            in stable conditions.
-!            TKE budget output option (bl_mynn_tkebudget)
-! v3.5.0:    TKE advection option (bl_mynn_tkeadvect)
-! v3.5.1:    Fog deposition related changes.
-! v3.6.0:    Removed fog deposition from the calculation of tendencies
-!            Added mixing of qc, qi, qni
-!            Added output for wstar, delta, TKE_PBL, & KPBL for correct 
-!                   coupling to shcu schemes  
-! v3.8.0:    Added subgrid scale cloud output for coupling to radiation
-!            schemes (activated by setting icloud_bl =1 in phys namelist).
-!            Added WRF_DEBUG prints (at level 3000)
-!            Added Tripoli and Cotton (1981) correction.
-!            Added namelist option bl_mynn_cloudmix to test effect of mixing
-!                cloud species (default = 1: on). 
-!            Added mass-flux option (bl_mynn_edmf, = 1 for DMP mass-flux, 0: off).
-!                Related options: 
-!                 bl_mynn_edmf_mom = 1 : activate momentum transport in MF scheme
-!                 bl_mynn_edmf_tke = 1 : activate TKE transport in MF scheme
-!            Added mixing length option (bl_mynn_mixlength, see notes below)
-!            Added more sophisticated saturation checks, following Thompson scheme
-!            Added new cloud PDF option (bl_mynn_cloudpdf = 2) from Chaboureau
-!                and Bechtold (2002, JAS, with mods) 
-!            Added capability to mix chemical species when env variable
-!                WRF_CHEM = 1, thanks to Wayne Angevine.
-!            Added scale-aware mixing length, following Junshi Ito's work
-!                Ito et al. (2015, BLM).
-! v3.9.0    Improvement to the mass-flux scheme (dynamic number of plumes,
-!                better plume/cloud depth, significant speed up, better cloud
-!                fraction). 
-!            Added Stochastic Parameter Perturbation (SPP) implementation.
-!            Many miscellaneous tweaks to the mixing lengths and stratus
-!                component of the subgrid clouds.
-! v.4.0      Removed or added alternatives to WRF-specific functions/modules
-!                for the sake of portability to other models.
-!                the sake of portability to other models.
-!            Further refinement of mass-flux scheme from SCM experiments with
-!                Wayne Angevine: switch to linear entrainment and back to
-!                Simpson and Wiggert-type w-equation.
-!            Addition of TKE production due to radiation cooling at top of 
-!                clouds (proto-version); not activated by default.
-!            Some code rewrites to move if-thens out of loops in an attempt to
-!                improve computational efficiency.
-!            New tridiagonal solver, which is supposedly 14% faster and more
-!                conservative. Impact seems very small.
-!            Many miscellaneous tweaks to the mixing lengths and stratus
-!                component of the subgrid-scale (SGS) clouds.
-! v4.1       Big improvements in downward SW radiation due to revision of subgrid clouds
-!                - better cloud fraction and subgrid scale mixing ratios.
-!                - may experience a small cool bias during the daytime now that high 
-!                  SW-down bias is greatly reduced...
-!            Some tweaks to increase the turbulent mixing during the daytime for
-!                bl_mynn_mixlength option 2 to alleviate cool bias (very small impact).
-!            Improved ensemble spread from changes to SPP in MYNN
-!                - now perturbing eddy diffusivity and eddy viscosity directly
-!                - now perturbing background rh (in SGS cloud calc only)
-!                - now perturbing entrainment rates in mass-flux scheme
-!            Added IF checks (within IFDEFS) to protect mixchem code from being used
-!                when HRRR smoke is used (no impact on regular non-wrf chem use)
-!            Important bug fix for wrf chem when transporting chemical species in MF scheme
-!            Removed 2nd mass-flux scheme (no only bl_mynn_edmf = 1, no option 2)
-!            Removed unused stochastic code for mass-flux scheme
-!            Changed mass-flux scheme to be integrated on interface levels instead of
-!                mass levels - impact is small
-!            Added option to mix 2nd moments in MYNN as opposed to the scalar_pblmix option.
-!                - activated with bl_mynn_mixscalars = 1; this sets scalar_pblmix = 0
-!                - added tridagonal solver used in scalar_pblmix option to duplicate tendencies
-!                - this alone changes the interface call considerably from v4.0.
-!            Slight revision to TKE production due to radiation cooling at top of clouds
-!            Added the non-Guassian buoyancy flux function of Bechtold and Siebesma (1998, JAS).
-!                - improves TKE in SGS clouds
-!            Added heating due to dissipation of TKE (small impact, maybe + 0.1 C daytime PBL temp)
-!            Misc changes made for FV3/MPAS compatibility
-!
-!            Many of these changes are now documented in Olson et al. (2019,
-!                NOAA Technical Memorandum)
-!
-! For more explanation of some configuration options, see "JOE's mods" below:
-!-------------------------------------------------------------------
 
+!>\defgroup gsd_mynn_edmf GSD MYNN-EDMF PBL Scheme
+!! This module is translated from Nakanishi and Niino (2009) \cite NAKANISHI_2009 
+!! f77 to F90 and put into WRF by Mariusz Pagowski
+!! NOAA/GSD & CIRA/CSU, Feb 2008.
+!! Changes to original code:
+!! -# code is 1D (in z)
+!! -# no advection of TKE, covariances and variances 
+!! -# Cranck-Nicholson replaced with the implicit scheme
+!! -# removed terrain dependent grid since input in WRF in actual distances in z[m]
+!! -# cosmetic changes to adhere to WRF standard (remove common blocks, intent etc)
+!!
+!!Modifications implemented by Joseph Olson and Jaymes Kenyon NOAA/GSD/MDB - CU/CIRES
+!!
+!! Departures from original MYNN (Nakanish and Niino (2009) \cite NAKANISHI_2009)
+!! -# Addition of BouLac mixing length in the free atmosphere.
+!! -# Changed the turbulent mixing length to be integrated from the
+!!    surface to the top of the BL + a transition layer depth.
+!!
+!!\version v3.4.1:    
+!! - Option to use Kitamura/Canuto modification which removes 
+!! the critical Richardson number and negative TKE (default).
+!! - Hybrid PBL height diagnostic, which blends a theta-v-based
+!! definition in neutral/convective BL and a TKE-based definition
+!! in stable conditions.
+!! - TKE budget output option (bl_mynn_tkebudget)
+!!\version v3.5.0:    
+!! - TKE advection option (bl_mynn_tkeadvect)
+!!\version v3.5.1:    
+!! - Fog deposition related changes.
+!!\version v3.6.0:    
+!! - Removed fog deposition from the calculation of tendencies
+!! - Added mixing of qc, qi, qni
+!! - Added output for wstar, delta, TKE_PBL, & KPBL for correct 
+!! coupling to shcu schemes  
+!!\version v3.8.0:    
+!! - Added subgrid scale cloud output for coupling to radiation
+!! schemes (activated by setting icloud_bl =1 in phys namelist).
+!! - Added WRF_DEBUG prints (at level 3000)
+!! - Added Tripoli and Cotton (1981) \cite Tripoli_1981 correction.
+!! - Added namelist option bl_mynn_cloudmix to test effect of mixing cloud species (default = 1: on). 
+!! - Added mass-flux option (bl_mynn_edmf, = 1 for DMP mass-flux, 0: off). Related options: 
+!!   -  bl_mynn_edmf_mom = 1 : activate momentum transport in MF scheme
+!!   -  bl_mynn_edmf_tke = 1 : activate TKE transport in MF scheme
+!! - Added mixing length option (bl_mynn_mixlength, see notes below)
+!! - Added more sophisticated saturation checks, following Thompson scheme
+!! - Added new cloud PDF option (bl_mynn_cloudpdf = 2) from Chaboureau
+!!   and Bechtold (2002) \cite Chaboureau_2002 with modifications 
+!! - Added capability to mix chemical species when env variable
+!!   WRF_CHEM = 1, thanks to Wayne Angevine.
+!! - Added scale-aware mixing length, following Junshi Ito's work
+!!   Ito et al. (2015, BLM) \cite Ito_2015.
+!!\version v3.9.0:    
+!! - Improvement to the mass-flux scheme (dynamic number of plumes,
+!!   better plume/cloud depth, significant speed up, better cloud fraction). 
+!! - Added Stochastic Parameter Perturbation (SPP) implementation.
+!! -  Many miscellaneous tweaks to the mixing lengths and stratus
+!!    component of the subgrid clouds.
+!!\version v4.0:      
+!! - Removed or added alternatives to WRF-specific functions/modules
+!!   for the sake of portability to other models.
+!! - Further refinement of mass-flux scheme from SCM experiments with
+!!   Wayne Angevine: switch to linear entrainment and back to
+!!   Simpson and Wiggert-type w-equation.
+!! - Addition of TKE production due to radiation cooling at top of 
+!!   clouds (proto-version); not activated by default.
+!! - Some code rewrites to move if-thens out of loops in an attempt to
+!!   improve computational efficiency.
+!! - New tridiagonal solver, which is supposedly 14% faster and more
+!!   conservative. Impact seems very small.
+!! - Many miscellaneous tweaks to the mixing lengths and stratus
+!!   component of the subgrid-scale (SGS) clouds.
+!!\version v4.1:
+!! - Big improvements in downward SW radiation due to revision of subgrid clouds
+!!   - better cloud fraction and subgrid scale mixing ratios.
+!!   - may experience a small cool bias during the daytime now that high 
+!!     SW-down bias is greatly reduced...
+!! - Some tweaks to increase the turbulent mixing during the daytime for
+!!   bl_mynn_mixlength option 2 to alleviate cool bias (very small impact).
+!! - Improved ensemble spread from changes to SPP in MYNN
+!!   - now perturbing eddy diffusivity and eddy viscosity directly
+!!   - now perturbing background rh (in SGS cloud calc only)
+!!   - now perturbing entrainment rates in mass-flux scheme
+!! - Added IF checks (within IFDEFS) to protect mixchem code from being used
+!!   when HRRR smoke is used (no impact on regular non-wrf chem use)
+!! - Important bug fix for wrf chem when transporting chemical species in MF scheme
+!! - Removed 2nd mass-flux scheme (no only bl_mynn_edmf = 1, no option 2)
+!! - Removed unused stochastic code for mass-flux scheme
+!! - Changed mass-flux scheme to be integrated on interface levels instead of
+!!   mass levels - impact is small
+!! - Added option to mix 2nd moments in MYNN as opposed to the scalar_pblmix option.
+!!   - activated with bl_mynn_mixscalars = 1; this sets scalar_pblmix = 0
+!!   - added tridagonal solver used in scalar_pblmix option to duplicate tendencies
+!!   - this alone changes the interface call considerably from v4.0.
+!! - Slight revision to TKE production due to radiation cooling at top of clouds
+!! - Added the non-Guassian buoyancy flux function of Bechtold and Siebesma (1998) \cite Bechtold_1998
+!!    - improves TKE in SGS clouds
+!! - Added heating due to dissipation of TKE (small impact, maybe + 0.1 C daytime PBL temp)
+!! - Misc changes made for FV3/MPAS compatibility
+!!
+!!Many of these changes are now documented in Olson et al. (2019,
+!! NOAA Technical Memorandum)
 MODULE module_bl_mynn
 
 !==================================================================
@@ -161,8 +166,8 @@ MODULE module_bl_mynn
   REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
        &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
 
-  REAL, PARAMETER :: tref=300.0     ! reference temperature (K)
-  REAL, PARAMETER :: TKmin=253.0    ! for total water conversion, Tripoli and Cotton (1981)
+  REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
+  REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
   REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref
 
 ! Closure constants
@@ -199,47 +204,47 @@ MODULE module_bl_mynn
 
 ! Constants for gravitational settling
 !  REAL, PARAMETER :: gno=1.e6/(1.e8)**(2./3.), gpw=5./3., qcgmin=1.e-8
-  REAL, PARAMETER :: gno=1.0  !original value seems too agressive: 4.64158883361278196
+  REAL, PARAMETER :: gno=1.0  !< original value seems too agressive: 4.64158883361278196
   REAL, PARAMETER :: gpw=5./3., qcgmin=1.e-8, qkemin=1.e-12
 
 ! Constants for cloud PDF (mym_condensation)
   REAL, PARAMETER :: rr2=0.7071068, rrp=0.3989423
 
-! 'parameters' for Poisson distribution (EDMF scheme)
+! 'parameters' for Poisson distribution (StEM EDMF scheme)
   REAL, PARAMETER  :: zero = 0.0, half = 0.5, one = 1.0, two = 2.0
 
-  !Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
-  !For more info, see Canuto et al. (2008 JAS) and Kitamura (Journal of the 
-  !Meteorological Society of Japan, Vol. 88, No. 5, pp. 857-864, 2010).
-  !Note that this change required further modification of other parameters
-  !above (c2, c3). If you want to remove this option, set c2 and c3 constants 
-  !(above) back to NN2009 values (see commented out lines next to the
-  !parameters above). This only removes the negative TKE problem
-  !but does not necessarily improve performance - neutral impact.
+  !>Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
+  !!For more info, see Canuto et al. (2008 JAS) and Kitamura (Journal of the 
+  !!Meteorological Society of Japan, Vol. 88, No. 5, pp. 857-864, 2010).
+  !!Note that this change required further modification of other parameters
+  !!above (c2, c3). If you want to remove this option, set c2 and c3 constants 
+  !!(above) back to NN2009 values (see commented out lines next to the
+  !!parameters above). This only removes the negative TKE problem
+  !!but does not necessarily improve performance - neutral impact.
   REAL, PARAMETER :: CKmod=1.
 
-  !Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
-  !on the cloud PDF and mass-flux scheme, using Honnert et al. (2011) similarity function
-  !for TKE in the upper PBL/cloud layer.
+  !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
+  !!on the cloud PDF and mass-flux scheme, using Honnert et al. (2011) similarity function
+  !!for TKE in the upper PBL/cloud layer.
   REAL, PARAMETER :: scaleaware=1.
 
-  !Temporary switch to deactivate the mixing of chemical species (already done when WRF_CHEM = 1)
+  !>Temporary switch to deactivate the mixing of chemical species (already done when WRF_CHEM = 1)
   INTEGER, PARAMETER :: bl_mynn_mixchem = 0
 
-  !Adding top-down diffusion driven by cloud-top radiative cooling
+  !>Adding top-down diffusion driven by cloud-top radiative cooling
   INTEGER, PARAMETER :: bl_mynn_topdown = 1
 
-  !Option to activate heating due to dissipation of TKE (to activate, set to 1.0)
+  !>Option to activate heating due to dissipation of TKE (to activate, set to 1.0)
   REAL, PARAMETER :: dheat_opt = 1.
 
-  !option to print out more stuff for debugging purposes
+  !>option to print out more stuff for debugging purposes
   LOGICAL, PARAMETER :: debug_code = .false.
 
 ! JAYMES-
-! Constants used for empirical calculations of saturation
-! vapor pressures (in function "esat") and saturation mixing ratios
-! (in function "qsat"), reproduced from module_mp_thompson.F, 
-! v3.6 
+!> Constants used for empirical calculations of saturation
+!! vapor pressures (in function "esat") and saturation mixing ratios
+!! (in function "qsat"), reproduced from module_mp_thompson.F, 
+!! v3.6 
   REAL, PARAMETER:: J0= .611583699E03
   REAL, PARAMETER:: J1= .444606896E02
   REAL, PARAMETER:: J2= .143177157E01
@@ -264,6 +269,7 @@ MODULE module_bl_mynn
 !JOE & JAYMES'S mods
 !
 ! Mixing Length Options 
+!\authors Joe and Jaymes
 !   specifed through namelist:  bl_mynn_mixlength
 !   added:  16 Apr 2015
 !
@@ -420,11 +426,16 @@ CONTAINS
 !     # As to dtl, ...gh, see subroutine mym_turbulence.
 !
 !-------------------------------------------------------------------
+
+!>\ingroup gsd_mynn_edmf
+!! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
+!! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
+!!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
+!> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,                                  &
        &            dz, zw,                                   &
-       &            u, v, thl, qw,                            &
-!       &            ust, rmo, pmz, phh, flt, flq,             &
+       &            u, v, thl, qw,                            & ! &ust, rmo, pmz, phh, flt, flq, &
        &            zi, theta, sh,                            &
        &            ust, rmo, el,                             &
        &            Qke, Tsq, Qsq, Cov, Psig_bl, cldfra_bl1D, &
@@ -456,13 +467,14 @@ CONTAINS
     REAL, DIMENSION(kts:kte) :: rstoch_col
     INTEGER ::spp_pbl
 
-!   **  At first ql, vt and vq are set to zero.  **
+!> - At first ql, vt and vq are set to zero.
     DO k = kts,kte
        ql(k) = 0.0
        vt(k) = 0.0
        vq(k) = 0.0
     END DO
 !
+!> - Call mym_level2() to calculate the stability functions at level 2.
     CALL mym_level2 ( kts,kte,&
          &            dz,  &
          &            u, v, thl, qw, &
@@ -495,6 +507,7 @@ CONTAINS
 !
     DO l = 1,lmax
 !
+!> - call mym_length() to calculate the master length scale.
        CALL mym_length (                     &
             &            kts,kte,            &
             &            dz, zw,             &
@@ -562,6 +575,7 @@ CONTAINS
 !    RETURN
 
   END SUBROUTINE mym_initialize
+!> @}
   
 !
 ! ==================================================================
@@ -580,6 +594,30 @@ CONTAINS
 !
 !       These are defined on the walls of the grid boxes.
 !
+
+!>\ingroup gsd_mynn_edmf
+!! This subroutine calculates the level 2, non-dimensional wind shear
+!! \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as 
+!! the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
+!!\param kts    horizontal dimension
+!!\param kte    vertical dimension
+!!\param dz     vertical grid spacings (\f$m\f$)
+!!\param u      west-east component of the horizontal wind (\f$m s^{-1}\f$)
+!!\param v      south-north component of the horizontal wind (\f$m s^{-1}\f$)
+!!\param thl    liquid water potential temperature
+!!\param qw     total water content \f$Q_w\f$
+!!\param ql     liquid water content (\f$kg kg^{-1}\f$)
+!!\param vt
+!!\param vq
+!!\param dtl     vertical gradient of \f$\theta_l\f$ (\f$K m^{-1}\f$)
+!!\param dqw     vertical gradient of \f$Q_w\f$
+!!\param dtv     vertical gradient of \f$\theta_V\f$ (\f$K m^{-1}\f$)
+!!\param gm      \f$G_M\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+!!\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+!!\param sm      stability function for momentum, at Level 2
+!!\param sh      stability function for heat, at Level 2
+!!\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+!! @ {
   SUBROUTINE  mym_level2 (kts,kte,&
        &            dz, &
        &            u, v, thl, qw, &
@@ -689,6 +727,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE mym_level2
+!! @}
 
 ! ==================================================================
 !     SUBROUTINE  mym_length:
@@ -705,6 +744,8 @@ CONTAINS
 !     NOTE: the mixing lengths are meant to be calculated at the full-
 !           sigmal levels (or interfaces beween the model layers).
 !
+!>\ingroup gsd_mynn_edmf
+!! This subroutine calculates the mixing lengths.
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,                      &
     &            dz, zw,                       &
@@ -743,27 +784,27 @@ CONTAINS
 
     ! THE FOLLOWING CONSTANTS ARE IMPORTANT FOR REGULATING THE
     ! MIXING LENGTHS:
-    REAL :: cns,   &   ! for surface layer (els) in stable conditions
-            alp1,  &   ! for turbulent length scale (elt)
-            alp2,  &   ! for buoyancy length scale (elb)
-            alp3,  &   ! for buoyancy enhancement factor of elb
-            alp4,  &   ! for surface layer (els) in unstable conditions
-            alp5,  &   ! for BouLac mixing length or above PBLH
-            alp6       ! for mass-flux/
+    REAL :: cns,   &   !< for surface layer (els) in stable conditions
+            alp1,  &   !< for turbulent length scale (elt)
+            alp2,  &   !< for buoyancy length scale (elb)
+            alp3,  &   !< for buoyancy enhancement factor of elb
+            alp4,  &   !< for surface layer (els) in unstable conditions
+            alp5,  &   !< for BouLac mixing length or above PBLH
+            alp6       !< for mass-flux/
 
     !THE FOLLOWING LIMITS DO NOT DIRECTLY AFFECT THE ACTUAL PBLH.
     !THEY ONLY IMPOSE LIMITS ON THE CALCULATION OF THE MIXING LENGTH 
     !SCALES SO THAT THE BOULAC MIXING LENGTH (IN FREE ATMOS) DOES
     !NOT ENCROACH UPON THE BOUNDARY LAYER MIXING LENGTH (els, elb & elt).
-    REAL, PARAMETER :: minzi = 300.  !min mixed-layer height
-    REAL, PARAMETER :: maxdz = 750.  !max (half) transition layer depth
-                                     !=0.3*2500 m PBLH, so the transition
-                                     !layer stops growing for PBLHs > 2.5 km.
-    REAL, PARAMETER :: mindz = 300.  !300  !min (half) transition layer depth
+    REAL, PARAMETER :: minzi = 300.  !< min mixed-layer height
+    REAL, PARAMETER :: maxdz = 750.  !< max (half) transition layer depth
+                                     !! =0.3*2500 m PBLH, so the transition
+                                     !! layer stops growing for PBLHs > 2.5 km.
+    REAL, PARAMETER :: mindz = 300.  !< 300  !min (half) transition layer depth
 
     !SURFACE LAYER LENGTH SCALE MODS TO REDUCE IMPACT IN UPPER BOUNDARY LAYER
-    REAL, PARAMETER :: ZSLH = 100. ! Max height correlated to surface conditions (m)
-    REAL, PARAMETER :: CSL = 2.    ! CSL = constant of proportionality to L O(1)
+    REAL, PARAMETER :: ZSLH = 100. !< Max height correlated to surface conditions (m)
+    REAL, PARAMETER :: CSL = 2.    !< CSL = constant of proportionality to L O(1)
     REAL :: z_m
 
 
@@ -1079,23 +1120,19 @@ CONTAINS
   END SUBROUTINE mym_length
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!! This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
+!! integration into the MYNN PBL scheme. WHILE loops were added to reduce the
+!! computational expense. This subroutine computes the length scales up and down
+!! and then computes the min, average of the up/down length scales, and also
+!! considers the distance to the surface.
+!!\param dlu  the distance a parcel can be lifted upwards give a finite
+!!  amount of TKE.
+!\param dld  the distance a parcel can be displaced downwards given a
+!!  finite amount of TKE.
+!!\param lb1  the minimum of the length up and length down
+!!\param lb2  the average of the length up and length down
   SUBROUTINE boulac_length0(k,kts,kte,zw,dz,qtke,theta,lb1,lb2)
-!
-!    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
-!          and modified for integration into the MYNN PBL scheme.
-!          WHILE loops were added to reduce the computational expense.
-!          This subroutine computes the length scales up and down
-!          and then computes the min, average of the up/down
-!          length scales, and also considers the distance to the
-!          surface.
-!
-!      dlu = the distance a parcel can be lifted upwards give a finite
-!            amount of TKE.
-!      dld = the distance a parcel can be displaced downwards given a
-!            finite amount of TKE.
-!      lb1 = the minimum of the length up and length down
-!      lb2 = the average of the length up and length down
-!-------------------------------------------------------------------
 
      INTEGER, INTENT(IN) :: k,kts,kte
      REAL, DIMENSION(kts:kte), INTENT(IN) :: qtke,dz,theta
@@ -1230,16 +1267,15 @@ CONTAINS
   END SUBROUTINE boulac_length0
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!! This subroutine was taken from the BouLac scheme in WRF-ARW
+!! and modified for integration into the MYNN PBL scheme.
+!! WHILE loops were added to reduce the computational expense.
+!! This subroutine computes the length scales up and down
+!! and then computes the min, average of the up/down
+!! length scales, and also considers the distance to the
+!! surface.
   SUBROUTINE boulac_length(kts,kte,zw,dz,qtke,theta,lb1,lb2)
-!
-!    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
-!          and modified for integration into the MYNN PBL scheme.
-!          WHILE loops were added to reduce the computational expense.
-!          This subroutine computes the length scales up and down
-!          and then computes the min, average of the up/down
-!          length scales, and also considers the distance to the
-!          surface.
-!
 !      dlu = the distance a parcel can be lifted upwards give a finite 
 !            amount of TKE.
 !      dld = the distance a parcel can be displaced downwards given a
@@ -1423,6 +1459,24 @@ CONTAINS
 !     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
 !       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
 !
+!>\ingroup gsd_mynn_edmf
+!! This subroutine calculates the vertical diffusivity coefficients and the 
+!! production terms for the turbulent quantities.      
+!>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+!! Two subroutines mym_level2() and mym_length() are called within this
+!!subrouine to collect variable to carry out successive calculations:
+!! - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
+!! and vertical temperature gradient \f$G_H\f$ as well as the level 2 stability
+!! functions \f$S_h\f$ and \f$S_m\f$.
+!! - mym_length() calculates the mixing lengths.
+!! - The stability criteria from Helfand and Labraga (1989) are applied.
+!! - The stability functions for level 2.5 or level 3.0 are calculated.
+!! - If level 3.0 is used, counter-gradient terms are calculated.
+!! - Production terms of TKE,\f$\theta^{'2}\f$,\f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$
+!! are calculated.
+!! - Eddy diffusivity \f$K_h\f$ and eddy viscosity \f$K_m\f$ are calculated.
+!! - TKE budget terms are calculated (if the namelist parameter \p bl_mynn_tkebudget 
+!! is set to True)
   SUBROUTINE  mym_turbulence (                                &
     &            kts,kte,                                     &
     &            levflag,                                     &
@@ -1916,7 +1970,7 @@ CONTAINS
 ! ==================================================================
 !     SUBROUTINE  mym_predict:
 !
-!     Input variables:    see subroutine mym_initialize and turbulence
+!!     Input variables:    see subroutine mym_initialize and turbulence
 !       qke(nx,nz,ny) : qke at (n)th time level
 !       tsq, ...cov     : ditto
 !
@@ -1957,15 +2011,17 @@ CONTAINS
 !       scheme (program).
 !
 !-------------------------------------------------------------------
-  SUBROUTINE  mym_predict (kts,kte,&
-       &            levflag,  &
-       &            delt,&
-       &            dz, &
-       &            ust, flt, flq, pmz, phh, &
-       &            el, dfq, &
-       &            pdk, pdt, pdq, pdc,&
-       &            qke, tsq, qsq, cov, &
-       &            s_aw,s_awqke,bl_mynn_edmf_tke &
+!>\ingroup gsd_mynn_edmf
+!! This subroutine predicts the turbulent quantities at the next step.
+  SUBROUTINE  mym_predict (kts,kte,                                     &
+       &            levflag,                                            &
+       &            delt,                                               &
+       &            dz,                                                 &
+       &            ust, flt, flq, pmz, phh,                            &
+       &            el, dfq,                                            &
+       &            pdk, pdt, pdq, pdc,                                 &
+       &            qke, tsq, qsq, cov,                                 &
+       &            s_aw,s_awqke,bl_mynn_edmf_tke                       &
        &)
 
 !-------------------------------------------------------------------
@@ -2272,6 +2328,11 @@ CONTAINS
 !       Set these values to those adopted by you.
 !
 !-------------------------------------------------------------------
+!>\ingroup gsd_mynn_edmf 
+!! This subroutine calculates the nonconvective component of the 
+!! subgrid cloud fraction and mixing ratio as well as the functions used to 
+!! calculate the buoyancy flux. Different cloud PDFs can be selected by
+!! use of the namelist parameter \p bl_mynn_cloudpdf .
   SUBROUTINE  mym_condensation (kts,kte,  &
     &            dx, dz,                  &
     &            thl, qw,                 &
@@ -2722,6 +2783,9 @@ CONTAINS
   END SUBROUTINE mym_condensation
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
+!! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,      &
        &levflag,grav_settling,             &
        &delt,dz,rho,                       &
@@ -3522,7 +3586,8 @@ ENDIF
 
 ! ==================================================================
 #if (WRF_CHEM == 1)
-  SUBROUTINE mynn_mix_chem(kts,kte,       &
+!>\ingroup gsd_mynn_edmf
+  SUBROUTINE mynn_mix_chem(kts,kte,      &
        levflag,grav_settling,             &
        delt,dz,                           &
        nchem, kdvel, ndvel, num_vert_mix, &
@@ -3607,6 +3672,7 @@ ENDIF
 #endif
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dz,K_m,K_h)
 
@@ -3634,6 +3700,7 @@ ENDIF
   END SUBROUTINE retrieve_exchange_coeffs
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
   SUBROUTINE tridiag(n,a,b,c,d)
 
 !! to solve system of linear eqs on tridiagonal matrix n times n
@@ -3669,6 +3736,7 @@ ENDIF
   END SUBROUTINE tridiag
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
       subroutine tridiag2(n,a,b,c,d,x)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
@@ -3703,6 +3771,7 @@ ENDIF
 
     end subroutine tridiag2
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
        subroutine tridiag3(kte,a,b,c,d,x)
 
 !ccccccccccccccccccccccccccccccc                                                                   
@@ -3743,6 +3812,13 @@ ENDIF
         return
         end subroutine tridiag3
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!! encompassed the majority of the subroutines that comprise the 
+!! procedures that ultimately solve for tendencies of 
+!! \f$U, V, \theta, q_v, q_c, and q_i\f$.
+!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,grav_settling, &
        &delt,dz,dx,znt,                 &
@@ -3985,6 +4061,10 @@ ENDIF
     maxKHtopdown(its:ite,jts:jte)=0.
 
     ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
+!> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
+!! If true, a three-dimensional initialization loop is entered. Within this loop,
+!! several arrays are initialized and k-oriented (vertical) subroutines are called 
+!! at every i and j point, corresponding to the x- and y- directions, respectively.  
     IF (initflag > 0) THEN
  
        if (.not.restart) THEN
@@ -4094,10 +4174,13 @@ ENDIF
 
              zw(kte+1)=zw(kte)+dz(i,kte,j)
 
+!>  - Call get_pblh() to calculate hybrid (\f$\theta_{vli}-TKE\f$) PBL height.
 !             CALL GET_PBLH(KTS,KTE,PBLH(i,j),thetav,&
              CALL GET_PBLH(KTS,KTE,PBLH(i,j),thvl,&
                &  Qke1,zw,dz1,xland(i,j),KPBL(i,j))
              
+!>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
+!! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
              IF (scaleaware > 0.) THEN
                 CALL SCALE_AWARE(dx(i,j),PBLH(i,j),Psig_bl(i,j),Psig_shcu(i,j))
              ELSE
@@ -4106,6 +4189,10 @@ ENDIF
              ENDIF
 
              ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
+!>  - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
+!! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$. These variables are calculated after 
+!! obtaining prerequisite variables by calling the following subroutines from 
+!! within mym_initialize(): mym_level2() and mym_length().
              CALL mym_initialize (             & 
                   &kts,kte,                    &
                   &dz1, zw, u1, v1, thl, sqv,  &
@@ -4149,6 +4236,8 @@ ENDIF
 
     ENDIF ! end initflag
 
+!> - After initializing all required variables, the regular procedures 
+!! performed at every time step are ready for execution.
     !ACF- copy qke_adv array into qke if using advection
     IF (bl_mynn_tkeadvect) THEN
        qke=qke_adv
@@ -4308,10 +4397,16 @@ ENDIF
           ENDDO
 #endif
 
+!>  - Call get_pblh() to calculate the hybrid \f$\theta_{vli}-TKE\f$
+!! PBL height diagnostic.
 !          CALL GET_PBLH(KTS,KTE,PBLH(i,j),thetav,&
           CALL GET_PBLH(KTS,KTE,PBLH(i,j),thvl,&
           & Qke1,zw,dz1,xland(i,j),KPBL(i,j))
 
+!>  - Call scale_aware() to calculate the similarity functions,
+!! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
+!! the scale-adaptive behaviour for the local and nonlocal 
+!! components, respectively.
           IF (scaleaware > 0.) THEN
              CALL SCALE_AWARE(dx(i,j),PBLH(i,j),Psig_bl(i,j),Psig_shcu(i,j))
           ELSE
@@ -4365,6 +4460,11 @@ ENDIF
           delta(i,j) = min(d1*pblh(i,j) + d2*wm2/delb, 100.)
           !-- End GRIMS-----------------------------------------
 
+!>  - Call mym_condensation() to calculate the nonconvective component
+!! of the subgrid cloud fraction and mixing ratio as well as the functions
+!! used to calculate the buoyancy flux. Different cloud PDFs can be 
+!! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
+
           CALL  mym_condensation ( kts,kte,      &
                &dx(i,j),dz1,thl,sqw,p1,ex1,           &
                &tsq1, qsq1, cov1,                &
@@ -4375,6 +4475,8 @@ ENDIF
                &spp_pbl, rstoch_col              )
 
           !ADD TKE source driven by cloud top cooling
+!>  - Calculate the buoyancy production of TKE from cloud-top cooling when
+!! \p bl_mynn_topdown =1.
           IF (bl_mynn_topdown.eq.1)then
              cloudflg=.false.
              minrad=100.
@@ -4464,6 +4566,9 @@ ENDIF
              TKEprodTD(kts:kte)=0.0
           ENDIF !end top-down check
 
+!>  - Call dmp_mf() to calculate the nonlocal turbulent transport from  
+!! the dynamic multiplume mass-flux scheme as well as the shallow-cumulus
+!! component of the subgrid clouds.
           IF (bl_mynn_edmf == 1) THEN
             !PRINT*,"Calling DMP Mass-Flux: i= ",i," j=",j
             CALL DMP_mf(                         &
@@ -4504,6 +4609,8 @@ ENDIF
 
           ENDIF
 
+!>  - Call mym_turbulence() to collect the necessary variable
+!! to carry out successive claculations.
           CALL mym_turbulence (                  & 
                &kts,kte,levflag,                 &
                &dz1, zw, u1, v1, thl, sqc, sqw,  &
@@ -4523,6 +4630,9 @@ ENDIF
                &TKEprodTD,                       &
                &spp_pbl,rstoch_col)
 
+!>  - Call mym_predict() to solve TKE and 
+!! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
+!! for the following time step.
           CALL mym_predict (kts,kte,levflag,     &
                &delt, dz1,                       &
                &ust(i,j), flt, flq, pmz, phh,    &
@@ -4536,6 +4646,8 @@ ENDIF
           ENDDO
           diss_heat(kte) = 0.
 
+!>  - Call mynn_tendencies() to solve for tendencies of 
+!! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
           CALL mynn_tendencies(kts,kte,          &
                &levflag,grav_settling,           &
                &delt, dz1, rho1,                 &
@@ -4590,7 +4702,8 @@ ENDIF
     ENDIF
 #endif
 
- 
+!>  - Call retrieve_exchange_coeffs() to retrieve K_m1
+!! and K_h1. 
           CALL retrieve_exchange_coeffs(kts,kte,&
                &dfm, dfh, dz1, K_m1, K_h1)
 
@@ -4627,6 +4740,8 @@ ENDIF
                cldfra_bl(i,k,j)=cldfra_bl1D(k) !*Psig_shcu(i,j)
 
                !DIAGNOSTIC-DECAY FOR SUBGRID-SCALE CLOUDS
+!>  - Compute the temporal decay of diagnostic subgrid cloud. This allows the diagnostic
+!! sugrid clouds to persist for an eddy turnover time scale.
                IF (CLDFRA_BL(i,k,j) < cldfra_bl1D_old(k)) THEN
                   !DECAY TIMESCALE FOR CALM CONDITION IS THE EDDY TURNOVER
                   !TIMESCALE, BUT FOR
@@ -4741,13 +4856,14 @@ ENDIF
 #endif
 
   END SUBROUTINE mynn_bl_driver
+!> @}
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
   SUBROUTINE mynn_bl_init_driver(                   &
        &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,          &
        &RQCBLTEN,RQIBLTEN & !,RQNIBLTEN,RQNCBLTEN       &
-       &,QKE,TKE_PBL,EXCH_H                         &
-!       &,icloud_bl,qc_bl,cldfra_bl                 & !JOE-subgrid bl clouds 
+       &,QKE,TKE_PBL,EXCH_H                         & ! &,icloud_bl,qc_bl,cldfra_bl  & !JOE-subgrid bl clouds 
        &,RESTART,ALLOWED_TO_READ,LEVEL              &
        &,IDS,IDE,JDS,JDE,KDS,KDE                    &
        &,IMS,IME,JMS,JME,KMS,KME                    &
@@ -4803,25 +4919,26 @@ ENDIF
   END SUBROUTINE mynn_bl_init_driver
 
 ! ==================================================================
-
+!>\ingroup gsd_mynn_edmf
+!! This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
+!!
+!! NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
+!!PBL heights as the level at.
+!!which the potential temperature first exceeds the minimum potential.
+!!temperature within the boundary layer by 1.5 K. When applied to.
+!!observed temperatures, this method has been shown to produce PBL-
+!!height estimates that are unbiased relative to profiler-based.
+!!estimates (Nielsen-Gammon et al. 2008 \cite Nielsen_Gammon_2008). 
+!! However, their study did not
+!!include LLJs. Banta and Pichugina (2008) \cite Pichugina_2008  show that a TKE-based.
+!!threshold is a good estimate of the PBL height in LLJs. Therefore,
+!!a hybrid definition is implemented that uses both methods, weighting
+!!the TKE-method more during stable conditions (PBLH < 400 m).
+!!A variable tke threshold (TKEeps) is used since no hard-wired
+!!value could be found to work best in all conditions.
+!>\section gen_get_pblh  GSD get_pblh General Algorithm
+!> @{
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
-
-    !---------------------------------------------------------------
-    !             NOTES ON THE PBLH FORMULATION
-    !
-    !The 1.5-theta-increase method defines PBL heights as the level at 
-    !which the potential temperature first exceeds the minimum potential 
-    !temperature within the boundary layer by 1.5 K. When applied to 
-    !observed temperatures, this method has been shown to produce PBL-
-    !height estimates that are unbiased relative to profiler-based 
-    !estimates (Nielsen-Gammon et al. 2008). However, their study did not
-    !include LLJs. Banta and Pichugina (2008) show that a TKE-based 
-    !threshold is a good estimate of the PBL height in LLJs. Therefore,
-    !a hybrid definition is implemented that uses both methods, weighting
-    !the TKE-method more during stable conditions (PBLH < 400 m).
-    !A variable tke threshold (TKEeps) is used since no hard-wired
-    !value could be found to work best in all conditions.
-    !---------------------------------------------------------------
 
     INTEGER,INTENT(IN) :: KTS,KTE
 
@@ -4836,9 +4953,9 @@ ENDIF
     REAL, DIMENSION(KTS:KTE+1), INTENT(IN) :: zw1D
     !LOCAL VARS
     REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv
-    REAL :: delt_thv   !delta theta-v; dependent on land/sea point
-    REAL, PARAMETER :: sbl_lim  = 200. !upper limit of stable BL height (m).
-    REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
+    REAL :: delt_thv   !< delta theta-v; dependent on land/sea point
+    REAL, PARAMETER :: sbl_lim  = 200. !< upper limit of stable BL height (m).
+    REAL, PARAMETER :: sbl_damp = 400. !< transition length for blending (m).
     INTEGER :: I,J,K,kthv,ktke,kzi,kzi2
 
     !ADD KPBL (kzi)
@@ -4846,7 +4963,7 @@ ENDIF
     kzi = 2
     kzi2= 2
 
-    !FIND MIN THETAV IN THE LOWEST 200 M AGL
+    !> - FIND MIN THETAV IN THE LOWEST 200 M AGL
     k = kts+1
     kthv = 1
     minthv = 9.E9
@@ -4860,7 +4977,7 @@ ENDIF
        !IF (zw1D(k) .GT. sbl_lim) exit
     ENDDO
 
-    !FIND THETAV-BASED PBLH (BEST FOR DAYTIME).
+    !> - FIND THETAV-BASED PBLH (BEST FOR DAYTIME).
     zi=0.
     k = kthv+1
     IF((landsea-1.5).GE.0)THEN
@@ -4888,10 +5005,10 @@ ENDIF
     ENDDO
     !print*,"IN GET_PBLH:",thsfc,zi
 
-    !FOR STABLE BOUNDARY LAYERS, USE TKE METHOD TO COMPLEMENT THE
-    !THETAV-BASED DEFINITION (WHEN THE THETA-V BASED PBLH IS BELOW ~0.5 KM).
-    !THE TANH WEIGHTING FUNCTION WILL MAKE THE TKE-BASED DEFINITION NEGLIGIBLE 
-    !WHEN THE THETA-V-BASED DEFINITION IS ABOVE ~1 KM.
+    !> - FOR STABLE BOUNDARY LAYERS, USE TKE METHOD TO COMPLEMENT THE
+    !! THETAV-BASED DEFINITION (WHEN THE THETA-V BASED PBLH IS BELOW ~0.5 KM).
+    !!THE TANH WEIGHTING FUNCTION WILL MAKE THE TKE-BASED DEFINITION NEGLIGIBLE 
+    !!WHEN THE THETA-V-BASED DEFINITION IS ABOVE ~1 KM.
     ktke = 1
     maxqke = MAX(Qke1D(kts),0.)
     !Use 5% of tke max (Kosovic and Curry, 2000; JAS)
@@ -4920,12 +5037,12 @@ ENDIF
        IF (PBLH_TKE .NE. 0.) exit
     ENDDO
 
-    !With TKE advection turned on, the TKE-based PBLH can be very large 
-    !in grid points with convective precipitation (> 8 km!),
-    !so an artificial limit is imposed to not let PBLH_TKE exceed the
-    !theta_v-based PBL height +/- 350 m.
-    !This has no impact on 98-99% of the domain, but is the simplest patch
-    !that adequately addresses these extremely large PBLHs.
+    !> - With TKE advection turned on, the TKE-based PBLH can be very large 
+    !! in grid points with convective precipitation (> 8 km!),
+    !! so an artificial limit is imposed to not let PBLH_TKE exceed the
+    !!theta_v-based PBL height +/- 350 m.
+    !!This has no impact on 98-99% of the domain, but is the simplest patch
+    !!that adequately addresses these extremely large PBLHs.
     PBLH_TKE = MIN(PBLH_TKE,zi+350.)
     PBLH_TKE = MAX(PBLH_TKE,MAX(zi-350.,10.))
 
@@ -4946,19 +5063,27 @@ ENDIF
 #endif
 
   END SUBROUTINE GET_PBLH
+!> @}
   
 ! ==================================================================
-! Dynamic Multi-Plume (DMP) Mass-Flux Scheme
-!
-! Much thanks to Kay Suslj of NASA-JPL for contributing the original version
-! of this mass-flux scheme. Considerable changes have been made from it's
-! original form. Some additions include:
-!  1) scale-aware tapering as dx -> 0
-!  2) transport of TKE (extra namelist option)
-!  3) Chaboureau-Bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
-!  4) some extra limits for numerical stability
-! This scheme remains under development, so consider it experimental code. 
-!
+!>\ingroup gsd_mynn_edmf
+!! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
+!! 
+!! dmp_mf() calculates the nonlocal turbulent transport from the dynamic
+!! multiplume mass-flux scheme as well as the shallow-cumulus component of 
+!! the subgrid clouds. Note that this mass-flux scheme is called when the
+!! namelist paramter \p bl_mynn_edmf is set to 1 (recommended).
+!!
+!! Much thanks to Kay Suslj of NASA-JPL for contributing the original version
+!! of this mass-flux scheme. Considerable changes have been made from it's
+!! original form. Some additions include:
+!!  -# scale-aware tapering as dx -> 0
+!!  -# transport of TKE (extra namelist option)
+!!  -# Chaboureau-Bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
+!!  -# some extra limits for numerical stability
+!!
+!! This scheme remains under development, so consider it experimental code. 
+!!
   SUBROUTINE DMP_mf(                       &
                  & kts,kte,dt,zw,dz,p,      &
                  & momentum_opt,            &
@@ -5861,7 +5986,8 @@ ENDIF !END Debugging
 
 END SUBROUTINE DMP_MF
 !=================================================================
-
+!>\ingroup gsd_mynn_edmf
+!! This subroutine 
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
 ! zero or one condensation for edmf: calculates THV and QC
@@ -5922,15 +6048,17 @@ real :: diff,exn,t,th,qs,qcold
 end subroutine condensation_edmf
 
 !===============================================================
-
+!>\ingroup gsd_mynn_edmf
+!! This subroutine calculates the similarity functions, 
+!!\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control the 
+!! scale-adaptive behavior for the local and nonlocal components,
+!! respectively.
+!!
+!! NOTES ON SCALE-AWARE FORMULATION:
+!!JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
+!! JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
-    !---------------------------------------------------------------
-    !             NOTES ON SCALE-AWARE FORMULATION
-    !
-    !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
-    !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
-    !
     ! Psig_bl tapers local mixing
     ! Psig_shcu tapers nonlocal mixing
 
@@ -5997,15 +6125,14 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END SUBROUTINE SCALE_AWARE
 
 ! =====================================================================
-
+!>\ingroup gsd_mynn_edmf
+!! \author JAYMES- added 22 Apr 2015
+!! This function calculates saturation vapor pressure.  Separate ice and liquid functions
+!! are used (identical to those in module_mp_thompson.F, v3.6). Then, the
+!! final returned value is a temperature-dependant "blend". Because the final
+!! value is "phase-aware", this formulation may be preferred for use throughout
+!! the module (replacing "svp").
   FUNCTION esat_blend(t) 
-! JAYMES- added 22 Apr 2015
-! 
-! This calculates saturation vapor pressure.  Separate ice and liquid functions 
-! are used (identical to those in module_mp_thompson.F, v3.6).  Then, the 
-! final returned value is a temperature-dependant "blend".  Because the final 
-! value is "phase-aware", this formulation may be preferred for use throughout 
-! the module (replacing "svp").
 
       IMPLICIT NONE
       
@@ -6032,9 +6159,11 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ====================================================================
 
+!>\ingroup gsd_mynn_edmf
+!! This function extends function "esat" and returns a "blended"
+!! saturation mixing ratio.
+!!\author JAYMES
   FUNCTION qsat_blend(t, P, waterice)
-! JAYMES- this function extends function "esat" and returns a "blended"
-! saturation mixing ratio.
 
       IMPLICIT NONE
 
@@ -6070,10 +6199,12 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ===================================================================
 
+!>\ingroup gsd_mynn_edmf
+!! This function interpolates the latent heats of vaporization and sublimation into
+!! a single, temperature-dependent, "blended" value, following 
+!! Chaboureau and Bechtold (2002) \cite Chaboureau_2002, Appendix.
+!!\author JAYMES
   FUNCTION xl_blend(t)
-! JAYMES- this function interpolates the latent heats of vaporization and
-! sublimation into a single, temperature-dependant, "blended" value, following
-! Chaboureau and Bechtold (2002), Appendix.
 
       IMPLICIT NONE
 

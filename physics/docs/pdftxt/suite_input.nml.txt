@@ -1,0 +1,235 @@
+/**
+\page GFSsuite_nml Namelist Option Description
+
+\section gfs_physics_nml GFS Physics Parameters
+The namelist variable description is provided in host-model side: GFS_typedefs.F90
+<table>
+<tr><th>option          <th>DDT in Host Model                       <th>Description                <th>Default Value
+<tr><td colspan="4">\b &gfs_physics_nml 
+<tr><td>fhzero          <td>gfs_control_type          <td>hour between clearing of diagnostic buckets     <td>0.0     
+<tr><td>h2o_phys        <td>gfs_control_type          <td>flag for stratosphere h2o scheme                <td>.false. 
+<tr><td>ldiag3d         <td>gfs_control_type          <td>flag for 3D diagnostic fields                   <td>.false. 
+<tr><td>oz_phys         <td>gfs_control_type          <td>flag for old (2006) ozone physics               <td>.true.  
+<tr><td>oz_phys_2015    <td>gfs_control_type          <td>flag for new (2015) ozone physics               <td>.false.
+     fhcyc         | gfs_typedefs::gfs_control_type  | frequency for surface data cycling in hours        |   0.0         |
+     use_ufo       | gfs_typedefs::gfs_control_type  | flag for using unfiltered orography surface option |   .false.     |
+     pre_rad       | gfs_typedefs::gfs_control_type  | flag for testing purpose                           |   .false.     |
+     ncld          | gfs_typedefs::gfs_control_type  | number of hydrometeors                             |      1        |
+
+</table>
+
+
+
+\section gfs_physics_nml GFS Physics Parameters
+    option         |    DDT in Host Model            |       Description                                  | Default Value |
+-------------------|---------------------------------|----------------------------------------------------|---------------|
+     fhzero        | gfs_typedefs::gfs_control_type  | hour between clearing of diagnostic buckets        |   0.0         |
+     h2o_phys      | gfs_typedefs::gfs_control_type  | flag for stratosphere h2o scheme                   |   .false.     |
+     ldiag3d       | gfs_typedefs::gfs_control_type  | flag for 3D diagnostic fields                      |   .false.     |
+     oz_phys       | gfs_typedefs::gfs_control_type  | flag for old (2006) ozone physics                  |   .true.      |
+     oz_phys_2015  | gfs_typedefs::gfs_control_type  | flag for new (2015) ozone physics                  |   .false.     |
+     fhcyc         | gfs_typedefs::gfs_control_type  | frequency for surface data cycling in hours        |   0.0         |
+     use_ufo       | gfs_typedefs::gfs_control_type  | flag for using unfiltered orography surface option |   .false.     | 
+     pre_rad       | gfs_typedefs::gfs_control_type  | flag for testing purpose                           |   .false.     |
+     ncld          | gfs_typedefs::gfs_control_type  | number of hydrometeors                             |      1        |
+     imp_physics   | gfs_typedefs::gfs_control_type  | choice of microphysics scheme: \n 11: GFDL microphysics scheme \n 8: GSD Thompson microphysics scheme \n 6: WSMG microphysics scheme  \n 10: Morrison-Gettelman microphysics scheme |     99    |
+     pdfcld        | gfs_typedefs::gfs_control_type  | flag for PDF clouds                                |   .false.     |
+     fhswr         | gfs_typedefs::gfs_control_type  | frequency for shortwave radiation (secs)           |    3600.      | 
+     fhlwr         | gfs_typedefs::gfs_control_type  | frequency for longwave radiation (secs)            |    3600.      |
+     ialb          | gfs_typedefs::gfs_control_type  | SW surface albedo control flag: \n 0: using climatology surface albedo scheme for SW \n 1: using MODIS based land surface albedo for SW   | 0     |
+     iems          | gfs_typedefs::gfs_control_type  | LW surface emissivity control flag: \n 0: black-body emissivity \n 1:surface type based climatology in 1 degree horizontal resolution     |   0    |
+     iaer          | gfs_typedefs::gfs_control_type  | aerosol flag "abc" (volcanic, LW, SW): \n a: stratospheric volcanic aerosols \n b: tropospheric aerosols for LW \n c: tropospheric aerosols for SW.\n 0: aerosol effect is not included; 1: aerosol effect is included |    1     |
+     ico2          | gfs_typedefs::gfs_control_type  | \f$CO_2\f$ data source control flag:\n 0: prescribed value (380 ppmv) \n 1: yearly global averaged annual mean from observations \n 2: monthly 15 degree horizontal resolution from observations|    0     |
+     isubc_sw      | gfs_typedefs::gfs_control_type  | subgrid cloud approximation control flag in SW radiation: \n 0: no McICA approximation in SW radiation \n 1: use McICA with prescribed permutation seeds (test mode) \n 2: use McICA with randomly generated permutation seeds |    0    |
+     isubc_lw      | gfs_typedefs::gfs_control_type  | subgrid cloud approximation control flag in LW radiation: \n 0: no McICA approximation in LW radiation \n 1: use McICA with prescribed permutation seeds (test mode) \n 2: use McICA with randomly generated permutation seeds |    0    |
+     isol          | gfs_typedefs::gfs_control_type  | solar constant scheme control flag: \n 0: fixed value = 1366.0 \f$W m^{-2}\f$ (old standard) \n 10: fixed value =1360.8 \f$W m^{-2}\f$ (new standard) \n 1: NOAA ABS-scale TSI table (yearly) with 11-yr cycle approximation \n 2: NOAA TIM-scale TSI table(yearly) with 11-yr cycle approximation \n 3: CMIP5 TIM-scale TSI table (yearly) with 11-yr cycle approximation \n 4: CMIP5 TIM-scale TSI table (monthly) with 11-yr cycle approximation    |  0     |
+     lwhtr         | gfs_typedefs::gfs_control_type  | logical flag for output of longwave heating rate       |    .true.    |
+     swhtr         | gfs_typedefs::gfs_control_type  | logical flag for output of shortwave heating rate      |    .true.    |
+     cnvgwd        | gfs_typedefs::gfs_control_type  | logical flag for convective gravity wave drag scheme   |    .false.   |
+     shal_cnv      | gfs_typedefs::gfs_control_type  | logical flag for calling shallow convection            |    .false.   |
+     cal_pre       | gfs_typedefs::gfs_control_type  | logical flag for calling precipitation type algorithm  |    .false.   |
+     redrag        | gfs_typedefs::gfs_control_type  | logical flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme |   .false.   |
+     dspheat       | gfs_typedefs::gfs_control_type  | logical flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes |      .false.    |
+     hybedmf       | gfs_typedefs::gfs_control_type  | logical flag for calling hybrid EDMF PBL scheme        |    .false.   |   
+     random_clds   | gfs_typedefs::gfs_control_type  | logical flag for whether clouds are random             |    .false.   |
+     trans_trac    | gfs_typedefs::gfs_control_type  | logical flag for convective transport of tracers       |    .false.   |
+     cnvcld        | gfs_typedefs::gfs_control_type  | logical flag for convective cloud                      |    .false.   |
+     imfshalcnv    | gfs_typedefs::gfs_control_type  | flag for mass flux shallow convective scheme:\n 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) \n 2: scale- & aerosol- aware mass-flux shallow convective scheme (2017) \n 0: modified Tiedtke's eddy-diffusion shallow convective scheme \n -1: no shallow convection used       |    1   |
+     imfdeepcnv    | gfs_typedefs::gfs_control_type  | flag for mass-flux deep convective scheme:\n 1: July 2010 version of SAS convective scheme (operational version as of 2016) \n 2: scale- & aerosol-aware mass-flux deep convective scheme (2017) \n 0: old SAS convective scheme before July 2010 |     1  |
+     cdmbgwd(2)    | gfs_typedefs::gfs_control_type  | multiplication factors for mountain blocking and orographic gravity wave drag | /2.0d0,0.25d0/   |
+     prslrd0       | gfs_typedefs::gfs_control_type  | pressure level above which to apply Rayleigh damping |   0.0d0   |
+     ivegsrc       | gfs_typedefs::gfs_control_type  | flag for vegetation type dataset choice: \n 0: USGS; 1: IGBP(20 category); 2: UMD (13 category) |   2     |
+     isot          | gfs_typedefs::gfs_control_type  | flag for soil type dataset choice:\n 0: Zobler soil type (9 category) \n 1: STATSGO soil type (19 category) |   0   |
+     debug         | gfs_typedefs::gfs_control_type  | flag for debug printout                             |   .false.     |
+     nstf_name(5)  | gfs_typedefs::gfs_control_type  | NSST related paramters:\n flag 0 for no NST; 1 for uncoupled nst; and 2 for coupled NST \n nstf_name(1): 0=NSSTM off, 1= NSSTM on but uncoupled, 2= NSSTM on and coupled \n nstf_name(2): 1=NSSTM spin up on, 0=NSSTM spin up off \n nstf_name(3): 1=NSST analysis on, 0=NSSTM analysis off \n nstf_name(4): zsea1 in mm \n nstf_name(5): zesa2 in mm | /0,0,1,0,5/    |
+     nst_anl       | gfs_typedefs::gfs_control_type  | flag for NSSTM analysis in gcycle/sfcsub            |    .false.    |
+     satmedmf      | gfs_typedefs::gfs_control_type  |  logical flag for calling TKE EDMF PBL scheme       |    .false.    |
+
+\section cpt_physics_nml EMC CPT Physics Parameters
+   \c NML_option   |  Definition in Host Model        |   Description                                     |  Default Value        |
+-------------------|----------------------------------|---------------------------------------------------|-----------------------|
+   crtrh(3)        | gfs_typedefs::gfs_control_type   | critical relative humidity at the surface, PBL top and at the top of the atmosphere | /0.90d0,0.90d0,0.90d0/    |
+   ras             | gfs_typedefs::gfs_control_type   | logical flag for RAS convection scheme            |  .false.              |
+   cscnv           | gfs_typedefs::gfs_control_type   | logical flag for Chikira-Sugiyama deep convection |  .false.              |
+   do_aw           | gfs_typedefs::gfs_control_type   | flag for Arakawa-Wu scale-awere adjustment        |  .false.              |
+   shcnvcw         | gfs_typedefs::gfs_control_type   | logical flag for shallow convective cloud         |  .false.              |
+   xkzm_h          | gfs_typedefs::gfs_control_type   | background vertical diffusion for heat q          |  1.0d0                |
+   xkzm_m          | gfs_typedefs::gfs_control_type   | background vertical diffusion for momentum        |  1.0d0                |
+   xkzm_s          | gfs_typedefs::gfs_control_type   | sigma threshold for background mom. diffusion     |  1.0d0                |
+   microp_uniform  | gfs_typedefs::gfs_control_type   | logical flag for uniform subcolumns for MG microphysics |  .true.            |
+   mg_do_ice_gmao  | gfs_typedefs::gfs_control_type   | logical flag for turning on gmao ice autoconversion in MG microphysics  |   .false.    |
+   mg_do_liq_liu   | gfs_typedefs::gfs_control_type   | logical flag for turning on Liu liquid treatment in MG  microphysics    |   .true.     |
+   mg_dcs          | gfs_typedefs::gfs_control_type   | autoconversion size threshold for cloud ice to snow in MG microphysics  |   200.0      |
+   mg_alf          | gfs_typedefs::gfs_control_type   | tuning factor for alphas (alpha = 1 - critical relative humidity)       |   1.0        |
+   mg_ts_auto_ice(2)  | gfs_typedefs::gfs_control_type   | autoconversion time scale for ice in MG microphysics                 | /180.0,180.0/  |
+   mg_qcvar        | gfs_typedefs::gfs_control_type   | cloud water relative variance in MG microphysics                        |   1.0        |
+   fprcp           | gfs_typedefs::gfs_control_type   | number of frozen precipitation species in MG microphysics \n 0: no prognostic rain and snow, 1: MG2;2:MG3 |   0        |
+   cs_parm(10)     | gfs_typedefs::gfs_control_type   | tunable parameters for Chikira-Sugiyama convection    |  /8.0,4.0,1.0e3,3.5e3,20.0,1.0,-999.,1.,0.6,0./    |
+   iccn            | gfs_typedefs::gfs_control_type   | flag for using IN and CCN forcing in MG2/3 microphysics  |  .false.      |
+   aero_in         | gfs_typedefs::gfs_control_type   | flag for using aerosols in MG microphysics            |   .false.     |
+   ctei_rm(2)      | gfs_typedefs::gfs_control_type   | critical cloud top entrainment instability criteria (used if mstrat=.true.) | /10.0d0,10.0d0/  |
+   rhcmax          | gfs_typedefs::gfs_control_type   | maximum critical relative humidity                    | 0.9999999   |
+   effr_in         | gfs_typedefs::gfs_control_type   | logical flag for using input cloud effective radii calculation    |    .false.   |
+   cplflx          | gfs_typedefs::gfs_control_type   | logical flag for controlling cplflx collection |     .false.    |
+   iau_delthrs     | gfs_typedefs::gfs_control_type   | incremental analysis update (IAU) time interval in hours   |    6    |
+   iaufhrs         | gfs_typedefs::gfs_control_type   | forecast hours associated with increment files   |   -1      |
+
+\section gsd_hrrr_nml GSD Physics Parameters
+   \c NML_option           |  Definition in Host Model       |    Description                                |     Default Value     |
+---------------------------|---------------------------------|-----------------------------------------------|-----------------------|
+   ltaerosol               | gfs_typedefs::gfs_control_type  | logical flag for using aerosol climotology    |    .false.            |
+   lradar                  | gfs_typedefs::gfs_control_type  | logical flag for computing radar reflectivity |    .false.            |
+   do_mynnedmf             | gfs_typedefs::gfs_control_type  | flag to activate MYNN-EDMF scheme             |    .false.            |
+   do_mynnsfclay           | gfs_typedefs::gfs_control_type  | flag to activate MYNN-SFCLAY scheme           |    .false.            |
+   lmfshal                 | gfs_typedefs::gfs_control_type  | flag for mass-flux shallow convection scheme in the cloud fraction calculation (lmf=shal_cnv .and. imfshalcnv > 0) | shal_cnv .and. (imfshalcnv > 0)  |
+   bl_mynn_mixlength       | gfs_typedefs::gfs_control_type  | flag for different version of mixing length formulation \n 0: Original form from Nakanishi and Niino (2009) \cite NAKANISHI_2009 . NO scale-awareness is applied to the master mixing length, regardless of "scaleware" setting \n 1: HRRR operational form 201609-201807.Designed to work without the mass-flux scheme. Uses BouLac mixing length in free atmosphere.  \n 2: HRRR operational form 201807-present. Designed to be compatible with mass-flux scheme activated (default) |  2   |
+   bl_mynn_edmf            | gfs_typedefs::gfs_control_type  | flag to activate the mass-flux scheme  \n 0: Deactivate mass-flux scheme \n 1: Activate dynamic multiplume mass-flux scheme (default)   |   0   |
+   bl_mynn_edmf_mom        | gfs_typedefs::gfs_control_type  | flag to activate the transport of momentum \n 0: Deactivate momentum transport in mass-flux scheme (default) \n 1: Activate momentum transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1 |     1   |
+   bl_mynn_edmf_tke        | gfs_typedefs::gfs_control_type  | flag to activate the transport of TKE \n 0: Deactivate TKE transport in mass-flux scheme (default) \n 1: Activate TKE transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1   |   0    |
+   bl_mynn_edmf_tkeadvect  | gfs_typedefs::gfs_control_type  | activate computation of TKE advection (not yet in use for FV3) \n False: Deactivate TKE advection (default) \n True: Activate TKE advection |   .false.   |
+   bl_mynn_edmf_tkebudget  | gfs_typedefs::gfs_control_type  | flag to activate TKE budget                  |   0    |
+   bl_mynn_edmf_cloudpdf   | gfs_typedefs::gfs_control_type  | flag to determine which cloud PDF to use \n 0: use Sommeria-Deardorff subgrid cloud PDF \n 1: use Kuwano-Yoshida subgrid cloud PDF \n 2: use modified Chaboureau-Bechtold subgrid cloud PDF (default)   |    2 |
+   bl_mynn_edmf_cloudmix   | gfs_typedefs::gfs_control_type  | flag to activate mixing of cloud species \n: Deactivate the mixing of any water species mixing ratios \n 1: activate the mixing of all water species mixing ratios (default)  |   1    |
+   bl_mynn_mixqt           | gfs_typedefs::gfs_control_type  | flag to mix total water or individual species \n 0: Mix individual water species separately (default) \n 1: DO NOT USE |   0   |
+   icloud_bl               | gfs_typedefs::gfs_control_type  | flag to coupling sgs clouds to radiation \n 0: Deactivate coupling subgrid clouds to radiation \n 1: Activate subgrid cloud coupling to radiation (highly suggested) |  1    |
+   lsoil_lsm               | gfs_typedefs::gfs_control_type  | number of soil layers internal to land surface model |   -1   |
+   lsm                     | gfs_typedefs::gfs_control_type  | flag for land surface model                     |  1    |
+  
+\section stochy_nml  Stochastic Physics Parameters
+   \c NML_option   |    Definition in Host Model    |    Description                                                        | Default Value |
+-------------------|--------------------------------|-----------------------------------------------------------------------|---------------|
+ do_sppt           | gfs_typedefs::gfs_control_type | flag for stochastic SPPT option                                       |  .false.      |
+ do_shum           | gfs_typedefs::gfs_control_type | flag for stochastic SHUM option                                       |  .false.      |
+ do_skeb           | gfs_typedefs::gfs_control_type | flag for stochastic SKEB option                                       |  .false.      |
+ use_zmtnblck      | gfs_typedefs::gfs_control_type | flag for mountain blocking                                            |  .false.      | 
+ do_sfcperts       | gfs_typedefs::gfs_control_type | flag for stochastic surface perturbations option                      |  .false.      |
+ nsfcpert          | gfs_typedefs::gfs_control_type | number of weights for stochastic surface perturbation                 |    6          |
+ pertz0            | gfs_typedefs::gfs_control_type | magnitude of perturbation of momentum roughness length                |  -999.        |
+ pertzt            | gfs_typedefs::gfs_control_type | magnitude of perturbation of heat to momentum roughness length ratio  |  -999.        |
+ pertshc           | gfs_typedefs::gfs_control_type | magnitude of perturbation of soil hydraulic conductivity              |  -999.        |
+ pertlai           | gfs_typedefs::gfs_control_type | magnitude of perturbation of leaf area index                          |  -999.        |
+ pertalb           | gfs_typedefs::gfs_control_type | magnitude of surface albedo perturbation                              |  -999.        |
+ pertvegf          | gfs_typedefs::gfs_control_type | magnitude of perturbation of vegetation fraction                      |  -999.        |
+
+\subsection gen_stochy_nml General Stochastic Physics Paramters
+   \c NML_option   |  Definition in Host Model  |    Description                                               | Default Value |
+-------------------|----------------------------|--------------------------------------------------------------|---------------|
+  ntrunc           |  compns_stochy_mod         | spectral resolution (e.g. T126) of random patterns           |   -999        |
+  lon_s, lat_s     |  compns_stochy_mod         | number of longitude and latitude point for the Gaussian grid |   -999        |          
+  fhstoch          |  compns_stochy_mod         | forecast hour to write out random pattern in order to restart the pattern for a different forecast (used in DA), file is stoch_out.F<HHH> | -999.0      |
+  stochini         |  compns_stochy_mod         | set to true if wanting to read in a previous random pattern (input file need to be named \c stoch_ini)   |     -999.0      | .false.   |
+
+\subsection sppt_contrl_nml SPPT Control Parameters
+   \c NML_option   | Definition in Host Model   |    Description                                                                 | Default Value |
+-------------------|----------------------------|--------------------------------------------------------------------------------|---------------|
+  sppt             |  compns_stochy_mod         | amplitude of random patterns                                                   |  -999.        |    
+  sppt_tau         |  compns_stochy_mod         | decorrelation timescales in secods                                             |  -999.        |
+  sppt_lscale      |  compns_stochy_mod         | decorrelation spatial scales in meters                                         |  -999.        |
+  sppt_logit       |  compns_stochy_mod         | logit transform for SPPT to bounded interval [-1,+1]                           | .false.       |
+  iseed_sppt       |  compns_stochy_mod         | seeds for setting the random number sequence (ignored if \c stochini is true)  |    0          |
+  sppt_sigtop1, sppt_sigtop2  | compns_stochy_mod | sigma levels to taper perturbations to zeros                                 | 0.1, 0.025    |
+  sppt_sfclimit    |  compns_stochy_mod         | reduce amplitude of SPPT near surface (lowest 2 levels)                        | .false.       |
+  use_zmtnblck     | gfs_typedefs::gfs_control_type | flag for mountain blocking. .T. = do not apply perturbations below the dividing streamline that is diagnosed by the gravity wave drag, mountain blocking scheme  |  .false.      |
+
+ 
+\subsection shum_contrl_nml SHUM Control Parameters
+   \c NML_option   | Definition in Host Model   |    Description                                                               | Default Value |
+-------------------|----------------------------|------------------------------------------------------------------------------|---------------|
+  shum             | compns_stochy_mod          | amplitude of stochastic boundary layer specific humidity perturbations       | -999.         |
+  shum_tau         | compns_stochy_mod          | decorrelation time scales in seconds                                         | -999.         |
+  shum_lscale      | compns_stochy_mod          | decorrelation spatial scales in meters                                       | -999.         |
+  shum_sigefold    | compns_stochy_mod          | e-folding lengthscale (in units of sigma) of specific humidity perturbations |     0.2       |
+
+\subsection skeb_contrl_nml SKEB Control Parameters
+   \c NML_option              | Definition in Host Model   |    Description                                                                     | Default Value |
+------------------------------|----------------------------|------------------------------------------------------------------------------------|---------------|
+  skeb                        | compns_stochy_mod          | stochastic KE backscatter amplitude                                                | -999.         |
+  skeb_tau                    | compns_stochy_mod          | decorrelation timescales in seconds                                                | -999.         |
+  skeb_lscale                 | compns_stochy_mod          | decorrelation spatial scales in meter                                              | -999.         |
+  iseed_skeb                  | compns_stochy_mod          | seeds for setting the random number sequnce (ignored if \c stochini is true)       |  0            |
+  skebnorm                    | compns_stochy_mod          | 0: random pattern is stream function,1: pattern is kenorm, 2: pattern is vorticity |  0            |
+  skeb_varspect_opt           | compns_stochy_mod          | Gaussian or power law variance spectrum for SKEB (0: Gaussian, 1: power law        |  0            |
+  skeb_npass                  | compns_stochy_mod          | number of passes of smoother for dissipation estimate                              |  11           |
+  skeb_vdof                   | compns_stochy_mod          | the number of degrees of freedom in the vertical for the SKEB random pattern       |   5           |
+  skeb_sigtop1, skeb_sigtop2  | compns_stochy_mod          | sigma levels to taper perturbations to zeros                                       | 0.1, 0.025    |
+
+ 
+
+\section zhao_carr_nml   Zhao-Carr MP Parameters
+   \c NML_option   |    DDT in Host Model            |    Description                                |   Default Value     |
+-------------------|---------------------------------|-----------------------------------------------|---------------------|
+  psautco(2)       | gfs_typedefs::gfs_control_type  | auto conversion coeff from ice to snow        | /6.0d-4,3.0d-4/     |
+  prautco(2)       | gfs_typedefs::gfs_control_type  | auto conversion coeff from cloud to rain      | /1.0d-4,1.0d-4/     |
+
+\section gfdl_cloud_microphysics_nml GFDL Cloud MP Parameters
+The namelist variable description is provided in module_gfdl_cloud_microphys.F90
+   \c NML_option         |   Definition in CCPP      |      Description                                                               |   Default Value      |
+-------------------------|---------------------------|--------------------------------------------------------------------------------|----------------------|
+   sedi_transport        | gfdl_cloud_microphys_mod  | logical flag for turning on horizontal momentum transport during sedimentation |   .true.             |
+     do_sedi_heat        | gfdl_cloud_microphys_mod  | logical flag for turning on horizontal heat transport during sedimentation     |   .true.             |
+         rad_snow        | gfdl_cloud_microphys_mod  | logical flag for considering snow in cloud fraction calculation                |   .true.             |
+      rad_graupel        | gfdl_cloud_microphys_mod  | logical flag for considering graupel in cloud fraction calculation             |   .true.             |
+         rad_rain        | gfdl_cloud_microphys_mod  | logical flag for considering rain in cloud fraction calculation                |   .true.             |
+         const_vi        | gfdl_cloud_microphys_mod  | logical flag for using constant cloud ice fall speed                           |   .false.            |
+         const_vs        | gfdl_cloud_microphys_mod  | logical flag for using constant snow fall speed                                |   .false.            |
+         const_vg        | gfdl_cloud_microphys_mod  | logical flag for using constant graupel fall speed                             |   .false.            |
+         const_vr        | gfdl_cloud_microphys_mod  | logical flag for using constant rain fall speed                                |   .false.            |
+           vi_max        | gfdl_cloud_microphys_mod  | maximum fall speed for cloud ice                                               |   0.5                |
+           vs_max        | gfdl_cloud_microphys_mod  | maximum fall speed for snow                                                    |   5.0                |
+           vg_max        | gfdl_cloud_microphys_mod  | maximum fall speed for graupel                                                 |   8.0                |
+           vr_max        | gfdl_cloud_microphys_mod  | maximum fall speed for rain                                                    |   12.0               |
+           qi_lim        | gfdl_cloud_microphys_mod  | cloud ice limiter to prevent large ice built up in cloud ice freezing and deposition |   1.           |
+         prog_ccn        | gfdl_cloud_microphys_mod  | logical flag for activating prognostic CCN (not supported in GFS Physics)      |   .false.            |
+            do_qa        | gfdl_cloud_microphys_mod  | logical flag for activating inline cloud fraction diagnosis in fast saturation adjustment |    .true.   |
+     fast_sat_adj        | gfdl_cloud_microphys_mod  | logical flag for adjusting cloud water evaporation/freezing, cloud ice deposition when fast saturation adjustment is activated (do_sat_adj=.true.) |  .true.     |
+          tau_l2v        | gfdl_cloud_microphys_mod  | time scale for evaporation of cloud water to water vapor. Increasing(decreasing) \p tau_l2v can decrease(boost) deposition of cloud water to water vapor |   300.  |
+          tau_v2l        | gfdl_cloud_microphys_mod  | time scale for condensation of water vapor to cloud water. Increasing(decreasing) \p tau_v2l can decrease(boost) condensation of water vapor to cloud water |   150.   |
+          tau_g2v        | gfdl_cloud_microphys_mod  | time scale for sublimation of graupel to water vapor. Increasing(decreasing) \p tau_g2v can decrease(boost) sublimation of graupel to water vapor |    900.     |
+          rthresh        | gfdl_cloud_microphys_mod  | critical cloud water radius for autoconversion (cloud water -> rain). Increasing(decreasing) of \p rthresh makes the autoconversion harder(easier) |   10.0e-6    |
+         dw_land         | gfdl_cloud_microphys_mod  | base value for subgrid deviation/variability over land    | 0.20   |
+         dw_ocean        | gfdl_cloud_microphys_mod  | base value for subgrid deviation/variability over ocean   | 0.10   |
+           ql_gen        | gfdl_cloud_microphys_mod  | maximum value for cloud water generated from condensation of water vapor (water vapor-> cloud water) |    1.0e-3       |
+           ql_mlt        | gfdl_cloud_microphys_mod  | maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain) |  2.0e-3       |
+          qi0_crt        | gfdl_cloud_microphys_mod  | threshold of cloud ice to snow autoconversion (cloud ice -> snow) |    1.0e-4     |
+          qs0_crt        | gfdl_cloud_microphys_mod  | threshold of snow to graupel autoconversion (snow->graupel) |  1.0e-3      |
+          tau_i2s        | gfdl_cloud_microphys_mod  | time scale for autoconversion of cloud ice to snow |   1000.    |
+          c_psaci        | gfdl_cloud_microphys_mod  | accretion efficiency of cloud ice to snow |   0.02 |
+          c_pgacs        | gfdl_cloud_microphys_mod  | accretion efficiency of snow to graupel   |  2.0e-3    |
+           rh_inc        | gfdl_cloud_microphys_mod  | relative humidity increment for complete evaporation of cloud water and cloud ice |  0.25   |
+           rh_inr        | gfdl_cloud_microphys_mod  | relative humidity increment for sublimation of snow |  0.25   |
+           rh_ins        | gfdl_cloud_microphys_mod  | relative humidity increment for minimum evaporation of rain |   0.25    |
+            ccn_l        | gfdl_cloud_microphys_mod  | base CCN over land \f$cm^{-3}\f$ | 270.   |
+            ccn_o        | gfdl_cloud_microphys_mod  | base CCN over ocean \f$cm^{-3}\f$ |  90.  |
+           c_paut        | gfdl_cloud_microphys_mod  | autoconversion efficiency of cloud water to rain |    0.55  |
+          c_cracw        | gfdl_cloud_microphys_mod  | accretion efficiency of cloud water to rain      |    0.9   |
+          use_ppm        | gfdl_cloud_microphys_mod  | \e true to use PPM fall scheme; \e false to use time-implicit monotonic fall scheme |  .false.   |
+          use_ccn        | gfdl_cloud_microphys_mod  | \e true to compute prescribed CCN. It should be .true. when \p prog_ccn = .false. |  .false.    |
+        mono_prof        | gfdl_cloud_microphys_mod  | \e true to turn on terminal fall with monotonic PPM scheme. This is used together with \p use_ppm=.true. |     .true. |
+     z_slope_liq         | gfdl_cloud_microphys_mod  | \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud water to rain |   .true.   |
+     z_slope_ice         | gfdl_cloud_microphys_mod  | \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud ice to snow  |     .false.   |
+           de_ice        | gfdl_cloud_microphys_mod  | \e true to convert excessive cloud ice to snow to prevent ice over-built from other sources like convection scheme (not supported in GFS physics) |   .false.   |
+     fix_negative        | gfdl_cloud_microphys_mod  | \e true to fix negative water species using nearby points |   .false.   |
+         icloud_f        | gfdl_cloud_microphys_mod  | flag (0,1,or 2) for cloud fraction diagnostic scheme |   0  |
+          mp_time        | gfdl_cloud_microphys_mod  | time step of GFDL cloud microphysics |   150.   |
+  
+*/

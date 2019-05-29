@@ -1,3 +1,8 @@
+!>\file compns_stochy.F90
+!! This file includes ...
+
+!>\ingroup gfs_stoch
+!! This module
 module compns_stochy_mod
 
    implicit none
@@ -65,16 +70,16 @@ module compns_stochy_mod
       lat_s=-999
       ! can specify up to 5 values for the stochastic physics parameters
       ! (each is an array of length 5)
-      sppt             = -999.  ! stochastic physics tendency amplitude
-      shum             = -999.  ! stochastic boundary layer spf hum amp
-      skeb             = -999.  ! stochastic KE backscatter amplitude
+      sppt             = -999.  !< stochastic physics tendency amplitude
+      shum             = -999.  !< stochastic boundary layer spf hum amp
+      skeb             = -999.  !< stochastic KE backscatter amplitude
       ! mg, sfcperts 
-      pertz0           = -999.  ! momentum roughness length amplitude
-      pertshc          = -999.  ! soil hydraulic conductivity amp
-      pertzt           = -999.  ! mom/heat roughness length amplitude
-      pertlai          = -999.  ! leaf area index amplitude
-      pertvegf         = -999.  ! vegetation fraction amplitude
-      pertalb          = -999.  ! albedo perturbations amplitude
+      pertz0           = -999.  !< momentum roughness length amplitude
+      pertshc          = -999.  !< soil hydraulic conductivity amp
+      pertzt           = -999.  !< mom/heat roughness length amplitude
+      pertlai          = -999.  !< leaf area index amplitude
+      pertvegf         = -999.  !< vegetation fraction amplitude
+      pertalb          = -999.  !< albedo perturbations amplitude
 ! logicals
       do_sppt = .false.
       use_zmtnblck = .false.
@@ -85,7 +90,7 @@ module compns_stochy_mod
       sppt_land = .false.
       nsfcpert = 0
 ! for sfcperts random patterns
-      sfc_lscale  = -999.       ! length scales
+      sfc_lscale  = -999.       !< length scales
       sfc_tau     = -999.       ! time scales
       iseed_sfc   = 0           ! random seeds (if 0 use system clock)
 ! for SKEB random patterns.

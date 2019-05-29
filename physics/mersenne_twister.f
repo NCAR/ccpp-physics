@@ -1,25 +1,27 @@
-!$$$  Module Documentation Block
-!
-! Module: mersenne_twister   Modern random number generator
-!   Prgmmr: Iredell          Org: W/NX23     date: 2005-06-14
-!
-! Abstract: This module calculates random numbers using the Mersenne twister.
-!   (It has been adapted to a Fortran 90 module from open source software.
-!   The comments from the original software are given below in the remarks.)
-!   The Mersenne twister (aka MT19937) is a state-of-the-art random number
-!   generator based on Mersenne primes and originally developed in 1997 by
-!   Matsumoto and Nishimura. It has a period before repeating of 2^19937-1,
-!   which certainly should be good enough for geophysical purposes. :-)
-!   Considering the algorithm's robustness, it runs fairly speedily.
-!   (Some timing statistics are given below in the remarks.)
-!   This adaptation uses the standard Fortran 90 random number interface,
-!   which can generate an arbitrary number of random numbers at one time.
-!   The random numbers generated are uniformly distributed between 0 and 1.
-!   The module also can generate random numbers from a Gaussian distribution
-!   with mean 0 and standard deviation 1, using a Numerical Recipes algorithm.
-!   The module also can generate uniformly random integer indices.
-!   There are also thread-safe versions of the generators in this adaptation,
-!   necessitating the passing of generator states which must be kept private.
+!>\file mersenne_twister.f
+!! This file contains the module that calculates random numbers using the 
+!! Mersenne twister
+
+!> \defgroup mersenne_ge Mersenne Twister Module
+!! Module: mersenne_twister   Modern random number generator
+!!\author Iredell          Org: W/NX23     date: 2005-06-14
+!! Abstract: This module calculates random numbers using the Mersenne twister.
+!!   (It has been adapted to a Fortran 90 module from open source software.
+!!   The comments from the original software are given below in the remarks.)
+!!   The Mersenne twister (aka MT19937) is a state-of-the-art random number
+!!   generator based on Mersenne primes and originally developed in 1997 by
+!!   Matsumoto and Nishimura. It has a period before repeating of 2^19937-1,
+!!   which certainly should be good enough for geophysical purposes. :-)
+!!   Considering the algorithm's robustness, it runs fairly speedily.
+!!   (Some timing statistics are given below in the remarks.)
+!!   This adaptation uses the standard Fortran 90 random number interface,
+!!   which can generate an arbitrary number of random numbers at one time.
+!!   The random numbers generated are uniformly distributed between 0 and 1.
+!!   The module also can generate random numbers from a Gaussian distribution
+!!   with mean 0 and standard deviation 1, using a Numerical Recipes algorithm.
+!!   The module also can generate uniformly random integer indices.
+!!   There are also thread-safe versions of the generators in this adaptation,
+!!   necessitating the passing of generator states which must be kept private.
 !
 ! Program History Log:
 !   2005-06-14  Mark Iredell
@@ -172,16 +174,16 @@
 !  Parameters
         integer,parameter:: n=624
         integer,parameter:: m=397
-        integer,parameter:: mata=-1727483681 ! constant vector a
-        integer,parameter:: umask=-2147483648 ! most significant w-r bits
-        integer,parameter:: lmask =2147483647 ! least significant r bits
-        integer,parameter:: tmaskb=-1658038656 ! tempering parameter
-        integer,parameter:: tmaskc=-272236544 ! tempering parameter
+        integer,parameter:: mata=-1727483681     !< constant vector a
+        integer,parameter:: umask=-2147483648    !< most significant w-r bits
+        integer,parameter:: lmask =2147483647    !< least significant r bits
+        integer,parameter:: tmaskb=-1658038656   !< tempering parameter
+        integer,parameter:: tmaskc=-272236544    !< tempering parameter
         integer,parameter:: mag01(0:1)=(/0,mata/)
         integer,parameter:: iseed=4357
         integer,parameter:: nrest=n+6
 !  Defined types
-        type random_stat
+        type random_stat                         !< Generator state 
           private
           integer:: mti=n+1
           integer:: mt(0:n-1)
@@ -213,7 +215,7 @@
 !  All the subprograms
       contains
 !  Subprogram random_seed
-!  Sets and gets state; overloads Fortran 90 standard.
+!> This subroutine sets and gets state; overloads Fortran 90 standard.
         subroutine random_seed(size,put,get,stat)
           implicit none
           integer,intent(out),optional:: size
@@ -271,14 +273,14 @@
           endif
         end subroutine
 !  Subprogram random_setseed_s
-!  Sets seed in saved mode.
+!> This subroutine sets seed in saved mode.
         subroutine random_setseed_s(inseed)
           implicit none
           integer,intent(in):: inseed
           call random_setseed_t(inseed,sstat)
         end subroutine
 !  Subprogram random_setseed_t
-!  Sets seed in thread-safe mode.
+!> This subroutine sets seed in thread-safe mode.
         subroutine random_setseed_t(inseed,stat)
           implicit none
           integer,intent(in):: inseed
@@ -295,7 +297,7 @@
           stat%gset=0.
         end subroutine
 !  Subprogram random_number_f
-!  Generates random numbers in functional mode.
+!> This function generates random numbers in functional mode.
         function random_number_f() result(harvest)
           implicit none
           real:: harvest
@@ -305,7 +307,7 @@
           harvest=h(1)
         end function
 !  Subprogram random_number_i
-!  Generates random numbers in interactive mode.
+!> This subroutine generates random numbers in interactive mode.
         subroutine random_number_i(harvest,inseed)
           implicit none
           real,intent(out):: harvest(:)
@@ -315,7 +317,7 @@
           call random_number_t(harvest,stat)
         end subroutine
 !  Subprogram random_number_s
-!  Generates random numbers in saved mode; overloads Fortran 90 standard.
+!> This subroutine generates random numbers in saved mode; overloads Fortran 90 standard.
         subroutine random_number_s(harvest)
           implicit none
           real,intent(out):: harvest(:)
@@ -323,7 +325,7 @@
           call random_number_t(harvest,sstat)
         end subroutine
 !  Subprogram random_number_t
-!  Generates random numbers in thread-safe mode.
+!> This subroutine generates random numbers in thread-safe mode.
         subroutine random_number_t(harvest,stat)
           implicit none
           real,intent(out):: harvest(:)
@@ -365,7 +367,7 @@
           enddo
         end subroutine
 !  Subprogram random_gauss_f
-!  Generates Gaussian random numbers in functional mode.
+!> This subrouitne generates Gaussian random numbers in functional mode.
         function random_gauss_f() result(harvest)
           implicit none
           real:: harvest
@@ -375,7 +377,7 @@
           harvest=h(1)
         end function
 !  Subprogram random_gauss_i
-!  Generates Gaussian random numbers in interactive mode.
+!> This subrouitne generates Gaussian random numbers in interactive mode.
         subroutine random_gauss_i(harvest,inseed)
           implicit none
           real,intent(out):: harvest(:)
@@ -385,7 +387,7 @@
           call random_gauss_t(harvest,stat)
         end subroutine
 !  Subprogram random_gauss_s
-!  Generates Gaussian random numbers in saved mode.
+!> This subroutine generates Gaussian random numbers in saved mode.
         subroutine random_gauss_s(harvest)
           implicit none
           real,intent(out):: harvest(:)
@@ -393,7 +395,7 @@
           call random_gauss_t(harvest,sstat)
         end subroutine
 !  Subprogram random_gauss_t
-!  Generates Gaussian random numbers in thread-safe mode.
+!> This subroutine generates Gaussian random numbers in thread-safe mode.
         subroutine random_gauss_t(harvest,stat)
           implicit none
           real,intent(out):: harvest(:)
@@ -432,7 +434,7 @@
             stat%iset=1
           endif
         contains
-!  Numerical Recipes algorithm to generate Gaussian random numbers.
+!> This subroutine contains numerical Recipes algorithm to generate Gaussian random numbers.
           subroutine rgauss(r1,r2,r,g1,g2)
             real,intent(in):: r1,r2
             real,intent(out):: r,g1,g2
@@ -448,7 +450,7 @@
           end subroutine
         end subroutine
 !  Subprogram random_index_f
-!  Generates random indices in functional mode.
+!> This subroutine generates random indices in functional mode.
         function random_index_f(imax) result(iharvest)
           implicit none
           integer,intent(in):: imax
@@ -459,7 +461,7 @@
           iharvest=ih(1)
         end function
 !  Subprogram random_index_i
-!  Generates random indices in interactive mode.
+!> This subroutine generates random indices in interactive mode.
         subroutine random_index_i(imax,iharvest,inseed)
           implicit none
           integer,intent(in):: imax
@@ -470,7 +472,7 @@
           call random_index_t(imax,iharvest,stat)
         end subroutine
 !  Subprogram random_index_s
-!  Generates random indices in saved mode.
+!> This subroutine generates random indices in saved mode.
         subroutine random_index_s(imax,iharvest)
           implicit none
           integer,intent(in):: imax
@@ -479,7 +481,7 @@
           call random_index_t(imax,iharvest,sstat)
         end subroutine
 !  Subprogram random_index_t
-!  Generates random indices in thread-safe mode.
+!> This subroutine  generates random indices in thread-safe mode.
         subroutine random_index_t(imax,iharvest,stat)
           implicit none
           integer,intent(in):: imax

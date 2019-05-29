@@ -2885,7 +2885,6 @@
 !!\param laersw,laerlw  logical flag for sw/lw aerosol calculations
 !!\param IMAX           horizontal dimension of arrays
 !!\param NLAY,NLP1      vertical dimensions of arrays
-!!\param NSPC           num of species for optional aod output fields
 !!\param aerosw        (IMAX,NLAY,NBDSW,NF_AESW), aeros opt properties for sw
 !!\n                              (:,:,:,1): optical depth
 !!\n                              (:,:,:,2): single scattering albedo

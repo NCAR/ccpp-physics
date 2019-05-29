@@ -85,7 +85,6 @@
       end subroutine GFS_MP_generic_post_init
 
 !>\defgroup gfs_calpreciptype GFS/GFDL calpreciptype Main
-!! @{
 !! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
 !! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
 !! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
@@ -172,7 +171,7 @@
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
-!! @{
+!> @{
       subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
         imp_physics_thompson, cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1, rann, xlat, xlon, &
         gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0, graupel0, del,         &
@@ -448,8 +447,7 @@
       endif
 
     end subroutine GFS_MP_generic_post_run
-!! @}
-!! @}
+!> @}
 
 !> \section arg_table_GFS_MP_generic_post_finalize Argument Table
 !!

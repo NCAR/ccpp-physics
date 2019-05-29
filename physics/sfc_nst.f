@@ -259,7 +259,7 @@
 !  ---  inputs:
       integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
      &       nstf_name5
-      real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,
+      real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &

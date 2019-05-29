@@ -88,8 +88,6 @@
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
-! \defgroup GFS_Ice GFS Three-layer Thermodynamics Sea Ice
-!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !>\defgroup gfs_sice_main GFS sfc_sice Main
 !!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !! \section arg_table_sfc_sice_run Argument Table
@@ -158,7 +156,6 @@
 !! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets.
 !! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
-!! \image latex GFS_sice_wonton2000_fig1.eps "Schematic representation of the three-layer model" width=5cm
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature
 !!\n The surface temperature is determined from the diagnostic balance between
@@ -171,18 +168,15 @@
 !! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
-!!  @{
+!>  @{
       subroutine sfc_sice_run                                           &
-!  ---  inputs:
-     &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    &
+     &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
      &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
      &       flag_iter, mom4ice, lsm, lprnt, ipr,                       &
-!  ---  input/outputs:
-     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            &
-!  ---  outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
+     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  ---  outputs:
      &       errmsg, errflg
      &     )
 
@@ -204,21 +198,21 @@
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
-!  program history log:                                                 !
-!         2005  --  xingren wu created  from original progtm and added  !
-!                     two-layer ice model                               !
-!         200x  -- sarah lu    added flag_iter                          !
-!    oct  2006  -- h. wei      added cmm and chh to output              !
-!         2007  -- x. wu modified for mom4 coupling (i.e. mom4ice)      !
-!         2007  -- s. moorthi micellaneous changes                      !
-!    may  2009  -- y.-t. hou   modified to include surface emissivity   !
-!                     effect on lw radiation. replaced the confusing    !
-!                     slrad with sfc net sw sfcnsw (dn-up). reformatted !
-!                     the code and add program documentation block.     !
-!    sep  2009 -- s. moorthi removed rcl, changed pressure units and    !
-!                     further optimized                                 !
-!    jan  2015 -- x. wu change "cimin = 0.15" for both                  !
-!                              uncoupled and coupled case               !
+!>  program history log:                                                 
+!!-         2005  --  xingren wu created  from original progtm and added  
+!!                     two-layer ice model                               
+!!-         200x  -- sarah lu    added flag_iter           
+!!-    oct  2006  -- h. wei      added cmm and chh to output     
+!!-         2007  -- x. wu modified for mom4 coupling (i.e. mom4ice)  
+!!-         2007  -- s. moorthi micellaneous changes   
+!!-    may  2009  -- y.-t. hou   modified to include surface emissivity  
+!!                     effect on lw radiation. replaced the confusing  
+!!                     slrad with sfc net sw sfcnsw (dn-up). reformatted
+!!                     the code and add program documentation block. 
+!!-    sep  2009 -- s. moorthi removed rcl, changed pressure units and 
+!!                     further optimized    
+!!-    jan  2015 -- x. wu change "cimin = 0.15" for both  
+!!                              uncoupled and coupled case 
 !                                                                       !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -572,7 +566,6 @@
 !-----------------------------------
 !> This subroutine is the entity of three-layer sea ice vertical thermodynamics
 !! based on Winton(2000) \cite winton_2000 .
-!! @{
 !!\ingroup gfs_sice_main
 !\param[in] im    integer, horizontal dimension
 !\param[in] kmi   integer, number of ice layers (2)
@@ -591,7 +584,7 @@
 !\param[out] snowmt real, snow melt during delt (\f$m\f$)
 !\param[out] gflux real, conductive heat flux (\f$W/m^2\f$)
 !>\section gen_ice3lay Three-layer Thermodynamics Sea Ice Model General Algorithm
-!! @{
+!> @{
       subroutine ice3lay
 !...................................
 !  ---  inputs:
@@ -874,7 +867,7 @@
       return
 !...................................
       end subroutine ice3lay
-!! @}
+!> @}
 !-----------------------------------
 
 ! =========================== !
@@ -884,6 +877,5 @@
 !...................................
       end subroutine sfc_sice_run
 !-----------------------------------
-!! @}
-!! @}
+!> @}
       end module sfc_sice

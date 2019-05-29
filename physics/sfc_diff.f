@@ -25,7 +25,7 @@
       end subroutine sfc_diff_finalize
 
 !> \defgroup GFS_diff_main GFS sfc_diff Main
-!! @{
+!> @{
 !> \brief This subroutine calculates surface roughness length.
 !!
 !! This subroutine includes the surface roughness length formulation
@@ -104,7 +104,6 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
-!! @{
 !! - Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
 !!  in Zeng et al. (1998) \cite zeng_et_al_1998).
 !! - Calculate Zeng's momentum roughness length formulation over land and sea ice.
@@ -130,30 +129,28 @@
 !!\f]
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,        !intent(in)
-     &                    ps,u1,v1,t1,q1,z1,                    !intent(in)
-     &                    prsl1,prslki,ddvel,                   !intent(in)
-     &                    sigmaf,vegtype,shdmax,ivegsrc,        !intent(in)
-     &                    z0pert,ztpert,        ! mg, sfc-perts !intent(in)
-     &                    flag_iter,redrag,                     !intent(in)
-     &                    wet,dry,icy,fice,                     !intent(in)
-     &                    tskin_ocn, tskin_lnd, tskin_ice,      !intent(in)
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,      !intent(in)
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,      !intent(in)
-!
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,      !intent(inout)
-     &                    ustar_ocn, ustar_lnd, ustar_ice,      !intent(inout)
-!
-     &                       cm_ocn,    cm_lnd,    cm_ice,      !intent(inout)
-     &                       ch_ocn,    ch_lnd,    ch_ice,      !intent(inout)
-     &                       rb_ocn,    rb_lnd,    rb_ice,      !intent(inout)
-     &                   stress_ocn,stress_lnd,stress_ice,      !intent(inout)
-     &                       fm_ocn,    fm_lnd,    fm_ice,      !intent(inout)
-     &                       fh_ocn,    fh_lnd,    fh_ice,      !intent(inout)
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,      !intent(inout)
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,      !intent(inout)
-     &                    wind                           ,      !intent(inout)
-     &                    errmsg, errflg)                       !intent(out)
+      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
+     &                    ps,u1,v1,t1,q1,z1,                            &  !intent(in)
+     &                    prsl1,prslki,ddvel,                           &  !intent(in)
+     &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
+     &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
+     &                    flag_iter,redrag,                             &  !intent(in)
+     &                    wet,dry,icy,fice,                             &  !intent(in)
+     &                    tskin_ocn, tskin_lnd, tskin_ice,              &  !intent(in)
+     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &  !intent(in)
+     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &  !intent(in)
+     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
+     &                    ustar_ocn, ustar_lnd, ustar_ice,              &  !intent(inout)
+     &                       cm_ocn,    cm_lnd,    cm_ice,              &  !intent(inout)
+     &                       ch_ocn,    ch_lnd,    ch_ice,              &  !intent(inout)
+     &                       rb_ocn,    rb_lnd,    rb_ice,              &  !intent(inout)
+     &                   stress_ocn,stress_lnd,stress_ice,              &  !intent(inout)
+     &                       fm_ocn,    fm_lnd,    fm_ice,              &  !intent(inout)
+     &                       fh_ocn,    fh_lnd,    fh_ice,              &  !intent(inout)
+     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &  !intent(inout)
+     &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    wind                           ,              &  !intent(inout)
+     &                    errmsg, errflg)                                  !intent(out)
 !
       use funcphys, only : fpvs
 
@@ -166,27 +163,27 @@
       logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy ! added by s.lu
 
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
-      real(kind=kind_phys), dimension(im), intent(in)    ::
-     &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,ddvel,
-     &                    sigmaf,shdmax,
+      real(kind=kind_phys), dimension(im), intent(in)    ::             &
+     &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,ddvel,         &
+     &                    sigmaf,shdmax,                                &
      &                    z0pert,ztpert ! mg, sfc-perts
-      real(kind=kind_phys), dimension(im), intent(in)    ::
-     &                    tskin_ocn, tskin_lnd, tskin_ice,
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,
+      real(kind=kind_phys), dimension(im), intent(in)    ::             &
+     &                    tskin_ocn, tskin_lnd, tskin_ice,              &
+     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &
+     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &
      &                    fice
 
-      real(kind=kind_phys), dimension(im), intent(inout) ::
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,
-     &                    ustar_ocn, ustar_lnd, ustar_ice,
-     &                       cm_ocn,    cm_lnd,    cm_ice,
-     &                       ch_ocn,    ch_lnd,    ch_ice,
-     &                       rb_ocn,    rb_lnd,    rb_ice,
-     &                   stress_ocn,stress_lnd,stress_ice,
-     &                       fm_ocn,    fm_lnd,    fm_ice,
-     &                       fh_ocn,    fh_lnd,    fh_ice,
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,
+      real(kind=kind_phys), dimension(im), intent(inout) ::             &
+     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &
+     &                    ustar_ocn, ustar_lnd, ustar_ice,              &
+     &                       cm_ocn,    cm_lnd,    cm_ice,              &
+     &                       ch_ocn,    ch_lnd,    ch_ice,              &
+     &                       rb_ocn,    rb_lnd,    rb_ice,              &
+     &                   stress_ocn,stress_lnd,stress_ice,              &
+     &                       fm_ocn,    fm_lnd,    fm_ice,              &
+     &                       fh_ocn,    fh_lnd,    fh_ice,              &
+     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &
+     &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &
      &                      wind
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -198,14 +195,14 @@
       real(kind=kind_phys) :: qs1,  rat, thv1, restar,
      &                      czilc, tem1, tem2
 
-      real(kind=kind_phys) :: tvs_ocn,  tvs_lnd,  tvs_ice,
-     &                         z0_ocn,   z0_lnd,   z0_ice,
-     &                      z0max_ocn,z0max_lnd,z0max_ice,
+      real(kind=kind_phys) :: tvs_ocn,  tvs_lnd,  tvs_ice,              &
+     &                         z0_ocn,   z0_lnd,   z0_ice,              &
+     &                      z0max_ocn,z0max_lnd,z0max_ice,              &
      &                      ztmax_ocn,ztmax_lnd,ztmax_ice
 !
       real(kind=kind_phys), parameter ::
-     &              charnock=.014, z0s_max=.317e-2       ! a limiting value at high winds over sea
-     &,             vis=1.4e-5, rnu=1.51e-5, visi=1.0/vis
+     &              charnock=.014, z0s_max=.317e-2                      &! a limiting value at high winds over sea
+     &,             vis=1.4e-5, rnu=1.51e-5, visi=1.0/vis               &
      &,             log01=log(0.01), log05=log(0.05), log07=log(0.07)
 
 !     parameter (charnock=.014,ca=.4)!c ca is the von karman constant
@@ -410,13 +407,10 @@
 !> @}
 
 !----------------------------------------
-      subroutine stability
-!........................................
-!  ---  inputs:
-     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           &
-!  ---  outputs:
-     &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
-!-----
+!>\ingroup GFS_diff_main
+      subroutine stability                                              &
+     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           & !  ---  inputs:
+     &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)                !  ---  outputs:
 
 !  ---  inputs:
       real(kind=kind_phys), intent(in) ::                               &
@@ -568,5 +562,4 @@
 !---------------------------------
 
 !---------------------------------
-!> @}
       end module sfc_diff
