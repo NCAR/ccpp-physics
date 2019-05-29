@@ -51,18 +51,12 @@ module GFS_rrtmgp_pre
        setemis,                  & ! Routine to compute surface-emissivity
        NF_ALBD,                  & ! Number of surface albedo categories (4; nir-direct, nir-diffuse, uvvis-direct, uvvis-diffuse)
        setalb                      ! Routine to compute surface albedo
-  
-  use rrtmgp_lw, only:  nrghice_lw => nrghice, ipsdlw0
-  use rrtmgp_sw, only:  nrghice_sw => nrghice, ipsdsw0, check_error_msg
   use mersenne_twister, only: &
        random_setseed, &
        random_number, &
        random_stat
   ! RRTMGP types
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
-  use mo_cloud_optics,       only: ty_cloud_optics
-  use mo_optical_props,      only: ty_optical_props_1scl, ty_optical_props_2str
-  use mo_cloud_sampling,     only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use mo_gas_concentrations, only: ty_gas_concs
   
   real(kind_phys), parameter :: &
@@ -101,8 +95,6 @@ contains
 !! | kt                      | vertical_index_difference_between_layer_and_upper_bound       | vertical index difference between layer and upper bound                       | index    |    0 | integer               |           | out    | F        |
 !! | kb                      | vertical_index_difference_between_layer_and_lower_bound       | vertical index difference between layer and lower bound                       | index    |    0 | integer               |           | out    | F        |
 !! | raddt                   | time_step_for_radiation                                       | radiation time step                                                           | s        |    0 | real                  | kind_phys | out    | F        |
-!! | delp                    | layer_pressure_thickness_for_radiation                        | layer pressure thickness on radiation levels                                  | hPa      |    2 | real                  | kind_phys | out    | F        |
-!! | dz                      | layer_thickness_for_radiation                                 | layer thickness on radiation levels                                           | km       |    2 | real                  | kind_phys | out    | F        |
 !! | plvl                    | air_pressure_at_interface_for_radiation_in_hPa                | air pressure at vertical interface for radiation calculation                  | hPa      |    2 | real                  | kind_phys | out    | F        |
 !! | plyr                    | air_pressure_at_layer_for_radiation_in_hPa                    | air pressure at vertical layer for radiation calculation                      | hPa      |    2 | real                  | kind_phys | out    | F        |
 !! | tlvl                    | air_temperature_at_interface_for_radiation                    | air temperature at vertical interface for radiation calculation               | K        |    2 | real                  | kind_phys | out    | F        |
@@ -111,45 +103,31 @@ contains
 !! | tsfa                    | surface_air_temperature_for_radiation                         | lowest model layer air temperature for radiation                              | K        |    1 | real                  | kind_phys | out    | F        |
 !! | qlyr                    | water_vapor_specific_humidity_at_layer_for_radiation          | water vapor specific humidity at vertical layer for radiation calculation     | kg kg-1  |    2 | real                  | kind_phys | out    | F        |
 !! | olyr                    | ozone_concentration_at_layer_for_radiation                    | ozone concentration                                                           | kg kg-1  |    2 | real                  | kind_phys | out    | F        |
-!! | icseed                  | seed_random_numbers_lw                                        | seed for random number generation for longwave radiation                      | none     |    1 | integer               |           | in     | F        |
+!! | cld_frac                | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |    2 | real                  | kind_phys | out    | F        |
+!! | cld_lwp                 | cloud_liquid_water_path                                       | layer cloud liquid water path                                                 | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_reliq               | mean_effective_radius_for_liquid_cloud                        | mean effective radius for liquid cloud                                        | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_iwp                 | cloud_ice_water_path                                          | layer cloud ice water path                                                    | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_reice               | mean_effective_radius_for_ice_cloud                           | mean effective radius for ice cloud                                           | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | icseed_sw               | seed_random_numbers_sw                                        | seed for random number generation for shortwave radiation                     | none     |    1 | integer               |           | in     | F        |
+!! | icseed_lw               | seed_random_numbers_lw                                        | seed for random number generation for longwave radiation                      | none     |    1 | integer               |           | in     | F        |
+!! | faerlw                  | aerosol_optical_properties_for_longwave_bands_01-16           | aerosol optical properties for longwave bands 01-16                           | various  |    4 | real                  | kind_phys | out    | F        |
+!! | faersw                  | aerosol_optical_properties_for_shortwave_bands_01-16          | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
 !! | aerodp                  | atmosphere_optical_thickness_due_to_ambient_aerosol_particles | vertical integrated optical depth for various aerosol species                 | none     |    2 | real                  | kind_phys | out    | F        |
-!! | cldsa                   | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle,high, total and BL                         | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | mtopa                   | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer               |           | out    | F        |
-!! | mbota                   | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer               |           | out    | F        |
-!! | de_lgth                 | cloud_decorrelation_length                                    | cloud decorrelation length                                                    | km       |    1 | real                  | kind_phys | out    | F        |
 !! | alb1d                   | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
-!! | errmsg                  | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg                  | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !! | kdist_lw                | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | kdist_sw                | K_distribution_file_for_RRTMGP_SW_scheme                      | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | kdist_cldy_lw           | K_distribution_file_for_cloudy_RRTMGP_LW_scheme               | DDT containing spectral information for cloudy RRTMGP LW radiation scheme     | DDT      |    0 | ty_cloud_optics       |           | in     | F        |
-!! | kdist_cldy_sw           | K_distribution_file_for_cloudy_RRTMGP_SW_scheme               | DDT containing spectral information for cloudy RRTMGP SW radiation scheme     | DDT      |    0 | ty_cloud_optics       |           | in     | F        |
-!! | optical_propsLW_clouds  | longwave_optical_properties_for_cloudy_atmosphere             | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_1scl |           | out    | F        |
-!! | optical_propsLW_aerosol | longwave_optical_properties_for_aerosols                      | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_1scl |           | out    | F        |
-!! | optical_propsSW_clouds  | shortwave_optical_properties_for_cloudy_atmosphere            | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_2str |           | out    | F        |
-!! | optical_propsSW_aerosol | shortwave_optical_properties_for_aerosols                     | Fortran DDT containing RRTMGP optical properties                              | DDT      |    0 | ty_optical_props_2str |           | out    | F        |
-!! | gas_concentrations_lw   | Gas_concentrations_for_RRTMGP_suite_lw                        | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
-!! | gas_concentrations_sw   | Gas_concentrations_for_RRTMGP_suite_sw                        | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
+!! | gas_concentrations      | Gas_concentrations_for_RRTMGP_suite                           | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
 !! | sfc_emiss_byband        | surface_longwave_emissivity_in_each_band                      | surface lw emissivity in fraction in each LW band                             | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_nir_dir         | surface_shortwave_albedo_near_infrared_direct_in_each_band    | surface sw near-infrared direct albedo in each SW band                        | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_nir_dif         | surface_shortwave_albedo_near_infrared_diffuse_in_each_band   | surface sw near-infrared diffuse albedo in each SW band                       | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_uvvis_dir       | surface_shortwave_albedo_uv_visible_direct_in_each_band       | surface sw uv-visible direct albedo in each SW band                           | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_uvvis_dif       | surface_shortwave_albedo_uv_visible_diffuse_in_each_band      | surface sw uv-visible diffuse albedo in each SW band                          | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | nday                    | daytime_points_dimension                                      | daytime points dimension                                                      | count    |    0 | integer               |           | out    | F        |
-!! | idxday                  | daytime_points                                                | daytime points                                                                | index    |    1 | integer               |           | out    | F        |
+!! | errmsg                  | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg                  | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
   ! Attention - the output arguments lm, im, lmk, lmp must not be set
   ! in the CCPP version - they are defined in the interstitial_create routine
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_pre_run (Model, Grid, Sfcprop, Statein, Tbd, Coupling,     & ! IN
-       Radtend,                                                                             & ! INOUT
-       lm, im, lmk, lmp, kdist_lw, kdist_sw, kdist_cldy_lw, kdist_cldy_sw,                  & ! IN
-       kd, kt, kb, raddt, delp, dz, plvl, plyr, tlvl, tlyr, tsfg, tsfa, qlyr, olyr, icseed, & ! OUT
-       aerodp,  cldsa, mtopa, mbota, de_lgth, alb1d,                                        & ! OUT
-       optical_propsLW_clouds, optical_propsLW_aerosol, optical_propsSW_clouds,             & ! OUT
-       optical_propsSW_aerosol, gas_concentrations_lw, gas_concentrations_sw,               &
-       sfc_emiss_byband, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,               &
-       sfc_alb_uvvis_dif, nday, idxday, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_run (Model, Grid, Sfcprop, Statein, Tbd, Coupling,      &
+       Radtend,lm, im, lmk, lmp, kdist_lw, kdist_sw, kd, kt, kb, raddt, plvl, plyr, &
+       tlvl, tlyr, tsfg, tsfa, qlyr, olyr, icseed_lw, icseed_sw, aerodp, alb1d,     &
+       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, faerlw, faersw,            & 
+       gas_concentrations, sfc_emiss_byband, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type),   intent(in)    :: Model
@@ -163,14 +141,11 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          kdist_lw, & ! RRTMGP DDT containing spectral information for LW calculation
          kdist_sw    ! RRTMGP DDT containing spectral information for SW calculation
-    type(ty_cloud_optics),intent(in) :: &
-         kdist_cldy_lw, &
-         kdist_cldy_sw
     type(ty_gas_concs),intent(out) :: &
-         gas_concentrations_lw,gas_concentrations_sw
+         gas_concentrations
     integer,intent(in),dimension(IM) :: &
-         icseed          ! auxiliary special cloud related array when module 
-                         ! variable isubclw=2, it provides permutation seed 
+         icseed_sw, &    ! auxiliary special cloud related array when module 
+         icseed_lw       ! variable isubclw=2, it provides permutation seed 
                          ! for each column profile that are used for generating 
                          ! random numbers. when isubclw /=2, it will not be used.
 
@@ -179,69 +154,64 @@ contains
     real(kind_phys), intent(out) :: raddt
     real(kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: &
          tsfg, tsfa
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(out) ::  &
-         delp, dz, plyr, tlyr, qlyr, olyr
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+1+LTP), intent(out) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK), intent(out) ::  &
+         plyr, tlyr, qlyr, olyr
+    real(kind_phys), dimension(size(Grid%xlon,1),LMP), intent(out) :: &
          plvl, tlvl
     real(kind_phys), dimension(size(Grid%xlon,1),NSPC1), intent(out) :: &
          aerodp
     
-    real(kind_phys), dimension(size(Grid%xlon,1),5), intent(out) :: cldsa
-    integer,         dimension(size(Grid%xlon,1),3), intent(out) :: mbota,mtopa
-    real(kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: de_lgth,alb1d
+    real(kind_phys), dimension(size(Grid%xlon,1),5) :: cldsa
+    integer,         dimension(size(Grid%xlon,1),3) :: mbota,mtopa
+    real(kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: alb1d
+    real(kind_phys), dimension(size(Grid%xlon,1))  :: de_lgth
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
-    type(ty_optical_props_1scl),intent(out) :: &
-         optical_propsLW_clouds, &
-         optical_propsLW_aerosol
-    type(ty_optical_props_2str),intent(out) :: &
-         optical_propsSW_clouds, &
-         optical_propsSW_aerosol
-    real(kind_phys),dimension(kdist_sw%get_nband(),size(Grid%xlon,1)),intent(out) :: &
-         sfc_emiss_byband,  & ! Longwave surface emissivity in each band
-         sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
-         sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
-         sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
-         sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)
-    
-    integer,                        intent(out)   :: nday
-    integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
+    real(kind_phys),dimension(kdist_sw%get_nband(),IM),intent(out) :: &
+         sfc_emiss_byband    ! Longwave surface emissivity in each band
+    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),intent(out) :: &
+         cld_frac,          & !
+         cld_lwp,           & !
+         cld_reliq,         & !
+         cld_iwp,           & !
+         cld_reice            !
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,kdist_sw%get_nband(),NF_AESW), intent(out) ::&
+         faersw          
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,kdist_lw%get_nband(),NF_AELW), intent(out) ::&
+         faerlw
     
     ! Local variables
     integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl,i, j, k, k1, k2, lsk, &
          LP1, lla, llb, lya, lyb, iCol, iBand
     integer,dimension(IM) :: ipseed_lw,ipseed_sw
-    logical,dimension(IM,Model%levr+LTP) :: &
+    logical,dimension(IM,LMK) :: &
          liqmask,icemask
-    real(kind_phys),dimension(IM,Model%levr+LTP) :: &
+    real(kind_phys),dimension(IM,LMK) :: &
           vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs, tem0d
     real(kind_phys), dimension(size(Grid%xlon,1)) :: tem1d, tskn
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) ::  &
-         rhly, tvly, qstl, prslk1,     &
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK) ::  &
+         rhly, tvly, qstl, prslk1, delp, dz,    &
          tem2da, cldcov, deltaq, cnvc, cnvw, effrl, effri, effrr, effrs
     real (kind_phys) :: clwmin, clwm, clwt, onemrh, value, tem1, tem2
     real (kind_phys), parameter :: xrc3 = 100.
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: tem2db
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,Model%ncnd) :: ccnd
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,2:Model%ntrac) :: tracer1
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_CLDS) :: clouds
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NF_VGAS) :: gasvmr
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_sw%get_nband(),NF_AESW)::faersw,faersw2
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,kdist_lw%get_nband(),NF_AELW)::faerlw
-    type(ty_optical_props_1scl) :: optical_propsLW_cloudsByBand
-    type(ty_optical_props_2str) :: optical_propsSW_cloudsByBand
-    real(kind_phys), dimension(kdist_lw%get_ngpt(),Model%levr+LTP,IM) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1),LMP) :: tem2db
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,Model%ncnd) :: ccnd
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,2:Model%ntrac) :: tracer1
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,NF_CLDS) :: clouds
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,NF_VGAS) :: gasvmr
+    real(kind_phys), dimension(size(Grid%xlon,1),LMK,kdist_sw%get_nband(),NF_AESW)::faersw2
+    real(kind_phys), dimension(kdist_lw%get_ngpt(),LMK,IM) :: &
          rng3D_lw
-    real(kind_phys), dimension(kdist_lw%get_ngpt()*(Model%levr+LTP)) :: &
+    real(kind_phys), dimension(kdist_lw%get_ngpt()*LMK) :: &
          rng1D_lw
-    logical, dimension(IM,Model%levr+LTP,kdist_lw%get_ngpt()) :: &
+    logical, dimension(IM,LMK,kdist_lw%get_ngpt()) :: &
          cldfracMCICA_lw
-    real(kind_phys), dimension(kdist_sw%get_ngpt(),Model%levr+LTP,IM) :: &
+    real(kind_phys), dimension(kdist_sw%get_ngpt(),LMK,IM) :: &
          rng3D_sw
-    real(kind_phys), dimension(kdist_sw%get_ngpt()*(Model%levr+LTP)) :: &
+    real(kind_phys), dimension(kdist_sw%get_ngpt()*LMK) :: &
          rng1D_sw
-    logical, dimension(IM,Model%levr+LTP,kdist_sw%get_ngpt()) :: &
+    logical, dimension(IM,LMK,kdist_sw%get_ngpt()) :: &
          cldfracMCICA_sw
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
@@ -685,7 +655,13 @@ contains
             clouds,cldsa,mtopa,mbota, de_lgth)                                   ! OUT
     endif                            ! end if_imp_physics
 
-    
+    cld_frac  = clouds(:,:,1)
+    cld_lwp   = clouds(:,:,2)
+    cld_reliq = clouds(:,:,3)
+    cld_iwp   = clouds(:,:,4)
+    cld_reice = clouds(:,:,5)   
+
+
     ! mg, sfc-perts
     !  ---  scale random patterns for surface perturbations with
     !  perturbation size
@@ -706,18 +682,18 @@ contains
     ! LW and SW radiation.
     ! #######################################################################################
     call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk,  tracer1, Grid%xlon,        &
-         Grid%xlat, IM, LMK, LMP, Model%lsswr, Model%lslwr, faersw, faerlw, aerodp)
+         Grid%xlat, IM, LMK, LMP, Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
     
     ! Store aerosol optical properties
     ! SW. 
     ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
     ! band ordering was [nIR -> UV -> IR(band)]
-    faersw2(1:IM,1:LMK,1,1)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),1)
-    faersw2(1:IM,1:LMK,1,2)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),2)
-    faersw2(1:IM,1:LMK,1,3)                      = faersw(1:IM,1:LMK,kdist_sw%get_nband(),3)
-    faersw2(1:IM,1:LMK,2:kdist_sw%get_nband(),1) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,1)
-    faersw2(1:IM,1:LMK,2:kdist_sw%get_nband(),2) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,2)
-    faersw2(1:IM,1:LMK,2:kdist_sw%get_nband(),3) = faersw(1:IM,1:LMK,1:kdist_sw%get_nband()-1,3)
+    faersw(1:IM,1:LMK,1,1)                      = faersw2(1:IM,1:LMK,kdist_sw%get_nband(),1)
+    faersw(1:IM,1:LMK,1,2)                      = faersw2(1:IM,1:LMK,kdist_sw%get_nband(),2)
+    faersw(1:IM,1:LMK,1,3)                      = faersw2(1:IM,1:LMK,kdist_sw%get_nband(),3)
+    faersw(1:IM,1:LMK,2:kdist_sw%get_nband(),1) = faersw2(1:IM,1:LMK,1:kdist_sw%get_nband()-1,1)
+    faersw(1:IM,1:LMK,2:kdist_sw%get_nband(),2) = faersw2(1:IM,1:LMK,1:kdist_sw%get_nband()-1,2)
+    faersw(1:IM,1:LMK,2:kdist_sw%get_nband(),3) = faersw2(1:IM,1:LMK,1:kdist_sw%get_nband()-1,3)
 
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
@@ -731,214 +707,35 @@ contains
     endif
     
     ! #######################################################################################
-    ! Check for daytime points for SW radiation.
+    ! Set gas concentrations for RRTMGP
     ! #######################################################################################
-    if (Model%lsswr) then
-       nday   = 0
-       idxday = 0
-       do iCol = 1, IM
-          if (Radtend%coszen(iCol) >= 0.0001) then
-             nday = nday + 1
-             idxday(nday) = iCol
-          endif
-       enddo
-    else
-       nday   = 0
-       idxday = 0
-    endif
-    
-    ! #######################################################################################
-    ! Call module_radiation_surface::setalb() to setup surface albedo for SW radiation.        
-    ! #######################################################################################
-    if (Model%lsswr) then
-       call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%snoalb,           &
-            Sfcprop%zorl, Radtend%coszen, tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf, &
-            Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, Sfcprop%facsf,             &
-            Sfcprop%facwf, Sfcprop%fice, Sfcprop%tisfc, IM, alb1d, Model%pertalb,   &    
-            sfcalb)     
-       
-       ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-       Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-       
-       ! Spread across all SW bands
-       do iBand=1,kdist_sw%get_nband()
-          sfc_alb_nir_dir(iBand,1:IM)   = sfcalb(:,1)
-          sfc_alb_nir_dif(iBand,1:IM)   = sfcalb(:,2)
-          sfc_alb_uvvis_dir(iBand,1:IM) = sfcalb(:,3)
-          sfc_alb_uvvis_dif(iBand,1:IM) = sfcalb(:,4)
-       enddo
-    else
-       sfc_alb_nir_dir(:,:)   = 0._kind_phys
-       sfc_alb_nir_dif(:,:)   = 0._kind_phys
-       sfc_alb_uvvis_dir(:,:) = 0._kind_phys
-       sfc_alb_uvvis_dif(:,:) = 0._kind_phys
-    endif
-    
-    ! #######################################################################################
-    ! Compute radiative properties needed for RRTMGP
-    ! #######################################################################################
-    
-    ! Change random number seed value for each radiation invocation (isubclw =1 or 2).
-    if(isubclw == 1) then      ! advance prescribed permutation seed
-       do iCol = 1, IM
-          ipseed_lw(iCol) = ipsdlw0 + iCol
-       enddo
-    elseif (isubclw == 2) then ! use input array of permutaion seeds
-       do iCol = 1, IM
-          ipseed_lw(iCol) = icseed(iCol)
-       enddo
-    endif
-    ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
-    if(isubcsw == 1) then      ! advance prescribed permutation seed
-       do iCol = 1, ncol
-          ipseed_sw(iCol) = ipsdsw0 + iCol
-       enddo
-    elseif (isubcsw == 2) then ! use input array of permutaion seeds
-       do iCol = 1, ncol
-          ipseed_sw(iCol) = icseed(iCol)
-       enddo
-    endif
-    
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((qlyr/(1-qlyr))*amdw, 0., qlyr .ne. 1.)
     vmr_o3  = merge(olyr*amdo3,           0., olyr .gt. 0.)
-    
-    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
-    liqmask = (clouds(:,:,1) .gt. 0 .and. clouds(:,:,2) .gt. 0)
-    icemask = (clouds(:,:,1) .gt. 0 .and. clouds(:,:,4) .gt. 0)
-    
-    ! #######################################################################################
-    ! Allocate space for gas optical properties [ncol,nlay,ngpts]
-    ! #######################################################################################
-    ! Longwave
-    if (Model%lslwr) then
-       ! Cloud optics [nCol,nLay,nBands]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsLW_cloudsByBand%init(kdist_lw%get_band_lims_wavenumber()))
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsLW_cloudsByBand%alloc_1scl(IM, LMK))
-       ! Aerosol optics [Ccol,nLay,nBands]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsLW_aerosol%init(kdist_lw%get_band_lims_wavenumber()))
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsLW_aerosol%alloc_1scl(IM, LMK))
-       ! Cloud optics [nCol,nLay,nGpts]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsLW_clouds%alloc_1scl(IM, LMK, kdist_lw))
-    endif
-    ! Shortwave
-    if (Model%lsswr .and. nday .gt. 0) then
-       ! Cloud optics [nCol,nLay,nBands]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsSW_cloudsByBand%init(kdist_sw%get_band_lims_wavenumber()))
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsSW_cloudsByBand%alloc_2str(nDay, LMK))
-       ! Aerosol optics [Ccol,nLay,nBands]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsSW_aerosol%init(kdist_sw%get_band_lims_wavenumber()))
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsSW_aerosol%alloc_2str(nDay, LMK))
-       ! Cloud optics [nCol,nLay,nGpts]
-       call check_error_msg('GFS_rrtmgp_pre_run',optical_propsSW_clouds%alloc_2str(nDay, LMK, kdist_sw))
-    endif
+    !
+    call gas_concentrations%reset()
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o2',  gasvmr(:,:,4)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('co2', gasvmr(:,:,1)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('ch4', gasvmr(:,:,3)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('n2o', gasvmr(:,:,2)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('h2o', vmr_h2o))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o3',  vmr_o3))
 
-    ! #######################################################################################
-    ! Set gas concentrations
-    ! #######################################################################################
-    !if (Model%lslwr) then
-       call gas_concentrations_lw%reset()
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('o2',  gasvmr(:,:,4)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('co2', gasvmr(:,:,1)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('ch4', gasvmr(:,:,3)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('n2o', gasvmr(:,:,2)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('h2o', vmr_h2o))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_lw%set_vmr('o3',  vmr_o3))
-    !endif
-    !if (Model%lsswr .and. nday .gt. 0) then
-       call gas_concentrations_sw%reset()
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('o2',  gasvmr(idxday,:,4)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('co2', gasvmr(idxday,:,1)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('ch4', gasvmr(idxday,:,3)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('n2o', gasvmr(idxday,:,2)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('h2o', vmr_h2o(idxday,:)))
-       call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations_sw%set_vmr('o3',  vmr_o3(idxday,:)))
-    !endif
-    
-    ! #######################################################################################
-    ! Copy aerosol to RRTMGP DDT
-    ! #######################################################################################
-    ! LW
-    if (Model%lslwr) then
-       optical_propsLW_aerosol%tau = faerlw(:,:,:,1) * (1. - faerlw(:,:,:,2))
-    endif
-    ! SW
-    if (Model%lsswr .and. nday .gt. 0) then
-       optical_propsSW_aerosol%tau = faersw2(idxday,:,:,1)
-       optical_propsSW_aerosol%ssa = faersw2(idxday,:,:,2)
-       optical_propsSW_aerosol%g   = faersw2(idxday,:,:,3)
-    endif
-    
-    ! #######################################################################################
-    ! Compute cloud-optics for RTE.
-    ! #######################################################################################
-    ! Longwave
-    if (Model%lslwr) then
-       call check_error_msg('GFS_rrtmgp_pre_run',kdist_cldy_lw%cloud_optics(IM, LMK, kdist_lw%get_nband(),       &
-            nrghice_lw, liqmask, icemask, clouds(:,:,2), clouds(:,:,4), clouds(:,:,3),         &
-            clouds(:,:,5), optical_propsLW_cloudsByBand))
-    endif
-    ! Shortwave
-    if (Model%lsswr .and. nday .gt. 0) then
-       call check_error_msg('GFS_rrtmgp_pre_run',kdist_cldy_sw%cloud_optics(nDay, LMK, kdist_sw%get_nband(),     &
-            nrghice_sw, liqmask(idxday,:), icemask(idxday,:), clouds(idxday,:,2),              &
-            clouds(idxday,:,4), clouds(idxday,:,3), clouds(idxday,:,5),                     &
-            optical_propsSW_cloudsByBand))
-    endif
-    
-    ! #######################################################################################
-    ! Call McICA to generate subcolumns.
-    ! #######################################################################################
-    ! Longwave
-    if (Model%lslwr .and. isubclw .gt. 0) then
-       
-       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       ! and layers. ([nGpts,nLayer,nColumn]-> [nGpts*nLayer]*nColumn)
-       do iCol=1,IM
-          call random_setseed(ipseed_lw(icol),rng_stat)
-          call random_number(rng1D_lw,rng_stat)
-          rng3D_lw(:,:,iCol) = reshape(source = rng1D_lw,shape=[kdist_lw%get_ngpt(),LMK])
-       enddo
-       
-       ! Call McICA
-       select case ( iovrlw )
-          ! Maximumn-random 
-       case(1)
-          call check_error_msg('GFS_rrtmgp_pre_run',sampled_mask_max_ran(rng3D_lw,clouds(:,:,1),cldfracMCICA_lw))       
-       end select
-       
-       ! Map band optical depth to each g-point using McICA
-       call check_error_msg('GFS_rrtmgp_pre_run',draw_samples(cldfracMCICA_lw,optical_propsLW_cloudsByBand,optical_propsLW_clouds))
-    endif
-    
-    ! Shortwave
-    if (Model%lsswr .and. nday .gt. 0 .and. isubcsw .gt. 0) then
-       
-       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       ! and layers. ([nGpts,nLayer,nColumn]-> [nGpts*nLayer]*nColumn)
-       do iCol=1,IM
-          call random_setseed(ipseed_sw(icol),rng_stat)
-          call random_number(rng1D_sw,rng_stat)
-          rng3D_sw(:,:,iCol) = reshape(source = rng1D_sw,shape=[kdist_sw%get_ngpt(),LMK])
-       enddo
-       
-       ! Call McICA
-       select case ( iovrsw )
-          ! Maximumn-random 
-       case(1)
-          call check_error_msg('GFS_rrtmgp_pre_run',sampled_mask_max_ran(rng3D_sw,clouds(:,:,1),cldfracMCICA_sw))       
-       end select
-       
-       ! Map band optical depth to each g-point using McICA
-       call check_error_msg('GFS_rrtmgp_pre_run',draw_samples(cldfracMCICA_sw,optical_propsSW_cloudsByBand,optical_propsSW_clouds))
-    endif
-    
   end subroutine GFS_rrtmgp_pre_run
   
 !> \section arg_table_GFS_rrtmgp_pre_finalize Argument Table
 !!
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
-  
-!! @}
+  subroutine check_error_msg(routine_name, error_msg)
+    character(len=*), intent(in) :: &
+         error_msg, routine_name
+    
+    if(error_msg /= "") then
+       print*,"ERROR("//trim(routine_name)//"): "
+       print*,trim(error_msg)
+       return
+    end if
+  end subroutine check_error_msg      
+
 end module GFS_rrtmgp_pre

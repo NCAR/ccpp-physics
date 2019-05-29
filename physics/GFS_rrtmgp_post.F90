@@ -15,7 +15,6 @@ module GFS_rrtmgp_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use rrtmgp_sw,                 only: check_error_msg
 
   implicit none
 contains
@@ -55,10 +54,14 @@ contains
 !! | p_lev             | air_pressure_at_interface_for_radiation_in_hPa                                                 | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
 !! | nday              | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer              |           | in     | F        |
 !! | idxday            | daytime_points                                                                                 | daytime points                                                               | index    |    1 | integer              |           | in     | F        |
-!! | fluxLW_allsky     | lw_flux_profiles_byband_allsky                                                                 | Fortran DDT containing RRTMGP 3D fluxes                                      | DDT      |    0 | ty_fluxes_byband     |           | in     | F        |
-!! | fluxLW_clrsky     | lw_flux_profiles_byband_clrsky                                                                 | Fortran DDT containing RRTMGP 3D fluxes                                      | DDT      |    0 | ty_fluxes_byband     |           | in     | F        |
-!! | fluxSW_allsky     | sw_flux_profiles_byband_allsky                                                                 | Fortran DDT containing RRTMGP 3D fluxes                                      | DDT      |    0 | ty_fluxes_byband     |           | in     | F        |
-!! | fluxSW_clrsky     | sw_flux_profiles_byband_clrsky                                                                 | Fortran DDT containing RRTMGP 3D fluxes                                      | DDT      |    0 | ty_fluxes_byband     |           | in     | F        |
+!! | fluxswUP_allsky   | sw_flux_profile_upward_allsky                                                                  | RRTMGP upward shortwave all-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxswDOWN_allsky | sw_flux_profile_downward_allsky                                                                | RRTMGP downward shortwave all-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxswUP_clrsky   | sw_flux_profile_upward_clrsky                                                                  | RRTMGP upward shortwave clr-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxswDOWN_clrsky | sw_flux_profile_downward_clrsky                                                                | RRTMGP downward shortwave clr-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxlwUP_allsky   | lw_flux_profile_upward_allsky                                                                  | RRTMGP upward longwave all-sky flux profile                                  | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxlwDOWN_allsky | lw_flux_profile_downward_allsky                                                                | RRTMGP downward longwave all-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxlwUP_clrsky   | lw_flux_profile_upward_clrsky                                                                  | RRTMGP upward longwave clr-sky flux profile                                  | W m-2    |    2 | real                 | kind_phys | in     | F        |
+!! | fluxlwDOWN_clrsky | lw_flux_profile_downward_clrsky                                                                | RRTMGP downward longwave clr-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | kdist_lw          | K_distribution_file_for_RRTMGP_LW_scheme                                                       | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
 !! | kdist_sw          | K_distribution_file_for_RRTMGP_SW_scheme                                                       | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
 !! | sfc_alb_nir_dir   | surface_shortwave_albedo_near_infrared_direct_in_each_band                                     | surface sw near-infrared direct albedo in each SW band                       | frac     |    2 | real                 | kind_phys | in     | F        |
@@ -83,7 +86,8 @@ contains
               cldsa, mtopa, mbota, cloud_fraction, cldtaulw, cldtausw, p_lev, kdist_lw, kdist_sw,         &
               sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,               &
               sfc_alb_uvvis_dif, &
-              tsfa, nday, idxday, fluxSW_allsky, fluxSW_clrsky,fluxLW_allsky, fluxLW_clrsky,&
+              tsfa, nday, idxday, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, &
+              fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, &
               hlwc, hswc, topflx_sw, sfcflx_sw, flxprf_sw, topflx_lw, sfcflx_lw, flxprf_lw, hlw0, hsw0, errmsg, errflg)
 
     ! Inputs
@@ -130,16 +134,20 @@ contains
          kdist_sw          ! DDT containing SW spectral information
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP+1), intent(in) :: &
          p_lev             ! Pressure @ model layer-interfaces    (hPa)
-    type(ty_fluxes_byband),intent(in) :: &
-         fluxLW_allsky,  & ! Longwave all-sky flux                (W/m2)
-         fluxLW_clrsky,  & ! Longwave clear-sky flux              (W/m2)
-         fluxSW_allsky,  & ! Shortwave all-sky flux               (W/m2)
-         fluxSW_clrsky     ! Shortwave clear-sky flux             (W/m2)
     real(kind_phys),dimension(kdist_sw%get_nband(),size(Grid%xlon,1)),intent(in) :: &
          sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
          sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
          sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
          sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)    
+    real(kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP+1), intent(in) :: &
+         fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
+         fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
+         fluxswUP_clrsky,   & ! SW Clear-sky flux                  (W/m2)
+         fluxswDOWN_clrsky, & ! SW All-sky flux                    (W/m2)
+         fluxlwUP_allsky,   & ! LW All-sky flux                    (W/m2)
+         fluxlwDOWN_allsky, & ! LW All-sky flux                    (W/m2)
+         fluxlwUP_clrsky,   & ! LW Clear-sky flux                  (W/m2)
+         fluxlwDOWN_clrsky    ! LW All-sky flux                    (W/m2)
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -203,9 +211,9 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
+
     if (.not. (Model%lsswr .or. Model%lslwr)) return
-    
+
     ! Are any optional outputs requested?
     l_clrskylw_hr   = present(hlw0)
     l_fluxeslw2d    = present(flxprf_lw)
@@ -223,80 +231,7 @@ contains
        iSFC = 1
        iTOA = Model%levr+LTP+1
     endif
-    
-    ! #######################################################################################
-    ! Compute LW heating-rates. (Note. This piece was originally in rrtmg_lw.F90:_run())
-    ! #######################################################################################
-    if (Model%lslwr) then
-       ! Clear-sky heating-rate (optional)
-       if (l_clrskylw_hr) then
-          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
-               fluxLW_clrsky%flux_up,                 &
-               fluxLW_clrsky%flux_dn,                 &
-               p_lev,                                 &
-               hlw0))
-       endif
-       ! All-sky heating-rate (mandatory)
-       call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
-            fluxLW_allsky%flux_up,                    &
-            fluxLW_allsky%flux_dn,                    &
-            p_lev,                                    &
-            hlwc))
-       
-       ! Copy fluxes from RRTGMP types into model radiation types.
-       ! Mandatory outputs
-       topflx_lw%upfxc = fluxLW_allsky%flux_up(:,iTOA)
-       topflx_lw%upfx0 = fluxLW_clrsky%flux_up(:,iTOA)
-       sfcflx_lw%upfxc = fluxLW_allsky%flux_up(:,iSFC)
-       sfcflx_lw%upfx0 = fluxLW_clrsky%flux_up(:,iSFC)
-       sfcflx_lw%dnfxc = fluxLW_allsky%flux_dn(:,iSFC)
-       sfcflx_lw%dnfx0 = fluxLW_clrsky%flux_dn(:,iSFC)
-       
-       ! Optional outputs
-       if(l_fluxeslw2d) then
-          flxprf_lw%upfxc = fluxLW_allsky%flux_up
-          flxprf_lw%dnfxc = fluxLW_allsky%flux_dn
-          flxprf_lw%upfx0 = fluxLW_clrsky%flux_up
-          flxprf_lw%dnfx0 = fluxLW_clrsky%flux_dn
-       endif
-    endif
-    
-    ! #######################################################################################
-    !  Save LW outputs (Note. This piece was originally in rrtmg_lw_post.F90:_run())
-    ! #######################################################################################
-    if (Model%lslwr) then
-       ! Save surface air temp for diurnal adjustment at model t-steps
-       Radtend%tsflw (:) = tsfa(:)
-       
-       do k = 1, LM
-          k1 = k + kd
-          Radtend%htrlw(1:im,k) = hlwc(1:im,k1)
-       enddo
-       ! Repopulate the points above levr
-       if (lm < Model%levs) then
-          do k = lm,Model%levs
-             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
-          enddo
-       endif
-       
-       if (Model%lwhtr) then
-          do k = 1, lm
-             k1 = k + kd
-             Radtend%lwhc(1:im,k) = hlw0(1:im,k1)
-          enddo
-          ! Repopulate the points above levr
-          if (lm < Model%levs) then
-             do k = lm,Model%levs
-                Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
-             enddo
-          endif
-       endif
-       
-       ! Radiation fluxes for other physics processes
-       Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
-       
-    endif 
-
+ 
     ! #######################################################################################
     ! Compute SW heating-rates
     ! #######################################################################################
@@ -318,36 +253,35 @@ contains
        ! Clear-sky heating-rate (optional)
        if (l_clrskysw_HR) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
-               fluxSW_clrsky%flux_up,                &
-               fluxSW_clrsky%flux_dn,                &
+               fluxswUP_clrsky,                &
+               fluxswDOWN_clrsky,                &
                p_lev(idxday,1:Model%levr+LTP+1),     &
                thetaTendClrSky))
           hsw0(idxday,:)=thetaTendClrSky
        endif
        ! All-sky heating-rate (mandatory)
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
-            fluxSW_allsky%flux_up,                   &
-            fluxSW_allsky%flux_dn,                   &
+            fluxswUP_allsky,                   &
+            fluxswDOWN_allsky,                   &
             p_lev(idxday,1:Model%levr+LTP+1),        &
             thetaTendAllSky))
        hswc(idxday,:) = thetaTendAllSky
-       print*,'IN POST: ',fluxSW_allsky%flux_up
-       print*,'IN POSTT: ',fluxSW_allsky%flux_dn
+       
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
-       topflx_sw(idxday)%upfxc = fluxSW_allsky%flux_up(:,iTOA)
-       topflx_sw(idxday)%upfx0 = fluxSW_clrsky%flux_up(:,iTOA)
-       sfcflx_sw(idxday)%upfxc = fluxSW_allsky%flux_up(:,iSFC)
-       sfcflx_sw(idxday)%upfx0 = fluxSW_clrsky%flux_up(:,iSFC)
-       sfcflx_sw(idxday)%dnfxc = fluxSW_allsky%flux_dn(:,iSFC)
-       sfcflx_sw(idxday)%dnfx0 = fluxSW_clrsky%flux_dn(:,iSFC)
+       topflx_sw%upfxc = fluxswUP_allsky(:,iTOA)
+       topflx_sw%upfx0 = fluxswUP_clrsky(:,iTOA)
+       sfcflx_sw%upfxc = fluxswUP_allsky(:,iSFC)
+       sfcflx_sw%upfx0 = fluxswUP_clrsky(:,iSFC)
+       sfcflx_sw%dnfxc = fluxswDOWN_allsky(:,iSFC)
+       sfcflx_sw%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
 
        ! Optional output
        if(l_fluxessw2D) then
-          flxprf_sw(idxday,:)%upfxc = fluxSW_allsky%flux_up
-          flxprf_sw(idxday,:)%dnfxc = fluxSW_allsky%flux_dn
-          flxprf_sw(idxday,:)%upfx0 = fluxSW_clrsky%flux_up
-          flxprf_sw(idxday,:)%dnfx0 = fluxSW_clrsky%flux_dn
+          flxprf_sw%upfxc = fluxswUP_allsky
+          flxprf_sw%dnfxc = fluxswDOWN_allsky
+          flxprf_sw%upfx0 = fluxswUP_clrsky
+          flxprf_sw%dnfx0 = fluxswDOWN_clrsky
        endif
     endif
 
@@ -394,7 +328,7 @@ contains
              Coupling%visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
           enddo
        else                   ! if_nday_block
-          Radtend%htrsw(:,:) = 0.0
+         Radtend%htrsw(:,:) = 0.0
           Radtend%sfcfsw     = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
           Diag%topfsw        = topfsw_type( 0.0, 0.0, 0.0 )
           scmpsw             = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
@@ -422,6 +356,81 @@ contains
           Coupling%sfcdsw(i) = Radtend%sfcfsw(i)%dnfxc
        enddo  
     endif                                ! end_if_lsswr
+
+   
+    ! #######################################################################################
+    ! Compute LW heating-rates. (Note. This piece was originally in rrtmg_lw.F90:_run())
+    ! #######################################################################################
+    if (Model%lslwr) then
+       ! Clear-sky heating-rate (optional)
+       if (l_clrskylw_hr) then
+          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
+               fluxlwUP_clrsky,                 &
+               fluxlwDOWN_clrsky,               &
+               p_lev,                           &
+               hlw0))
+       endif
+       ! All-sky heating-rate (mandatory)
+       call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
+            fluxlwUP_allsky,                    &
+            fluxlwDOWN_allsky,                  &
+            p_lev,                              &
+            hlwc))
+       
+       ! Copy fluxes from RRTGMP types into model radiation types.
+       ! Mandatory outputs
+       topflx_lw%upfxc = fluxlwUP_allsky(:,iTOA)
+       topflx_lw%upfx0 = fluxlwUP_clrsky(:,iTOA)
+       sfcflx_lw%upfxc = fluxlwUP_allsky(:,iSFC)
+       sfcflx_lw%upfx0 = fluxlwUP_clrsky(:,iSFC)
+       sfcflx_lw%dnfxc = fluxlwDOWN_allsky(:,iSFC)
+       sfcflx_lw%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
+       
+       ! Optional outputs
+       if(l_fluxeslw2d) then
+          flxprf_lw%upfxc = fluxlwUP_allsky
+          flxprf_lw%dnfxc = fluxlwDOWN_allsky
+          flxprf_lw%upfx0 = fluxlwUP_clrsky
+          flxprf_lw%dnfx0 = fluxlwDOWN_clrsky
+       endif
+    endif
+    
+    ! #######################################################################################
+    !  Save LW outputs (Note. This piece was originally in rrtmg_lw_post.F90:_run())
+    ! #######################################################################################
+    if (Model%lslwr) then
+       ! Save surface air temp for diurnal adjustment at model t-steps
+       Radtend%tsflw (:) = tsfa(:)
+       
+       do k = 1, LM
+          k1 = k + kd
+          Radtend%htrlw(1:im,k) = hlwc(1:im,k1)
+       enddo
+       ! Repopulate the points above levr
+       if (lm < Model%levs) then
+          do k = lm,Model%levs
+             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
+          enddo
+       endif
+       
+       if (Model%lwhtr) then
+          do k = 1, lm
+             k1 = k + kd
+             Radtend%lwhc(1:im,k) = hlw0(1:im,k1)
+          enddo
+          ! Repopulate the points above levr
+          if (lm < Model%levs) then
+             do k = lm,Model%levs
+                Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
+             enddo
+          endif
+       endif
+       
+       ! Radiation fluxes for other physics processes
+       Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
+       
+    endif 
+
 
     ! #######################################################################################
     ! #######################################################################################
@@ -537,7 +546,16 @@ contains
 !> \section arg_table_GFS_rrtmgp_post_finalize Argument Table
 !!
   subroutine GFS_rrtmgp_post_finalize ()
-  end subroutine GFS_rrtmgp_post_finalize
 
-!! @}
+  end subroutine GFS_rrtmgp_post_finalize
+  subroutine check_error_msg(routine_name, error_msg)
+    character(len=*), intent(in) :: &
+         error_msg, routine_name
+    
+    if(error_msg /= "") then
+       print*,"ERROR("//trim(routine_name)//"): "
+       print*,trim(error_msg)
+       return
+    end if
+  end subroutine check_error_msg   
 end module GFS_rrtmgp_post
