@@ -3,8 +3,9 @@
 
 \section allscheme_overview Physics Parameterizations 
 
-In the CCPP-Physics v3.0 package, each parameterization is placed in its own modern Fortran module, which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
+In the CCPP-Physics v3.0 release, each parameterization is in its own modern Fortran module,
+ which facilitates model development and
+code maintenance. While some individual parameterization can be invoked for the GMTB SCM, most users will assemble the 
 parameterizations in suites. 
 
 - Radiation:
@@ -20,15 +21,16 @@ parameterizations in suites.
  - \subpage surf_pert
  - \subpage GSD_RUCLSM
 
-- Cumulus parameterizations:
- - \subpage GFS_SAMFdeep
- - \subpage GFS_SAMFshal
+# Cumulus parameterizations:
+ - GFS Simplified Arakawa Schubert (SAS)
+  - \subpage GFS_SAMFdeep
+  - \subpage GFS_SAMFshal
  - \subpage CSAW_scheme
  - \subpage GSD_CU_GF
   - \ref cu_gf_deep_group
   - \ref cu_gf_sh_group
 
-- Cloud Microphysics:
+- Microphysics:
  - \subpage GFDL_cloud
  - \subpage fast_sat_adj
  - \subpage CPT_MG3
@@ -43,7 +45,7 @@ parameterizations in suites.
   - \ref GFS_ozphys
   - \ref GFS_ozphys_2015
 
-- \f$H_2O\f$:
+- Water Vapor Photochemical Production and Loss:
  - \subpage GFS_H2OPHYS
 
 - Gravity Wave Drag:

@@ -1,5 +1,5 @@
 /**
-\page GSD_THOMPSON GSD Thompson Aerosol-Aware Microphysics Scheme
+\page GSD_THOMPSON Thompson Aerosol-Aware Microphysics Scheme
 \section thompson_descrp  Description
 
 

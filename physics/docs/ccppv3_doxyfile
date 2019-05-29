@@ -186,7 +186,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../rayleigh_damp.f  \
 ### Prognostic Ozone
                         ../ozphys_2015.f \
-                        ../ozphys.f  \
+###                        ../ozphys.f  \
 ### stratospheric h2o
                         ../h2ophys.f \
 ### Deep Convection
@@ -197,8 +197,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../samfshalcnv.f \
                         ../cnvc90.f \
 ### Microphysics
-                        ../gscond.f \
-                        ../precpd.f \
+###                        ../gscond.f \
+###                        ../precpd.f \
                         ../module_bfmicrophysics.f \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \

@@ -2,8 +2,26 @@
 \page GFSsuite_nml Namelist Option Description
 
 \section gfs_physics_nml GFS Physics Parameters
-The namelist variable description is provided in host-model side :GFS_typedefs.F90
-   \c NML_option   |    DDT in Host Model            |       Description                                  | Default Value |
+The namelist variable description is provided in host-model side: GFS_typedefs.F90
+<table>
+<tr><th>option          <th>DDT in Host Model                       <th>Description                <th>Default Value
+<tr><td colspan="4">\b &gfs_physics_nml 
+<tr><td>fhzero          <td>gfs_control_type          <td>hour between clearing of diagnostic buckets     <td>0.0     
+<tr><td>h2o_phys        <td>gfs_control_type          <td>flag for stratosphere h2o scheme                <td>.false. 
+<tr><td>ldiag3d         <td>gfs_control_type          <td>flag for 3D diagnostic fields                   <td>.false. 
+<tr><td>oz_phys         <td>gfs_control_type          <td>flag for old (2006) ozone physics               <td>.true.  
+<tr><td>oz_phys_2015    <td>gfs_control_type          <td>flag for new (2015) ozone physics               <td>.false.
+     fhcyc         | gfs_typedefs::gfs_control_type  | frequency for surface data cycling in hours        |   0.0         |
+     use_ufo       | gfs_typedefs::gfs_control_type  | flag for using unfiltered orography surface option |   .false.     |
+     pre_rad       | gfs_typedefs::gfs_control_type  | flag for testing purpose                           |   .false.     |
+     ncld          | gfs_typedefs::gfs_control_type  | number of hydrometeors                             |      1        |
+
+</table>
+
+
+
+\section gfs_physics_nml GFS Physics Parameters
+    option         |    DDT in Host Model            |       Description                                  | Default Value |
 -------------------|---------------------------------|----------------------------------------------------|---------------|
      fhzero        | gfs_typedefs::gfs_control_type  | hour between clearing of diagnostic buckets        |   0.0         |
      h2o_phys      | gfs_typedefs::gfs_control_type  | flag for stratosphere h2o scheme                   |   .false.     |
@@ -14,7 +32,7 @@ The namelist variable description is provided in host-model side :GFS_typedefs.F
      use_ufo       | gfs_typedefs::gfs_control_type  | flag for using unfiltered orography surface option |   .false.     | 
      pre_rad       | gfs_typedefs::gfs_control_type  | flag for testing purpose                           |   .false.     |
      ncld          | gfs_typedefs::gfs_control_type  | number of hydrometeors                             |      1        |
-     imp_physics   | gfs_typedefs::gfs_control_type  | choice of microphysics scheme: \n 11: GFDL microphysics scheme \n 8: Thompson microphysics scheme \n 6: WSMG microphysics scheme \n 99: Zhao-Carr microphysics scheme \n 98: Zhao-Carr microphysics scheme with PDF clouds \n 10: Morrison-Gettelman microphysics scheme |     99    |
+     imp_physics   | gfs_typedefs::gfs_control_type  | choice of microphysics scheme: \n 11: GFDL microphysics scheme \n 8: GSD Thompson microphysics scheme \n 6: WSMG microphysics scheme  \n 10: Morrison-Gettelman microphysics scheme |     99    |
      pdfcld        | gfs_typedefs::gfs_control_type  | flag for PDF clouds                                |   .false.     |
      fhswr         | gfs_typedefs::gfs_control_type  | frequency for shortwave radiation (secs)           |    3600.      | 
      fhlwr         | gfs_typedefs::gfs_control_type  | frequency for longwave radiation (secs)            |    3600.      |
