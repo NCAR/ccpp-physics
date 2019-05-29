@@ -139,7 +139,7 @@
        imp_physics    = 8
        ltaerosol      = @[LTAEROSOL]
        lradar         = @[LRADAR]
-       ttendlim       = -999.
+       ttendlim       = 0.005
        make_number_concentrations = .true.
        pdfcld         = .false.
        fhswr          = 3600.
