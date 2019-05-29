@@ -1,6 +1,6 @@
 ###############################################################################
 #
-#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + RUC LSM) coldstart (0-24h) test
+#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + RUC LSM) full (0-48h) test
 #
 ###############################################################################
 
@@ -120,7 +120,5 @@ export LSOIL_LSM=9
 
 RUN_SCRIPT=rt_fv3.sh
 
-if [[ $MACHINE_ID = cheyenne.intel ]]; then
-  export WLCLK=30
-fi
+export WLCLK=30
 
