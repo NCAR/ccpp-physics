@@ -1,12 +1,12 @@
 ###############################################################################
 #
-#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + RUC LSM) full (0-48h) test
+#  FV3 CCPP GSD (GF CU + Thompson MP + MYNN PBL + NOAH LSM) test
 #
 ###############################################################################
 
 export TEST_DESCR="Compare FV3 CCPP GSD results with previous trunk version"
 
-export CNTL_DIR=fv3_ccpp_gsd
+export CNTL_DIR=fv3_ccpp_gsd_noah
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -106,7 +106,7 @@ export LRADAR=.T.
 export LTAEROSOL=.T.
 
 export FV3_RUN=ccpp_gsd_run.IN
-export CCPP_SUITE=FV3_GSD_v0
+export CCPP_SUITE=FV3_GSD_noah
 export CCPP_LIB_DIR=ccpp/lib
 export INPUT_NML=ccpp_gsd.nml.IN
 
@@ -115,8 +115,8 @@ export DO_MYNNEDMF=.T.
 export IMFSHALCNV=3
 export IMFDEEPCNV=3
 export FHCYC=0
-export LSM=2
-export LSOIL_LSM=9
+export LSM=1
+export LSOIL_LSM=4
 
 RUN_SCRIPT=rt_fv3.sh
 

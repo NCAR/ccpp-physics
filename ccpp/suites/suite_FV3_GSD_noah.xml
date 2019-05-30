@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GSD_v0" lib="ccppphys" ver="2">
+<suite name="FV3_GSD_noah" lib="ccppphys" ver="2">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -45,7 +45,7 @@
       <scheme>sfc_nst_pre</scheme>
       <scheme>sfc_nst</scheme>
       <scheme>sfc_nst_post</scheme>
-      <scheme>lsm_ruc</scheme>
+      <scheme>lsm_noah</scheme>
       <scheme>sfc_sice</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>

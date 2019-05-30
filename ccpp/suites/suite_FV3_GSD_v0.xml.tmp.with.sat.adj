@@ -2,6 +2,11 @@
 
 <suite name="FV3_GSD_v0" lib="ccppphys" ver="2">
   <!-- <init></init> -->
+  <group name="fast_physics">
+    <subcycle loop="1">
+      <scheme>fv_sat_adj</scheme>
+    </subcycle>
+  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
