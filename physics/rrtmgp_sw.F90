@@ -669,11 +669,11 @@ contains
 !! \section arg_table_rrtmgp_sw_run Argument Table
 !! | local_name              | standard_name                                                                                  | long_name                                                                | units | rank | type                  |    kind   | intent | optional |
 !! |-------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
+!! | Model                   | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                  | DDT   |    0 | GFS_control_type      |           | in     | F        |
 !! | ncol                    | horizontal_loop_extent                                                                         | horizontal dimension                                                     | count |    0 | integer               |           | in     | F        |
-!! | nlay                    | adjusted_vertical_layer_dimension_for_radiation                                                | number of vertical layers for radiation                                  | count |    0 | integer               |           | in     | F        |
-!! | p_lay                   | air_pressure_at_layer_for_radiation_in_hPa                                                     | air pressure layer                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                   | air_pressure_at_interface_for_radiation_in_hPa                                                 | air pressure level                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                   | air_temperature_at_layer_for_radiation                                                         | air temperature layer                                                    | K     |    2 | real                  | kind_phys | in     | F        |
+!! | p_lay                   | air_pressure_at_layer_for_RRTMGP_in_hPa                                                        | air pressure layer                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | p_lev                   | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | t_lay                   | air_temperature_at_layer_for_RRTMGP                                                            | air temperature layer                                                    | K     |    2 | real                  | kind_phys | in     | F        |
 !! | kdist_sw                | K_distribution_file_for_RRTMGP_SW_scheme                                                       | DDT containing spectral information for RRTMGP SW radiation scheme       | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | optical_props_clds      | shortwave_optical_properties_for_cloudy_atmosphere                                             | Fortran DDT containing RRTMGP optical properties                         | DDT   |    0 | ty_optical_props_2str |           | in     | F        |
 !! | optical_props_aerosol   | shortwave_optical_properties_for_aerosols                                                      | Fortran DDT containing RRTMGP optical properties                         | DDT   |    0 | ty_optical_props_2str |           | in     | F        |
@@ -694,22 +694,22 @@ contains
 !! | errmsg                  | ccpp_error_message                                                                             | error message for error handling in CCPP                                 | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                  | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                    | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_sw_run(ncol, nlay, kdist_sw, p_lay, t_lay, p_lev, gas_concentrations, &
+  subroutine rrtmgp_sw_run(Model, ncol, kdist_sw, p_lay, t_lay, p_lev, gas_concentrations, &
        optical_props_clds, optical_props_aerosol,&
        lsswr, sfcalb_nir_dir, sfcalb_nir_dif, cossza,  nday, idxday, hsw0, hswb, scmpsw, &
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
+    type(GFS_control_type),   intent(in)    :: Model
     integer, intent(in) :: &
          ncol,                 & ! Number of horizontal gridpoints
-         nlay,                 & ! Number of vertical layers
          nday                    ! Number of daytime points
     integer, intent(in), dimension(nday) :: &
          idxday                  ! Index array for daytime points
-    real(kind_phys), dimension(ncol,nlay), intent(in) :: &
+    real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers         (hPa)
          t_lay                   ! Temperature                            (K)
-    real(kind_phys), dimension(ncol,nlay+1), intent(in) :: &
+    real(kind_phys), dimension(ncol,Model%levs+1), intent(in) :: &
          p_lev                   ! Pressure @ model layer-interfaces      (hPa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          kdist_sw                ! DDT containing SW spectral information
@@ -730,16 +730,16 @@ contains
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
-    real(kind_phys), dimension(ncol,nlay), intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
          fluxUP_allsky,   & ! All-sky flux                    (W/m2)
          fluxDOWN_allsky, & ! All-sky flux                    (W/m2)
          fluxUP_clrsky,   & ! Clear-sky flux                  (W/m2)
          fluxDOWN_clrsky    ! All-sky flux                    (W/m2)
 
     ! Inputs (optional) (NOTE. We only need the optional arguments to know what fluxes to output, HR's are computed later)
-    real(kind_phys), dimension(ncol,nlay), optional, intent(inout) :: &
+    real(kind_phys), dimension(ncol,Model%levs), optional, intent(inout) :: &
          hsw0             ! Clear-sky heating rate            (K/sec)
-    real(kind_phys), dimension(ncol,nlay,kdist_sw%get_nband()), intent(inout), optional :: &
+    real(kind_phys), dimension(ncol,Model%levs,kdist_sw%get_nband()), intent(inout), optional :: &
          hswb             ! All-sky heating rate, by band     (K/sec)
     ! Outputs (optional)
     type(cmpfsw_type), dimension(ncol), intent(inout),optional :: &
@@ -755,11 +755,11 @@ contains
     type(ty_fluxes_byband) :: &
          flux_allsky, & ! All-sky flux                      (W/m2)
          flux_clrsky    ! Clear-sky flux                    (W/m2)
-    real(kind_phys), dimension(nday,nlay+1),target :: &
+    real(kind_phys), dimension(nday,Model%levs+1),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky
-    real(kind_phys), dimension(nday,nlay+1,kdist_sw%get_nband()),target :: &
+    real(kind_phys), dimension(nday,Model%levs+1,kdist_sw%get_nband()),target :: &
          fluxSWBB_up_allsky, fluxSWBB_dn_allsky
-    real(kind_phys), dimension(ncol,nlay) :: vmrTemp
+    real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false.
     integer :: k, iGas
     type(ty_optical_props_2str)  :: &
@@ -789,13 +789,13 @@ contains
     if (nDay .gt. 0) then
 
        ! Subset the cloud and aerosol radiative properties over daylit points.
-       ! Cloud optics [nDay,nLay,nBands]
-       call check_error_msg('rrtmgp_sw_run',optical_props_clds_daylit%alloc_2str(nday, nlay, kdist_sw))
+       ! Cloud optics [nDay,Model%levs,nBands]
+       call check_error_msg('rrtmgp_sw_run',optical_props_clds_daylit%alloc_2str(nday, Model%levs, kdist_sw))
        optical_props_clds_daylit%tau    = optical_props_clds%tau(idxday,:,:)
        optical_props_clds_daylit%ssa    = optical_props_clds%ssa(idxday,:,:)
        optical_props_clds_daylit%g      = optical_props_clds%g(idxday,:,:)
-       ! Aerosol optics [nDay,nLay,nBands]
-       call check_error_msg('rrtmgp_sw_run',optical_props_aerosol_daylit%alloc_2str(nday, nlay, kdist_sw%get_band_lims_wavenumber()))
+       ! Aerosol optics [nDay,Model%levs,nBands]
+       call check_error_msg('rrtmgp_sw_run',optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, kdist_sw%get_band_lims_wavenumber()))
        optical_props_aerosol_daylit%tau = optical_props_aerosol%tau(idxday,:,:)
        optical_props_aerosol_daylit%ssa = optical_props_aerosol%ssa(idxday,:,:)
        optical_props_aerosol_daylit%g   = optical_props_aerosol%g(idxday,:,:)
@@ -821,15 +821,15 @@ contains
        call check_error_msg('rrtmgp_sw_run',rte_sw(               &
             kdist_sw,                                 & ! IN  - spectral information 
             gas_concentrations_daylit,                & ! IN  - gas concentrations (vmr)
-            p_lay(idxday,1:nlay),                     & ! IN  - pressure at layer interfaces (Pa)  
-            t_lay(idxday,1:nlay),                     & ! IN  - temperature at layer interfaes (K)
-            p_lev(idxday,1:nlay+1),                   & ! IN  - pressure at layer centers (Pa)
+            p_lay(idxday,1:Model%levs),               & ! IN  - pressure at layer interfaces (Pa)  
+            t_lay(idxday,1:Model%levs),               & ! IN  - temperature at layer interfaes (K)
+            p_lev(idxday,1:Model%levs+1),             & ! IN  - pressure at layer centers (Pa)
             cossza(idxday),                           & ! IN  - Cosine of solar zenith angle
             sfcalb_nir_dir(:,idxday),                 & ! IN  - Shortwave surface albedo (direct)
             sfcalb_nir_dif(:,idxday),                 & ! IN  - Shortwave surface albedo (diffuse)
             optical_props_clds_daylit,                & ! IN  - DDT containing cloud optical information 
-            flux_allsky,                              & ! OUT - Fluxes, all-sky, 3D (nCol,nLay,nBand) 
-            flux_clrsky,                              & ! OUT - Fluxes, clear-sky, 3D (nCol,nLay,nBand) 
+            flux_allsky,                              & ! OUT - Fluxes, all-sky, 3D (nCol,Model%levs,nBand) 
+            flux_clrsky,                              & ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
             aer_props = optical_props_aerosol_daylit))  ! IN(optional) - DDT containing aerosol optical information
        fluxUP_allsky(idxday,:)   = flux_allsky%flux_up
        fluxDOWN_allsky(idxday,:) = flux_allsky%flux_dn 

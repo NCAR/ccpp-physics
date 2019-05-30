@@ -37,11 +37,6 @@ contains
 !! | Coupling          | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type    |           | inout  | F        |
 !! | scmpsw            | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes     | W m-2    |    1 | cmpfsw_type          |           | inout  | T        |
 !! | im                | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer              |           | in     | F        |
-!! | lm                | vertical_layer_dimension_for_radiation                                                         | number of vertical layers for radiation calculation                          | count    |    0 | integer              |           | in     | F        |
-!! | ltp               | extra_top_layer                                                                                | extra top layers                                                             | none     |    0 | integer              |           | in     | F        |
-!! | kt                | vertical_index_difference_between_layer_and_upper_bound                                        | vertical index difference between layer and upper bound                      | index    |    0 | integer              |           | in     | F        |
-!! | kb                | vertical_index_difference_between_layer_and_lower_bound                                        | vertical index difference between layer and lower bound                      | index    |    0 | integer              |           | in     | F        |
-!! | kd                | vertical_index_difference_between_inout_and_local                                              | vertical index difference between in/out and local                           | index    |    0 | integer              |           | in     | F        |
 !! | raddt             | time_step_for_radiation                                                                        | radiation time step                                                          | s        |    0 | real                 | kind_phys | in     | F        |
 !! | aerodp            | atmosphere_optical_thickness_due_to_ambient_aerosol_particles                                  | vertical integrated optical depth for various aerosol species                | none     |    2 | real                 | kind_phys | in     | F        |
 !! | cldsa             | cloud_area_fraction_for_radiation                                                              | fraction of clouds for low, middle, high, total and BL                       | frac     |    2 | real                 | kind_phys | in     | F        |
@@ -51,7 +46,7 @@ contains
 !! | cldtaulw          | cloud_optical_depth_layers_at_10mu_band                                                        | approx 10mu band layer cloud optical depth                                   | none     |    2 | real                 | kind_phys | in     | F        |
 !! | cldtausw          | cloud_optical_depth_layers_at_0.55mu_band                                                      | approx .55mu band layer cloud optical depth                                  | none     |    2 | real                 | kind_phys | in     | F        |
 !! | tsfa              | surface_air_temperature_for_radiation                                                          | lowest model layer air temperature for radiation                             | K        |    1 | real                 | kind_phys | in     | F        |
-!! | p_lev             | air_pressure_at_interface_for_radiation_in_hPa                                                 | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
+!! | p_lev             | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
 !! | nday              | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer              |           | in     | F        |
 !! | idxday            | daytime_points                                                                                 | daytime points                                                               | index    |    1 | integer              |           | in     | F        |
 !! | fluxswUP_allsky   | sw_flux_profile_upward_allsky                                                                  | RRTMGP upward shortwave all-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
@@ -82,7 +77,7 @@ contains
 !! | errflg            | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer              |           | out    | F        |
 !!
   subroutine GFS_rrtmgp_post_run (Model, Grid, Diag, Radtend, Statein, &
-              Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &
+              Coupling, scmpsw, im, raddt, aerodp,   &
               cldsa, mtopa, mbota, cloud_fraction, cldtaulw, cldtausw, p_lev, kdist_lw, kdist_sw,         &
               sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,               &
               sfc_alb_uvvis_dif, &
@@ -103,14 +98,8 @@ contains
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
     type(GFS_diag_type), intent(inout) :: &
          Diag              ! Fortran DDT containing FV3-GFS diagnotics data  
-
     integer, intent(in) :: &
          im,             & ! Horizontal loop extent 
-         lm,             & ! Number of vertical layers for radiation calculation
-         ltp,            & ! Extra-top-layers
-         kt,             & ! Vertical index difference between layer and upper bound  
-         kb,             & ! Vertical index difference between layer and upper bound  
-         kd,             & ! Vertical index difference between in/out and local
          nDay              ! Number of daylit columns
     integer, intent(in), dimension(nday) :: &
          idxday            ! Index array for daytime points
@@ -125,21 +114,21 @@ contains
     integer,         dimension(size(Grid%xlon,1),3), intent(in) ::&
          mbota,          & ! vertical indices for low, middle and high cloud tops 
          mtopa             ! vertical indices for low, middle and high cloud bases
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(in) :: &
          cloud_fraction, & ! Total cloud fraction in each layer
          cldtausw,       & ! approx .55mu band layer cloud optical depth  
          cldtaulw          ! approx 10mu band layer cloud optical depth  
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          kdist_lw,       & ! DDT containing LW spectral information
          kdist_sw          ! DDT containing SW spectral information
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP+1), intent(in) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          p_lev             ! Pressure @ model layer-interfaces    (hPa)
     real(kind_phys),dimension(kdist_sw%get_nband(),size(Grid%xlon,1)),intent(in) :: &
          sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
          sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
          sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
          sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)    
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP+1), intent(in) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
          fluxswUP_clrsky,   & ! SW Clear-sky flux                  (W/m2)
@@ -154,7 +143,7 @@ contains
          errmsg
     integer, intent(out) :: &
          errflg
-    real(kind_phys),dimension(size(Grid%xlon,1), Model%levr+LTP),intent(out) :: &
+    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs),intent(out) :: &
          hlwc,          & ! Longwave all-sky heating-rate          (K/sec)
          hswc             ! Shortwave all-sky heating-rate         (K/sec)
     type(topflw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
@@ -179,16 +168,16 @@ contains
                           ! dnfx0 - clear sky downward flux at sfc (w/m2)
     
     ! Outputs (optional)
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), optional, intent(inout) :: &
+    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs), optional, intent(inout) :: &
          hlw0,          & ! Longwave clear-sky heating rate          (K/sec)
          hsw0             ! Shortwave clear-sky heating-rate         (K/sec)
-    type(proflw_type), dimension(size(Grid%xlon,1), Model%levr+LTP+1), optional, intent(inout) :: &
+    type(proflw_type), dimension(size(Grid%xlon,1), Model%levs+1), optional, intent(inout) :: &
          flxprf_lw        ! 2D radiative fluxes, components:
                           ! upfxc - total sky upward flux            (W/m2)
                           ! dnfxc - total sky dnward flux            (W/m2)
                           ! upfx0 - clear sky upward flux            (W/m2)
                           ! dnfx0 - clear sky dnward flux            (W/m2)
-    type(profsw_type), dimension(size(Grid%xlon,1), Model%levr+LTP+1), intent(inout), optional :: &
+    type(profsw_type), dimension(size(Grid%xlon,1), Model%levs+1), intent(inout), optional :: &
          flxprf_sw        ! 2D radiative fluxes, components:
                           ! upfxc - total sky upward flux            (W/m2)
                           ! dnfxc - total sky dnward flux            (W/m2)
@@ -205,7 +194,7 @@ contains
     ! Local variables
     integer :: i, j, k, k1, itop, ibtc, iBand, iSFC, iTOA
     real(kind_phys) :: tem0d, tem1, tem2
-    real(kind_phys), dimension(nDay, Model%levr+LTP) :: thetaTendClrSky, thetaTendAllSky
+    real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
     logical :: l_clrskylw_hr,l_clrskysw_hr, l_fluxeslw2d, l_fluxessw2d, top_at_1, l_sfcFluxessw1D
 
     ! Initialize CCPP error handling variables
@@ -221,15 +210,16 @@ contains
     l_fluxessw2d    = present(flxprf_sw)
     l_sfcfluxessw1D = present(scmpsw)
 
-
+    ! #######################################################################################
     ! What is vertical ordering?
-    top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levr+LTP))
+    ! #######################################################################################
+    top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
     if (top_at_1) then 
-       iSFC = Model%levr+LTP+1
+       iSFC = Model%levs
        iTOA = 1
     else
        iSFC = 1
-       iTOA = Model%levr+LTP+1
+       iTOA = Model%levs
     endif
  
     ! #######################################################################################
@@ -255,7 +245,7 @@ contains
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
                fluxswUP_clrsky,                &
                fluxswDOWN_clrsky,                &
-               p_lev(idxday,1:Model%levr+LTP+1),     &
+               p_lev(idxday,1:Model%levs+1),     &
                thetaTendClrSky))
           hsw0(idxday,:)=thetaTendClrSky
        endif
@@ -263,7 +253,7 @@ contains
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
             fluxswUP_allsky,                   &
             fluxswDOWN_allsky,                   &
-            p_lev(idxday,1:Model%levr+LTP+1),        &
+            p_lev(idxday,1:Model%levs+1),        &
             thetaTendAllSky))
        hswc(idxday,:) = thetaTendAllSky
        
@@ -290,28 +280,15 @@ contains
     ! #######################################################################################
     if (Model%lsswr) then
        if (nday > 0) then
-          do k = 1, LM
-             k1 = k + kd
-             Radtend%htrsw(1:im,k) = hswc(1:im,k1)
+          ! All-sky heating rate
+          do k = 1, Model%levs
+             Radtend%htrsw(1:im,k) = hswc(1:im,k)
           enddo
-          ! Repopulate the points above levr i.e. LM
-          if (lm < Model%levs) then
-             do k = lm,Model%levs
-                Radtend%htrsw (1:im,k) = Radtend%htrsw (1:im,LM)
-             enddo
-          endif
-          
+          ! Clear-sk heating rate
           if (Model%swhtr) then
-             do k = 1, lm
-                k1 = k + kd
-                Radtend%swhc(1:im,k) = hsw0(1:im,k1)
+             do k = 1, Model%levs
+                Radtend%swhc(1:im,k) = hsw0(1:im,k)
              enddo
-             ! Repopulate the points above levr i.e. LM
-             if (lm < Model%levs) then
-                do k = lm,Model%levs
-                   Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM)
-                enddo
-             endif
           endif
           
           ! Surface down and up spectral component fluxes
@@ -328,7 +305,7 @@ contains
              Coupling%visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
           enddo
        else                   ! if_nday_block
-         Radtend%htrsw(:,:) = 0.0
+          Radtend%htrsw(:,:) = 0.0
           Radtend%sfcfsw     = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
           Diag%topfsw        = topfsw_type( 0.0, 0.0, 0.0 )
           scmpsw             = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
@@ -396,39 +373,24 @@ contains
     endif
     
     ! #######################################################################################
-    !  Save LW outputs (Note. This piece was originally in rrtmg_lw_post.F90:_run())
+    !  Save LW outputs.
     ! #######################################################################################
     if (Model%lslwr) then
        ! Save surface air temp for diurnal adjustment at model t-steps
        Radtend%tsflw (:) = tsfa(:)
        
-       do k = 1, LM
-          k1 = k + kd
-          Radtend%htrlw(1:im,k) = hlwc(1:im,k1)
+       ! All-sky heating rate profile
+       do k = 1, model%levs
+          Radtend%htrlw(1:im,k) = hlwc(1:im,k)
        enddo
-       ! Repopulate the points above levr
-       if (lm < Model%levs) then
-          do k = lm,Model%levs
-             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
-          enddo
-       endif
-       
        if (Model%lwhtr) then
-          do k = 1, lm
-             k1 = k + kd
-             Radtend%lwhc(1:im,k) = hlw0(1:im,k1)
+          do k = 1, model%levs
+             Radtend%lwhc(1:im,k) = hlw0(1:im,k)
           enddo
-          ! Repopulate the points above levr
-          if (lm < Model%levs) then
-             do k = lm,Model%levs
-                Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
-             enddo
-          endif
        endif
        
        ! Radiation fluxes for other physics processes
        Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
-       
     endif 
 
 
@@ -512,11 +474,11 @@ contains
           do j = 1, 3
              do i = 1, IM
                 tem0d = raddt * cldsa(i,j)
-                itop  = mtopa(i,j) - kd
-                ibtc  = mbota(i,j) - kd
+                itop  = mtopa(i,j)
+                ibtc  = mbota(i,j)
                 Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
-                Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
-                Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
+                Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop)
+                Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc)
                 Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
                 
                 !       Anning adds optical depth and emissivity output
@@ -534,9 +496,8 @@ contains
        
        !       if (.not. Model%uni_cld) then
        if (Model%lgocart .or. Model%ldiag3d) then
-          do k = 1, LM
-             k1 = k + kd
-             Coupling%cldcovi(1:im,k) = cloud_fraction(1:im,k1)
+          do k = 1, Model%levs
+             Coupling%cldcovi(1:im,k) = cloud_fraction(1:im,k)
           enddo
        endif
     endif                                ! end_if_lssav

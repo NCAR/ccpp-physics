@@ -662,11 +662,11 @@ contains
 !! \section arg_table_rrtmgp_lw_run Argument Table
 !! | local_name              | standard_name                                                                                 | long_name                                                          | units | rank | type                  |    kind   | intent | optional |
 !! |-------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
+!! | Model                   | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type      |           | in     | F        |
 !! | ncol                    | horizontal_loop_extent                                                                        | horizontal dimension                                               | count |    0 | integer               |           | in     | F        |
-!! | nlay                    | adjusted_vertical_layer_dimension_for_radiation                                               | number of vertical layers for radiation                            | count |    0 | integer               |           | in     | F        |
-!! | p_lay                   | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                   | air_pressure_at_interface_for_radiation_in_hPa                                                | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                   | air_temperature_at_layer_for_radiation                                                        | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
+!! | p_lay                   | air_pressure_at_layer_for_RRTMGP_in_hPa                                                       | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | p_lev                   | air_pressure_at_interface_for_RRTMGP_in_hPa                                                   | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
+!! | t_lay                   | air_temperature_at_layer_for_RRTMGP                                                           | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
 !! | skt                     | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                           | K     |    1 | real                  | kind_phys | in     | F        |
 !! | sfc_emiss               | surface_longwave_emissivity_in_each_band                                                      | surface lw emissivity in fraction in each LW band                  | frac  |    2 | real                  | kind_phys | in     | F        |
 !! | kdist_lw                | K_distribution_file_for_RRTMGP_LW_scheme                                                      | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
@@ -683,18 +683,18 @@ contains
 !! | errmsg                  | ccpp_error_message                                                                            | error message for error handling in CCPP                           | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                  | ccpp_error_flag                                                                               | error flag for error handling in CCPP                              | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_lw_run(ncol, nlay, kdist_lw, p_lay, t_lay, p_lev, skt, &
+  subroutine rrtmgp_lw_run(Model, ncol, kdist_lw, p_lay, t_lay, p_lev, skt, &
        sfc_emiss, gas_concentrations, optical_propsLW_clds, optical_propsLW_aerosol,&
        lslwr, fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
+    type(GFS_control_type),   intent(in)    :: Model
     integer, intent(in) :: &
-         ncol,                 & ! Number of horizontal gridpoints
-         nlay                    ! Number of vertical layers
-    real(kind_phys), dimension(ncol,nlay), intent(in) :: &
+         ncol                    ! Number of horizontal gridpoints
+    real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers         (hPa)
          t_lay                   ! Temperature                            (K)
-    real(kind_phys), dimension(ncol,nlay+1), intent(in) :: &
+    real(kind_phys), dimension(ncol,model%levs+1), intent(in) :: &
          p_lev                   ! Pressure @ model layer-interfaces      (hPa)
     real(kind_phys), dimension(ncol), intent(in) :: &
          skt                     ! Surface(skin) temperature              (K)
@@ -713,25 +713,25 @@ contains
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
-    real(kind_phys), dimension(ncol,nlay), intent(out) :: &
+    real(kind_phys), dimension(ncol,model%levs), intent(out) :: &
          fluxUP_allsky,   & ! All-sky flux                    (W/m2)
          fluxDOWN_allsky, & ! All-sky flux                    (W/m2)
          fluxUP_clrsky,   & ! Clear-sky flux                  (W/m2)
          fluxDOWN_clrsky    ! All-sky flux                    (W/m2)
 
     ! Outputs (optional)
-    real(kind_phys), dimension(ncol,nlay,kdist_lw%get_nband()), optional, intent(inout) :: &
+    real(kind_phys), dimension(ncol,model%levs,kdist_lw%get_nband()), optional, intent(inout) :: &
          hlwb             ! All-sky heating rate, by band     (K/sec)
-    real(kind_phys), dimension(ncol,nlay), optional, intent(inout) :: &
+    real(kind_phys), dimension(ncol,model%levs), optional, intent(inout) :: &
          hlw0             ! Clear-sky heating rate            (K/sec)
 
     ! Local variables
     type(ty_fluxes_byband) :: &
          flux_allsky, & ! All-sky flux                        (W/m2)
          flux_clrsky    ! Clear-sky flux                      (W/m2)
-    real(kind_phys), dimension(ncol,nlay+1),target :: &
+    real(kind_phys), dimension(ncol,model%levs+1),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
-    real(kind_phys), dimension(ncol,nlay+1,kdist_lw%get_nband()),target :: &
+    real(kind_phys), dimension(ncol,model%levs+1,kdist_lw%get_nband()),target :: &
          fluxLWBB_up_allsky, fluxLWBB_dn_allsky
     logical :: l_ClrSky_HR, l_AllSky_HR_byband
     integer :: k
@@ -766,8 +766,8 @@ contains
          skt,                                & ! IN  - skin temperature (K)
          sfc_emiss,                          & ! IN  - surface emissivity in each LW band
          optical_propsLW_clds,               & ! IN  - DDT containing cloud optical information 
-         flux_allsky,                        & ! OUT - Fluxes, all-sky, 3D (nCol,nLay,nBand) 
-         flux_clrsky,                        & ! OUT - Fluxes, clear-sky, 3D (nCol,nLay,nBand) 
+         flux_allsky,                        & ! OUT - Fluxes, all-sky, 3D (nCol,model%levs,nBand) 
+         flux_clrsky,                        & ! OUT - Fluxes, clear-sky, 3D (nCol,model%levs,nBand) 
          aer_props = optical_propsLW_aerosol)) ! IN(optional) - DDT containing aerosol optical information
     fluxUP_allsky   = flux_allsky%flux_up
     fluxDOWN_allsky = flux_allsky%flux_dn 
