@@ -83,7 +83,7 @@ contains
 !! | Tbd                     | GFS_tbd_type_instance                                         | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
 !! | Coupling                | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type     |           | in     | F        |
 !! | Radtend                 | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
-!! | im                      | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer               |           | in     | F        |
+!! | ncol                    | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer               |           | in     | F        |
 !! | kdist_lw                | K_distribution_file_for_RRTMGP_LW_scheme                      | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | kdist_sw                | K_distribution_file_for_RRTMGP_SW_scheme                      | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | raddt                   | time_step_for_radiation                                       | radiation time step                                                           | s        |    0 | real                  | kind_phys | out    | F        |
@@ -115,7 +115,7 @@ contains
   ! Attention - the output arguments lm, im, lmk, lmp must not be set
   ! in the CCPP version - they are defined in the interstitial_create routine
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
-       im, kdist_lw, kdist_sw,                                                          & ! IN
+       ncol, kdist_lw, kdist_sw,                                                        & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
        cld_reliq, cld_iwp, cld_reice, faerlw, faersw, sfc_emiss_byband, nday, idxday,   & ! OUT
        gas_concentrations, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,         & ! OUT
@@ -137,33 +137,33 @@ contains
     type(GFS_tbd_type), intent(in) :: &
          Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
-         im                   ! Number of horizontal grid points
+         ncol                   ! Number of horizontal grid points
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          kdist_lw,          & ! RRTMGP DDT containing spectral information for LW calculation
          kdist_sw             ! RRTMGP DDT containing spectral information for SW calculation
 
     ! Outputs
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levs), intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
          p_lay,             & !
          t_lay                !
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levs+1), intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
          p_lev,             & !
          t_lev                !
     real(kind_phys), intent(out) :: &
          raddt                !
-    real(kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(out) :: &
          tsfg,              & !
          tsfa                 !
-    real(kind_phys),dimension(kdist_sw%get_nband(),IM),intent(out) :: &
+    real(kind_phys),dimension(kdist_sw%get_nband(),NCOL),intent(out) :: &
          sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
          sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
          sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
          sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
-    integer, dimension(size(Grid%xlon,1)), intent(out) :: &
+    integer, dimension(ncol), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(out) :: &
          alb1d                ! Surface albedo pertubation
     type(ty_gas_concs),intent(out) :: &
          gas_concentrations   ! RRTMGP DDT containing gas volumne mixing ratios
@@ -171,41 +171,40 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-    real(kind_phys),dimension(kdist_sw%get_nband(),IM),intent(out) :: &
+    real(kind_phys),dimension(kdist_sw%get_nband(),NCOL),intent(out) :: &
          sfc_emiss_byband    ! Longwave surface emissivity in each band
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levr+LTP),intent(out) :: &
          cld_frac,          & ! Total cloud fraction
          cld_lwp,           & ! Cloud liquid water path
          cld_reliq,         & ! Cloud liquid effective radius
          cld_iwp,           & ! Cloud ice water path
          cld_reice            ! Cloud ice effecive radius
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levs,kdist_sw%get_nband(),NF_AESW), intent(out) ::&
+    real(kind_phys), dimension(ncol,Model%levs,kdist_sw%get_nband(),NF_AESW), intent(out) ::&
          faersw               ! Aerosol radiative properties in each SW band.
-    real(kind_phys), dimension(size(Grid%xlon,1),Model%levs,kdist_lw%get_nband(),NF_AELW), intent(out) ::&
+    real(kind_phys), dimension(ncol,Model%levs,kdist_lw%get_nband(),NF_AELW), intent(out) ::&
          faerlw               ! Aerosol radiative properties in each LW band.
     
     ! Local variables
     integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl,i, j, k, k1, k2, lsk, &
          LP1, lla, llb, lya, lyb, iCol, iBand, iSFC, iTOA, iLay
-    integer,dimension(IM) :: ipseed_lw,ipseed_sw
-    integer,dimension(size(Grid%xlon,1),3) :: mbota,mtopa
+    integer,dimension(NCOL) :: ipseed_lw,ipseed_sw
+    integer,dimension(ncol,3) :: mbota,mtopa
     logical :: top_at_1
-    logical,dimension(IM,Model%levs) :: &
+    logical,dimension(NCOL,Model%levs) :: &
          liqmask,icemask
-    real(kind_phys),dimension(IM,Model%levs) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, qs, tem0d,  clwmin, clwm, clwt, onemrh, value, tem1, tem2
-    real(kind_phys), parameter :: xrc3 = 100.
-    real(kind_phys), dimension(size(Grid%xlon,1))  :: de_lgth
-    real(kind_phys), dimension(size(Grid%xlon,1), 5) :: cldsa
-    real(kind_phys), dimension(size(Grid%xlon,1), NSPC1) :: aerodp
-    real(kind_phys), dimension(size(Grid%xlon,1), NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
+    real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
+    real(kind_phys) :: es, qs
+    real(kind_phys), dimension(ncol)  :: de_lgth
+    real(kind_phys), dimension(ncol, 5) :: cldsa
+    real(kind_phys), dimension(ncol, NSPC1) :: aerodp
+    real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
+    real(kind_phys), dimension(ncol, Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
          deltaP, o3_lay, delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs, 2:Model%ntrac) :: tracer
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs, NF_VGAS) :: gas_vmr
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs, Model%ncnd) :: cld_condensate
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs, NF_CLDS) :: clouds
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs, kdist_sw%get_nband(), NF_AESW)::faersw2
+    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac) :: tracer
+    real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
+    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
+    real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
+    real(kind_phys), dimension(ncol, Model%levs, kdist_sw%get_nband(), NF_AESW)::faersw2
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -229,17 +228,17 @@ contains
     ! Compute some fields needed by RRTMGP
     ! #######################################################################################
     ! Copy state fields over for use in RRTMGP
-    p_lev(1:IM,iSFC:iTOA) = Statein%prsi(1:IM,1:Model%levs)
-    p_lev(1:IM,iTOA+1)    = spread(kdist_lw%get_press_min(),dim=1, ncopies=IM)
-    p_lay(1:IM,iSFC:iTOA) = Statein%prsl(1:IM,1:Model%levs)
-    t_lay(1:IM,iSFC:iTOA) = Statein%tgrs(1:IM,1:Model%levs)
+    p_lev(1:NCOL,iSFC:iTOA) = Statein%prsi(1:NCOL,1:Model%levs)
+    p_lev(1:NCOL,iTOA+1)    = spread(kdist_lw%get_press_min(),dim=1, ncopies=NCOL)
+    p_lay(1:NCOL,iSFC:iTOA) = Statein%prsl(1:NCOL,1:Model%levs)
+    t_lay(1:NCOL,iSFC:iTOA) = Statein%tgrs(1:NCOL,1:Model%levs)
 
     ! Compute layer pressure thicknes
     deltaP = p_lev(:,iSFC:iTOA)-p_lev(:,iSFC+1:iTOA+1)
 
     ! Compute temperature at layer-interfaces
-    t_lev(1:IM,iSFC) = Sfcprop%tsfc(1:IM)
-    do iCol=1,IM
+    t_lev(1:NCOL,iSFC) = Sfcprop%tsfc(1:NCOL)
+    do iCol=1,NCOL
        do iLay=iSFC+1,iTOA
           t_lev(iCol,iLay) = (t_lay(iCol,iLay)+t_lay(iCol,iLay-1))/2._kind_phys
        enddo
@@ -248,7 +247,7 @@ contains
 
     ! Compute a bunch of thermodynamic fields needed by the macrophysics schemes. Relative humidity, 
     ! saturation mixing-ratio, vapor mixing-ratio, virtual temperature, layer thickness,...
-    do iCol=1,IM
+    do iCol=1,NCOL
        do iLay=iSFC,iTOA
           es                = min( Statein%prsl(iCol,iLay),  fpvs( Statein%tgrs(iCol,iLay) ) )  ! fpvs and prsl in pa
           qs                = max( QMIN, eps * es / (Statein%prsl(iCol,iLay) + epsm1*es) )
@@ -265,25 +264,25 @@ contains
     ! #######################################################################################
     ! First recast remaining all tracers (except sphum) forcing them all to be positive
     do j = 2, model%NTRAC
-       tracer(1:IM,1:Model%levs,j) = max(0.0, Statein%qgrs(1:IM,1:Model%levs,j))
+       tracer(1:NCOL,1:Model%levs,j) = max(0.0, Statein%qgrs(1:NCOL,1:Model%levs,j))
     enddo
     
     if (Model%ntoz > 0) then 
        do iLay=iSFC,iTOA
-          do iCol=1,IM
+          do iCol=1,NCOL
              o3_lay(iCol,iLay) = max( QMIN, tracer(iCol,iLay,Model%ntoz) )
           enddo
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (Statein%prslk(1:IM,iSFC:iTOA), Grid%xlat, IM, Model%levs, o3_lay) 
+       call getozn (Statein%prslk(1:NCOL,iSFC:iTOA), Grid%xlat, NCOL, Model%levs, o3_lay) 
     endif
 
     ! #######################################################################################
     ! Set gas concentrations for RRTMGP
     ! #######################################################################################
     ! Call getgases(), to set up non-prognostic gas volume mixing ratios (gas_vmr).
-    call getgases (p_lev/100., Grid%xlon, Grid%xlat, IM, Model%levs, gas_vmr)
+    call getgases (p_lev/100., Grid%xlon, Grid%xlat, NCOL, Model%levs, gas_vmr)
 
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
@@ -306,9 +305,178 @@ contains
     ! Compute cosine of zenith angle (only when SW is called)
     ! #######################################################################################
     if (Model%lsswr) then
-       call coszmn (Grid%xlon, Grid%sinlat, Grid%coslat, Model%solhr, IM, Model%me, &
+       call coszmn (Grid%xlon, Grid%sinlat, Grid%coslat, Model%solhr, NCOL, Model%me, &
             Radtend%coszen, Radtend%coszdg)
     endif
+
+    ! #######################################################################################
+    ! Cloud microphysics
+    ! #######################################################################################
+    call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
+         p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
+         cld_condensate, clouds, cldsa, mbota, mtopa, de_lgth)
+
+    ! Copy output cloud fields
+    cld_frac  = clouds(:,:,1)
+    cld_lwp   = clouds(:,:,2)
+    cld_reliq = clouds(:,:,3)
+    cld_iwp   = clouds(:,:,4)
+    cld_reice = clouds(:,:,5)   
+
+    ! #######################################################################################
+    ! mg, sfc-perts
+    !  ---  scale random patterns for surface perturbations with perturbation size
+    !  ---  turn vegetation fraction pattern into percentile pattern
+    ! #######################################################################################
+    alb1d(:) = 0.
+    if (Model%do_sfcperts) then
+       if (Model%pertalb(1) > 0.) then
+          do i=1,ncol
+             call cdfnor(Coupling%sfc_wts(i,5),alb1d(i))
+          enddo
+       endif
+    endif    
+    
+    ! #######################################################################################
+    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile for both 
+    ! LW and SW radiation.
+    ! #######################################################################################
+    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
+         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
+         Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
+    
+    ! Store aerosol optical properties
+    ! SW. 
+    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
+    ! band ordering was [nIR -> UV -> IR(band)]
+    faersw(1:NCOL,1:Model%levs,1,1)                      = faersw2(1:NCOL,1:Model%levs,kdist_sw%get_nband(),1)
+    faersw(1:NCOL,1:Model%levs,1,2)                      = faersw2(1:NCOL,1:Model%levs,kdist_sw%get_nband(),2)
+    faersw(1:NCOL,1:Model%levs,1,3)                      = faersw2(1:NCOL,1:Model%levs,kdist_sw%get_nband(),3)
+    faersw(1:NCOL,1:Model%levs,2:kdist_sw%get_nband(),1) = faersw2(1:NCOL,1:Model%levs,1:kdist_sw%get_nband()-1,1)
+    faersw(1:NCOL,1:Model%levs,2:kdist_sw%get_nband(),2) = faersw2(1:NCOL,1:Model%levs,1:kdist_sw%get_nband()-1,2)
+    faersw(1:NCOL,1:Model%levs,2:kdist_sw%get_nband(),3) = faersw2(1:NCOL,1:Model%levs,1:kdist_sw%get_nband()-1,3)
+
+    ! Setup surface ground temperature and ground/air skin temperature if required.
+    tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)
+    tsfa(1:NCOL) = Sfcprop%tsfc(1:NCOL)
+
+    ! #######################################################################################
+    ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
+    ! #######################################################################################
+    if (Model%lslwr) then
+       call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,     &
+            Sfcprop%zorl, tsfg, tsfa, Sfcprop%hprim, NCOL,  Radtend%semis)
+       do iBand=1,kdist_lw%get_nband()
+          sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
+       enddo
+    endif
+
+    ! #######################################################################################
+    ! For SW, gather daylit points, compute surface albedo in each band,
+    ! #######################################################################################
+    if (Model%lsswr) then
+       ! Check for daytime points for SW radiation.
+       nday = 0
+       idxday = 0
+       do i = 1, NCOL
+          if (Radtend%coszen(i) >= 0.0001) then
+             nday = nday + 1
+             idxday(nday) = i
+          endif
+       enddo
+       
+       ! Call module_radiation_surface::setalb() to setup surface albedo.
+       call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
+                    Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
+                    tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
+                    Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
+                    Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
+                    Sfcprop%tisfc, NCOL,                         &
+                    alb1d, Model%pertalb,                        &    !  mg, sfc-perts
+                    sfcalb)                                           !  ---  outputs
+       
+       ! Approximate mean surface albedo from vis- and nir-  diffuse values.
+       Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+    else
+       nday   = 0
+       idxday = 0
+       sfcalb = 0.0
+    endif
+      
+    ! Spread across all SW bands
+    do iBand=1,kdist_sw%get_nband()
+       sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
+       sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
+       sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
+       sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
+    enddo
+
+  end subroutine GFS_rrtmgp_pre_run
+  
+!> \section arg_table_GFS_rrtmgp_pre_finalize Argument Table
+!!
+  subroutine GFS_rrtmgp_pre_finalize ()
+  end subroutine GFS_rrtmgp_pre_finalize
+
+  ! #######################################################################################
+  ! SUBROUTINE check_error_msg()
+  ! #######################################################################################
+  subroutine check_error_msg(routine_name, error_msg)
+    character(len=*), intent(in) :: &
+         error_msg, routine_name
+    
+    if(error_msg /= "") then
+       print*,"ERROR("//trim(routine_name)//"): "
+       print*,trim(error_msg)
+       return
+    end if
+  end subroutine check_error_msg      
+
+  ! #######################################################################################
+  ! Subroutine cloud_microphysics()
+  ! #######################################################################################
+  subroutine cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
+       p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
+       cld_condensate, clouds, cldsa, mbota, mtopa, de_lgth)
+    ! Inputs
+    type(GFS_control_type), intent(in) :: &
+         Model                ! Fortran DDT containing FV3-GFS model control parameters
+    type(GFS_tbd_type), intent(in) :: &
+         Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
+    type(GFS_grid_type), intent(in) :: &
+         Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+    type(GFS_sfcprop_type), intent(in) :: &
+         Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
+
+    integer, intent(in) :: &
+         ncol ! Number of horizontal gridpoints
+    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac) :: tracer
+    real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
+         p_lay,             & !
+         t_lay,             & !
+         tv_lay,            & !
+         relhum,            & !
+         qs_lay,            & !
+         q_lay,             & !
+         deltaZ,            & !
+         deltaP
+    real(kind_phys), dimension(ncol,Model%levs+1), intent(in) :: &
+         p_lev                !
+
+    ! Outputs
+    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd),intent(out) :: cld_condensate
+    real(kind_phys), dimension(ncol, Model%levs, NF_CLDS),intent(out) :: clouds
+    integer,dimension(ncol,3), intent(out) :: mbota, mtopa
+    real(kind_phys), dimension(ncol), intent(out)  :: de_lgth
+    real(kind_phys), dimension(ncol, 5), intent(out) :: cldsa
+
+    ! Local variables
+    !real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
+    integer :: i,k
+    real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
+    real(kind_phys) :: es, qs,  clwmin, clwm, clwt, onemrh, value, tem1, tem2
+    real(kind_phys), parameter :: xrc3 = 100.
+
     
     ! #######################################################################################
     !  Obtain cloud information for radiation calculations
@@ -322,24 +490,25 @@ contains
     ! #######################################################################################
     cld_condensate = 0.0_kind_phys
     if (Model%ncnd == 1) then                                                                    ! Zhao_Carr_Sundqvist
-       cld_condensate(1:IM,1:Model%levs,1) = tracer(1:IM,1:Model%levs,Model%ntcw)                ! -liquid water/ice
+       cld_condensate(1:NCOL,1:Model%levs,1) = tracer(1:NCOL,1:Model%levs,Model%ntcw)            ! -liquid water/ice
     elseif (Model%ncnd == 2) then                                                                ! MG
-       cld_condensate(1:IM,1:Model%levs,1) = tracer(1:IM,1:Model%levs,Model%ntcw)                ! -liquid water
-       cld_condensate(1:IM,1:Model%levs,2) = tracer(1:IM,1:Model%levs,Model%ntiw)                ! -ice water
+       cld_condensate(1:NCOL,1:Model%levs,1) = tracer(1:NCOL,1:Model%levs,Model%ntcw)            ! -liquid water
+       cld_condensate(1:NCOL,1:Model%levs,2) = tracer(1:NCOL,1:Model%levs,Model%ntiw)            ! -ice water
     elseif (Model%ncnd == 4) then                                                                ! MG2
-       cld_condensate(1:IM,1:Model%levs,1) = tracer(1:IM,1:Model%levs,Model%ntcw)                ! -liquid water
-       cld_condensate(1:IM,1:Model%levs,2) = tracer(1:IM,1:Model%levs,Model%ntiw)                ! -ice water
-       cld_condensate(1:IM,1:Model%levs,3) = tracer(1:IM,1:Model%levs,Model%ntrw)                ! -rain water
-       cld_condensate(1:IM,1:Model%levs,4) = tracer(1:IM,1:Model%levs,Model%ntsw)                ! -snow water
+       cld_condensate(1:NCOL,1:Model%levs,1) = tracer(1:NCOL,1:Model%levs,Model%ntcw)            ! -liquid water
+       cld_condensate(1:NCOL,1:Model%levs,2) = tracer(1:NCOL,1:Model%levs,Model%ntiw)            ! -ice water
+       cld_condensate(1:NCOL,1:Model%levs,3) = tracer(1:NCOL,1:Model%levs,Model%ntrw)            ! -rain water
+       cld_condensate(1:NCOL,1:Model%levs,4) = tracer(1:NCOL,1:Model%levs,Model%ntsw)            ! -snow water
     elseif (Model%ncnd == 5) then                                                                ! GFDL MP, Thompson, MG3
-       cld_condensate(1:IM,1:Model%levs,1) = tracer(1:IM,1:Model%levs,Model%ntcw)                ! -liquid water
-       cld_condensate(1:IM,1:Model%levs,2) = tracer(1:IM,1:Model%levs,Model%ntiw)                ! -ice water
-       cld_condensate(1:IM,1:Model%levs,3) = tracer(1:IM,1:Model%levs,Model%ntrw)                ! -rain water
-       cld_condensate(1:IM,1:Model%levs,4) = tracer(1:IM,1:Model%levs,Model%ntsw) + &            ! -snow + grapuel
-                                             tracer(1:IM,1:Model%levs,Model%ntgl) 
+       cld_condensate(1:NCOL,1:Model%levs,1) = tracer(1:NCOL,1:Model%levs,Model%ntcw)            ! -liquid water
+       cld_condensate(1:NCOL,1:Model%levs,2) = tracer(1:NCOL,1:Model%levs,Model%ntiw)            ! -ice water
+       cld_condensate(1:NCOL,1:Model%levs,3) = tracer(1:NCOL,1:Model%levs,Model%ntrw)            ! -rain water
+       cld_condensate(1:NCOL,1:Model%levs,4) = tracer(1:NCOL,1:Model%levs,Model%ntsw) + &        ! -snow + grapuel
+                                               tracer(1:NCOL,1:Model%levs,Model%ntgl) 
     endif
     where(cld_condensate < epsq) cld_condensate = 0.0
     
+    ! For GFDL microphysics scheme...
     if (Model%imp_physics == 11 ) then
        if (.not. Model%lgfdlmprad) then
           cld_condensate(:,:,1) =                         tracer(:,1:Model%levs,Model%ntcw)
@@ -349,48 +518,51 @@ contains
           cld_condensate(:,:,1) = cld_condensate(:,:,1) + tracer(:,1:Model%levs,Model%ntgl)
        endif
        do k=1,Model%levs
-          do i=1,IM
+          do i=1,NCOL
              if (cld_condensate(i,k,1) < EPSQ ) cld_condensate(i,k,1) = 0.0
           enddo
        enddo
     endif
+
 
     ! Add suspended convective cloud water to grid-scale cloud water
     ! only for cloud fraction & radiation computation it is to enhance 
     ! cloudiness due to suspended convec cloud water for zhao/moorthi's 
     ! (imp_phys=99) & ferrier's (imp_phys=5) microphysics schemes
     if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then       ! same as Model%imp_physics = 99
-       delta_q(1:im,1:Model%levs) = Tbd%phy_f3d(1:im,1:Model%levs,5)
-       cnv_w  (1:im,1:Model%levs) = Tbd%phy_f3d(1:im,1:Model%levs,6)
-       cnv_c  (1:im,1:Model%levs) = Tbd%phy_f3d(1:im,1:Model%levs,7)
+       delta_q(1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,5)
+       cnv_w  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,6)
+       cnv_c  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,7)
     elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then ! same as MOdel%imp_physics=98
-       delta_q(1:im,1:Model%levs) = 0.0
-       cnv_w  (1:im,1:Model%levs) = Tbd%phy_f3d(1:im,1:Model%levs,Model%num_p3d+1)
-       cnv_c  (1:im,1:Model%levs) = 0.0
+       delta_q(1:ncol,1:Model%levs) = 0.0
+       cnv_w  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,Model%num_p3d+1)
+       cnv_c  (1:ncol,1:Model%levs) = 0.0
     else                                                           ! all the rest
-       delta_q(1:im,1:Model%levs) = 0.0
-       cnv_w  (1:im,1:Model%levs) = 0.0
-       cnv_c  (1:im,1:Model%levs) = 0.0
+       delta_q(1:ncol,1:Model%levs) = 0.0
+       cnv_w  (1:ncol,1:Model%levs) = 0.0
+       cnv_c  (1:ncol,1:Model%levs) = 0.0
     endif
 
+    ! For zhao/moorthi's prognostic cloud scheme, add in convective cloud water to liquid-cloud water
     if (Model%imp_physics == 99) then
-       cld_condensate(1:IM,1:Model%levs,1) = cld_condensate(1:IM,1:Model%levs,1) + cnv_w(1:IM,1:Model%levs)
+       cld_condensate(1:NCOL,1:Model%levs,1) = cld_condensate(1:NCOL,1:Model%levs,1) + cnv_w(1:NCOL,1:Model%levs)
     endif
     
+    ! For MG prognostic cloud scheme, add in convective cloud water to liquid-and-ice-cloud condensate
     if (Model%imp_physics == 10) then
-       cld_condensate(1:IM,1:Model%levs,1) = cld_condensate(1:IM,1:Model%levs,1) + cnv_w(1:IM,1:Model%levs) + cld_condensate(1:IM,1:Model%levs,2)
+       cld_condensate(1:NCOL,1:Model%levs,1) = cld_condensate(1:NCOL,1:Model%levs,1) + cnv_w(1:NCOL,1:Model%levs) + cld_condensate(1:NCOL,1:Model%levs,2)
     endif
 
     if (Model%uni_cld) then
        if (Model%effr_in) then
-          cldcov(1:im,1:Model%levs)  = Tbd%phy_f3d(1:im,1:Model%levs,Model%indcld)
-          effr_l(1:im,1:Model%levs)  = Tbd%phy_f3d(1:im,1:Model%levs,2)
-          effr_i(1:im,1:Model%levs)  = Tbd%phy_f3d(1:im,1:Model%levs,3)
-          effr_r(1:im,1:Model%levs)  = Tbd%phy_f3d(1:im,1:Model%levs,4)
-          effr_s(1:im,1:Model%levs)  = Tbd%phy_f3d(1:im,1:Model%levs,5)
+          cldcov(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,Model%indcld)
+          effr_l(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,2)
+          effr_i(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,3)
+          effr_r(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,4)
+          effr_s(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,5)
        else
           do k=1,model%levs
-             do i=1,im
+             do i=1,ncol
                 !cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
                 !if (tracer1(i,k,ntcw) .gt. 0 .or. tracer1(i,k,ntiw) .gt. 0) then
                 !   cldcov(i,k) = 0.1
@@ -401,7 +573,7 @@ contains
           enddo
        endif
     elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-       cldcov(1:IM,1:Model%levs) = tracer(1:IM,1:Model%levs,Model%ntclamt)
+       cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
     else                                                           ! neither of the other two cases
        ! cldcov = 0.0
     endif
@@ -415,7 +587,7 @@ contains
     cldcov(:,:) = 0.0
     if (.not. Model%lmfshal) then
        do k = 1, Model%levs
-          do i = 1, IM
+          do i = 1, NCOL
              clwt = 1.0e-6 * (p_lay(i,k)*0.1)
              if (cld_condensate(i,k,1) > 0.) then
                 onemrh= max( 1.e-10, 1.0-relhum(i,k) )
@@ -430,7 +602,7 @@ contains
        enddo
     else
        do k = 1, Model%levs
-          do i = 1, IM
+          do i = 1, NCOL
              clwt = 1.0e-6 * (p_lay(i,k)*0.1)
              if (cld_condensate(i,k,1) .gt. 0) then
                 onemrh= max( 1.e-10, 1.0-relhum(i,k) )
@@ -449,7 +621,8 @@ contains
        enddo
     endif
     ! DJS2019: END
-      
+
+
     ! #######################################################################################
     ! MICROPHYSICS
     ! #######################################################################################
@@ -457,149 +630,150 @@ contains
     if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           
        if (Model%uni_cld .and. Model%ncld >= 2) then
           call progclduni(           &
-               p_lay/100.,           & ! IN
-               p_lev/100.,           & ! IN
-               t_lay,                & ! IN
-               tv_lay,               & ! IN
-               cld_condensate,       & ! IN
-               Model%ncnd,           & ! IN
-               Grid%xlat,            & ! IN
-               Grid%xlon,            & ! IN
-               Sfcprop%slmsk,        & ! IN
-               deltaZ,               & ! IN
-               deltaP/100.,          & ! IN
-               IM,                   & ! IN
-               MODEL%LEVS,           & ! IN
-               MODEL%LEVS+1,         & ! IN
-               cldcov,               & ! IN
-               effr_l,               & ! IN
-               effr_i,               & ! IN
-               effr_r,               & ! IN
-               effr_s,               & ! IN
-               Model%effr_in,        & ! IN
-               clouds,               & ! OUT
-               cldsa,                & ! OUT
-               mtopa,                & ! OUT
-               mbota,                & ! OUT
-               de_lgth)                ! OUT
+               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
+               cld_condensate,       & ! IN  - Cloud condensate amount (Model%ncnd types)     ()
+               Model%ncnd,           & ! IN  - Number of cloud condensate types               ()
+               Grid%xlat,            & ! IN  - Latitude                                       (radians)
+               Grid%xlon,            & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
+               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
+               NCOL,                 & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,           & ! IN  - Number of model layers
+               MODEL%LEVS+1,         & ! IN  - Number of model levels
+               cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+               effr_l,               & ! IN  - Liquid-water effective radius                  (microns)
+               effr_i,               & ! IN  - Ice-water effective radius                     (microns)
+               effr_r,               & ! IN  - Rain-water effective radius                    (microns)
+               effr_s,               & ! IN  - Snow-water effective radius                    (microns)
+               Model%effr_in,        & ! IN  - Logical, if .true. use input effective radii
+               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                ! OUT - clouds decorrelation length (km)
        else
           call progcld1 (            &
-               p_lay/100.,           & ! IN
-               p_lev/100.,           & ! IN
-               t_lay,                & ! IN
-               tv_lay,               & ! IN
-               q_lay,                & ! IN
-               qs_lay,               & ! IN
-               relhum,               & ! IN
-               cld_condensate(:,:,1),& ! IN
-               Grid%xlat,            & ! IN
-               Grid%xlon,            & ! IN
-               Sfcprop%slmsk,        & ! IN
-               deltaZ,               & ! IN
-               deltaP/100.,          & ! IN
-               IM,                   & ! IN
-               Model%levs,           & ! IN
-               Model%levs+1,         & ! IN
-               Model%uni_cld,        & ! IN
-               Model%lmfshal,        & ! IN
-               Model%lmfdeep2,       & ! IN
-               cldcov,               & ! IN
-               effr_l,               & ! IN
-               effr_i,               & ! IN
-               effr_r,               & ! IN
-               effr_s,               & ! IN
-               Model%effr_in,        & ! IN
-               clouds,               & ! OUT
-               cldsa,                & ! OUT
-               mtopa,                & ! OUT
-               mbota,                & ! OUT
-               de_lgth)                ! OUT 
+               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
+               q_lay,                & ! IN  - Specific humidity at layer center              (kg/kg)
+               qs_lay,               & ! IN  - Saturation specific humidity at layer center   (kg/kg)
+               relhum,               & ! IN  - Relative humidity at layer center              (1)
+               cld_condensate(:,:,1),& ! IN  - Cloud condensate amount                        ()
+                                       !       (Zhao: liq+convective; MG: liq+ice+convective) 
+               Grid%xlat,            & ! IN  - Latitude                                       (radians)
+               Grid%xlon,            & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
+               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
+               NCOL,                 & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,           & ! IN  - Number of model layers
+               MODEL%LEVS+1,         & ! IN  - Number of model levels
+               Model%uni_cld,        & ! IN  - True for cloud fraction from shoc
+               Model%lmfshal,        & ! IN  - True for mass flux shallow convection
+               Model%lmfdeep2,       & ! IN  - True for mass flux deep convection
+               cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+               effr_l,               & ! IN  - Liquid-water effective radius                  (microns)
+               effr_i,               & ! IN  - Ice-water effective radius                     (microns)
+               effr_r,               & ! IN  - Rain-water effective radius                    (microns)
+               effr_s,               & ! IN  - Snow-water effective radius                    (microns)
+               Model%effr_in,        & ! IN  - Logical, if .true. use input effective radii
+               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                ! OUT - clouds decorrelation length (km)
        endif
        ! *) zhao/moorthi's prognostic cloud+pdfcld
     elseif(Model%imp_physics == 98) then
        call progcld3 (               &
-               p_lay/100.,           & ! IN
-               p_lev/100.,           & ! IN
-               t_lay,                & ! IN
-               tv_lay,               & ! IN
-               q_lay,                & ! IN
-               qs_lay,               & ! IN
-               relhum,               & ! IN
-               cld_condensate(:,:,1),& ! IN
-               cnv_w,                & ! IN
-               cnv_c,                & ! IN
-               Grid%xlat,            & ! IN
-               Grid%xlon,            & ! IN
-               Sfcprop%slmsk,        & ! IN
-               deltaZ,               & ! IN
-               deltaP/100.,          & ! IN
-               im,                   & ! IN
-               Model%levs,           & ! IN
-               Model%levs+1,         & ! IN
-               delta_q,              & ! IN Total water distribution width
-               Model%sup,            & ! IN
-               Model%kdt,            & ! IN
-               me,                   & ! IN
-               clouds,               & ! OUT
-               cldsa,                & ! OUT
-               mtopa,                & ! OUT
-               mbota,                & ! OUT
-               de_lgth)                ! OUT
+               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
+               q_lay,                & ! IN  - Specific humidity at layer center              (kg/kg)
+               qs_lay,               & ! IN  - Saturation specific humidity at layer center   (kg/kg)
+               relhum,               & ! IN  - Relative humidity at layer center              (1)
+               cld_condensate(:,:,1),& ! IN  - Cloud condensate amount (only h20)             ()
+               cnv_w,                & ! IN  - Layer convective cloud condensate
+               cnv_c,                & ! IN  - Layer convective cloud cover
+               Grid%xlat,            & ! IN  - Latitude                                       (radians)
+               Grid%xlon,            & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
+               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
+               NCOL,                 & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,           & ! IN  - Number of model layers
+               MODEL%LEVS+1,         & ! IN  - Number of model levels
+               delta_q,              & ! IN  - Total water distribution width
+               Model%sup,            & ! IN  - ??? Supersaturation?
+               Model%kdt,            & ! IN  - ??? 
+               me,                   & ! IN  - ??? NOT USED IN PROGCLD3()
+               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                ! OUT - clouds decorrelation length (km)
        ! *) GFDL cloud scheme
     elseif (Model%imp_physics == 11) then 
        if (.not.Model%lgfdlmprad) then
           call progcld4 (            &
-               p_lay/100.,           & ! IN
-               p_lev/100.,           & ! IN
-               t_lay,                & ! IN
-               tv_lay,               & ! IN
-               q_lay,                & ! IN
-               qs_lay,               & ! IN
-               relhum,               & ! IN
-               cld_condensate(:,:,1),& ! IN
-               cnv_w,                & ! IN
-               cnv_c,                & ! IN
-               Grid%xlat,            & ! IN
-               Grid%xlon,            & ! IN
-               Sfcprop%slmsk,        & ! IN
-               cldcov,               & ! IN
-               deltaZ,               & ! IN
-               deltaP/100.,          & ! IN
-               im,                   & ! IN
-               Model%levs,           & ! IN
-               Model%levs+1,         & ! IN
-               clouds,               & ! OUT
-               cldsa,                & ! OUT
-               mtopa,                & ! OUT
-               mbota,                & ! OUT
-               de_lgth)                ! OUT
+               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
+               q_lay,                & ! IN  - Specific humidity at layer center              (kg/kg)
+               qs_lay,               & ! IN  - Saturation specific humidity at layer center   (kg/kg)
+               relhum,               & ! IN  - Relative humidity at layer center              (1)
+               cld_condensate(:,:,1),& ! IN  - Cloud condensate amount (only h20)             ()
+               cnv_w,                & ! IN  - Layer convective cloud condensate
+               cnv_c,                & ! IN  - Layer convective cloud cover
+               Grid%xlat,            & ! IN  - Latitude                                       (radians)
+               Grid%xlon,            & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
+               cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
+               NCOL,                 & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,           & ! IN  - Number of model layers
+               MODEL%LEVS+1,         & ! IN  - Number of model levels
+               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                ! OUT - clouds decorrelation length (km)
        else
           call progclduni(           &
-               p_lay/100.,           & ! IN
-               p_lev/100.,           & ! IN
-               t_lay,                & ! IN
-               tv_lay,               & ! IN
-               cld_condensate,       & ! IN
-               Model%ncnd,           & ! IN
-               Grid%xlat,            & ! IN
-               Grid%xlon,            & ! IN
-               Sfcprop%slmsk,        & ! IN
-               deltaZ,               & ! IN
-               deltaP/100.,          & ! IN
-               IM,                   & ! IN
-               MODEL%LEVS,           & ! IN
-               MODEL%LEVS+1,         & ! IN
-               cldcov,               & ! IN
-               effr_l,               & ! IN
-               effr_i,               & ! IN
-               effr_r,               & ! IN
-               effr_s,               & ! IN
-               Model%effr_in,        & ! IN
-               clouds,               & ! OUT
-               cldsa,                & ! OUT
-               mtopa,                & ! OUT
-               mbota,                & ! OUT
-               de_lgth)                ! OUT
+               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
+               cld_condensate,       & ! IN  - Cloud condensate amount (Model%ncnd types)     ()
+               Model%ncnd,           & ! IN  - Number of cloud condensate types               ()
+               Grid%xlat,            & ! IN  - Latitude                                       (radians)
+               Grid%xlon,            & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
+               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
+               NCOL,                 & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,           & ! IN  - Number of model layers
+               MODEL%LEVS+1,         & ! IN  - Number of model levels
+               cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+               effr_l,               & ! IN  - Liquid-water effective radius                  (microns)
+               effr_i,               & ! IN  - Ice-water effective radius                     (microns)
+               effr_r,               & ! IN  - Rain-water effective radius                    (microns)
+               effr_s,               & ! IN  - Snow-water effective radius                    (microns)
+               Model%effr_in,        & ! IN  - Logical, if .true. use input effective radii
+               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                ! OUT - clouds decorrelation length (km)
        endif
        ! *) Thompson / WSM6 cloud micrphysics scheme
     elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then
@@ -610,150 +784,44 @@ contains
        endif
        
        call progcld5 ( & ! IN
-            p_lay/100.,               & ! IN
-            p_lev/100.,               & ! IN
-            t_lay,                    & ! IN
-            q_lay,                    & ! IN
-            qs_lay,                   & ! IN
-            relhum,                   & ! IN
-            tracer,                   & ! IN
-            Grid%xlat,                & ! IN
-            Grid%xlon,                & ! IN
-            Sfcprop%slmsk,            & ! IN
-            deltaZ,                   & ! IN
-            deltaP/100.,              & ! IN
-            Model%ntrac-1,            & ! IN - Number of tracers
-            Model%ntcw-1,             & ! IN - Tracer index for cloud condensate (or liquid water)
-            Model%ntiw-1,             & ! IN - Tracer index for ice 
-            Model%ntrw-1,             & ! IN - Tracer index for rain 
-            Model%ntsw-1,             & ! IN - Tracer index for snow 
-            Model%ntgl-1,             & ! IN - Tracer index for groupel
-            im,                       & ! IN
-            Model%levs,               & ! IN
-            Model%levs+1,             & ! IN
-            Model%uni_cld,            & ! IN
-            Model%lmfshal,            & ! IN
-            Model%lmfdeep2,           & ! IN
-            cldcov(:,1:Model%levs),   & ! IN
-            Tbd%phy_f3d(:,:,1),       & ! IN
-            Tbd%phy_f3d(:,:,2),       & ! IN
-            Tbd%phy_f3d(:,:,3),       & ! IN
-            clouds,                   & ! OUT
-            cldsa,                    & ! OUT
-            mtopa,                    & ! OUT
-            mbota,                    & ! OUT
-            de_lgth)                    ! OUT
+            p_lay/100.,               & ! IN  - Pressure at model layer centers                (mb)
+            p_lev/100.,               & ! IN  - Pressure at model interfaces                   (mb)
+            t_lay,                    & ! IN  - Temperature at layer centers                   (K)
+            q_lay,                    & ! IN  - Specific humidity at layer center              (kg/kg)
+            qs_lay,                   & ! IN  - Saturation specific humidity at layer center   (kg/kg)
+            relhum,                   & ! IN  - Relative humidity at layer center              (1)
+            tracer,                   & ! IN  - Cloud condensate amount in layer by type       ()
+            Grid%xlat,                & ! IN  - Latitude                                       (radians)
+            Grid%xlon,                & ! IN  - Longitude                                      (radians)
+            Sfcprop%slmsk,            & ! IN  - Land/Sea mask                                  ()
+            deltaZ,                   & ! IN  - Layer thickness                                (m)
+            deltaP/100.,              & ! IN  - Layer thickness                                (hPa)
+            Model%ntrac-1,            & ! IN  - Number of tracers
+            Model%ntcw-1,             & ! IN  - Tracer index for cloud condensate (or liquid water)
+            Model%ntiw-1,             & ! IN  - Tracer index for ice 
+            Model%ntrw-1,             & ! IN  - Tracer index for rain 
+            Model%ntsw-1,             & ! IN  - Tracer index for snow 
+            Model%ntgl-1,             & ! IN  - Tracer index for groupel
+            NCOL,                     & ! IN  - Number of horizontal gridpoints
+            MODEL%LEVS,               & ! IN  - Number of model layers
+            MODEL%LEVS+1,             & ! IN  - Number of model levels
+            Model%uni_cld,            & ! IN  - True for cloud fraction from shoc
+            Model%lmfshal,            & ! IN  - True for mass flux shallow convection
+            Model%lmfdeep2,           & ! IN  - True for mass flux deep convection
+            cldcov(:,1:Model%levs),   & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+            Tbd%phy_f3d(:,:,1),       & ! IN  - Liquid-water effective radius                  (microns)
+            Tbd%phy_f3d(:,:,2),       & ! IN  - Ice-water effective radius                     (microns)
+            Tbd%phy_f3d(:,:,3),       & ! IN  - LSnow-water effective radius                   (microns)
+            clouds,                   & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+            cldsa,                    & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+            mtopa,                    & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+            mbota,                    & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+            de_lgth)                    ! OUT - clouds decorrelation length (km)
     endif ! end if_imp_physics
 
-    ! Copy output cloud fields
-    cld_frac  = clouds(:,:,1)
-    cld_lwp   = clouds(:,:,2)
-    cld_reliq = clouds(:,:,3)
-    cld_iwp   = clouds(:,:,4)
-    cld_reice = clouds(:,:,5)   
 
-    ! #######################################################################################
-    ! mg, sfc-perts
-    !  ---  scale random patterns for surface perturbations with perturbation size
-    !  ---  turn vegetation fraction pattern into percentile pattern
-    ! #######################################################################################
-    alb1d(:) = 0.
-    if (Model%do_sfcperts) then
-       if (Model%pertalb(1) > 0.) then
-          do i=1,im
-             call cdfnor(Coupling%sfc_wts(i,5),alb1d(i))
-          enddo
-       endif
-    endif    
-    
-    ! #######################################################################################
-    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile for both 
-    ! LW and SW radiation.
-    ! #######################################################################################
-    call setaer (p_lev, p_lay, Statein%prslk(1:IM,iSFC:iTOA), tv_lay, relhum, Sfcprop%slmsk,  tracer, Grid%xlon,        &
-         Grid%xlat, IM, Model%levs, Model%levs+1, Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
-    
-    ! Store aerosol optical properties
-    ! SW. 
-    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
-    ! band ordering was [nIR -> UV -> IR(band)]
-    faersw(1:IM,1:Model%levs,1,1)                      = faersw2(1:IM,1:Model%levs,kdist_sw%get_nband(),1)
-    faersw(1:IM,1:Model%levs,1,2)                      = faersw2(1:IM,1:Model%levs,kdist_sw%get_nband(),2)
-    faersw(1:IM,1:Model%levs,1,3)                      = faersw2(1:IM,1:Model%levs,kdist_sw%get_nband(),3)
-    faersw(1:IM,1:Model%levs,2:kdist_sw%get_nband(),1) = faersw2(1:IM,1:Model%levs,1:kdist_sw%get_nband()-1,1)
-    faersw(1:IM,1:Model%levs,2:kdist_sw%get_nband(),2) = faersw2(1:IM,1:Model%levs,1:kdist_sw%get_nband()-1,2)
-    faersw(1:IM,1:Model%levs,2:kdist_sw%get_nband(),3) = faersw2(1:IM,1:Model%levs,1:kdist_sw%get_nband()-1,3)
 
-    ! Setup surface ground temperature and ground/air skin temperature if required.
-    tsfg(1:IM) = Sfcprop%tsfc(1:IM)
-    tsfa(1:IM) = Sfcprop%tsfc(1:IM)
+  end subroutine cloud_microphysics
 
-    ! #######################################################################################
-    ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
-    ! #######################################################################################
-    if (Model%lslwr) then
-       call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,     &
-            Sfcprop%zorl, tsfg, tsfa, Sfcprop%hprim, IM,  Radtend%semis)
-       do iBand=1,kdist_lw%get_nband()
-          sfc_emiss_byband(iBand,1:IM) = Radtend%semis(1:IM)
-       enddo
-    endif
-
-    ! #######################################################################################
-    ! For SW, gather daylit points, compute surface albedo in each band,
-    ! #######################################################################################
-    if (Model%lsswr) then
-       ! Check for daytime points for SW radiation.
-       nday = 0
-       idxday = 0
-       do i = 1, IM
-          if (Radtend%coszen(i) >= 0.0001) then
-             nday = nday + 1
-             idxday(nday) = i
-          endif
-       enddo
-       
-       ! Call module_radiation_surface::setalb() to setup surface albedo.
-       call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                    Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                    tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                    Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                    Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                    Sfcprop%tisfc, IM,                           &
-                    alb1d, Model%pertalb,                        &    !  mg, sfc-perts
-                    sfcalb)                                           !  ---  outputs
-       
-       ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-       Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-    else
-       nday   = 0
-       idxday = 0
-       sfcalb = 0.0
-    endif
-      
-    ! Spread across all SW bands
-    do iBand=1,kdist_sw%get_nband()
-       sfc_alb_nir_dir(iBand,1:IM)   = sfcalb(1:IM,1)
-       sfc_alb_nir_dif(iBand,1:IM)   = sfcalb(1:IM,2)
-       sfc_alb_uvvis_dir(iBand,1:IM) = sfcalb(1:IM,3)
-       sfc_alb_uvvis_dif(iBand,1:IM) = sfcalb(1:IM,4)
-    enddo
-
-  end subroutine GFS_rrtmgp_pre_run
-  
-!> \section arg_table_GFS_rrtmgp_pre_finalize Argument Table
-!!
-  subroutine GFS_rrtmgp_pre_finalize ()
-  end subroutine GFS_rrtmgp_pre_finalize
-  subroutine check_error_msg(routine_name, error_msg)
-    character(len=*), intent(in) :: &
-         error_msg, routine_name
-    
-    if(error_msg /= "") then
-       print*,"ERROR("//trim(routine_name)//"): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg      
 
 end module GFS_rrtmgp_pre
