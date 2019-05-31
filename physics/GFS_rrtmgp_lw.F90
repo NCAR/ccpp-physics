@@ -38,6 +38,7 @@ contains
 !! | kdist_cldy_lw         | K_distribution_file_for_cloudy_RRTMGP_LW_scheme     | DDT containing spectral information for cloudy RRTMGP LW radiation scheme    | DDT     |    0 | ty_cloud_optics       |           | in     | F        |
 !! | optical_props_clouds  | longwave_optical_properties_for_cloudy_atmosphere   | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | optical_props_aerosol | longwave_optical_properties_for_aerosols            | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
+!! | cldtaulw              | cloud_optical_depth_layers_at_10mu_band             | approx 10mu band layer cloud optical depth                                   | none    |    2 | real                  | kind_phys | out    | F        |
 !! | errmsg                | ccpp_error_message                                  | error message for error handling in CCPP                                     | none    |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                                     | error flag for error handling in CCPP                                        | flag    |    0 | integer               |           | out    | F        |
 !!
@@ -45,7 +46,7 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_run(Model, ncol, icseed_lw, p_lay, t_lay, p_lev, cld_frac,       &
        cld_lwp, cld_reliq, cld_iwp, cld_reice, gas_concentrations, kdist_lw, aerosols,      &
-       kdist_cldy_lw, optical_props_clouds, optical_props_aerosol, errmsg, errflg)
+       kdist_cldy_lw, optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -76,6 +77,8 @@ contains
          kdist_cldy_lw       !
     real(kind_phys), intent(in),dimension(ncol, model%levs, kdist_lw%get_nband(),3) :: &
          aerosols            !
+    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
+         cldtaulw            ! approx 10.mu band layer cloud optical depth  
 
     ! Outputs
     type(ty_optical_props_1scl),intent(out) :: &
@@ -172,6 +175,9 @@ contains
     ! Map band optical depth to each g-point using McICA
     call check_error_msg('GFS_rrtmgp_lw_run',draw_samples(cldfracMCICA,optical_props_cloudsByBand,optical_props_clouds))
     
+    ! GFS_RRTMGP_POST_RUN() requires the LW optical depth ~10microns
+    cldtaulw = optical_props_cloudsByBand%tau(:,:,7)
+
   end subroutine GFS_rrtmgp_lw_run
   
   subroutine GFS_rrtmgp_lw_finalize()

@@ -202,7 +202,6 @@ contains
          deltaP, o3_lay, delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac) :: tracer
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
-    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
     real(kind_phys), dimension(ncol, Model%levs, kdist_sw%get_nband(), NF_AESW)::faersw2
 
@@ -314,7 +313,7 @@ contains
     ! #######################################################################################
     call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
          p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
-         cld_condensate, clouds, cldsa, mbota, mtopa, de_lgth)
+         clouds, cldsa, mbota, mtopa, de_lgth)
 
     ! Copy output cloud fields
     cld_frac  = clouds(:,:,1)
@@ -437,7 +436,7 @@ contains
   ! #######################################################################################
   subroutine cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
        p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
-       cld_condensate, clouds, cldsa, mbota, mtopa, de_lgth)
+       clouds, cldsa, mbota, mtopa, de_lgth)
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                ! Fortran DDT containing FV3-GFS model control parameters
@@ -447,10 +446,10 @@ contains
          Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
          Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
-
     integer, intent(in) :: &
          ncol ! Number of horizontal gridpoints
-    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac) :: tracer
+    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac) :: &
+         tracer               !
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
          p_lay,             & !
          t_lay,             & !
@@ -464,19 +463,17 @@ contains
          p_lev                !
 
     ! Outputs
-    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd),intent(out) :: cld_condensate
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS),intent(out) :: clouds
     integer,dimension(ncol,3), intent(out) :: mbota, mtopa
     real(kind_phys), dimension(ncol), intent(out)  :: de_lgth
     real(kind_phys), dimension(ncol, 5), intent(out) :: cldsa
 
     ! Local variables
-    !real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
+    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
     integer :: i,k
     real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
     real(kind_phys) :: es, qs,  clwmin, clwm, clwt, onemrh, value, tem1, tem2
     real(kind_phys), parameter :: xrc3 = 100.
-
     
     ! #######################################################################################
     !  Obtain cloud information for radiation calculations
@@ -524,7 +521,6 @@ contains
        enddo
     endif
 
-
     ! Add suspended convective cloud water to grid-scale cloud water
     ! only for cloud fraction & radiation computation it is to enhance 
     ! cloudiness due to suspended convec cloud water for zhao/moorthi's 
@@ -563,19 +559,19 @@ contains
        else
           do k=1,model%levs
              do i=1,ncol
-                !cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                !if (tracer1(i,k,ntcw) .gt. 0 .or. tracer1(i,k,ntiw) .gt. 0) then
-                !   cldcov(i,k) = 0.1
-                !else
-                !   cldcov(i,k) = 0.0
-                !endif
+                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                if (tracer(i,k,model%ntcw) .gt. 0 .or. tracer(i,k,model%ntiw) .gt. 0) then
+                   cldcov(i,k) = 0.1
+                else
+                   cldcov(i,k) = 0.0
+                endif
              enddo
           enddo
        endif
     elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
        cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
     else                                                           ! neither of the other two cases
-       ! cldcov = 0.0
+       cldcov = 0.0
     endif
 
     ! #######################################################################################
