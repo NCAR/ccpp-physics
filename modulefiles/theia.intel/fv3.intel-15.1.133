@@ -1,0 +1,62 @@
+#%Module######################################################################
+##
+##    NEMS FV3 Prerequisites: Theia
+
+proc ModulesHelp {} {
+  puts stderr "\tcit - loads modules required for building and running FV3 under NEMS on Theia"
+}
+
+module-whatis "loads NEMS FV3 prerequisites for Theia"
+
+# NOTE: the "module purge" and loading of the module command are
+# handled by the module-setup.sh (or .csh) script.
+
+##
+## load programming environment
+## this typically includes compiler, MPI and job scheduler
+##
+##
+## load programming environment
+## this typically includes compiler, MPI and job scheduler
+##
+module load intel/15.1.133
+module load impi/5.1.1.109
+module load netcdf/4.3.0
+module load pnetcdf
+module load slurm
+
+##
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
+##
+set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-intel-20181105
+setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
+setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
+setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
+setenv BACIO_LIB4   ${NCEPLIBS_DIR}/lib/libbacio_4.a
+setenv SP_LIBd      ${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
+setenv W3EMC_LIBd   ${NCEPLIBS_DIR}/lib/libw3emc_d.a
+setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
+
+##
+## SIONlib library
+##
+set    SIONLIB     /scratch4/BMC/gmtb/sionlib-1.7.2/intel-15.1.133/impi-5.1.1.109
+setenv SIONLIB     ${SIONLIB}
+setenv SIONLIB_INC "-I${SIONLIB}/include -I${SIONLIB}/include/mod_64"
+setenv SIONLIB_LIB "-L${SIONLIB}/lib -lsionmpi_f90_64 -lsionser_f90_64 -lsionmpi_64 -lsiongen_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none"
+
+##
+## load ESMF library for above compiler / MPI combination
+##
+module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
+module load esmf/8.0.0bs21
+
+##
+## Set compiler environment variables for CCPP
+##
+setenv CC  mpiicc
+setenv CXX mpiicpc
+setenv FC  mpiifort
+setenv F77 mpiifort
+setenv F90 mpiifort
+

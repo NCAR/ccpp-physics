@@ -1,0 +1,10 @@
+# Standalone GSM
+#
+## NEMS Application Builder file
+
+COMPONENTS=( CCPP FMS FV3 )
+
+FV3_MAKEOPT="CCPP=Y STATIC=Y SUITE=suite_FV3_GFS_2017.xml"
+
+# The modules.nems and configure.nems are selected by
+# conf/before_appbuilder_file.mk.

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#BSUB -oo out
+#BSUB -eo err
+#BSUB -J @[JBNME]
+#BSUB -W 00:@[WLCLK]
+#BSUB -q @[QUEUE]
+#BSUB -P FV3GFS-T2O
+#BSUB -n @[TASKS]
+#BSUB -R span[ptile=@[TPN]]
+#BSUB -R affinity[core(@[THRD])]
+
+set -eux
+
+set +x
+source ./module-setup.sh
+module use $( pwd -P )
+module load modules.fv3
+module list
+set -x
+
+echo "Model started:  " `date`
+
+export OMP_NUM_THREADS=@[THRD]
+export I_MPI_DEBUG=4
+
+mpirun -l -n @[TASKS] ./fv3.exe
+
+echo "Model ended:    " `date`
+
+exit

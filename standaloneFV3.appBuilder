@@ -1,0 +1,8 @@
+# Standalone GSM
+#
+## NEMS Application Builder file
+
+COMPONENTS=( FMS FV3 )
+
+# The modules.nems and configure.nems are selected by
+# conf/before_appbuilder_file.mk.
