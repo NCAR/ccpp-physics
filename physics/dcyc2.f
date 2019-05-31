@@ -1,3 +1,11 @@
+!>\file dcyc2.f
+!! This file contains the CCPP-compliant dcyc2t3 codes that fits
+!! radiative fluxes and heating rates from a coarse radiation
+!! calculation time interval into model's more frequent time steps.
+
+!! This module contains the CCPP-compliant dcyc2t3 codes that fits
+!! radiative fluxes and heating rates from a coarse radiation
+!! calculation time interval into model's more frequent time steps.
       module dcyc2t3
 
       implicit none
@@ -12,6 +20,13 @@
 !!
       subroutine dcyc2t3_init()
       end subroutine dcyc2t3_init
+
+!! \section arg_table_dcyc2t3_finalize Argument Table
+!!
+      subroutine dcyc2t3_finalize()
+      end subroutine dcyc2t3_finalize
+
+
 
 
 ! ===================================================================== !
@@ -45,42 +60,11 @@
 !            adjdnnbmd,adjdnndfd,adjdnvbmd,adjdnvdfd)                   !
 !                                                                       !
 !                                                                       !
-!  program history:                                                     !
-!          198?  nmc mrf    - created, similar as treatment in gfdl     !
-!                             radiation treatment                       !
-!          1994  y. hou     - modified solar zenith angle calculation   !
-!     nov  2004  x. wu      - add sfc sw downward flux to the variable  !
-!                             list for sea-ice model                    !
-!     mar  2008  y. hou     - add cosine of zenith angle as output for  !
-!                             sunshine duration time calc.              !
-!     sep  2008  y. hou     - separate net sw and downward lw in slrad, !
-!                 changed the sign of sfc net sw to consistent with     !
-!                 other parts of the mdl (positive value defines from   !
-!                 atmos to the ground). rename output fluxes as adjusted!
-!                 fluxes. other minor changes such as renaming some of  !
-!                 passing argument names to be consistent with calling  !
-!                 program.                                              !
-!     apr  2009  y. hou     - integrated with the new parallel model    !
-!                 along with other modifications                        !
-!     mar  2011  y. hou     - minor modification including rearrange    !
-!                 loop orders and loop structures to improve efficiency !
-!     mar  2014  x. wu      - add sfc nir/vis bm/df to the variable     !
-!                             list for the coupled model input          !
-!     jul  2014  s moorthi  - merge gfs and nems versions               !
-!     jun  2014  y. hou     - revised to include both up and down sw    !
-!                 spectral component fluxes                             !
-!     Oct  2014  y. hous s. moorthi - add emissivity contribution to    !
-!                             upward longwave flux                      !
-!                                                                       !
-!  subprograms called:  none                                            !
-!                                                                       !
-!                                                                       !
-!  ====================  defination of variables  ====================  !
-!                                                                       !
-!  inputs:                                                              !
-!     solhr        - real, forecast time in 24-hour form (hr)           !
-!     slag         - real, equation of time in radians                  !
-!     sdec, cdec   - real, sin and cos of the solar declination angle   !
+!                                                                       
+!  inputs:                                                              
+!     solhr        - real, forecast time in 24-hour form (hr)           
+!     slag         - real, equation of time in radians                  
+!     sdec, cdec   - real, sin and cos of the solar declination angle   
 !     sinlat(im), coslat(im):                                           !
 !                  - real, sin and cos of latitude                      !
 !     xlon   (im)  - real, longitude in radians                         !
@@ -131,8 +115,46 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 
-!-----------------------------------
-!! \section arg_table_dcyc2t3_run Argument Table
+!>\defgroup dcyc2t3_mod RRTMG dcyc2t3 Module
+!! This module contains the CCPP-compliant dcyc2t3 codes that fits
+!! radiative fluxes and heating rates from a coarse radiation
+!! calculation time interval into model's more frequent time steps.
+!!
+!! Solar heating rates and fluxes are scaled by the ratio of cosine
+!! of zenith angle at the current time to the mean value used in
+!! radiation calculation. Surface downward LW flux is scaled by the
+!! ratio of current surface air temperature to the corresponding
+!! temperature saved during LW radiation calculation. Upward LW flux
+!! at the surface is computed by current ground surface temperature.
+!! Surface emissivity effect will be taken in other part of the model.
+!!
+!! program history:
+!!-          198?  nmc mrf    - created, similar as treatment in gfdl
+!!                             radiation treatment
+!!-          1994  y. hou     - modified solar zenith angle calculation
+!!-     nov  2004  x. wu      - add sfc sw downward flux to the variable
+!!                             list for sea-ice model
+!!-     mar  2008  y. hou     - add cosine of zenith angle as output for
+!!                             sunshine duration time calc.
+!!-     sep  2008  y. hou     - separate net sw and downward lw in slrad,
+!!                changed the sign of sfc net sw to consistent with
+!!                 other parts of the mdl (positive value defines from
+!!                 atmos to the ground). rename output fluxes as adjusted
+!!                 fluxes. other minor changes such as renaming some of
+!!                 passing argument names to be consistent with calling
+!!                 program.
+!!-     apr  2009  y. hou     - integrated with the new parallel model
+!!                 along with other modifications
+!!-     mar  2011  y. hou     - minor modification including rearrange
+!!                 loop orders and loop structures to improve efficiency
+!!-     mar  2014  x. wu      - add sfc nir/vis bm/df to the variable
+!!                             list for the coupled model input
+!!-     jul  2014  s moorthi  - merge gfs and nems versions
+!!-     jun  2014  y. hou     - revised to include both up and down sw
+!!                 spectral component fluxes
+!!-     Oct  2014  y. hous s. moorthi - add emissivity contribution to
+!!                             upward longwave flux
+!> \section arg_table_dcyc2t3_run Argument Table
 !! | local_name     | standard_name                                                                                  | long_name                                                                                            | units   | rank | type      | kind      | intent | optional |
 !! |----------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | solhr          | forecast_hour                                                                                  | forecast time in 24-hour form                                                                        | h       |    0 | real      | kind_phys | in     | F        |
@@ -185,22 +207,20 @@
 !! | errmsg         | ccpp_error_message                                                                             | error message for error handling in CCPP                                                             | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                                                | flag    |    0 | integer   |           | out    | F        |
 !!
+!!\section dcyc2t3_general RRTMG dcyc2t3 General Algorithm
+!> @{
       subroutine dcyc2t3_run                                            &
-!...................................
-!  ---  inputs:
-     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        & !  ---  inputs:
      &       xlon,coszen,tsea,tf,tsflw,sfcemis,                         &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       ix, im, levs, deltim,                                      &
-!  ---  input/output:
-     &       dtdt,dtdtc,                                                &
-!  ---  outputs:
-     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,xmu,xcosz,         &
+     &       dtdt,dtdtc,                                                & !  ---  input/output:
+     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,xmu,xcosz,         & !  ---  outputs:
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
-     &       errmsg,errflg
+     &       errmsg,errflg                                              &
      &     )
 !
       use machine,         only : kind_phys
@@ -226,8 +246,8 @@
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
-      real(kind=kind_phys), dimension(ix,levs), intent(in) :: swh,  hlw
-     &,                                                       swhc, hlwc&
+      real(kind=kind_phys), dimension(ix,levs), intent(in) :: swh,  hlw &
+     &,                                                       swhc, hlwc
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -255,31 +275,28 @@
 !
       do i = 1, im
 
-!  --- ...  lw time-step adjustment
-!           -----------------------
-!  --- ...  adjust sfc downward lw flux to account for t changes in layer 1
-!           compute 4th power of the ratio of layer 1 tf over the mean value tsflw
-
+!> - LW time-step adjustment:
+!!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
+!! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
         tem1 = tf(i) / tsflw(i)
         tem2 = tem1 * tem1
         adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 
-!  --- ...  compute sfc upward lw flux from current sfc temp,
+!!  - compute \a sfc upward LW flux from current \a sfc temperature.
 !      note: sfc emiss effect is not appied here, and will be dealt in other place
 
         tem2 = tsea(i) * tsea(i)
         adjsfculw(i) =  sfcemis(i) * con_sbc * tem2 * tem2
      &               + (1.0 - sfcemis(i)) * adjsfcdlw(i)
 !
-!  --- ...  sw time-step adjustment
-!           -----------------------
+!> - SW time-step adjustment:
 
         ss     = sinlat(i) * sdec
         cc     = coslat(i) * cdec
         ch     = cc * cos( xlon(i)+cns )
         xcosz(i) = ch + ss        ! cosine of solar zenith angle at current time
 
-!  --- ...  normalize by average value over radiation period for daytime.
+!>  - normalize by average value over radiation period for daytime.
 
         if ( xcosz(i) > f_eps .and. coszen(i) > f_eps ) then
           xmu(i) = xcosz(i) / coszen(i)
@@ -287,7 +304,7 @@
           xmu(i) = 0.0
         endif
 
-!  --- ...  adjust sfc net and downward sw fluxes for zenith angle changes
+!>  - adjust \a sfc net and downward SW fluxes for zenith angle changes.
 !      note: sfc emiss effect will not be appied here
 
         adjsfcnsw(i) = sfcnsw(i)    * xmu(i)
@@ -304,8 +321,8 @@
         adjvisdfd(i) = sfcvisdfd(i) * xmu(i)
       enddo
 
-!  --- ...  adjust sw heating rates with zenith angle change and
-!           add with lw heating to temperature tendency
+!>  - adjust SW heating rates with zenith angle change and
+!! add with LW heating to temperature tendency.
 
       do k = 1, levs
         do i = 1, im
@@ -317,14 +334,8 @@
       return
 !...................................
       end subroutine dcyc2t3_run
+!> @}
 !-----------------------------------
-
-
-!! \section arg_table_dcyc2t3_finalize Argument Table
-!!
-      subroutine dcyc2t3_finalize()
-      end subroutine dcyc2t3_finalize
-
       end module dcyc2t3
 
 
@@ -344,7 +355,15 @@
       subroutine dcyc2t3_post_init()
       end subroutine dcyc2t3_post_init
 
+!! \section arg_table_dcyc2t3_post_finalize Argument Table
+!!
+      subroutine dcyc2t3_post_finalize()
+      end subroutine dcyc2t3_post_finalize
 
+
+!> This subroutine contains CCPP-compliant dcyc2t3 that calulates
+!! surface upwelling shortwave flux at current time.
+!!
 !! \section arg_table_dcyc2t3_post_run Argument Table
 !! | local_name     | standard_name                          | long_name                                              | units   | rank | type                  | kind      | intent | optional |
 !! |----------------|----------------------------------------|--------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
@@ -378,16 +397,7 @@
       adjsfcusw(:) = adjsfcdsw(:) - adjsfcnsw(:)
 
       return
-
       end subroutine dcyc2t3_post_run
 
-
-!! \section arg_table_dcyc2t3_post_finalize Argument Table
-!!
-      subroutine dcyc2t3_post_finalize()
-      end subroutine dcyc2t3_post_finalize
-
       end module dcyc2t3_post
-
-
 

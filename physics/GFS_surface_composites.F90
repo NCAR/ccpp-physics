@@ -111,7 +111,7 @@ contains
         if(landfrac(i) >0.)           dry(i) = .true.
         if(lakefrac(i) >0.)          lake(i) = .true.
         if(ocean(i) .or. lake(i))     wet(i) = .true.
-        if(fice(i) > cimin*max(oceanfrac(i),lakefrac(i))) icy(i) = .true.
+        if(wet(i) .and. fice(i) >= cimin*max(oceanfrac(i),lakefrac(i))) icy(i) = .true.
       enddo
 
       do i=1,im

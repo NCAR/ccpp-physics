@@ -81,7 +81,7 @@
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-!!  \section general_edmf Hybrid EDMF General Algorithm
+!!  \section general_edmf GFS Hybrid EDMF General Algorithm
 !!  -# Compute preliminary variables from input arguments.
 !!  -# Calculate the first estimate of the PBL height ("Predictor step").
 !!  -# Calculate Monin-Obukhov similarity parameters.
@@ -95,7 +95,7 @@
 !!  -# Solve for the temperature and moisture tendencies due to vertical mixing.
 !!  -# Calculate heating due to TKE dissipation and add to the tendency for temperature.
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
-!!  \section detailed Detailed Algorithm
+!!  \section detailed_hedmf  GFS Hybrid HEDMF Detailed Algorithm
 !!  @{
       subroutine hedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,          &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
@@ -456,7 +456,7 @@ c
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
-!>  ## Calculate the first estimate of the PBL height (``Predictor step")
+!>  ## Calculate the first estimate of the PBL height ("Predictor step")
 !!  The calculation of the boundary layer height follows Troen and Mahrt (1986) \cite troen_and_mahrt_1986 section 3. The approach is to find the level in the column where a modified bulk Richardson number exceeds a critical value.
 !!
 !!  The temperature of the thermal is of primary importance. For the initial estimate of the PBL height, the thermal is assumed to have one of two temperatures. If the boundary layer is stable, the thermal is assumed to have a temperature equal to the surface virtual temperature. Otherwise, the thermal is assumed to have the same virtual potential temperature as the lowest model level. For the stable case, the critical bulk Richardson number becomes a function of the wind speed and roughness length, otherwise it is set to a tunable constant.

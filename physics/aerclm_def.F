@@ -1,3 +1,8 @@
+!>\file aerclm_def.F
+!! This file contains aerosol climatology definition in MG microphysics
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module defines aerosol arrays in MG microphysics.
       module aerclm_def
       use machine , only : kind_phys
       implicit none

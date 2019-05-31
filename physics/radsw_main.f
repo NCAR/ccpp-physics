@@ -2205,7 +2205,7 @@
 !!\param selffac         scale factor for w. v. self-continuum equals
 !!                       (w.v. density)/(atmospheric density at 296k
 !!                       and 1013 mb)
-!!\param seffrac         factor for temperature interpolation of
+!!\param selffrac         factor for temperature interpolation of
 !!                       reference w.v. self-continuum data
 !!\param indself         index of lower ref temp for selffac
 !!\param forfac          scale factor for w. v. foreign-continuum

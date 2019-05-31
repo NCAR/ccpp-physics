@@ -1,3 +1,10 @@
+!>\file aerinterp.F90
+!! This file contains subroutines of reading and interpolating
+!! aerosol data for MG microphysics.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module contain subroutines of reading and interpolating 
+!! aerosol data for MG microphysics.
 module aerinterp
 
     implicit none

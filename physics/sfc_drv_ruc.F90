@@ -1,3 +1,4 @@
+!>\file sfc_drv_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
 module lsm_ruc
@@ -17,6 +18,8 @@ module lsm_ruc
 
       contains
 
+!> This subroutine calls set_soilveg_ruc() to specify vegetation and soil parameters for 
+!! a given soil and land-use classification.
 !! \section arg_table_lsm_ruc_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -45,7 +48,6 @@ module lsm_ruc
 
       end subroutine lsm_ruc_init
 
-!---
 !! \section arg_table_lsm_ruc_finalize Argument Table
 !! | local_name     | standard_name                                               | long_name                                  | units      | rank | type      |  kind     | intent | optional |
 !! |----------------|-------------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -136,8 +138,10 @@ module lsm_ruc
 !                                                                       !
 !  ====================    end of description    =====================  !
 
+!> \defgroup lsm_ruc_group GSD RUC LSM Model
+!! This module contains GSD RUC Land Surface Model
 #if 0
-!! \section arg_table_lsm_ruc_run Argument Table
+!> \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |-----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | delt            | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
@@ -245,9 +249,8 @@ module lsm_ruc
 !! | errflg          | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-
-      subroutine lsm_ruc_run                                            &
-! --- inputs
+!>\section gen_lsmruc GSD RUC LSM General Algorithm
+      subroutine lsm_ruc_run                                            &   ! --- inputs
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
      &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
@@ -255,21 +258,14 @@ module lsm_ruc
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
      &       smc, stc, slc, lsm_ruc, lsm, land,                         &
      &       smcwlt2, smcref2, wspd, do_mynnsfclay,                     &
-! --- constants
-     &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,&
-! --- in/outs
-     !&       weasd, snwdph, tskin, tprcp, rain, rainc, snow,            &
-     &       weasd, snwdph, tskin,                                      &
-! --- in
-     &       rainnc, rainc, ice, snow, graupel,                         &
-! --- in/outs
-     &       srflag, sr,                                                &
-     !&       graupel, srflag, sr,                                       &
+     &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
+     &       weasd, snwdph, tskin,                                      & !  in/outs
+     &       rainnc, rainc, ice, snow, graupel,                         & ! in
+     &       srflag, sr,                                                & !  in/outs
      &       smois, tslb, sh2o, keepfr, smfrkeep,                       & ! on RUC levels
      &       canopy, trans, tsurf, tsnow, zorl,                         &
      &       sfcqc, sfcdew, tice, sfcqv,                                &
-! --- outputs
-     &       sncovr1, qsurf, gflux, drain, evap, hflx,                  &
+     &       sncovr1, qsurf, gflux, drain, evap, hflx,                  & ! --- outputs
      &       rhosnf, runof, runoff, srunoff,                            &
      &       chh, cmm, evbs, evcw, sbsno, stm, wet1,                    &
      &       acsnow, snowfallac,                                        &
@@ -308,10 +304,9 @@ module lsm_ruc
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-!     &       snwdph, tskin, tprcp, rain, rainc, graupel, snow,          &
      &       snwdph, tskin,                                             &
-             srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
-             sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
+     &       srflag, sr, canopy, trans, tsurf, zorl, tsnow,             &
+     &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
       real (kind=kind_phys), dimension(im), intent(in) ::               &
      &       rainnc, rainc, ice, snow, graupel
@@ -364,13 +359,13 @@ module lsm_ruc
 
       real (kind=kind_phys) :: xice_threshold
 
-      character(len=256) :: llanduse  ! Land-use dataset.  Valid values are :
-                                      ! "USGS" (USGS 24/27 category dataset) and
-                                      ! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
+      character(len=256) :: llanduse  !< Land-use dataset.  Valid values are :
+                                      !! "USGS" (USGS 24/27 category dataset) and
+                                      !! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
 
       integer :: nscat, nlcat
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef ! fractional landuse
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop ! fractional soil type
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef !< fractional landuse
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop !< fractional soil type
 
       integer :: nsoil, iswater, isice
       integer, dimension (1:im,1:1) :: stype, vtype
@@ -418,8 +413,10 @@ module lsm_ruc
         print *,'flag_init =',flag_init
         print *,'flag_restart =',flag_restart
       endif
-
-! RUC initialization
+ 
+!> - Call rucinit() at the first time step and the first interation
+!! for RUC initialization,then overwrite Noah soil fields
+!! with initialized RUC soil fields for output.
       if(flag_init .and. iter==1) then
         !print *,'RUC LSM initialization, kdt=', kdt
 
@@ -466,13 +463,13 @@ module lsm_ruc
       landusef (:,:,:) = 0.0
       soilctop (:,:,:) = 0.0
 
-      !> -- number of soil categories          
+      ! -- number of soil categories          
       !if(isot == 1) then
       !nscat = 19 ! stasgo
       !else
       !nscat = 9  ! zobler
       !endif
-      !> -- set parameters for IGBP land-use data
+      !> - Set parameters for IGBP land-use data.
       if(ivegsrc == 1) then
         llanduse = 'MODI-RUC'  ! IGBP
         iswater = 17
@@ -600,7 +597,6 @@ module lsm_ruc
 
 !> - Prepare variables to run RUC LSM: 
 !!  -   1. configuration information (c):
-!!\n  ----------------------------------------
 !!\n  \a ffrozp  - fraction of frozen precipitation
 !!\n  \a frpcpn  - .true. if mixed phase precipitation available
 !!\n  \a 1:im - horizontal_loop_extent
@@ -635,7 +631,6 @@ module lsm_ruc
         conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
 
 !>  -   2. forcing data (f):
-!!\n  ---------------------------------------
 !!\n  \a sfcprs  - pressure at height zf above ground (pascals)
 !!\n  \a sfctmp  - air temperature (\f$K\f$) at height zf above ground
 !!\n  \a q2      - pressure at height zf above ground (pascals)
@@ -648,7 +643,6 @@ module lsm_ruc
         qcatm(i,1,j)   = max(0., qc(i))
         rho2(i,1,j)    = rho(i)
 
-!!\n  ---------------------------------------
 !!\n  \a lwdn    - lw dw radiation flux at surface (\f$W m^{-2}\f$)
 !!\n  \a swdn    - sw dw radiation flux at surface (\f$W m^{-2}\f$)
 !!\n  \a solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
@@ -687,7 +681,6 @@ module lsm_ruc
         qcg(i,j)    = sfcqc(i) 
 
 !>  -   3. canopy/soil characteristics (s):
-!!\n      ------------------------------------
 !!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
 !!\n \a soiltyp - soil type (integer index)                         -> stype
 !!\n \a shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
@@ -748,7 +741,6 @@ module lsm_ruc
         tbot(i,j) = tg3(i)
 
 !>  -   4. history (state) variables (h):
-!!\n      ------------------------------
 !!\n \a cmc        - canopy moisture content (\f$mm\f$)
 !!\n \a soilt = tskin - ground/canopy/snowpack effective skin temperature (\f$K\f$)
 !!\n \a soilt1 = snowpack temperature at the bottom of the 1st layer (\f$K\f$)
@@ -801,7 +793,7 @@ module lsm_ruc
         snfallac(i,j) = snowfallac(i)
         acsn(i,j)     = acsnow(i)
 
-        !> -- sanity checks on sneqv and snowh
+        ! -- sanity checks on sneqv and snowh
         if (sneqv(i,j) /= 0.0 .and. snowh(i,j) == 0.0) then
           snowh(i,j) = 0.003 * sneqv(i,j) ! snow density ~300 kg m-3 
         endif
@@ -1003,7 +995,6 @@ module lsm_ruc
 
 !> - RUC LSM: prepare variables for return to parent model and unit conversion.
 !>  -   6. output (o):
-!!\n  ------------------------------
 !!\n \a lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
 !!\n \a hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
 !!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
@@ -1152,6 +1143,9 @@ module lsm_ruc
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
+
+!>\ingroup lsm_ruc_group
+!! This subroutine contains RUC LSM initialization.
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                islmsk, tsurf, tg3,                    & ! in
@@ -1193,7 +1187,7 @@ module lsm_ruc
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-!> local
+! local
       logical :: debug_print
       logical :: smadj ! for soil mosture adjustment
       logical :: swi_init ! for initialization in terms of SWI (soil wetness index)
@@ -1516,5 +1510,6 @@ module lsm_ruc
       endif ! flag_soil_layers==1
 
       end subroutine rucinit
+
 
 end module lsm_ruc

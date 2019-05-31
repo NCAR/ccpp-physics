@@ -1,9 +1,0 @@
-/**
-\page GEFS_SFC_PERT GEFS Surface Perturbation Treatment
-
-This treatment is based on the hypothesis that one of the major causes of the insufficient spread is a lack of treament of uncertainty in 
-the soil state and in the associated model paramters, and that spread can be increased through the introduction of realistic stochastic 
-parameterizations
-
-
-*/

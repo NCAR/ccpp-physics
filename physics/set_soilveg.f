@@ -1,3 +1,6 @@
+!> \file set_soilveg.f
+
+!> This module contains set_soilveg subroutine.
       module set_soilveg_mod
 
       implicit none
@@ -8,6 +11,8 @@
 
       contains
 
+!> \ingroup Noah_LSM
+!! This subroutine initializes soil and vegetation.
       subroutine set_soilveg(me,isot,ivet,nlunit)
       use namelist_soilveg
       implicit none

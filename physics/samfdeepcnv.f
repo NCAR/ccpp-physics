@@ -150,31 +150,31 @@
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
-      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
+      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
       logical, intent(in)  :: do_ca
 
       integer, intent(inout)  :: kcnv(im)
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),
+      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
+     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),                  &
      &   cnvw(ix,km),  cnvc(ix,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
-      real(kind=kind_phys), intent(out) :: cldwrk(im),
-     &   rn(im),
+      real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
+     &   rn(im),                                                        &
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
 
-      real(kind=kind_phys), dimension(im,km), intent(inout) :: 
-     &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn
+      real(kind=kind_phys), dimension(im,km), intent(inout) ::          &
+     &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
       integer :: mp_phys, mp_phys_mg
 
-      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,
-     &                     betal,   betas,   asolfac,
+      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
+     &                     betal,   betas,   asolfac,                   &
      &                     evfact,  evfactl, pgcon
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

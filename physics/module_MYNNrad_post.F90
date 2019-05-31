@@ -12,8 +12,9 @@
       subroutine mynnrad_post_finalize ()
       end subroutine mynnrad_post_finalize
 
-!!
-!> \brief This interstitial code restores the original resolved-scale clouds (qc and qi).
+!>\defgroup gsd_mynnrad_post GSD mynnrad_post_run Module
+!>\ingroup gsd_mynn_edmf
+!!  This interstitial code restores the original resolved-scale clouds (qc and qi).
 #if 0
 !! \section arg_table_mynnrad_post_run Argument Table
 !! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
@@ -29,7 +30,6 @@
 !! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 #endif
-!###===================================================================
 SUBROUTINE mynnrad_post_run(               &
      &     ix,im,levs,                     &
      &     qc,qi,                          &
