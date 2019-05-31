@@ -79,7 +79,7 @@
 
       write(0,*) "DH DEBUG: ccpptest_run  IN, convtest1 in            m is ", convtest1
       write(0,*) "DH DEBUG: ccpptest_run  IN, convtest2 in           Pa is ", convtest2
-      write(0,*) "DH DEBUG: ccpptest_run  IN, convtest3 in            s is ", convtest3
+      !write(0,*) "DH DEBUG: ccpptest_run  IN, convtest3 in            s is ", convtest3
       write(0,*) "DH DEBUG: ccpptest_run  IN, convtest4 in       km h-1 is ", convtest4
       write(0,*) "DH DEBUG: ccpptest_run  IN, convtest5 in erg cm-2 s-1 is ", convtest5
 
