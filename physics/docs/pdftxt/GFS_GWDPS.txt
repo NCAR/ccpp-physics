@@ -56,7 +56,7 @@
  determination of the momentum flux due to gravity waves at the
  surface, as well as upper levels. The surface stress is a nonlinear
  function of the surface wind speed and the local Froude number,
- following Pierrehumbert (1987) \cite pierrehumbert_1987. Vertical
+ following Pierrehumbert (1986) \cite pierrehumbert_1986. Vertical
  variations in the momentum flux occur when the local Richardson
  number is less than 0.25 (the stress vanishes), or when wave
  breaking occurs (local Froude number becomes critical); in the

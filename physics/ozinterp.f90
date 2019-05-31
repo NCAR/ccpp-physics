@@ -1,3 +1,8 @@
+!>\file ozinterp.f90
+!! This file contains ozone climatology interpolation subroutines.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module contains subroutines of reading and interpolating ozone coefficients.
 module ozinterp
 
    implicit none

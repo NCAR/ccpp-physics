@@ -20,7 +20,6 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup phy_sparam GFS Physics Parameter Module
-!! @{
 !! Those variables are grouped  together in accordance with functionaity
 !! and are given brief descriptions and value specifications. There are
 !! two types of attributes (parameters vs. save) designated for the
@@ -71,8 +70,7 @@
 
 !> SW optical property for liquid clouds
 !!\n =0:input cld opt depth, ignoring iswcice setting
-!!\n =1:cloud optical property scheme based on Hu and Stamnes(1993) \cite
-!!      hu_and_stamnes_1993 method
+!!\n =1:cloud optical property scheme based on Hu and Stamnes(1993) \cite hu_and_stamnes_1993 method
 !!\n =2:cloud optical property scheme based on Hu and Stamnes(1993) -updated
       integer,save      :: iswcliq = 1
 
@@ -301,4 +299,3 @@
 !...................................!
       end module physparam          !
 !===================================!
-!! @}

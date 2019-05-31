@@ -1,3 +1,8 @@
+!>\file get_stochy_pattern.F90
+!! This file includes random pattern generators for FV3GFS stochastic physics.
+
+!>\ingroup gfs_stoch
+!! This module contains random pattern generators for FV3GFS stochastic physics.
 module get_stochy_pattern_mod
  use machine, only : kind_dbl_prec, kind_evod
  use stochy_ccpp, only : nodes => mpisize, stochy_la2ga
@@ -30,6 +35,7 @@ module get_stochy_pattern_mod
  logical :: first_call=.true.
  contains
 
+!> This subroutine generates a random pattern for stochastic physics.
 subroutine get_random_pattern_fv3(rpattern,npatterns,&
            gis_stochy,Model,Grid,nblks,maxlen,pattern_2d)
 
@@ -97,7 +103,8 @@ subroutine get_random_pattern_fv3(rpattern,npatterns,&
 
 end subroutine get_random_pattern_fv3
 
-
+!> This subroutine generates a random pattern for surface perturbations of 
+!! stochastic physics.
 subroutine get_random_pattern_sfc_fv3(rpattern,npatterns,&
            gis_stochy,Model,Grid,nblks,maxlen,pattern_3d)
 
@@ -170,7 +177,7 @@ subroutine get_random_pattern_sfc_fv3(rpattern,npatterns,&
 
 end subroutine get_random_pattern_sfc_fv3
 
-
+!> This subroutine generates a random pattern for FV3GFS stochastic physics in SKEB application.
 subroutine get_random_pattern_fv3_vect(rpattern,npatterns,&
            gis_stochy,Model,Grid,nblks,maxlen,upattern_3d,vpattern_3d)
 
@@ -444,6 +451,8 @@ subroutine dump_patterns(sfile)
    endif
    deallocate(pattern2d)
  end subroutine write_pattern
+
+
  subroutine vrtdivspect_to_uvgrid(&
            trie_di,trio_di,trie_ze,trio_ze,&
            uug,vvg,&

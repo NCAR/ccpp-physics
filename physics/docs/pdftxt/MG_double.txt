@@ -1,0 +1,20 @@
+/**
+\page MG_double Morrison-Gettleman Microphysics Scheme
+\section mg_descri  Description
+
+- Based on MG microphysics from GMAO, with an option to predict rain, snow, and their number concentration (added at EMC) 
+- Takes into account the detrained condensates from RAS, CSAW, or any other convective parameterizations.
+- Couples with either GMAO macrophysics or SHOC (needs some work)
+- Couples with prognostic GOCART via internal tracers
+- Can use "prescribed" GOCART aerosols via external files, either GEOS-4 GOCART monthly climatology or NGAC output or
+MERRA2 aerosol reanalysis (proposed) for an affordable approach.
+- Included in IPDv4
+
+
+\section intra_mg Intraphysics Communication
+\ref arg_table_sfc_ex_coef_run
+
+\section gen_mgh  General Algorithm
+\ref general_diff
+
+*/

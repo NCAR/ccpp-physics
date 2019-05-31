@@ -14,6 +14,8 @@
 
       contains
 
+!>\ingroup Noah_LSM
+!! This subroutine contains the CCPP-compliant lsm_noah_init to initialize soil vegetation.
 !! \section arg_table_lsm_noah_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -169,8 +171,7 @@
 !  ====================    end of description    =====================  !
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!> @{
-!! \brief This is Noah LSM driver module, with the functionality of
+!! \brief This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well
 !! as diagnotics calculation.
@@ -256,10 +257,9 @@
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 !> \section general_noah_drv GFS sfc_drv General Algorithm
-!!  @{
+!>  @{
       subroutine lsm_noah_run                                           &
-!  ---  inputs:
-     &     ( im, km, grav, cp, hvap, rd, eps, epsm1, rvrdm1, ps, u1,    &
+     &     ( im, km, grav, cp, hvap, rd, eps, epsm1, rvrdm1, ps, u1,    & !  ---  inputs:
      &       v1, t1, q1, soiltyp, vegtype, sigmaf,                      &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, prslki, zf, land, ddvel, slopetyp,                  &
@@ -732,7 +732,6 @@
 !...................................
       end subroutine lsm_noah_run
 !-----------------------------
-!! @}
 !> @}
 
       end module lsm_noah

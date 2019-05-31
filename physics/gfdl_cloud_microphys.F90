@@ -22,7 +22,7 @@ contains
 ! CCPP entry points for gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>@brief The subroutine initializes the GFDL
+!>\brief The subroutine initializes the GFDL
 !! cloud microphysics.
 !!
 !> \section arg_table_gfdl_cloud_microphys_init Argument Table
@@ -82,7 +82,7 @@ contains
    end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
-!>@brief The subroutine 'gfdl_cloud_microphys_finalize' terminates the GFDL
+!>\brief The subroutine 'gfdl_cloud_microphys_finalize' terminates the GFDL
 !! cloud microphysics.
 !!
 !! \section arg_table_gfdl_cloud_microphys_finalize  Argument Table
@@ -110,8 +110,7 @@ contains
 
    end subroutine gfdl_cloud_microphys_finalize
 
-!>\defgroup gfdlmp  GFDL MP Module
-!! @{
+!>\defgroup gfdlmp  GFDL Cloud Microphysics Module
 !! This is cloud microphysics package for GFDL global cloud resolving model.
 !! The algorithms are originally derived from Lin et al. (1983) \cite lin_et_al_1983.
 !! most of the key elements have been simplified/improved. This code at this stage
@@ -119,12 +118,12 @@ contains
 !! therefore, it is best to be called GFDL microphysics (GFDL MP) .
 !>\author Shian-Jiann Lin, Linjiong Zhou
 !!
-!>@brief The module contains the GFDL cloud
+!>\brief The module contains the GFDL cloud
 !! microphysics (Chen and Lin (2013) \cite chen_and_lin_2013 ).
 !> The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
 !!
-!>@brief The subroutine executes the full GFDL cloud microphysics.
+!>\brief The subroutine executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! | local_name       | standard_name                                                    | long_name                                                             | units      | rank | type      | kind      | intent| optional |
 !! |------------------|------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|-------|----------|
@@ -385,4 +384,3 @@ contains
    end subroutine gfdl_cloud_microphys_run
 
 end module gfdl_cloud_microphys
-!!@}

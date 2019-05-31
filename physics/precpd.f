@@ -14,7 +14,6 @@
       end subroutine zhaocarr_precpd_init
 
 !> \defgroup precip GFS precpd Main
-!! @{
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
@@ -68,7 +67,7 @@
 !! -# Update t and q due to precipitation (snow or rain) production.
 !! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
 !! \section Zhao-Carr_precip_detailed GFS precpd Scheme Detailed Algorithm
-!! @{
+!> @{
        subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
      &,                   wk1,lprnt,jpr,errmsg,errflg)
@@ -725,11 +724,8 @@
 !
       return
       end subroutine zhaocarr_precpd_run
-!! @}
-!! @}
+!> @}
 
-!! \brief Brief description of the subroutine
-!!
 !! \section arg_table_zhaocarr_precpd_finalize  Argument Table
 !!
       subroutine zhaocarr_precpd_finalize

@@ -32,7 +32,7 @@
  Some processes, such as the freezing of raindrops and the interaction between rain drops and cloud ice, have been ignored
  since the upward motion on the synoptic scale is too weak to advect the raindrops upward. Additionally, precipitation is
  diagnostically calculated directly from the cloud mixing ratio.
-\section intro_zhao Intraphysics Communication
+\section intra_zhao Intraphysics Communication
  + For grid-scale condensation and evaporation of cloud process (\ref arg_table_zhaocarr_gscond_run)
  + For precipitation (snow or rain) production (\ref arg_table_zhaocarr_precpd_run)
 \section Gen_zhao  General Algorithm
