@@ -424,7 +424,7 @@ module lsm_ruc
         !print *,'RUC LSM initialization, kdt=', kdt
 
         call rucinit          (flag_restart, im, lsoil_ruc, lsoil, nlev, & ! in
-                               isot, soiltyp, vegtype, fice,             & ! in
+                               isot, soiltyp, vegtype, fice, land,       & ! in
                                islmsk, tskin, tg3,                       & ! in
                                smc, slc, stc,                            & ! in
                                smcref2, smcwlt2,                         & ! inout
@@ -1153,7 +1153,7 @@ module lsm_ruc
       end subroutine lsm_ruc_run
 !-----------------------------------
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                               isot, soiltyp, vegtype, fice,          & ! in
+                               isot, soiltyp, vegtype, fice, land,    & ! in
                                islmsk, tsurf, tg3,                    & ! in
                                smc, slc, stc,                         & ! in
                                smcref2, smcwlt2,                      & ! inout
@@ -1171,6 +1171,7 @@ module lsm_ruc
       integer,                                 intent(in   ) :: lsoil_ruc
       integer,                                 intent(in   ) :: lsoil
       integer,               dimension(im),    intent(in   ) :: islmsk
+      logical,               dimension(im),    intent(in   ) :: land
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
@@ -1322,6 +1323,12 @@ module lsm_ruc
           tbot(i,j)=tg3(i)
 
           !SLMSK   - SEA(0),LAND(1),ICE(2) MASK
+         if (LAND(i)) then
+            ivgtyp(i,j)=vegtype(i)
+            isltyp(i,j)=soiltyp(i)
+            landmask(i,j)=1.
+            xice(i,j)=0.
+         else
           if(islmsk(i) == 0) then
             ivgtyp(i,j)= 17 ! 17 - water (oceans and lakes) in MODIS
             isltyp(i,j)=14
@@ -1343,6 +1350,7 @@ module lsm_ruc
             landmask(i,j)=1.
             xice(i,j)=fice(i)
           endif
+        endif ! land =.true.
 
           sst(i,j) = tsk(i,j)
 
@@ -1350,7 +1358,7 @@ module lsm_ruc
           sm_input(i,1,j)=0.
 
           !--- initialize smcwlt2 and smcref2 with Noah values
-          if(islmsk(i) == 0 .or. islmsk(i) == 2) then
+          if(.not. land (i)) then
             !water and sea ice
             smcref2 (i) = 1.
             smcwlt2 (i) = 0.
@@ -1401,7 +1409,7 @@ module lsm_ruc
           do k=1,lsoil_ruc
            ! convert from SWI to RUC volumetric soil moisture
            if(swi_init) then
-             if(islmsk(i) == 1) then
+             if(land(i) ) then
                !land 
                soilm(i,k,j)= dumsm(i,k,j) *                             &
                  (refsmc(isltyp(i,j))-drysmc(isltyp(i,j)))              &
@@ -1436,7 +1444,7 @@ module lsm_ruc
           do j=jts,jte
           do i=its,ite
 
-          IF ( islmsk(i) == 1 ) then  ! Land
+          IF ( land(i)  ) then  ! Land
             ! initialize factor
             do k=1,lsoil_ruc
                factorsm(k)=1.
