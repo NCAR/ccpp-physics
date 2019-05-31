@@ -1,15 +1,15 @@
 module GFS_rrtmgp_lw
- use GFS_typedefs,           only: GFS_control_type
-  use machine,               only: kind_phys
-  use physparam,             only: isubclw, iovrlw
-  use rrtmgp_lw,             only: nrghice_lw => nrghice, ipsdlw0
-  use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
-  use mo_cloud_optics,       only: ty_cloud_optics
-  use mo_optical_props,      only: ty_optical_props_1scl, ty_optical_props_2str
-  use mo_cloud_sampling,     only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
-  use mo_gas_concentrations, only: ty_gas_concs
-  use mersenne_twister,      only: random_setseed, random_number, random_stat
-
+ use GFS_typedefs,               only: GFS_control_type
+  use machine,                   only: kind_phys
+  use physparam,                 only: isubclw, iovrlw
+  use rrtmgp_lw,                 only: nrghice_lw => nrghice, ipsdlw0
+  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
+  use mo_cloud_optics,           only: ty_cloud_optics
+  use mo_optical_props,          only: ty_optical_props_1scl, ty_optical_props_2str
+  use mo_cloud_sampling,         only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
+  use mo_gas_concentrations,     only: ty_gas_concs
+  use mersenne_twister,          only: random_setseed, random_number, random_stat
+  use mo_rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics
   public GFS_rrtmgp_lw_run,GFS_rrtmgp_lw_init,GFS_rrtmgp_lw_finalize
   
 contains
@@ -31,6 +31,10 @@ contains
 !! | cld_reliq             | mean_effective_radius_for_liquid_cloud              | mean effective radius for liquid cloud                                       | micron  |    2 | real                  | kind_phys | in     | F        |
 !! | cld_iwp               | cloud_ice_water_path                                | layer cloud ice water path                                                   | g m-2   |    2 | real                  | kind_phys | in     | F        |
 !! | cld_reice             | mean_effective_radius_for_ice_cloud                 | mean effective radius for ice cloud                                          | micron  |    2 | real                  | kind_phys | in     | F        |
+!! | cld_swp               | cloud_snow_water_path                               | layer cloud snow water path                                                  | g m-2   |    2 | real                  | kind_phys | in     | F        |
+!! | cld_resnow            | mean_effective_radius_for_snow_flake                | mean effective radius for snow cloud                                         | micron  |    2 | real                  | kind_phys | in     | F        |
+!! | cld_rwp               | cloud_rain_water_path                               | layer cloud rain water path                                                  | g m-2   |    2 | real                  | kind_phys | in     | F        |
+!! | cld_rerain            | mean_effective_radius_for_rain_drop                 | mean effective radius for rain cloud                                         | micron  |    2 | real                  | kind_phys | in     | F        |
 !! | gas_concentrations    | Gas_concentrations_for_RRTMGP_suite                 | DDT containing gas concentrations for RRTMGP radiation scheme                | DDT     |    0 | ty_gas_concs          |           | in     | F        |
 !! | icseed_lw             | seed_random_numbers_sw                              | seed for random number generation for shortwave radiation                    | none    |    1 | integer               |           | in     | F        |
 !! | kdist_lw              | K_distribution_file_for_RRTMGP_LW_scheme            | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT     |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
@@ -45,8 +49,9 @@ contains
   ! #########################################################################################
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_run(Model, ncol, icseed_lw, p_lay, t_lay, p_lev, cld_frac,       &
-       cld_lwp, cld_reliq, cld_iwp, cld_reice, gas_concentrations, kdist_lw, aerosols,      &
-       kdist_cldy_lw, optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
+       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
+       gas_concentrations, kdist_lw, aerosols, kdist_cldy_lw,                               &
+       optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -68,7 +73,11 @@ contains
          cld_lwp,          & ! Cloud liquid water path
          cld_reliq,        & ! Cloud liquid effective radius
          cld_iwp,          & ! Cloud ice water path
-         cld_reice           ! Cloud ice effective radius
+         cld_reice,        & ! Cloud ice effective radius
+         cld_swp,          & ! Cloud snow water path
+         cld_resnow,       & ! Cloud snow effective radius
+         cld_rwp,          & ! Cloud rain water path
+         cld_rerain          ! Cloud rain effective radius
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations  !
     type(ty_gas_optics_rrtmgp),intent(in) :: &
@@ -96,6 +105,8 @@ contains
     real(kind_phys), dimension(kdist_lw%get_ngpt(),model%levs,ncol) :: rng3D
     real(kind_phys), dimension(kdist_lw%get_ngpt()*model%levs) :: rng1D
     logical, dimension(ncol,model%levs,kdist_lw%get_ngpt()) :: cldfracMCICA
+    real(kind_phys), dimension(ncol,model%levs,kdist_lw%get_nband()) :: &
+         tau_cld
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -140,20 +151,31 @@ contains
     ! #######################################################################################
     ! Compute cloud-optics for RTE.
     ! #######################################################################################
-    call check_error_msg('GFS_rrtmgp_lw_run',kdist_cldy_lw%cloud_optics(&
-         ncol,                       & ! IN  - Number of horizontal gridpoints 
-         model%levs,                 & ! IN  - Number of vertical layers
-         kdist_lw%get_nband(),       & ! IN  - Number of LW bands
-         nrghice_lw,                 & ! IN  - Number of ice-roughness categories
-         liqmask,                    & ! IN  - Liquid-cloud mask
-         icemask,                    & ! IN  - Ice-cloud mask
-         cld_lwp,                    & ! IN  - Cloud liquid water path
-         cld_iwp,                    & ! IN  - Cloud ice water path
-         cld_reliq,                  & ! IN  - Cloud liquid effective radius
-         cld_reice,                  & ! IN  - Cloud ice effective radius
-         optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
-                                       !       in each band
- 
+    if (Model%rrtmgp_cld_phys .gt. 0) then
+       ! i) RRTMGP cloud-optics.
+       call check_error_msg('GFS_rrtmgp_lw_run',kdist_cldy_lw%cloud_optics(&
+            ncol,                       & ! IN  - Number of horizontal gridpoints 
+            model%levs,                 & ! IN  - Number of vertical layers
+            kdist_lw%get_nband(),       & ! IN  - Number of LW bands
+            nrghice_lw,                 & ! IN  - Number of ice-roughness categories
+            liqmask,                    & ! IN  - Liquid-cloud mask
+            icemask,                    & ! IN  - Ice-cloud mask
+            cld_lwp,                    & ! IN  - Cloud liquid water path
+            cld_iwp,                    & ! IN  - Cloud ice water path
+            cld_reliq,                  & ! IN  - Cloud liquid effective radius
+            cld_reice,                  & ! IN  - Cloud ice effective radius
+            optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
+                                          !       in each band
+    else
+       ! ii) RRTMG cloud-optics.
+       if (any(cld_frac .gt. 0)) then
+          call rrtmgp_lw_cloud_optics(ncol, model%levs, kdist_lw%get_nband(), cld_lwp,     &
+               cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow,    &
+               cld_frac, tau_cld)
+          optical_props_cloudsByBand%tau = tau_cld
+       endif
+    endif
+
     ! #######################################################################################
     ! Call McICA to generate subcolumns.
     ! #######################################################################################

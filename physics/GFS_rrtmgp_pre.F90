@@ -98,6 +98,10 @@ contains
 !! | cld_reliq               | mean_effective_radius_for_liquid_cloud                        | mean effective radius for liquid cloud                                        | micron   |    2 | real                  | kind_phys | out    | F        |
 !! | cld_iwp                 | cloud_ice_water_path                                          | layer cloud ice water path                                                    | g m-2    |    2 | real                  | kind_phys | out    | F        |
 !! | cld_reice               | mean_effective_radius_for_ice_cloud                           | mean effective radius for ice cloud                                           | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_swp                 | cloud_snow_water_path                                         | layer cloud snow water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_resnow              | mean_effective_radius_for_snow_flake                          | mean effective radius for snow cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_rwp                 | cloud_rain_water_path                                         | layer cloud rain water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_rerain              | mean_effective_radius_for_rain_drop                           | mean effective radius for rain cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
 !! | faerlw                  | aerosol_optical_properties_for_longwave_bands_01-16           | aerosol optical properties for longwave bands 01-16                           | various  |    4 | real                  | kind_phys | out    | F        |
 !! | faersw                  | aerosol_optical_properties_for_shortwave_bands_01-16          | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
 !! | alb1d                   | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
@@ -117,9 +121,9 @@ contains
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
        ncol, kdist_lw, kdist_sw,                                                        & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
-       cld_reliq, cld_iwp, cld_reice, faerlw, faersw, sfc_emiss_byband, nday, idxday,   & ! OUT
-       gas_concentrations, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,         & ! OUT
-       sfc_alb_uvvis_dif, errmsg, errflg)                                                 ! OUT
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, faerlw, & ! OUT
+       faersw, sfc_emiss_byband, nday, idxday, gas_concentrations, sfc_alb_nir_dir,     & ! OUT
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, errmsg, errflg)             ! OUT
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -178,7 +182,11 @@ contains
          cld_lwp,           & ! Cloud liquid water path
          cld_reliq,         & ! Cloud liquid effective radius
          cld_iwp,           & ! Cloud ice water path
-         cld_reice            ! Cloud ice effecive radius
+         cld_reice,         & ! Cloud ice effecive radius
+         cld_swp,          & ! Cloud snow water path
+         cld_resnow,       & ! Cloud snow effective radius
+         cld_rwp,          & ! Cloud rain water path
+         cld_rerain          ! Cloud rain effective radius
     real(kind_phys), dimension(ncol,Model%levs,kdist_sw%get_nband(),NF_AESW), intent(out) ::&
          faersw               ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,Model%levs,kdist_lw%get_nband(),NF_AELW), intent(out) ::&
@@ -316,11 +324,15 @@ contains
          clouds, cldsa, mbota, mtopa, de_lgth)
 
     ! Copy output cloud fields
-    cld_frac  = clouds(:,:,1)
-    cld_lwp   = clouds(:,:,2)
-    cld_reliq = clouds(:,:,3)
-    cld_iwp   = clouds(:,:,4)
-    cld_reice = clouds(:,:,5)   
+    cld_frac   = clouds(:,:,1)
+    cld_lwp    = clouds(:,:,2)
+    cld_reliq  = clouds(:,:,3)
+    cld_iwp    = clouds(:,:,4)
+    cld_reice  = clouds(:,:,5)   
+    cld_rwp    = clouds(:,:,6)  
+    cld_rerain = clouds(:,:,7)  
+    cld_swp    = clouds(:,:,8)  
+    cld_resnow = clouds(:,:,9)  
 
     ! #######################################################################################
     ! mg, sfc-perts
