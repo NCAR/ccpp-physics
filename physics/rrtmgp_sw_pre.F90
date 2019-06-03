@@ -27,7 +27,7 @@ contains
 !! | idxday                | daytime_points                                              | daytime points                                                     | index    |    1 | integer              |           | out    | F        |
 !! | tsfg                  | surface_ground_temperature_for_radiation                    | surface ground temperature for radiation                           | K        |    1 | real                 | kind_phys | in     | F        |
 !! | tsfa                  | surface_air_temperature_for_radiation                       | lowest model layer air temperature for radiation                   | K        |    1 | real                 | kind_phys | in     | F        |
-!! | kdist_sw              | K_distribution_file_for_RRTMGP_SW_scheme                    | DDT containing spectral information for RRTMGP SW radiation scheme | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
+!! | sw_gas_props          | coefficients_for_sw_gas_optics                              | DDT containing spectral information for RRTMGP SW radiation scheme | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
 !! | sfc_alb_nir_dir       | surface_shortwave_albedo_near_infrared_direct_in_each_band  | surface sw near-infrared direct albedo in each SW band             | frac     |    2 | real                 | kind_phys | out    | F        |
 !! | sfc_alb_nir_dif       | surface_shortwave_albedo_near_infrared_diffuse_in_each_band | surface sw near-infrared diffuse albedo in each SW band            | frac     |    2 | real                 | kind_phys | out    | F        |
 !! | sfc_alb_uvvis_dir     | surface_shortwave_albedo_uv_visible_direct_in_each_band     | surface sw uv-visible direct albedo in each SW band                | frac     |    2 | real                 | kind_phys | out    | F        |
@@ -36,13 +36,13 @@ contains
 !! | errmsg                | ccpp_error_message                                          | error message for error handling in CCPP                           | none     |    0 | character            | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                                             | error flag for error handling in CCPP                              | flag     |    0 | integer              |           | out    | F        |
 !!
-  subroutine rrtmgp_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, kdist_sw, &
+  subroutine rrtmgp_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, sw_gas_props, &
        nday, idxday, tsfg, tsfa, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, &
        sfc_alb_uvvis_dif, alb1d, errmsg, errflg)
 
     ! Inputs
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         kdist_sw    ! RRTMGP DDT containing spectral information for SW calculation
+         sw_gas_props    ! RRTMGP DDT containing spectral information for SW calculation
     type(GFS_control_type),         intent(in)    :: Model
     type(GFS_radtend_type),         intent(inout) :: Radtend
     type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
@@ -54,7 +54,7 @@ contains
     real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: alb1d
 
     ! Outputs
-    real(kind_phys),dimension(kdist_sw%get_nband(),IM),intent(out) :: &
+    real(kind_phys),dimension(sw_gas_props%get_nband(),IM),intent(out) :: &
          sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
          sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
          sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
@@ -100,7 +100,7 @@ contains
     endif
       
     ! Spread across all SW bands
-    do iBand=1,kdist_sw%get_nband()
+    do iBand=1,sw_gas_props%get_nband()
        sfc_alb_nir_dir(iBand,1:IM)   = sfcalb(1:IM,1)
        sfc_alb_nir_dif(iBand,1:IM)   = sfcalb(1:IM,2)
        sfc_alb_uvvis_dir(iBand,1:IM) = sfcalb(1:IM,3)

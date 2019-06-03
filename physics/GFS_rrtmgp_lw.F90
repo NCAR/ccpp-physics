@@ -2,7 +2,7 @@ module GFS_rrtmgp_lw
  use GFS_typedefs,               only: GFS_control_type
   use machine,                   only: kind_phys
   use physparam,                 only: isubclw, iovrlw
-  use rrtmgp_lw,                 only: nrghice_lw => nrghice, ipsdlw0
+  use rrtmgp_aux,                only: nrghice_lw, ipsdlw0
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,           only: ty_cloud_optics
   use mo_optical_props,          only: ty_optical_props_1scl, ty_optical_props_2str
@@ -37,9 +37,9 @@ contains
 !! | cld_rerain            | mean_effective_radius_for_rain_drop                 | mean effective radius for rain cloud                                         | micron  |    2 | real                  | kind_phys | in     | F        |
 !! | gas_concentrations    | Gas_concentrations_for_RRTMGP_suite                 | DDT containing gas concentrations for RRTMGP radiation scheme                | DDT     |    0 | ty_gas_concs          |           | in     | F        |
 !! | icseed_lw             | seed_random_numbers_sw                              | seed for random number generation for shortwave radiation                    | none    |    1 | integer               |           | in     | F        |
-!! | kdist_lw              | K_distribution_file_for_RRTMGP_LW_scheme            | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT     |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
+!! | lw_gas_props          | coefficients_for_lw_gas_optics                      | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT     |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | aerosols              | aerosol_optical_properties_for_longwave_bands_01-16 | aerosol optical properties for longwave bands 01-16                          | various |    4 | real                  | kind_phys | in     | F        |
-!! | kdist_cldy_lw         | K_distribution_file_for_cloudy_RRTMGP_LW_scheme     | DDT containing spectral information for cloudy RRTMGP LW radiation scheme    | DDT     |    0 | ty_cloud_optics       |           | in     | F        |
+!! | lw_cloud_props        | coefficients_for_lw_cloud_optics                    | DDT containing spectral information for cloudy RRTMGP LW radiation scheme    | DDT     |    0 | ty_cloud_optics       |           | in     | F        |
 !! | optical_props_clouds  | longwave_optical_properties_for_cloudy_atmosphere   | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | optical_props_aerosol | longwave_optical_properties_for_aerosols            | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | cldtaulw              | cloud_optical_depth_layers_at_10mu_band             | approx 10mu band layer cloud optical depth                                   | none    |    2 | real                  | kind_phys | out    | F        |
@@ -50,7 +50,7 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_run(Model, ncol, icseed_lw, p_lay, t_lay, p_lev, cld_frac,       &
        cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
-       gas_concentrations, kdist_lw, aerosols, kdist_cldy_lw,                               &
+       gas_concentrations, lw_gas_props, aerosols, lw_cloud_props,                               &
        optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
     
     ! Inputs
@@ -81,10 +81,10 @@ contains
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations  !
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         kdist_lw            ! RRTMGP DDT containing spectral information for LW calculation
+         lw_gas_props            ! RRTMGP DDT containing spectral information for LW calculation
     type(ty_cloud_optics),intent(in) :: &
-         kdist_cldy_lw       !
-    real(kind_phys), intent(in),dimension(ncol, model%levs, kdist_lw%get_nband(),3) :: &
+         lw_cloud_props       !
+    real(kind_phys), intent(in),dimension(ncol, model%levs, lw_gas_props%get_nband(),3) :: &
          aerosols            !
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
          cldtaulw            ! approx 10.mu band layer cloud optical depth  
@@ -102,10 +102,10 @@ contains
     logical,dimension(ncol,model%levs) :: liqmask, icemask
     type(ty_optical_props_1scl) :: optical_props_cloudsByBand
     type(random_stat) :: rng_stat
-    real(kind_phys), dimension(kdist_lw%get_ngpt(),model%levs,ncol) :: rng3D
-    real(kind_phys), dimension(kdist_lw%get_ngpt()*model%levs) :: rng1D
-    logical, dimension(ncol,model%levs,kdist_lw%get_ngpt()) :: cldfracMCICA
-    real(kind_phys), dimension(ncol,model%levs,kdist_lw%get_nband()) :: &
+    real(kind_phys), dimension(lw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt()*model%levs) :: rng1D
+    logical, dimension(ncol,model%levs,lw_gas_props%get_ngpt()) :: cldfracMCICA
+    real(kind_phys), dimension(ncol,model%levs,lw_gas_props%get_nband()) :: &
          tau_cld
 
     ! Initialize CCPP error handling variables
@@ -137,11 +137,11 @@ contains
     ! Allocate space for RRTMGP DDTs containing cloud and aerosol radiative properties
     ! #######################################################################################
     ! Cloud optics [nCol,model%levs,nBands]
-    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_cloudsByBand%alloc_1scl(ncol, model%levs, kdist_lw%get_band_lims_wavenumber()))
+    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_cloudsByBand%alloc_1scl(ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
     ! Aerosol optics [Ccol,model%levs,nBands]
-    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_aerosol%alloc_1scl(ncol, model%levs, kdist_lw%get_band_lims_wavenumber()))
+    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_aerosol%alloc_1scl(ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
     ! Cloud optics [nCol,model%levs,nGpts]
-    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_clouds%alloc_1scl(ncol, model%levs, kdist_lw))
+    call check_error_msg('GFS_rrtmgp_lw_run',optical_props_clouds%alloc_1scl(ncol, model%levs, lw_gas_props))
 
     ! #######################################################################################
     ! Copy aerosol optical information to RRTMGP DDT
@@ -151,12 +151,12 @@ contains
     ! #######################################################################################
     ! Compute cloud-optics for RTE.
     ! #######################################################################################
-    if (Model%rrtmgp_cld_phys .gt. 0) then
+    if (Model%rrtmgp_cld_optics .gt. 0) then
        ! i) RRTMGP cloud-optics.
-       call check_error_msg('GFS_rrtmgp_lw_run',kdist_cldy_lw%cloud_optics(&
+       call check_error_msg('GFS_rrtmgp_lw_run',lw_cloud_props%cloud_optics(&
             ncol,                       & ! IN  - Number of horizontal gridpoints 
             model%levs,                 & ! IN  - Number of vertical layers
-            kdist_lw%get_nband(),       & ! IN  - Number of LW bands
+            lw_gas_props%get_nband(),   & ! IN  - Number of LW bands
             nrghice_lw,                 & ! IN  - Number of ice-roughness categories
             liqmask,                    & ! IN  - Liquid-cloud mask
             icemask,                    & ! IN  - Ice-cloud mask
@@ -169,7 +169,7 @@ contains
     else
        ! ii) RRTMG cloud-optics.
        if (any(cld_frac .gt. 0)) then
-          call rrtmgp_lw_cloud_optics(ncol, model%levs, kdist_lw%get_nband(), cld_lwp,     &
+          call rrtmgp_lw_cloud_optics(ncol, model%levs, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow,    &
                cld_frac, tau_cld)
           optical_props_cloudsByBand%tau = tau_cld
@@ -184,7 +184,7 @@ contains
     do iCol=1,ncol
        call random_setseed(ipseed_lw(icol),rng_stat)
        call random_number(rng1D,rng_stat)
-       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[kdist_lw%get_ngpt(),model%levs])
+       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),model%levs])
     enddo
     
     ! Call McICA

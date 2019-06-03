@@ -14,6 +14,7 @@ module GFS_rrtmgp_sw_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
+  use rrtmgp_aux,                only: check_error_msg
   implicit none
   
   public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize
@@ -44,7 +45,7 @@ contains
 !! | fluxswDOWN_allsky | sw_flux_profile_downward_allsky                                                                | RRTMGP downward shortwave all-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | fluxswUP_clrsky   | sw_flux_profile_upward_clrsky                                                                  | RRTMGP upward shortwave clr-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | fluxswDOWN_clrsky | sw_flux_profile_downward_clrsky                                                                | RRTMGP downward shortwave clr-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | kdist_sw          | K_distribution_file_for_RRTMGP_SW_scheme                                                       | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
+!! | sw_gas_props      | coefficients_for_sw_gas_optics                                                                 | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
 !! | sfc_alb_nir_dir   | surface_shortwave_albedo_near_infrared_direct_in_each_band                                     | surface sw near-infrared direct albedo in each SW band                       | frac     |    2 | real                 | kind_phys | in     | F        |
 !! | sfc_alb_nir_dif   | surface_shortwave_albedo_near_infrared_diffuse_in_each_band                                    | surface sw near-infrared diffuse albedo in each SW band                      | frac     |    2 | real                 | kind_phys | in     | F        |
 !! | sfc_alb_uvvis_dir | surface_shortwave_albedo_uv_visible_direct_in_each_band                                        | surface sw uv-visible direct albedo in each SW band                          | frac     |    2 | real                 | kind_phys | in     | F        |
@@ -59,7 +60,7 @@ contains
 !!
 #endif
   subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Statein, Coupling,       & 
-       scmpsw, im, p_lev, kdist_sw, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,  &
+       scmpsw, im, p_lev, sw_gas_props, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,  &
        sfc_alb_uvvis_dif, tsfa, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,         &
        fluxswUP_clrsky, fluxswDOWN_clrsky, hswc, topflx_sw, sfcflx_sw, flxprf_sw, hsw0,   &
        errmsg, errflg)
@@ -85,10 +86,10 @@ contains
     real(kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  &
          tsfa              ! Lowest model layer air temperature for radiation 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         kdist_sw          ! DDT containing SW spectral information
+         sw_gas_props          ! DDT containing SW spectral information
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          p_lev             ! Pressure @ model layer-interfaces    (hPa)
-    real(kind_phys),dimension(kdist_sw%get_nband(),size(Grid%xlon,1)),intent(in) :: &
+    real(kind_phys),dimension(sw_gas_props%get_nband(),size(Grid%xlon,1)),intent(in) :: &
          sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
          sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
          sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
@@ -274,14 +275,4 @@ contains
   subroutine GFS_rrtmgp_sw_post_finalize ()
   end subroutine GFS_rrtmgp_sw_post_finalize
 
-  subroutine check_error_msg(routine_name, error_msg)
-    character(len=*), intent(in) :: &
-         error_msg, routine_name
-    
-    if(error_msg /= "") then
-       print*,"ERROR("//trim(routine_name)//"): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg
 end module GFS_rrtmgp_sw_post

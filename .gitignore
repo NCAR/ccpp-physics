@@ -1,2 +1,7 @@
 # Auto-generated include files in Fortran code
 *.inc
+physics/*cap.F90
+physics/*.xml
+*.cmake
+*.mk
+*.html
