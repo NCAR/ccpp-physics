@@ -11,6 +11,7 @@
       subroutine GFS_DCNV_generic_pre_finalize()
       end subroutine GFS_DCNV_generic_pre_finalize
 
+#if 0
 !> \brief Interstitial scheme called prior to any deep convective scheme to save state variables for calculating tendencies after the deep convective scheme is executed
 !! \section arg_table_GFS_DCNV_generic_pre_run Argument Table
 !! | local_name      | standard_name                                          | long_name                                                                 | units   | rank | type      |    kind   | intent | optional |
@@ -34,6 +35,7 @@
 !! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                  | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag    |    0 | integer   |           | out    | F        |
 !!
+#endif
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, cnvgwd, lgocart, do_ca,     &
                                          isppt_deep, gu0, gv0, gt0, gq0_water_vapor,    &
                                          save_u, save_v, save_t, save_qv, ca_deep,      &
@@ -101,6 +103,7 @@
     subroutine GFS_DCNV_generic_post_finalize ()
     end subroutine GFS_DCNV_generic_post_finalize
 
+#if 0
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! | local_name      | standard_name                                                                               | long_name                                                            | units         | rank | type              |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
@@ -162,6 +165,7 @@
 !! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
 !!
+#endif
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv, do_ca,      &
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
