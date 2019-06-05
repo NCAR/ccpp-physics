@@ -194,7 +194,7 @@ module mp_thompson
 !!
 #endif
 !>\ingroup aathompson
-!>\section gen_thompson_hrrr GSD Thompson MP General Algorithm
+!>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
       subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &

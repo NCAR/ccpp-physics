@@ -1,5 +1,5 @@
 /**
-\page CSAW_scheme CPT Scale-Aware Chikira-Sugiyama Scale-aware Convection Scheme with Arakawa-Wu Extension 
+\page CSAW_scheme Scale-Aware Chikira-Sugiyama Scale-aware Convection Scheme with Arakawa-Wu Extension 
 \section cs_descrip  Description
 
 Chikira-Sugiyama cumulus scheme (Chikira and Sugiyama (2010) \cite Chikira_2010) with prognostic closure and

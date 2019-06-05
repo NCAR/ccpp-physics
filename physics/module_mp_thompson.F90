@@ -408,7 +408,7 @@ MODULE module_mp_thompson
 !>\ingroup aathompson
 !! This subroutine calculates simplified cloud species equations and create
 !! lookup tables in Thomspson scheme.
-!>\section gen_thompson_init GSD thompson_init General Algorithm
+!>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
                           ids, ide, jds, jde, kds, kde,     &
@@ -994,7 +994,7 @@ MODULE module_mp_thompson
 
 !>\ingroup aathompson
 !!This is a wrapper routine designed to transfer values from 3D to 1D.
-!!\section gen_mpgtdriver GSD Thompson mp_gt_driver General Algorithm
+!!\section gen_mpgtdriver Thompson mp_gt_driver General Algorithm
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
@@ -1477,7 +1477,7 @@ MODULE module_mp_thompson
 !! Previously this code was based on Reisner et al (1998), but few of
 !! those pieces remain.  A complete description is now found in
 !! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
-!>\section gen_mp_thompson  GSD mp_thompson General Algorithm
+!>\section gen_mp_thompson  mp_thompson General Algorithm
 !> @{
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &

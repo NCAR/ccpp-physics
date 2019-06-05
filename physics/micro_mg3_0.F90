@@ -44,8 +44,6 @@
 !!           Part II: Global model solutions and Aerosol-Cloud Interactions.
 !!           J. Climate, 28, 1288-1307. doi:10.1175/JCLI-D-14-00103.1 , 2015.
 !!
-!! for questions contact Hugh Morrison, Andrew Gettelman
-!! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !!
 !! NOTE: Modified to allow other microphysics packages (e.g. CARMA) to do ice
 !! microphysics in cooperation with the MG liquid microphysics. This is
