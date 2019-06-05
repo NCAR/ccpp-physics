@@ -1,65 +1,29 @@
 ! ###########################################################################################
 ! ###########################################################################################
 module rrtmgp_lw
-  use machine,               only: kind_phys
-  use GFS_typedefs,          only: GFS_control_type
-  use mo_rte_kind,           only: wl
-  use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
-  use mo_cloud_optics,       only: ty_cloud_optics
-  use mo_optical_props,      only: ty_optical_props_1scl
-  use mo_rrtmgp_clr_all_sky, only: rte_lw
-  use mo_gas_concentrations, only: ty_gas_concs
-  use mo_fluxes_byband,      only: ty_fluxes_byband
-  use rrtmgp_aux,            only: lw_gas_optics_init, lw_cloud_optics_init, check_error_msg
+  use machine,                only: kind_phys
+  use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type
+  use mo_rte_kind,            only: wl
+  use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
+  use mo_cloud_optics,        only: ty_cloud_optics
+  use mo_optical_props,       only: ty_optical_props_1scl
+  use mo_rrtmgp_clr_all_sky,  only: rte_lw
+  use mo_gas_concentrations,  only: ty_gas_concs
+  use mo_fluxes_byband,       only: ty_fluxes_byband
+  use rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics_init
+  use rrtmgp_lw_gas_optics,   only: rrtmgp_lw_gas_optics_init, check_error_msg
 
   public rrtmgp_lw_init, rrtmgp_lw_run, rrtmgp_lw_finalize
 contains
 
-!! \section arg_table_rrtmgp_lw_init Argument Table
-!! | local_name     | standard_name                    | long_name                                                                 | units | rank | type                 |    kind   | intent | optional |
-!! |----------------|----------------------------------|---------------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance        | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type     |           | in     | F        |
-!! | mpirank        | mpi_rank                         | current MPI rank                                                          | index |    0 | integer              |           | in     | F        |
-!! | mpiroot        | mpi_root                         | master MPI rank                                                           | index |    0 | integer              |           | in     | F        |
-!! | mpicomm        | mpi_comm                         | MPI communicator                                                          | index |    0 | integer              |           | in     | F        |
-!! | errmsg         | ccpp_error_message               | error message for error handling in CCPP                                  | none  |    0 | character            | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                  | error flag for error handling in CCPP                                     | flag  |    0 | integer              |           | out    | F        |
-!! | lw_gas_props   | coefficients_for_lw_gas_optics   | DDT containing spectral information for RRTMGP LW radiation scheme        | DDT   |    0 | ty_gas_optics_rrtmgp |           | inout  | F        |
-!! | lw_cloud_props | coefficients_for_lw_cloud_optics | DDT containing spectral information for cloudy RRTMGP LW radiation scheme | DDT   |    0 | ty_cloud_optics      |           | inout  | F        |
-!!
   ! #########################################################################################
-  subroutine rrtmgp_lw_init(Model, mpicomm, mpirank, mpiroot, lw_gas_props, lw_cloud_props,   &
-        errmsg, errflg)
-
-    ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model      ! DDT containing model control parameters
-    integer,intent(in) :: &
-         mpicomm, & ! MPI communicator
-         mpirank, & ! Current MPI rank
-         mpiroot    ! Master MPI rank
-    type(ty_gas_optics_rrtmgp),intent(inout) :: &
-         lw_gas_props
-    type(ty_cloud_optics),intent(inout) :: &
-         lw_cloud_props
- 
-    ! Outputs
-    character(len=*), intent(out) :: &
-         errmsg     ! Error message
-    integer,          intent(out) :: &
-         errflg     ! Error code
-
-    ! Load gas-optics
-    call lw_gas_optics_init(Model, mpicomm, mpirank, mpiroot, lw_gas_props, errmsg, errflg)
-
-    ! Load cloud optics
-    if (Model%rrtmgp_cld_optics .gt. 0) then
-       call lw_cloud_optics_init(Model, mpicomm, mpirank, mpiroot, lw_cloud_props, errmsg, errflg)
-    endif
-
+  ! SUBROUTINE rrtmgp_lw_init
+  ! #########################################################################################
+  subroutine rrtmgp_lw_init()
   end subroutine rrtmgp_lw_init
-  
+
   ! #########################################################################################
+  ! SUBROUTINE rrtmgp_lw_run
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_run Argument Table
 !! | local_name              | standard_name                                                                                 | long_name                                                          | units | rank | type                  |    kind   | intent | optional |
@@ -136,7 +100,6 @@ contains
     real(kind_phys), dimension(ncol,model%levs+1,lw_gas_props%get_nband()),target :: &
          fluxLWBB_up_allsky, fluxLWBB_dn_allsky
     logical :: l_ClrSky_HR, l_AllSky_HR_byband
-    integer :: k
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -178,6 +141,9 @@ contains
 
   end subroutine rrtmgp_lw_run
   
+  ! #########################################################################################
+  ! SUBROUTINE rrtmgp_lw_finalize
+  ! #########################################################################################
   subroutine rrtmgp_lw_finalize()
   end subroutine rrtmgp_lw_finalize
 

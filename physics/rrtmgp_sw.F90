@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_sw
   use machine,                 only: kind_phys
-  use GFS_typedefs,            only: GFS_control_type
+  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type
   use mo_rte_kind,             only: wl
   use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,         only: ty_cloud_optics
@@ -11,61 +11,27 @@ module rrtmgp_sw
   use mo_gas_concentrations,   only: ty_gas_concs
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
-  use rrtmgp_aux,              only: sw_gas_optics_init, sw_cloud_optics_init, check_error_msg, active_gases
+  use rrtmgp_sw_cloud_optics,  only: rrtmgp_sw_cloud_optics_init
+  use rrtmgp_sw_gas_optics,    only: rrtmgp_sw_gas_optics_init, check_error_msg
 
   public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
 
 contains
 
-!! \section arg_table_rrtmgp_sw_init Argument Table
-!! | local_name         | standard_name                    | long_name                                                                 | units | rank | type                 |    kind   | intent | optional |
-!! |--------------------|----------------------------------|---------------------------------------------------------------------------|-------|------|----------------------|-----------|--------|----------|
-!! | Model              | GFS_control_type_instance        | Fortran DDT containing FV3-GFS model control parameters                   | DDT   |    0 | GFS_control_type     |           | in     | F        |
-!! | mpirank            | mpi_rank                         | current MPI rank                                                          | index |    0 | integer              |           | in     | F        |
-!! | mpiroot            | mpi_root                         | master MPI rank                                                           | index |    0 | integer              |           | in     | F        |
-!! | mpicomm            | mpi_comm                         | MPI communicator                                                          | index |    0 | integer              |           | in     | F        |
-!! | errmsg             | ccpp_error_message               | error message for error handling in CCPP                                  | none  |    0 | character            | len=*     | out    | F        |
-!! | errflg             | ccpp_error_flag                  | error flag for error handling in CCPP                                     | flag  |    0 | integer              |           | out    | F        |
-!! | sw_gas_props       | coefficients_for_sw_gas_optics   | DDT containing spectral information for RRTMGP SW radiation scheme        | DDT   |    0 | ty_gas_optics_rrtmgp |           | inout  | F        |
-!! | sw_cloud_props     | coefficients_for_sw_cloud_optics | DDT containing spectral information for cloudy RRTMGP SW radiation scheme | DDT   |    0 | ty_cloud_optics      |           | inout  | F        |
-!!
   ! #########################################################################################
-  subroutine rrtmgp_sw_init(Model,mpicomm, mpirank, mpiroot, sw_gas_props, sw_cloud_props,   &
-        errmsg, errflg)
-
-    ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model      ! DDT containing model control parameters
-    integer,intent(in) :: &
-         mpicomm, & ! MPI communicator
-         mpirank, & ! Current MPI rank
-         mpiroot    ! Master MPI rank
-    type(ty_gas_optics_rrtmgp),intent(inout) :: &
-         sw_gas_props
-    type(ty_cloud_optics),intent(inout) :: &
-         sw_cloud_props
-
-    ! Outputs
-    character(len=*), intent(out) :: &
-         errmsg     ! Error message
-    integer,          intent(out) :: &
-         errflg     ! Error code
-
-    ! Load gas-optics
-    call sw_gas_optics_init(Model, mpicomm, mpirank, mpiroot, sw_gas_props, errmsg, errflg)
-
-    ! Load cloud optics
-    if (Model%rrtmgp_cld_optics .gt. 0) then
-       call sw_cloud_optics_init(Model, mpicomm, mpirank, mpiroot, sw_cloud_props, errmsg, errflg)
-    endif
+  ! SUBROUTINE rrtmgp_sw_init
+  ! #########################################################################################
+  subroutine rrtmgp_sw_init()
   end subroutine rrtmgp_sw_init
 
   ! #########################################################################################
+  ! SUBROUTINE rrtmgp_sw_run
   ! #########################################################################################
 !! \section arg_table_rrtmgp_sw_run Argument Table
 !! | local_name              | standard_name                                                                                  | long_name                                                                | units | rank | type                  |    kind   | intent | optional |
 !! |-------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
 !! | Model                   | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                  | DDT   |    0 | GFS_control_type      |           | in     | F        |
+!! | Radtend                 | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS radiation tendencies                      | DDT   |    0 | GFS_radtend_type      |           | in     | F        |
 !! | ncol                    | horizontal_loop_extent                                                                         | horizontal dimension                                                     | count |    0 | integer               |           | in     | F        |
 !! | p_lay                   | air_pressure_at_layer_for_RRTMGP_in_hPa                                                        | air pressure layer                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
 !! | p_lev                   | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                       | hPa   |    2 | real                  | kind_phys | in     | F        |
@@ -90,13 +56,14 @@ contains
 !! | errmsg                  | ccpp_error_message                                                                             | error message for error handling in CCPP                                 | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                  | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                    | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_sw_run(Model, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
-       optical_props_clds, optical_props_aerosol,&
+  subroutine rrtmgp_sw_run(Model, Radtend, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
+       optical_props_clds, optical_props_aerosol, &
        lsswr, sfcalb_nir_dir, sfcalb_nir_dif, cossza,  nday, idxday, hsw0, hswb, scmpsw, &
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type),   intent(in)    :: Model
+    type(GFS_radtend_type),   intent(in)    :: Radtend
     integer, intent(in) :: &
          ncol,                 & ! Number of horizontal gridpoints
          nday                    ! Number of daytime points
@@ -157,7 +124,7 @@ contains
          fluxSWBB_up_allsky, fluxSWBB_dn_allsky
     real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false.
-    integer :: k, iGas
+    integer :: iGas
     type(ty_optical_props_2str)  :: &
          optical_props_clds_daylit, & ! RRTMGP DDT: longwave cloud radiative properties 
          optical_props_aerosol_daylit ! RRTMGP DDT: longwave aerosol radiative properties
@@ -197,9 +164,9 @@ contains
        optical_props_aerosol_daylit%g   = optical_props_aerosol%g(idxday,:,:)
       
        ! Similarly, subset the gas concentrations.
-       do iGas=1,size(active_gases,1)
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations%get_vmr(trim(active_gases(iGas)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations_daylit%set_vmr(trim(active_gases(iGas)),vmrTemp(idxday,:)))
+       do iGas=1,Model%nGases
+          call check_error_msg('rrtmgp_sw_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas)),vmrTemp(idxday,:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
@@ -234,6 +201,9 @@ contains
     endif
   end subroutine rrtmgp_sw_run
   
+  ! #########################################################################################
+  ! SUBROUTINE rrtmgp_sw_finalize
+  ! #########################################################################################
   subroutine rrtmgp_sw_finalize()
   end subroutine rrtmgp_sw_finalize
 

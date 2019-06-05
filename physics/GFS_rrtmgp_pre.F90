@@ -54,7 +54,7 @@ module GFS_rrtmgp_pre
   ! RRTMGP types
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,             only: check_error_msg
+  use rrtmgp_lw_gas_optics,  only: check_error_msg
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -66,11 +66,7 @@ module GFS_rrtmgp_pre
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize
   
 contains
-  
-!> \defgroup GFS_rrtmgp_pre GFS RRTMGP Scheme Pre
-!! @{
-!! \section arg_table_GFS_rrtmgp_pre_init Argument Table
-!!
+
   subroutine GFS_rrtmgp_pre_init ()
   end subroutine GFS_rrtmgp_pre_init
 
