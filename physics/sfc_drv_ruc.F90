@@ -1,3 +1,4 @@
+!>\file sfc_drv_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
 module lsm_ruc
@@ -17,6 +18,9 @@ module lsm_ruc
 
       contains
 
+!> This subroutine calls set_soilveg_ruc() to specify vegetation and soil
+!parameters for 
+!! a given soil and land-use classification.
 !! \section arg_table_lsm_ruc_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
 !! |----------------|-------------------------------------------------------------|---------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
@@ -136,8 +140,10 @@ module lsm_ruc
 !                                                                       !
 !  ====================    end of description    =====================  !
 
+!> \defgroup lsm_ruc_group GSD RUC LSM Model
+!! This module contains GSD RUC Land Surface Model
 #if 0
-!! \section arg_table_lsm_ruc_run Argument Table
+!> \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | delt           | time_step_for_dynamics                                                       | physics time step                                               | s             |    0 | real      | kind_phys | in     | F        |
@@ -275,7 +281,7 @@ module lsm_ruc
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-
+!>\section gen_lsmruc GSD RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            &
 ! --- inputs
      &     ( iter, me, kdt, im, nlev, lsoil_ruc, lsoil, zs,             &
@@ -482,7 +488,6 @@ module lsm_ruc
         flag_ice_uncoupled(i) = (icy(i) .and. (islmsk(i) == 2))
       enddo
 
-
       if (isot == 1) then
         nscat = 19 ! stasgo
       else
@@ -507,6 +512,10 @@ module lsm_ruc
         print *,'flag_init =',flag_init
         print *,'flag_restart =',flag_restart
       endif
+
+!> - Call rucinit() at the first time step and the first interation
+!! for RUC initialization. Initial land and ice subsurface temperatures
+!! are set equal to TSLB.
 
 ! RUC initialization
       if(flag_init .and. iter==1) then
@@ -734,15 +743,14 @@ module lsm_ruc
 
 !> - Prepare variables to run RUC LSM: 
 !!  -   1. configuration information (c):
-!!----------------------------------------
-!! ffrozp  - fraction of frozen precipitation
-!! frpcpn  - .true. if mixed phase precipitation available
-!! 1:im - horizontal_loop_extent
-!! fice    - fraction of sea-ice in the grid cell
-!! delt    - timestep (sec) (dt should not exceed 3600 secs) 
-!! conflx2 - height (\f$m\f$) above ground of atmospheric forcing variables
-!! lsoil_ruc - number of soil layers (= 6 or 9)
-!! zs      - the depth of each soil level (\f$m\f$)
+!!\n  \a ffrozp  - fraction of frozen precipitation
+!!\n  \a frpcpn  - .true. if mixed phase precipitation available
+!!\n  \a 1:im - horizontal_loop_extent
+!!\n  \a fice    - fraction of sea-ice in the grid cell
+!!\n  \a delt    - timestep (sec) (dt should not exceed 3600 secs) 
+!!\n  \a conflx2 - height (\f$m\f$) above ground of atmospheric forcing variables
+!!\n  \a lsoil_ruc - number of soil layers (= 6 or 9)
+!!\n  \a zs      - the depth of each soil level (\f$m\f$)
 
       ! DH* TODO - TEST FOR DIFFERENT PHYSICS AND SET ACCORDINGLY?
       frpcpn = .true.                 ! .true. if mixed phase precipitation available (Thompson)
@@ -768,33 +776,31 @@ module lsm_ruc
 
         conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
 
-!  -   2. forcing data (f):
-!!---------------------------------------
-!! sfcprs  - pressure at height zf above ground (pascals)
-!! sfctmp  - air temperature (\f$K\f$) at height zf above ground
-!! q2      - pressure at height zf above ground (pascals)
-!! qcatm   - cloud water mising ration at height zf above ground (\f$kg !kg^{-1}\f$)
-!! rho2    - air density at height zf above ground (pascals)
+!>  -   2. forcing data (f):
+!!\n  \a sfcprs  - pressure at height zf above ground (pascals)
+!!\n  \a sfctmp  - air temperature (\f$K\f$) at height zf above ground
+!!\n  \a q2      - pressure at height zf above ground (pascals)
+!!\n  \a qcatm   - cloud water mising ration at height zf above ground (\f$kg kg^{-1}\f$)
+!!\n  \a rho2    - air density at height zf above ground (pascals)
 
         sfcprs(i,1,j)  = prsl1(i)
         sfctmp(i,1,j)  = t1(i)
         q2(i,1,j)      = q0(i)
         qcatm(i,1,j)   = max(0., qc(i))
         rho2(i,1,j)    = rho(i)
-
-!!---------------------------------------
-!! lwdn    - lw dw radiation flux at surface (\f$W m^{-2}\f$)
-!! swdn    - sw dw radiation flux at surface (\f$W m^{-2}\f$)
-!! prcp    - time-step total precip (\f$kg m^{-2} \f$)
-!! raincv  - time-step convective precip (\f$kg m^{-2} \f$)
-!! rainncv - time-step non-convective precip (\f$kg m^{-2} \f$)
-!! graupelncv - time-step graupel (\f$kg m^{-2} \f$)
-!! snowncv - time-step snow (\f$kg m^{-2} \f$)
-!! precipfr - time-step precipitation in solod form (\f$kg m^{-2} \f$)
-!! shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
-!! shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
-!! shdmax  - maximum areal fractional coverage of green vegetation -> shdmax1d
-!! tbot    - bottom soil temperature (local yearly-mean sfc air temp)
+!
+!!\n  \a lwdn    - lw dw radiation flux at surface (\f$W m^{-2}\f$)
+!!\n  \a swdn    - sw dw radiation flux at surface (\f$W m^{-2}\f$)
+!!\n  \a prcp    - time-step total precip (\f$kg m^{-2} \f$)
+!!\n  \a raincv  - time-step convective precip (\f$kg m^{-2} \f$)
+!!\n  \a rainncv - time-step non-convective precip (\f$kg m^{-2} \f$)
+!!\n  \a graupelncv - time-step graupel (\f$kg m^{-2} \f$)
+!!\n  \a snowncv - time-step snow (\f$kg m^{-2} \f$)
+!!\n  \a precipfr - time-step precipitation in solod form (\f$kg m^{-2} \f$)
+!!\n  \a shdfac  - areal fractional coverage of green vegetation (0.0-1.0)
+!!\n  \a shdmin  - minimum areal fractional coverage of green vegetation -> shdmin1d
+!!\n  \a shdmax  - maximum areal fractional coverage of green vegetation -> shdmax1d
+!!\n  \a tbot    - bottom soil temperature (local yearly-mean sfc air temp)
 
         lwdn(i,j)   = dlwflx(i)         !..downward lw flux at sfc in w/m2
         swdn(i,j)   = dswsfc(i)         !..downward sw flux at sfc in w/m2
@@ -821,18 +827,13 @@ module lsm_ruc
 
         tbot(i,j) = tg3(i)
 
-!  -   3. canopy/soil characteristics (s):
-!!------------------------------------
-!! vegtyp  - vegetation type (integer index)                   -> vtype
-!! vtype_ocn, _lnd, _ice  - vegetation type index for ocean, ice and land
-!! portion of a grid cell
-!! soiltyp - soil type (integer index)                         -> stype
-!! stype_ocn, _lnd, _ice  - soil type index for ocean, ice and land
-!! portion of a grid cell
-!! sfcems  -  surface emmisivity                                   -> sfcemis
-!! 0.5*(alvwf + alnwf) - backround snow-free surface albedo (fraction)         -> albbck
-!! snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
-!! sfalb  - surface albedo including snow effect (unitless fraction) -> alb
+!>  -   3. canopy/soil characteristics (s):
+!!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
+!!\n \a soiltyp - soil type (integer index)                         -> stype
+!!\n \a sfcems  -  surface emmisivity                                   -> sfcemis
+!!\n \a 0.5*(alvwf + alnwf) - backround snow-free surface albedo (fraction) -> albbck
+!!\n \a snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
+!!\n \a sfalb  - surface albedo including snow effect (unitless fraction) -> alb
 
         if(ivegsrc == 1) then   ! IGBP - MODIS
             vtype_ocn(i,j) = 17 ! 17 - water (oceans and lakes) in MODIS
@@ -863,32 +864,30 @@ module lsm_ruc
           print *,'MODIS landuse is not available'
         endif
 
-! - Call RUC LSM lsmruc(). 
    if(.not.land(i) .and. .not. flag_ice_uncoupled(i)) return
 
    if (land(i)) then ! at least some land in the grid cell
 
-!  -   4. history (state) variables (h):
-!! ------------------------------
-!! cmc        - canopy moisture content (\f$mm\f$)
-!! soilt = tskin - ground/canopy/snowpack effective skin temperature (\f$K\f$)
-!! soilt1 = snowpack temperature at the bottom of the 1st layer (\f$K\f$)
-!! tslb(lsoil_ruc) - soil temp (\f$K\f$)                                    -> stsoil
-!! smois(lsoil_ruc) - total soil moisture content (volumetric fraction)     -> smsoil
-!! sh2o(lsoil_ruc) - unfrozen soil moisture content (volumetric fraction)   -> slsoil
-!! smfrsoil(lsoil_ruc) - frozen soil moisture content (volumetric fraction) -> smfrsoil
-!! keepfrflag(lsoil_ruc) - flag for frozen soil physics: 0. or 1.
-!! wet        - soil moisture availability at surface
-!! snowh      - actual snow depth (\f$m\f$)
-!! sneqv      - liquid water-equivalent snow depth (\f$m\f$)
-!! sncovr     - fraction of snow in the grid cell
-!! ch         - surface exchange coefficient for heat (\f$m s^{-1}\f$)      -> chs
-!! z0         - surface roughness (\f$m\f$)     -> z0rl(\f$cm\f$)
-!! qsfc    - specific humidity at surface (\f$kg kg^{-1}\f$)
-!! qvg     - water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
-!! qsg     - saturated water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
-!! qcg     - cloud water mixing ratio at surface (\f$kg kg^{-1}\f$)
-!! solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
+!>  -   4. history (state) variables (h):
+!!\n \a cmc        - canopy moisture content (\f$mm\f$)
+!!\n \a soilt = tskin - ground/canopy/snowpack effective skin temperature (\f$K\f$)
+!!\n \a soilt1 = snowpack temperature at the bottom of the 1st layer (\f$K\f$)
+!!\n \a tslb(lsoil_ruc) - soil temp (\f$K\f$) -> stsoil
+!!\n \a smois(lsoil_ruc) - total soil moisture content (volumetric fraction) -> smsoil
+!!\n \a sh2o(lsoil_ruc) - unfrozen soil moisture content (volumetric fraction) -> slsoil
+!!\n \a smfrsoil(lsoil_ruc) - frozen soil moisture content (volumetric fraction) -> smfrsoil
+!!\n \a keepfrflag(lsoil_ruc) - flag for frozen soil physics: 0. or 1.
+!!\n \a wet        - soil moisture availability at surface
+!!\n \a snowh      - actual snow depth (\f$m\f$)
+!!\n \a sneqv      - liquid water-equivalent snow depth (\f$m\f$)
+!!\n \a sncovr     - fraction of snow in the grid cell
+!!\n \a ch         - surface exchange coefficient for heat (\f$m s^{-1}\f$) -> chs
+!!\n \a z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
+!!\n \a qsfc       - specific humidity at surface (\f$kg kg^{-1}\f$)
+!!\n \a qvg        - water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
+!!\n \a qsg        - saturated water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
+!!\n \a qcg        - cloud water mixing ratio at surface (\f$kg kg^{-1}\f$)
+!!\n \a solnet     - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
 
         solnet_lnd(i,j) = dswsfc(i)*(1.-sfalb_lnd(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
         qvg_lnd(i,j)    = sfcqv_lnd(i)
@@ -1021,6 +1020,7 @@ module lsm_ruc
           !endif
         endif
 
+!> - Call RUC LSM lsmruc() for land. 
       call lsmruc(                                                           &
      &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
@@ -1095,13 +1095,18 @@ module lsm_ruc
 
 !> - RUC LSM: prepare variables for return to parent model and unit conversion.
 !>  -   6. output (o):
-!! ------------------------------
-!! lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!! hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!! ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
-!! runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
-!! runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
-!! snoh    - phase-change heat flux from snowmelt (w m-2)
+!!\n \a lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
+!!\n \a runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
+!!\n \a runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
+!!\n \a snoh    - phase-change heat flux from snowmelt (w m-2)
+!!\n \a lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
+!!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
+!!\n \a runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
+!!\n \a runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
+!!\n \a snoh    - phase-change heat flux from snowmelt (w m-2)
 !
 !  --- ...  do not return the following output fields to parent model
 !    ec      - canopy water evaporation (m s-1)
@@ -1180,11 +1185,6 @@ module lsm_ruc
 
    if (flag_ice_uncoupled(i)) then ! at least some ice in the grid cell
 
-!!\n  \a qsfc    - specific humidity at surface (\f$kg kg^{-1}\f$)
-!!\n  \a qvg     - water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
-!!\n  \a qsg     - saturated water vapor mixing ratio at surface (\f$kg kg^{-1}\f$)
-!!\n  \a qcg     - cloud water mixing ratio at surface (\f$kg kg^{-1}\f$)
-!!\n  \a solnet  - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
         solnet_ice(i,j) = dswsfc(i)*(1.-sfalb_ice(i))
         qvg_ice(i,j)    = sfcqv_ice(i)
         qsfc_ice(i,j)   = sfcqv_ice(i)/(1.+sfcqv_ice(i))
@@ -1236,6 +1236,7 @@ module lsm_ruc
         z0_ice(i,j)  = z0rl_ice(i)/100.
         znt_ice(i,j) = z0rl_ice(i)/100.
 
+!> - Call RUC LSM lsmruc() for ice. 
       call lsmruc(                                                           &
      &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
@@ -1272,15 +1273,6 @@ module lsm_ruc
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
      &          its,ite, jts,jte, kts,kte                                    )
-
-!> - RUC LSM: prepare variables for return to parent model and unit conversion.
-!>  -   6. output (o):
-!!\n  ------------------------------
-!!\n \a lh     - actual latent heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!!\n \a hfx    - sensible heat flux (\f$W m^{-2}\f$: positive, if upward from sfc)
-!!\n \a ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
-!!\n \a snoh    - phase-change heat flux from snowmelt (w m-2)
-!
 
         ! Interstitial
         evap_ice(i)   = qfx_ice(i,j) / rho(i)           ! kinematic
@@ -1438,6 +1430,9 @@ module lsm_ruc
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
+
+!>\ingroup lsm_ruc_group
+!! This subroutine contains RUC LSM initialization.
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
                                land, icy,                             & ! in
