@@ -780,7 +780,8 @@ module lsm_ruc
 
 !>  -   2. forcing data (f):
 !!\n  \a sfcprs  - pressure at height zf above ground (pascals)
-!!\n  \a sfctmp  - air temperature (\f$K\f$) at height zf above ground
+!!\n  \a sfctmp  - air temperature (\f$K\f$) at height zf above ground, 
+!!\n  \a           do not use factor prslki (bug!) as in sfc_drv.f
 !!\n  \a q2      - pressure at height zf above ground (pascals)
 !!\n  \a qcatm   - cloud water mising ration at height zf above ground (\f$kg kg^{-1}\f$)
 !!\n  \a rho2    - air density at height zf above ground (pascals)
