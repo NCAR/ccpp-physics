@@ -14,7 +14,7 @@ module GFS_rrtmgp_lw_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use rrtmgp_lw_gas_optics,      only: check_error_msg
+  use rrtmgp_aux,                only: check_error_msg
   implicit none
   
   public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize
@@ -42,7 +42,6 @@ contains
 !! | fluxlwDOWN_allsky | lw_flux_profile_downward_allsky                                                                | RRTMGP downward longwave all-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | fluxlwUP_clrsky   | lw_flux_profile_upward_clrsky                                                                  | RRTMGP upward longwave clr-sky flux profile                                  | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | fluxlwDOWN_clrsky | lw_flux_profile_downward_clrsky                                                                | RRTMGP downward longwave clr-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | lw_gas_props      | coefficients_for_lw_gas_optics                                                                 | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
 !! | hlwc              | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                     | longwave total sky heating rate                                              | K s-1    |    2 | real                 | kind_phys | out    | F        |
 !! | topflx_lw         | lw_fluxes_top_atmosphere                                                                       | longwave total sky fluxes at the top of the atm                              | W m-2    |    1 | topflw_type          |           | inout  | F        |
 !! | sfcflx_lw         | lw_fluxes_sfc                                                                                  | longwave total sky fluxes at the Earth surface                               | W m-2    |    1 | sfcflw_type          |           | inout  | F        |
@@ -53,7 +52,7 @@ contains
 !!
 #endif
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Diag, Radtend, Statein, &
-              Coupling, im, p_lev, lw_gas_props,          &
+              Coupling, im, p_lev,          &
               tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, &
               hlwc, topflx_lw, sfcflx_lw, flxprf_lw, hlw0, errmsg, errflg)
 
@@ -74,8 +73,6 @@ contains
          im                ! Horizontal loop extent 
     real(kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  &
          tsfa              ! Lowest model layer air temperature for radiation 
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props      ! DDT containing LW spectral information
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          p_lev             ! Pressure @ model layer-interfaces    (hPa)
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &

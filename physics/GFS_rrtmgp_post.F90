@@ -221,14 +221,5 @@ contains
   subroutine GFS_rrtmgp_post_finalize ()
 
   end subroutine GFS_rrtmgp_post_finalize
-  subroutine check_error_msg(routine_name, error_msg)
-    character(len=*), intent(in) :: &
-         error_msg, routine_name
-    
-    if(error_msg /= "") then
-       print*,"ERROR("//trim(routine_name)//"): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg   
+ 
 end module GFS_rrtmgp_post

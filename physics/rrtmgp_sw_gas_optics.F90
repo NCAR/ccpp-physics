@@ -4,12 +4,14 @@ module rrtmgp_sw_gas_optics
   use mo_rte_kind,           only: wl
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
+  use rrtmgp_aux,            only: check_error_msg
   use netcdf
 
-  ! Parameters
-  integer :: ipsdsw0
-
 contains
+
+  ! #########################################################################################
+  ! SUBROUTINE sw_gas_optics_init
+  ! #########################################################################################
 !! \section arg_table_rrtmgp_sw_gas_optics_init Argument Table
 !! | local_name   | standard_name                                | long_name                                                          | units | rank | type                 | kind  | intent | optional |
 !! |--------------|----------------------------------------------|--------------------------------------------------------------------|-------|------|----------------------|-------|--------|----------|
@@ -20,14 +22,11 @@ contains
 !! | mpicomm      | mpi_comm                                     | MPI communicator                                                   | index |    0 | integer              |       | in     | F        |
 !! | errmsg       | ccpp_error_message                           | error message for error handling in CCPP                           | none  |    0 | character            | len=* | out    | F        |
 !! | errflg       | ccpp_error_flag                              | error flag for error handling in CCPP                              | flag  |    0 | integer              |       | out    | F        |
+!! | ipsdsw0      | initial_permutation_seed_sw                  | initial seed for McICA SW                                          | none  |    0 | integer              |       | out    | F        |
 !! | sw_gas_props | coefficients_for_sw_gas_optics               | DDT containing spectral information for RRTMGP SW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp |       | out    | F        |
-!! | ngpts_sw     | number_of_spectral_points_for_SW_calculation | Number of spectral points for SW RRTMGP calculation                | none  |    0 | integer              |       | out    | F        |
 !!
-  ! #########################################################################################
-  ! SUBROUTINE sw_gas_optics_init
-  ! #########################################################################################
   subroutine rrtmgp_sw_gas_optics_init(Model, Radtend, mpicomm, mpirank, mpiroot, sw_gas_props, &
-       ngpts_sw, errmsg, errflg)
+       ipsdsw0, errmsg, errflg)
     use netcdf
 #ifdef MPI
     use mpi
@@ -47,9 +46,8 @@ contains
     character(len=*), intent(out) :: &
          errmsg     ! Error message
     integer,          intent(out) :: &
-         errflg     ! Error code
-    integer, intent(out) :: &
-         ngpts_sw
+         errflg,  & ! Error code
+         ipsdsw0    !
     type(ty_gas_optics_rrtmgp),intent(out) :: &
          sw_gas_props
 
@@ -58,61 +56,62 @@ contains
     type(ty_gas_concs)  :: &
          gas_concentrations
     integer, dimension(:), allocatable :: &
-         kminor_start_lower_sw,              & ! used by RRTMGP gas optics 
-         kminor_start_upper_sw                 ! used by RRTMGP gas optics 
+         kminor_start_lower_sw,              & !  
+         kminor_start_upper_sw                 !  
     integer, dimension(:,:), allocatable :: &
-         band2gpt_sw,                        & ! used by RRTMGP gas optics 
-         minor_limits_gpt_lower_sw,          & ! used by RRTMGP gas optics 
-         minor_limits_gpt_upper_sw             ! used by RRTMGP gas optics 
+         band2gpt_sw,                        & !  
+         minor_limits_gpt_lower_sw,          & !  
+         minor_limits_gpt_upper_sw             !  
     integer, dimension(:,:,:), allocatable :: &
-         key_species_sw                        ! used by RRTMGP gas optics 
+         key_species_sw                        !  
     real(kind_phys) :: &
-         press_ref_trop_sw,                  & ! used by RRTMGP gas optics 
-         temp_ref_p_sw,                      & ! used by RRTMGP gas optics 
-         temp_ref_t_sw                         ! used by RRTMGP gas optics 
+         press_ref_trop_sw,                  & !  
+         temp_ref_p_sw,                      & !  
+         temp_ref_t_sw                         !  
     real(kind_phys), dimension(:), allocatable :: &
-         press_ref_sw,                       & ! used by RRTMGP gas optics 
-         temp_ref_sw,                        & ! used by RRTMGP gas optics 
-         solar_source_sw                       ! used by RRTMGP gas optics 
+         press_ref_sw,                       & !  
+         temp_ref_sw,                        & !  
+         solar_source_sw                       !  
     real(kind_phys), dimension(:,:), allocatable :: &
-         band_lims_sw                          ! used by RRTMGP gas optics                         
+         band_lims_sw                          !                          
 
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         vmr_ref_sw,                         & ! used by RRTMGP gas optics 
-         kminor_lower_sw,                    & ! used by RRTMGP gas optics 
-         kminor_upper_sw,                    & ! used by RRTMGP gas optics 
-         rayl_lower_sw,                      & ! used by RRTMGP gas optics 
-         rayl_upper_sw                         ! used by RRTMGP gas optics 
+         vmr_ref_sw,                         & !  
+         kminor_lower_sw,                    & !  
+         kminor_upper_sw,                    & !  
+         rayl_lower_sw,                      & !  
+         rayl_upper_sw                         !  
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         kmajor_sw                             ! used by RRTMGP gas optics 
+         kmajor_sw                             !  
     character(len=32),  dimension(:), allocatable :: &
-         gas_names_sw,                       & ! used by RRTMGP gas optics 
-         gas_minor_sw,                       & ! used by RRTMGP gas optics 
-         identifier_minor_sw,                & ! used by RRTMGP gas optics 
-         minor_gases_lower_sw,               & ! used by RRTMGP gas optics 
-         minor_gases_upper_sw,               & ! used by RRTMGP gas optics 
-         scaling_gas_lower_sw,               & ! used by RRTMGP gas optics 
-         scaling_gas_upper_sw                  ! used by RRTMGP gas optics 
+         gas_names_sw,                       & !  
+         gas_minor_sw,                       & !  
+         identifier_minor_sw,                & !  
+         minor_gases_lower_sw,               & !  
+         minor_gases_upper_sw,               & !  
+         scaling_gas_lower_sw,               & !  
+         scaling_gas_upper_sw                  !  
     logical(wl), dimension(:), allocatable :: &
-         minor_scales_with_density_lower_sw, & ! used by RRTMGP gas optics 
-         minor_scales_with_density_upper_sw, & ! used by RRTMGP gas optics 
-         scale_by_complement_lower_sw,       & ! used by RRTMGP gas optics 
-         scale_by_complement_upper_sw          ! used by RRTMGP gas optics 
+         minor_scales_with_density_lower_sw, & !  
+         minor_scales_with_density_upper_sw, & !  
+         scale_by_complement_lower_sw,       & !  
+         scale_by_complement_upper_sw          !  
     ! Dimensions (to be broadcast across all processors)
     integer :: &
-         ntemps_sw,                          & ! used by RRTMGP gas optics 
-         npress_sw,                          & ! used by RRTMGP gas optics 
-         nabsorbers_sw,                      & ! used by RRTMGP gas optics 
-         nextrabsorbers_sw,                  & ! used by RRTMGP gas optics 
-         nminorabsorbers_sw,                 & ! used by RRTMGP gas optics 
-         nmixingfracs_sw,                    & ! used by RRTMGP gas optics 
-         nlayers_sw,                         & ! used by RRTMGP gas optics 
-         nbnds_sw,                           & ! used by RRTMGP gas optics 
-         npairs_sw,                          & ! used by RRTMGP gas optics 
-         nminor_absorber_intervals_lower_sw, & ! used by RRTMGP gas optics 
-         nminor_absorber_intervals_upper_sw, & ! used by RRTMGP gas optics 
-         ncontributors_lower_sw,             & ! used by RRTMGP gas optics 
-         ncontributors_upper_sw                ! used by RRTMGP gas optics 
+         ntemps_sw,                          & !  
+         npress_sw,                          & !  
+         ngpts_sw,                           & ! 
+         nabsorbers_sw,                      & !  
+         nextrabsorbers_sw,                  & !  
+         nminorabsorbers_sw,                 & !  
+         nmixingfracs_sw,                    & !  
+         nlayers_sw,                         & !  
+         nbnds_sw,                           & !  
+         npairs_sw,                          & !  
+         nminor_absorber_intervals_lower_sw, & !  
+         nminor_absorber_intervals_upper_sw, & !  
+         ncontributors_lower_sw,             & !  
+         ncontributors_upper_sw                !  
 
     ! Local variables
     integer :: status,ncid_sw,ncid_sw_clds,dimid,varID,ij,iGas
@@ -411,22 +410,22 @@ contains
     ipsdsw0 = sw_gas_props%get_ngpt()
   end subroutine rrtmgp_sw_gas_optics_init
 
+  ! #########################################################################################
+  ! SUBROUTINE rrtmgp_sw_gas_optics_run
+  ! *NOTE* The computation of the optical properties for a gaseous (+aerosols) atmosphere are
+  !        handled internally by the rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90:rte_sw() 
+  !        driver. 
+  !        If calling rte/mo_rte_sw.F90:rte_sw() directly, place calls to compute source 
+  !        function and gas_optics() here.
+  ! #########################################################################################
   subroutine rrtmgp_sw_gas_optics_run()
-  end subroutine rrtmgp_sw_gas_optics_run
+  end subroutine rrtmgp_sw_gas_optics_run  
+
+  ! #########################################################################################
+  ! SUBROUTINE rrtmgp_sw_gas_optics_finalize
+  ! #########################################################################################
   subroutine rrtmgp_sw_gas_optics_finalize()
   end subroutine rrtmgp_sw_gas_optics_finalize
-  ! #########################################################################################
-  ! SUBROUTINE check_error_msg
-  ! #########################################################################################
-  subroutine check_error_msg(routine_name, error_msg)
-    character(len=*), intent(in) :: &
-         error_msg, routine_name
-    
-    if(error_msg /= "") then
-       print*,"ERROR("//trim(routine_name)//"): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg  
+
 end module rrtmgp_sw_gas_optics
  

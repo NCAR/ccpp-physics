@@ -14,7 +14,7 @@ module GFS_rrtmgp_sw_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use rrtmgp_sw_gas_optics,                only: check_error_msg
+  use rrtmgp_aux,                only: check_error_msg
   implicit none
   
   public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize

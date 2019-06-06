@@ -12,7 +12,8 @@ module rrtmgp_sw
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
   use rrtmgp_sw_cloud_optics,  only: rrtmgp_sw_cloud_optics_init
-  use rrtmgp_sw_gas_optics,    only: rrtmgp_sw_gas_optics_init, check_error_msg
+  use rrtmgp_sw_gas_optics,    only: rrtmgp_sw_gas_optics_init
+  use rrtmgp_aux,              only: check_error_msg
 
   public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
 

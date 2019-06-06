@@ -9,10 +9,9 @@ module rrtmgp_lw_cloud_optics
   use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat
   use mo_rrtmg_lw_cloud_optics, only: rrtmg_lw_cloud_optics   
-  use rrtmgp_lw_gas_optics,     only: ipsdlw0
+  use rrtmgp_aux,               only: check_error_msg
   use netcdf
 
-  integer :: nrghice_lw
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
 contains
 
@@ -54,46 +53,47 @@ contains
 
     ! Variables that will be passed to cloud_optics%load()
     real(kind_phys) :: &
-         radliq_lwr,                      & ! used by RRTMGP cloud optics 
-         radliq_upr,                      & ! used by RRTMGP cloud optics 
-         radliq_fac,                      & ! used by RRTMGP cloud optics 
-         radice_lwr,                      & ! used by RRTMGP cloud optics 
-         radice_upr,                      & ! used by RRTMGP cloud optics 
-         radice_fac                         ! used by RRTMGP cloud optics 
+         radliq_lwr,                      & !   
+         radliq_upr,                      & !   
+         radliq_fac,                      & !   
+         radice_lwr,                      & !   
+         radice_upr,                      & !   
+         radice_fac                         !   
     real(kind_phys), dimension(:), allocatable :: &
-         pade_sizereg_extliq,             & ! used by RRTMGP cloud optics 
-         pade_sizereg_ssaliq,             & ! used by RRTMGP cloud optics 
-         pade_sizereg_asyliq,             & ! used by RRTMGP cloud optics 
-         pade_sizereg_extice,             & ! used by RRTMGP cloud optics 
-         pade_sizereg_ssaice,             & ! used by RRTMGP cloud optics 
-         pade_sizereg_asyice                ! used by RRTMGP cloud optics 
+         pade_sizereg_extliq,             & !   
+         pade_sizereg_ssaliq,             & !   
+         pade_sizereg_asyliq,             & !   
+         pade_sizereg_extice,             & !   
+         pade_sizereg_ssaice,             & !   
+         pade_sizereg_asyice                !   
     real(kind_phys), dimension(:,:), allocatable :: &
-         lut_extliq,                      & ! used by RRTMGP cloud optics 
-         lut_ssaliq,                      & ! used by RRTMGP cloud optics 
-         lut_asyliq,                      & ! used by RRTMGP cloud optics 
-         band_lims_cldy                     ! used by RRTMGP cloud optics 
+         lut_extliq,                      & !   
+         lut_ssaliq,                      & !   
+         lut_asyliq,                      & !   
+         band_lims_cldy                     !   
 
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         lut_extice,                      & ! used by RRTMGP cloud optics 
-         lut_ssaice,                      & ! used by RRTMGP cloud optics 
-         lut_asyice,                      & ! used by RRTMGP cloud optics 
-         pade_extliq,                     & ! used by RRTMGP cloud optics 
-         pade_ssaliq,                     & ! used by RRTMGP cloud optics 
-         pade_asyliq                        ! used by RRTMGP cloud optics 
+         lut_extice,                      & !   
+         lut_ssaice,                      & !   
+         lut_asyice,                      & !   
+         pade_extliq,                     & !   
+         pade_ssaliq,                     & !   
+         pade_asyliq                        !   
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         pade_extice,                     & ! used by RRTMGP cloud optics 
-         pade_ssaice,                     & ! used by RRTMGP cloud optics 
-         pade_asyice                        ! used by RRTMGP cloud optics 
+         pade_extice,                     & !   
+         pade_ssaice,                     & !   
+         pade_asyice                        !   
     ! Dimensions
     integer :: &
-         nbandLWcldy,                     & ! used by RRTMGP cloud optics 
-         nsize_liq,                       & ! used by RRTMGP cloud optics 
-         nsize_ice,                       & ! used by RRTMGP cloud optics 
-         nsizereg,                        & ! used by RRTMGP cloud optics 
-         ncoeff_ext,                      & ! used by RRTMGP cloud optics 
-         ncoeff_ssa_g,                    & ! used by RRTMGP cloud optics 
-         nbound,                          & ! used by RRTMGP cloud optics  
-         npairsLWcldy                       ! used by RRTMGP cloud optics 
+         nrghice_lw,                      & ! Number of ice-roughness categories in file
+         nbandLWcldy,                     & !   
+         nsize_liq,                       & !   
+         nsize_ice,                       & !   
+         nsizereg,                        & !   
+         ncoeff_ext,                      & !   
+         ncoeff_ssa_g,                    & !   
+         nbound,                          & !    
+         npairsLWcldy                       !   
 
     ! Local variables
     integer :: dimID,varID,status,igpt,iGas,ij,ierr,ncid_lw_clds
@@ -131,6 +131,11 @@ contains
           status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=npairsLWcldy)
           status = nf90_close(ncid_lw_clds)
        endif
+    endif
+
+    ! Check to ensure that number of ice-roughness categories is feasible.
+    if (Model%rrtmgp_nrghice .gt. nrghice_lw) then
+       errmsg = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed'
     endif
 
     ! Broadcast dimensions to all processors
@@ -290,14 +295,13 @@ contains
 #endif
 
     ! Load tables data for RRTMGP cloud-optics  
+    call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
     if (Model%rrtmgp_cld_optics .eq. 1) then
-       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice_lw))
        call check_error_msg('lw_cloud_optics_init',lw_cloud_props%load(band_lims_cldy, &
             radliq_lwr, radliq_upr, radliq_fac, radice_lwr, radice_upr, radice_fac,    &
             lut_extliq, lut_ssaliq, lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (Model%rrtmgp_cld_optics .eq. 2) then
-       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice_lw))
        call check_error_msg('lw_cloud_optics_init',lw_cloud_props%load(band_lims_cldy, &
             pade_extliq, pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice,           &
             pade_asyice, pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,&
@@ -311,7 +315,6 @@ contains
 !! |-----------------------|-----------------------------------------------------|------------------------------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
 !! | Model                 | GFS_control_type_instance                           | Fortran DDT containing FV3-GFS model control parameters                      | DDT     |    0 | GFS_control_type      |           | in     | F        |
 !! | ncol                  | horizontal_loop_extent                              | horizontal dimension                                                         | count   |    0 | integer               |           | in     | F        |
-!! | ngpts_lw              | number_of_spectral_points_for_LW_calculation        | Number of spectral points for LW RRTMGP calculation                          | none    |    0 | integer               |           | in     | F        |
 !! | p_lay                 | air_pressure_at_layer_for_RRTMGP_in_hPa             | air pressure layer                                                           | hPa     |    2 | real                  | kind_phys | in     | F        |
 !! | t_lay                 | air_temperature_at_layer_for_RRTMGP                 | air temperature layer                                                        | K       |    2 | real                  | kind_phys | in     | F        |
 !! | p_lev                 | air_pressure_at_interface_for_RRTMGP_in_hPa         | air pressure level                                                           | hPa     |    2 | real                  | kind_phys | in     | F        |
@@ -328,6 +331,7 @@ contains
 !! | aerosols              | aerosol_optical_properties_for_longwave_bands_01-16 | aerosol optical properties for longwave bands 01-16                          | various |    4 | real                  | kind_phys | in     | F        |
 !! | lw_cloud_props        | coefficients_for_lw_cloud_optics                    | DDT containing spectral information for cloudy RRTMGP LW radiation scheme    | DDT     |    0 | ty_cloud_optics       |           | in     | F        |
 !! | lw_gas_props          | coefficients_for_lw_gas_optics                      | DDT containing spectral information for RRTMGP LW radiation scheme           | DDT     |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
+!! | ipsdlw0               | initial_permutation_seed_lw                         | initial seed for McICA LW                                                    | none    |    0 | integer               |           | in     | F        |
 !! | optical_props_clouds  | longwave_optical_properties_for_cloudy_atmosphere   | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | optical_props_aerosol | longwave_optical_properties_for_aerosols            | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_1scl |           | out    | F        |
 !! | cldtaulw              | cloud_optical_depth_layers_at_10mu_band             | approx 10mu band layer cloud optical depth                                   | none    |    2 | real                  | kind_phys | out    | F        |
@@ -337,9 +341,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, ngpts_lw, icseed_lw, p_lay, t_lay, p_lev, cld_frac,       &
+  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, icseed_lw, p_lay, t_lay, p_lev, cld_frac,       &
        cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
-       aerosols, lw_cloud_props, lw_gas_props,                              &
+       aerosols, lw_cloud_props, lw_gas_props, ipsdlw0,                             &
        optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
     
     ! Inputs
@@ -347,7 +351,7 @@ contains
          Model               ! DDT containing FV3-GFS model control parameters 
     integer, intent(in) :: &
          ncol,             & ! Number of horizontal gridpoints
-         ngpts_lw            ! Number of spectral points
+         ipsdlw0             ! Initial permutation seed for McICA
     integer,intent(in),dimension(ncol) :: &
          icseed_lw           ! auxiliary special cloud related array when module 
                              ! variable isubclw=2, it provides permutation seed 
@@ -392,9 +396,9 @@ contains
     logical,dimension(ncol,model%levs) :: liqmask, icemask
     type(ty_optical_props_1scl) :: optical_props_cloudsByBand
     type(random_stat) :: rng_stat
-    real(kind_phys), dimension(ngpts_lw,model%levs,ncol) :: rng3D
-    real(kind_phys), dimension(ngpts_lw*model%levs) :: rng1D
-    logical, dimension(ncol,model%levs,ngpts_lw) :: cldfracMCICA
+    real(kind_phys), dimension(lw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt()*model%levs) :: rng1D
+    logical, dimension(ncol,model%levs,lw_gas_props%get_ngpt()) :: cldfracMCICA
     real(kind_phys), dimension(ncol,model%levs,lw_cloud_props%get_nband()) :: &
          tau_cld
 
@@ -450,7 +454,7 @@ contains
             ncol,                       & ! IN  - Number of horizontal gridpoints 
             model%levs,                 & ! IN  - Number of vertical layers
             lw_cloud_props%get_nband(), & ! IN  - Number of LW bands
-            nrghice_lw,                 & ! IN  - Number of ice-roughness categories
+            Model%rrtmgp_nrghice,       & ! IN  - Number of ice-roughness categories
             liqmask,                    & ! IN  - Liquid-cloud mask
             icemask,                    & ! IN  - Ice-cloud mask
             cld_lwp,                    & ! IN  - Cloud liquid water path
@@ -477,7 +481,7 @@ contains
     do iCol=1,ncol
        call random_setseed(ipseed_lw(icol),rng_stat)
        call random_number(rng1D,rng_stat)
-       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[ngpts_lw,model%levs])
+       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),model%levs])
     enddo
     
     ! Call McICA
@@ -500,19 +504,4 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_lw_cloud_optics_finalize()
   end subroutine rrtmgp_lw_cloud_optics_finalize
-
-  ! #########################################################################################
-  ! SUBROUTINE check_error_msg
-  ! #########################################################################################
-  subroutine check_error_msg(routine_name, error_msg)
-    character(len=*), intent(in) :: &
-         error_msg, routine_name
-    
-    if(error_msg /= "") then
-       print*,"ERROR("//trim(routine_name)//"): "
-       print*,trim(error_msg)
-       return
-    end if
-  end subroutine check_error_msg  
-
 end module rrtmgp_lw_cloud_optics
