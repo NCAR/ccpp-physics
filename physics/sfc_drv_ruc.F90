@@ -774,7 +774,9 @@ module lsm_ruc
         rdlai2d = .false.
         !if( .not. rdlai2d) xlai = lai_data(vtype)
 
-        conflx2(i,1,j)  = zf(i) ! first atm. level above ground surface
+        conflx2(i,1,j)  = zf(i) * 2. ! factor 2. is needed to get the height of
+                                     ! atm. forcing inside RUC LSM (inherited
+                                     ! from WRF)
 
 !>  -   2. forcing data (f):
 !!\n  \a sfcprs  - pressure at height zf above ground (pascals)
@@ -1389,7 +1391,7 @@ module lsm_ruc
            ! Compute fluxes over open water
             qss_ocean  = rslf(prsl1(i),tskin_ocn(i))
             evap_ocean = ch_ocn(i) * wind(i) * (qss_ocean - q0(i))
-            hflx_ocean = ch_ocn(i) * wind(i) * (tskin_ocn(i) - t1(i)) * prslki(i)
+            hflx_ocean = ch_ocn(i) * wind(i) * (tskin_ocn(i) - t1(i)) 
 
           ! Compute the composite of ice and open water for 2-way coupling in the
           ! uncoupled sea-ice model. Use ice variables for the composite.
