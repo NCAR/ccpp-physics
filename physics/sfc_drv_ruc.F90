@@ -18,8 +18,7 @@ module lsm_ruc
 
       contains
 
-!> This subroutine calls set_soilveg_ruc() to specify vegetation and soil
-!parameters for 
+!> This subroutine calls set_soilveg_ruc() to specify vegetation and soil parameters for
 !! a given soil and land-use classification.
 !! \section arg_table_lsm_ruc_init Argument Table
 !! | local_name     | standard_name                                               | long_name                                               | units      | rank | type      |    kind   | intent | optional |
@@ -451,13 +450,13 @@ module lsm_ruc
       real (kind=kind_phys) :: xice_threshold
       real (kind=kind_phys) :: focean, qss_ocean, evap_ocean, hflx_ocean
 
-      character(len=256) :: llanduse  ! Land-use dataset.  Valid values are :
-                                      ! "USGS" (USGS 24/27 category dataset) and
-                                      ! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
+      character(len=256) :: llanduse  !< Land-use dataset.  Valid values are :
+                                      !! "USGS" (USGS 24/27 category dataset) and
+                                      !! "MODIFIED_IGBP_MODIS_NOAH" (MODIS 20-category dataset)
 
       integer :: nscat, nlcat
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef ! fractional landuse
-      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop ! fractional soil type
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: landusef !< fractional landuse
+      real (kind=kind_phys), dimension(:,:,:), allocatable :: soilctop !< fractional soil type
 
       integer :: nsoil, iswater, isice
       integer, dimension (1:im,1:1) :: stype_ocn, vtype_ocn
