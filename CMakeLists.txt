@@ -12,11 +12,11 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(ccppphys VERSION 2.0.0)
+    project(ccppphys VERSION 3.0.0)
 else(POLICY CMP0048)
     project(ccppphys)
-    set(PROJECT_VERSION 2.0.0)
-    set(PROJECT_VERSION_MAJOR 2)
+    set(PROJECT_VERSION 3.0.0)
+    set(PROJECT_VERSION_MAJOR 3)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
 endif(POLICY CMP0048)
@@ -263,19 +263,6 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-SCM")
-  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
-  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
-  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
-
-  #add "sibling" directories (must specify the build directory too)
-  ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
-  ADD_SUBDIRECTORY(${BACIOLIB_SRC} ${CMAKE_BINARY_DIR}/bacio)
-  ADD_SUBDIRECTORY(${SPLIB_SRC} ${CMAKE_BINARY_DIR}/sp)
-
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/w3nco)
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/sp)
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
-
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
 endif (PROJECT STREQUAL "CCPP-SCM")
 
@@ -293,14 +280,10 @@ else(STATIC)
   add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
 endif(STATIC)
 
-if (PROJECT STREQUAL "CCPP-FV3")
-  # Link required NCEPlibs for dynamic builds
-  if (NOT STATIC)
-    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
-  endif (NOT STATIC)
-elseif (PROJECT STREQUAL "CCPP-SCM")
-  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
-endif (PROJECT STREQUAL "CCPP-FV3")
+if (NOT STATIC)
+  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
+endif (NOT STATIC)
+
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
